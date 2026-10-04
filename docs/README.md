@@ -29,6 +29,7 @@ limits of opening new saves in older builds.
 | Libraries, provenance, licensing | [Dependency record](dependencies.md) and [license](../LICENSE) |
 | Independent scientific references and regeneration | [PySCF fixtures](../fixtures/pyscf/README.md) |
 | Cross-platform checks and absence of active hosted CI | [Portability checks](../ci/README.md) |
+| Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
 | Fast project overview | [Rewrite README](../README.md) |
 
 ## Planning archive
