@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.0, a development preview. Scientific calculations and
+This is version 0.5.1, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -344,10 +344,14 @@ Display→Shaders:
    Diffuse / Blinn-Phong materials.
 
 Classic GLSL 1.x shaders that use `ftransform()`, `gl_Vertex`, `gl_Normal`,
-`gl_Color`, and `gl_NormalMatrix` are mapped onto Three.js/WebGL2 built-ins.
-Surface colors feed `gl_Color`. Example pairs live under `app/shaders/`.
-Shaders and uniform values are session-only and are not stored in `.eigenvista`
-documents. Invalid GLSL is reported by the WebGL backend; apply a corrected
+`gl_Color`, `gl_ClipVertex`, `gl_FogFragCoord`, and `gl_NormalMatrix` are mapped
+onto Three.js/WebGL2 built-ins (including writable clip/fog outputs). Surface
+colors feed `gl_Color`. EigenVista examples live under `app/shaders/`. Tester
+and source packages also include classic Molekel samples under `Shaders/`
+(repository `shaders/`), suitable for **Vertex shader** / **Fragment shader** /
+**Parameters file**. After Apply, any WebGL compile/link log is shown in the
+panel (red). Shaders and uniform values are session-only and are not stored in
+`.eigenvista` documents. Invalid GLSL is reported there; apply a corrected
 pair or **Clear shader** to restore the built-in materials.
 
 Raycasting can miss crossings, marching cubes is not topology-certified, and

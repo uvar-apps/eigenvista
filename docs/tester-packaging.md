@@ -50,6 +50,9 @@ The ZIP contains:
   all yield three atoms/two bonds, while Molden also supplies orbitals/density.
 - `Examples/signed-affine.cube`, a first-party mathematical signed field with
   two atoms/one bond on a skewed 7 x 7 x 7 grid, for volume/raycast and mesh checks.
+- `Shaders/` — classic Molekel GLSL surface-shader samples (vertex/fragment/
+  `.params`) for **Appearance → Surface shader**, plus provenance notes.
+  Attribution is also under `Third-party-notices/Classic-shaders/`.
 - The application license and collected third-party notices. Notices are also
   embedded in the app's Resources, so moving the app does not discard them.
 - The exact standalone first-party source snapshot, lockfiles, and data-only

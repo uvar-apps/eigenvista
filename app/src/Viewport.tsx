@@ -12,6 +12,8 @@ import {
   applyUniformValues,
   attachSurfaceColors,
   buildSurfaceMaterial,
+  formatShaderLog,
+  validateShaderMaterial,
   type ShaderPair,
 } from "./shaderTools";
 import { volumeObject } from "./volume";
@@ -106,6 +108,7 @@ export function Viewport({
   shader,
   reset,
   onSelect,
+  onShaderLog,
 }: {
   doc: EigenVistaDocument;
   grid: SampledGrid | null;
@@ -114,6 +117,7 @@ export function Viewport({
   shader: (ShaderPair & { target: string }) | null;
   reset: number;
   onSelect: (text: string) => void;
+  onShaderLog?: (log: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const engine = useRef<{
@@ -129,6 +133,8 @@ export function Viewport({
   selection.current = onSelect;
   const shaderRef = useRef(shader);
   shaderRef.current = shader;
+  const onShaderLogRef = useRef(onShaderLog);
+  onShaderLogRef.current = onShaderLog;
   const [error, setError] = useState("");
   useEffect(() => {
     const div = host.current!;
@@ -337,6 +343,18 @@ export function Viewport({
         if (usesCustom) mesh.userData.customShader = true;
         mesh.userData.label = `${s.label} | ${(s.indices.length / 3).toLocaleString()} triangles`;
         group.add(mesh);
+      }
+      if (shader) {
+        // Compile once so GLSL errors surface in the shader panel.
+        const sample = group.children.find(
+          (obj) => obj instanceof THREE.Mesh && obj.userData.customShader,
+        ) as THREE.Mesh | undefined;
+        if (sample && sample.material instanceof THREE.ShaderMaterial) {
+          const log = formatShaderLog(
+            validateShaderMaterial(e.renderer, sample.material),
+          );
+          onShaderLogRef.current?.(log);
+        }
       }
       if (grid && mode !== "mesh")
         group.add(

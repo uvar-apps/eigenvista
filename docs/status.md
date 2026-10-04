@@ -8,6 +8,39 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.1
+
+The user requested a version bump to **0.5.1**, a commit, an annotated
+`v0.5.1` tag, and a push to `origin` on `main`. This release adds shader
+compile/link log display in the surface-shader panel, writable classic
+`gl_ClipVertex`/`gl_FogFragCoord` compatibility (so Molekel `phong.*` works),
+and vendored Molekel `shaders/` shipped as `Shaders/` in tester packages with
+`Third-party-notices/Classic-shaders/`. External locked dependencies are unchanged.
+
+Preflight: packaging tests 13/13, full verified ZIP
+`EigenVista-0.5.0-apple-silicon-20261004T083506Z-b62d05f-dirty.zip` (from the
+pre-bump tree), Playwright `viewer.spec.ts` + `shaders.spec.ts` (18 cases)
+Chromium and WebKit, production build. Rust workspace tests were run earlier
+in this increment and are unchanged by the version bump itself. Not notarized.
+
+## Classic Molekel surface shaders in packages
+
+The Molekel `shaders/` tree is vendored unchanged at repository `shaders/`
+(lambert, phong, phong_fog, clip, x-ray families plus `doc/`). Provenance and
+GPL-2.0-or-later attribution are in `shaders/README.md`. The macOS tester ZIP
+stages that directory as `Shaders/` and copies the README under
+`Third-party-notices/Classic-shaders/`. EigenVista-authored samples remain in
+`app/shaders/`. No legacy C++ or application code was copied.
+
+Verification: packaging tests 13/13 including a completeness check for the
+vendored pairs. Full verified ZIP
+`EigenVista-0.5.0-apple-silicon-20261004T083506Z-b62d05f-dirty.zip` passes
+ad-hoc signature checks, extracted-artifact verification, example
+conversion/roundtrips, and contains `Shaders/` plus both notice copies. That
+archive is built from uncommitted working-tree changes (shader feature work
+after `v0.5.0`); `BUILD-INFO.json`/`SOURCE-MANIFEST.json` identify it as
+`-dirty`. Not notarized; not uploaded.
+
 ## Version 0.5.0
 
 The user requested a version bump to **0.5.0**, a commit, an annotated

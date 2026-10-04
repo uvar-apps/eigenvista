@@ -3,7 +3,7 @@
 Recorded 4 October 2026. Start with [root AGENTS.md](../AGENTS.md), then this
 document, [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.0**, in the standalone
+The current application is **EigenVista**, version **0.5.1**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.

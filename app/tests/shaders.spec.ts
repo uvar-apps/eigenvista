@@ -139,3 +139,36 @@ test("custom surface shader applies with live uniforms and parameter files", asy
   await expect(page.locator(".shader-status")).toContainText("Cleared");
   expect(errors).toEqual([]);
 });
+
+test("classic clip/fog shaders compile and GLSL errors are shown", async ({
+  page,
+}) => {
+  await ready(page);
+  await loadShaderFiles(
+    page,
+    path.join(shadersDir, "surface-clip.vert"),
+    path.join(shadersDir, "surface-clip.frag"),
+    path.join(shadersDir, "surface-clip.params"),
+  );
+  await page.getByRole("button", { name: "Apply shader" }).click();
+  await expect(page.locator(".shader-status")).toContainText("Applied");
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  const ok = await pixels(page);
+  expect(ok.colorful).toBeGreaterThan(300);
+
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "broken.vert",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "varying vec3 n;\nvoid main(){\n  gl_Position = ftransform();\n  n = gl_NormalMatrix * gl_Normal;\n  n = notAFunction();\n}\n",
+    ),
+  });
+  await page.getByRole("button", { name: "Apply shader" }).click();
+  const alert = page.getByRole("alert");
+  await expect(alert).toBeVisible({ timeout: 10000 });
+  const text = (await alert.innerText()).toLowerCase();
+  expect(text).toMatch(/error|not compiled|not linked|shader/);
+  await page.screenshot({
+    path: "../artifacts/custom-shader-compile-error.png",
+  });
+});

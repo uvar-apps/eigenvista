@@ -312,9 +312,9 @@ export function ShaderPanel({
       </div>
       {status && <p className="shader-status">{status}</p>}
       {error && (
-        <p className="viewport-error" role="alert">
+        <pre className="shader-log" role="alert">
           {error}
-        </p>
+        </pre>
       )}
     </section>
   );

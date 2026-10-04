@@ -135,6 +135,26 @@ test("package paths reject escape and absolute destinations", () => {
     assert.throws(() => inside(tmp, name));
   assert.equal(inside(tmp, "a/file"), path.join(tmp, "a/file"));
 });
+test("classic Molekel shaders ship with provenance for the tester archive", () => {
+  const shaders = path.join(repo, "shaders");
+  assert.ok(fs.existsSync(path.join(shaders, "README.md")));
+  for (const name of [
+    "lambert.vert",
+    "lambert.frag",
+    "lambert.params",
+    "phong.vert",
+    "phong.frag",
+    "phong.params",
+    "clip.vert",
+    "clip.frag",
+    "clip.params",
+    "x-ray.vert",
+    "x-ray.frag",
+    "x-ray.params",
+  ])
+    assert.ok(fs.existsSync(path.join(shaders, name)), `missing ${name}`);
+  assert.ok(fs.existsSync(path.join(shaders, "doc/readme")));
+});
 test("source snapshots include current edits and reject symlinks/credentials", (t) => {
   const dir = fixture(t);
   fs.writeFileSync(path.join(dir, "source.rs"), "first");

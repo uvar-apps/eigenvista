@@ -504,6 +504,20 @@ section {
   color: #3d7d6c;
   margin: 0;
 }
+.shader-log {
+  margin: 0;
+  padding: 8px;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.45;
+  color: #8a2e2e;
+  background: #f8eeee;
+  border: 1px solid #e3c4c4;
+  border-radius: 6px;
+}
 .shader-panel code {
   font-size: 10px;
 }

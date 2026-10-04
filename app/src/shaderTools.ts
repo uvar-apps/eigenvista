@@ -155,7 +155,10 @@ export function prepareVertexSource(source: string): string {
   const classic = usesClassicGlsl(body);
   if (classic) body = renameReservedDeclarations(body);
   if (!classic) return body;
+  // Writable aliases so assignments like `gl_ClipVertex = ...` compile.
   return `attribute vec3 aColor;
+vec4 clipVertexCompat;
+float fogFragCoordCompat;
 #define gl_Vertex vec4(position, 1.0)
 #define gl_Normal normal
 #define gl_Color vec4(aColor, 1.0)
@@ -163,8 +166,8 @@ export function prepareVertexSource(source: string): string {
 #define gl_ProjectionMatrix projectionMatrix
 #define gl_ModelViewProjectionMatrix (projectionMatrix * modelViewMatrix)
 #define gl_NormalMatrix normalMatrix
-#define gl_ClipVertex (modelViewMatrix * vec4(position, 1.0))
-#define gl_FogFragCoord abs((modelViewMatrix * vec4(position, 1.0)).z)
+#define gl_ClipVertex clipVertexCompat
+#define gl_FogFragCoord fogFragCoordCompat
 vec4 ftransform() { return projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
 ${body}`;
 }
@@ -261,4 +264,107 @@ export function mergeUniformValues(
     if (patch[def.name] !== undefined) next[def.name] = patch[def.name];
   }
   return next;
+}
+
+/**
+ * Force-compile a surface material and collect WebGL/Three.js log lines.
+ * Uses Three's `debug.onShaderError` plus console capture; logs are also
+ * left on the console for debugging.
+ */
+export function validateShaderMaterial(
+  renderer: THREE.WebGLRenderer,
+  material: THREE.ShaderMaterial,
+): string[] {
+  const messages: string[] = [];
+  const originalError = console.error;
+  const originalWarn = console.warn;
+  const previousOnShaderError = renderer.debug.onShaderError;
+  const capture =
+    (original: (...args: unknown[]) => void) =>
+    (...args: unknown[]) => {
+      const text = args
+        .map((a) => {
+          if (typeof a === "string") return a;
+          if (a instanceof Error) return a.stack || a.message;
+          try {
+            return JSON.stringify(a);
+          } catch {
+            return String(a);
+          }
+        })
+        .join(" ");
+      if (text.trim()) messages.push(text);
+      original.apply(console, args as []);
+    };
+  console.error = capture(originalError);
+  console.warn = capture(originalWarn);
+  renderer.debug.onShaderError = (gl, program, vs, fs) => {
+    const parts = [
+      gl.getProgramInfoLog(program) || "",
+      gl.getShaderInfoLog(vs) || "",
+      gl.getShaderInfoLog(fs) || "",
+    ].filter((s) => s.trim());
+    messages.push(parts.join("\n") || "Shader failed to compile or link");
+  };
+  try {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+    camera.position.z = 2;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute([-1, -1, 0, 1, -1, 0, 0, 1, 0], 3),
+    );
+    geometry.setAttribute(
+      "normal",
+      new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1], 3),
+    );
+    geometry.setAttribute(
+      "aColor",
+      new THREE.Float32BufferAttribute([1, 1, 1, 1, 1, 1, 1, 1, 1], 3),
+    );
+    const probe = new THREE.Mesh(geometry, material);
+    probe.frustumCulled = false;
+    scene.add(probe);
+    try {
+      renderer.render(scene, camera);
+    } catch (error) {
+      messages.push(String(error));
+    }
+    geometry.dispose();
+    const diagnostics = (
+      material as THREE.ShaderMaterial & {
+        program?: { diagnostics?: { runnable?: boolean; programLog?: string } };
+      }
+    ).program?.diagnostics;
+    if (diagnostics && diagnostics.runnable === false) {
+      messages.push(diagnostics.programLog || "Shader program is not runnable");
+    }
+  } finally {
+    console.error = originalError;
+    console.warn = originalWarn;
+    renderer.debug.onShaderError = previousOnShaderError;
+  }
+  return messages;
+}
+
+/** Compact shader log for UI display (drop GPU stall noise). */
+export function formatShaderLog(messages: string[]): string {
+  const unique = [
+    ...new Set(
+      messages
+        .map((m) => m.trim())
+        .filter(Boolean)
+        .filter((m) => !/GPU stall|ReadPixels/i.test(m)),
+    ),
+  ];
+  if (!unique.length) return "";
+  return unique
+    .map((m) =>
+      m
+        .replace(/^THREE\.WebGLProgram:\s*/i, "")
+        .replace(/^Error:\s*/i, "")
+        .trim(),
+    )
+    .join("\n");
 }

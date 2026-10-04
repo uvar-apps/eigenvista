@@ -637,6 +637,17 @@ export default function App() {
               shader={appliedShader}
               reset={reset}
               onSelect={setInspected}
+              onShaderLog={(log) => {
+                if (log) {
+                  setShaderError(log);
+                  setShaderStatus("Shader reported compile messages");
+                } else if (appliedShader) {
+                  setShaderError("");
+                  setShaderStatus(
+                    `Applied ${appliedShader.vertexName} + ${appliedShader.fragmentName}`,
+                  );
+                }
+              }}
             />
             <div className="selection-status">
               {inspected || fieldLabel || doc.title}

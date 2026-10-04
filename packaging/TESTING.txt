@@ -43,6 +43,9 @@ QUICK TEST
   in Volume preview immediately. Try Sampled raycast preview, then Generate
   surfaces to create both signed meshes. Save and reopen to check the cached
   meshes and preserved scalar grid. This is a mathematical rendering fixture.
+- Optional: Appearance → Surface shader, load vertex/fragment/params from
+  Shaders/ (for example phong.vert, phong.frag, phong.params). Uniforms
+  update the surfaces live; Save parameters writes a .params file.
 - Convert files opens a separate batch window. Add inputs, Convert, review
   warnings, then Save each result. Closing keeps results in memory; Clear
   discards them. Nothing is written until you explicitly save a result.

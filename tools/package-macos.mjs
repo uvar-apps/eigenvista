@@ -187,6 +187,10 @@ function main() {
       path.join(root, "fixtures/molden/third-party", file),
       path.join(notices, "Molden-test-data", file),
     );
+  copy(
+    path.join(root, "shaders/README.md"),
+    path.join(notices, "Classic-shaders", "README.md"),
+  );
   rustNotices(
     report,
     path.join(notices, "Rust.txt"),
@@ -300,6 +304,7 @@ function main() {
     path.join(payload, "READ-ME-FIRST.txt"),
   );
   copy(path.join(root, "packaging/examples"), path.join(payload, "Examples"));
+  copy(path.join(root, "shaders"), path.join(payload, "Shaders"));
   copy(
     path.join(root, "fixtures/molden/water-rhf-ccpvdz.molden"),
     path.join(payload, "Examples/water.molden"),
