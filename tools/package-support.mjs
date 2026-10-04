@@ -23,7 +23,7 @@ export function existingSourceFiles(root, names) {
 }
 
 function privateChat(name) {
-  return /(^|[\\/])chat-[^\\/]*\.md$/i.test(name);
+  return /(^|[\\/])(?:[^\\/]*-)?chat-[^\\/]*\.md$/i.test(name);
 }
 
 export function packageSourceFiles(root, names) {

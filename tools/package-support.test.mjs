@@ -91,6 +91,15 @@ test("standalone source selection excludes private exports and cannot escape the
     /Private chat exports/,
   );
 });
+test("titled chat exports are excluded before any file access", (t) => {
+  const dir = fixture(t);
+  const name = "New Molekel-EigenVista-chat-20261004-2.10pm-AWST.md";
+  const names = [name, `docs/${name}`, "Project-CHAT-export.MD"];
+  // These files do not exist: exclusion must happen before filesystem access.
+  assert.deepEqual(packageSourceFiles(dir, names), []);
+  for (const entry of names)
+    assert.throws(() => snapshotFiles(dir, [entry]), /Private chat exports/);
+});
 test("tester environment cannot inherit Apple signing/notarization secrets", () => {
   const env = testerEnvironment(
     {

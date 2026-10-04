@@ -36,7 +36,8 @@ for new documents. Older `.molekel` preview documents remain readable. See the
   before development/browser work; a server in another checkout is not this app.
 - Treat imported documents as untrusted. Preserve validation, allocation bounds,
   source hashes, exact scientific data, and atomic-save guarantees.
-- Exclude private `chat-*.md` exports from reads, commits, and source packages.
+- Exclude private `chat-*.md` and `*-chat-*.md` exports from reads, commits,
+  and source packages. This includes titled chat exports at the repository root.
 - Keep current behavior, decisions, tests, and limitations documented. This is
   a development preview, not completion of v1 or the historical M0-M7 plan.
 

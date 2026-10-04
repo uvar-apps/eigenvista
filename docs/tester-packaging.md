@@ -58,8 +58,10 @@ The ZIP contains:
   research and the original brief are linked to the original repository,
   not copied into this source archive. No legacy application code is included.
   Uncommitted source is included and identified, not silently replaced with
-  the last Git commit. Git history is not included. Personal `chat-*.md`
-  exports are ignored and excluded from source snapshots and commits.
+  the last Git commit. Git history is not included. Personal `chat-*.md` and
+  titled `*-chat-*.md` exports at the repository root are ignored by Git.
+  Source packaging also rejects both filename forms before reading their
+  contents, even if an export is accidentally tracked.
 - Checksummed original Rust dependency archives and frontend production
   dependency sources, including source for MPL components. Build-only Rust
   dependencies are conservatively included. Normal rebuilding still uses the

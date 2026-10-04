@@ -10,4 +10,5 @@
 /artifacts/
 # Personal chat exports are not application source or redistribution inputs.
 /chat-*.md
+/*-chat-*.md
 *.log

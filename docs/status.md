@@ -8,6 +8,22 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Private chat exports
+
+Root-level titled `*-chat-*.md` exports are now ignored alongside `chat-*.md`.
+Source selection excludes both filename forms before filesystem access, and
+snapshotting rejects either form even if accidentally tracked. The user's
+saved chat was not read or modified. Agent and packaging guidance reflect
+the exclusion; application behavior, dependencies, and version are unchanged.
+
+Verification passes 12 packaging tests, including a missing-file regression
+that proves exclusion happens before reads, Git ignore/source-list checks,
+and a full macOS tester build with extracted signatures and example checks.
+The extracted source archive and source manifest contain no chat export files.
+The archive is `EigenVista-0.4.0-apple-silicon-20261004T061422Z-473024d-dirty.zip`;
+its source snapshot predates this evidence-only documentation update. Browser
+and interactive native checks were not rerun. Nothing was committed or uploaded.
+
 ## Standalone migration
 
 The user requested a dedicated EigenVista repository with the former `next/`
