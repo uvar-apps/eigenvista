@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.4.0 development preview, not the complete
+This describes the 0.5.0 development preview, not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
@@ -294,9 +294,10 @@ folds its sign. A source mismatch is rejected; revision-aware historical assets
 are not yet implemented. Never discard saved meshes as disposable cache data.
 
 Persistent view settings include representation, active field selection, colors,
-opacity, and isovalue. Camera, active render mode, grid-resolution control,
-orbital-browser checkbox selection, worker cache, transient display grid, and
-dirty state are not persisted. Multi-orbital selection produces independent
+opacity, and isovalue. Camera, active render mode, surface shading, custom
+surface shader sources/uniforms, grid-resolution control, orbital-browser
+checkbox selection, worker cache, transient display grid, and dirty state are
+not persisted. Multi-orbital selection produces independent
 saved meshes, not a new combined orbital/density or multiple active volumes. A
 loaded document can show saved geometry without recomputation. A selected
 authoritative grid also gets a new transient display sample on Open, making

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { SampledGrid, RenderMode } from "./types";
+import type { SampledGrid, RenderMode, SurfaceShading } from "./types";
 
 export function volumeObject(
   grid: SampledGrid,
@@ -9,6 +9,7 @@ export function volumeObject(
   negative: string,
   opacity: number,
   filtered: boolean,
+  shading: SurfaceShading,
 ) {
   const [nx, ny, nz] = grid.dims;
   const texture = new THREE.Data3DTexture(grid.values, nx, ny, nz);
@@ -42,7 +43,10 @@ export function volumeObject(
     side: THREE.BackSide,
     transparent: true,
     depthWrite: mode === "raycast",
-    defines: filtered ? { FILTERED_FIELD: 1 } : {},
+    defines: {
+      ...(filtered ? { FILTERED_FIELD: 1 } : {}),
+      ...(shading === "blinn-phong" ? { SURFACE_BLINN_PHONG: 1 } : {}),
+    },
     uniforms: {
       field: { value: texture },
       gridSize: { value: new THREE.Vector3(nx, ny, nz) },
@@ -106,7 +110,16 @@ export function volumeObject(
                 if(vl*vm<=0.0)hi=mid;else{lo=mid;vl=vm;}}
               hit=(lo+hi)*0.5;p=cameraPosition+direction*hit;
               vec3 grad=gradient(p);vec3 n=length(grad)>1e-12?normalize(grad):vec3(0,1,0);
-              float light=0.4+0.6*abs(dot(n,normalize(vec3(0.4,0.7,1.0))));
+              #ifdef SURFACE_BLINN_PHONG
+                vec3 L=normalize(vec3(0.4,0.7,1.0));
+                vec3 V=normalize(cameraPosition-p);
+                vec3 H=normalize(L+V);
+                float ndl=abs(dot(n,L));
+                float ndh=pow(max(abs(dot(n,H)),0.0),64.0);
+                float light=0.22+0.48*ndl+1.1*ndh;
+              #else
+                float light=0.4+0.6*abs(dot(n,normalize(vec3(0.4,0.7,1.0))));
+              #endif
               color=(pos?positiveColor:negativeColor)*light;alpha=opacity;
             }
           }

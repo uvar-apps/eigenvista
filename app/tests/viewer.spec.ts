@@ -85,6 +85,30 @@ test("desktop scene, orbit interaction, raycast and volume are nonblank", async 
   }
   expect(errors).toEqual([]);
 });
+test("surface shading switches mesh and raycast lighting", async ({ page }) => {
+  await ready(page);
+  const diffuse = await pixels(page);
+  expect(diffuse.colorful).toBeGreaterThan(500);
+  await page.getByLabel("Surface shading").selectOption("blinn-phong");
+  await expect
+    .poll(async () => (await pixels(page)).checksum, { timeout: 10000 })
+    .not.toBe(diffuse.checksum);
+  const phong = await pixels(page);
+  expect(phong.colorful).toBeGreaterThan(500);
+  await page.screenshot({ path: "../artifacts/surface-blinn-phong.png" });
+  await page.getByLabel("Rendering mode").selectOption("raycast");
+  await expect(page.locator(".scene-label")).toContainText("Sampled raycast");
+  const raycastPhong = await pixels(page);
+  expect(raycastPhong.colorful).toBeGreaterThan(500);
+  await page.screenshot({
+    path: "../artifacts/raycast-blinn-phong.png",
+  });
+  await page.getByLabel("Surface shading").selectOption("diffuse");
+  await expect
+    .poll(async () => (await pixels(page)).checksum, { timeout: 10000 })
+    .not.toBe(raycastPhong.checksum);
+  expect((await pixels(page)).colorful).toBeGreaterThan(500);
+});
 test("portable save/reopen retains both orbital signs without calculation", async ({
   page,
 }) => {
@@ -102,7 +126,7 @@ test("portable save/reopen retains both orbital signs without calculation", asyn
     .first()
     .click();
   page.on("dialog", (d) => d.accept());
-  await page.locator("input[type=file]").setInputFiles(filename);
+  await page.getByLabel("Open molecular file").setInputFiles(filename);
   await expect(page.locator("footer [role=status]")).toContainText(
     "saved geometry restored",
   );
@@ -151,7 +175,7 @@ test("native chemistry reference opens cached orbital and density meshes", async
   await ready(page);
   page.on("dialog", (d) => d.accept());
   await page
-    .locator("input[type=file]")
+    .getByLabel("Open molecular file")
     .setInputFiles(
       path.resolve("../artifacts/references/water-rhf-ccpvdz.eigenvista"),
     );
@@ -185,7 +209,7 @@ test("explicit density matrix renders and invalid import keeps current document"
     1,
   );
   page.on("dialog", (d) => d.accept());
-  await page.locator("input[type=file]").setInputFiles({
+  await page.getByLabel("Open molecular file").setInputFiles({
     name: "broken.xyz",
     mimeType: "text/plain",
     buffer: Buffer.from("2\nbad\nH 0 0 0\n"),

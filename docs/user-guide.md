@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.4.0, a development preview. Scientific calculations and
+This is version 0.5.0, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -319,8 +319,36 @@ analytic orbital clears that preview; **Generate surfaces** prepares the newly
 active field while retaining other orbitals' saved meshes.
 
 Positive/negative colors and opacity currently apply across the document's
-surfaces, not just the selected field. Eye icons toggle individual mesh
-visibility; trash icons remove meshes from the document. There is no undo.
+surfaces, not just the selected field. **Surface shading** chooses how those
+surfaces are lit: **Diffuse** (default, flat two-sided lighting) or
+**Blinn-Phong** (adds specular highlights on saved meshes and sampled raycast
+isosurfaces). Shading is a session display preference and is not written into
+`.eigenvista` files; molecular atoms and bonds keep their own material. Eye
+icons toggle individual mesh visibility; trash icons remove meshes from the
+document. There is no undo.
+
+### Custom surface shaders
+
+**Surface shader** (Appearance) optionally replaces the built-in surface
+materials with a user vertex + fragment GLSL pair, similar to classic Molekel
+Display→Shaders:
+
+1. Choose a **Vertex shader** and **Fragment shader** file (`.vert` / `.frag` /
+   `.glsl`, or any text).
+2. Optionally load a **Parameters file** (`.params`) with default uniform values.
+3. Pick **Apply to**: all surfaces or a single saved surface.
+4. Click **Apply shader**. Uniforms parsed from the sources appear as live
+   controls; edits update the scene immediately.
+5. **Save parameters** downloads the current uniform values as a Molekel-style
+   `.params` file (`float name<TAB>value` per line). **Clear shader** restores
+   Diffuse / Blinn-Phong materials.
+
+Classic GLSL 1.x shaders that use `ftransform()`, `gl_Vertex`, `gl_Normal`,
+`gl_Color`, and `gl_NormalMatrix` are mapped onto Three.js/WebGL2 built-ins.
+Surface colors feed `gl_Color`. Example pairs live under `app/shaders/`.
+Shaders and uniform values are session-only and are not stored in `.eigenvista`
+documents. Invalid GLSL is reported by the WebGL backend; apply a corrected
+pair or **Clear shader** to restore the built-in materials.
 
 Raycasting can miss crossings, marching cubes is not topology-certified, and
 transparent/volume overlaps have known limitations. These modes are experimental,

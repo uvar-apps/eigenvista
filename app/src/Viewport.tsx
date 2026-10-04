@@ -2,7 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Focus, Camera, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
-import type { EigenVistaDocument, SampledGrid, RenderMode } from "./types";
+import type {
+  EigenVistaDocument,
+  SampledGrid,
+  RenderMode,
+  SurfaceShading,
+} from "./types";
+import {
+  applyUniformValues,
+  attachSurfaceColors,
+  buildSurfaceMaterial,
+  type ShaderPair,
+} from "./shaderTools";
 import { volumeObject } from "./volume";
 
 const BOHR = 0.529177210903;
@@ -33,16 +44,74 @@ function dispose(group: THREE.Object3D) {
   });
 }
 
+function surfaceMaterial(
+  s: {
+    color: string;
+    opacity: number;
+  },
+  shading: SurfaceShading,
+) {
+  if (shading === "blinn-phong") {
+    return new THREE.ShaderMaterial({
+      glslVersion: THREE.GLSL3,
+      transparent: s.opacity < 1,
+      side: THREE.DoubleSide,
+      depthWrite: s.opacity >= 1,
+      uniforms: {
+        color: { value: new THREE.Color(s.color) },
+        opacity: { value: s.opacity },
+      },
+      vertexShader: `out vec3 vNormal; out vec3 vWorld;
+        void main() {
+          vNormal = normalize(mat3(modelMatrix) * normal);
+          vec4 p = modelMatrix * vec4(position, 1.0);
+          vWorld = p.xyz;
+          gl_Position = projectionMatrix * viewMatrix * p;
+        }`,
+      fragmentShader: `precision highp float;
+        out vec4 outputColor;
+        #define gl_FragColor outputColor
+        in vec3 vNormal; in vec3 vWorld;
+        uniform vec3 color; uniform float opacity;
+        void main() {
+          vec3 n = normalize(vNormal);
+          if (!gl_FrontFacing) n = -n;
+          vec3 L = normalize(vec3(0.4, 0.7, 1.0));
+          vec3 V = normalize(cameraPosition - vWorld);
+          vec3 H = normalize(L + V);
+          float ndl = abs(dot(n, L));
+          float ndh = pow(max(abs(dot(n, H)), 0.0), 64.0);
+          float light = 0.22 + 0.48 * ndl + 1.1 * ndh;
+          outputColor = vec4(color * light, opacity);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`,
+    });
+  }
+  return new THREE.MeshStandardMaterial({
+    color: s.color,
+    opacity: s.opacity,
+    transparent: s.opacity < 1,
+    side: THREE.DoubleSide,
+    roughness: 0.45,
+    depthWrite: s.opacity >= 1,
+  });
+}
+
 export function Viewport({
   doc,
   grid,
   mode,
+  shading,
+  shader,
   reset,
   onSelect,
 }: {
   doc: EigenVistaDocument;
   grid: SampledGrid | null;
   mode: RenderMode;
+  shading: SurfaceShading;
+  shader: (ShaderPair & { target: string }) | null;
   reset: number;
   onSelect: (text: string) => void;
 }) {
@@ -58,6 +127,8 @@ export function Viewport({
   } | null>(null);
   const selection = useRef(onSelect);
   selection.current = onSelect;
+  const shaderRef = useRef(shader);
+  shaderRef.current = shader;
   const [error, setError] = useState("");
   useEffect(() => {
     const div = host.current!;
@@ -188,6 +259,7 @@ export function Viewport({
   useEffect(() => {
     const e = engine.current;
     if (!e) return;
+    const shader = shaderRef.current;
     const group = new THREE.Group();
     try {
       for (const [i, atom] of doc.atoms.entries()) {
@@ -252,17 +324,17 @@ export function Viewport({
           new THREE.Float32BufferAttribute(s.normals, 3),
         );
         geometry.setIndex(s.indices);
+        const usesCustom =
+          shader && (shader.target === "all" || shader.target === s.id);
+        if (shader)
+          attachSurfaceColors(geometry, s.color, s.positions.length / 3);
         const mesh = new THREE.Mesh(
           geometry,
-          new THREE.MeshStandardMaterial({
-            color: s.color,
-            opacity: s.opacity,
-            transparent: s.opacity < 1,
-            side: THREE.DoubleSide,
-            roughness: 0.45,
-            depthWrite: s.opacity >= 1,
-          }),
+          usesCustom && shader
+            ? buildSurfaceMaterial(shader, s)
+            : surfaceMaterial(s, shading),
         );
+        if (usesCustom) mesh.userData.customShader = true;
         mesh.userData.label = `${s.label} | ${(s.indices.length / 3).toLocaleString()} triangles`;
         group.add(mesh);
       }
@@ -276,6 +348,7 @@ export function Viewport({
             doc.view.negative_color,
             doc.view.opacity,
             e.renderer.extensions.has("OES_texture_float_linear"),
+            shading,
           ),
         );
     } catch (error) {
@@ -290,7 +363,30 @@ export function Viewport({
     e.group.add(group);
     if (!e.renderer.getContext().isContextLost()) setError("");
     e.needsRender = true;
-  }, [doc, grid, mode]);
+  }, [
+    doc,
+    grid,
+    mode,
+    shading,
+    shader?.vertexSource,
+    shader?.fragmentSource,
+    shader?.target,
+  ]);
+  useEffect(() => {
+    const e = engine.current;
+    const active = shaderRef.current;
+    if (!e || !active) return;
+    e.group.traverse((obj) => {
+      if (
+        obj instanceof THREE.Mesh &&
+        obj.userData.customShader &&
+        obj.material instanceof THREE.ShaderMaterial
+      ) {
+        applyUniformValues(obj.material, active.uniforms, active.values);
+      }
+    });
+    e.needsRender = true;
+  }, [shader?.values]);
   useEffect(() => {
     engine.current?.fit();
   }, [reset, doc.id]);

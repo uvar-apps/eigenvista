@@ -32,7 +32,7 @@ for (const input of inputs) {
       "triangles",
     );
     page.on("dialog", (dialog) => dialog.accept());
-    await page.locator("input[type=file]").setInputFiles({
+    await page.getByLabel("Open molecular file").setInputFiles({
       name: input.name,
       mimeType: "text/plain",
       buffer: Buffer.from(input.text),
@@ -101,7 +101,7 @@ for (const input of inputs) {
       input.bonds,
     );
     expect(doc.provenance.join(" ")).toContain("Automatic bonds");
-    await page.locator("input[type=file]").setInputFiles(file);
+    await page.getByLabel("Open molecular file").setInputFiles(file);
     await expect(page.locator("footer [role=status]")).toHaveText(
       `Opened ${input.name}.eigenvista`,
     );
@@ -204,13 +204,13 @@ test("PDB error preserves the current connected structure", async ({
   await page.goto("/");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   page.on("dialog", (dialog) => dialog.accept());
-  await page.locator("input[type=file]").setInputFiles({
+  await page.getByLabel("Open molecular file").setInputFiles({
     name: "water.xyz",
     mimeType: "text/plain",
     buffer: Buffer.from(inputs[0].text),
   });
   await expect(page.locator(".document-summary")).toContainText("2 bonds");
-  await page.locator("input[type=file]").setInputFiles({
+  await page.getByLabel("Open molecular file").setInputFiles({
     name: "bad.pdb",
     mimeType: "text/plain",
     buffer: Buffer.from("ATOM      1\n"),

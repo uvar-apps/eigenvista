@@ -437,6 +437,76 @@ section {
   flex-shrink: 0;
   color: #8a989d;
 }
+.shader-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shader-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shader-files button {
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.shader-uniforms {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shader-uniforms h3 {
+  margin: 4px 0 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #84918d;
+}
+.shader-uniform {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+}
+.shader-uniform span {
+  overflow-wrap: anywhere;
+  color: #4c5550;
+}
+.shader-uniform input[type="number"] {
+  width: 64px;
+}
+.shader-uniform input[type="color"] {
+  width: 42px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d5dadd;
+}
+.shader-uniform:has(input[type="color"]),
+.shader-uniform:has(input[type="number"] + input[type="number"]) {
+  grid-template-columns: 1fr;
+}
+.shader-uniform:has(input[type="number"] + input[type="number"]) {
+  display: flex;
+  flex-wrap: wrap;
+}
+.shader-uniform:has(input[type="number"] + input[type="number"]) span {
+  width: 100%;
+}
+.shader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.shader-status {
+  font-size: 11px;
+  color: #3d7d6c;
+  margin: 0;
+}
+.shader-panel code {
+  font-size: 10px;
+}
 .surface-swatch {
   width: 6px;
   height: 18px;

@@ -1,5 +1,6 @@
 /target/
 /tmp/
+/app/tmp/
 .DS_Store
 /app/node_modules/
 /app/dist/

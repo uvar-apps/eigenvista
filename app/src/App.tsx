@@ -30,6 +30,14 @@ import { ConvertFiles } from "./ConvertFiles";
 import { OrbitalBrowser, maxOrbitalBatch } from "./OrbitalBrowser";
 import { gridResolutions, isGridResolution } from "./resolution";
 import { Viewport } from "./Viewport";
+import { ShaderPanel, type ShaderEditorState } from "./ShaderPanel";
+import {
+  defaultValues,
+  mergeUniformValues,
+  parseUniforms,
+  type ShaderPair,
+  type UniformValue,
+} from "./shaderTools";
 import type {
   EigenVistaDocument,
   Generation,
@@ -37,6 +45,7 @@ import type {
   ImportReport,
   ImportResult,
   RenderMode,
+  SurfaceShading,
   Surface,
 } from "./types";
 
@@ -47,6 +56,19 @@ export default function App() {
   const [status, setStatus] = useState("");
   const [resolution, setResolution] = useState(40);
   const [mode, setMode] = useState<RenderMode>("mesh");
+  const [surfaceShading, setSurfaceShading] =
+    useState<SurfaceShading>("diffuse");
+  const [shaderEditor, setShaderEditor] = useState<ShaderEditorState>({
+    vertex: null,
+    fragment: null,
+    values: {},
+    target: "all",
+  });
+  const [appliedShader, setAppliedShader] = useState<
+    (ShaderPair & { target: string }) | null
+  >(null);
+  const [shaderStatus, setShaderStatus] = useState("");
+  const [shaderError, setShaderError] = useState("");
   const [grid, setGrid] = useState<SampledGrid | null>(null);
   const [reset, setReset] = useState(0);
   const [inspected, setInspected] = useState("");
@@ -611,6 +633,8 @@ export default function App() {
               doc={doc}
               grid={grid}
               mode={mode}
+              shading={surfaceShading}
+              shader={appliedShader}
               reset={reset}
               onSelect={setInspected}
             />
@@ -746,7 +770,88 @@ export default function App() {
                   }
                 />
               </label>
+              <label>
+                Surface shading
+                <select
+                  aria-label="Surface shading"
+                  value={surfaceShading}
+                  onChange={(e) =>
+                    setSurfaceShading(e.target.value as SurfaceShading)
+                  }
+                >
+                  <option value="diffuse">Diffuse</option>
+                  <option value="blinn-phong">Blinn-Phong</option>
+                </select>
+              </label>
             </section>
+            {(() => {
+              const defs =
+                shaderEditor.vertex && shaderEditor.fragment
+                  ? parseUniforms(
+                      shaderEditor.vertex.source,
+                      shaderEditor.fragment.source,
+                    )
+                  : [];
+              return (
+                <ShaderPanel
+                  uniforms={defs}
+                  state={shaderEditor}
+                  surfaceOptions={doc.surfaces.map((s) => ({
+                    id: s.id,
+                    label: s.label,
+                  }))}
+                  onChange={(next) => {
+                    setShaderEditor(next);
+                    if (appliedShader) {
+                      setAppliedShader({
+                        ...appliedShader,
+                        target: next.target,
+                        values: next.values,
+                      });
+                    }
+                  }}
+                  onApply={() => {
+                    if (!shaderEditor.vertex || !shaderEditor.fragment) return;
+                    try {
+                      const uniforms = parseUniforms(
+                        shaderEditor.vertex.source,
+                        shaderEditor.fragment.source,
+                      );
+                      const values = mergeUniformValues(
+                        uniforms,
+                        defaultValues(uniforms),
+                        shaderEditor.values,
+                      );
+                      const pair: ShaderPair & { target: string } = {
+                        vertexName: shaderEditor.vertex.name,
+                        fragmentName: shaderEditor.fragment.name,
+                        vertexSource: shaderEditor.vertex.source,
+                        fragmentSource: shaderEditor.fragment.source,
+                        uniforms,
+                        values,
+                        target: shaderEditor.target,
+                      };
+                      setShaderEditor({ ...shaderEditor, values });
+                      setAppliedShader(pair);
+                      setShaderError("");
+                      setShaderStatus(
+                        `Applied ${pair.vertexName} + ${pair.fragmentName}`,
+                      );
+                    } catch (e) {
+                      setShaderError(String(e));
+                      setShaderStatus("");
+                    }
+                  }}
+                  onClear={() => {
+                    setAppliedShader(null);
+                    setShaderStatus("Cleared custom surface shader");
+                    setShaderError("");
+                  }}
+                  status={shaderStatus}
+                  error={shaderError}
+                />
+              );
+            })()}
             <section className="surfaces">
               <h2>
                 Saved surfaces <span>{doc.surfaces.length}</span>

@@ -8,6 +8,67 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.0
+
+The user requested a version bump to **0.5.0**, a commit, an annotated
+`v0.5.0` tag, and a push to `origin` on `main`. This release adds surface
+shading (Diffuse / Blinn-Phong), custom vertex/fragment surface shaders with
+live uniform controls and Molekel-style `.params` load/save, and the agent
+guide refresh. External locked dependencies are unchanged.
+
+Preflight for this bump: cargo fmt --check, workspace `cargo test --locked`
+(all default scientific/format/import/CLI tests green), workspace/all-target
+Clippy with `-D warnings`, production WASM/TypeScript/frontend build,
+`tsc --noEmit`, and Playwright `viewer.spec.ts` + `shaders.spec.ts` +
+`connectivity.spec.ts` (28 cases) on Chromium and WebKit. Packaging and a full
+tester ZIP were not rerun for this release action. No clean-machine install or
+notarized build is claimed.
+
+## Custom surface shaders (vertex/fragment + live uniforms)
+
+Appearance now includes a **Surface shader** panel modeled on classic Molekel
+Display→Shaders: load a vertex file, fragment file, and optional `.params`
+file; apply to all surfaces or one saved surface; edit parsed uniforms live;
+save current values back to a Molekel-style `.params` text file.
+
+Implementation is TypeScript-only (`app/src/shaderTools.ts`,
+`app/src/ShaderPanel.tsx`, `Viewport.tsx`/`App.tsx` wiring). Classic GLSL 1.x
+built-ins (`ftransform`, `gl_Vertex`, `gl_Normal`, `gl_Color`,
+`gl_ModelViewMatrix`, `gl_NormalMatrix`) are mapped onto Three.js ShaderMaterial
+names, with reserved-name renames to avoid `normal`/`position` collisions.
+Examples: `app/shaders/surface-lambert.*` and `surface-phong.*`. Native schema,
+scientific data, and `.eigenvista` contracts are unchanged; shaders/uniforms are
+session-only.
+
+Verification: production WASM/TypeScript/frontend build and `tsc --noEmit`
+pass. `app/tests/shaders.spec.ts` covers load → params → apply → live uniform
+edits → save parameters → clear on Chromium and WebKit (2/2). Full
+`viewer.spec.ts` remains 14/14 after scoping document file-input selectors.
+Screenshots: `artifacts/custom-shader-lambert.png`,
+`custom-shader-saturation0.png`, `custom-shader-phong.png`. Manual native
+acceptance and packaging were not rerun. Nothing committed.
+
+## Surface shading (Diffuse / Blinn-Phong)
+
+The Appearance panel now offers **Surface shading**: **Diffuse** (previous
+two-sided lambert-style lighting) or **Blinn-Phong** (explicit ambient +
+diffuse + specular half-vector term). The option applies to saved/generated
+isosurface meshes and sampled raycast isosurfaces only; atoms, bonds, and
+volume preview keep their existing materials. Shading is a session display
+preference like render mode and is not written into `.eigenvista` files.
+
+Implementation is TypeScript/shader only (`app/src/types.ts`, `App.tsx`,
+`Viewport.tsx`, `volume.ts`). Native schema shape `[0, 1]`, scientific data,
+and format contracts are unchanged.
+
+Verification: production WASM/TypeScript/frontend build and `tsc --noEmit`
+pass. Focused Playwright coverage in `app/tests/viewer.spec.ts` switches
+mesh and raycast shading on Chromium and WebKit, asserts canvas pixels change
+and remain nonblank, and writes `artifacts/surface-blinn-phong.png` and
+`artifacts/raycast-blinn-phong.png` (both inspected). Full `viewer.spec.ts`
+passes 14/14 on Chromium and WebKit. Manual native acceptance and packaging
+were not rerun. Nothing committed.
+
 ## Private chat exports
 
 Root-level titled `*-chat-*.md` exports are now ignored alongside `chat-*.md`.

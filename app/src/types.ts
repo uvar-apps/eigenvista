@@ -85,3 +85,4 @@ export interface ImportResult {
   report: ImportReport;
 }
 export type RenderMode = "mesh" | "raycast" | "volume";
+export type SurfaceShading = "diffuse" | "blinn-phong";

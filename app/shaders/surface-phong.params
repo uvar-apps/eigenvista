@@ -1,0 +1,7 @@
+vec3 lightDir	0.4 0.7 1
+vec3 lightColor	1 1 1
+float ambient	0.22
+float diffuseScale	0.48
+float specularScale	1.1
+float shininess	64
+float opacity	1
