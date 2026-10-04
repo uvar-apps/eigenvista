@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "source_repository": "https://github.com/ugovaretto/molekel",
+  "source_commit": "4edabf6852db44ff849e82223bef6c0702730e3c",
+  "files": [
+    {
+      "path": "data/molden.input",
+      "source_path": "data/molden.input",
+      "bytes": 494537,
+      "sha256": "9309464ace24326f70c344852d4bbc49bc1bca418876a1a0d6b42863202b4645"
+    },
+    {
+      "path": "data/guanine.pdb",
+      "source_path": "data/guanine.pdb",
+      "bytes": 2754,
+      "sha256": "f1dcaf929cb79b262547b4941df08a70db1ba2f386fdad947f2fef083a582ea5"
+    },
+    {
+      "path": "data/3POR.pdb",
+      "source_path": "data/3POR.pdb",
+      "bytes": 207036,
+      "sha256": "68271018139d6d18169e47b24ba7ae2b13b1e682e3d4cfbebc94a717515e6304"
+    },
+    {
+      "path": "data/URIDINE-VANADATE.pdb",
+      "source_path": "data/URIDINE-VANADATE.pdb",
+      "bytes": 2524,
+      "sha256": "9642819165d9c450c5440c81a557f45636f5d97d3a49bd12ef5aea585786f889"
+    },
+    {
+      "path": "data/alaninemulti.pdb",
+      "source_path": "data/alaninemulti.pdb",
+      "bytes": 527089,
+      "sha256": "0599d68eeaad9e9c78a87ad0ece02376fe3f867ec2e4c20340a839c1c78958f2"
+    },
+    {
+      "path": "data/h2o-dens.cube",
+      "source_path": "data/h2o-dens.cube",
+      "bytes": 843590,
+      "sha256": "406468ec72e81ab96585fc2409c6b8660faf6ced88568dd7c40c1238e59afc61"
+    },
+    {
+      "path": "all_data/Benzene.MO19-BOTH-SIGNS.cube",
+      "source_path": "all_data/Benzene.MO19-BOTH-SIGNS.cube",
+      "bytes": 3104109,
+      "sha256": "c71035825cc64ca1e2bd34b479d8e056627e09a9af1132ba1dfdb99aa525efb8"
+    },
+    {
+      "path": "all_data/molden_test/test_homo.cube",
+      "source_path": "all_data/molden_test/test_homo.cube",
+      "bytes": 854786,
+      "sha256": "490a90a30ab94f8141e073d35f55800a7357d3b7c170c8d8a4e016b8e05bd075"
+    },
+    {
+      "path": "LICENSE",
+      "source_path": "src/license",
+      "bytes": 19544,
+      "sha256": "4684826c12c9724f3cf9227d5c243880e612e28767b366fbdcb2460184706df1"
+    }
+  ]
+}

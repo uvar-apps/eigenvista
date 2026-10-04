@@ -2,8 +2,10 @@
 
 A clean Rust scientific core with a React/Three.js interface, shared by a Tauri macOS application and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
 
-EigenVista is the renamed Molekel rewrite. The repository and `next/` source
-location are unchanged, as are the icon and logo. New documents use
+EigenVista is the standalone successor to the Molekel Rust rewrite, in
+[`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista). Application code
+now lives at this repository's root; legacy application code is not included.
+The icon and logo are unchanged. New documents use
 `.eigenvista`; existing `.molekel` preview documents still open with their
 scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
@@ -17,24 +19,26 @@ a `.molekel` filename. See the [native profile](docs/preview-format.md).
   installation, supported files, controls, surfaces, saving, and troubleshooting.
 - **Building or running from source:** [Development guide](docs/development.md).
 - **Sharing a tester ZIP:** [Packaging guide](docs/tester-packaging.md).
-- **Continuing development:** [Root AGENTS.md](../AGENTS.md),
+- **Continuing development:** [Root AGENTS.md](AGENTS.md),
   [handoff](docs/handoff.md), and [as-built architecture](docs/architecture.md).
 - **Planning and all documentation:** [Documentation map](docs/README.md).
 
-The historical research and M0-M7 plan remain in `../doc/rewrite/`. They record
-the initial proposal; current implementation facts and later decisions are in
-`docs/`. In particular, proposed features are not all available in this preview.
+The [historical research and M0-M7 plan](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/README.md)
+remain in the original repository at the pinned extraction revision. Current
+implementation facts and later decisions live in `docs/`. The
+[migration record](docs/migration.md) explains the eight-commit rewrite-only
+history and data-only legacy fixtures. Proposed features are not all available
+in this preview.
 
 ## Run
 
 Tested toolchain: Rust 1.92.0, Node 26, wasm-bindgen CLI 0.2.108. Dependency versions are locked in Cargo.lock and app/package-lock.json.
 
-From `next/`:
+From the repository root:
 
 ```sh
-mkdir -p ../tmp
-export TMPDIR="$(cd ../tmp && pwd)"
-export TMP="$TMPDIR" TEMP="$TMPDIR"
+mkdir -p tmp
+export TMPDIR="$PWD/tmp" TMP="$PWD/tmp" TEMP="$PWD/tmp"
 rustup target add wasm32-unknown-unknown
 cargo install wasm-bindgen-cli --version 0.2.108 --locked
 cd app
@@ -43,6 +47,8 @@ npm run dev
 ```
 
 The development viewer is served at `http://127.0.0.1:5178`. The port is deliberately strict; choose another in Vite, Tauri, and Playwright config if it is occupied. All project scripts use the ignored repository `tmp/` for temporary work.
+
+Other commands, from `app/`:
 
 ```sh
 npm run desktop        # Tauri development app, starts its own Vite server

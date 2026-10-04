@@ -1,13 +1,14 @@
 # EigenVista agent guide
 
-Read the [root working agreement](../AGENTS.md) first. Work only inside `next/`
-for implementation; do not edit legacy source, existing data, or historical
-research. Keep the current branch and preserve existing changes. No C++ or
-copied legacy implementation; use Rust and the established TypeScript UI.
+This is the self-contained working agreement for the standalone
+[`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository.
+The Rust workspace, `app/`, `crates/`, `docs/`, `tools/`, and `fixtures/` live at
+the repository root. There is no `next/` wrapper or legacy application code here.
 
-The active rewrite is **EigenVista**, formerly the Molekel Rust preview. Its
-source remains in `next/`; legacy Molekel code, repository URLs, historical
-plans, Git tags, and existing scientific fixtures retain their identity. Use
+EigenVista was extracted from the Molekel rewrite with eight rewrite-only
+commits; the [migration record](docs/migration.md) identifies the pinned original
+source and changed commit identities. Historical plans, original Git tags, and
+legacy implementation remain in the original repository, not this checkout. Use
 `eigenvista-*` Rust packages, the `eigenvista-convert` CLI, and `.eigenvista`
 for new documents. Older `.molekel` preview documents remain readable. See the
 [native profile](docs/preview-format.md) before changing format compatibility.
@@ -19,6 +20,25 @@ for new documents. Older `.molekel` preview documents remain readable. See the
 - [Development](docs/development.md): exact setup/build/test commands.
 - [Documentation index](docs/README.md): planning through delivery.
 - [User guide](docs/user-guide.md): actual controls, supported files, and limits.
+
+## Working agreement
+
+- Inspect `git status`, current branch, and relevant diffs before editing.
+  Preserve existing work. Continue on the current branch; do not create branches
+  or worktrees, commit, tag, or push unless requested.
+- Implement scientific/native behavior in Rust and shared UI in TypeScript.
+  Do not copy legacy C++ application code or add a legacy build to this repository.
+- Keep the original Molekel checkout unchanged. Historical research is linked
+  to its pinned original revision, not copied here as current implementation.
+- Preserve frozen scientific fixtures and provenance. `fixtures/legacy/` contains
+  eight data-only regression inputs and their license, not legacy application code.
+- Never stop or restart the user's app or an unknown server. Check port ownership
+  before development/browser work; a server in another checkout is not this app.
+- Treat imported documents as untrusted. Preserve validation, allocation bounds,
+  source hashes, exact scientific data, and atomic-save guarantees.
+- Exclude private `chat-*.md` exports from reads, commits, and source packages.
+- Keep current behavior, decisions, tests, and limitations documented. This is
+  a development preview, not completion of v1 or the historical M0-M7 plan.
 
 Before running tools, from the repository root:
 

@@ -80,8 +80,9 @@ REDISTRIBUTION
 Keep LICENSE, Third-party-notices, and Source together with the application
 when forwarding this package. Source contains the exact first-party source
 snapshot and lockfiles used for this build, including uncommitted changes.
-Its root AGENTS.md is the development entry point; current documentation,
-the original brief, and the historical planning documents are also included.
+Its root AGENTS.md is the development entry point. Current documentation and
+the required molecular test fixtures are included in the standalone source;
+no legacy application implementation or personal chat exports are included.
 Third-party components retain their own licenses and copyright notices.
 No credentials or development caches are included. Dependency source copies
 are provided for inspection and redistribution alongside their notices.

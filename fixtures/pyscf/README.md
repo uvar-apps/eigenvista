@@ -37,16 +37,17 @@ From the repository root, using a development-only environment in the ignored re
 mkdir -p tmp
 export TMPDIR="$PWD/tmp" TMP="$PWD/tmp" TEMP="$PWD/tmp"
 python3 -m venv tmp/reference-venv
-tmp/reference-venv/bin/python -m pip install --only-binary=:all: -r next/tools/reference-requirements.txt
-tmp/reference-venv/bin/python next/tools/generate_references.py
+tmp/reference-venv/bin/python -m pip install --only-binary=:all: -r tools/reference-requirements.txt
+tmp/reference-venv/bin/python tools/generate_references.py
 ```
 
 The generator also sets all temporary-directory variables before loading PySCF. Packages are pinned for the recorded environment; normal builds do not install them. Regeneration overwrites only these four generated JSON fixtures and their manifest. Review numerical changes rather than automatically regenerating expected data in tests: SCF phases and degenerate subspaces may differ with software or BLAS versions. `manifest.json` pins the checked-in bytes.
 
-To produce usable `.eigenvista` examples from the frozen molecular fixtures, run from `next/` with the same temporary-directory environment:
+To produce usable `.eigenvista` examples from the frozen molecular fixtures,
+run from the repository root with the same temporary-directory environment:
 
 ```sh
 cargo run --locked -p eigenvista-format --example reference_documents
 ```
 
-This creates files in ignored `next/artifacts/references/`, each with quantum data and cached meshes. Water and OH initially show signed HOMO meshes; a saved total-density mesh is also available but hidden. The synthetic spherical example displays its supplied transition density. All use the current classic marching-cubes preview, not topology-certified extraction. The browser test runner creates these artifacts automatically.
+This creates files in ignored `artifacts/references/`, each with quantum data and cached meshes. Water and OH initially show signed HOMO meshes; a saved total-density mesh is also available but hidden. The synthetic spherical example displays its supplied transition density. All use the current classic marching-cubes preview, not topology-certified extraction. The browser test runner creates these artifacts automatically.

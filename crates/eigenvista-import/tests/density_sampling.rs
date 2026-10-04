@@ -1,7 +1,7 @@
 use eigenvista_core::compute;
 use eigenvista_import::import_bytes;
 
-const SOURCE: &[u8] = include_bytes!("../../../../data/molden.input");
+const SOURCE: &[u8] = include_bytes!("../../../fixtures/legacy/data/molden.input");
 
 #[test]
 fn repository_molden_density_generates_and_persists_at_minimum_ui_resolution() {

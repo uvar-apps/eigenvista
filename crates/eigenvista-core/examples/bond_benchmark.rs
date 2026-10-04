@@ -3,7 +3,11 @@ use std::time::Instant;
 
 fn main() {
     let start = Instant::now();
-    let pdb = import::pdb(include_str!("../../../../data/3POR.pdb"), "3POR.pdb").unwrap();
+    let pdb = import::pdb(
+        include_str!("../../../fixtures/legacy/data/3POR.pdb"),
+        "3POR.pdb",
+    )
+    .unwrap();
     println!(
         "3POR PDB parse + bonds: {} atoms, {} bonds, {:.2} ms",
         pdb.atoms.len(),

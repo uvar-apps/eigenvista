@@ -9,7 +9,7 @@ Public License or, at your option, any later version. It is provided
 WITHOUT ANY WARRANTY, including MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. Third-party components retain their own licenses;
 see the notices and source packages supplied with tester distributions.
-Legacy test fixtures retain the notices in src/license in the source archive.
+Data-only legacy test fixtures retain their notices in fixtures/legacy/LICENSE.
 
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991

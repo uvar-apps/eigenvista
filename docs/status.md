@@ -1,11 +1,55 @@
 # Implementation status
 
-Date: 4 October 2026. Branch: `2026`. All new implementation is under `next/`; legacy source, data, and historical research remain untouched. Root `AGENTS.md` is the user-requested development entry point. The previously requested root ignore rule excludes repository-local `tmp/`.
+Date: 4 October 2026. Standalone repository: `uvar-apps/eigenvista`, initially on
+`main`. Application source is at the repository root without legacy application
+code. [AGENTS.md](../AGENTS.md) is the self-contained entry point. Temporary
+storage remains repository-local ignored `tmp/`.
 
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
-## Version 0.4.0
+## Standalone migration
+
+The user requested a dedicated EigenVista repository with the former `next/`
+contents at its root and no legacy application code. Eight rewrite-only
+commits were extracted from the original repository at
+`4edabf6852db44ff849e82223bef6c0702730e3c`; their rewritten hashes differ from
+the original history. Original commits and tags remain in the Molekel
+repository. See the [migration record](migration.md) for provenance.
+
+Version remains **0.4.0**. The workspace/app/tooling/documentation paths are
+root-relative. Four PDB files, one Molden file, and three cube files are
+retained as unchanged, licensed data-only inputs under `fixtures/legacy/`.
+The original brief and research plans are linked to the pinned original
+revision rather than copied. No legacy C++ application source or build system
+is included, and the original checkout is not modified. The icon, logo,
+scientific data contracts, and native-file compatibility are unchanged.
+
+The standalone checkout passes **108 workspace Rust tests**, **114 Chromium/WebKit
+browser cases**, and **11 packaging tests**. Production WASM/TypeScript/frontend
+build, formatting, workspace/all-target Clippy, fixture checksums, and local
+documentation targets pass. Browser tests used an isolated server on port 5189;
+the user's original preview on 5178 was preserved. Desktop/mobile rendering
+screenshots were inspected. The existing frontend chunk-size warning remains.
+
+All original icons, frozen scientific references, runtime scientific/UI code,
+and dependency records are unchanged. The eight extracted commits contain no
+legacy C/C++ application files or private chat exports. New root-local temporary
+paths also cover the offline reference generators; they were syntax-checked,
+not executed, and no scientific expectations were regenerated.
+
+The full standalone macOS packager also passes: optimized arm64 app and CLI,
+bundle identity, system-library checks, strict ad-hoc signatures, extracted ZIP
+bytes/permissions, source stability, and PDB/XYZ/Molden/cube native/WASM example
+agreement. Its verification archive is
+`EigenVista-0.4.0-apple-silicon-20261004T054740Z-da27738-dirty.zip`, built from
+the explicitly identified uncommitted migration before this final evidence
+update. `BUILD-INFO.json` and `SOURCE-MANIFEST.json` identify that exact snapshot;
+this is not a new tag, notarized release, native-dialog test, or clean-Mac install.
+All 220 local documentation targets resolve. Git records actual new commits,
+remotes, and publication; original dated evidence below remains historical.
+
+## Version 0.4.0 in the original repository
 
 The user requested **EigenVista 0.4.0**, committing the rename below, an annotated
 `v0.4.0` tag, and a push of the current `2026` branch to `origin`. The Rust

@@ -67,10 +67,10 @@ Repository fixtures, read without modification:
 
 | File | Selected atoms | Bonds |
 | --- | ---: | ---: |
-| `data/guanine.pdb` | 33 | 35 |
-| `data/3POR.pdb` | 2,325 | 2,285 |
-| `data/URIDINE-VANADATE.pdb` | 31 | 33 |
-| `data/alaninemulti.pdb` | 66 (first structure only) | 65 |
+| `fixtures/legacy/data/guanine.pdb` | 33 | 35 |
+| `fixtures/legacy/data/3POR.pdb` | 2,325 | 2,285 |
+| `fixtures/legacy/data/URIDINE-VANADATE.pdb` | 31 | 33 |
+| `fixtures/legacy/data/alaninemulti.pdb` | 66 (first structure only) | 65 |
 
 Single release-build measurements on the development Apple Silicon Mac, 3 October 2026, using `cargo run --locked --release -p molekel-core --example bond_benchmark`:
 

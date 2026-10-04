@@ -22,6 +22,18 @@ export function existingSourceFiles(root, names) {
   );
 }
 
+function privateChat(name) {
+  return /(^|[\\/])chat-[^\\/]*\.md$/i.test(name);
+}
+
+export function packageSourceFiles(root, names) {
+  const publicNames = names.filter((name) => {
+    inside(root, name);
+    return !privateChat(name);
+  });
+  return [...new Set(existingSourceFiles(root, publicNames))].sort();
+}
+
 export function testerEnvironment(parent, root) {
   const env = { ...parent };
   // A tester build must never use developer credentials or contact the notary.
@@ -29,7 +41,7 @@ export function testerEnvironment(parent, root) {
     if (key.startsWith("APPLE_") || key.startsWith("TAURI_SIGNING_"))
       delete env[key];
   }
-  const tmp = path.resolve(root, "../tmp");
+  const tmp = path.join(root, "tmp");
   return {
     ...env,
     TMPDIR: tmp,
@@ -62,6 +74,10 @@ export function digest(bytes) {
 export function snapshotFiles(root, names, destination) {
   const manifest = {};
   for (const name of [...new Set(names)].sort()) {
+    if (privateChat(name))
+      throw new Error(
+        `Private chat exports must not enter the source package: ${name}`,
+      );
     const source = inside(root, name);
     if (fs.realpathSync(source) !== source || !fs.lstatSync(source).isFile()) {
       throw new Error(

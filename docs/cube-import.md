@@ -125,8 +125,8 @@ These are rejection bounds, not interactive-performance promises.
 [Cube core tests](../crates/eigenvista-core/tests/cube_import.rs) exercise ordering,
 affine grids, signed fields, bonds, single-orbital headers, malformed profiles,
 sampling, and meshing. They read the existing
-`data/h2o-dens.cube`, `all_data/Benzene.MO19-BOTH-SIGNS.cube`, and
-`all_data/molden_test/test_homo.cube` without changing them. Shared-import/CLI
+`fixtures/legacy/data/h2o-dens.cube`, `fixtures/legacy/all_data/Benzene.MO19-BOTH-SIGNS.cube`, and
+`fixtures/legacy/all_data/molden_test/test_homo.cube` without changing them. Shared-import/CLI
 tests cover exact native grid persistence, conversion, and missing-bond backfill. The analytic fixture
 provides independent expected samples for browser rendering and persistence
 checks. See [status](status.md) for tests actually run, separately from native

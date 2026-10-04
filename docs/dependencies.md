@@ -1,6 +1,8 @@
 # Dependency record
 
-The application code in this directory is new Rust and TypeScript. No legacy Molekel source is copied, no C++ source is added, and the C-library checkouts in the ignored repository `tmp/` are not build dependencies.
+The application code is new Rust and TypeScript. No legacy Molekel application
+source or C++ source is included. Historical research checkouts from the original
+repository are not part of this standalone repository or its build dependencies.
 
 Direct dependency versions are resolved in the committed lockfiles `Cargo.lock` and `app/package-lock.json`:
 
@@ -26,7 +28,7 @@ The app icon is newly authored in `app/src-tauri/icons/source.svg`; bitmap/nativ
 
 Independent numerical reference generation uses PySCF 2.14.0 (Apache-2.0) in an ignored development-only Python environment under repository `tmp/`. Its compiled numerical libraries are not linked into EigenVista or shipped in the desktop/browser builds. The frozen generated data and conventions are documented in [fixtures/pyscf/README.md](../fixtures/pyscf/README.md); generator dependencies are pinned in `tools/reference-requirements.txt`. Normal tests require only Rust and the existing frontend toolchain.
 
-The rewrite retains Molekel's GPL-2.0-or-later terms in `next/LICENSE`. The tester
+The rewrite retains Molekel's GPL-2.0-or-later terms in `LICENSE`. The tester
 packager uses pinned cargo-about 0.9.1 and installed npm license files to collect
 locked dependency notices, supplements omitted upstream notices from pinned
 revisions, and includes dependency source archives. Notices are embedded in the

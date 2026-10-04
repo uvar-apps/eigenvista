@@ -1,11 +1,12 @@
 # Building and running from source
 
 For an already packaged application, use the [user guide](user-guide.md).
-This guide is for the rewrite under `next/`, not the root legacy C++ build.
+This guide is for the standalone EigenVista repository, which contains no
+legacy C++ application or legacy build system.
 Commands below start from the **repository root** unless explicitly stated.
 The current app is EigenVista; the npm package is `eigenvista`, Rust packages
 and crate directories use `eigenvista-*`, and browser bindings are generated as
-`eigenvista_wasm`. The checkout and `next/` source location have not moved.
+`eigenvista_wasm`. The workspace is at the repository root, not in `next/`.
 
 ## Prerequisites
 
@@ -29,8 +30,9 @@ toolchain/WebView2 requirements. Neither is an already verified release target.
 
 ## Fresh checkout setup
 
-Check out the user-selected rewrite branch, then open a shell at its repository
-root. Do not run root CMake or build legacy dependencies. If starting from the
+Check out the user-selected branch of `uvar-apps/eigenvista`, then open a shell
+at its repository root. The migration starts on `main`; inspect the actual
+checkout rather than switching branches. If starting from the
 tester source archive, extract it into a working directory and use that directory
 as the root; it includes required test fixtures but no Git history.
 
@@ -41,7 +43,7 @@ rustup toolchain install 1.92.0
 export RUSTUP_TOOLCHAIN=1.92.0
 rustup target add wasm32-unknown-unknown
 cargo install wasm-bindgen-cli --version 0.2.108 --locked
-npm --prefix next/app ci
+npm --prefix app ci
 ```
 
 Keep the temporary-directory environment in every build/test shell. **Never
@@ -59,14 +61,14 @@ mismatch by updating one side of the bridge independently.
 Choose **one** development command:
 
 ```sh
-npm --prefix next/app run dev
+npm --prefix app run dev
 ```
 
 This builds WASM and starts Vite at `http://127.0.0.1:5178`. Open that address in
 a WebGL2-capable browser. Stop your server with Ctrl-C when finished.
 
 ```sh
-npm --prefix next/app run desktop
+npm --prefix app run desktop
 ```
 
 This starts Tauri and its own Vite server on the same port. Stop a separately
@@ -84,27 +86,27 @@ an existing server: verify it belongs to this checkout before trusting results.
 
 | Command from the root | Result |
 | --- | --- |
-| `npm --prefix next/app run wasm` | Optimized Rust/WASM and web bindings in `next/app/src/wasm/` |
-| `npm --prefix next/app run build` | WASM, TypeScript checking, and production frontend in `next/app/dist/` |
-| `npm --prefix next/app run desktop:build` | Debug macOS bundle at `next/target/debug/bundle/macos/EigenVista.app` |
-| `npm --prefix next/app run package:macos` | Verified optimized Apple Silicon tester ZIP under `next/artifacts/distributions/` |
-| `cargo build --manifest-path next/Cargo.toml --locked --release -p eigenvista-convert` | Standalone converter at `next/target/release/eigenvista-convert` |
+| `npm --prefix app run wasm` | Optimized Rust/WASM and web bindings in `app/src/wasm/` |
+| `npm --prefix app run build` | WASM, TypeScript checking, and production frontend in `app/dist/` |
+| `npm --prefix app run desktop:build` | Debug macOS bundle at `target/debug/bundle/macos/EigenVista.app` |
+| `npm --prefix app run package:macos` | Verified optimized Apple Silicon tester ZIP under `artifacts/distributions/` |
+| `cargo build --manifest-path Cargo.toml --locked --release -p eigenvista-convert` | Standalone converter at `target/release/eigenvista-convert` |
 
 The converter links the same Rust importer used through WASM by Open and Convert
 files. It needs no GUI, Python, ORCA, or running application. For a repository
 sample, preserving the original and writing only to ignored artifacts:
 
 ```sh
-mkdir -p next/artifacts/conversions
-cargo run --manifest-path next/Cargo.toml --locked -p eigenvista-convert -- --output next/artifacts/conversions/molden.eigenvista data/molden.input
-cargo run --manifest-path next/Cargo.toml --locked -p eigenvista-convert -- --check --json data/molden.input
+mkdir -p artifacts/conversions
+cargo run --manifest-path Cargo.toml --locked -p eigenvista-convert -- --output artifacts/conversions/molden.eigenvista fixtures/legacy/data/molden.input
+cargo run --manifest-path Cargo.toml --locked -p eigenvista-convert -- --check --json fixtures/legacy/data/molden.input
 ```
 
 See [Molden import](molden-import.md) for exact profiles, CLI batch options,
 exit codes, losses, and overwrite policy. The tester ZIP includes the optimized
 Apple Silicon CLI as `Tools/eigenvista-convert`.
 The same CLI accepts [cube files](cube-import.md); for example replace the input
-above with `next/fixtures/cube/signed-affine.cube` and choose a new output path.
+above with `fixtures/cube/signed-affine.cube` and choose a new output path.
 It also accepts existing `.molekel` preview documents. Native output defaults
 to `.eigenvista` and always uses new identifiers, including when an explicit
 legacy `.molekel` destination is used. Keep originals needed by older builds;
@@ -114,7 +116,7 @@ The web build is an HTTP-served application, not a standalone `file://` HTML fil
 For a local production-build preview, after `run build`:
 
 ```sh
-npm --prefix next/app exec -- vite preview --host 127.0.0.1 --port 5180 --strictPort --outDir "$PWD/next/app/dist"
+npm --prefix app exec -- vite preview --host 127.0.0.1 --port 5180 --strictPort --outDir "$PWD/app/dist"
 ```
 
 Open `http://127.0.0.1:5180`; choose another free port if needed. This command
@@ -124,7 +126,7 @@ preview server, not a deployment setup.
 To launch a debug bundle already built on this Mac:
 
 ```sh
-open "next/target/debug/bundle/macos/EigenVista.app"
+open "target/debug/bundle/macos/EigenVista.app"
 ```
 
 The debug bundle is not Developer ID-signed/notarized and is not the supported
@@ -133,7 +135,7 @@ bundle: the staged distributable also embeds notices and is re-signed after
 staging. See [tester packaging](tester-packaging.md).
 
 Do not set `CARGO_TARGET_DIR` to an arbitrary location for ordinary scripts:
-`run.mjs` expects the workspace's `next/target/` layout. The packager explicitly
+`run.mjs` expects the workspace's `target/` layout. The packager explicitly
 sets that location and uses an architecture-specific release subdirectory.
 Generated outputs, downloaded dependencies, reports, and staging are ignored.
 Keep `Cargo.lock` and `app/package-lock.json` under version control.
@@ -143,14 +145,14 @@ Keep `Cargo.lock` and `app/package-lock.json` under version control.
 Use the root-shell temporary-directory setup above, then:
 
 ```sh
-cargo fmt --manifest-path next/Cargo.toml --all --check
-npm --prefix next/app test
-cargo clippy --manifest-path next/Cargo.toml --locked --workspace --all-targets -- -D warnings
-cargo test --manifest-path next/Cargo.toml --locked -p eigenvista-desktop
-npm --prefix next/app run build
-npm --prefix next/app exec -- playwright install chromium webkit
-npm --prefix next/app run test:e2e
-npm --prefix next/app run test:packaging
+cargo fmt --manifest-path Cargo.toml --all --check
+npm --prefix app test
+cargo clippy --manifest-path Cargo.toml --locked --workspace --all-targets -- -D warnings
+cargo test --manifest-path Cargo.toml --locked -p eigenvista-desktop
+npm --prefix app run build
+npm --prefix app exec -- playwright install chromium webkit
+npm --prefix app run test:e2e
+npm --prefix app run test:packaging
 ```
 
 `npm test` runs `cargo test --locked` for the default scientific/format/WASM
@@ -158,7 +160,7 @@ members, not the desktop shell. Workspace Clippy checks the shell too and needs
 its platform prerequisites. A focused shell check is:
 
 ```sh
-cargo check --manifest-path next/Cargo.toml --locked -p eigenvista-desktop
+cargo check --manifest-path Cargo.toml --locked -p eigenvista-desktop
 ```
 
 | Coverage | Location and meaning |
@@ -169,7 +171,7 @@ cargo check --manifest-path next/Cargo.toml --locked -p eigenvista-desktop
 | Molden and converter | [Independent imports](../crates/eigenvista-import/tests/independent_molden.rs), parser unit tests, [CLI regressions](../crates/eigenvista-convert/tests/cli.rs), [fixtures/provenance](../fixtures/molden/README.md) |
 | Container/native saving | Format unit tests and [reference roundtrips](../crates/eigenvista-format/tests/reference_roundtrips.rs) |
 | Browser workflows/numerics | [Playwright tests](../app/tests): Chromium/WebKit, real file input/download, pixels, camera, desktop/mobile layout |
-| EigenVista identity and native compatibility | [Branding/browser regression](../app/tests/branding.spec.ts), [legacy format profiles](../crates/eigenvista-format/tests/legacy_compatibility.rs), and [native import compatibility](../crates/eigenvista-import/tests/native_compatibility.rs): old-profile scientific data/cached meshes, canonical names, unchanged atom logo, downloads, and narrow-window layout |
+| EigenVista identity and native compatibility | [Branding/browser regression](../app/tests/branding.spec.ts), [legacy format profiles](../crates/eigenvista-format/tests/legacy_compatibility.rs), and [native import compatibility](../crates/eigenvista-import/tests/native_compatibility.rs): old-profile scientific fixtures/legacy/data/cached meshes, canonical names, unchanged atom logo, downloads, and narrow-window layout |
 | Camera redraw and zoom alternatives | [Camera regressions](../app/tests/camera.spec.ts): wheel-only redraw without a later click, idle settling, both zoom directions, middle-drag and keyboard buttons in every rendering mode, and narrow toolbar layout |
 | Orbital selection and batch rendering | [Orbital browser workflows](../app/tests/orbitals.spec.ts): complete imported lists and metadata, filtering/checkboxes, bounded generation, preserved meshes, cancellation, save/reopen, desktop/mobile layout |
 | Density sampling and remaining bounds | [Scalar reference parity](../crates/eigenvista-core/tests/scalar_sampling.rs), [real Molden density](../crates/eigenvista-import/tests/density_sampling.rs), [allocation limits](../crates/eigenvista-core/tests/allocation_limits.rs), and [browser regression](../app/tests/density-budget.spec.ts): value-only sampling, nonsymmetric/signed matrices, finite extremes, 125-AO density regressions, real-worker cancellation/responsiveness, and retained numerical/allocation bounds |
@@ -177,11 +179,11 @@ cargo check --manifest-path next/Cargo.toml --locked -p eigenvista-desktop
 | Packaging safety/notices | [Packaging tests](../tools/package-support.test.mjs), followed by a full ZIP build when packaging changes |
 
 `test:e2e` first generates native reference documents in
-`next/artifacts/references/`, then runs Playwright. Its server command builds
-WASM when starting a server. Inspect screenshots under `next/artifacts/` after
+`artifacts/references/`, then runs Playwright. Its server command builds
+WASM when starting a server. Inspect screenshots under `artifacts/` after
 UI changes, including `desktop.png`, `mobile.png`, and reference/import scenes;
 tests also assert canvas pixels and camera movement. Playwright failure output
-lives in `next/app/test-results/`. Screenshots with shared names can be overwritten
+lives in `app/test-results/`. Screenshots with shared names can be overwritten
 by the second engine; retain specifically needed evidence before another run.
 
 Numerical tests read frozen fixtures without Python. Deliberate regeneration
@@ -191,7 +193,7 @@ as a substitute for investigating a regression. The optional release-mode bond
 benchmark is:
 
 ```sh
-cargo run --manifest-path next/Cargo.toml --locked --release -p eigenvista-core --example bond_benchmark
+cargo run --manifest-path Cargo.toml --locked --release -p eigenvista-core --example bond_benchmark
 ```
 
 There is no active hosted rewrite CI workflow. [Portability checks](../ci/README.md)
@@ -209,7 +211,7 @@ then convert a mixed valid/invalid batch without replacing the scene. Check
 per-result Save, cancellation, retry, and protected-source errors with disposable
 copies. Native automated destination validation is separate from dialog QA.
 
-For the larger repository `data/molden.input`, select the occupation-derived
+For the larger repository `fixtures/legacy/data/molden.input`, select the occupation-derived
 density and exercise the intended resolution on the target machine. Both grid
 selectors offer 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, and 256 points
 per axis, with default 40. Larger real-molecule tests remain user/platform
@@ -270,7 +272,7 @@ active application window. Current gaps are in [status](status.md).
 | Playwright browser missing | Run the browser-install command with repo-local temporary variables |
 | Rust native link/build fails | Check platform prerequisites/toolchain, then the focused shell check; preserve diagnostics |
 | New dependency notice fails packaging | Review the locked dependency's actual license and pinned notice source; do not bypass the check |
-| Test refers to missing legacy PDB/Molden/cube fixture | Use the full checkout or supplied source snapshot, not `next/` copied alone |
+| Test refers to missing legacy PDB/Molden/cube fixture | Use the full checkout or source snapshot including the data-only `fixtures/legacy/` directory |
 | Desktop display differs from browser | Record both runtimes; test the packaged system WebView separately |
 | App file is rejected | Read the exact profile/validation error and import/format docs; do not weaken checks to accept malformed input |
 

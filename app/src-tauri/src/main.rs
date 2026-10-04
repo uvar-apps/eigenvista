@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn native_save_requires_native_extension_and_protects_import_sources() {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tmp");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tmp");
         std::fs::create_dir_all(&root).unwrap();
         let path = root.join(format!(
             "native-destination-test-{}.eigenvista",

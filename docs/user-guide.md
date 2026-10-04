@@ -162,7 +162,7 @@ Density matrices are derived from listed orbitals and occupations, not recovered
 correlated/transition density matrices. Truncated orbital sets can produce only
 a partial density; inspect the warnings. Frequency, trajectory, and other
 unsupported sections are omitted with notices. Keep original calculation files.
-The full profile and command-line workflow are in `next/docs/molden-import.md`
+The full profile and command-line workflow are in `docs/molden-import.md`
 (also `Molden-import.md` in the ZIP). No Python, ORCA, or other calculation
 program is required to read a supported Molden file.
 
@@ -191,7 +191,7 @@ downsample a large input but does not add samples to a small one. The full
 original scalar values and affine grid remain in the document and are saved
 in `.eigenvista`, alongside any generated meshes. Convert files and the standalone
 converter also accept cube inputs; conversion alone does not generate meshes.
-The detailed profile is in `next/docs/cube-import.md` (`Cube-import.md` in the ZIP).
+The detailed profile is in `docs/cube-import.md` (`Cube-import.md` in the ZIP).
 
 ## Orbitals, densities, and isosurfaces
 
@@ -200,7 +200,7 @@ menu beside Document and choose **Hydrogen pair** or **Fractional open shell**.
 These are mathematical demonstrations, not calculated molecular reference
 results. Opening an example replaces the current document after an unsaved-change
 confirmation. Independently calculated water/OH `.eigenvista` reference documents
-can also be generated from the source tree; see `next/fixtures/pyscf/README.md`.
+can also be generated from the source tree; see `fixtures/pyscf/README.md`.
 
 ### Browse and render several orbitals
 
@@ -254,7 +254,7 @@ new density matrix.
 Density calculation cost depends on the basis size as well as grid resolution.
 Analytic sampling has no estimated CPU-work cutoff and does not automatically
 lower the chosen resolution. Higher resolutions, including those for the
-repository's `data/molden.input` density, can be requested subject to numerical,
+repository's `fixtures/legacy/data/molden.input` density, can be requested subject to numerical,
 geometry, and file-size limits. A larger calculation may take longer, even
 while the same phase remains displayed. **Cancel** terminates the calculation
 worker; the next request starts a new worker. Existing completed geometry is
@@ -394,11 +394,11 @@ when sharing the application with another tester.
 ## Running from source instead
 
 Developer prerequisites are Rust, Node.js/npm, wasm-bindgen CLI 0.2.108, and
-platform build tools. After setup in `next/docs/development.md`, run
-`npm --prefix next/app run desktop` from the repository root for the native
-development app, or `npm --prefix next/app run dev` for the browser viewer at
+platform build tools. After setup in `docs/development.md`, run
+`npm --prefix app run desktop` from the repository root for the native
+development app, or `npm --prefix app run dev` for the browser viewer at
 `http://127.0.0.1:5178`. These are alternatives: the native development command
 starts its own server on that port. The installed tester app needs neither.
 
-Other developer documentation is in `next/docs/README.md`; the tester ZIP's
+Other developer documentation is in `docs/README.md`; the tester ZIP's
 `Source/eigenvista-source.tar.gz` contains those files with their original paths.

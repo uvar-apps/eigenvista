@@ -76,7 +76,7 @@ test("a real high-resolution density worker leaves the scene responsive and can 
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await page
     .getByLabel("Open molecular file")
-    .setInputFiles(path.resolve("../../data/molden.input"));
+    .setInputFiles(path.resolve("../fixtures/legacy/data/molden.input"));
   await expect(page.locator("footer [role=status]")).toContainText(
     "Opened molden.input",
   );
@@ -245,7 +245,7 @@ for (const resolution of [24, 48]) {
     );
     await page
       .getByLabel("Open molecular file")
-      .setInputFiles(path.resolve("../../data/molden.input"));
+      .setInputFiles(path.resolve("../fixtures/legacy/data/molden.input"));
     await expect(page.locator("footer [role=status]")).toContainText(
       "Opened molden.input",
     );

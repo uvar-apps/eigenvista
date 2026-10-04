@@ -118,18 +118,22 @@ fn repository_pdb_fixtures_load_with_automatically_computed_bonds() {
     for (name, text, expected_atoms) in [
         (
             "guanine.pdb",
-            include_str!("../../../../data/guanine.pdb"),
+            include_str!("../../../fixtures/legacy/data/guanine.pdb"),
             33,
         ),
-        ("3POR.pdb", include_str!("../../../../data/3POR.pdb"), 2325),
+        (
+            "3POR.pdb",
+            include_str!("../../../fixtures/legacy/data/3POR.pdb"),
+            2325,
+        ),
         (
             "uridine.pdb",
-            include_str!("../../../../data/URIDINE-VANADATE.pdb"),
+            include_str!("../../../fixtures/legacy/data/URIDINE-VANADATE.pdb"),
             31,
         ),
         (
             "alaninemulti.pdb",
-            include_str!("../../../../data/alaninemulti.pdb"),
+            include_str!("../../../fixtures/legacy/data/alaninemulti.pdb"),
             66,
         ),
     ] {

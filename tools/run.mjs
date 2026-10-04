@@ -5,7 +5,7 @@ import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const app = path.join(root, "app");
-const tmp = path.resolve(root, "../tmp");
+const tmp = path.join(root, "tmp");
 mkdirSync(tmp, { recursive: true });
 const env = { ...process.env, TMPDIR: tmp, TMP: tmp, TEMP: tmp };
 function run(command, args, cwd = root) {

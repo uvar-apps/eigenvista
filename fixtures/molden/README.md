@@ -1,6 +1,6 @@
 # Independent Molden import fixtures
 
-These frozen files test actual external-text import, not a EigenVista-generated
+These frozen files test actual external-text import, not an EigenVista-generated
 document masquerading as a format test. Normal Rust and browser tests need no
 Python, PySCF, IOData, ORCA installation, or network access. The generator never
 calls an EigenVista evaluator, parser, or conversion executable.
@@ -73,7 +73,7 @@ surface, encoded to `.eigenvista`, reopened through the shared importer, and
 compared exactly including scientific inputs, provenance, and saved meshes.
 
 A separate read-only smoke regression checks the existing repository
-[`data/molden.input`](../../../data/molden.input): 17 atoms, 125 AOs, 118 MOs,
+[`fixtures/legacy/data/molden.input`](../legacy/data/molden.input): 17 atoms, 125 AOs, 118 MOs,
 automatic bonds, one occupation-derived density, and explicit warnings for
 omitted vibration/geometry-history sections. Its input digest is pinned, but
 it has no independent numerical field oracle. It must remain in full-checkout
@@ -108,13 +108,13 @@ pin the independent IOData source. All temporary files remain in repository
 mkdir -p tmp
 export TMPDIR="$PWD/tmp" TMP="$PWD/tmp" TEMP="$PWD/tmp"
 python3 -m venv tmp/reference-venv
-tmp/reference-venv/bin/python -m pip install --only-binary=:all: -r next/tools/reference-requirements.txt
+tmp/reference-venv/bin/python -m pip install --only-binary=:all: -r tools/reference-requirements.txt
 git clone --depth 1 https://github.com/theochem/iodata.git tmp/molden-iodata-reference
 git -C tmp/molden-iodata-reference fetch --depth 1 origin 9f7e800fc414b086d677b5f2882dd0c1dfa919f3
 git -C tmp/molden-iodata-reference checkout --detach 9f7e800fc414b086d677b5f2882dd0c1dfa919f3
 tmp/reference-venv/bin/python -m pip install attrs==26.1.0 ./tmp/molden-iodata-reference
-tmp/reference-venv/bin/python next/tools/generate_molden_references.py --iodata-source tmp/molden-iodata-reference
-cargo test --manifest-path next/Cargo.toml --locked -p eigenvista-import --test independent_molden
+tmp/reference-venv/bin/python tools/generate_molden_references.py --iodata-source tmp/molden-iodata-reference
+cargo test --manifest-path Cargo.toml --locked -p eigenvista-import --test independent_molden
 ```
 
 The generator verifies the IOData revision and original ORCA fixture digest.

@@ -144,7 +144,7 @@ fn cube_limits_and_unsupported_channels_fail_explicitly() {
 
 #[test]
 fn repository_density_and_single_orbital_cubes_generate_bonds_and_surfaces() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../..");
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/legacy");
     for (path, atoms, bonds, dims, signed) in [
         ("data/h2o-dens.cube", 3, 2, [40, 40, 40], false),
         (

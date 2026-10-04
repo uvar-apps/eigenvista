@@ -3,12 +3,12 @@
 From the repository root, run:
 
 ```sh
-npm --prefix next/app run package:macos
+npm --prefix app run package:macos
 ```
 
-Or, from `next/app`, run `npm run package:macos`. The script resolves paths
+Or, from `app`, run `npm run package:macos`. The script resolves paths
 relative to itself, not the current directory. Run
-`node next/tools/package-macos.mjs --help` for requirements without building.
+`node tools/package-macos.mjs --help` for requirements without building.
 
 ## Prerequisites
 
@@ -20,13 +20,13 @@ relative to itself, not the current directory. Run
 
 The command installs npm dependencies from the lockfile and installs pinned
 `cargo-about` 0.9.1 with its CLI feature under ignored
-`next/artifacts/packaging-tools/` when needed. It does not install a global npm
+`artifacts/packaging-tools/` when needed. It does not install a global npm
 or Cargo tool. Subsequent runs reuse compiled Rust dependencies and the local
 license tool. Build/staging temporary files use the repository's ignored `tmp/`.
 
 ## Outputs
 
-Successful runs print a ZIP path under `next/artifacts/distributions/`, a
+Successful runs print a ZIP path under `artifacts/distributions/`, a
 SHA-256 companion file, and a build-information JSON file. Filenames include
 the app version, architecture, UTC timestamp, Git revision, and `-dirty` when
 the implementation has uncommitted changes. Existing packages are never
@@ -52,12 +52,13 @@ The ZIP contains:
   two atoms/one bond on a skewed 7 x 7 x 7 grid, for volume/raycast and mesh checks.
 - The application license and collected third-party notices. Notices are also
   embedded in the app's Resources, so moving the app does not discard them.
-- The exact current first-party source snapshot, lockfiles, and legacy test
-  fixtures needed by the regression suite. This includes root/scoped
-  `AGENTS.md`, current documentation, the original brief, and historical
-  `doc/rewrite/` plans so another agent can continue from the snapshot.
+- The exact standalone first-party source snapshot, lockfiles, and data-only
+  regression fixtures with their [license](../fixtures/legacy/LICENSE).
+  This includes the root `AGENTS.md` and current documentation. Historical
+  research and the original brief are linked to the original repository,
+  not copied into this source archive. No legacy application code is included.
   Uncommitted source is included and identified, not silently replaced with
-  the last Git commit. Git history is not included. Personal `next/chat-*.md`
+  the last Git commit. Git history is not included. Personal `chat-*.md`
   exports are ignored and excluded from source snapshots and commits.
 - Checksummed original Rust dependency archives and frontend production
   dependency sources, including source for MPL components. Build-only Rust
@@ -73,11 +74,11 @@ the top of the ZIP. No developer tools are needed to run the packaged app.
 Forward the complete package with its license, notices, and sources.
 
 To work from the supplied source, extract `Source/eigenvista-source.tar.gz` into
-a directory and follow `AGENTS.md` and `next/docs/development.md` there. The
+a directory and follow `AGENTS.md` and `docs/development.md` there. The
 snapshot includes frozen scientific data, four legacy PDB test inputs,
-the read-only `data/molden.input` regression, and the cube regressions
-`data/h2o-dens.cube`, `all_data/Benzene.MO19-BOTH-SIGNS.cube`, and
-`all_data/molden_test/test_homo.cube`;
+the read-only `fixtures/legacy/data/molden.input` regression, and the cube regressions
+`fixtures/legacy/data/h2o-dens.cube`, `fixtures/legacy/all_data/Benzene.MO19-BOTH-SIGNS.cube`, and
+`fixtures/legacy/all_data/molden_test/test_homo.cube`;
 normal builds/tests do not need the rest of the legacy application. The
 snapshot is not a vendored offline build environment. It has no `.git`, and
 the ZIP packager itself requires a Git checkout for revision/status recording.

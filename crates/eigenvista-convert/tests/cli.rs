@@ -13,7 +13,7 @@ struct Scratch(PathBuf);
 static SCRATCH_ID: AtomicUsize = AtomicUsize::new(0);
 impl Scratch {
     fn new() -> Self {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tmp");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tmp");
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()

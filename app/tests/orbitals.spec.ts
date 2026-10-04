@@ -104,7 +104,7 @@ test("the orbital browser lists all 118 imported orbitals with metadata, filteri
   await ready(page);
   await page
     .getByLabel("Open molecular file")
-    .setInputFiles(path.resolve("../../data/molden.input"));
+    .setInputFiles(path.resolve("../fixtures/legacy/data/molden.input"));
   await expect(page.locator("footer [role=status]")).toContainText(
     "Opened molden.input",
   );

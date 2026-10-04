@@ -12,7 +12,10 @@ const inputs = [
   },
   {
     name: "guanine.PDB",
-    text: readFileSync(path.resolve("../../data/guanine.pdb"), "utf8"),
+    text: readFileSync(
+      path.resolve("../fixtures/legacy/data/guanine.pdb"),
+      "utf8",
+    ),
     atoms: 33,
     bonds: 35,
   },
@@ -223,7 +226,10 @@ test("legacy protein and multiple-model PDB files use the same WASM path", async
 }) => {
   const files = ["3POR", "alaninemulti", "URIDINE-VANADATE"].map((name) => ({
     name: `${name}.pdb`,
-    text: readFileSync(path.resolve(`../../data/${name}.pdb`), "utf8"),
+    text: readFileSync(
+      path.resolve(`../fixtures/legacy/data/${name}.pdb`),
+      "utf8",
+    ),
   }));
   await page.goto("/");
   const counts = await page.evaluate(async (files) => {

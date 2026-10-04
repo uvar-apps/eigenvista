@@ -3,7 +3,7 @@
 This is the documentation hub for the **Rust EigenVista development preview**.
 It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
-[root AGENTS.md](../../AGENTS.md) to continue development.
+[root AGENTS.md](../AGENTS.md) to continue development.
 
 The active rewrite is now EigenVista. Historical Molekel names in research,
 release evidence, repository URLs, and Git tags are preserved. Existing
@@ -18,7 +18,8 @@ limits of opening new saves in older builds.
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |
-| Agent continuation, current baseline, priorities, verification gaps | [Handoff](handoff.md) and [scoped AGENTS.md](../AGENTS.md) |
+| Agent continuation, current baseline, priorities, verification gaps | [Handoff](handoff.md) and [root AGENTS.md](../AGENTS.md) |
+| Standalone repository provenance, extracted history, legacy fixture boundary | [Migration record](migration.md) |
 | Implemented features, test evidence, M0-M7 progress | [Implementation status](status.md) |
 | Repeatable Apple Silicon tester ZIP, contents, signing boundaries | [Tester packaging](tester-packaging.md) |
 | Implemented `.eigenvista` container, validation, persistence | [Native preview format](preview-format.md) |
@@ -32,23 +33,25 @@ limits of opening new saves in older builds.
 
 ## Planning archive
 
-The [original brief](../../prompt-and-info.md) and [research overview](../../doc/rewrite/README.md)
+The [original brief](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/prompt-and-info.md) and [research overview](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/README.md)
 explain the goal and early investigation. These are **historical planning
 documents**, not a description of the current executable. Their "not started"
 statements refer to that phase. Preserve them as evidence; record subsequent
 decisions and progress in the current documents above.
+These links are pinned to the original Molekel revision used for extraction.
+The planning archive and legacy application code are not copied into EigenVista.
 
 | Planning question | Historical document |
 | --- | --- |
-| What did the original application do? | [Legacy review](../../doc/rewrite/01-legacy-review.md) |
-| What is required for full v1? | [Requirements](../../doc/rewrite/02-requirements.md) |
-| Why the shared browser/native approach? | [Architecture decision](../../doc/rewrite/03-architecture-decision.md) |
-| Which scientific/rendering methods were considered? | [Scientific methods](../../doc/rewrite/04-scientific-methods.md) |
-| What is the proposed complete native format? | [Full format proposal](../../doc/rewrite/05-molekel-format.md) |
-| How should external producers be converted? | [Conversion strategy](../../doc/rewrite/06-conversion-strategy.md) |
-| What evidence is required before release? | [Validation and delivery](../../doc/rewrite/07-validation-and-delivery.md) |
-| Where did the research come from? | [Sources](../../doc/rewrite/08-sources.md) |
-| What is the implementation sequence? | [M0-M7 plan](../../doc/rewrite/09-implementation-plan.md) |
+| What did the original application do? | [Legacy review](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/01-legacy-review.md) |
+| What is required for full v1? | [Requirements](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/02-requirements.md) |
+| Why the shared browser/native approach? | [Architecture decision](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md) |
+| Which scientific/rendering methods were considered? | [Scientific methods](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/04-scientific-methods.md) |
+| What is the proposed complete native format? | [Full format proposal](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/05-molekel-format.md) |
+| How should external producers be converted? | [Conversion strategy](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/06-conversion-strategy.md) |
+| What evidence is required before release? | [Validation and delivery](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/07-validation-and-delivery.md) |
+| Where did the research come from? | [Sources](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/08-sources.md) |
+| What is the implementation sequence? | [M0-M7 plan](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/09-implementation-plan.md) |
 
 Later decisions take precedence for the current implementation: a clean Rust
 scientific core instead of the proposed scientific C integrations; classic
@@ -66,5 +69,7 @@ development/packaging docs for commands, and status/handoff for changed gates.
 Never turn an unverified design intention into a supported-feature claim.
 
 Tester ZIPs include a standalone `User-guide.md`. Their first-party source
-archive contains this documentation tree, the agent entry points, original
-brief, and planning archive. It excludes development caches and Git history.
+archive contains this documentation tree, the root agent entry point, and the
+data-only regression fixtures with their licenses. The original brief and
+planning archive remain accessible through the pinned links above; legacy
+application code, development caches, private chats, and Git history are excluded.

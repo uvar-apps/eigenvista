@@ -342,7 +342,7 @@ fn imported_quantum_data_and_signed_cached_meshes_survive_native_conversion() {
 
 #[test]
 fn legacy_molden_input_imports_without_modifying_its_source() {
-    let source = include_bytes!("../../../../data/molden.input");
+    let source = include_bytes!("../../../fixtures/legacy/data/molden.input");
     let digest = format!("{:x}", Sha256::digest(source));
     assert_eq!(
         digest,

@@ -16,7 +16,7 @@ records the scientific and API contract.
 ## Command-line conversion
 
 The tester ZIP includes `Tools/eigenvista-convert`; source builds produce
-`next/target/release/eigenvista-convert` with the release command in the development
+`target/release/eigenvista-convert` with the release command in the development
 guide. The examples below assume the executable is on your PATH. Output
 directories must already exist.
 
@@ -238,7 +238,7 @@ is named in the report/provenance, with its starting line. An ignored `[CORE]`
 section does not recover missing core density. Duplicate sections whose values
 would be scientifically ambiguous are rejected instead of picking a geometry.
 
-The existing repository file `data/molden.input` was imported without editing it:
+The existing repository file `fixtures/legacy/data/molden.input` was imported without editing it:
 17 atoms, 118 orbitals, and one occupation-derived matrix. Its frequency,
 normal-coordinate, convergence, and geometry-trajectory sections are reported
 as omitted. This is a real-file smoke test, separate from independent numerical
@@ -270,8 +270,8 @@ orthonormal; explicit input flags and the selected profile remain authoritative.
 From the repository root, with repository-local temporary variables set:
 
 ```sh
-cargo test --manifest-path next/Cargo.toml --locked -p eigenvista-import
-cargo clippy --manifest-path next/Cargo.toml --locked -p eigenvista-import --all-targets -- -D warnings
+cargo test --manifest-path Cargo.toml --locked -p eigenvista-import
+cargo clippy --manifest-path Cargo.toml --locked -p eigenvista-import --all-targets -- -D warnings
 ```
 
 See [status](status.md) for the broader WASM, browser, native, CLI, and packaging

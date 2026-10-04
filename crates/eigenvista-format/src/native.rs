@@ -66,7 +66,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../tmp")
+            .join("../../tmp")
             .join(format!(
                 "native-save-{label}-{}-{nonce}",
                 std::process::id()

@@ -1,17 +1,46 @@
 # Development handoff
 
-Recorded 4 October 2026. Start with [root AGENTS.md](../../AGENTS.md), then this
+Recorded 4 October 2026. Start with [root AGENTS.md](../AGENTS.md), then this
 document, [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.4.0**. The source remains
-in `next/`, on the existing repository/branch; the icon and logo are unchanged.
+The current application is **EigenVista**, version **0.4.0**, in the standalone
+[`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
+lives at this repository's root, without a `next/` wrapper or legacy application
+code. The icon and logo are unchanged.
 
-## Version 0.4.0 release
+## Standalone migration
+
+The dedicated checkout starts on `main`, with eight rewrite-only commits
+extracted from the original repository's `next/` subtree at
+`4edabf6852db44ff849e82223bef6c0702730e3c`. Commit hashes differ; original
+Molekel commits and tags remain in the original repository, not as assumed
+local refs. The [migration record](migration.md) records source provenance,
+extracted identities, and the data boundary.
+
+The workspace, app, tools, documentation, and fixtures are root-relative.
+Eight unchanged PDB/Molden/cube data files and their license live under
+`fixtures/legacy/`, so tests no longer need a parent Molekel checkout. No
+legacy application code or build system is copied. Original research and
+the brief are linked to the pinned original revision. The original checkout
+and private chat exports remain untouched.
+
+Version remains 0.4.0. The standalone checkout passes 108 workspace Rust tests,
+114 Chromium/WebKit cases, 11 packaging tests, production WASM/frontend build,
+formatting, Clippy, fixture checksums, and documentation links. Browser checks
+ran on isolated port 5189 without disturbing the original preview. The full
+standalone macOS ZIP build and extracted-artifact verification also pass, using
+an identified uncommitted migration snapshot before the final evidence update.
+Native interaction and clean-machine installation remain separate gates.
+Earlier evidence below describes the original checkout. Continue with
+[AGENTS.md](../AGENTS.md), [status](status.md), and Git for current source,
+artifact, and publication state.
+
+## Version 0.4.0 release in the original repository
 
 The user requested the 0.4.0 version bump, a commit, annotated `v0.4.0` tag,
 and push of the current `2026` branch to `origin`. This is the first release
 under the EigenVista name, including the rename and legacy-file compatibility
-described below. The repository has not moved to `uvar-apps`: origin remains
+described below. At that time the repository had not moved to `uvar-apps`; origin was
 `https://github.com/ugovaretto/molekel.git`. External dependencies, icon assets,
 scientific references, and native schema shape `[0, 1]` remain unchanged.
 The post-bump preflight passes 108 workspace Rust tests, 114 browser cases,
@@ -88,10 +117,11 @@ not guaranteed recoverable.
 
 ## Establish the live state
 
-The rewrite began on user-created branch `2026`. Commit `a75e8e2` and annotated
-tag `molekel-next-start` mark its first working increment; both were pushed to
-`origin`. They are **not** proof that subsequent packaging/documentation work
-is already committed. Inspect current state before doing anything:
+The standalone checkout begins on `main`; always inspect its actual current
+state. In the original repository, branch `2026`, commit `a75e8e2`, and tag
+`molekel-next-start` marked the initial rewrite. Those original identities are
+historical context, not local refs or proof that new changes are committed.
+Inspect current state before doing anything:
 
 ```sh
 git status --short --branch
@@ -109,7 +139,7 @@ and `BUILD-INFO.json` for provenance instead.
 ## What is already implemented
 
 - Shared Rust core, native format, import library/CLI, Rust/WASM bridge, React/Three.js viewer,
-  and Tauri desktop shell, all under `next/`.
+  and Tauri desktop shell, in this standalone repository.
 - Automatic exact-neighbor-search display bonds for every supported import:
   XYZ, PDB, Molden, cube, and native files. Native Open supplements only missing
   edges, preserves explicit edges/science/cached meshes, and reports an unsaved
@@ -137,6 +167,10 @@ and `BUILD-INFO.json` for provenance instead.
   documentation. Documentation is not a substitute for remaining release tests.
 
 ## Evidence, not assumptions
+
+The recorded runs below predate standalone extraction and refer to the original
+Molekel checkout. Standalone migration checks are tracked separately in the
+latest [status](status.md) entry.
 
 The 0.3.2 release preflight reruns **102 workspace Rust tests**, **110 browser
 cases**, and **7 packaging tests** successfully after the version bump. The
@@ -234,7 +268,7 @@ existing running app was not restarted during this change.
 
 ## Plan and next work
 
-The [original implementation plan](../../doc/rewrite/09-implementation-plan.md)
+The [original implementation plan](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/09-implementation-plan.md)
 remains the full target. [Status](status.md) is the authoritative progress table:
 M0 is still open, M1-M5 are partial preview implementations, M6 release qualification
 is incomplete, and M7 is not started. Later user decisions require a clean Rust
@@ -300,8 +334,8 @@ these requirements because the current preview can display a scene.
   active field. Checkbox selection is transient; volume/raycast still uses one
   active field. Reopening saved meshes must not require regeneration or a source
   attachment. Cancel must work even when the prior document has no active field.
-- Tests use four unchanged legacy PDB fixtures, `data/molden.input`, and three
-  cube fixtures outside `next/`. Their exact paths are listed by the packager
+- Tests use four unchanged legacy PDB fixtures, the Molden regression, and three
+  cube fixtures under `fixtures/legacy/`. Their exact paths are listed by the packager
   and [cube guide](cube-import.md); keep them in supplied source archives.
   Do not copy legacy implementation into the rewrite.
 - Preserve ORCA producer markers. Its qualified Molden profile differs from

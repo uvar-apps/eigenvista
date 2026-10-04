@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 import {
   ABOUT_VERSION,
   testerPackageName,
-  existingSourceFiles,
+  packageSourceFiles,
   testerEnvironment,
   digest,
   snapshotFiles,
@@ -18,7 +18,7 @@ import {
 } from "./package-support.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const repo = path.dirname(root);
+const repo = root;
 const app = path.join(root, "app");
 const env = testerEnvironment(process.env, root);
 const target = "aarch64-apple-darwin";
@@ -56,7 +56,7 @@ function json(file, value) {
 function sourceNames() {
   return [
     ...new Set([
-      ...existingSourceFiles(
+      ...packageSourceFiles(
         repo,
         run(
           "git",
@@ -67,10 +67,7 @@ function sourceNames() {
             "--exclude-standard",
             "-z",
             "--",
-            "next",
-            "AGENTS.md",
-            "prompt-and-info.md",
-            "doc/rewrite",
+            ".",
           ],
           repo,
           true,
@@ -79,13 +76,13 @@ function sourceNames() {
           .filter(Boolean),
       ),
       ".gitignore",
-      "src/license",
-      "data/molden.input",
-      "data/h2o-dens.cube",
-      "all_data/Benzene.MO19-BOTH-SIGNS.cube",
-      "all_data/molden_test/test_homo.cube",
+      "fixtures/legacy/LICENSE",
+      "fixtures/legacy/data/molden.input",
+      "fixtures/legacy/data/h2o-dens.cube",
+      "fixtures/legacy/all_data/Benzene.MO19-BOTH-SIGNS.cube",
+      "fixtures/legacy/all_data/molden_test/test_homo.cube",
       ...["guanine", "3POR", "URIDINE-VANADATE", "alaninemulti"].map(
-        (name) => `data/${name}.pdb`,
+        (name) => `fixtures/legacy/data/${name}.pdb`,
       ),
     ]),
   ].sort();
@@ -94,7 +91,7 @@ function sourceNames() {
 function main() {
   if (process.argv.includes("--help")) {
     console.log(
-      "Usage: node next/tools/package-macos.mjs\nBuild and verify an ad-hoc-signed Apple Silicon tester ZIP.\nOutputs: next/artifacts/distributions/; no upload, notarization, or prompts.\nRequires macOS on Apple Silicon, Xcode command-line tools, Rust, Node, wasm-bindgen 0.2.108.\nInstalls locked npm dependencies and a pinned, repository-local cargo-about on first use.",
+      "Usage: node tools/package-macos.mjs\nBuild and verify an ad-hoc-signed Apple Silicon tester ZIP.\nOutputs: artifacts/distributions/; no upload, notarization, or prompts.\nRequires macOS on Apple Silicon, Xcode command-line tools, Rust, Node, wasm-bindgen 0.2.108.\nInstalls locked npm dependencies and a pinned, repository-local cargo-about on first use.",
     );
     return;
   }
@@ -111,20 +108,15 @@ function main() {
   );
   if (!fs.existsSync(path.join(root, "LICENSE")))
     throw new Error("Add the application's LICENSE before redistribution");
+  const checkoutRoot = run("git", ["rev-parse", "--show-toplevel"], repo, true);
+  if (fs.realpathSync(checkoutRoot) !== fs.realpathSync(root))
+    throw new Error(
+      "Package sources must belong to this standalone EigenVista repository",
+    );
   const revision = run("git", ["rev-parse", "HEAD"], repo, true);
   const dirty = !!run(
     "git",
-    [
-      "status",
-      "--porcelain",
-      "--untracked-files=all",
-      "--",
-      "next",
-      ".gitignore",
-      "AGENTS.md",
-      "prompt-and-info.md",
-      "doc/rewrite",
-    ],
+    ["status", "--porcelain", "--untracked-files=all", "--", "."],
     repo,
     true,
   );
@@ -141,7 +133,7 @@ function main() {
   const wasmBindgen = run("wasm-bindgen", ["--version"], root, true);
   if (wasmBindgen !== "wasm-bindgen 0.2.108")
     throw new Error(
-      "Install the pinned wasm-bindgen-cli 0.2.108 from next/docs/development.md",
+      "Install the pinned wasm-bindgen-cli 0.2.108 from docs/development.md",
     );
   run("xcrun", ["--find", "clang"], root, true);
   run("rustup", ["target", "add", "wasm32-unknown-unknown", target]);

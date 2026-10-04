@@ -13,7 +13,7 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-TMP = ROOT.parent / "tmp"
+TMP = ROOT / "tmp"
 TMP.mkdir(exist_ok=True)
 for key in ("TMPDIR", "TMP", "TEMP"):
     os.environ[key] = str(TMP)

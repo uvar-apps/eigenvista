@@ -1,10 +1,13 @@
 # As-built architecture
 
 This describes the 0.4.0 development preview, not the complete
-[proposed architecture](../../doc/rewrite/03-architecture-decision.md).
+[proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
-The current application is EigenVista; its source remains in `next/`. Rust
+The current application is EigenVista in the standalone
+[`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository.
+Application source lives at the repository root without a `next/` wrapper or
+legacy application code. Rust
 packages/crate directories use `eigenvista-*`, the npm package is `eigenvista`,
 and generated browser bindings use `eigenvista_wasm`. The macOS bundle is
 `EigenVista.app`, with application identifier `org.uvar-apps.eigenvista`.

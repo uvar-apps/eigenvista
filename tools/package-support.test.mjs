@@ -7,6 +7,7 @@ import {
   testerEnvironment,
   testerPackageName,
   existingSourceFiles,
+  packageSourceFiles,
   inside,
   snapshotFiles,
   treeManifest,
@@ -16,10 +17,7 @@ import {
   licenseSupplements,
 } from "./package-support.mjs";
 
-const repo = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../..",
-);
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tmp = path.join(repo, "tmp");
 fs.mkdirSync(tmp, { recursive: true });
 function fixture(t) {
@@ -61,6 +59,38 @@ test("uncommitted source renames omit deleted tracked paths without bypassing sa
   assert.throws(() => snapshotFiles(dir, existingSourceFiles(dir, ["link"])));
   assert.throws(() => existingSourceFiles(dir, ["../outside"]));
 });
+test("standalone source selection excludes private exports and cannot escape the repository", (t) => {
+  const dir = fixture(t);
+  fs.mkdirSync(path.join(dir, "docs"));
+  fs.writeFileSync(path.join(dir, "source.rs"), "application source");
+  fs.writeFileSync(path.join(dir, "chat-private.md"), "private fixture");
+  fs.writeFileSync(path.join(dir, "docs/chat-private.md"), "private fixture");
+  const names = packageSourceFiles(dir, [
+    "source.rs",
+    "source.rs",
+    "deleted.rs",
+    "chat-private.md",
+    "docs/chat-private.md",
+  ]);
+  assert.deepEqual(names, ["source.rs"]);
+  assert.deepEqual(Object.keys(snapshotFiles(dir, names)), ["source.rs"]);
+  assert.throws(
+    () => packageSourceFiles(dir, ["../outside"]),
+    /Unsafe package path/,
+  );
+  assert.throws(
+    () => packageSourceFiles(dir, [path.join(path.dirname(dir), "outside")]),
+    /Unsafe package path/,
+  );
+  assert.throws(
+    () => snapshotFiles(dir, ["chat-private.md"]),
+    /Private chat exports/,
+  );
+  assert.throws(
+    () => snapshotFiles(dir, ["docs/chat-private.md"]),
+    /Private chat exports/,
+  );
+});
 test("tester environment cannot inherit Apple signing/notarization secrets", () => {
   const env = testerEnvironment(
     {
@@ -72,7 +102,7 @@ test("tester environment cannot inherit Apple signing/notarization secrets", () 
       TMPDIR: "/not-our-tmp",
       PATH: "test",
     },
-    path.join(repo, "next"),
+    repo,
   );
   assert.equal(env.APPLE_ID, undefined);
   assert.equal(env.APPLE_PASSWORD, undefined);
@@ -83,6 +113,13 @@ test("tester environment cannot inherit Apple signing/notarization secrets", () 
   assert.equal(env.TMP, tmp);
   assert.equal(env.TEMP, tmp);
   assert.equal(env.PATH, "test");
+});
+test("standalone tester staging and build outputs remain inside the chosen repository", (t) => {
+  const dir = fixture(t);
+  const env = testerEnvironment({ TMPDIR: path.dirname(dir) }, dir);
+  for (const key of ["TMPDIR", "TMP", "TEMP"])
+    assert.equal(env[key], path.join(dir, "tmp"));
+  assert.equal(env.CARGO_TARGET_DIR, path.join(dir, "target"));
 });
 test("package paths reject escape and absolute destinations", () => {
   for (const name of ["", "../outside", "/absolute", "a/../../outside"])
@@ -182,7 +219,7 @@ test("Rust notices retain distinct copyright text and extra NOTICE files", (t) =
 });
 
 test("pinned supplementary notices are complete and checksummed", (t) => {
-  const original = path.join(repo, "next/packaging/licenses");
+  const original = path.join(repo, "packaging/licenses");
   const entries = licenseSupplements(original);
   assert.ok(entries.some((e) => e.packages.includes("alloc-stdlib@0.3.0")));
   const dir = fixture(t);
