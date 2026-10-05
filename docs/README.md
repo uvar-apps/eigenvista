@@ -31,6 +31,7 @@ limits of opening new saves in older builds.
 | Large-structure rendering and format regression input (RCSB PDB 4PJ1) | [Large-structure fixtures](../fixtures/large-structure/README.md) |
 | Cross-platform checks and absence of active hosted CI | [Portability checks](../ci/README.md) |
 | Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
+| Issue triage conventions — area, kind, and priority label axes | [Issue label taxonomy](labels.md) |
 | Fast project overview | [Rewrite README](../README.md) |
 
 ## Planning archive
