@@ -309,3 +309,69 @@ test("a worker construction failure rejects the request instead of throwing sync
   expect(result.synchronousThrow).toBe(false);
   expect(result.rejection).toContain("worker construction blocked");
 });
+test("clicking an instanced atom resolves its per-instance selection label", async ({
+  page,
+}) => {
+  await page.goto("/");
+  // A structure-only document has no surfaces to occlude the atoms. Atoms render
+  // as a single InstancedMesh, so the label must come from the raycast
+  // instanceId rather than a per-object userData.label.
+  await page
+    .getByLabel("Open molecular file")
+    .setInputFiles(path.resolve("../fixtures/legacy/data/guanine.pdb"));
+  await expect(page.locator("footer [role=status]")).toContainText(
+    "Opened guanine.pdb",
+    { timeout: 45000 },
+  );
+  // The scene draws on an animation loop, so wait until something is actually on
+  // screen before clicking into it.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const canvas = document.querySelector("canvas");
+          const gl = canvas && canvas.getContext("webgl2");
+          if (!gl) return 0;
+          const px = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
+          gl.readPixels(
+            0,
+            0,
+            gl.drawingBufferWidth,
+            gl.drawingBufferHeight,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            px,
+          );
+          let drawn = 0;
+          for (let i = 0; i < px.length; i += 4) {
+            if (
+              Math.abs(px[i] - 0xe8) > 12 ||
+              Math.abs(px[i + 1] - 0xed) > 12 ||
+              Math.abs(px[i + 2] - 0xef) > 12
+            )
+              drawn++;
+          }
+          return drawn;
+        }),
+      { timeout: 30000 },
+    )
+    .toBeGreaterThan(500);
+  await page.getByLabel("Fit scene").click();
+  await page.waitForTimeout(400);
+  const box = await page.locator("canvas").boundingBox();
+  expect(box).not.toBeNull();
+  const cx = box!.x + box!.width / 2;
+  const cy = box!.y + box!.height / 2;
+  // Scan a grid so the assertion does not depend on where the camera lands.
+  let selected = "";
+  outer: for (let dx = -160; dx <= 160 && !selected; dx += 10) {
+    for (let dy = -160; dy <= 160 && !selected; dy += 10) {
+      await page.mouse.click(cx + dx, cy + dy);
+      const text = (await page.locator(".selection-status").innerText()).trim();
+      if (/\|.*angstrom/.test(text)) selected = text;
+    }
+  }
+  expect(selected.split("\n")[0]).toMatch(
+    /^[A-Za-z]{1,2} \d+ \| -?\d+\.\d+, -?\d+\.\d+, -?\d+\.\d+ angstrom$/,
+  );
+});

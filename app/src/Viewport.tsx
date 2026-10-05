@@ -35,8 +35,23 @@ const elements: Record<
 export function symbol(z: number) {
   return elements[z]?.symbol ?? `Z${z}`;
 }
+
+const IDENTITY_QUATERNION = new THREE.Quaternion();
+
+/**
+ * Resolve the selection label for a raycast hit. Instanced meshes carry one label
+ * per instance rather than one per object, so the instance index selects the text.
+ */
+function labelForHit(hit: THREE.Intersection): string | undefined {
+  const data = hit.object.userData;
+  if (Array.isArray(data.instanceLabels) && hit.instanceId != null)
+    return data.instanceLabels[hit.instanceId];
+  return data.label as string | undefined;
+}
+
 function dispose(group: THREE.Object3D) {
   group.traverse((o) => {
+    if (o instanceof THREE.InstancedMesh) o.dispose();
     if (o instanceof THREE.Mesh) {
       o.geometry.dispose();
       for (const m of Array.isArray(o.material) ? o.material : [o.material])
@@ -226,10 +241,14 @@ export function Viewport({
         ),
         camera,
       );
-      const hit = ray
-        .intersectObjects(group.children, true)
-        .find((h) => h.object.userData.label);
-      if (hit) selection.current(hit.object.userData.label);
+      const hits = ray.intersectObjects(group.children, true);
+      for (const hit of hits) {
+        const label = labelForHit(hit);
+        if (label) {
+          selection.current(label);
+          return;
+        }
+      }
     };
     const lost = (e: Event) => {
       e.preventDefault();
@@ -268,52 +287,98 @@ export function Viewport({
     const shader = shaderRef.current;
     const group = new THREE.Group();
     try {
-      for (const [i, atom] of doc.atoms.entries()) {
-        const element = elements[atom.element] ?? {
-          symbol: `Z${atom.element}`,
-          color: "#b294b9",
-          radius: 1.8,
-        };
-        const radius =
-          doc.view.representation === "space-fill"
-            ? element.radius / BOHR
-            : doc.view.representation === "liquorice"
-              ? 0.28
-              : atom.element === 1
-                ? 0.32
-                : 0.52;
-        const m = new THREE.Mesh(
-          new THREE.SphereGeometry(radius, 24, 16),
-          new THREE.MeshStandardMaterial({
-            color: element.color,
-            roughness: 0.34,
-          }),
+      // Atoms are one InstancedMesh: a single unit sphere and a single material
+      // shared by every atom, with per-instance scale and colour. The previous
+      // per-atom geometry + material cost 132k draw calls and 3.3 GB of heap on a
+      // 66k-atom structure; this renders the same scene in one draw call.
+      if (doc.atoms.length > 0) {
+        const atomGeometry = new THREE.SphereGeometry(1, 24, 16);
+        const atomMaterial = new THREE.MeshStandardMaterial({ roughness: 0.34 });
+        const atoms = new THREE.InstancedMesh(
+          atomGeometry,
+          atomMaterial,
+          doc.atoms.length,
         );
-        m.position.set(...atom.position);
-        m.userData.label = `${element.symbol} ${i + 1} | ${atom.position.map((v) => (v * BOHR).toFixed(3)).join(", ")} angstrom`;
-        group.add(m);
-      }
-      if (doc.view.representation !== "space-fill")
-        for (const [i, j] of doc.bonds) {
-          const from = new THREE.Vector3(...doc.atoms[i].position);
-          const to = new THREE.Vector3(...doc.atoms[j].position);
-          const delta = to.clone().sub(from);
-          if (delta.length() < 1e-10) continue;
-          const radius = doc.view.representation === "liquorice" ? 0.28 : 0.105;
-          const bond = new THREE.Mesh(
-            new THREE.CylinderGeometry(radius, radius, delta.length(), 12),
-            new THREE.MeshStandardMaterial({
-              color: "#9ba3a8",
-              roughness: 0.5,
-            }),
-          );
-          bond.position.copy(from).add(to).multiplyScalar(0.5);
-          bond.quaternion.setFromUnitVectors(
-            new THREE.Vector3(0, 1, 0),
-            delta.normalize(),
-          );
-          group.add(bond);
+        atoms.name = "atoms";
+        const matrix = new THREE.Matrix4();
+        const position = new THREE.Vector3();
+        const scale = new THREE.Vector3();
+        const tint = new THREE.Color();
+        const labels: string[] = [];
+        for (const [i, atom] of doc.atoms.entries()) {
+          const element = elements[atom.element] ?? {
+            symbol: `Z${atom.element}`,
+            color: "#b294b9",
+            radius: 1.8,
+          };
+          const radius =
+            doc.view.representation === "space-fill"
+              ? element.radius / BOHR
+              : doc.view.representation === "liquorice"
+                ? 0.28
+                : atom.element === 1
+                  ? 0.32
+                  : 0.52;
+          position.set(atom.position[0], atom.position[1], atom.position[2]);
+          scale.setScalar(radius);
+          matrix.compose(position, IDENTITY_QUATERNION, scale);
+          atoms.setMatrixAt(i, matrix);
+          tint.set(element.color);
+          atoms.setColorAt(i, tint);
+          const angstrom = atom.position
+            .map((v) => (v * BOHR).toFixed(3))
+            .join(", ");
+          labels.push(`${element.symbol} ${i + 1} | ${angstrom} angstrom`);
         }
+        atoms.instanceMatrix.needsUpdate = true;
+        if (atoms.instanceColor) atoms.instanceColor.needsUpdate = true;
+        atoms.userData.instanceLabels = labels;
+        group.add(atoms);
+      }
+      if (doc.view.representation !== "space-fill") {
+        const bondRadius = doc.view.representation === "liquorice" ? 0.28 : 0.105;
+        const from = new THREE.Vector3();
+        const to = new THREE.Vector3();
+        const delta = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        const midpoint = new THREE.Vector3();
+        const orientation = new THREE.Quaternion();
+        const cylinderAxis = new THREE.Vector3(0, 1, 0);
+        const placed: [number, number][] = [];
+        for (const [i, j] of doc.bonds) {
+          from.set(...doc.atoms[i].position);
+          to.set(...doc.atoms[j].position);
+          if (delta.subVectors(to, from).length() >= 1e-10) placed.push([i, j]);
+        }
+        if (placed.length > 0) {
+          const bondGeometry = new THREE.CylinderGeometry(1, 1, 1, 12);
+          const bondMaterial = new THREE.MeshStandardMaterial({
+            color: "#9ba3a8",
+            roughness: 0.5,
+          });
+          const bonds = new THREE.InstancedMesh(
+            bondGeometry,
+            bondMaterial,
+            placed.length,
+          );
+          bonds.name = "bonds";
+          const matrix = new THREE.Matrix4();
+          const scale = new THREE.Vector3();
+          for (const [k, [i, j]] of placed.entries()) {
+            from.set(...doc.atoms[i].position);
+            to.set(...doc.atoms[j].position);
+            const length = delta.subVectors(to, from).length();
+            direction.copy(delta).multiplyScalar(1 / length);
+            orientation.setFromUnitVectors(cylinderAxis, direction);
+            midpoint.addVectors(from, to).multiplyScalar(0.5);
+            scale.set(bondRadius, length, bondRadius);
+            matrix.compose(midpoint, orientation, scale);
+            bonds.setMatrixAt(k, matrix);
+          }
+          bonds.instanceMatrix.needsUpdate = true;
+          group.add(bonds);
+        }
+      }
       for (const s of doc.surfaces) {
         if (
           !s.visible ||
