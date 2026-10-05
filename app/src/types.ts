@@ -2,6 +2,16 @@ export interface Atom {
   element: number;
   position: [number, number, number];
 }
+/**
+ * Columnar atom storage: two parallel arrays instead of one record per atom, so a
+ * large structure does not carry tens of thousands of small objects through the
+ * bridge or the saved manifest. `positions.length` is the atom count and
+ * `elements[i]` pairs with `positions[i]`.
+ */
+export interface AtomColumns {
+  elements: number[];
+  positions: [number, number, number][];
+}
 export interface Orbital {
   id: string;
   label: string;
@@ -49,7 +59,7 @@ export interface Surface {
 export interface EigenVistaDocument {
   id: string;
   title: string;
-  atoms: Atom[];
+  atoms: AtomColumns;
   bonds: number[][];
   basis: {
     center: number[];

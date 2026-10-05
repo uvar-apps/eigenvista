@@ -240,7 +240,7 @@ test("legacy protein and multiple-model PDB files use the same WASM path", async
       const doc = JSON.parse(
         core.import_text(text, name),
       ) as EigenVistaDocument;
-      return [doc.atoms.length, doc.bonds.length];
+      return [doc.atoms.positions.length, doc.bonds.length];
     });
   }, files);
   expect(counts).toEqual([

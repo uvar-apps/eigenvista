@@ -546,7 +546,7 @@ export default function App() {
               <div className="document-summary">
                 <Atom size={19} />
                 <div>
-                  <strong>{doc.atoms.length} atoms</strong>
+                  <strong>{doc.atoms.positions.length} atoms</strong>
                   <span>
                     {doc.bonds.length}{" "}
                     {doc.bonds.length === 1 ? "bond" : "bonds"}

@@ -52,7 +52,21 @@ When every row of an array-of-objects carries the *same* numeric shape under a k
 
 Column references are validated on decode: the index must be an integer within the column's row count, the object must carry exactly the two expected keys, and the target column must exist. A row cannot be consumed twice.
 
-This changes only the on-disk layout. The Rust API is unchanged — `Document::atoms` is still a row-wise `Vec<Atom>` — and the app-facing JSON keeps its row-wise shape. Documents written before coalescing still decode, because a plain single-key `{ "$array": "aN" }` reference remains valid; a coalesced file requires the newer reader.
+This changes only the on-disk layout. Documents written before coalescing still decode, because a plain single-key `{ "$array": "aN" }` reference remains valid; a coalesced file requires the newer reader.
+
+### Atom columns
+
+The atom collection itself is columnar in both the document JSON and the manifest:
+
+```json
+"atoms": { "elements": { "$array": "aN" }, "positions": { "$array": "aM" } }
+```
+
+Two references, so the manifest is **constant-size with respect to atom count** — 1,455 bytes for a 100,000-atom structure, where the row-wise form needed roughly 5.6 MiB and could not be written at all past 8,191 atoms. `Document::atoms` in Rust is still a row-wise `Vec<Atom>`; the conversion happens in the `atoms_columnar` serde module, and the app reads `atoms.elements[i]` / `atoms.positions[i]`.
+
+Deserialization accepts the columnar object **and** the older row-wise array of `{ element, position }` records. The custom `Visitor` dispatches on the JSON token via `visit_map` / `visit_seq`, so supporting both forms costs no buffering — an untagged enum would have copied the whole collection into an intermediate value, which is exactly the cost this removes. Column lengths must agree; a mismatch is rejected.
+
+Measured per-atom decode peak RSS: 3,198 B (row-wise) → 2,185 B (coalesced rows) → **929 B** (atom columns).
 
 ### Why the entry cap mattered
 

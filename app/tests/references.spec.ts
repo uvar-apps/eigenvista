@@ -3,6 +3,24 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { EigenVistaDocument } from "../src/types";
 
+/**
+ * The frozen PySCF fixtures carry atoms row-wise while the current representation
+ * is columnar. Normalize both sides so this test asserts the science rather than
+ * the layout, and keeps passing whichever form a fixture happens to use.
+ */
+function rowWise(atoms: EigenVistaDocument["atoms"]) {
+  if (Array.isArray(atoms)) return atoms;
+  return atoms.elements.map((element, i) => ({
+    element,
+    position: atoms.positions[i],
+  }));
+}
+
+function withoutAtoms(doc: EigenVistaDocument) {
+  const { atoms: _atoms, ...rest } = doc;
+  return rest;
+}
+
 interface ReferenceFixture {
   document: EigenVistaDocument;
   reference: {
@@ -119,9 +137,9 @@ for (const name of [
       };
     }, fixture);
     // Compare to the actual JSON input: JSON.stringify canonicalizes signed zero.
-    expect(result.document).toEqual(
-      JSON.parse(JSON.stringify(fixture.document)),
-    );
+    const expected = JSON.parse(JSON.stringify(fixture.document));
+    expect(rowWise(result.document.atoms)).toEqual(rowWise(expected.atoms));
+    expect(withoutAtoms(result.document)).toEqual(withoutAtoms(expected));
     expect(result.comparisons).toBeGreaterThan(400);
     expect(result.maxScaledError).toBeLessThanOrEqual(1);
     expect(result.invalidRejected).toBeTruthy();

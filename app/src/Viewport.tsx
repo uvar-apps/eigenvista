@@ -287,17 +287,19 @@ export function Viewport({
     const shader = shaderRef.current;
     const group = new THREE.Group();
     try {
+      const columns = doc.atoms;
+      const atomCount = columns.positions.length;
       // Atoms are one InstancedMesh: a single unit sphere and a single material
       // shared by every atom, with per-instance scale and colour. The previous
-      // per-atom geometry + material cost 132k draw calls and 3.3 GB of heap on a
+      // per-atom geometry + material cost 121k draw calls and 3.2 GB of heap on a
       // 66k-atom structure; this renders the same scene in one draw call.
-      if (doc.atoms.length > 0) {
+      if (atomCount > 0) {
         const atomGeometry = new THREE.SphereGeometry(1, 24, 16);
         const atomMaterial = new THREE.MeshStandardMaterial({ roughness: 0.34 });
         const atoms = new THREE.InstancedMesh(
           atomGeometry,
           atomMaterial,
-          doc.atoms.length,
+          atomCount,
         );
         atoms.name = "atoms";
         const matrix = new THREE.Matrix4();
@@ -305,9 +307,11 @@ export function Viewport({
         const scale = new THREE.Vector3();
         const tint = new THREE.Color();
         const labels: string[] = [];
-        for (const [i, atom] of doc.atoms.entries()) {
-          const element = elements[atom.element] ?? {
-            symbol: `Z${atom.element}`,
+        for (let i = 0; i < atomCount; i++) {
+          const point = columns.positions[i];
+          const z = columns.elements[i];
+          const element = elements[z] ?? {
+            symbol: `Z${z}`,
             color: "#b294b9",
             radius: 1.8,
           };
@@ -316,18 +320,16 @@ export function Viewport({
               ? element.radius / BOHR
               : doc.view.representation === "liquorice"
                 ? 0.28
-                : atom.element === 1
+                : z === 1
                   ? 0.32
                   : 0.52;
-          position.set(atom.position[0], atom.position[1], atom.position[2]);
+          position.set(point[0], point[1], point[2]);
           scale.setScalar(radius);
           matrix.compose(position, IDENTITY_QUATERNION, scale);
           atoms.setMatrixAt(i, matrix);
           tint.set(element.color);
           atoms.setColorAt(i, tint);
-          const angstrom = atom.position
-            .map((v) => (v * BOHR).toFixed(3))
-            .join(", ");
+          const angstrom = point.map((v) => (v * BOHR).toFixed(3)).join(", ");
           labels.push(`${element.symbol} ${i + 1} | ${angstrom} angstrom`);
         }
         atoms.instanceMatrix.needsUpdate = true;
@@ -346,8 +348,8 @@ export function Viewport({
         const cylinderAxis = new THREE.Vector3(0, 1, 0);
         const placed: [number, number][] = [];
         for (const [i, j] of doc.bonds) {
-          from.set(...doc.atoms[i].position);
-          to.set(...doc.atoms[j].position);
+          from.set(...columns.positions[i]);
+          to.set(...columns.positions[j]);
           if (delta.subVectors(to, from).length() >= 1e-10) placed.push([i, j]);
         }
         if (placed.length > 0) {
@@ -365,8 +367,8 @@ export function Viewport({
           const matrix = new THREE.Matrix4();
           const scale = new THREE.Vector3();
           for (const [k, [i, j]] of placed.entries()) {
-            from.set(...doc.atoms[i].position);
-            to.set(...doc.atoms[j].position);
+            from.set(...columns.positions[i]);
+            to.set(...columns.positions[j]);
             const length = delta.subVectors(to, from).length();
             direction.copy(delta).multiplyScalar(1 / length);
             orientation.setFromUnitVectors(cylinderAxis, direction);

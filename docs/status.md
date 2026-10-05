@@ -8,6 +8,111 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Unreleased — renderer instancing and columnar packing
+
+Date: 5 October 2026. Follows the review's item 4. Measured against
+`fixtures/legacy/data/4PJ1.pdb` (65,963 atoms, 66,610 bonds perceived).
+
+### Renderer instancing
+
+Atoms and bonds were one `Mesh` with one geometry and one material each. On 4PJ1
+that meant ~121,500 draw calls per frame and a 3.2 GB JS heap. Both collections
+now render as a single `THREE.InstancedMesh` over one shared unit geometry and one
+shared material, with per-instance transform and colour.
+
+| Metric (4PJ1, 12 forced frames) | Before | After |
+| --- | --- | --- |
+| Draw calls per frame | 121,525 | **1.8** |
+| Non-instanced draw calls | 1,458,303 | **0** |
+| JS heap | 3,185 MB | **73 MB** |
+
+Radius formulas per representation, the `1e-10` degenerate-bond filter, and label
+text are unchanged. Selection required real work: an `InstancedMesh` has no
+per-object `userData.label`, so the hit label is resolved from
+`intersection.instanceId` against a per-instance label list, falling back to the
+per-object label used by surfaces. `InstancedMesh::dispose` is now called so
+instance buffers are released. `app/src/Viewport.tsx`; regression test in
+`app/tests/viewer.spec.ts` (verified to fail if the instance-aware lookup is
+reverted).
+
+### Columnar packing
+
+Instancing fixed rendering, but the document still could not be **saved**:
+`Document has too many array entries for the preview profile`. Every numeric array
+leaf took its own ZIP entry, and `Atom` stores `position` as a nested array, so
+each atom cost one entry — capping any document at **8,191 atoms regardless of
+byte size**. Raising the cap alone does not help: each entry needs ~196 bytes of
+manifest to describe as little as 24 bytes of payload, so 65,963 atoms would put
+the manifest at ~12 MiB against the separate 8 MiB manifest budget.
+
+`pack` now coalesces any run of identically-shaped numeric arrays across the rows
+of an object array into one `[rows, …inner]` column, with each row holding a
+`{ "$array": id, "$index": k }` pointer. Uniform shapes coalesce (atom
+positions, basis centers, orbital coefficient vectors); non-uniform rows fall
+back to per-row entries.
+
+| 4PJ1 | Before | After |
+| --- | --- | --- |
+| Array entries | 65,963+ (encode refused) | **2** |
+| Saved size | — | 1.71 MB |
+| Decode peak RSS per atom | 3,198 B | 2,185 B |
+
+The Rust API and the app-facing JSON keep their row-wise shape; only the on-disk
+layout changed. Pre-coalescing documents still decode, since a single-key
+`{ "$array": id }` reference remains valid. See
+[preview format](preview-format.md#columnar-coalescing).
+
+### Verification
+
+`cargo fmt`, `cargo test --locked`, `clippy --workspace --all-targets -D warnings`,
+`cargo test -p eigenvista-desktop`, `npm run build`, and `test:packaging` all
+pass. New `crates/eigenvista-format/tests/columnar_packing.rs` pins the
+entry-count collapse, round-trip fidelity at 1–10,000 atoms, the non-uniform
+fallback, and rejection of out-of-range, non-integer, extra-key, and unknown-id
+column references (the manifest carries no digest of its own, so decode-side
+bounds checks are the boundary). All 14 chemistry fixtures across PDB, XYZ, Cube,
+and Molden encode and round-trip. In-browser, 4PJ1 opens, renders, and saves
+through the real app path to a file byte-identical (same SHA-256) to the CLI
+encode. Full Playwright suite green on Chromium and WebKit.
+
+### Atom columns — the ceiling removed
+
+Coalescing fixed the entry count but left the manifest growing with atom count
+(~56 B per row object), which would still have bound near 140k atoms against the
+8 MiB manifest budget. The atom collection is now columnar in the document JSON
+itself:
+
+```json
+"atoms": { "elements": { "$array": "aN" }, "positions": { "$array": "aM" } }
+```
+
+Two references, so the manifest is constant-size with respect to atom count.
+`Document::atoms` in Rust stays a row-wise `Vec<Atom>`; the conversion lives in a
+`atoms_columnar` serde module in `model.rs`. The app reads
+`atoms.elements[i]` / `atoms.positions[i]` (`app/src/types.ts`,
+`Viewport.tsx`, `App.tsx`).
+
+Deserialization accepts the columnar object **and** the older row-wise array of
+`{ element, position }` records. The custom `Visitor` dispatches on the JSON token
+via `visit_map` / `visit_seq`, so both forms parse without buffering — an
+untagged enum would have copied the whole collection into an intermediate value,
+which is precisely the cost being removed. This is what keeps the existing
+`fixtures/pyscf` JSON inputs parsing unchanged.
+
+| 60,000 atoms | Row-wise | Coalesced rows | Atom columns |
+| --- | --- | --- | --- |
+| Manifest | 3,271 KiB | 3,271 KiB | **1 KiB** |
+| Decode peak per atom | 3,198 B | 2,185 B | **929 B** |
+
+At 100,000 atoms the manifest is 1,455 bytes with 3 entries, encoding and
+validating at 77 MB peak — a size the previous format refused outright at 8,191.
+The XYZ importer keeps its own separate `1..100000` input cap.
+
+New tests cover the constant-size manifest, exact round-trip from 1 to 10,000
+atoms, row-wise backward compatibility, column length-mismatch rejection, and the
+`{array, index}` tamper surface that remains on basis centers and orbital
+coefficients.
+
 ## Version 0.5.2
 
 Date: 5 October 2026. The user asked that all changes be documented and the

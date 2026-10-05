@@ -101,10 +101,112 @@ impl Default for View {
     }
 }
 
+/// Columnar JSON for the atom collection.
+///
+/// Serialized as `{ "elements": [...], "positions": [[x, y, z], …] }` so the
+/// whole collection is two numeric arrays. The format layer then stores each as
+/// one column blob, which keeps the manifest independent of atom count instead of
+/// carrying one JSON record per atom.
+///
+/// Deserialization accepts the columnar object *and* the older row-wise array of
+/// `{ element, position }` records. Dispatch happens on the JSON token itself via
+/// `visit_map`/`visit_seq`, so supporting both forms costs no buffering — an
+/// untagged enum would have copied the entire collection into an intermediate.
+mod atoms_columnar {
+    use super::Atom;
+    use serde::de::{self, MapAccess, SeqAccess, Visitor};
+    use serde::ser::SerializeMap;
+    use serde::{Deserializer, Serializer};
+    use std::fmt;
+
+    pub fn serialize<S>(atoms: &[Atom], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry(
+            "elements",
+            &atoms.iter().map(|a| a.element).collect::<Vec<_>>(),
+        )?;
+        map.serialize_entry(
+            "positions",
+            &atoms.iter().map(|a| a.position).collect::<Vec<_>>(),
+        )?;
+        map.end()
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<Atom>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct AtomColumns;
+
+        impl<'de> Visitor<'de> for AtomColumns {
+            type Value = Vec<Atom>;
+
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str("a columnar {elements, positions} object or a row-wise array of atoms")
+            }
+
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+                let mut elements: Option<Vec<u16>> = None;
+                let mut positions: Option<Vec<[f64; 3]>> = None;
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "elements" => {
+                            if elements.is_some() {
+                                return Err(de::Error::duplicate_field("elements"));
+                            }
+                            elements = Some(map.next_value()?);
+                        }
+                        "positions" => {
+                            if positions.is_some() {
+                                return Err(de::Error::duplicate_field("positions"));
+                            }
+                            positions = Some(map.next_value()?);
+                        }
+                        other => {
+                            return Err(de::Error::unknown_field(
+                                other,
+                                &["elements", "positions"],
+                            ));
+                        }
+                    }
+                }
+                let elements = elements.ok_or_else(|| de::Error::missing_field("elements"))?;
+                let positions = positions.ok_or_else(|| de::Error::missing_field("positions"))?;
+                if elements.len() != positions.len() {
+                    return Err(de::Error::custom(format!(
+                        "atom column length mismatch: {} elements vs {} positions",
+                        elements.len(),
+                        positions.len()
+                    )));
+                }
+                Ok(elements
+                    .into_iter()
+                    .zip(positions)
+                    .map(|(element, position)| Atom { element, position })
+                    .collect())
+            }
+
+            fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+                let mut atoms = Vec::with_capacity(seq.size_hint().unwrap_or(0));
+                while let Some(atom) = seq.next_element::<Atom>()? {
+                    atoms.push(atom);
+                }
+                Ok(atoms)
+            }
+        }
+
+        deserializer.deserialize_any(AtomColumns)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Document {
     pub id: String,
     pub title: String,
+    #[serde(with = "atoms_columnar")]
     pub atoms: Vec<Atom>,
     pub bonds: Vec<[usize; 2]>,
     pub basis: Vec<BasisFunction>,

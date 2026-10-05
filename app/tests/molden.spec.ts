@@ -163,7 +163,8 @@ test("Molden Open generates a field and saves quantum data plus durable surfaces
   );
   await saved.saveAs(filename);
   const doc = await decode(page, filename);
-  expect(doc.atoms).toHaveLength(3);
+  expect(doc.atoms.elements).toHaveLength(3);
+  expect(doc.atoms.positions).toHaveLength(3);
   expect(doc.bonds).toHaveLength(2);
   expect(doc.basis).toHaveLength(24);
   expect(doc.orbitals.length).toBeGreaterThan(5);

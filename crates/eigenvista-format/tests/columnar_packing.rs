@@ -1,9 +1,13 @@
-//! Columnar packing: a row-wise collection whose rows share a numeric shape is
-//! stored as one column blob instead of one ZIP entry per row. These tests pin the
-//! entry-count win, the round-trip fidelity, and the validation of the new
-//! `{array, index}` column reference.
+//! Columnar packing and the atom column representation.
+//!
+//! Covers three things: the atom collection serializes to two numeric columns so
+//! the manifest stops growing with atom count; uniform numeric arrays elsewhere
+//! (basis centers, orbital coefficients) coalesce into one entry with
+//! `{ "$array": id, "$index": k }` row pointers; and the new reference form is
+//! validated on decode. The manifest carries no digest of its own, so these
+//! decode-side checks are the boundary.
 
-use eigenvista_core::{Atom, Document};
+use eigenvista_core::{Atom, BasisFunction, Document, Term};
 use eigenvista_format::{decode, encode};
 use serde_json::{Value, json};
 use std::io::{Cursor, Read, Write};
@@ -16,6 +20,25 @@ fn atoms_doc(count: usize) -> Document {
         .map(|i| Atom {
             element: (i % 90 + 1) as u16,
             position: [i as f64 * 1.3, i as f64 * -0.7, i as f64 * 2.1],
+        })
+        .collect();
+    doc.validate().unwrap();
+    doc
+}
+
+/// A document whose rows keep per-row column references, so the `{array, index}`
+/// tamper surface is reachable.
+fn basis_doc(functions: usize) -> Document {
+    let mut doc = atoms_doc(functions);
+    doc.basis = (0..functions)
+        .map(|i| BasisFunction {
+            center: [i as f64, 0., 0.],
+            exponents: vec![1.0 + i as f64],
+            coefficients: vec![0.5],
+            terms: vec![Term {
+                powers: [i as u32, 0, 0],
+                weight: 1.0,
+            }],
         })
         .collect();
     doc.validate().unwrap();
@@ -58,13 +81,13 @@ fn with_manifest(bytes: &[u8], replacement: Value) -> Vec<u8> {
     let mut writer = ZipWriter::new(Cursor::new(vec![]));
     let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
     for (name, data) in entries(bytes) {
-        if name == "manifest.json" {
-            writer.start_file(name, options).unwrap();
+        let is_manifest = name == "manifest.json";
+        writer.start_file(name, options).unwrap();
+        if is_manifest {
             writer
                 .write_all(&serde_json::to_vec(&replacement).unwrap())
                 .unwrap();
         } else {
-            writer.start_file(name, options).unwrap();
             writer.write_all(&data).unwrap();
         }
     }
@@ -72,39 +95,55 @@ fn with_manifest(bytes: &[u8], replacement: Value) -> Vec<u8> {
 }
 
 #[test]
-fn position_columns_coalesce_to_one_entry_regardless_of_atom_count() {
+fn atom_columns_keep_the_manifest_independent_of_atom_count() {
     let small = encode(&atoms_doc(4)).unwrap();
     let large = encode(&atoms_doc(5000)).unwrap();
+
+    let small_atoms = manifest(&small)["document"]["atoms"].clone();
+    let large_atoms = manifest(&large)["document"]["atoms"].clone();
+
+    // Two references and nothing else, so the manifest cannot grow with atoms.
+    assert_eq!(
+        small_atoms
+            .as_object()
+            .map(|m| m.keys().cloned().collect::<Vec<_>>()),
+        Some(vec!["elements".to_owned(), "positions".to_owned()])
+    );
+    assert_eq!(
+        serde_json::to_string(&small_atoms).unwrap().len(),
+        serde_json::to_string(&large_atoms).unwrap().len(),
+        "manifest atom representation must not scale with atom count"
+    );
+
+    // The columns themselves are single entries at both sizes.
     assert_eq!(
         array_entries(&small).len(),
-        1,
+        2,
         "{:?}",
         array_entries(&small)
     );
     assert_eq!(
         array_entries(&large).len(),
-        1,
+        2,
         "{:?}",
         array_entries(&large)
     );
-    // The manifest describes one [rows, 3] column rather than one record per row.
-    let shapes: Vec<Vec<usize>> = manifest(&large)
-        .get("arrays")
-        .and_then(|a| a.as_object())
-        .map(|m| {
-            m.values()
-                .map(|v| {
-                    v["shape"]
-                        .as_array()
-                        .unwrap()
-                        .iter()
-                        .map(|s| s.as_u64().unwrap() as usize)
-                        .collect()
-                })
+
+    let mut shapes: Vec<Vec<usize>> = manifest(&large)["arrays"]
+        .as_object()
+        .unwrap()
+        .values()
+        .map(|v| {
+            v["shape"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|s| s.as_u64().unwrap() as usize)
                 .collect()
         })
-        .unwrap();
-    assert_eq!(shapes, vec![vec![5000, 3]]);
+        .collect();
+    shapes.sort();
+    assert_eq!(shapes, vec![vec![5000], vec![5000, 3]]);
 }
 
 #[test]
@@ -122,30 +161,70 @@ fn coalesced_document_round_trips_exactly_at_scale() {
 }
 
 #[test]
+fn row_wise_atom_arrays_still_deserialize() {
+    // Older documents and JSON fixtures carry atoms as [{element, position}, …].
+    // The visitor dispatches on the JSON token, so both forms parse without
+    // buffering the collection into an intermediate.
+    let doc = atoms_doc(3);
+    let columnar = serde_json::to_value(&doc).unwrap();
+    assert!(
+        columnar["atoms"].is_object(),
+        "atoms must serialize columnar"
+    );
+
+    let elements = columnar["atoms"]["elements"].as_array().unwrap().clone();
+    let positions = columnar["atoms"]["positions"].as_array().unwrap().clone();
+    let mut legacy = columnar.clone();
+    let rows: Vec<Value> = elements
+        .iter()
+        .zip(positions.iter())
+        .map(|(e, p)| json!({ "element": e, "position": p }))
+        .collect();
+    legacy["atoms"] = Value::Array(rows);
+
+    let restored: Document = serde_json::from_value(legacy).unwrap();
+    assert_eq!(restored, doc);
+}
+
+#[test]
+fn mismatched_atom_column_lengths_are_rejected() {
+    let doc = atoms_doc(3);
+    let mut json = serde_json::to_value(&doc).unwrap();
+    json["atoms"]["elements"] = json!([6, 6]);
+    let err = serde_json::from_value::<Document>(json)
+        .unwrap_err()
+        .to_string();
+    assert!(
+        err.contains("length mismatch"),
+        "expected a length-mismatch rejection, got: {err}"
+    );
+}
+
+#[test]
 fn rows_without_a_uniform_shape_are_not_coalesced_and_stay_correct() {
     // Varying-length numeric arrays must fall back to per-row entries rather than
     // being forced into a column that would corrupt them.
     let mut doc = atoms_doc(3);
     doc.basis = vec![
-        eigenvista_core::BasisFunction {
+        BasisFunction {
             center: [0., 0., 0.],
             exponents: vec![1.0],
             coefficients: vec![0.5],
-            terms: vec![eigenvista_core::Term {
+            terms: vec![Term {
                 powers: [0, 0, 0],
                 weight: 1.0,
             }],
         },
-        eigenvista_core::BasisFunction {
+        BasisFunction {
             center: [1., 0., 0.],
             exponents: vec![1.0, 2.5, 4.0],
             coefficients: vec![0.25, 0.5, 0.75],
             terms: vec![
-                eigenvista_core::Term {
+                Term {
                     powers: [1, 0, 0],
                     weight: 1.0,
                 },
-                eigenvista_core::Term {
+                Term {
                     powers: [0, 1, 0],
                     weight: -1.0,
                 },
@@ -155,7 +234,7 @@ fn rows_without_a_uniform_shape_are_not_coalesced_and_stay_correct() {
     doc.validate().unwrap();
     let bytes = encode(&doc).unwrap();
     assert!(
-        array_entries(&bytes).len() > 1,
+        array_entries(&bytes).len() > 2,
         "non-uniform rows should not collapse into one column"
     );
     assert_eq!(decode(&bytes).unwrap(), doc);
@@ -163,9 +242,9 @@ fn rows_without_a_uniform_shape_are_not_coalesced_and_stay_correct() {
 
 #[test]
 fn column_index_out_of_range_is_rejected() {
-    let bytes = encode(&atoms_doc(3)).unwrap();
+    let bytes = encode(&basis_doc(3)).unwrap();
     let mut tampered = manifest(&bytes);
-    tampered["document"]["atoms"][0]["position"]["$index"] = json!(99);
+    tampered["document"]["basis"][0]["center"]["$index"] = json!(99);
     let err = decode(&with_manifest(&bytes, tampered)).unwrap_err();
     assert!(
         err.contains("Column index out of range"),
@@ -174,40 +253,28 @@ fn column_index_out_of_range_is_rejected() {
 }
 
 #[test]
-fn column_reference_with_extra_or_missing_keys_is_rejected() {
-    let bytes = encode(&atoms_doc(3)).unwrap();
-
+fn column_reference_with_extra_key_is_rejected() {
+    let bytes = encode(&basis_doc(3)).unwrap();
     let mut extra = manifest(&bytes);
-    extra["document"]["atoms"][1]["position"]["$extra"] = json!(0);
+    extra["document"]["basis"][1]["center"]["$extra"] = json!(0);
     let err = decode(&with_manifest(&bytes, extra)).unwrap_err();
     assert!(err.contains("Malformed column reference"), "got: {err}");
-
-    let mut missing = manifest(&bytes);
-    missing["document"]["atoms"][1]["position"]
-        .as_object_mut()
-        .unwrap()
-        .remove("$array");
-    let err = decode(&with_manifest(&bytes, missing)).unwrap_err();
-    assert!(
-        !err.is_empty(),
-        "a reference missing $array must not decode"
-    );
 }
 
 #[test]
 fn non_integer_column_index_is_rejected() {
-    let bytes = encode(&atoms_doc(3)).unwrap();
+    let bytes = encode(&basis_doc(3)).unwrap();
     let mut tampered = manifest(&bytes);
-    tampered["document"]["atoms"][2]["position"]["$index"] = json!("2");
+    tampered["document"]["basis"][2]["center"]["$index"] = json!("2");
     let err = decode(&with_manifest(&bytes, tampered)).unwrap_err();
     assert!(err.contains("Invalid column index"), "got: {err}");
 }
 
 #[test]
 fn unknown_column_id_is_rejected() {
-    let bytes = encode(&atoms_doc(3)).unwrap();
+    let bytes = encode(&basis_doc(3)).unwrap();
     let mut tampered = manifest(&bytes);
-    tampered["document"]["atoms"][1]["position"]["$array"] = json!("zzz");
+    tampered["document"]["basis"][1]["center"]["$array"] = json!("zzz");
     let err = decode(&with_manifest(&bytes, tampered)).unwrap_err();
     assert!(err.contains("Unknown"), "got: {err}");
 }

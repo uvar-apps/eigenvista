@@ -94,10 +94,13 @@ async function decode(
 }
 
 function assertScalarData(doc: EigenVistaDocument) {
-  expect(doc.atoms).toEqual([
-    { element: 1, position: [-0.7, 0, 0] },
-    { element: 1, position: [0.7, 0, 0] },
-  ]);
+  expect(doc.atoms).toEqual({
+    elements: [1, 1],
+    positions: [
+      [-0.7, 0, 0],
+      [0.7, 0, 0],
+    ],
+  });
   expect(doc.bonds).toEqual([[0, 1]]);
   expect(doc.basis).toEqual([]);
   expect(doc.orbitals).toEqual([]);
