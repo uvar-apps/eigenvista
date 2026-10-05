@@ -46,11 +46,23 @@ import/save of valid f64 data. See [cube import](cube-import.md).
 
 The ZIP contains `manifest.json` first and `arrays/aN/0.bin` entries. Numeric array leaves in the document are replaced by `{ "$array": "aN" }` references. Descriptors record shape, entry, byte count, SHA-256, and either `f64` or `u32`. Values are little-endian and row-major; grids are x-fastest. Authoritative Rust float arrays remain f64. Mesh positions are f64 containers for the f32 interpolated result, with that precision limitation recorded explicitly.
 
+### Columnar coalescing
+
+When every row of an array-of-objects carries the *same* numeric shape under a key, that key is stored once as a `[rows, …inner]` column and each row keeps a `{ "$array": "aN", "$index": k }` pointer into it. This is what makes large systems storable: 65,963 atom positions become **one** entry instead of 65,963, and the manifest stops carrying a record per row. The same applies to basis centers and to orbital coefficient vectors, which are uniform by construction. Rows whose shapes differ — basis functions with different contraction lengths, for instance — fall back to per-row entries rather than being forced into a column.
+
+Column references are validated on decode: the index must be an integer within the column's row count, the object must carry exactly the two expected keys, and the target column must exist. A row cannot be consumed twice.
+
+This changes only the on-disk layout. The Rust API is unchanged — `Document::atoms` is still a row-wise `Vec<Atom>` — and the app-facing JSON keeps its row-wise shape. Documents written before coalescing still decode, because a plain single-key `{ "$array": "aN" }` reference remains valid; a coalesced file requires the newer reader.
+
+### Why the entry cap mattered
+
+Every array leaf previously cost one ZIP entry, one manifest descriptor (~196 bytes to describe as little as 24 bytes of payload), and one decode buffer. The 8,192-entry cap therefore capped a document at roughly **8,191 atoms regardless of byte size**, and raising the cap alone would still have failed: at 65,963 atoms the manifest alone reaches ~12 MiB against the separate 8 MiB manifest budget. Coalescing removes all three per-row costs at once.
+
 Small scalar metadata is JSON. Basis radial weights already include normalization; no automatic normalization is applied. Orbital energies are optional hartree values, not fabricated zeros. Occupations are explicit. A full row-major density matrix identifies its kind independently of orbitals. Current object relationships use stable IDs within a single geometry/basis document.
 
 Saved surface records contain source field ID and scientific hash, signed isovalue, algorithm/version, grid origin/step vectors/resolution, precision, geometry/normals/indices, sRGB color, opacity, and visibility. Quantum inputs remain in the same document. A source mismatch is rejected in this preview; the later revision-aware model should preserve historical assets with their original inputs.
 
-Loading verifies ZIP paths, duplicate entries, supported compression, declared inflated size, reference coverage, shape products, byte lengths, digests, finite arrays, IDs, indices, and scientific dimensions. Entry count, file size, inflated size, grid size, and mesh size are bounded. The preview refuses unreferenced archive entries and unsupported required profiles. Original source attachments, arbitrary extensions, multiple geometry revisions, chunk streaming, and migrations are not implemented.
+Loading verifies ZIP paths, duplicate entries, supported compression, declared inflated size, reference coverage, column index bounds, shape products, byte lengths, digests, finite arrays, IDs, indices, and scientific dimensions. Entry count, file size, inflated size, grid size, and mesh size are bounded. The preview refuses unreferenced archive entries and unsupported required profiles. Original source attachments, arbitrary extensions, multiple geometry revisions, chunk streaming, and migrations are not implemented.
 
 `eigenvista-format::decode` preserves the validated document exactly. The shared
 import layer used by Open and conversion subsequently supplements missing

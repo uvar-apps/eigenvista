@@ -64,6 +64,99 @@ fn flatten(v: &Value, out: &mut Vec<Value>) {
     }
 }
 
+/// Pack already-flattened numeric values into one binary entry and return its id.
+fn emit_entry(
+    flat: &[Value],
+    shape: Vec<usize>,
+    arrays: &mut BTreeMap<String, Array>,
+    entries: &mut Vec<(String, Vec<u8>)>,
+) -> Result<String> {
+    let integer = flat
+        .iter()
+        .all(|v| v.as_u64().is_some_and(|n| n <= u32::MAX as u64));
+    let mut bytes = vec![];
+    for v in flat {
+        if integer {
+            bytes.extend((v.as_u64().ok_or("Invalid integer")? as u32).to_le_bytes());
+        } else {
+            bytes.extend(v.as_f64().ok_or("Invalid float")?.to_le_bytes());
+        }
+    }
+    let id = format!("a{}", arrays.len());
+    let entry = format!("arrays/{id}/0.bin");
+    arrays.insert(
+        id.clone(),
+        Array {
+            dtype: if integer { "u32" } else { "f64" }.into(),
+            shape,
+            entry: entry.clone(),
+            bytes: bytes.len(),
+            sha256: digest(&bytes),
+        },
+    );
+    entries.push((entry, bytes));
+    Ok(id)
+}
+
+/// Coalesce a column of identically-shaped numeric arrays into one blob.
+///
+/// A row-wise collection such as `atoms: [{element, position:[f64;3]}, …]` would
+/// otherwise cost one ZIP entry, one manifest record, and one decode buffer per
+/// row. When every row carries the same numeric shape under a key, that key is
+/// stored once as a `[rows, …inner]` column and each row keeps a `{array,index}`
+/// pointer into it. This turns N entries per column into a single entry.
+fn coalesce_columns(
+    items: &mut [Value],
+    arrays: &mut BTreeMap<String, Array>,
+    entries: &mut Vec<(String, Vec<u8>)>,
+) -> Result<()> {
+    if items.len() < 2 {
+        return Ok(());
+    }
+    let Some(first) = items[0].as_object() else {
+        return Ok(());
+    };
+    let mut columns: Vec<(String, Vec<usize>)> = Vec::new();
+    for (key, value) in first {
+        let Some(shape) = numeric_shape(value) else {
+            continue;
+        };
+        // Only array-valued keys can form a column; scalars have an empty shape.
+        if shape.is_empty() {
+            continue;
+        }
+        let uniform = items.iter().all(|item| {
+            item.as_object()
+                .and_then(|o| o.get(key))
+                .and_then(numeric_shape)
+                .as_ref()
+                == Some(&shape)
+        });
+        if uniform {
+            columns.push((key.clone(), shape));
+        }
+    }
+    for (key, shape) in columns {
+        let rows = items.len();
+        let mut flat = Vec::with_capacity(rows * shape.iter().product::<usize>());
+        for item in items.iter() {
+            let value = item
+                .as_object()
+                .and_then(|o| o.get(&key))
+                .ok_or("Missing coalesced column")?;
+            flatten(value, &mut flat);
+        }
+        let column_shape = std::iter::once(rows).chain(shape).collect();
+        let id = emit_entry(&flat, column_shape, arrays, entries)?;
+        for (row, item) in items.iter_mut().enumerate() {
+            if let Some(object) = item.as_object_mut() {
+                object.insert(key.clone(), json!({"$array": id, "$index": row}));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn pack(
     v: &mut Value,
     arrays: &mut BTreeMap<String, Array>,
@@ -74,45 +167,23 @@ fn pack(
     {
         let mut flat = vec![];
         flatten(v, &mut flat);
-        let integer = flat
-            .iter()
-            .all(|v| v.as_u64().is_some_and(|n| n <= u32::MAX as u64));
-        let mut bytes = vec![];
-        for v in flat {
-            if integer {
-                bytes.extend((v.as_u64().ok_or("Invalid integer")? as u32).to_le_bytes());
-            } else {
-                bytes.extend(v.as_f64().ok_or("Invalid float")?.to_le_bytes());
-            }
-        }
-        let id = format!("a{}", arrays.len());
-        let entry = format!("arrays/{id}/0.bin");
-        arrays.insert(
-            id.clone(),
-            Array {
-                dtype: if integer { "u32" } else { "f64" }.into(),
-                shape,
-                entry: entry.clone(),
-                bytes: bytes.len(),
-                sha256: digest(&bytes),
-            },
-        );
-        entries.push((entry, bytes));
+        let id = emit_entry(&flat, shape, arrays, entries)?;
         *v = json!({"$array":id});
-    } else {
-        match v {
-            Value::Array(a) => {
-                for v in a {
-                    pack(v, arrays, entries)?;
-                }
+        return Ok(());
+    }
+    match v {
+        Value::Array(items) => {
+            coalesce_columns(items, arrays, entries)?;
+            for item in items.iter_mut() {
+                pack(item, arrays, entries)?;
             }
-            Value::Object(o) => {
-                for v in o.values_mut() {
-                    pack(v, arrays, entries)?;
-                }
-            }
-            _ => {}
         }
+        Value::Object(o) => {
+            for v in o.values_mut() {
+                pack(v, arrays, entries)?;
+            }
+        }
+        _ => {}
     }
     Ok(())
 }
@@ -164,25 +235,52 @@ fn reshape(values: &[Value], shape: &[usize]) -> Value {
             .collect(),
     )
 }
-fn unpack(v: &mut Value, arrays: &mut BTreeMap<String, Value>) -> Result<()> {
+fn unpack(
+    v: &mut Value,
+    arrays: &mut BTreeMap<String, Value>,
+    referenced: &mut HashSet<String>,
+) -> Result<()> {
     if let Some(id) = v.get("$array") {
-        let id = id.as_str().ok_or("Invalid array reference")?;
-        if v.as_object().is_none_or(|o| o.len() != 1) {
-            return Err("Malformed array reference".into());
+        let id = id.as_str().ok_or("Invalid array reference")?.to_owned();
+        let object = v.as_object().ok_or("Malformed array reference")?;
+        if let Some(index) = object.get("$index") {
+            if object.len() != 2 {
+                return Err("Malformed column reference".into());
+            }
+            let index = index.as_u64().ok_or("Invalid column index")? as usize;
+            let column = arrays
+                .get_mut(&id)
+                .ok_or("Unknown or multiply referenced array")?;
+            let rows = column
+                .as_array_mut()
+                .ok_or("Column reference target is not an array")?;
+            let Some(slot) = rows.get_mut(index) else {
+                return Err("Column index out of range".into());
+            };
+            if slot.is_null() {
+                return Err("Column row already consumed".into());
+            }
+            *v = std::mem::replace(slot, Value::Null);
+            referenced.insert(id);
+        } else {
+            if object.len() != 1 {
+                return Err("Malformed array reference".into());
+            }
+            *v = arrays
+                .remove(&id)
+                .ok_or("Unknown or multiply referenced array")?;
+            referenced.insert(id);
         }
-        *v = arrays
-            .remove(id)
-            .ok_or("Unknown or multiply referenced array")?;
     } else {
         match v {
             Value::Array(a) => {
                 for v in a {
-                    unpack(v, arrays)?;
+                    unpack(v, arrays, referenced)?;
                 }
             }
             Value::Object(o) => {
                 for v in o.values_mut() {
-                    unpack(v, arrays)?;
+                    unpack(v, arrays, referenced)?;
                 }
             }
             _ => {}
@@ -301,8 +399,9 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
     if used != names {
         return Err("Unreferenced entries are not supported by the preview profile".into());
     }
-    unpack(&mut manifest.document, &mut decoded)?;
-    if !decoded.is_empty() {
+    let mut referenced = HashSet::new();
+    unpack(&mut manifest.document, &mut decoded, &mut referenced)?;
+    if !decoded.keys().all(|id| referenced.contains(id)) {
         return Err("Unreferenced arrays".into());
     }
     let doc: Document = serde_json::from_value(manifest.document).map_err(|e| e.to_string())?;
