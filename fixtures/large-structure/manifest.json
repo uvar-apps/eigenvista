@@ -1,0 +1,21 @@
+{
+  "fixtures": [
+    {
+      "file": "4PJ1.pdb",
+      "sha256": "5c51e991f01bf5c9c6e676400006de17d225b93a027c31dc375dd4106e8b30a5",
+      "bytes": 5661819,
+      "source": "RCSB Protein Data Bank entry 4PJ1",
+      "source_url": "https://www.rcsb.org/structure/4PJ1",
+      "deposited": "2014-05-10",
+      "method": "X-RAY DIFFRACTION",
+      "resolution_angstrom": 3.15,
+      "atom_records": 65571,
+      "hetatm_records": 392,
+      "imported_atoms": 65963,
+      "perceived_bonds": 66610,
+      "space_group": "P 41 21 2",
+      "added": "2026-10-05",
+      "purpose": "large-structure rendering and native format regression"
+    }
+  ]
+}

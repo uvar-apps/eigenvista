@@ -28,6 +28,7 @@ limits of opening new saves in older builds.
 | Gaussian cube profile, volume/raycast previews, signed meshes, preserved grids | [Cube import](cube-import.md) and [analytic fixture](../fixtures/cube/README.md) |
 | Libraries, provenance, licensing | [Dependency record](dependencies.md) and [license](../LICENSE) |
 | Independent scientific references and regeneration | [PySCF fixtures](../fixtures/pyscf/README.md) |
+| Large-structure rendering and format regression input (RCSB PDB 4PJ1) | [Large-structure fixtures](../fixtures/large-structure/README.md) |
 | Cross-platform checks and absence of active hosted CI | [Portability checks](../ci/README.md) |
 | Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
 | Fast project overview | [Rewrite README](../README.md) |

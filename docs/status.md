@@ -13,7 +13,7 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 Date: 5 October 2026. Follows the review's item 4. The user asked for the work
 committed as separate commits, the remaining manifest ceiling addressed, and the
 version bumped to **0.5.3** with a tag. No push was requested. Measured against
-`fixtures/legacy/data/4PJ1.pdb` (65,963 atoms, 66,610 bonds perceived).
+`fixtures/large-structure/4PJ1.pdb` (65,963 atoms, 66,610 bonds perceived).
 
 ### Renderer instancing
 
@@ -76,6 +76,18 @@ bounds checks are the boundary). All 14 chemistry fixtures across PDB, XYZ, Cube
 and Molden encode and round-trip. In-browser, 4PJ1 opens, renders, and saves
 through the real app path to a file byte-identical (same SHA-256) to the CLI
 encode. Full Playwright suite green on Chromium and WebKit.
+
+4PJ1 is now a checked-in regression fixture under
+[`fixtures/large-structure/`](../fixtures/large-structure/README.md) with its own
+SHA-256 manifest recording the RCSB source. It deliberately does **not** live in
+`fixtures/legacy/`, whose README pins that directory to eight files copied
+byte-for-byte from Molekel commit `4edabf6`; 4PJ1 came from the PDB, so putting
+it there would have falsified that provenance record. The new
+`crates/eigenvista-format/tests/large_structure.rs` verifies the fixture checksum
+before anything else (a silently edited fixture would otherwise make every other
+assertion pass against the wrong molecule), then pins the import counts, the
+two-reference atom encoding, the small constant-shaped manifest, and exact decode
+fidelity.
 
 ### Atom columns — the ceiling removed
 
