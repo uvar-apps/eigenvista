@@ -8,9 +8,11 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
-## Unreleased — renderer instancing and columnar packing
+## Version 0.5.3
 
-Date: 5 October 2026. Follows the review's item 4. Measured against
+Date: 5 October 2026. Follows the review's item 4. The user asked for the work
+committed as separate commits, the remaining manifest ceiling addressed, and the
+version bumped to **0.5.3** with a tag. No push was requested. Measured against
 `fixtures/legacy/data/4PJ1.pdb` (65,963 atoms, 66,610 bonds perceived).
 
 ### Renderer instancing

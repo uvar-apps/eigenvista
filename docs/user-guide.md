@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.2, a development preview. Scientific calculations and
+This is version 0.5.3, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.

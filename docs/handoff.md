@@ -1,19 +1,30 @@
 # Development handoff
 
-Recorded 5 October 2026 for the 0.5.2 defect-fix increment; the dated entries
-below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
+Recorded 5 October 2026 for the 0.5.3 rendering and format increment; the dated
+entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.2**, in the standalone
+The current application is **EigenVista**, version **0.5.3**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
-Version 0.5.2 adds no features. It fixes the cold-start unsaved-changes defect,
+Version 0.5.3 makes large structures practical. Atoms and bonds render as
+instanced meshes (121,525 → 1.8 draw calls per frame, 3.2 GB → 40 MB heap on a
+66k-atom structure), and the document format coalesces uniform numeric columns
+and stores the atom collection as two columns, so the manifest no longer grows
+with atom count. A 100,000-atom structure now saves with a 1,455-byte manifest;
+the previous format refused anything past 8,191 atoms. Chemistry input is
+unchanged — PDB, XYZ, Cube, and Molden all still import, and legacy `.molekel`
+documents still read. See
+[status — Version 0.5.3](status.md#version-053) and
+[preview format](preview-format.md#columnar-coalescing).
+
+Version 0.5.2 added no features. It fixed the cold-start unsaved-changes defect,
 a synchronous throw in the scientific worker bridge, silent `NaN` acceptance in
 shader `.params` files, and a flaky canvas read in the test suite; it also
-corrects stale statements in these docs. See
+corrected stale statements in these docs. See
 [status — Version 0.5.2](status.md#version-052) for the full list, the
 verification table, and the gates that were not rerun.
 
