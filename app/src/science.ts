@@ -59,12 +59,18 @@ export function request<T>(
   args: Record<string, unknown>,
   onProgress?: (stage: string) => void,
 ): Promise<T> {
-  if (!worker) start();
   const id = ++nextId;
-  return new Promise((resolve, reject) => {
+  // Worker construction and posting happen inside the executor so any failure
+  // rejects this promise instead of throwing synchronously out of request(),
+  // which a caller's .catch() would never see.
+  return new Promise<T>((resolve, reject) => {
     pending.set(id, { resolve: (v) => resolve(v as T), reject, onProgress });
     try {
-      worker!.postMessage({ id, action, args });
+      if (!worker) start();
+      const instance = worker;
+      if (!instance)
+        throw new Error("Scientific worker is unavailable; retry the calculation");
+      instance.postMessage({ id, action, args });
     } catch (error) {
       cancel(error instanceof Error ? error : new Error(String(error)));
     }

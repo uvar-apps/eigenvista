@@ -89,6 +89,7 @@ export default function App() {
     document: EigenVistaDocument,
     res = resolution,
     orbitals?: string[],
+    markDirty = true,
   ) {
     if (!document.view.field) return;
     if (!isGridResolution(res)) {
@@ -192,7 +193,7 @@ export default function App() {
         setResolution(res);
       }
       setReset((v) => v + 1);
-      setDirty(true);
+      if (markDirty) setDirty(true);
       setStatus(
         `${orbitals ? `${fields.length} orbitals / ` : ""}${generated.reduce((n, s) => n + s.indices.length / 3, 0).toLocaleString()} triangles / ${((performance.now() - started) / 1000).toFixed(2)} s`,
       );
@@ -240,7 +241,9 @@ export default function App() {
       setInspected("");
       setImportReport(null);
       setProtectedSourcePath(undefined);
-      await compute(d);
+      // A built-in example regenerates identically on every load, so generating
+      // its starting surfaces is not an unsaved user edit.
+      await compute(d, resolution, undefined, false);
     } catch (e) {
       setError(String(e));
       setBusy("");

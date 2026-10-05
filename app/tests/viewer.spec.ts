@@ -10,33 +10,44 @@ async function ready(page: Page) {
   await expect(page.getByRole("alert")).toHaveCount(0);
 }
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate((canvas) => {
+  return page.locator("canvas").evaluate(async (canvas) => {
     const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
     const pixels = new Uint8Array(
       gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
     );
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      pixels,
-    );
-    let colorful = 0,
-      checksum = 0;
-    for (let i = 0; i < pixels.length; i += 4) {
-      if (
-        Math.max(pixels[i], pixels[i + 1], pixels[i + 2]) -
-          Math.min(pixels[i], pixels[i + 1], pixels[i + 2]) >
-        30
-      )
-        colorful++;
-      checksum =
-        (checksum + pixels[i] * ((i % 97) + 1) + pixels[i + 1]) % 2147483647;
+    const read = () => {
+      gl.readPixels(
+        0,
+        0,
+        gl.drawingBufferWidth,
+        gl.drawingBufferHeight,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        pixels,
+      );
+      let colorful = 0,
+        checksum = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (
+          Math.max(pixels[i], pixels[i + 1], pixels[i + 2]) -
+            Math.min(pixels[i], pixels[i + 1], pixels[i + 2]) >
+          30
+        )
+          colorful++;
+        checksum =
+          (checksum + pixels[i] * ((i % 97) + 1) + pixels[i + 1]) % 2147483647;
+      }
+      return { colorful, checksum };
+    };
+    // The scene draws on an animation loop, so a single read can land before the
+    // first frame reaches the buffer. Poll until a frame is present; a genuinely
+    // blank canvas still reports 0 and fails the caller's threshold.
+    let last = read();
+    for (let attempt = 0; attempt < 60 && last.colorful === 0; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      last = read();
     }
-    return { colorful, checksum, total: pixels.length / 4 };
+    return { ...last, total: pixels.length / 4 };
   });
 }
 test("desktop scene, orbit interaction, raycast and volume are nonblank", async ({
@@ -240,4 +251,61 @@ test("mobile layout and Rust WASM analytic reference", async ({ page }) => {
   const expected =
     0.75 * Math.pow(2 / Math.PI, 1.5) * Math.exp(-2 * (0.16 + 0.01 + 0.49));
   expect(Math.abs(value - expected)).toBeLessThan(1e-12);
+});
+test("cold start is clean and the first real edit marks unsaved changes", async ({
+  page,
+}) => {
+  await ready(page);
+  // The built-in example regenerates identically on every load, so generating its
+  // starting surfaces must not leave the session marked as having unsaved edits.
+  await expect(page.locator(".dirty")).toHaveCount(0);
+  // A real user edit must mark the document unsaved again.
+  await page.getByLabel("Isovalue").fill("0.05");
+  await expect(page.locator(".dirty")).toHaveCount(1);
+  // Loading a built-in example returns to a clean state.
+  page.on("dialog", (d) => d.accept());
+  await page.locator("details.examples > summary").click();
+  await page.getByRole("button", { name: "Fractional open shell" }).click();
+  await expect(page.locator("footer [role=status]")).toContainText(
+    "triangles",
+    { timeout: 45000 },
+  );
+  await expect(page.locator(".dirty")).toHaveCount(0);
+});
+test("a worker construction failure rejects the request instead of throwing synchronously", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const result = await page.evaluate(async () => {
+    const spec = "/src/science.ts?isolated=1";
+    const mod = (await import(
+      /* @vite-ignore */ spec
+    )) as unknown as {
+      cancel: () => void;
+      request: (action: string, args: Record<string, unknown>) => Promise<unknown>;
+    };
+    const original = window.Worker;
+    // Simulate a Worker that cannot be constructed (blocked CSP, exhausted
+    // resource limit) so the failure path is exercised deterministically.
+    window.Worker = function BrokenWorker() {
+      throw new Error("worker construction blocked");
+    } as unknown as typeof Worker;
+    let synchronousThrow = false;
+    let rejection = "";
+    try {
+      mod.cancel();
+      const promise = mod.request("example", {});
+      try {
+        await promise;
+      } catch (e) {
+        rejection = String(e);
+      }
+    } catch {
+      synchronousThrow = true;
+    }
+    window.Worker = original;
+    return { synchronousThrow, rejection };
+  });
+  expect(result.synchronousThrow).toBe(false);
+  expect(result.rejection).toContain("worker construction blocked");
 });

@@ -1,12 +1,21 @@
 # Development handoff
 
-Recorded 4 October 2026. Start with [root AGENTS.md](../AGENTS.md), then this
-document, [architecture](architecture.md), and [development commands](development.md).
+Recorded 5 October 2026 for the 0.5.2 defect-fix increment; the dated entries
+below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
+then this document, [architecture](architecture.md), and
+[development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.1**, in the standalone
+The current application is **EigenVista**, version **0.5.2**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+Version 0.5.2 adds no features. It fixes the cold-start unsaved-changes defect,
+a synchronous throw in the scientific worker bridge, silent `NaN` acceptance in
+shader `.params` files, and a flaky canvas read in the test suite; it also
+corrects stale statements in these docs. See
+[status — Version 0.5.2](status.md#version-052) for the full list, the
+verification table, and the gates that were not rerun.
 
 ## Standalone migration
 
@@ -92,8 +101,8 @@ Native schema `[0, 1]` and external dependencies are unchanged. The user request
 committing this increment, tagging it `v0.3.2`, pushing on `2026`, and rebuilding
 the redistributable Apple Silicon tester ZIP. Inspect Git and the delivered
 archive's `BUILD-INFO.json` for actual release state and packaging evidence.
-Personal `next/chat-*.md` exports are ignored and excluded from commits and
-source snapshots without changing their contents.
+Personal root-level `chat-*.md` and `*-chat-*.md` exports are ignored and
+excluded from commits and source snapshots without changing their contents.
 
 The user confirmed that the camera fix works in the web preview before
 requesting this release. OrbitControls change events invalidate the next frame,

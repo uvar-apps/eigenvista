@@ -8,6 +8,91 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.2
+
+Date: 5 October 2026. The user asked that all changes be documented and the
+version bumped to **0.5.2**, committed, and tagged. No push was requested.
+
+This release adds no features. It fixes four defects surfaced by the
+[2026-10-04 code review](reviews/2026-10-04-code-review.md) and the review
+that followed it in the same session, and corrects stale documentation.
+
+### Fixed
+
+- **A cold start no longer marks the session unsaved** (P1). `example()` set
+  `dirty = false` and then awaited `compute()`, which ended in an
+  unconditional `setDirty(true)`. Every load therefore showed the
+  unsaved-changes dot and armed the `beforeunload` guard with zero user
+  edits. `compute()` now takes a `markDirty` flag (default `true`); the
+  built-in example passes `false`, because it regenerates identically on
+  every load. Verified in-browser: no leave-site prompt on a clean cold
+  start, and the prompt still fires after a real edit. `app/src/App.tsx`,
+  regression test in `app/tests/viewer.spec.ts`.
+- **`request()` rejects instead of throwing synchronously** (Medium). Worker
+  construction and posting moved inside the Promise executor, so a
+  `new Worker()` failure (blocked CSP, exhausted resource limit) rejects the
+  caller's promise instead of escaping `request()` where a caller's
+  `.catch()` could not see it. The `worker!` non-null assertion was replaced
+  with an explicit guard. `app/src/science.ts`, regression test in
+  `app/tests/viewer.spec.ts`.
+- **A malformed `.params` file is rejected instead of pushing NaN into a
+  uniform** (Medium). Every numeric component is now checked with
+  `Number.isFinite`, and an unsupported `kind` is reported rather than
+  silently dropped; both errors name the parameter and the line number.
+  Previously `Number("nonsense")` yielded `NaN`, which went straight into the
+  WebGL uniform and was written back out by Save parameters.
+  `app/src/shaderTools.ts`, surfaced through a new `paramsError` state in
+  `app/src/ShaderPanel.tsx`, regression test in `app/tests/shaders.spec.ts`.
+- **Intermittent WebKit canvas-read failure in the test suite** (test-only).
+  Three specs read the WebGL canvas with a bare one-shot `readPixels`, racing
+  the first rendered frame and intermittently measuring zero colourful
+  pixels. The helper now polls until a frame is present (bounded 60 × 50 ms);
+  a genuinely blank canvas still reports 0 and fails the caller's threshold,
+  so this cannot mask a real rendering bug. The other six pixel-reading specs
+  already wrapped their reads in `expect.poll` and were unaffected.
+  `app/tests/viewer.spec.ts`, `app/tests/shaders.spec.ts`,
+  `app/tests/camera.spec.ts`.
+
+### Documentation corrections
+
+Seven stale statements in `docs/status.md` and `docs/handoff.md` were
+corrected: three "Nothing committed" notes that contradicted the landed
+0.5.0/0.5.1 history (rewritten to name the commit that actually carries the
+work), and four `next/` paths in present-tense guidance, where the packaging
+command and output directory now read `app/` and `artifacts/`. One
+convenience-copy path was deliberately left as `next/…` with a clarifier,
+because that behaviour belonged to the pre-standalone tooling and the current
+`eigenvista-convert` CLI writes `INPUT.eigenvista` or `--output` /
+`--output-dir`. A stale `next/chat-*.md` ignore path in the handoff now names
+the actual root-level `chat-*.md` / `*-chat-*.md` patterns.
+
+### Verification
+
+All run on macOS 27 / Apple Silicon on 5 October 2026.
+
+| Check | Result |
+| --- | --- |
+| `cargo fmt --all --check` | pass |
+| `cargo test --locked` (default members) | 107 passed |
+| `cargo test --locked -p eigenvista-desktop` | 1 passed |
+| `cargo clippy --workspace --all-targets -- -D warnings` | pass |
+| `npm --prefix app run test:packaging` | 13/13 |
+| `npx tsc --noEmit` | pass |
+| Playwright, Chromium + WebKit, full suite | 126 passed, 3 consecutive full runs |
+
+Each new regression test was run against the pre-fix code to confirm it
+genuinely fails there: the cold-start test reports the dirty indicator, the
+worker test reports a synchronous throw, and the parameters test accepts the
+malformed file. The WebKit flake was confirmed pre-existing by stashing every
+change and reproducing it on the untouched `v0.5.1` tree, so rolling the
+fixes back would not have removed it.
+
+Not run for this bump: the macOS tester ZIP build and its extracted-artifact
+verification, ad-hoc signature and architecture checks, Gatekeeper
+clean-machine installation, notarization, and any interactive native dialog
+test. Linux and Windows remain unverified here. No new external dependencies;
+the only lockfile changes are the six first-party version entries.
+
 ## Version 0.5.1
 
 The user requested a version bump to **0.5.1**, a commit, an annotated
@@ -79,7 +164,8 @@ edits → save parameters → clear on Chromium and WebKit (2/2). Full
 `viewer.spec.ts` remains 14/14 after scoping document file-input selectors.
 Screenshots: `artifacts/custom-shader-lambert.png`,
 `custom-shader-saturation0.png`, `custom-shader-phong.png`. Manual native
-acceptance and packaging were not rerun. Nothing committed.
+acceptance and packaging were not rerun. This work was committed later in
+`b62d05f` (0.5.0); the statement above describes the pre-bump state.
 
 ## Surface shading (Diffuse / Blinn-Phong)
 
@@ -100,7 +186,8 @@ mesh and raycast shading on Chromium and WebKit, asserts canvas pixels change
 and remain nonblank, and writes `artifacts/surface-blinn-phong.png` and
 `artifacts/raycast-blinn-phong.png` (both inspected). Full `viewer.spec.ts`
 passes 14/14 on Chromium and WebKit. Manual native acceptance and packaging
-were not rerun. Nothing committed.
+were not rerun. This work was committed later in `b62d05f` (0.5.0); the
+statement above describes the pre-bump state.
 
 ## Private chat exports
 
@@ -116,7 +203,9 @@ and a full macOS tester build with extracted signatures and example checks.
 The extracted source archive and source manifest contain no chat export files.
 The archive is `EigenVista-0.4.0-apple-silicon-20261004T061422Z-473024d-dirty.zip`;
 its source snapshot predates this evidence-only documentation update. Browser
-and interactive native checks were not rerun. Nothing was committed or uploaded.
+and interactive native checks were not rerun. The ignore rules and packaging
+guidance for this were committed later in `5dd0ff4`; nothing was uploaded then
+or since.
 
 ## Standalone migration
 
@@ -673,6 +762,9 @@ normal modes, convergence history, and geometry trajectory are explicitly
 reported as omitted. This smoke test is separate from independent numerical
 qualification. A converted convenience copy is generated under ignored
 `next/artifacts/conversions/molden.molekel`, not beside the legacy input.
+(This convenience-copy path belonged to the pre-standalone `next/` tooling; the
+current `eigenvista-convert` CLI writes `INPUT.eigenvista` by default, or to
+`--output` / `--output-dir`.)
 
 Verification for the earlier Molden increment: 72 default-workspace Rust tests, one separate native
 destination-guard test, and seven packaging tests pass. Workspace/all-target
@@ -714,14 +806,14 @@ The independent browser roundtrip tests exposed JavaScript's folding of negative
 
 ## Tester packaging
 
-`npm --prefix next/app run package:macos` now produces an optimized Apple Silicon
+`npm --prefix app run package:macos` produces an optimized Apple Silicon
 ZIP with ad-hoc bundle signing, instructions, molecular samples, the
 exact source snapshot, dependency sources/notices, build identity, and a SHA-256
 companion file. The earlier packaging increment passed seven packaging regressions
 and 39 Rust tests. Its full run verified the extracted app's signature, every archived file's
 contents/permissions, system-only dynamic library links, and both sample imports.
 Rust formatting and workspace Clippy also pass. All temporary staging remains
-in repository-local `tmp/`; output remains ignored under `next/artifacts/`.
+in repository-local `tmp/`; output remains ignored under `artifacts/`.
 The package does not upload, notarize, or require Apple credentials.
 
 The deployment target is macOS 13, but only the recorded development host has

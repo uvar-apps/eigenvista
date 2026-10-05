@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.1, a development preview. Scientific calculations and
+This is version 0.5.2, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -336,6 +336,8 @@ Display→Shaders:
 1. Choose a **Vertex shader** and **Fragment shader** file (`.vert` / `.frag` /
    `.glsl`, or any text).
 2. Optionally load a **Parameters file** (`.params`) with default uniform values.
+   A file containing a non-numeric value or an unsupported kind is rejected with
+   the parameter name and line number, and your current values are left unchanged.
 3. Pick **Apply to**: all surfaces or a single saved surface.
 4. Click **Apply shader**. Uniforms parsed from the sources appear as live
    controls; edits update the scene immediately.

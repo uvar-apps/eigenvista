@@ -63,24 +63,45 @@ function tokenize(line: string): string[] {
   return line.split(/\s+/).filter(Boolean);
 }
 
+function finiteComponent(
+  rest: string[],
+  index: number,
+  name: string,
+  where: string,
+): number {
+  const raw = rest[index] ?? "0";
+  const value = Number(raw);
+  if (!Number.isFinite(value))
+    throw new Error(
+      `Parameter "${name}" has a non-numeric value "${raw}" at ${where}.`,
+    );
+  return value;
+}
+
 export function parseParams(text: string): Record<string, UniformValue> {
   const values: Record<string, UniformValue> = {};
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
+  const lines = text.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index].trim();
     if (!line || line.startsWith("#") || line.startsWith("//")) continue;
     const parts = tokenize(line);
     if (parts.length < 2) continue;
     const [kind, name, ...rest] = parts;
-    if (kind === "float") values[name] = Number(rest[0] ?? 0);
-    else if (kind === "int") values[name] = Math.trunc(Number(rest[0] ?? 0));
+    const where = `line ${index + 1}`;
+    if (kind === "float") values[name] = finiteComponent(rest, 0, name, where);
+    else if (kind === "int")
+      values[name] = Math.trunc(finiteComponent(rest, 0, name, where));
     else if (kind === "bool")
       values[name] = rest[0] === "1" || rest[0]?.toLowerCase() === "true";
     else if (kind === "vec2" || kind === "vec3" || kind === "vec4") {
       const size = kind === "vec2" ? 2 : kind === "vec3" ? 3 : 4;
       values[name] = Array.from({ length: size }, (_, i) =>
-        Number(rest[i] ?? 0),
+        finiteComponent(rest, i, name, where),
       );
-    }
+    } else
+      throw new Error(
+        `Unsupported parameter kind "${kind}" for "${name}" at ${where}.`,
+      );
   }
   return values;
 }

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   parseParams,
   serializeParams,
@@ -63,6 +63,7 @@ export function ShaderPanel({
   const vertexInput = useRef<HTMLInputElement>(null);
   const fragmentInput = useRef<HTMLInputElement>(null);
   const paramsInput = useRef<HTMLInputElement>(null);
+  const [paramsError, setParamsError] = useState("");
 
   async function readText(file: File): Promise<string> {
     return file.text();
@@ -80,14 +81,23 @@ export function ShaderPanel({
     });
   }
 
+  function applyParams(text: string) {
+    try {
+      const values = parseParams(text);
+      const merged = { ...state.values };
+      for (const def of uniforms) {
+        if (values[def.name] !== undefined) merged[def.name] = values[def.name];
+      }
+      setParamsError("");
+      onChange({ ...state, values: merged });
+    } catch (e) {
+      setParamsError(String(e));
+    }
+  }
+
   async function loadParams(file: File | undefined) {
     if (!file) return;
-    const values = parseParams(await readText(file));
-    const merged = { ...state.values };
-    for (const def of uniforms) {
-      if (values[def.name] !== undefined) merged[def.name] = values[def.name];
-    }
-    onChange({ ...state, values: merged });
+    applyParams(await readText(file));
   }
 
   async function pickNativeText(kind: "vertex" | "fragment" | "params") {
@@ -95,16 +105,8 @@ export function ShaderPanel({
     if (!picked) return;
     const bytes = await picked.read();
     const text = new TextDecoder().decode(bytes);
-    if (kind === "params") {
-      const values = parseParams(text);
-      const merged = { ...state.values };
-      for (const def of uniforms) {
-        if (values[def.name] !== undefined) merged[def.name] = values[def.name];
-      }
-      onChange({ ...state, values: merged });
-    } else {
-      onChange({ ...state, [kind]: { name: picked.name, source: text } });
-    }
+    if (kind === "params") applyParams(text);
+    else onChange({ ...state, [kind]: { name: picked.name, source: text } });
   }
 
   function chooseFile(kind: "vertex" | "fragment" | "params") {
@@ -311,9 +313,9 @@ export function ShaderPanel({
         </button>
       </div>
       {status && <p className="shader-status">{status}</p>}
-      {error && (
+      {(paramsError || error) && (
         <pre className="shader-log" role="alert">
-          {error}
+          {[paramsError, error].filter(Boolean).join("\n")}
         </pre>
       )}
     </section>

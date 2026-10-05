@@ -369,7 +369,10 @@ test("batch conversion keeps the active document and saves only on request", asy
   });
   await dialog.getByRole("button", { name: "Close conversion queue" }).click();
   await expect(page.locator(".document-title")).toHaveText(title);
-  await expect(page.getByLabel("Unsaved changes")).toHaveCount(1);
+  // Converting in the queue must leave the active document untouched, so it must
+  // not be marked unsaved. This previously read 1 only because a cold-start
+  // example was wrongly flagged as an unsaved edit.
+  await expect(page.getByLabel("Unsaved changes")).toHaveCount(0);
   await expect(page.locator(".surface-row")).toHaveCount(2);
   await page
     .getByRole("button", { name: "Convert Files", exact: true })
