@@ -348,8 +348,8 @@ fn malformed_or_unsupported_scientific_inputs_fail_at_the_boundary() {
 
 #[test]
 fn excessive_counts_are_rejected_before_unbounded_expansion() {
-    let large_basis = HYDROGEN.replace("s 1 1.00\n1.0 1.0", &"g 1\n1 1\n".repeat(18));
-    fails(&large_basis, "256 atomic orbitals");
+    let large_basis = HYDROGEN.replace("s 1 1.00\n1.0 1.0", &"g 1\n1 1\n".repeat(70));
+    fails(&large_basis, "1024 atomic orbitals");
     let orbitals = format!(
         "{}{}",
         HYDROGEN,

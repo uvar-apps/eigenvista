@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 
 const MAX_LINES: usize = 500_000;
 const MAX_LINE_BYTES: usize = 16_384;
-const MAX_BASIS: usize = 256;
+const MAX_BASIS: usize = 1024;
 const MAX_ORBITALS: usize = 512;
 const ELEMENTS: &str = "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og";
 
@@ -559,7 +559,9 @@ fn append_shell(
 ) -> Result<bool, String> {
     let components = components(angular, spherical);
     if document.basis.len() + components.len() > MAX_BASIS {
-        return Err(line.error("Basis exceeds the preview limit of 256 atomic orbitals"));
+        return Err(line.error(format!(
+            "Basis exceeds the preview limit of {MAX_BASIS} atomic orbitals"
+        )));
     }
     // Normalized primitives of equal angular degree have a component-independent overlap.
     let mut norm = 0.;

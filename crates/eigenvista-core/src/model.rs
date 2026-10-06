@@ -279,7 +279,7 @@ impl Document {
     pub fn validate(&self) -> Result<()> {
         if self.atoms.len() > 100_000
             || self.bonds.len() > MAX_BONDS
-            || self.basis.len() > 256
+            || self.basis.len() > 1024
             || self.orbitals.len() > 512
             || self.surfaces.len() > 128
             || self.grids.len() > 16
