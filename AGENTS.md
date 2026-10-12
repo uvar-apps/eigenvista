@@ -9,6 +9,24 @@ Use `eigenvista-*` crates, the `eigenvista-convert` CLI, and `.eigenvista` for n
 documents; older `.molekel` preview documents remain readable. Check
 [preview-format](docs/preview-format.md) before changing format compatibility.
 
+## Workspace boundaries
+
+- The active development checkout is `/Users/ugo/projects/eigenvista`. All
+  implementation, documentation edits, builds, tests, development servers,
+  packaging, generated artifacts, and authorized Git changes belong here or in
+  its subdirectories.
+- `/Users/ugo/projects/molekel` is **read-only reference**, including its `next/`
+  directory. Read or search it for historical context only. Do not edit files,
+  build, run tests or development servers, write artifacts, or change Git state
+  in that checkout.
+- Explicitly set each development command's working directory to EigenVista or
+  the appropriate subdirectory. Do not rely on an older chat's default working
+  directory; resolve development paths against EigenVista, not Molekel. Historical
+  instructions pointing to Molekel's `next/` are not the current work location.
+- Use `/Users/ugo/projects/eigenvista/tmp` for temporary files and set `TMPDIR`,
+  `TMP`, and `TEMP` to that directory before tools that create temporary files.
+  Never use system `/tmp` or the reference checkout for temporary storage.
+
 ## Orientation
 
 - [Handoff](docs/handoff.md) — current work, next gates, common traps.
@@ -124,6 +142,23 @@ Standard verification order for runtime changes (details and coverage map in
 - This is a development preview, not v1 or the historical M0-M7 plan. Do not mark
   those complete from preview checks. Record evidence in `docs/status.md` and
   behavior changes in the user/architecture docs.
+
+## Issue-first workflow
+
+- Before implementing a major change, open a GitHub issue in
+  `uvar-apps/eigenvista` to track the work. Search existing issues first and reuse
+  an applicable open issue instead of creating a duplicate.
+- Use judgment to distinguish major from minor changes based on behavioral
+  impact and risk, not line count. Bug fixes, new features, scientific or file
+  format changes, and substantial refactors require an issue. Minor changes such
+  as typo corrections, small documentation clarifications, or formatting-only
+  edits generally do not. When uncertain, open an issue.
+- Follow the existing [issue label taxonomy](docs/labels.md): one or more
+  `area:` and `kind:` labels, and exactly one `priority:` label. Record the
+  problem or goal, intended scope, and acceptance checks before implementation.
+- Keep the issue updated with material scope changes, verification results, and
+  the outcome. Reference it in commits or pull requests when those actions are
+  authorized; an issue does not itself authorize committing or publishing code.
 
 ## Working agreement
 

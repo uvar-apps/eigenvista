@@ -508,7 +508,7 @@ pub fn mesh(
         }));
     }
     if det < 0. {
-        for t in surface.indices.chunks_exact_mut(3) {
+        for t in surface.indices.as_chunks_mut::<3>().0 {
             t.swap(1, 2);
         }
     }
@@ -724,7 +724,7 @@ mod tests {
             }
             let s = mesh(&g, 1.5, "g", "hash", "#ffffff", 1.).unwrap();
             assert!(!s.indices.is_empty());
-            for p in s.positions.chunks_exact(3) {
+            for p in s.positions.as_chunks::<3>().0 {
                 let y = (p[1] - 2.) / 0.3;
                 assert!((p[0] - (1. + 1.5 * sx + y * 0.1)).abs() < 1e-6);
             }

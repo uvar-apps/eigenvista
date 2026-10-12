@@ -13,7 +13,8 @@ for (const name of ["water.pdb", "water.xyz"]) {
   const document = JSON.parse(
     core.import_text(fs.readFileSync(path.join(examples, name), "utf8"), name),
   );
-  assert.equal(document.atoms.length, 3, `${name}: atom count`);
+  assert.equal(document.atoms.positions.length, 3, `${name}: position count`);
+  assert.equal(document.atoms.elements.length, 3, `${name}: element count`);
   assert.equal(document.bonds.length, 2, `${name}: inferred bond count`);
 }
 const molden = path.join(examples, "water.molden");
@@ -21,7 +22,8 @@ const imported = JSON.parse(
   core.import_document(fs.readFileSync(molden), "water.molden"),
 );
 assert.equal(imported.report.format, "molden");
-assert.equal(imported.document.atoms.length, 3);
+assert.equal(imported.document.atoms.positions.length, 3);
+assert.equal(imported.document.atoms.elements.length, 3);
 assert.equal(imported.document.bonds.length, 2);
 assert.equal(imported.document.basis.length, 24);
 assert.ok(imported.document.orbitals.length > 0);
@@ -72,7 +74,8 @@ const cube = JSON.parse(
     cubeName,
   ),
 );
-assert.equal(cube.document.atoms.length, 2);
+assert.equal(cube.document.atoms.positions.length, 2);
+assert.equal(cube.document.atoms.elements.length, 2);
 assert.deepEqual(cube.document.bonds, [[0, 1]]);
 assert.equal(cube.document.basis.length, 0);
 assert.equal(cube.document.grids[0].values.length, 343);

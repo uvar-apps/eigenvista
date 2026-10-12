@@ -10,6 +10,12 @@ The current application is **EigenVista**, version **0.5.3**, in the standalone
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
+The 12 October 2026 follow-up fixes Rust 1.99 strict Clippy failures and stale
+columnar-atom checks in the macOS packager, tracked by issues #13 and #14.
+See [the verification record](status.md#rust-199-compatibility-and-packaging-fixes)
+before continuing. Version remains 0.5.3; toolchain pinning is still a separate
+decision under issue #8, and the setup instructions still select Rust 1.92.0.
+
 Version 0.5.3 makes large structures practical. Atoms and bonds render as
 instanced meshes (121,525 → 1.8 draw calls per frame, 3.2 GB → 40 MB heap on a
 66k-atom structure), and the document format coalesces uniform numeric columns

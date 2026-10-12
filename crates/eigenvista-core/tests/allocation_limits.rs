@@ -47,10 +47,10 @@ fn high_resolution_constant_and_signed_planes_fit_the_actual_mesh_budget() {
         assert_eq!(surface.resolution, [256; 3]);
         assert_eq!(surface.positions.len() / 3, 255 * 255 * 6);
         assert_eq!(surface.indices.len(), 255 * 255 * 6);
-        for position in surface.positions.chunks_exact(3) {
+        for position in surface.positions.as_chunks::<3>().0 {
             assert!((position[0] - (127.5 + iso)).abs() < 1e-6);
         }
-        for normal in surface.normals.chunks_exact(3) {
+        for normal in surface.normals.as_chunks::<3>().0 {
             assert!((normal[0] + iso.signum()).abs() < 1e-6);
             assert_eq!(&normal[1..], &[0., 0.]);
         }

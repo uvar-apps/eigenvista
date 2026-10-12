@@ -26,7 +26,9 @@ fn cube_bonds_bohr_positions_and_affine_field_are_preserved() {
         assert!(!mesh.indices.is_empty());
         assert!(
             mesh.positions
-                .chunks_exact(3)
+                .as_chunks::<3>()
+                .0
+                .iter()
                 .all(|p| (p[2] - height).abs() < 1e-7)
         );
         assert_eq!(mesh.source_hash.as_deref(), Some(hash.as_str()));

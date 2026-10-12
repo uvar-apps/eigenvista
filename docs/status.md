@@ -8,6 +8,52 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Rust 1.99 compatibility and packaging fixes
+
+Date: 12 October 2026. Version remains **0.5.3**. Work is tracked by
+[#13](https://github.com/uvar-apps/eigenvista/issues/13) and
+[#14](https://github.com/uvar-apps/eigenvista/issues/14).
+
+- Fixed the five `clippy::chunks_exact_to_as_chunks` findings exposed by Rust
+  1.99.0. Fixed-size slice chunks preserve triangle order, in-place winding
+  reversal, and ignored remainders without changing allocations or science.
+- Updated packaged-example assertions to check both `atoms.positions` and
+  `atoms.elements`. The old `atoms.length` assertions predated the columnar
+  atom JSON and blocked ZIP verification independently of the Rust upgrade.
+  PDB/XYZ bonds, Molden/cube fields, signed meshes, native roundtrips, and
+  converter/WASM agreement remain checked.
+- Toolchain policy is unchanged: the setup instructions still select 1.92.0,
+  there is no committed `rust-toolchain.toml`, and
+  [#8](https://github.com/uvar-apps/eigenvista/issues/8) remains open.
+  This verification explicitly selects `RUSTUP_TOOLCHAIN=stable` (1.99.0),
+  with all temporary storage under the repository's ignored `tmp/`.
+
+### Verification
+
+The strict Clippy failure and obsolete `water.pdb` atom-count assertion were
+both reproduced before editing. After the fixes, on Apple Silicon macOS 27.0:
+
+| Gate | Result |
+| --- | --- |
+| `cargo fmt --all --check` | Passed |
+| `cargo clippy --locked --workspace --all-targets -- -D warnings` | Passed, without lint suppression |
+| `cargo test --locked --workspace` | 122 passed, including the desktop shell |
+| `npm --prefix app run test:packaging` | 13 passed |
+| `npm --prefix app run package:macos` | Passed: optimized CLI/native app, production WASM/frontend, signatures, sample conversions, ZIP extraction contents and permissions |
+| `npm --prefix app run test:e2e` | 128 passed: 64 Chromium and 64 WebKit; fresh cube mesh/mobile volume screenshots inspected |
+| Archive SHA-256 companion | Independently checked with `shasum -a 256 -c`; passed |
+
+The verified local tester archive under `artifacts/distributions/` is
+`EigenVista-0.5.3-apple-silicon-20261012T035325Z-f13aa8f-dirty.zip`.
+Its source snapshot includes these fixes and the existing agent instructions,
+before this final verification-record update. `BUILD-INFO.json` records Rust
+1.99.0, wasm-bindgen 0.2.108, and the identified uncommitted source state.
+The archive is ad-hoc signed, not notarized. At packaging time, the source was
+uncommitted and the archive was not uploaded; later Git publication does not
+change that archive's recorded source identity.
+Native GUI interaction, clean-machine installation, and Linux/Windows acceptance
+were not rerun or established by these checks.
+
 ## Version 0.5.3
 
 Date: 5 October 2026. Follows the review's item 4. The user asked for the work
