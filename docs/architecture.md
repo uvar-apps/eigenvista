@@ -57,6 +57,7 @@ by native saving. There is no calculation server, remote service, or database.
 | [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
 | [Worker client](../app/src/science.ts) and [worker](../app/src/science.worker.ts) | Request lifecycle, WASM initialization, single sampled-grid cache, cancellation |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
+| [Element display table](../app/src/elements.ts) | CPK colour and van der Waals display radius for elements 1-118. Presentation data only; [element_display.rs](../crates/eigenvista-core/tests/element_display.rs) re-derives every radius from the `pdbtbx` source tables so the table cannot drift |
 | [File adapter](../app/src/files.ts) | Browser file/download versus native dialog/read/save |
 | [Desktop entry point](../app/src-tauri/src/main.rs) | Tauri plugins and `save_native`/version commands |
 | [Runner](../tools/run.mjs) and [packager](../tools/package-macos.mjs) | Repeatable builds/tests and verified tester artifacts |

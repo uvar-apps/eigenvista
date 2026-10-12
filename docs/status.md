@@ -8,6 +8,61 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Unreleased — per-element display colours and published radii
+
+Date: 12 October 2026. Not committed. Supersedes the display table shipped in
+0.5.5/0.5.6, which coloured by periodic **group** rather than by element.
+
+The 0.5.6 table used 13 distinct colours across 118 elements. `#e6e600` alone
+covered 32 of them, including sulfur and chlorine, and Sc through Zn were all
+the same yellow. Issue #1 was closed as completed, but for the d-block the
+original complaint — several chemically distinct elements rendering visually
+identical — still held.
+
+The table now lives in [elements.ts](../app/src/elements.ts) and gives every
+supported element its own colour and radius:
+
+| Field | Count | Source |
+| --- | --- | --- |
+| Colour, Z 1-109 | 101 | Jmol CPK (`PAL.argbsCpk`), cross-checked against jmol.sourceforge.net/jscolors and ASE `jmol_colors` |
+| Colour, Z 110-118 | 9 | OpenBabel `data/element.txt` continuation; no CPK colour is published past Mt |
+| Colour, legacy 8 | 8 | Restores the pre-0.5.5 EigenVista values, so H/C/N/O/F/P/S/Cl look as they did before 0.5.5 changed them |
+| Radius | 85 | Alvarez (2013), Dalton Trans. 42, 8617, via `pdbtbx::Element::atomic_radius().van_der_waals` |
+| Radius, Pm and Po-Ra | 6 | Rahm, Hoffmann & Ashcroft (2016), Chem. Eur. J. 22, 14625, via `atomic_radius().unbound` |
+| Radius, Fm-Og | 19 | No published value; Pyykko single-bond covalent radius x 1.65, the mean unbound/cov1 ratio over Ac-Cm |
+| Radius, legacy 8 | 8 | Bondi (1966) values pinned deliberately |
+
+Distinct colours go from 13 to 118. Radii change on 109 of 118 elements. The
+0.5.6 group-congener extrapolation for Rf-Og is replaced by the Pyykko
+scaling above, which now also covers Fm-Lr rather than stopping at 104.
+
+Display data only. Bond perception still uses the Pyykko-Atsumi covalent radii
+in `crates/eigenvista-core/src/bonds.rs`; nothing here feeds a scientific
+calculation.
+
+`default_atom_colors`, the raw RGB-triple working file committed at the
+repository root by `3637137`, is removed.
+
+New [element_display.rs](../crates/eigenvista-core/tests/element_display.rs)
+(6 tests) re-derives every radius from the `pdbtbx` tables, asserts the
+8/85/6/19 source split, checks symbols against the element table, checks
+colours are lowercase hex triplets, and bounds radii to 0.8-3.6 A to catch a
+unit slip.
+
+Verification on Apple Silicon macOS, Rust 1.99.0:
+
+| Gate | Result |
+| --- | --- |
+| `cargo fmt --all --check` | Passed |
+| `cargo clippy --locked --workspace --all-targets -- -D warnings` | Passed |
+| `cargo test --locked --workspace` | 128 passed (122 prior + 6 new) |
+| `npm --prefix app run build` | Passed; existing bundle-size warning remains |
+| `npm --prefix app run test:e2e` | 136 passed (68 Chromium, 68 WebKit) |
+| Visual A/B | Same 28-element fixture on both builds: 13 distinct rendered hue buckets before, 22 after |
+
+Not run: `test:packaging`, native Tauri shell, clean-machine install,
+Linux/Windows.
+
 ## Version 0.5.6
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated

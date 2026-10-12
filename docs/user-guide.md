@@ -92,11 +92,15 @@ Toolbar icons show their names on hover.
   is the reference path, and native image-download handling still needs qualification.
 
 The scene uses bohr internally. Picked atom positions are converted to angstroms.
-The display table covers all accepted elements (Z 1–118). Elements 1–103 use
-colors from the Jmol-style default palette and Bondi van der Waals radii;
-superheavy elements (Z 104–118) use group-congener estimates of the same
-convention, since no measured van der Waals radii exist for them. Bond
-inference uses a separate, complete covalent-radius table; display-radius
+The display table covers all accepted elements (Z 1–118) with a **distinct
+colour per element**, taken from the Jmol CPK palette (Z 1–109) and OpenBabel's
+continuation of it (Z 110–118). Radii are van der Waals radii from Alvarez
+(2013), with Rahm–Hoffmann–Ashcroft (2016) supplying Pm and Po–Ra. Fm–Og have
+no published van der Waals radius; they use the Pyykkö single-bond covalent
+radius scaled by 1.65, the mean unbound/cov1 ratio over Ac–Cm, which keeps the
+periodic trend instead of flattening it. A Rust test re-derives every radius
+from the same `pdbtbx` tables, so the table cannot drift from its sources.
+Bond inference uses a separate, complete covalent-radius table; display-radius
 choices do not affect it.
 
 ## Supported files

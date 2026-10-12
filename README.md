@@ -131,8 +131,13 @@ Imported cubes can be resampled for display without modifying their
 authoritative values. All imports use published covalent radii and bounded
 neighbor search for automatic bonds; these are display connectivity, not
 inferred bond orders. PDB import selects the first geometry and one alternate
-per residue. Van der Waals display-radius defaults outside the small explicit
-element table remain provisional and are independent of the complete bond-radius
-dataset.
+per residue. Space-filling rendering uses a complete display table for all 118
+supported elements: a distinct CPK colour per element, and van der Waals radii
+from Alvarez (2013) with Rahm-Hoffmann-Ashcroft (2016) filling Pm and Po-Ra.
+Fm-Og have no published van der Waals radius and use a documented
+Pyykko-covalent-radius extrapolation. These display radii stay separate from
+the Pyykko-Atsumi covalent radii used for bond perception, and a Rust test
+pins the table against those sources. See
+[element display data](app/src/elements.ts).
 
 Direct analytic shader raycasting, topology-certified MC33, shrinkwrap, full transfer-function editing, OBJ import, atom-color text import, metadata editing, undo, and release qualification remain to be implemented. Other external formats are deferred; no direct ORCA reader is planned for this increment. Linux and Windows are architectural targets, not tested supported releases.

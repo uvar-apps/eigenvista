@@ -17,137 +17,11 @@ import {
   type ShaderPair,
 } from "./shaderTools";
 import { volumeObject } from "./volume";
+import { elementDisplay } from "./elements";
 
 const BOHR = 0.529177210903;
-const elements: Record<
-  number,
-  { symbol: string; color: string; radius: number }
-> = {
-  1: { symbol: "H", color: "#ffffff", radius: 1.20 },
-  2: { symbol: "He", color: "#ffffff", radius: 1.40 },
-  3: { symbol: "Li", color: "#b34d00", radius: 1.82 },
-  4: { symbol: "Be", color: "#66ff54", radius: 1.53 },
-  5: { symbol: "B", color: "#5ca1ff", radius: 1.92 },
-  6: { symbol: "C", color: "#808080", radius: 1.70 },
-  7: { symbol: "N", color: "#0000ff", radius: 1.55 },
-  8: { symbol: "O", color: "#ff0000", radius: 1.52 },
-  9: { symbol: "F", color: "#b34de6", radius: 1.47 },
-  10: { symbol: "Ne", color: "#ffffff", radius: 1.54 },
-  11: { symbol: "Na", color: "#b34d00", radius: 2.27 },
-  12: { symbol: "Mg", color: "#66ff54", radius: 1.73 },
-  13: { symbol: "Al", color: "#5ca1ff", radius: 1.84 },
-  14: { symbol: "Si", color: "#0033ff", radius: 2.10 },
-  15: { symbol: "P", color: "#00ff00", radius: 1.80 },
-  16: { symbol: "S", color: "#e6e600", radius: 1.80 },
-  17: { symbol: "Cl", color: "#e6e600", radius: 1.75 },
-  18: { symbol: "Ar", color: "#ffffff", radius: 1.88 },
-  19: { symbol: "K", color: "#b34d00", radius: 2.75 },
-  20: { symbol: "Ca", color: "#66ff54", radius: 2.31 },
-  21: { symbol: "Sc", color: "#e6e600", radius: 2.11 },
-  22: { symbol: "Ti", color: "#e6e600", radius: 2.00 },
-  23: { symbol: "V", color: "#e6e600", radius: 2.00 },
-  24: { symbol: "Cr", color: "#e6e600", radius: 2.00 },
-  25: { symbol: "Mn", color: "#e6e600", radius: 2.00 },
-  26: { symbol: "Fe", color: "#e6e600", radius: 2.00 },
-  27: { symbol: "Co", color: "#e6e600", radius: 2.00 },
-  28: { symbol: "Ni", color: "#e6e600", radius: 1.63 },
-  29: { symbol: "Cu", color: "#e6e600", radius: 1.40 },
-  30: { symbol: "Zn", color: "#e6e600", radius: 1.39 },
-  31: { symbol: "Ga", color: "#5ca1ff", radius: 1.87 },
-  32: { symbol: "Ge", color: "#0033ff", radius: 2.11 },
-  33: { symbol: "As", color: "#b34d00", radius: 1.85 },
-  34: { symbol: "Se", color: "#009900", radius: 1.90 },
-  35: { symbol: "Br", color: "#b34de6", radius: 1.85 },
-  36: { symbol: "Kr", color: "#ffffff", radius: 2.02 },
-  37: { symbol: "Rb", color: "#b34d00", radius: 3.03 },
-  38: { symbol: "Sr", color: "#66ff54", radius: 2.49 },
-  39: { symbol: "Y", color: "#009900", radius: 2.19 },
-  40: { symbol: "Zr", color: "#009900", radius: 2.12 },
-  41: { symbol: "Nb", color: "#009900", radius: 2.17 },
-  42: { symbol: "Mo", color: "#009900", radius: 2.10 },
-  43: { symbol: "Tc", color: "#009900", radius: 2.05 },
-  44: { symbol: "Ru", color: "#009900", radius: 2.05 },
-  45: { symbol: "Rh", color: "#009900", radius: 2.00 },
-  46: { symbol: "Pd", color: "#009900", radius: 1.63 },
-  47: { symbol: "Ag", color: "#009900", radius: 1.72 },
-  48: { symbol: "Cd", color: "#009900", radius: 1.58 },
-  49: { symbol: "In", color: "#5ca1ff", radius: 1.93 },
-  50: { symbol: "Sn", color: "#333333", radius: 2.17 },
-  51: { symbol: "Sb", color: "#b34d00", radius: 2.06 },
-  52: { symbol: "Te", color: "#009900", radius: 2.06 },
-  53: { symbol: "I", color: "#b34de6", radius: 1.98 },
-  54: { symbol: "Xe", color: "#ffffff", radius: 2.16 },
-  55: { symbol: "Cs", color: "#b34d00", radius: 3.43 },
-  56: { symbol: "Ba", color: "#66ff54", radius: 2.68 },
-  57: { symbol: "La", color: "#e6e600", radius: 2.43 },
-  58: { symbol: "Ce", color: "#009900", radius: 2.42 },
-  59: { symbol: "Pr", color: "#009900", radius: 2.40 },
-  60: { symbol: "Nd", color: "#009900", radius: 2.39 },
-  61: { symbol: "Pm", color: "#009900", radius: 2.38 },
-  62: { symbol: "Sm", color: "#009900", radius: 2.36 },
-  63: { symbol: "Eu", color: "#009900", radius: 2.35 },
-  64: { symbol: "Gd", color: "#009900", radius: 2.34 },
-  65: { symbol: "Tb", color: "#009900", radius: 2.33 },
-  66: { symbol: "Dy", color: "#009900", radius: 2.31 },
-  67: { symbol: "Ho", color: "#009900", radius: 2.30 },
-  68: { symbol: "Er", color: "#009900", radius: 2.29 },
-  69: { symbol: "Tm", color: "#009900", radius: 2.27 },
-  70: { symbol: "Yb", color: "#009900", radius: 2.26 },
-  71: { symbol: "Lu", color: "#009900", radius: 2.24 },
-  72: { symbol: "Hf", color: "#e6e600", radius: 2.23 },
-  73: { symbol: "Ta", color: "#e6e600", radius: 2.22 },
-  74: { symbol: "W", color: "#e6e600", radius: 2.18 },
-  75: { symbol: "Re", color: "#e6e600", radius: 2.16 },
-  76: { symbol: "Os", color: "#e6e600", radius: 2.16 },
-  77: { symbol: "Ir", color: "#e6e600", radius: 2.13 },
-  78: { symbol: "Pt", color: "#e6e600", radius: 1.75 },
-  79: { symbol: "Au", color: "#e6e600", radius: 1.66 },
-  80: { symbol: "Hg", color: "#e6e600", radius: 1.55 },
-  81: { symbol: "Tl", color: "#5ca1ff", radius: 1.96 },
-  82: { symbol: "Pb", color: "#333333", radius: 2.02 },
-  83: { symbol: "Bi", color: "#b34d00", radius: 2.07 },
-  84: { symbol: "Po", color: "#009900", radius: 1.97 },
-  85: { symbol: "At", color: "#b34de6", radius: 2.02 },
-  86: { symbol: "Rn", color: "#ffffff", radius: 2.20 },
-  87: { symbol: "Fr", color: "#b34d00", radius: 3.48 },
-  88: { symbol: "Ra", color: "#66ff54", radius: 2.83 },
-  89: { symbol: "Ac", color: "#e6e600", radius: 2.47 },
-  90: { symbol: "Th", color: "#b34d00", radius: 2.45 },
-  91: { symbol: "Pa", color: "#b34d00", radius: 2.43 },
-  92: { symbol: "U", color: "#b34d00", radius: 2.41 },
-  93: { symbol: "Np", color: "#b34d00", radius: 2.39 },
-  94: { symbol: "Pu", color: "#b34d00", radius: 2.43 },
-  95: { symbol: "Am", color: "#b34d00", radius: 2.44 },
-  96: { symbol: "Cm", color: "#b34d00", radius: 2.45 },
-  97: { symbol: "Bk", color: "#b34d00", radius: 2.44 },
-  98: { symbol: "Cf", color: "#b34d00", radius: 2.45 },
-  99: { symbol: "Es", color: "#b34d00", radius: 2.45 },
-  100: { symbol: "Fm", color: "#b34d00", radius: 2.45 },
-  101: { symbol: "Md", color: "#b34d00", radius: 2.46 },
-  102: { symbol: "No", color: "#b34d00", radius: 2.46 },
-  103: { symbol: "Lr", color: "#b34d00", radius: 2.46 },
-  // No measured van der Waals radii exist for Rf-Og. Radii extrapolated from
-  // each element's group congener above (Rf<-Hf ... Og<-Rn); colors follow
-  // the same group palette as the table (transition metals yellow, group 13
-  // light blue, 14 dark gray, 15 brown, 16 dark green, 17 purple, 18 white).
-  104: { symbol: "Rf", color: "#e6e600", radius: 2.23 },
-  105: { symbol: "Db", color: "#e6e600", radius: 2.22 },
-  106: { symbol: "Sg", color: "#e6e600", radius: 2.18 },
-  107: { symbol: "Bh", color: "#e6e600", radius: 2.16 },
-  108: { symbol: "Hs", color: "#e6e600", radius: 2.16 },
-  109: { symbol: "Mt", color: "#e6e600", radius: 2.13 },
-  110: { symbol: "Ds", color: "#e6e600", radius: 1.75 },
-  111: { symbol: "Rg", color: "#e6e600", radius: 1.66 },
-  112: { symbol: "Cn", color: "#e6e600", radius: 1.55 },
-  113: { symbol: "Nh", color: "#5ca1ff", radius: 1.96 },
-  114: { symbol: "Fl", color: "#333333", radius: 2.02 },
-  115: { symbol: "Mc", color: "#b34d00", radius: 2.07 },
-  116: { symbol: "Lv", color: "#009900", radius: 1.97 },
-  117: { symbol: "Ts", color: "#b34de6", radius: 2.02 },
-  118: { symbol: "Og", color: "#ffffff", radius: 2.20 },
-};
 export function symbol(z: number) {
-  return elements[z]?.symbol ?? `Z${z}`;
+  return elementDisplay(z).symbol;
 }
 
 const IDENTITY_QUATERNION = new THREE.Quaternion();
@@ -424,11 +298,7 @@ export function Viewport({
         for (let i = 0; i < atomCount; i++) {
           const point = columns.positions[i];
           const z = columns.elements[i];
-          const element = elements[z] ?? {
-            symbol: `Z${z}`,
-            color: "#b294b9",
-            radius: 1.8,
-          };
+          const element = elementDisplay(z);
           const radius =
             doc.view.representation === "space-fill"
               ? element.radius / BOHR
