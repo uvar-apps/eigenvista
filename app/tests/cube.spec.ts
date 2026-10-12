@@ -372,10 +372,19 @@ test("a finite scalar grid outside GPU precision still opens and saves without d
   await expect(page.getByLabel("Rendering mode")).toHaveValue("mesh");
   await expect(
     page.getByLabel("Rendering mode").locator("option[value=volume]"),
-  ).toHaveAttribute("disabled", "");
+  ).toHaveJSProperty("disabled", false);
   await expect(
     page.getByLabel("Rendering mode").locator("option[value=raycast]"),
-  ).toHaveAttribute("disabled", "");
+  ).toHaveJSProperty("disabled", false);
+  for (const mode of ["volume", "raycast"]) {
+    await page.getByLabel("Rendering mode").selectOption(mode);
+    await expect(page.getByRole("alert")).toContainText(
+      "Grid values exceed rendering precision",
+    );
+    await expect(page.getByLabel("Rendering mode")).toBeEnabled();
+    await expect(page.getByLabel("Rendering mode")).toHaveValue("mesh");
+    await expect(page.locator(".surface-row")).toHaveCount(0);
+  }
   await expect(page.getByLabel("Unsaved changes")).toHaveCount(1);
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Save", exact: true }).click();

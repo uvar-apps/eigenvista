@@ -8,6 +8,72 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.4
+
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.4` tag, and push to `origin` on `main`. This patch releases the direct
+orbital/density volume and raycast workflow described below, tracked by
+[#15](https://github.com/uvar-apps/eigenvista/issues/15). It also includes the
+already-committed Rust 1.99 and packaging fixes from issues #13 and #14 since
+the previous tag. Rust, npm (including its previously stale root lock metadata),
+and Tauri versions now agree. External locked dependencies, scientific model,
+native schema, memory limits, icon, and logo are unchanged. Toolchain pinning
+remains separate under issue #8.
+
+Fresh post-bump verification on Apple Silicon macOS with Rust 1.99.0:
+
+| Gate | Result |
+| --- | --- |
+| `cargo fmt --all --check` | Passed |
+| `cargo clippy --locked --workspace --all-targets -- -D warnings` | Passed |
+| `cargo test --locked --workspace` | 122 passed, including the desktop shell |
+| `npm --prefix app run build` | Production WASM, TypeScript, and Vite passed; existing bundle-size warning remains |
+| `npm --prefix app run test:e2e` | All 136 cases passed in one run: 68 Chromium and 68 WebKit |
+| `npm --prefix app run test:packaging` | 13 passed |
+| `eigenvista-convert --version` | Reports `0.5.4` |
+| Version/lock checks and local documentation targets | Passed; no external dependency changes |
+
+Fresh direct-preview screenshots were inspected at desktop and mobile sizes
+in both engines; canvas pixel, camera, and responsive-layout checks pass. The
+existing web preview server was left running. No 0.5.4 redistributable ZIP was
+built for this request; the older archive does not contain the direct-preview
+fix. Native GUI interaction, clean-machine installation, and Linux/Windows
+qualification were not rerun. Consult Git for commit/tag/publication identity.
+
+## Direct sampled previews
+
+Date: 12 October 2026. Implemented at version **0.5.3** before the release above;
+tracked by
+[#15](https://github.com/uvar-apps/eigenvista/issues/15).
+
+The UI previously disabled volume/raycast until a sampled grid existed, while
+analytic fields only obtained that grid through mesh generation. Selecting a
+sampled mode now uses the existing worker `sample` operation directly. No
+marching-cubes call or saved surface is needed. Field/resolution changes in a
+sampled mode resample while preserving that mode; switching volume/raycast
+reuses the current grid. Changed settings and the new preview publish only on
+success, so cancellation or failure retains the prior field, resolution, mode,
+and saved geometry. Explicit Generate surfaces remains the mesh operation.
+Scientific evaluation, allocation limits, and native file format are unchanged.
+
+Verification with Rust 1.99.0: production WASM/TypeScript/frontend build and
+`tsc --noEmit` pass. All **136 browser scenarios** are verified across Chromium
+and WebKit: the full run passed 128; eight existing cases asserted the former
+disabled-mode behavior and all eight passed a `--last-failed` rerun after those
+expectations were updated. The new eight cases use the actual legacy
+`molden.input`, observe sampling-only worker requests with no meshing, exercise
+orbital/density selection, resolution changes, cache reuse, native save/reopen,
+structure-only mode availability, cancellation during real 256-cubed sampling,
+and worker-error recovery without changing saved meshes. Cube preview-failure
+retries still preserve the original finite f64 samples. Desktop/mobile pixel
+checks and screenshots in both engines show nonblank, correctly framed previews.
+
+The running web preview received the update without restarting its server.
+Rust unit tests, native GUI interaction, and the redistributable ZIP were not
+rerun/rebuilt for this UI-only change. The prior tester archive does not include
+this fix. Changes were local at that stage; the authorized 0.5.4 release and
+fresh verification are recorded above.
+
 ## Rust 1.99 compatibility and packaging fixes
 
 Date: 12 October 2026. Version remains **0.5.3**. Work is tracked by

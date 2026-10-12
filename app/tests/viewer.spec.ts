@@ -146,7 +146,7 @@ test("portable save/reopen retains both orbital signs without calculation", asyn
   ).toHaveCount(2);
   await expect(
     page.getByLabel("Rendering mode").locator("option[value=raycast]"),
-  ).toHaveAttribute("disabled", "");
+  ).toHaveJSProperty("disabled", false);
   await expect(page.locator("output")).toHaveText("99%");
   expect((await pixels(page)).colorful).toBeGreaterThan(500);
 });
@@ -202,7 +202,7 @@ test("native chemistry reference opens cached orbital and density meshes", async
   );
   await expect(
     page.getByLabel("Rendering mode").locator("option[value=raycast]"),
-  ).toHaveAttribute("disabled", "");
+  ).toHaveJSProperty("disabled", false);
   await expect
     .poll(async () => (await pixels(page)).colorful)
     .toBeGreaterThan(500);

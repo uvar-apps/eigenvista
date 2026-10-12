@@ -294,8 +294,12 @@ export default function App() {
     nextMode: RenderMode,
   ) {
     if (!document.view.field) return;
+    if (!isGridResolution(res)) {
+      setError("Choose an available grid resolution.");
+      return;
+    }
     const token = ++generation.current;
-    setBusy("Preparing sampled field");
+    setBusy("Calculating sampled field");
     setError("");
     try {
       const sampled = await request<SampledGrid>("sample", {
@@ -304,7 +308,11 @@ export default function App() {
         resolution: res,
       });
       if (token !== generation.current) return;
+      // Keep the previous field and preview until sampling has succeeded.
+      if (document.view.field !== current.current?.view.field)
+        editView({ field: document.view.field });
       setGrid(sampled);
+      setResolution(res);
       setMode(nextMode);
       setReset((v) => v + 1);
       setStatus("Sampled field ready");
@@ -314,17 +322,27 @@ export default function App() {
       if (token === generation.current) setBusy("");
     }
   }
+  async function selectMode(nextMode: RenderMode) {
+    if (!doc || busy) return;
+    if (nextMode !== "mesh" && !grid) {
+      await prepareGrid(doc, resolution, nextMode);
+      return;
+    }
+    setMode(nextMode);
+    setReset((v) => v + 1);
+  }
   async function selectField(id: string) {
-    if (!doc || id === doc.view.field) return;
-    editView({ field: id });
-    setGrid(null);
-    setMode("mesh");
-    if (doc.grids.some((g) => g.id === id))
+    if (!doc || busy || id === doc.view.field) return;
+    if (mode !== "mesh" || doc.grids.some((g) => g.id === id)) {
       await prepareGrid(
         { ...doc, view: { ...doc.view, field: id } },
         resolution,
-        "volume",
+        mode === "mesh" ? "volume" : mode,
       );
+      return;
+    }
+    editView({ field: id });
+    setGrid(null);
   }
   async function load(source: SourceFile) {
     const token = ++generation.current;
@@ -666,16 +684,15 @@ export default function App() {
                   aria-label="Rendering mode"
                   value={mode}
                   disabled={!!busy}
-                  onChange={(e) => {
-                    setMode(e.target.value as RenderMode);
-                    setReset((v) => v + 1);
-                  }}
+                  onChange={(e) =>
+                    void selectMode(e.target.value as RenderMode)
+                  }
                 >
                   <option value="mesh">Isosurface mesh</option>
-                  <option value="raycast" disabled={!grid}>
+                  <option value="raycast" disabled={!doc.view.field}>
                     Sampled raycast preview
                   </option>
-                  <option value="volume" disabled={!grid}>
+                  <option value="volume" disabled={!doc.view.field}>
                     Volume preview
                   </option>
                 </select>
@@ -711,9 +728,15 @@ export default function App() {
                   onChange={(e) => {
                     const value = Number(e.target.value);
                     if (!isGridResolution(value)) return;
-                    setResolution(value);
-                    if (doc.grids.some((g) => g.id === doc.view.field))
+                    if (
+                      mode !== "mesh" ||
+                      doc.grids.some((g) => g.id === doc.view.field)
+                    )
                       void prepareGrid(doc, value, mode);
+                    else {
+                      setResolution(value);
+                      setGrid(null);
+                    }
                   }}
                 >
                   {gridResolutions.map((n) => (

@@ -36,6 +36,13 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Version 0.5.4 fixes direct orbital/density previews (#15): choosing volume or
+  raycast uses the worker's sampling-only operation, without marching cubes.
+  Only explicit surface generation creates meshes. Keep field/resolution changes
+  transactional on sampling success; cancellation/error must retain the prior
+  preview and saved geometry. Regression coverage is in
+  `app/tests/field-preview.spec.ts`; release evidence is in `docs/status.md`.
+
 - Workspace members: `eigenvista-core`, `eigenvista-format`, `eigenvista-import`,
   `eigenvista-convert`, `eigenvista-wasm`, plus `app/src-tauri` (`eigenvista-desktop`).
   **Default members exclude the desktop shell** — `cargo test` alone is not a

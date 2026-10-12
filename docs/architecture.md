@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.5.3 development preview, not the complete
+This describes the 0.5.4 development preview, not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
@@ -264,6 +264,17 @@ single-volume compositing do not correctly solve all mixed-scene overlaps.
 Skewed and reflected affine grids use the full grid transform; reflected box
 winding is corrected for back-face ray-entry rendering, including inside views.
 
+Choosing a sampled mode without a current display grid sends only `sample`,
+not `generate`; the worker skips marching cubes. In a sampled mode, field and
+resolution changes also use `sample`. The UI stages the requested field,
+resolution, and mode until sampling succeeds, keeping the prior display grid
+and saved meshes on cancellation or failure. Generation tokens reject late
+results. Mode-only changes reuse a current grid; field/resolution changes in
+mesh mode invalidate it. Imported-grid selection retains automatic preview
+preparation. Sampling uses the existing resolution/allocation guards and the
+same cancellable worker, and does not change persistent geometry or mark a
+document dirty unless its active field changes.
+
 The viewport owns its Three.js engine and disposes rebuilt geometry/materials.
 Camera damping drives an animation loop with rendering on movement or changed
 scene state. OrbitControls change events also invalidate the next frame because
@@ -301,8 +312,9 @@ not persisted. Multi-orbital selection produces independent
 saved meshes, not a new combined orbital/density or multiple active volumes. A
 loaded document can show saved geometry without recomputation. A selected
 authoritative grid also gets a new transient display sample on Open, making
-sampled modes available immediately. Analytic orbital/density fields still need
-Generate to prepare their transient display grid after reopening. No sampled
+sampled modes available immediately. Selecting a sampled rendering mode prepares
+an analytic orbital/density field's transient grid after reopening, without
+mesh generation. No sampled
 preview is a substitute for the complete authoritative grid saved in the file.
 The larger 256 cubed transient-grid limit does not extend native source-grid or
 128 MiB container limits; generated meshes can record their larger generation

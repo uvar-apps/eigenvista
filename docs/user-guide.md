@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.3, a development preview. Scientific calculations and
+This is version 0.5.4, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -244,7 +244,10 @@ new density matrix.
    24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, or 256 points per axis;
    the cubic labels describe the full grid, and the default is 40. Larger values
    cost more memory and computation and are not an accuracy guarantee.
-4. Click **Generate surfaces**. The footer shows the sampling, meshing, and
+4. For a volume or raycast, select **Volume preview** or **Sampled raycast
+   preview** under Mode. This samples the selected field in the background;
+   it does not run marching cubes or create saved surfaces. For saved meshes,
+   click **Generate surfaces**. The footer shows the sampling, meshing, and
    validation phases, followed by completion and triangle count. These are
    phases, not percentage progress or a remaining-time estimate. During
    computation the same button becomes **Cancel**; cancelling retains the
@@ -270,8 +273,11 @@ operating system runs out of memory or terminates it. The larger options are
 not a claim that every molecule has been tested at those resolutions.
 
 Selecting a field or changing isovalue/resolution does not regenerate existing
-meshes automatically. For imported grids, selecting the field or changing
-resolution does prepare its sampled preview. Generate surfaces replaces the meshes for that field;
+meshes automatically. In volume or raycast mode, selecting another field or
+changing resolution prepares a new sampled preview and keeps the chosen mode.
+Cancellation or failure retains the previous preview, field, and resolution.
+Imported grids also prepare a sampled preview when selected in mesh mode.
+Generate surfaces replaces the meshes for that field;
 meshes belonging to other fields remain. Save separate documents to preserve
 multiple isovalues of the same field. The isovalue recorded on each saved
 surface is its actual generation value, not a later edited control value.
@@ -289,9 +295,13 @@ reopening a `.eigenvista` file, without recalculation.
 **Sampled raycast preview** and **Volume preview** use an in-memory display
 grid, not direct analytic shader evaluation of a wavefunction. Cube fields and
 other grids stored in `.eigenvista` prepare it automatically on Open or field
-selection. A reopened document with cached meshes starts in mesh mode, with
-sampled modes also ready. For orbital/density fields without a stored grid,
-Generate surfaces prepares it; generate again after switching away or reopening.
+selection. A reopened document with cached meshes starts in mesh mode.
+For orbital/density fields without a stored grid, choosing either sampled mode
+prepares the grid directly, including after reopening a saved document. No mesh
+generation is required. Switching between volume and raycast reuses the current
+sampled grid. During sampling, **Cancel** keeps the last completed preview and
+all saved meshes; a failed calculation can be retried by selecting the mode,
+field, or resolution again.
 The raycast isovalue control updates the sampled preview directly, but previously
 generated meshes still require regeneration.
 
@@ -315,8 +325,10 @@ Quantum fields panel; the browser's orbital checkboxes do not select multiple
 simultaneous volumes. After a successful orbital batch, the previous active
 orbital stays active if it was checked, otherwise the first checked orbital in
 document order becomes active. Its sampled preview is ready. Selecting another
-analytic orbital clears that preview; **Generate surfaces** prepares the newly
-active field while retaining other orbitals' saved meshes.
+orbital in volume or raycast mode samples it directly while retaining every
+saved mesh. In mesh mode, selecting an orbital changes the active field without
+calculating; choose a sampled mode to preview it or **Generate surfaces** to
+create its meshes.
 
 Positive/negative colors and opacity currently apply across the document's
 surfaces, not just the selected field. **Surface shading** chooses how those
@@ -399,7 +411,7 @@ Keep original data and backups because the native preview schema is not frozen.
 | --- | --- |
 | Generate surfaces is disabled | PDB/XYZ contain no quantum fields; open Molden, a native field document, cube, or example |
 | Generate selected is disabled | Check between 1 and 32 orbitals and enter a finite positive isovalue |
-| Raycast/volume choices are disabled | For orbitals/densities, Generate surfaces; imported grids prepare automatically unless the footer reports a preview error |
+| Raycast/volume choices are disabled | Select a document with quantum fields; controls are also disabled while another operation is running. Orbital/density previews do not require meshes |
 | Cube opens but no field is visible | Check the isovalue and scalar range, Fit scene, and any preview error; an all-zero grid has no nonzero surface |
 | Structure seems missing | Use Fit scene; try Ball and stick; check atom counts and error messages |
 | Unexpected PDB atom/bond count | Read Provenance; first-model/alternate/occupancy selection and heuristic bonds affect counts |

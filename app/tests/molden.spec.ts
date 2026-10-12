@@ -179,7 +179,7 @@ test("Molden Open generates a field and saves quantum data plus durable surfaces
   await expect(page.getByLabel("Unsaved changes")).toHaveCount(0);
   await expect(
     page.getByLabel("Rendering mode").locator("option[value=raycast]"),
-  ).toHaveAttribute("disabled", "");
+  ).toHaveJSProperty("disabled", false);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Fit scene", exact: true }).click();
   await expect

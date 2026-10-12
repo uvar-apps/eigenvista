@@ -3,8 +3,9 @@
 EigenVista now has a dedicated repository at
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista). Its Rust
 workspace, `app/`, `crates/`, `docs/`, `tools/`, `packaging/`, and `fixtures/`
-live at the repository root. Version remains **0.5.3** (0.4.0 at extraction); the application icon,
-logo, scientific model, and native-file compatibility are unchanged.
+live at the repository root. Extraction retained version **0.4.0**, the application
+icon, logo, scientific model, and native-file compatibility. See
+[status](status.md) for subsequent releases.
 
 ## Source and history
 

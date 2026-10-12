@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** first working development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence and remaining gates.
+**Status:** version 0.5.4 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence and remaining gates.
 
 ## Start here
 
@@ -32,7 +32,7 @@ in this preview.
 
 ## Run
 
-Tested toolchain: Rust 1.92.0, Node 26, wasm-bindgen CLI 0.2.108. Dependency versions are locked in Cargo.lock and app/package-lock.json.
+Latest tested toolchain: Rust 1.99.0, Node 26, wasm-bindgen CLI 0.2.108. The development guide still selects Rust 1.92.0; compiler pinning is tracked separately in [#8](https://github.com/uvar-apps/eigenvista/issues/8). Dependency versions are locked in Cargo.lock and app/package-lock.json.
 
 From the repository root:
 
@@ -78,6 +78,9 @@ release. It includes source and notices under the [application license](LICENSE)
   Cancel or failure preserves prior geometry, and successful batches retain
   surfaces belonging to unselected fields. See the [user guide](docs/user-guide.md).
 - Experimental sampled raycasting and volume integration with actual shaders; these do not yet meet the full correctness/performance release gates.
+- Volume and raycast previews can sample an orbital or density directly, without
+  generating meshes first. Field/resolution changes run in the cancellable worker;
+  cancellation or failure preserves the prior preview and saved surfaces.
 - Self-contained `.eigenvista` preview files containing quantum data, binary numeric arrays, saved meshes, isovalues, grid geometry, scientific hashes, provenance, and material settings. Reopen displays saved geometry without recomputation.
 - Native Save dialog with validated sibling-file replacement; browser file download. Native Open dialog and browser file selection.
 - Conventional single-frame XYZ and PDB import with automatic coordinate-based bonds, PDB alternate/model handling, and retained explicit connections. [Import policy and algorithm](docs/structure-imports.md).
