@@ -18,6 +18,7 @@ import {
 } from "./shaderTools";
 import { volumeObject } from "./volume";
 import { elementDisplay } from "./elements";
+import { resolveAtomColor, type AtomPalette } from "./atomColors";
 
 const BOHR = 0.529177210903;
 export function symbol(z: number) {
@@ -109,6 +110,7 @@ export function Viewport({
   mode,
   shading,
   shader,
+  atomPalette,
   reset,
   onSelect,
   onShaderLog,
@@ -118,6 +120,7 @@ export function Viewport({
   mode: RenderMode;
   shading: SurfaceShading;
   shader: (ShaderPair & { target: string }) | null;
+  atomPalette?: AtomPalette;
   reset: number;
   onSelect: (text: string) => void;
   onShaderLog?: (log: string) => void;
@@ -136,6 +139,11 @@ export function Viewport({
   selection.current = onSelect;
   const shaderRef = useRef(shader);
   shaderRef.current = shader;
+  // The scene rebuild reads the palette through a ref so a colour edit does not
+  // rebuild geometry; the re-tint effect below owns colour updates.
+  const paletteRef = useRef(atomPalette);
+  paletteRef.current = atomPalette;
+  const atomsRef = useRef<number[]>([]);
   const onShaderLogRef = useRef(onShaderLog);
   onShaderLogRef.current = onShaderLog;
   const [error, setError] = useState("");
@@ -311,7 +319,7 @@ export function Viewport({
           scale.setScalar(radius);
           matrix.compose(position, IDENTITY_QUATERNION, scale);
           atoms.setMatrixAt(i, matrix);
-          tint.set(element.color);
+          tint.set(resolveAtomColor(z, paletteRef.current));
           atoms.setColorAt(i, tint);
           const angstrom = point.map((v) => (v * BOHR).toFixed(3)).join(", ");
           labels.push(`${element.symbol} ${i + 1} | ${angstrom} angstrom`);
@@ -319,6 +327,7 @@ export function Viewport({
         atoms.instanceMatrix.needsUpdate = true;
         if (atoms.instanceColor) atoms.instanceColor.needsUpdate = true;
         atoms.userData.instanceLabels = labels;
+        atomsRef.current = Array.from(columns.elements);
         group.add(atoms);
       }
       if (doc.view.representation !== "space-fill") {
@@ -456,6 +465,25 @@ export function Viewport({
     });
     e.needsRender = true;
   }, [shader?.values]);
+  /**
+   * Re-tint atoms in place when the palette changes. Geometry is untouched: the
+   * rebuild effect reads the palette through `paletteRef` and so is not keyed on
+   * it, which keeps a colour edit from rebuilding the whole scene.
+   */
+  useEffect(() => {
+    const e = engine.current;
+    if (!e) return;
+    const atoms = e.group.getObjectByName("atoms");
+    if (!(atoms instanceof THREE.InstancedMesh)) return;
+    const elements = atomsRef.current;
+    const tint = new THREE.Color();
+    for (let i = 0; i < elements.length; i++) {
+      tint.set(resolveAtomColor(elements[i], atomPalette));
+      atoms.setColorAt(i, tint);
+    }
+    if (atoms.instanceColor) atoms.instanceColor.needsUpdate = true;
+    e.needsRender = true;
+  }, [atomPalette]);
   useEffect(() => {
     engine.current?.fit();
   }, [reset, doc.id]);

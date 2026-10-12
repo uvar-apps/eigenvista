@@ -38,6 +38,11 @@ import {
   type ShaderPair,
   type UniformValue,
 } from "./shaderTools";
+import {
+  DEFAULT_ATOM_COLORS,
+  parseAtomColors,
+  type AtomPalette,
+} from "./atomColors";
 import type {
   EigenVistaDocument,
   Generation,
@@ -69,6 +74,12 @@ export default function App() {
   >(null);
   const [shaderStatus, setShaderStatus] = useState("");
   const [shaderError, setShaderError] = useState("");
+  // Session-scoped atom colour override. Undefined means the bundled default
+  // palette is in use. Nothing here is saved into the document.
+  const [atomPalette, setAtomPalette] = useState<AtomPalette | undefined>();
+  const [atomPaletteName, setAtomPaletteName] = useState("");
+  const [atomPaletteError, setAtomPaletteError] = useState("");
+  const atomPaletteInput = useRef<HTMLInputElement>(null);
   const [grid, setGrid] = useState<SampledGrid | null>(null);
   const [reset, setReset] = useState(0);
   const [inspected, setInspected] = useState("");
@@ -85,6 +96,37 @@ export default function App() {
   const unsaved = useRef(dirty);
   current.current = doc;
   unsaved.current = dirty;
+  /**
+   * Apply a palette file. A rejected file leaves the current palette untouched
+   * and only the message changes, so a bad load can never half-colour the scene.
+   */
+  function applyAtomPalette(text: string, name: string) {
+    try {
+      setAtomPalette(parseAtomColors(text, name));
+      setAtomPaletteName(name);
+      setAtomPaletteError("");
+    } catch (error) {
+      setAtomPaletteError(String(error));
+    }
+  }
+  function resetAtomPalette() {
+    setAtomPalette(undefined);
+    setAtomPaletteName("");
+    setAtomPaletteError("");
+  }
+  async function pickAtomPalette() {
+    const [picked] = await pickNative();
+    if (!picked) return;
+    const bytes = await picked.read();
+    applyAtomPalette(new TextDecoder().decode(bytes), picked.name);
+  }
+  function chooseAtomPalette() {
+    if (native) {
+      void pickAtomPalette();
+      return;
+    }
+    atomPaletteInput.current?.click();
+  }
   async function compute(
     document: EigenVistaDocument,
     res = resolution,
@@ -656,6 +698,7 @@ export default function App() {
               mode={mode}
               shading={surfaceShading}
               shader={appliedShader}
+              atomPalette={atomPalette}
               reset={reset}
               onSelect={setInspected}
               onShaderLog={(log) => {
@@ -820,6 +863,44 @@ export default function App() {
                   <option value="blinn-phong">Blinn-Phong</option>
                 </select>
               </label>
+            </section>
+            <section>
+              <h2>Atom colours</h2>
+              <p className="empty">
+                {atomPalette
+                  ? `Overridden by ${atomPaletteName}`
+                  : `Built-in default (${DEFAULT_ATOM_COLORS.size} elements)`}
+              </p>
+              <div className="file-actions">
+                <button type="button" onClick={() => chooseAtomPalette()}>
+                  Colours file…
+                </button>
+                {atomPalette && (
+                  <button type="button" onClick={resetAtomPalette}>
+                    Reset to defaults
+                  </button>
+                )}
+              </div>
+              <input
+                ref={atomPaletteInput}
+                className="file-input"
+                type="file"
+                accept=".json,.txt"
+                aria-label="Atom colours file"
+                onChange={(e) => {
+                  const chosen = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!chosen) return;
+                  void chosen
+                    .text()
+                    .then((text) => applyAtomPalette(text, chosen.name));
+                }}
+              />
+              {atomPaletteError && (
+                <pre className="error" role="alert">
+                  {atomPaletteError}
+                </pre>
+              )}
             </section>
             {(() => {
               const defs =

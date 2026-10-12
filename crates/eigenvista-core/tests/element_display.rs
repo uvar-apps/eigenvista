@@ -1,10 +1,10 @@
-//! Pins the frontend element display table against the Rust scientific sources.
+//! Pins the frontend element display data against the Rust scientific sources.
 //!
-//! `app/src/elements.ts` carries the CPK colour and van der Waals radius used to
-//! draw atoms. The radii come from published tables that `pdbtbx` already ships,
-//! so the display table is re-derived here instead of being trusted to stay in
-//! step by hand. A failure means the TypeScript table no longer matches the
-//! source it documents, not that a source changed upstream on its own.
+//! Symbols and radii live in `app/src/elements.ts`; colours live in
+//! `app/src/atom-colors.json`, the single source of truth for the default
+//! palette. Both are re-derived here rather than trusted to stay in step by hand.
+//! A failure means the frontend no longer matches the source it documents, not
+//! that a source changed upstream on its own.
 
 use pdbtbx::Element;
 
@@ -27,6 +27,9 @@ const BONDI_DEFAULTS: &[(usize, f64)] = &[
 /// Ac(89)-Cm(96), which keeps the periodic trend rather than flattening it.
 const EXTRAPOLATION_FACTOR: f64 = 1.65;
 
+const COLORS_FORMAT: &str = "eigenvista-atom-colors";
+const COLORS_VERSION: u64 = 1;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Source {
     BondiDefault,
@@ -35,7 +38,8 @@ enum Source {
     Extrapolated,
 }
 
-/// The radius the display table must carry for an atomic number, and where it comes from.
+/// The radius the display table must carry for an atomic number, and where it
+/// comes from.
 fn expected(z: usize) -> (f64, Source) {
     if let Some((_, value)) = BONDI_DEFAULTS.iter().find(|(n, _)| *n == z) {
         return (*value, Source::BondiDefault);
@@ -69,11 +73,14 @@ fn number(body: &str, key: &str) -> Option<f64> {
     after[..end].trim().parse::<f64>().ok()
 }
 
-/// Every `N: { symbol: "..", color: "#..", radius: .. },` row of the table.
-fn table() -> Vec<(usize, String, String, f64)> {
-    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../app/src/elements.ts");
-    let source =
-        std::fs::read_to_string(path).unwrap_or_else(|e| panic!("cannot read {path}: {e}"));
+fn read(name: &str) -> String {
+    let full = format!("{}/../../app/src/{}", env!("CARGO_MANIFEST_DIR"), name);
+    std::fs::read_to_string(&full).unwrap_or_else(|e| panic!("cannot read {full}: {e}"))
+}
+
+/// Every `N: { symbol: "..", radius: .. },` row of the element table.
+fn table() -> Vec<(usize, String, f64)> {
+    let source = read("elements.ts");
     let mut rows = vec![];
     for line in source.lines() {
         let line = line.trim();
@@ -84,11 +91,41 @@ fn table() -> Vec<(usize, String, String, f64)> {
             continue;
         };
         let symbol = quoted(body, "symbol:").expect("every row carries a symbol");
-        let color = quoted(body, "color:").expect("every row carries a color");
         let radius = number(body, "radius:").expect("every row carries a radius");
-        rows.push((z, symbol, color, radius));
+        rows.push((z, symbol, radius));
     }
     rows
+}
+
+/// The default palette as parsed JSON.
+fn palette_json() -> serde_json::Value {
+    let source = read("atom-colors.json");
+    serde_json::from_str(&source).expect("atom-colors.json must be valid JSON")
+}
+
+/// Every `(z, color)` entry of the default palette.
+fn palette() -> Vec<(usize, String)> {
+    palette_json()["colors"]
+        .as_array()
+        .expect("\"colors\" must be an array")
+        .iter()
+        .map(|entry| {
+            let z = entry["z"].as_u64().expect("every entry needs an integer z") as usize;
+            let color = entry["color"]
+                .as_str()
+                .expect("every entry needs a color")
+                .to_owned();
+            (z, color)
+        })
+        .collect()
+}
+
+fn is_hex_triplet(color: &str) -> bool {
+    color.len() == 7
+        && color.starts_with('#')
+        && color[1..]
+            .chars()
+            .all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase())
 }
 
 #[test]
@@ -103,7 +140,7 @@ fn the_display_table_covers_every_supported_element_exactly_once() {
 
 #[test]
 fn display_symbols_agree_with_the_element_table() {
-    for (z, symbol, _, _) in table() {
+    for (z, symbol, _) in table() {
         let reference = Element::new(z).expect("valid element").symbol();
         assert_eq!(
             symbol.to_ascii_uppercase(),
@@ -114,24 +151,9 @@ fn display_symbols_agree_with_the_element_table() {
 }
 
 #[test]
-fn display_colors_are_valid_lowercase_hex_triplets() {
-    for (z, _, color, _) in table() {
-        assert!(
-            eigenvista_core::valid_color(&color),
-            "Z={z} has an invalid colour {color}"
-        );
-        assert_eq!(
-            color,
-            color.to_lowercase(),
-            "Z={z} colour {color} should be lowercase"
-        );
-    }
-}
-
-#[test]
 fn every_display_radius_matches_its_published_source() {
     let mut counted = [0usize; 4];
-    for (z, _, _, radius) in table() {
+    for (z, _, radius) in table() {
         let (want, source) = expected(z);
         // Published values are copied verbatim; the extrapolated tier is rounded
         // to two decimals in the table, so it gets that much slack.
@@ -151,7 +173,6 @@ fn every_display_radius_matches_its_published_source() {
             Source::Extrapolated => 3,
         }] += 1;
     }
-    // Guards against a source swap silently changing how the table is filled.
     assert_eq!(
         counted,
         [8, 85, 6, 19],
@@ -163,7 +184,7 @@ fn every_display_radius_matches_its_published_source() {
 fn display_radii_are_physically_plausible() {
     // Catches a unit slip (pm/nm) or a shifted column, which a per-element
     // comparison against a changed upstream table would not reveal.
-    for (z, _, _, radius) in table() {
+    for (z, _, radius) in table() {
         assert!(
             (0.8..=3.6).contains(&radius),
             "Z={z} radius {radius} is outside the plausible van der Waals range"
@@ -175,10 +196,101 @@ fn display_radii_are_physically_plausible() {
 fn the_bondi_defaults_are_pinned_not_drifting() {
     let rows = table();
     for (z, want) in BONDI_DEFAULTS {
-        let (_, _, _, got) = rows
+        let (_, _, got) = rows
             .iter()
             .find(|(n, ..)| n == z)
             .unwrap_or_else(|| panic!("Z={z} missing from the table"));
         assert_eq!(got, want, "Z={z} drifted from its pinned Bondi value");
+    }
+}
+
+#[test]
+fn the_element_table_carries_no_colour_of_its_own() {
+    // Colour must live only in atom-colors.json. A `color:` field creeping back
+    // into elements.ts recreates the two-sources-of-truth problem.
+    let source = read("elements.ts");
+    assert!(
+        !source.contains("color:"),
+        "elements.ts must not declare colours; they belong in atom-colors.json"
+    );
+}
+
+#[test]
+fn the_palette_declares_the_supported_format_and_version() {
+    let document = palette_json();
+    assert_eq!(
+        document["format"].as_str(),
+        Some(COLORS_FORMAT),
+        "unexpected palette format"
+    );
+    assert_eq!(
+        document["version"].as_u64(),
+        Some(COLORS_VERSION),
+        "unexpected palette version"
+    );
+}
+
+#[test]
+fn the_palette_covers_every_supported_element_exactly_once() {
+    let entries = palette();
+    assert_eq!(entries.len(), 118, "expected one colour per element");
+    for z in 1..=118usize {
+        let matches = entries.iter().filter(|(n, _)| *n == z).count();
+        assert_eq!(
+            matches, 1,
+            "palette entry for Z={z} appears {matches} times"
+        );
+    }
+}
+
+#[test]
+fn palette_colors_are_lowercase_hex_triplets() {
+    for (z, color) in palette() {
+        assert!(
+            is_hex_triplet(&color),
+            "Z={z} has an invalid colour {color}; expected lowercase #rrggbb"
+        );
+    }
+}
+
+#[test]
+fn every_element_gets_a_distinct_colour() {
+    // The regression this exists to prevent: the 0.5.5/0.5.6 palette used 13
+    // distinct colours across 118 elements, with #e6e600 alone covering 32 of
+    // them including sulfur and chlorine. Colour only carries element identity if
+    // no two elements share it.
+    let entries = palette();
+    let mut seen: Vec<(String, usize)> = vec![];
+    for (z, color) in &entries {
+        if let Some((_, first)) = seen.iter().find(|(c, _)| c == color) {
+            panic!("Z={first} and Z={z} share colour {color}; elements must be distinguishable");
+        }
+        seen.push((color.clone(), *z));
+    }
+    assert_eq!(seen.len(), entries.len());
+}
+
+#[test]
+fn palette_symbols_match_the_fixed_element_table() {
+    // Mirrors the TypeScript typo guard: `symbol` is a human label, never a
+    // lookup key, and must agree with the authoritative table.
+    let rows = table();
+    let document = palette_json();
+    for entry in document["colors"].as_array().expect("colors array") {
+        let z = entry["z"].as_u64().expect("integer z") as usize;
+        let Some(symbol) = entry.get("symbol").and_then(|s| s.as_str()) else {
+            continue;
+        };
+        let expected_symbol = rows
+            .iter()
+            .find(|(n, ..)| *n == z)
+            .unwrap_or_else(|| panic!("Z={z} missing from elements.ts"))
+            .1
+            .clone();
+        assert_eq!(
+            symbol.to_ascii_uppercase(),
+            expected_symbol.to_ascii_uppercase(),
+            "palette entry for Z={z} is labelled {symbol}"
+        );
     }
 }

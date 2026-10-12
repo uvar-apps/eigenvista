@@ -8,6 +8,48 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.8
+
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.8` tag, and push to `origin` on `main`. This release makes the
+per-element atom colour palette loadable from a JSON file, tracked by
+[#17](https://github.com/uvar-apps/eigenvista/issues/17).
+
+Colour moves out of `app/src/elements.ts` into
+[atom-colors.json](../app/src/atom-colors.json), the single source of truth
+for the default palette. [atomColors.ts](../app/src/atomColors.ts) parses and
+validates a loaded file, and `resolveAtomColor` resolves session override →
+bundled default → the `#b294b9` unknown-element sentinel. The **Atom colours**
+panel loads a file and resets to defaults across both the browser and Tauri
+paths.
+
+The palette is a session display preference and is **not** written into
+`.eigenvista` — no container format change, no format version bump, no
+migration. A colour change re-tints the instanced atoms in place; the scene
+rebuild reads the palette through a ref so it is not keyed on it. Symbols and
+radii stay fixed in `elements.ts`.
+
+`element_display.rs` now reads colours from the JSON and asserts schema, 118
+entries, lowercase hex, and **all-distinct**, plus that `elements.ts` declares
+no colour of its own.
+
+Fresh verification on Apple Silicon macOS with Rust 1.99.0:
+
+| Gate | Result |
+| --- | --- |
+| `cargo fmt --all --check` | Passed |
+| `cargo clippy --locked --workspace --all-targets -- -D warnings` | Passed |
+| `cargo test --locked --workspace` | 133 passed (122 at 0.5.7 + 11 new palette and table guards) |
+| `npm --prefix app run build` | Passed; existing bundle-size warning remains |
+| `npm --prefix app run test:e2e` | 144 passed — 72 Chromium and 72 WebKit |
+| `eigenvista-convert --version` | Reports `0.5.8` |
+| Version/lock checks and local documentation targets | Passed; no external dependency changes |
+
+Not run: `test:packaging`, the native Tauri shell, clean-machine install,
+Linux/Windows. No 0.5.8 redistributable ZIP was built for this request.
+External locked dependencies are unchanged; `cargo update --workspace` moved
+only the six first-party packages.
+
 ## Version 0.5.7
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated

@@ -1,14 +1,29 @@
 # Development handoff
 
-Updated 12 October 2026 for the 0.5.7 per-element display table; the dated
+Updated 12 October 2026 for the 0.5.8 loadable atom colour palette; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.7**, in the standalone
+The current application is **EigenVista**, version **0.5.8**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+Version 0.5.8 makes the per-element atom colour palette loadable from a JSON
+file (issue
+[#17](https://github.com/uvar-apps/eigenvista/issues/17)). Colour moves out of
+`elements.ts` into `app/src/atom-colors.json`, the single source of truth for
+the default palette, with `atomColors.ts` parsing and validating a loaded file.
+A session can override any subset of elements through the **Atom colours**
+panel and reset to the bundled default. The palette is a session display
+preference and is not written into `.eigenvista`; a colour change re-tints the
+instanced atoms in place rather than rebuilding the scene. Symbols and radii
+stay fixed in `elements.ts`, and the Rust guard now asserts the palette is
+all-distinct so the 13-colour regression cannot return. Verification: 133
+workspace Rust tests, strict Clippy, formatting, the production build, and the
+full 144-case Chromium/WebKit browser suite. See the
+[design record](design/2026-10-12-atom-colors-from-file.md).
 
 Version 0.5.7 replaces the group-coloured display table shipped in
 0.5.5/0.5.6 with a per-element table in `app/src/elements.ts` (issue

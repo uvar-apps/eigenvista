@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.7, a development preview. Scientific calculations and
+This is version 0.5.8, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -345,6 +345,42 @@ isosurfaces). Shading is a session display preference and is not written into
 `.eigenvista` files; molecular atoms and bonds keep their own material. Eye
 icons toggle individual mesh visibility; trash icons remove meshes from the
 document. There is no undo.
+
+### Atom colours
+
+Every element is drawn with its own CPK colour from a bundled palette. The
+**Atom colours** section shows which palette is active: **Built-in default
+(118 elements)**, or the name of the file you loaded this session.
+
+**Colours file…** loads a JSON palette:
+
+```json
+{
+  "format": "eigenvista-atom-colors",
+  "version": 1,
+  "colors": [
+    { "z": 6, "symbol": "C", "color": "#ff00aa" }
+  ]
+}
+```
+
+- `z` is the atomic number and the only thing that selects an element.
+- `symbol` is optional and checked only as a typo guard; it never selects
+  anything.
+- **Partial files are fine.** List only the elements you want to change; every
+  other element keeps its default colour.
+- **Reset to defaults** returns to the bundled palette.
+
+The palette is a **session display preference**. It is not written into
+`.eigenvista` files, so a saved document comes back with the built-in palette.
+Changing colours re-tints the atoms in place; the scene is not rebuilt.
+
+A file that fails validation is rejected with a message and the current colours
+are left untouched. The whole file is refused rather than partially applied, so
+a typo cannot leave the scene half-coloured. A file is refused for: wrong
+`format`, unsupported `version`, a missing or empty `colors` list, a duplicate
+`z`, a `z` outside 1-118, a colour that is not a lowercase `#rrggbb` triplet,
+or a `symbol` that disagrees with the element for that number.
 
 ### Custom surface shaders
 

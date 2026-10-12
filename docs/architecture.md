@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.5.7 development preview, not the complete
+This describes the 0.5.8 development preview, not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
@@ -57,7 +57,8 @@ by native saving. There is no calculation server, remote service, or database.
 | [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
 | [Worker client](../app/src/science.ts) and [worker](../app/src/science.worker.ts) | Request lifecycle, WASM initialization, single sampled-grid cache, cancellation |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
-| [Element display table](../app/src/elements.ts) | CPK colour and van der Waals display radius for elements 1-118. Presentation data only; [element_display.rs](../crates/eigenvista-core/tests/element_display.rs) re-derives every radius from the `pdbtbx` source tables so the table cannot drift |
+| [Element display table](../app/src/elements.ts) | Symbol and van der Waals display radius for elements 1-118. Presentation data only; [element_display.rs](../crates/eigenvista-core/tests/element_display.rs) re-derives every radius from the `pdbtbx` source tables so the table cannot drift. Carries no colour — that lives in `atom-colors.json` |
+| [Atom colour palette](../app/src/atom-colors.json) and [loader](../app/src/atomColors.ts) | Single source of truth for the default per-element colour. `parseAtomColors` validates a loaded file and rejects it whole; `resolveAtomColor` resolves session override → bundled default → `#b294b9` sentinel. Session-only, never persisted to `.eigenvista`. See the [design record](design/2026-10-12-atom-colors-from-file.md) |
 | [File adapter](../app/src/files.ts) | Browser file/download versus native dialog/read/save |
 | [Desktop entry point](../app/src-tauri/src/main.rs) | Tauri plugins and `save_native`/version commands |
 | [Runner](../tools/run.mjs) and [packager](../tools/package-macos.mjs) | Repeatable builds/tests and verified tester artifacts |
