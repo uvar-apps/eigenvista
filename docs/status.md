@@ -8,6 +8,38 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.5
+
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.5` tag, and push to `origin` on `main`. This patch extends the atom
+display table from eight elements to elements 1–103, tracked by
+[#1](https://github.com/uvar-apps/eigenvista/issues/1). Colors come from the
+supplied Jmol-style default palette (float RGB converted to hex); radii are
+the Bondi (1964) van der Waals values with the standard extensions of the
+same table, matching the eight radii already in the viewer. Picking labels
+use real symbols across the covered range. Elements Z ≥ 104 retain the
+generic fallback color, radius, and `Z`-prefixed label. This is a
+display-only change: the scientific model, bond perception (separate
+covalent-radius table), native format, and worker paths are untouched.
+
+Verification on Apple Silicon macOS (partial; the change is TypeScript-only):
+
+| Gate | Result |
+| --- | --- |
+| `npx tsc --noEmit` | Passed |
+| `npx playwright test tests/viewer.spec.ts tests/connectivity.spec.ts` | 28 passed: 14 scenarios across Chromium and WebKit |
+| Desktop/mobile screenshots in both engines | Inspected; new colors and instanced picking labels render correctly |
+
+Not rerun for this change: the remaining 11 browser specs (full suite is
+136 cases), workspace Rust tests, Clippy, formatting, the production
+WASM/frontend build, packaging tests, native GUI interaction, and any
+redistributable ZIP. External locked dependencies and all first-party
+versions agree at 0.5.5. The `default_atom_colors` source table remains an
+untracked working file unless separately added to the repository. The
+issue's remaining suggestions (a deliberately distinct fallback for
+unmodelled elements and an unrecognized-element count in the document
+summary) are not implemented.
+
 ## Version 0.5.4
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated
