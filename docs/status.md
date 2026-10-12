@@ -8,10 +8,14 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
-## Unreleased — per-element display colours and published radii
+## Version 0.5.7
 
-Date: 12 October 2026. Not committed. Supersedes the display table shipped in
-0.5.5/0.5.6, which coloured by periodic **group** rather than by element.
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.7` tag, and push to `origin` on `main`. The display-table work landed
+separately as `97114f4`; this release carries the version bump across the
+workspace, npm, and Tauri manifests plus the documentation below. It
+supersedes the display table shipped in 0.5.5/0.5.6, which coloured by
+periodic **group** rather than by element.
 
 The 0.5.6 table used 13 distinct colours across 118 elements. `#e6e600` alone
 covered 32 of them, including sulfur and chlorine, and Sc through Zn were all
@@ -61,7 +65,9 @@ Verification on Apple Silicon macOS, Rust 1.99.0:
 | Visual A/B | Same 28-element fixture on both builds: 13 distinct rendered hue buckets before, 22 after |
 
 Not run: `test:packaging`, native Tauri shell, clean-machine install,
-Linux/Windows.
+Linux/Windows. No 0.5.7 redistributable ZIP was built for this request.
+External locked dependencies are unchanged; `cargo update --workspace` moved
+only the six first-party packages.
 
 ## Version 0.5.6
 

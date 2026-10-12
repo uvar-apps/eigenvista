@@ -1,26 +1,28 @@
 # Development handoff
 
-Updated 12 October 2026 for the 0.5.6 full element display table; the dated
+Updated 12 October 2026 for the 0.5.7 per-element display table; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.6**, in the standalone
+The current application is **EigenVista**, version **0.5.7**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
-Version 0.5.6 replaces the eight-element display table with colors for
-all accepted elements (Z 1–118) (issue [#1](https://github.com/uvar-apps/eigenvista/issues/1)).
-Elements 1–103 use a Jmol-style default palette and Bondi van der Waals
-radii; superheavy elements (Z 104–118) use group-congener estimates, since
-no measured van der Waals radii exist for them. Picking labels use real
-symbols everywhere. This is a display-only change; bond perception and the
-scientific model are untouched. Verification: `tsc --noEmit` and the
-viewer/connectivity Playwright specs (28 cases across Chromium and WebKit)
-passed; the full 136-case browser suite, Rust tests, Clippy, production
-build, packaging tests, and a redistributable ZIP were not rerun for this
-change.
+Version 0.5.7 replaces the group-coloured display table shipped in
+0.5.5/0.5.6 with a per-element table in `app/src/elements.ts` (issue
+[#16](https://github.com/uvar-apps/eigenvista/issues/16)). Distinct colours go
+from 13 to 118: Jmol CPK for Z 1-109 and OpenBabel's continuation of the same
+gradient for Z 110-118. Radii are Alvarez (2013) van der Waals values, with
+Rahm-Hoffmann-Ashcroft (2016) supplying Pm and Po-Ra, and a documented
+Pyykko-covalent-radius extrapolation for Fm-Og, which have no published van
+der Waals radius. The legacy eight keep their pre-0.5.5 colours and Bondi
+radii. Picking labels use real symbols everywhere. This is a display-only
+change; bond perception and the scientific model are untouched. Verification:
+128 workspace Rust tests, including the new table drift guard, strict Clippy,
+formatting, the production build, and the full 136-case Chromium/WebKit
+browser suite.
 
 The orbital preview follow-up ([#15](https://github.com/uvar-apps/eigenvista/issues/15))
 lets users select volume or raycast directly after importing Molden, without
