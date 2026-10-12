@@ -94,6 +94,10 @@ release. It includes source and notices under the [application license](LICENSE)
   plus a standalone `eigenvista-convert` CLI. Canonical Gaussian shells through G
   and a tested ORCA S/P/spherical-D export subset are supported with explicit
   normalization and loss reports. [Molden profile and converter](docs/molden-import.md).
+- mmCIF structure import (`.cif`, `.mcif`, `.pdbx`) through the same Open path as
+  legacy PDB, so entries the PDB no longer distributes in legacy format are
+  viewable. Coordinates, alternates, and perceived bonds only; cell and symmetry
+  are recorded but not expanded. [mmCIF profile](docs/structure-imports.md#mmcif-profile).
 
 ## Boundaries
 

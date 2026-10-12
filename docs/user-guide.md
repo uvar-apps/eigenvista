@@ -111,13 +111,18 @@ choices do not affect it.
 | `.molden`, `.molf`, `.molden.input` or recognized Molden header | Geometry, Gaussian basis, real orbitals, energies, occupations, and occupation-derived density matrices | Canonical S/P/D/F/G and SP; explicitly identified ORCA exports currently S/P/spherical D only |
 | `.xyz` | One conventional atom-count/comment/coordinate frame, in angstroms | Geometry and automatically inferred bonds; multiple frames and extended XYZ are rejected |
 | `.pdb` | Selected ATOM/HETATM geometry and explicit plus inferred bonds | First model/structure and one alternate conformer per residue |
+| `.cif`, `.mcif`, `.pdbx` (mmCIF) | `_atom_site` geometry in angstroms, with bonds perceived from coordinates | First model and one alternate conformer per residue; cell and symmetry are recorded but not applied, and `struct_conn` is not read |
 | `.cube`, `.cub` | One scalar field, bohr geometry, and computed bonds; includes single-orbital cubes | Multi-field and alternative-unit cube profiles are not supported |
 
 PDB selection keeps common atoms and chooses the alternate with the highest
-mean occupancy per residue; zero-occupancy atoms are omitted. The preview does
-not preserve chain/residue labels, occupancies, B-factors, formal charges,
-isotope identity, cell/symmetry, or secondary-structure information. It does
-not expand crystal images. mmCIF and compressed PDB files are not supported.
+mean occupancy per residue; zero-occupancy atoms are omitted. mmCIF follows the
+same alternate-location policy. Neither format preserves chain/residue labels,
+occupancies, B-factors, formal charges, isotope identity, cell/symmetry, or
+secondary-structure information after selection, and neither expands crystal
+images. Compressed PDB and BinaryCIF (`.bcif`) are not supported.
+
+An element symbol mmCIF does not recognise is skipped and reported rather than
+guessed, so a mistyped symbol cannot silently change the structure.
 
 Bonds are a distance-and-coordination heuristic for display, not bond orders,
 aromaticity, hydrogen-bond analysis, or proof of chemical validity. PDB `CONECT`

@@ -8,6 +8,65 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.9
+
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.9` tag, and push to `origin` on `main`. This release adds mmCIF
+structure import, tracked by
+[#18](https://github.com/uvar-apps/eigenvista/issues/18).
+
+mmCIF (`.cif`, `.mcif`, `.pdbx`) now opens through the same path as legacy
+PDB in the browser, the Tauri shell, and `eigenvista-convert` — one dispatch
+change in `import_bytes` covers all three. This matters because the PDB no
+longer distributes larger entries in legacy PDB format, which is capped at
+99,999 atoms.
+
+New reader: [cif.rs](../crates/eigenvista-core/src/import/cif.rs), dispatched
+from `eigenvista_import::import_bytes`, so the browser, Tauri shell, and
+`eigenvista-convert` CLI all gain it from one change. Frontend picker and CLI
+help updated.
+
+**Why a dedicated tokenizer rather than `pdbtbx`'s mmCIF reader.** `pdbtbx`
+0.12.0 was probed first and does parse mmCIF from memory under the currently
+pinned feature set, which would have meant no new dependency. It was rejected
+because it **panics** on malformed input — `?` in a required field such as
+`label_atom_id`, a `nan` coordinate, a `.` where a number is expected — and a
+panic in the WASM worker is a hard abort rather than a reportable error.
+Imported files are untrusted, so that is not an acceptable boundary. The
+reader tokenizes the needed mmCIF subset directly and checks every value.
+`cif_malformed_input_errors_rather_than_panicking` covers each shape that
+panics upstream with `catch_unwind`.
+
+Scope: `_atom_site` coordinates (angstrom → bohr), first model only, the same
+alternate-location policy as PDB, unknown element symbols skipped and counted
+rather than guessed, bonds perceived from coordinates. `_cell` and
+`_symmetry.space_group_name_H-M` are read into provenance but not applied.
+`struct_conn` is not read. No symmetry mates, no periodic boundaries, no
+BinaryCIF, no mmCIF export. Budgets: 64 MiB per file, 250,000 atoms.
+
+Evidence on the development Apple Silicon Mac, 12 October 2026:
+
+| Check | Result |
+| --- | --- |
+| `cargo fmt --all --check` | clean |
+| `npm --prefix app test` | 141 passed, 0 failed |
+| `cargo clippy --workspace --all-targets -- -D warnings` | clean |
+| `npm --prefix app run build` | passed (WASM + `tsc --noEmit`) |
+| `cif_import.rs` unit/integration tests | 9 passed |
+| `cif.spec.ts` e2e, Chromium + WebKit | 6 passed |
+| `1BH3.cif` | 2,372 atoms / 2,270 bonds (from 2,395 rows) |
+| `1AON.cif` | 58,870 atoms / 59,307 bonds |
+
+Rendered output was inspected directly: `1BH3.cif` opens as a ball-and-stick
+structure with correct CPK colours, and provenance reports the unit cell
+`a=104.250, b=104.250, c=124.930, α=90.00, β=90.00, γ=120.00` and space
+group `'H 3'`, matching the independent `pdbtbx` probe (hexagonal, index 146).
+Screenshot: `app/artifacts/cif-1bh3-desktop.png`.
+
+Not done here, captured as separate follow-up issues: `struct_conn`
+connectivity, symmetry mates and periodic boundaries, BinaryCIF, and mmCIF
+export.
+
 ## Version 0.5.8
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated

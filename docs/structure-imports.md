@@ -1,6 +1,6 @@
 # Structure imports and automatic bonds
 
-All supported formats, including XYZ, PDB, Molden, Gaussian cube, and native
+All supported formats, including XYZ, PDB, mmCIF, Molden, Gaussian cube, and native
 `.eigenvista` and legacy `.molekel` preview files, automatically compute display
 connectivity through the shared Rust
 import path. This applies to the native application, browser, and converter CLI.
@@ -51,7 +51,47 @@ Bounds are explicit: 100,000 atoms, 600,000 output connections, 2,000,000 candid
 - Support the repository's old identifier/line-number suffixes only when matched to a legacy HEADER. A narrowly scoped repair recognizes full-occupancy, element-unspecified five-column nucleotide hydrogen names such as ` H2'1`; it records the repair and leaves partial-occupancy numeric alternates alone.
 - Blank occupancy and B-factor fields default to 1 and 0. Invalid numbers do not become fabricated coordinates. Non-ASCII records and hybrid-36 serials are rejected in this profile.
 
-The preview stores coordinates, elements, and connectivity, not the full PDB hierarchy. Residue/chain labels, formal charges, occupancies/B-factors, isotope identity, unit cells, symmetry and secondary-structure annotations are not retained after selection; provenance records this loss. Crystal/periodic images are not generated. No quantum data is inferred from a structure file. mmCIF and gzipped PDB are not currently accepted.
+The preview stores coordinates, elements, and connectivity, not the full PDB hierarchy. Residue/chain labels, formal charges, occupancies/B-factors, isotope identity, unit cells, symmetry and secondary-structure annotations are not retained after selection; provenance records this loss. Crystal/periodic images are not generated. No quantum data is inferred from a structure file. Gzipped PDB is not currently accepted; see the [mmCIF profile](#mmcif-profile) for the `.cif` reader.
+
+## mmCIF profile
+
+mmCIF (`.cif`, `.mcif`, `.pdbx`) is read by a dedicated tokenizer in
+[cif.rs](../crates/eigenvista-core/src/import/cif.rs) rather than by the `pdbtbx`
+mmCIF reader that the PDB profile shares.
+
+That is a deliberate safety decision, not a preference. `pdbtbx`'s mmCIF reader
+**panics** on malformed input: a `?` in a required field such as
+`label_atom_id`, a `nan` coordinate, or a `.` where a number is expected.
+Imported files are untrusted, and a panic inside the WASM worker is a hard abort
+rather than a reportable error, so its behaviour cannot be relied on as a
+validation boundary. The mmCIF subset needed for a structure preview is small
+enough — `data_` blocks, `loop_` categories, quoted fields, `;` text blocks,
+and the `?`/`.` null markers — to tokenize directly with every value checked
+before use. `cif_malformed_input_errors_rather_than_panicking` guards this with
+`catch_unwind` over each shape that panics upstream.
+
+What is read, from the `_atom_site` category:
+
+- `Cartn_x/y/z` in angstrom, converted to bohr like every other importer. Values must parse as finite and stay within 1e9 angstrom; a row that fails is an error, not a fabricated position.
+- `type_symbol` resolved case-insensitively against the core element table. An unrecognised symbol is **skipped with a recorded count**, never guessed into some other element.
+- `label_alt_id` and `occupancy` drive the same alternate-location policy as PDB: common atoms plus one conformer per residue, highest mean occupancy, alphabetically first label on a tie. Zero-occupancy atoms are dropped. Grouping is by entity/asym/sequence/component rather than residue object.
+- `pdbx_PDB_model_num` selects the first model only; later models are skipped and counted in provenance. Models are never merged.
+- A row whose field count differs from its declared column count fails rather than being partially read.
+
+Unit cell (`_cell`) and space group (`_symmetry.space_group_name_H-M`) are read
+and reported in provenance but **not applied**: no symmetry-mate generation, no
+periodic boundary handling, no wrapped distances.
+
+`struct_conn` is not read. `pdbtbx` does not surface it either — both fixtures
+report zero bonds through that path — so connectivity is perceived from
+coordinates exactly as it is for a PDB file with no `CONECT` records. Reading
+`struct_conn` is a separate follow-up.
+
+Budgets: 64 MiB per file (mmCIF is markedly more verbose than PDB for the same
+structure) and 250,000 atoms, both enforced before unbounded allocation.
+
+Out of scope: BinaryCIF (`.bcif`), full dictionary validation against
+`mmcif_pdbx.dic`, symmetry expansion, and writing/exporting mmCIF.
 
 ## Verification
 
@@ -71,6 +111,8 @@ Repository fixtures, read without modification:
 | `fixtures/legacy/data/3POR.pdb` | 2,325 | 2,285 |
 | `fixtures/legacy/data/URIDINE-VANADATE.pdb` | 31 | 33 |
 | `fixtures/legacy/data/alaninemulti.pdb` | 66 (first structure only) | 65 |
+| `fixtures/cif/1BH3.cif` | 2,372 (from 2,395 rows) | 2,270 |
+| `fixtures/cif/1AON.cif` | 58,870 | 59,307 |
 
 Single release-build measurements on the development Apple Silicon Mac, 3 October 2026, using `cargo run --locked --release -p molekel-core --example bond_benchmark`:
 

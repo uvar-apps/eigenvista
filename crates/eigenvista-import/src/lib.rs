@@ -96,11 +96,25 @@ pub fn import_bytes(bytes: &[u8], name: &str) -> Result<ImportResult, String> {
                 let warnings = document.provenance.iter().filter(|entry| entry.starts_with("Structure-only") || entry.starts_with("PDB parser:")).cloned().collect();
                 (document, "pdb", warnings)
             }
+            "cif" | "mcif" | "pdbx" => {
+                let document = import::cif(text, name)?;
+                let warnings = document
+                    .provenance
+                    .iter()
+                    .filter(|entry| {
+                        entry.starts_with("Structure-only")
+                            || entry.starts_with("mmCIF parser:")
+                            || entry.starts_with("Skipped ")
+                    })
+                    .cloned()
+                    .collect();
+                (document, "cif", warnings)
+            }
             "cube" | "cub" => {
                 let document = import::cube(text, name)?;
                 (document, "cube", vec!["Cube scalar meaning and units are unspecified; only the sampled field is available.".into()])
             }
-            _ => return Err("Unsupported file. Open .eigenvista (or legacy .molekel), Molden, .xyz, .pdb, or .cube/.cub; Molden content is detected by [Molden Format].".into()),
+            _ => return Err("Unsupported file. Open .eigenvista (or legacy .molekel), Molden, .xyz, .pdb/.ent, .cif (mmCIF), or .cube/.cub; Molden content is detected by [Molden Format].".into()),
         }
     };
     document.provenance.push(format!(

@@ -47,7 +47,7 @@ by native saving. There is no calculation server, remote service, or database.
 | --- | --- |
 | [Core model](../crates/eigenvista-core/src/model.rs) | `Document`, validation, explicit scientific units, affine grid geometry, resource limits |
 | [Computation](../crates/eigenvista-core/src/compute.rs) | AO/field values and gradients, sampling/resampling, source hashes, classic marching cubes |
-| [Imports](../crates/eigenvista-core/src/import.rs) and [PDB importer](../crates/eigenvista-core/src/import/pdb.rs) | Supported text profiles and recorded conversion losses |
+| [Imports](../crates/eigenvista-core/src/import.rs), [PDB importer](../crates/eigenvista-core/src/import/pdb.rs) and [mmCIF importer](../crates/eigenvista-core/src/import/cif.rs) | Supported text profiles and recorded conversion losses |
 | [Import library](../crates/eigenvista-import/src/lib.rs) | Shared byte detection/dispatch, Molden conventions, import reports, source-byte digest |
 | [Converter CLI](../crates/eigenvista-convert/src/main.rs) | Bounded file reads, batch/JSON/check mode, destination preflight and no-clobber saves |
 | [Connectivity](../crates/eigenvista-core/src/bonds.rs) | Exact k-d-tree neighbors, explicit-plus-inferred display bonds |
