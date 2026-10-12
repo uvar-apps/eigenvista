@@ -9,7 +9,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.5, a development preview. Scientific calculations and
+This is version 0.5.6, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -92,11 +92,12 @@ Toolbar icons show their names on hover.
   is the reference path, and native image-download handling still needs qualification.
 
 The scene uses bohr internally. Picked atom positions are converted to angstroms.
-The display table covers elements 1–103 with colors from the Jmol-style default
-palette and Bondi van der Waals radii. Elements outside that table (Z ≥ 104)
-appear as `Z` plus their atomic number and use a fallback color/radius. Bond
+The display table covers all accepted elements (Z 1–118). Elements 1–103 use
+colors from the Jmol-style default palette and Bondi van der Waals radii;
+superheavy elements (Z 104–118) use group-congener estimates of the same
+convention, since no measured van der Waals radii exist for them. Bond
 inference uses a separate, complete covalent-radius table; display-radius
-fallbacks do not affect it.
+choices do not affect it.
 
 ## Supported files
 

@@ -126,6 +126,25 @@ const elements: Record<
   101: { symbol: "Md", color: "#b34d00", radius: 2.46 },
   102: { symbol: "No", color: "#b34d00", radius: 2.46 },
   103: { symbol: "Lr", color: "#b34d00", radius: 2.46 },
+  // No measured van der Waals radii exist for Rf-Og. Radii extrapolated from
+  // each element's group congener above (Rf<-Hf ... Og<-Rn); colors follow
+  // the same group palette as the table (transition metals yellow, group 13
+  // light blue, 14 dark gray, 15 brown, 16 dark green, 17 purple, 18 white).
+  104: { symbol: "Rf", color: "#e6e600", radius: 2.23 },
+  105: { symbol: "Db", color: "#e6e600", radius: 2.22 },
+  106: { symbol: "Sg", color: "#e6e600", radius: 2.18 },
+  107: { symbol: "Bh", color: "#e6e600", radius: 2.16 },
+  108: { symbol: "Hs", color: "#e6e600", radius: 2.16 },
+  109: { symbol: "Mt", color: "#e6e600", radius: 2.13 },
+  110: { symbol: "Ds", color: "#e6e600", radius: 1.75 },
+  111: { symbol: "Rg", color: "#e6e600", radius: 1.66 },
+  112: { symbol: "Cn", color: "#e6e600", radius: 1.55 },
+  113: { symbol: "Nh", color: "#5ca1ff", radius: 1.96 },
+  114: { symbol: "Fl", color: "#333333", radius: 2.02 },
+  115: { symbol: "Mc", color: "#b34d00", radius: 2.07 },
+  116: { symbol: "Lv", color: "#009900", radius: 1.97 },
+  117: { symbol: "Ts", color: "#b34de6", radius: 2.02 },
+  118: { symbol: "Og", color: "#ffffff", radius: 2.20 },
 };
 export function symbol(z: number) {
   return elements[z]?.symbol ?? `Z${z}`;

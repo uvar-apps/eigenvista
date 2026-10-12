@@ -8,6 +8,40 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.6
+
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.6` tag, and push to `origin` on `main`. This patch extends the atom
+display table from Z 1–103 to the full model-accepted range Z 1–118, the
+remaining scope of
+[#1](https://github.com/uvar-apps/eigenvista/issues/1). No measured van der
+Waals radii exist for Rf–Og; their radii are extrapolated from each
+element's group congener (Rf←Hf … Og←Rn) and their colors follow the same
+group palette as the supplied table (transition metals yellow, group 13
+light blue, 14 dark gray, 15 brown, 16 dark green, 17 purple, 18 white).
+The code records this provenance in a comment at the table. The generic
+`Z`-prefixed fallback is now unreachable for documents the Rust model
+accepts (Z 1–118) but remains as defensive code. `docs/user-guide.md` and
+`docs/handoff.md` now describe the full-range table. This is a display-only
+change; the scientific model, bond perception, native format, and worker
+paths are untouched.
+
+Verification on Apple Silicon macOS (partial; the change is TypeScript-only):
+
+| Gate | Result |
+| --- | --- |
+| `npx tsc --noEmit` | Passed |
+| `npx playwright test tests/viewer.spec.ts tests/connectivity.spec.ts` | 28 passed: 14 scenarios across Chromium and WebKit |
+
+Not rerun for this change: the remaining 11 browser specs (full suite is
+136 cases), workspace Rust tests, Clippy, formatting, the production
+WASM/frontend build, packaging tests, native GUI interaction, and any
+redistributable ZIP. External locked dependencies and all first-party
+versions agree at 0.5.6. The issue's remaining suggestions (a deliberately
+distinct fallback for unmodelled elements and an unrecognized-element count
+in the document summary) are not implemented, though the fallback is now
+unreachable for valid documents.
+
 ## Version 0.5.5
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated

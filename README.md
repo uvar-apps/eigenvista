@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version 0.5.5 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence and remaining gates.
+**Status:** version 0.5.6 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence and remaining gates.
 
 ## Start here
 

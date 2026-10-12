@@ -1,25 +1,26 @@
 # Development handoff
 
-Updated 12 October 2026 for the 0.5.5 element display table; the dated
+Updated 12 October 2026 for the 0.5.6 full element display table; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.5**, in the standalone
+The current application is **EigenVista**, version **0.5.6**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
-Version 0.5.5 replaces the eight-element display table with colors for
-elements 1–103 from a Jmol-style default palette and Bondi van der Waals
-radii (issue [#1](https://github.com/uvar-apps/eigenvista/issues/1)).
-Picking labels now use real symbols across that range. Elements Z ≥ 104
-still use the generic fallback. This is a display-only change; bond
-perception and the scientific model are untouched. Verification: `tsc
---noEmit` and the viewer/connectivity Playwright specs (28 cases across
-Chromium and WebKit) passed; the full 136-case browser suite, Rust tests,
-Clippy, production build, packaging tests, and a redistributable ZIP were
-not rerun for this change.
+Version 0.5.6 replaces the eight-element display table with colors for
+all accepted elements (Z 1–118) (issue [#1](https://github.com/uvar-apps/eigenvista/issues/1)).
+Elements 1–103 use a Jmol-style default palette and Bondi van der Waals
+radii; superheavy elements (Z 104–118) use group-congener estimates, since
+no measured van der Waals radii exist for them. Picking labels use real
+symbols everywhere. This is a display-only change; bond perception and the
+scientific model are untouched. Verification: `tsc --noEmit` and the
+viewer/connectivity Playwright specs (28 cases across Chromium and WebKit)
+passed; the full 136-case browser suite, Rust tests, Clippy, production
+build, packaging tests, and a redistributable ZIP were not rerun for this
+change.
 
 The orbital preview follow-up ([#15](https://github.com/uvar-apps/eigenvista/issues/15))
 lets users select volume or raycast directly after importing Molden, without
