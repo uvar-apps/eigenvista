@@ -65,6 +65,19 @@ export function ShaderPanel({
   const paramsInput = useRef<HTMLInputElement>(null);
   const [paramsError, setParamsError] = useState("");
 
+  // One source of truth for which files each picker accepts: the browser
+  // uses it as the input accept list, the native dialog uses it as the file
+  // filter. Without this the native dialog filters by molecular-document
+  // extensions and every shader file appears disabled (#23).
+  const accept = {
+    vertex: ".vert,.glsl,.vs,.txt,.frag",
+    fragment: ".frag,.glsl,.fs,.txt,.vert",
+    params: ".params,.txt",
+  } as const;
+
+  const extensions = (kind: keyof typeof accept) =>
+    accept[kind].split(",").map((extension) => extension.slice(1));
+
   async function readText(file: File): Promise<string> {
     return file.text();
   }
@@ -101,7 +114,11 @@ export function ShaderPanel({
   }
 
   async function pickNativeText(kind: "vertex" | "fragment" | "params") {
-    const [picked] = await pickNative();
+    const [picked] = await pickNative(
+      false,
+      extensions(kind),
+      kind === "params" ? "Shader parameters" : "GLSL shaders",
+    );
     if (!picked) return;
     const bytes = await picked.read();
     const text = new TextDecoder().decode(bytes);
@@ -152,7 +169,7 @@ export function ShaderPanel({
       <input
         ref={vertexInput}
         type="file"
-        accept=".vert,.glsl,.vs,.txt,.frag"
+        accept={accept.vertex}
         hidden
         data-shader-input="vertex"
         onChange={(e) => {
@@ -163,7 +180,7 @@ export function ShaderPanel({
       <input
         ref={fragmentInput}
         type="file"
-        accept=".frag,.glsl,.fs,.txt,.vert"
+        accept={accept.fragment}
         hidden
         data-shader-input="fragment"
         onChange={(e) => {
@@ -174,7 +191,7 @@ export function ShaderPanel({
       <input
         ref={paramsInput}
         type="file"
-        accept=".params,.txt"
+        accept={accept.params}
         hidden
         data-shader-input="params"
         onChange={(e) => {

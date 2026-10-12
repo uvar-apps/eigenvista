@@ -115,7 +115,7 @@ export default function App() {
     setAtomPaletteError("");
   }
   async function pickAtomPalette() {
-    const [picked] = await pickNative();
+    const [picked] = await pickNative(false, ["json", "txt"], "Atom colours");
     if (!picked) return;
     const bytes = await picked.read();
     applyAtomPalette(new TextDecoder().decode(bytes), picked.name);

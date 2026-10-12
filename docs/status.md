@@ -8,6 +8,43 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.10
+
+Date: 12 October 2026. The user requested a version bump, commit, annotated
+`v0.5.10` tag, push to `origin` on `main`, and a rebuilt redistributable. This
+release fixes
+[#23](https://github.com/uvar-apps/eigenvista/issues/23): in the desktop app,
+loading a vertex/fragment shader or a `.params` file opened a native dialog
+with every file disabled.
+
+Root cause: `pickNative()` in [files.ts](../app/src/files.ts) hardcoded the
+"Molecular documents" filter for every native open dialog. The shader panel —
+and the atom-colours picker added in 0.5.8 — called it unchanged, so the
+dialog filtered out `.glsl`, `.vert`, `.frag`, `.params`, and `.json`.
+The browser build was unaffected (its `accept` attributes were already right),
+which is why the e2e suite never caught it: Playwright exercises the browser
+path only, and the native dialog is a Tauri platform call it cannot drive.
+
+The fix gives `pickNative` an optional extension list + label, and puts one
+extension map in [ShaderPanel.tsx](../app/src/ShaderPanel.tsx) behind both the
+browser `accept` attributes and the native filter so the two paths cannot
+diverge again. The atom-colours picker now filters for `json`/`txt`.
+
+Evidence on the development Apple Silicon Mac, 12 October 2026:
+
+| Check | Result |
+| --- | --- |
+| `cargo fmt --all --check` | clean |
+| `npm --prefix app test` | 141 passed, 0 failed |
+| `cargo clippy --workspace --all-targets -- -D warnings` | clean |
+| `cargo test -p eigenvista-desktop` | passed |
+| `npm --prefix app run build` | passed |
+| `shaders.spec.ts` + `atom-colors.spec.ts`, Chromium + WebKit | 14 passed |
+
+Gap: the native dialog filter itself is verified by inspection only — native
+file dialogs are not automatable in the current e2e harness. A manual smoke
+test (open a surface, load a shader) remains the close-out for #23.
+
 ## Version 0.5.9
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated

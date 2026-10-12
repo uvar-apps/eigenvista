@@ -21,15 +21,19 @@ export function browserSource(file: File): SourceFile {
     },
   };
 }
-export async function pickNative(multiple = false): Promise<SourceFile[]> {
+export async function pickNative(
+  multiple = false,
+  extensions?: string[],
+  label = "Molecular documents",
+): Promise<SourceFile[]> {
   const selection = await open({
     multiple,
     filters: [
       {
-        name: "Molecular documents",
-        extensions: molecularExtensions
-          .split(",")
-          .map((extension) => extension.slice(1)),
+        name: label,
+        extensions:
+          extensions ??
+          molecularExtensions.split(",").map((extension) => extension.slice(1)),
       },
       { name: "All files", extensions: ["*"] },
     ],
