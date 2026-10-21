@@ -63,6 +63,8 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
+Download the current [0.5.11 tester release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.11)
+for the ZIP, checksum, and build metadata.
 The ZIP is a development build for Apple Silicon Macs, not an Apple-notarized
 release. It includes source and notices under the [application license](LICENSE).
 

@@ -10,13 +10,15 @@ The current application is **EigenVista**, version **0.5.11**, in the standalone
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
-## Current local work
+## Current release
 
 Issue [#24](https://github.com/uvar-apps/eigenvista/issues/24) adds real-time
-progress for surface generation and sampling-only previews. The baseline is
-`3632df2` on `main`; source manifests and lockfiles are now 0.5.11. The user has
-authorized commit, tag, packaging, push, and a GitHub release; publication is
-pending verification. Rust reports completed z slices through optional WASM callbacks;
+progress for surface generation and sampling-only previews. Release commit
+`cd2ad8d` and annotated tag `v0.5.11` are pushed to origin. Source manifests and
+lockfiles are 0.5.11. The [GitHub preview release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.11)
+contains the verified Apple Silicon ZIP, checksum, and build metadata. This
+documentation follow-up records the completed release without moving its tag.
+Rust reports completed z slices through optional WASM callbacks;
 the worker throttles notifications and the UI shows the field/batch position,
 per-phase percentage/counts, and elapsed time beside Cancel. Meshing reports
 completed signed extraction passes, not internal marching-cubes iterations.
@@ -31,12 +33,16 @@ the complete 158-case Chromium/WebKit suite in one uninterrupted run. Inspected
 progress screenshots; earlier desktop/mobile inspection is recorded in status.
 Verified version agreement, unchanged external dependencies, and 214 local
 documentation link targets. Native interactive progress was not exercised.
-The preview runs on port 5178. The existing app/ZIP still predate the bump;
-the authorized 0.5.11 packaging step follows this verified source checkpoint.
-Issue #24 remains open pending publication. The user's untracked
+The preview runs on port 5178. The app and tester ZIP were rebuilt at 0.5.11
+from clean `cd2ad8d`, with signatures, extracted bytes/modes, sample imports,
+converter/WASM roundtrips, source identity, and uploaded ZIP digest verified.
+Package: `artifacts/distributions/EigenVista-0.5.11-apple-silicon-20261021T102833Z-cd2ad8d.zip`.
+It is ad-hoc signed, not notarized; clean-Mac installation and Linux/Windows
+remain unverified. Issue #24 is closed. The user's untracked
 `fixtures/large-structure/1AON.pdb` is preserved and locally excluded from Git
-and packaging via `.git/info/exclude`, not added to the release. Next: finish
-0.5.11 verification and publication; see status for the latest evidence.
+and packaging via `.git/info/exclude`, not added to the release. Next: user
+acceptance of native progress and remaining open issues; see status for artifact
+checksums and limits. Timestamped restart snapshots still describe 0.5.10.
 
 ## Release context
 

@@ -10,19 +10,43 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Version 0.5.11
 
-Date: 21 October 2026. Release preparation for live calculation progress (#24).
+Date: 21 October 2026. Released live calculation progress (#24) at commit
+`cd2ad8d529e81a02934fab748cce1143239c2185`, annotated tag `v0.5.11`, pushed to
+origin. [GitHub development-preview release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.11)
+is published with the ZIP, SHA-256 companion, and build-information JSON.
 The Rust workspace (all six crates), npm package/lock roots, and Tauri identity
 are now 0.5.11. User and agent guides reflect the current progress behavior;
-dated release records and restart snapshots remain unchanged. The user has
-authorized commit, annotated tag, a rebuilt tester ZIP, push, and GitHub release.
+dated release records and restart snapshots remain unchanged.
 No scientific schema, dependency version, or memory limit changes accompany
 the bump. Post-bump checks pass: 145 workspace Rust tests (including desktop),
 strict workspace/all-target Clippy, Rustfmt, production WASM/TypeScript/Vite
 build, 13 packaging tests, and the complete 158-case Chromium/WebKit suite in
 one uninterrupted run. Inspected progress screenshots and verified 214 local
 documentation link targets. All six crate versions and npm/Tauri versions agree;
-external locked dependencies are unchanged. Packaging and publication follow
-this verified source checkpoint; artifact evidence will be recorded afterward.
+external locked dependencies are unchanged.
+
+The packaging script rebuilt the native app and converter from clean release
+source, reran Rust/packaging tests, checked arm64/system-only libraries and
+strict signatures, compared ZIP extraction bytes/modes, and exercised packaged
+PDB/XYZ/Molden/cube examples plus converter/WASM roundtrips before and after
+extraction. The native bundle reports 0.5.11 and embeds the current frontend
+`assets/index-Bo_iKzRk.js`. Build metadata reports `sourceDirty: false` and the
+release commit above. The user's local `1AON.pdb` and private chat exports are
+absent from the source manifest; the PDB is unchanged and locally ignored via
+`.git/info/exclude` rather than committed or removed.
+
+Artifact: `artifacts/distributions/EigenVista-0.5.11-apple-silicon-20261021T102833Z-cd2ad8d.zip`
+(43,810,913 bytes), with adjacent `.zip.sha256` and `.json` files. SHA-256:
+`c09f8b626df287a1f9a370c3867db0b069176fadd69cdea8fb02767ce537d7da`.
+The local checksum passes and GitHub reports the same uploaded ZIP digest.
+The app is also available at
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+
+Issue #24 is closed. A documentation-only follow-up records this outcome;
+the release tag and packaged source remain at `cd2ad8d`. Native interactive
+progress, clean-Mac/Gatekeeper installation, the complete macOS range, and
+Linux/Windows remain unverified. This is an ad-hoc-signed development preview,
+not an Apple-notarized or scientifically qualified release.
 
 ## Live calculation progress
 
