@@ -39,6 +39,16 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Version 0.5.11 adds live calculation progress (#24). Rust sampling observers
+  report actual completed z slices; optional WASM callbacks feed throttled worker
+  events. The UI shows per-phase counts/percentage, field/batch position, and
+  elapsed time. Meshing reports two signed passes, not internal cell progress.
+  Preserve callback-free APIs, cache reuse, cancellation/stale-event guards,
+  numerical results, and allocation limits. Tests live in
+  `crates/eigenvista-core/tests/sampling_progress.rs` and
+  `app/tests/progress.spec.ts`. Consult `docs/handoff.md` and `docs/status.md`
+  for current release/artifact state rather than the dated restart snapshots.
+
 - Version 0.5.4 fixes direct orbital/density previews (#15): choosing volume or
   raycast uses the worker's sampling-only operation, without marching cubes.
   Only explicit surface generation creates meshes. Keep field/resolution changes

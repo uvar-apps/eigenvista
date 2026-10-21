@@ -8,6 +8,71 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.11
+
+Date: 21 October 2026. Release preparation for live calculation progress (#24).
+The Rust workspace (all six crates), npm package/lock roots, and Tauri identity
+are now 0.5.11. User and agent guides reflect the current progress behavior;
+dated release records and restart snapshots remain unchanged. The user has
+authorized commit, annotated tag, a rebuilt tester ZIP, push, and GitHub release.
+No scientific schema, dependency version, or memory limit changes accompany
+the bump. Post-bump checks pass: 145 workspace Rust tests (including desktop),
+strict workspace/all-target Clippy, Rustfmt, production WASM/TypeScript/Vite
+build, 13 packaging tests, and the complete 158-case Chromium/WebKit suite in
+one uninterrupted run. Inspected progress screenshots and verified 214 local
+documentation link targets. All six crate versions and npm/Tauri versions agree;
+external locked dependencies are unchanged. Packaging and publication follow
+this verified source checkpoint; artifact evidence will be recorded afterward.
+
+## Live calculation progress
+
+Pre-release implementation evidence, 21 October 2026 (before the 0.5.11 bump). Issue
+[#24](https://github.com/uvar-apps/eigenvista/issues/24), local changes after
+`3632df2`, tested initially at 0.5.10. Added actual sampling slice counts and signed
+mesh-pass checkpoints through the Rust/WASM worker. The panel beside Cancel
+shows the field, orbital batch position, elapsed time, and per-phase progress.
+Preparation, transfer, and validation are indeterminate. No ETA, timer-driven
+percentage, mesher replacement, scientific change, or limit increase was added.
+Cached fields skip sampling. Progress clears on completion/cancel/error and old
+worker/request events cannot update a later job.
+
+The Rust observer API is optional and bounded to at most 257 sampling events.
+The worker limits intermediate notifications to at most one per 100 ms while
+always retaining start/end. `js-sys` is now a direct dependency using its
+existing locked 0.3.85 version, without external dependency upgrades.
+
+Fresh verification on the development Apple Silicon Mac with Rust stable
+1.99.0 and wasm-bindgen 0.2.108:
+
+- Formatting, strict workspace/all-target Clippy, 145 workspace Rust tests
+  (including desktop), 13 packaging tests, and the production WASM/TypeScript/
+  Vite build passed. Vite retains its existing large-chunk warning.
+- The full 158-case Chromium/WebKit run passed 156 cases. The two failures were
+  the existing high-resolution cache probe counting incremental progress as
+  separate calculations. After changing it to count phase starts, all 18
+  high-resolution/progress cases passed in both engines. Together these runs
+  cover all 158 cases; this is not a single uninterrupted green full-suite run.
+- New checks cover exact Rust/WASM sample and mesh parity, callback failure,
+  imported affine-grid progress, real Molden batch completion, live 256-cubed
+  sampling, cancellation/error cleanup, stale events, retry, and cache reuse.
+  Desktop/mobile progress screenshots were inspected in both engines at
+  `artifacts/progress-{chromium,webkit}-{cancel,worker-error}.png`.
+- External registry dependency versions/checksums remain unchanged. The user's
+  untracked `fixtures/large-structure/1AON.pdb` is untouched.
+
+The Apple Silicon release app was rebuilt with the sanitized tester environment
+and ad-hoc signing at
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`. Strict deep
+signature verification passed, bundle metadata was 0.5.10, and the native
+executable contained frontend asset `assets/index-BCO92s6o.js`.
+Native interactive progress, clean-Mac installation, and Linux/Windows were not
+tested. An already-running native instance must be quit/reopened by the user to
+load the rebuild. The preview is available at `http://127.0.0.1:5178/`.
+
+At this pre-release checkpoint the ZIP was unchanged and the feature was
+uncommitted, with issue #24 open. See the 0.5.11 entry above for subsequent
+release verification and publication.
+
 ## Fresh-session handoff
 
 Date: 21 October 2026. Documentation-only restart preparation at `69d234b`

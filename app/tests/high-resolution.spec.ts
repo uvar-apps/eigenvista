@@ -175,9 +175,9 @@ test("256-cubed density meshes render and retain their requested resolution on s
       if (message.action === "generate" && message.args.resolution === 256) {
         this.addEventListener("message", ({ data }) => {
           if (data.id !== message.id) return;
-          if (data.progress === "sampling")
+          if (data.progress === "sampling" && data.completed === 0)
             control.highResolutionCacheProbe.sampling++;
-          if (data.progress === "meshing")
+          if (data.progress === "meshing" && data.completed === 0)
             control.highResolutionCacheProbe.meshing++;
           const grid = data.result?.grid;
           if (!grid) return;

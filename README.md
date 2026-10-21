@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version 0.5.8 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence and remaining gates.
+**Status:** version 0.5.11 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
 
 ## Start here
 
@@ -73,6 +73,9 @@ release. It includes source and notices under the [application license](LICENSE)
 - Explicit Gaussian-polynomial basis evaluation and gradients through G, signed orbitals, and supplied real density matrices in Rust/f64.
 - Ball-and-stick, liquorice, and space-filling representations; camera controls, atom picking, and image export.
 - Rust marching-cubes mesh extraction, signed colors, opacity, visibility, deletion, sampling/meshing/validation progress, worker cancellation, and sampled-field reuse.
+- Live calculation progress shows the current field and orbital batch position,
+  completed sampling slices, per-phase percentage, signed mesh-pass checkpoints,
+  and elapsed time. Cancellation remains available throughout worker jobs.
 - Searchable orbital table with energy, occupation, spin, and saved-surface counts;
   select up to 32 orbitals per batch to generate persistent signed meshes together.
   Cancel or failure preserves prior geometry, and successful batches retain
@@ -125,7 +128,9 @@ large sample array through JSON.
 
 A 256 cubed field contains 16,777,216 samples: 128 MiB for f64 values plus
 64 MiB for f32 display values, before meshes, additional copies, and GPU memory.
-Larger jobs may take longer; phase progress is not a percentage or time estimate.
+Larger jobs may take longer. Percentages measure completed sampling slices or
+signed mesh passes, not overall time remaining; preparation, transfer, and
+validation are indeterminate. There is no ETA or intra-pass mesher percentage.
 Cancel terminates the worker, retaining previous geometry, and recoverable
 errors leave the previous document intact. Allocation checks cannot guarantee
 recovery from every library, browser, GPU, or system out-of-memory failure;

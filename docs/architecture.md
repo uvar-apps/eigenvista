@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.5.8 development preview, not the complete
+This describes the 0.5.11 development preview, not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
@@ -249,14 +249,32 @@ in the UI for sampled rendering; the f64 grid remains in the worker's
 single-entry Rust/WASM cache rather than a JavaScript number array.
 
 Request IDs resolve worker promises and associate progress events with the
-request that emitted them. Sampling, meshing, and validation stage events update
-the footer while the UI remains separate from synchronous Rust/WASM work.
-They indicate phases, not completed voxel counts, percentages, or estimated
-remaining time. Stale progress is ignored through request and generation-token
+request that emitted them. Stage events keep the string `progress` field, with
+optional integer `completed`/`total` counts validated by the client. Rust
+`sample_with_progress` reports zero and each finished z slice; imported-grid
+copies report start/end and resampling reports its actual output slice count.
+The original `sample` entry point remains a no-observer wrapper. The WASM
+`SampledField.with_progress` and `surfaces_with_progress` APIs use optional
+JavaScript callbacks; old constructors/methods remain supported. Callback errors
+return errors without publishing a partial result. `js-sys` 0.3.85 is now a
+direct dependency at its already-locked version; no registry package was upgraded.
+
+Worker notifications are throttled to one per 100 ms, except phase start/end.
+Mesh counts are completed positive/negative extraction passes, including empty
+surfaces; the pinned mesher itself has no internal progress callback. The panel
+beside Cancel shows per-phase progress, current field/batch index, and elapsed
+time. Its timer updates only that component. Preparation, display transfer, and
+container validation are indeterminate, and cached sampling is skipped. This
+is measured work, not an ETA or an overall-job percentage. Fast phases may not
+paint before the next phase. No additional field arrays or meshes are allocated
+for progress. Stale progress is ignored through request and generation-token
 checks, just like stale completion. Cancellation terminates the same Web Worker,
 rejects outstanding work, and clears its cache; it does not cooperatively stop
 inside a Rust loop. The next request starts a new worker. Previous completed
 geometry remains intact, and cancellation is not a resumable checkpoint.
+Progress UI state is cleared on success, cancellation, and failure; it is not
+persisted in native documents. The existing global pending-request cancellation
+behavior remains tracked separately by issue #6.
 
 Mesh mode renders durable surface records. Sampled raycast and volume modes
 use a 3D texture and replace the selected field's mesh display. Other fields'

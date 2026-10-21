@@ -10,6 +10,16 @@ function clearCache() {
 self.onmessage = async (event: MessageEvent) => {
   const { id, action, args } = event.data;
   const progress = (stage: string) => self.postMessage({ id, progress: stage });
+  const measuredProgress = (stage: string) => {
+    let last = -Infinity;
+    return (completed: number, total: number) => {
+      const now = performance.now();
+      if (completed === 0 || completed === total || now - last >= 100) {
+        self.postMessage({ id, progress: stage, completed, total });
+        last = now;
+      }
+    };
+  };
   try {
     await ready;
     let result: unknown;
@@ -53,17 +63,27 @@ self.onmessage = async (event: MessageEvent) => {
         ]);
         if (cached?.key !== key) {
           clearCache();
-          progress("sampling");
           cached = {
             key,
-            field: new core.SampledField(json, args.field, args.resolution),
+            field: core.SampledField.with_progress(
+              json,
+              args.field,
+              args.resolution,
+              measuredProgress("sampling"),
+            ),
           };
         }
-        if (action === "generate") progress("meshing");
         const surfaces =
           action === "generate"
-            ? JSON.parse(cached.field.surfaces(json, args.iso))
+            ? JSON.parse(
+                cached.field.surfaces_with_progress(
+                  json,
+                  args.iso,
+                  measuredProgress("meshing"),
+                ),
+              )
             : null;
+        progress("transferring");
         const grid: SampledGrid = {
           ...JSON.parse(cached.field.metadata()),
           values: cached.field.display_values(),

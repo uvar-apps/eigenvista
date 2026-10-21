@@ -1,11 +1,12 @@
 let worker: Worker | null = null;
+export type WorkProgress = { completed: number; total: number };
 let nextId = 0;
 const pending = new Map<
   number,
   {
     resolve: (v: unknown) => void;
     reject: (e: Error) => void;
-    onProgress?: (stage: string) => void;
+    onProgress?: (stage: string, counts?: WorkProgress) => void;
   }
 >();
 function start() {
@@ -22,7 +23,15 @@ function start() {
       return;
     }
     if (typeof data.progress === "string") {
-      p.onProgress?.(data.progress);
+      const counts =
+        Number.isSafeInteger(data.completed) &&
+        Number.isSafeInteger(data.total) &&
+        data.total > 0 &&
+        data.completed >= 0 &&
+        data.completed <= data.total
+          ? { completed: data.completed, total: data.total }
+          : undefined;
+      p.onProgress?.(data.progress, counts);
       return;
     }
     pending.delete(data.id);
@@ -57,7 +66,7 @@ export function cancel(reason = new Error("Calculation cancelled")) {
 export function request<T>(
   action: string,
   args: Record<string, unknown>,
-  onProgress?: (stage: string) => void,
+  onProgress?: (stage: string, counts?: WorkProgress) => void,
 ): Promise<T> {
   const id = ++nextId;
   // Worker construction and posting happen inside the executor so any failure
@@ -69,7 +78,9 @@ export function request<T>(
       if (!worker) start();
       const instance = worker;
       if (!instance)
-        throw new Error("Scientific worker is unavailable; retry the calculation");
+        throw new Error(
+          "Scientific worker is unavailable; retry the calculation",
+        );
       instance.postMessage({ id, action, args });
     } catch (error) {
       cancel(error instanceof Error ? error : new Error(String(error)));

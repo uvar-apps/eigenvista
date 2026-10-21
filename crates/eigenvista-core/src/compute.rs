@@ -205,6 +205,16 @@ pub fn source_hash(doc: &Document, field: &str) -> Result<String> {
 }
 
 pub fn sample(doc: &Document, field: &str, resolution: usize) -> Result<Grid> {
+    sample_with_progress(doc, field, resolution, |_, _| Ok(()))
+}
+
+/// Report completed z slices, including zero and completion, without changing sampling.
+pub fn sample_with_progress(
+    doc: &Document,
+    field: &str,
+    resolution: usize,
+    mut progress: impl FnMut(usize, usize) -> Result<()>,
+) -> Result<Grid> {
     doc.validate()?;
     doc.check_field(field)?;
     if !(12..=256).contains(&resolution) {
@@ -217,7 +227,9 @@ pub fn sample(doc: &Document, field: &str, resolution: usize) -> Result<Grid> {
         let dims = g.dims.map(|n| n.min(resolution));
         if dims == g.dims {
             let mut values = buffer(g.values.len(), "sampled field")?;
+            progress(0, dims[2])?;
             values.extend_from_slice(&g.values);
+            progress(dims[2], dims[2])?;
             return Ok(Grid {
                 id: g.id.clone(),
                 label: g.label.clone(),
@@ -239,6 +251,7 @@ pub fn sample(doc: &Document, field: &str, resolution: usize) -> Result<Grid> {
             dims,
             values: buffer(sample_count(dims)?, "sampled field")?,
         };
+        progress(0, dims[2])?;
         for z in 0..dims[2] {
             for y in 0..dims[1] {
                 for x in 0..dims[0] {
@@ -272,6 +285,7 @@ pub fn sample(doc: &Document, field: &str, resolution: usize) -> Result<Grid> {
                     out.values.push(v);
                 }
             }
+            progress(z + 1, dims[2])?;
         }
         return Ok(out);
     }
@@ -319,6 +333,7 @@ pub fn sample(doc: &Document, field: &str, resolution: usize) -> Result<Grid> {
     };
     let mut ao = buffer(doc.basis.len(), "basis values")?;
     ao.resize(doc.basis.len(), 0.);
+    progress(0, resolution)?;
     for z in 0..resolution {
         for y in 0..resolution {
             for x in 0..resolution {
@@ -333,6 +348,7 @@ pub fn sample(doc: &Document, field: &str, resolution: usize) -> Result<Grid> {
                 grid.values.push(v);
             }
         }
+        progress(z + 1, resolution)?;
     }
     Ok(grid)
 }

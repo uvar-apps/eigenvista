@@ -5,6 +5,11 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
+Current source version: **0.5.11**, including live orbital/density calculation
+progress. Check the [living handoff](handoff.md) and [status](status.md) for
+publication, artifact, and verification state; timestamped restart documents
+are historical snapshots, not the current release record.
+
 The active rewrite is now EigenVista. Historical Molekel names in research,
 release evidence, repository URLs, and Git tags are preserved. Existing
 `.molekel` preview files remain supported; new saves default to `.eigenvista`.

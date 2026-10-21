@@ -3,13 +3,13 @@
 ## What this program does
 
 EigenVista displays molecular structures and quantum-chemistry fields in an
-interactive 3D scene. You can open Molden wavefunctions, PDB/XYZ structures, and
+interactive 3D scene. You can open Molden wavefunctions, PDB/mmCIF/XYZ structures, and
 Gaussian cube scalar fields, inspect automatically computed bonds, display
 supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This is version 0.5.8, a development preview. Scientific calculations and
+This guide describes version 0.5.11, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
@@ -229,8 +229,9 @@ can also be generated from the source tree; see `fixtures/pyscf/README.md`.
    **Generate selected**. Select at most **32 orbitals per generation**; the
    table itself is not limited to 32. Large jobs can still exceed the preview's
    geometry budget, so use fewer orbitals or a lower resolution if rejected.
-4. The window closes and the footer reports the current orbital and work phase.
-   **Cancel** stops the batch.
+4. The window closes. Beneath **Cancel**, live progress shows the current orbital,
+   its position in the batch, completed sampling slices, per-phase percentage,
+   signed mesh-pass checkpoints, and elapsed time. **Cancel** stops the batch.
    Results are applied together only after the complete batch passes validation;
    cancelling or a recoverable error leaves the previous surfaces in place.
 5. On success, the new meshes appear together in **Isosurface mesh** mode.
@@ -260,8 +261,15 @@ new density matrix.
    preview** under Mode. This samples the selected field in the background;
    it does not run marching cubes or create saved surfaces. For saved meshes,
    click **Generate surfaces**. The footer shows the sampling, meshing, and
-   validation phases, followed by completion and triangle count. These are
-   phases, not percentage progress or a remaining-time estimate. During
+   validation phases, followed by completion and triangle count. A progress
+   panel below the button shows the current field, batch position when generating
+   multiple orbitals, and elapsed time. Sampling reports completed grid slices
+   and a percentage for that field; mesh extraction reports completion of the
+   two signed isovalues. Percentages restart for each phase and orbital, not for
+   the whole job. Preparation, display transfer, and validation are indeterminate.
+   There is no remaining-time estimate; one slice or sign can take longer than
+   another. Cached fields skip sampling. Very short phases may complete before
+   their indicator is painted. During
    computation the same button becomes **Cancel**; cancelling retains the
    previous completed meshes.
 5. Adjust colors or opacity, then Save to make the result durable on disk.
@@ -463,7 +471,7 @@ Keep original data and backups because the native preview schema is not frozen.
 | Cube opens but no field is visible | Check the isovalue and scalar range, Fit scene, and any preview error; an all-zero grid has no nonzero surface |
 | Structure seems missing | Use Fit scene; try Ball and stick; check atom counts and error messages |
 | Unexpected PDB atom/bond count | Read Provenance; first-model/alternate/occupancy selection and heuristic bonds affect counts |
-| Calculation takes too long | Check the footer phase; Cancel preserves completed meshes, then retry at a lower resolution or with fewer orbitals |
+| Calculation takes too long | Check the progress panel's phase, counts, and elapsed time; meshing updates only between signed passes. Cancel preserves prior surfaces, then retry at a lower resolution or with fewer orbitals |
 | Mesh allocation or file-size error | Lower grid resolution or generate fewer orbitals; numerical, geometry, and persistence bounds remain |
 | File rejected | Check format/profile and exact message; do not strip validation metadata or rename unsupported data |
 | WebGL2 unavailable | Check graphics acceleration or try another compatible device/browser |

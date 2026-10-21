@@ -1,14 +1,44 @@
 # Development handoff
 
-Updated 21 October 2026 for fresh-session orientation at 0.5.10; the dated
+Updated 21 October 2026 for live calculation progress and release 0.5.11; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.10**, in the standalone
+The current application is **EigenVista**, version **0.5.11**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Current local work
+
+Issue [#24](https://github.com/uvar-apps/eigenvista/issues/24) adds real-time
+progress for surface generation and sampling-only previews. The baseline is
+`3632df2` on `main`; source manifests and lockfiles are now 0.5.11. The user has
+authorized commit, tag, packaging, push, and a GitHub release; publication is
+pending verification. Rust reports completed z slices through optional WASM callbacks;
+the worker throttles notifications and the UI shows the field/batch position,
+per-phase percentage/counts, and elapsed time beside Cancel. Meshing reports
+completed signed extraction passes, not internal marching-cubes iterations.
+Preparation/transfer/validation remain indeterminate; no ETA is fabricated.
+Cancellation, cache reuse, scientific results, memory guards, and atomic
+publication must remain unchanged. See [status](status.md#version-0511)
+for fresh verification and artifact state; timestamped snapshots stay unchanged.
+
+Fresh post-bump checks at 0.5.11: 145 workspace Rust tests, strict
+Clippy/formatting, 13 packaging tests, and the production build passed, as did
+the complete 158-case Chromium/WebKit suite in one uninterrupted run. Inspected
+progress screenshots; earlier desktop/mobile inspection is recorded in status.
+Verified version agreement, unchanged external dependencies, and 214 local
+documentation link targets. Native interactive progress was not exercised.
+The preview runs on port 5178. The existing app/ZIP still predate the bump;
+the authorized 0.5.11 packaging step follows this verified source checkpoint.
+Issue #24 remains open pending publication. The user's untracked
+`fixtures/large-structure/1AON.pdb` is preserved and locally excluded from Git
+and packaging via `.git/info/exclude`, not added to the release. Next: finish
+0.5.11 verification and publication; see status for the latest evidence.
+
+## Release context
 
 For a fresh session, start with the [restart snapshot](session-handoff-2026-10-21_173143-AWST.md) and
 [coding-agent prompt](restart-prompt-2026-10-21_173143-AWST.md). They cover current Git/issue state,
@@ -391,8 +421,9 @@ these requirements because the current preview can display a scene.
   jobs stay inside the worker. Retain numerical/domain validation, API grids
   from 12 through 256, separate 256-cubed transient and 128-cubed source-grid
   bounds, exact mesh-output preflight, and document/container budgets. UI
-  options extend from 24 through 256 with default 40; progress
-  reports phases rather than voxel counts or an ETA. Termination, request IDs,
+  options extend from 24 through 256 with default 40; progress reports completed
+  sampling slices and signed mesh passes, with indeterminate phases elsewhere
+  and no ETA. Termination, request IDs,
   and generation tokens must prevent cancelled or stale work from publishing.
 - `SampledField` owns the single worker cache. Free old fields before replacement
   and preserve scientific-hash checks on reuse. Display buffers are independent

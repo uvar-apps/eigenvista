@@ -26,6 +26,11 @@ license tool. Build/staging temporary files use the repository's ignored `tmp/`.
 
 ## Outputs
 
+Changing source versions does not update an existing app or ZIP. For each
+release, rebuild with the command above and check the output's `BUILD-INFO.json`
+version and Git revision before sharing. See [status](status.md) for the latest
+verified artifact; older packages remain historical outputs.
+
 Successful runs print a ZIP path under `artifacts/distributions/`, a
 SHA-256 companion file, and a build-information JSON file. Filenames include
 the app version, architecture, UTC timestamp, Git revision, and `-dirty` when

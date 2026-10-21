@@ -172,6 +172,7 @@ cargo check --manifest-path Cargo.toml --locked -p eigenvista-desktop
 | Container/native saving | Format unit tests and [reference roundtrips](../crates/eigenvista-format/tests/reference_roundtrips.rs) |
 | Browser workflows/numerics | [Playwright tests](../app/tests): Chromium/WebKit, real file input/download, pixels, camera, desktop/mobile layout |
 | Direct field previews | [Sampling-only workflows](../app/tests/field-preview.spec.ts): real `molden.input` orbital/density volume and raycast without meshing, field/resolution changes, transient cache reuse, save/reopen, cancellation and worker-failure recovery |
+| Live calculation progress | [Rust slice counts/parity](../crates/eigenvista-core/tests/sampling_progress.rs) and [browser progress workflows](../app/tests/progress.spec.ts): real in-flight updates, batch position, WASM numerical/mesh parity, cancellation/error cleanup, stale events, cached mesh progress, and desktop/mobile layout |
 | EigenVista identity and native compatibility | [Branding/browser regression](../app/tests/branding.spec.ts), [legacy format profiles](../crates/eigenvista-format/tests/legacy_compatibility.rs), and [native import compatibility](../crates/eigenvista-import/tests/native_compatibility.rs): old-profile scientific fixtures/legacy/data/cached meshes, canonical names, unchanged atom logo, downloads, and narrow-window layout |
 | Camera redraw and zoom alternatives | [Camera regressions](../app/tests/camera.spec.ts): wheel-only redraw without a later click, idle settling, both zoom directions, middle-drag and keyboard buttons in every rendering mode, and narrow toolbar layout |
 | Orbital selection and batch rendering | [Orbital browser workflows](../app/tests/orbitals.spec.ts): complete imported lists and metadata, filtering/checkboxes, bounded generation, preserved meshes, cancellation, save/reopen, desktop/mobile layout |
@@ -218,8 +219,11 @@ selectors offer 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, and 256 points
 per axis, with default 40. Larger real-molecule tests remain user/platform
 acceptance work, not an implied all-resolution benchmark. Confirm that the
 request uses its chosen resolution without an estimated-work rejection or
-automatic downgrade. Observe the footer's sampling, meshing, and validation
-phases; these are not a percentage-progress API. Cancel during a longer job,
+automatic downgrade. Observe the progress panel's actual completed slices,
+per-phase percentage, elapsed time, and signed mesh-pass checkpoints. Verify
+batch position advances between orbitals, cached fields skip sampling, and
+preparation/transfer/validation remain indeterminate. There is no ETA or
+intra-pass mesher percentage. Cancel during a longer job,
 verify previous geometry remains intact, then generate again to check worker
 restart. Record failures and the actual requested dimensions.
 

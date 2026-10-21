@@ -18,6 +18,10 @@ import {
 } from "lucide-react";
 import { request, cancel } from "./science";
 import {
+  CalculationProgress,
+  type CalculationState,
+} from "./CalculationProgress";
+import {
   browserSource,
   fileByteLimit,
   molecularExtensions,
@@ -57,6 +61,7 @@ import type {
 export default function App() {
   const [doc, setDoc] = useState<EigenVistaDocument | null>(null);
   const [busy, setBusy] = useState("Opening scientific core");
+  const [calculation, setCalculation] = useState<CalculationState | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [resolution, setResolution] = useState(40);
@@ -155,6 +160,11 @@ export default function App() {
     setBusy("Calculating field and surfaces");
     setError("");
     const started = performance.now();
+    setCalculation({
+      label: "Field and surfaces",
+      stage: "preparing",
+      started,
+    });
     try {
       const retained = document.surfaces.filter(
         (s) => !s.field || !fields.includes(s.field),
@@ -169,6 +179,8 @@ export default function App() {
           ? `Calculating orbital ${index + 1} of ${fields.length}: ${document.orbitals.find((o) => o.id === field)!.label}`
           : "Calculating field and surfaces";
         setBusy(description);
+        const label = `${orbitals ? `Orbital ${index + 1} of ${fields.length}: ` : ""}${[...document.orbitals, ...document.densities, ...document.grids].find((f) => f.id === field)?.label ?? field}`;
+        setCalculation({ label, stage: "preparing", started });
         const result = await request<Generation>(
           "generate",
           {
@@ -177,8 +189,9 @@ export default function App() {
             resolution: res,
             iso: document.view.isovalue,
           },
-          (stage) => {
+          (stage, counts) => {
             if (token !== generation.current) return;
+            setCalculation({ label, stage, counts, started });
             if (stage === "sampling")
               setBusy(`${description} / Sampling field`);
             if (stage === "meshing")
@@ -199,8 +212,16 @@ export default function App() {
         "validate",
         { doc: { ...document, surfaces: [...retained, ...generated] } },
         () => {
-          if (token === generation.current)
+          if (token === generation.current) {
             setBusy("Calculating surfaces / Checking saved geometry");
+            setCalculation({
+              label: orbitals
+                ? `${fields.length} orbitals`
+                : "Field and surfaces",
+              stage: "validating",
+              started,
+            });
+          }
         },
       );
       if (token !== generation.current) return;
@@ -242,7 +263,10 @@ export default function App() {
     } catch (e) {
       if (token === generation.current) setError(String(e));
     } finally {
-      if (token === generation.current) setBusy("");
+      if (token === generation.current) {
+        setBusy("");
+        setCalculation(null);
+      }
     }
   }
   function generateOrbitals(ids: string[], iso: number, res: number) {
@@ -343,12 +367,25 @@ export default function App() {
     const token = ++generation.current;
     setBusy("Calculating sampled field");
     setError("");
+    const started = performance.now();
+    const label =
+      [...document.orbitals, ...document.densities, ...document.grids].find(
+        (f) => f.id === document.view.field,
+      )?.label ?? document.view.field;
+    setCalculation({ label, stage: "preparing", started });
     try {
-      const sampled = await request<SampledGrid>("sample", {
-        doc: { ...document, surfaces: [] },
-        field: document.view.field,
-        resolution: res,
-      });
+      const sampled = await request<SampledGrid>(
+        "sample",
+        {
+          doc: { ...document, surfaces: [] },
+          field: document.view.field,
+          resolution: res,
+        },
+        (stage, counts) => {
+          if (token === generation.current)
+            setCalculation({ label, stage, counts, started });
+        },
+      );
       if (token !== generation.current) return;
       // Keep the previous field and preview until sampling has succeeded.
       if (document.view.field !== current.current?.view.field)
@@ -361,7 +398,10 @@ export default function App() {
     } catch (e) {
       if (token === generation.current) setError(String(e));
     } finally {
-      if (token === generation.current) setBusy("");
+      if (token === generation.current) {
+        setBusy("");
+        setCalculation(null);
+      }
     }
   }
   async function selectMode(nextMode: RenderMode) {
@@ -484,6 +524,7 @@ export default function App() {
     ++generation.current;
     cancel();
     setBusy("");
+    setCalculation(null);
     setStatus("Cancelled; previous surfaces retained");
   }
   const fieldLabel = doc
@@ -809,6 +850,12 @@ export default function App() {
                   </>
                 )}
               </button>
+              {calculation && (
+                <CalculationProgress
+                  key={calculation.started}
+                  progress={calculation}
+                />
+              )}
             </section>
             <section>
               <h2>Appearance</h2>

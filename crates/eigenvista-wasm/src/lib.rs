@@ -48,7 +48,22 @@ pub fn surfaces(json: &str, grid_json: &str, field: &str, iso: f64) -> Result<St
     let d = parse(json)?;
     let g = serde_json::from_str(grid_json).map_err(err)?;
     let hash = compute::source_hash(&d, field).map_err(err)?;
-    mesh_surfaces(&d, &g, field, &hash, iso)
+    mesh_surfaces(&d, &g, field, &hash, iso, |_, _| Ok(()))
+}
+
+fn report_progress(
+    callback: &Option<js_sys::Function>,
+    completed: usize,
+    total: usize,
+) -> Result<(), JsValue> {
+    if let Some(callback) = callback {
+        callback.call2(
+            &JsValue::NULL,
+            &JsValue::from_f64(completed as f64),
+            &JsValue::from_f64(total as f64),
+        )?;
+    }
+    Ok(())
 }
 
 fn mesh_surfaces(
@@ -57,16 +72,22 @@ fn mesh_surfaces(
     field: &str,
     hash: &str,
     iso: f64,
+    mut progress: impl FnMut(usize, usize) -> Result<(), JsValue>,
 ) -> Result<String, JsValue> {
     let mut surfaces = vec![];
-    for (level, color) in [
+    progress(0, 2)?;
+    for (index, (level, color)) in [
         (iso, &d.view.positive_color),
         (-iso, &d.view.negative_color),
-    ] {
+    ]
+    .into_iter()
+    .enumerate()
+    {
         let s = compute::mesh(g, level, field, hash, color, d.view.opacity).map_err(err)?;
         if !s.indices.is_empty() {
             surfaces.push(s);
         }
+        progress(index + 1, 2)?;
     }
     serde_json::to_string(&surfaces).map_err(err)
 }
@@ -83,10 +104,23 @@ pub struct SampledField {
 impl SampledField {
     #[wasm_bindgen(constructor)]
     pub fn new(json: &str, field: &str, resolution: usize) -> Result<SampledField, JsValue> {
+        Self::with_progress(json, field, resolution, None)
+    }
+
+    pub fn with_progress(
+        json: &str,
+        field: &str,
+        resolution: usize,
+        progress: Option<js_sys::Function>,
+    ) -> Result<SampledField, JsValue> {
         let document = parse(json)?;
         let hash = compute::source_hash(&document, field).map_err(err)?;
         Ok(Self {
-            grid: compute::sample(&document, field, resolution).map_err(err)?,
+            grid: compute::sample_with_progress(&document, field, resolution, |done, total| {
+                report_progress(&progress, done, total)
+                    .map_err(|error| format!("Progress callback failed: {error:?}"))
+            })
+            .map_err(err)?,
             field: field.into(),
             hash,
         })
@@ -117,13 +151,29 @@ impl SampledField {
     }
 
     pub fn surfaces(&self, json: &str, iso: f64) -> Result<String, JsValue> {
+        self.surfaces_with_progress(json, iso, None)
+    }
+
+    pub fn surfaces_with_progress(
+        &self,
+        json: &str,
+        iso: f64,
+        progress: Option<js_sys::Function>,
+    ) -> Result<String, JsValue> {
         let document = parse(json)?;
         if compute::source_hash(&document, &self.field).map_err(err)? != self.hash {
             return Err(err(
                 "Cached samples do not match the current scientific inputs",
             ));
         }
-        mesh_surfaces(&document, &self.grid, &self.field, &self.hash, iso)
+        mesh_surfaces(
+            &document,
+            &self.grid,
+            &self.field,
+            &self.hash,
+            iso,
+            |done, total| report_progress(&progress, done, total),
+        )
     }
 }
 #[wasm_bindgen]
