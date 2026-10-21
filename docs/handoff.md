@@ -1,14 +1,25 @@
 # Development handoff
 
-Updated 12 October 2026 for the 0.5.8 loadable atom colour palette; the dated
+Updated 21 October 2026 for fresh-session orientation at 0.5.10; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.8**, in the standalone
+The current application is **EigenVista**, version **0.5.10**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+For a fresh session, start with the [restart snapshot](session-handoff-2026-10-21_173143-AWST.md) and
+[coding-agent prompt](restart-prompt-2026-10-21_173143-AWST.md). They cover current Git/issue state,
+the preserved untracked `1AON.pdb`, toolchain ambiguity, verified local package,
+and the distinction between dated test reports and fresh checks.
+
+Versions 0.5.9 and 0.5.10 added bounded mmCIF import and fixed native shader,
+parameter, and palette file filters. The 0.5.10 release is commit `69d234b`,
+tagged and pushed to origin. Issue #23 records successful user verification of
+shader/params loading in the shipped native app and is closed. See
+[status](status.md#version-0510) for evidence and remaining boundaries.
 
 Version 0.5.8 makes the per-element atom colour palette loadable from a JSON
 file (issue
@@ -49,7 +60,10 @@ and preserve the previous preview on failure. See the
 The 0.5.4 post-bump checks pass 122 workspace Rust tests, 136 Chromium/WebKit
 cases in one full run, 13 packaging tests, formatting, strict Clippy, and the
 production WASM/frontend build. All first-party versions agree; external
-dependencies are unchanged. No 0.5.4 tester ZIP was rebuilt. See
+dependencies are unchanged. No 0.5.4 tester ZIP was rebuilt in the version-bump
+step; the subsequent user-requested packaging run produced
+`EigenVista-0.5.4-apple-silicon-20261012T043954Z-d829183.zip` from clean source.
+That archive is historical; use the restart snapshot for the latest package. See
 [release evidence](status.md#version-054) and Git for publication identity.
 
 The 12 October 2026 follow-up fixes Rust 1.99 strict Clippy failures and stale

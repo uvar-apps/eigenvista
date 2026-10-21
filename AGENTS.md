@@ -29,6 +29,9 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Orientation
 
+- [Fresh-session handoff](docs/session-handoff-2026-10-21_173143-AWST.md) and
+  [restart prompt](docs/restart-prompt-2026-10-21_173143-AWST.md) - restart without the previous chat;
+  recheck their dated Git, issue, and artifact snapshot before acting.
 - [Handoff](docs/handoff.md) — current work, next gates, common traps.
 - [Architecture](docs/architecture.md) — crate ownership and data contracts.
 - [Development](docs/development.md) — full setup, build, test, acceptance steps.
@@ -174,6 +177,18 @@ Standard verification order for runtime changes (details and coverage map in
 - Keep the original Molekel checkout unchanged; historical material is linked at a
   pinned revision, not copied as current implementation.
 - Preserve frozen fixtures and provenance.
+- Keep `docs/handoff.md` up to date as the living development handoff. Before
+  completing any significant change (including bug fixes, features, releases,
+  architecture/toolchain changes, or new verification evidence), update its
+  current version/revision, implementation state and decisions, verification
+  results and gaps, relevant issue/artifact state, and remaining work as
+  applicable. Record the update date, distinguish fresh checks from historical
+  evidence, and reconcile stale current-state claims without rewriting history.
+  Do not leave this maintenance to a later handoff request.
+- Timestamped handoff and restart-prompt files are fixed historical snapshots,
+  not living documentation. Preserve them; when a new snapshot is requested,
+  create a new timestamped pair and update the entry-point links instead of
+  overwriting an older snapshot, unless the user explicitly requests it.
 - Documentation-only edits: verify links, commands, and agreement with status —
   do not claim runtime tests were rerun.
 - Report tests actually run and remaining gaps.

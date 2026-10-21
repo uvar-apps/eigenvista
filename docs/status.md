@@ -8,6 +8,18 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Fresh-session handoff
+
+Date: 21 October 2026. Documentation-only restart preparation at `69d234b`
+(`v0.5.10`). Added a [session handoff](session-handoff-2026-10-21_173143-AWST.md) and standalone
+[restart prompt](restart-prompt-2026-10-21_173143-AWST.md), linked from the root agent guide and docs
+index. Rechecked live origin main/tag identity, manifest versions, installed
+toolchain, current GitHub issues, native bundle version, and the 0.5.10 ZIP's
+SHA-256 companion. The package checksum passes; metadata identifies clean
+`69d234b` source, ad-hoc signing, and no notarization. No runtime tests or builds
+were rerun. The existing untracked `fixtures/large-structure/1AON.pdb` was left
+untouched. No issue or Git publication state was changed by this pass.
+
 ## Version 0.5.10
 
 Date: 12 October 2026. The user requested a version bump, commit, annotated
@@ -41,9 +53,16 @@ Evidence on the development Apple Silicon Mac, 12 October 2026:
 | `npm --prefix app run build` | passed |
 | `shaders.spec.ts` + `atom-colors.spec.ts`, Chromium + WebKit | 14 passed |
 
-Gap: the native dialog filter itself is verified by inspection only — native
+At implementation time, the native dialog filter itself was verified by inspection only — native
 file dialogs are not automatable in the current e2e harness. A manual smoke
-test (open a surface, load a shader) remains the close-out for #23.
+test (open a surface, load a shader) was the remaining close-out for #23.
+
+Subsequent [release verification](https://github.com/uvar-apps/eigenvista/issues/23#issuecomment-6125936422)
+records 141 Rust tests, a separate desktop-shell pass, all 150 Chromium/WebKit
+cases, strict Clippy, and a verified 0.5.10 ZIP from clean `69d234b` source.
+The [user's native smoke-test confirmation](https://github.com/uvar-apps/eigenvista/issues/23#issuecomment-6126068761)
+then confirmed shader and params loading in shipped 0.5.10; issue #23 is closed.
+This is not evidence for every native dialog or clean-machine installation.
 
 ## Version 0.5.9
 

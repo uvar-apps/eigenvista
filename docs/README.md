@@ -15,6 +15,7 @@ limits of opening new saves in older builds.
 
 | Need | Read |
 | --- | --- |
+| Restart from a fresh coding-agent session without the old chat | [Session handoff](session-handoff-2026-10-21_173143-AWST.md) and [ready-to-use prompt](restart-prompt-2026-10-21_173143-AWST.md) |
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |
