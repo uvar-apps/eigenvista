@@ -247,7 +247,8 @@ fn unpack(
             if object.len() != 2 {
                 return Err("Malformed column reference".into());
             }
-            let index = index.as_u64().ok_or("Invalid column index")? as usize;
+            let index = usize::try_from(index.as_u64().ok_or("Invalid column index")?)
+                .map_err(|_| "Column index out of range")?;
             let column = arrays
                 .get_mut(&id)
                 .ok_or("Unknown or multiply referenced array")?;

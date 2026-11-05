@@ -253,6 +253,22 @@ fn column_index_out_of_range_is_rejected() {
 }
 
 #[test]
+fn oversized_column_indices_cannot_wrap_or_swap_rows() {
+    let doc = basis_doc(3);
+    let bytes = encode(&doc).unwrap();
+    for index in [1u64 << 32, (1u64 << 32) + 1, u64::MAX] {
+        let mut tampered = manifest(&bytes);
+        tampered["document"]["basis"][0]["center"]["$index"] = json!(index);
+        assert!(decode(&with_manifest(&bytes, tampered)).is_err());
+    }
+    let mut swapped = manifest(&bytes);
+    swapped["document"]["basis"][0]["center"]["$index"] = json!((1u64 << 32) + 1);
+    swapped["document"]["basis"][1]["center"]["$index"] = json!(1u64 << 32);
+    assert!(decode(&with_manifest(&bytes, swapped)).is_err());
+    assert_eq!(decode(&bytes).unwrap(), doc);
+}
+
+#[test]
 fn column_reference_with_extra_key_is_rejected() {
     let bytes = encode(&basis_doc(3)).unwrap();
     let mut extra = manifest(&bytes);
