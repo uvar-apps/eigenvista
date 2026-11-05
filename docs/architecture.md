@@ -61,6 +61,7 @@ by native saving. There is no calculation server, remote service, or database.
 | [Atom colour palette](../app/src/atom-colors.json) and [loader](../app/src/atomColors.ts) | Single source of truth for the default per-element colour. `parseAtomColors` validates a loaded file and rejects it whole; `resolveAtomColor` resolves session override → bundled default → `#b294b9` sentinel. Session-only, never persisted to `.eigenvista`. See the [design record](design/2026-10-12-atom-colors-from-file.md) |
 | [File adapter](../app/src/files.ts) | Browser file/download versus native dialog/read/save |
 | [Desktop entry point](../app/src-tauri/src/main.rs) | Tauri plugins and `save_native`/version commands |
+| [Shader parameter export](../app/src-tauri/src/shader_parameters.rs) | Bounded `.params` text, sibling-file write/sync/replacement, separate from molecular-document validation |
 | [Runner](../tools/run.mjs) and [packager](../tools/package-macos.mjs) | Repeatable builds/tests and verified tester artifacts |
 
 The Rust workspace's five default members are core, format, import, converter,
@@ -355,6 +356,26 @@ CLI saves protect inputs and output aliases, require `--force` for existing
 destinations, and atomically publish initially absent files without replacement
 even with `--force`. This uses same-directory hard links; filesystems that do
 not support them fail explicitly instead of falling back to an unsafe overwrite.
+
+Shader parameter export uses the separate `save_shader_parameters` command.
+It accepts at most 128 KiB of UTF-8 text, offers a `.params` dialog, checks the
+extension, and writes/syncs a new sibling before replacement. It does not route
+text through `save_native` or weaken native document decoding/source protection.
+The UI catches export failures and preserves document state on cancellation.
+
+Shader parameter files are checked against the active declarations before any
+values are published. Uniform merging/serialization also validates finite scalar
+types and exact vector lengths. Conflicting declarations are rejected. A source
+change reconciles editor defaults by declared kind; the applied pair keeps its
+own values until Apply. Live edits update only a pair with matching sources.
+File reads compose against the latest validated editor state and carry per-input
+generations; Clear invalidates pending reads and resets both staged files and
+values, so delayed completions cannot restore a cleared pair.
+
+Indexed numeric-column references are converted from `u64` with checked
+`usize::try_from` before bounds and single-consumption checks. Malformed oversized
+indices are rejected on both native and wasm32; array checksums alone cannot
+validate manifest references.
 
 ## Safety and distribution
 

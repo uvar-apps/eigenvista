@@ -68,3 +68,8 @@ export async function saveBytes(
   }
   return true;
 }
+
+export async function saveShaderParameters(text: string) {
+  if (native) return invoke<boolean>("save_shader_parameters", { text });
+  return saveBytes(new TextEncoder().encode(text), "surface-shader.params");
+}

@@ -9,6 +9,9 @@ are intended for macOS and Linux after installing Rust, Node, the WASM target,
 wasm-bindgen CLI 0.2.108, and Tauri's native platform prerequisites (needed by
 workspace Clippy). Only the macOS run has been verified:
 
+`rust-toolchain.toml` selects Rust 1.99.0, Clippy, Rustfmt, and the WASM target.
+Run with `RUSTUP_TOOLCHAIN` unset to exercise the repository selection.
+
 From the repository root:
 
 ```sh

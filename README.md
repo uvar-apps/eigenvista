@@ -32,7 +32,9 @@ in this preview.
 
 ## Run
 
-Latest tested toolchain: Rust 1.99.0, Node 26, wasm-bindgen CLI 0.2.108. The development guide still selects Rust 1.92.0; compiler pinning is tracked separately in [#8](https://github.com/uvar-apps/eigenvista/issues/8). Dependency versions are locked in Cargo.lock and app/package-lock.json.
+The repository selects Rust **1.99.0** through `rust-toolchain.toml`, including
+Clippy, Rustfmt, and the WASM target. Tested with Node 26 and wasm-bindgen CLI
+0.2.108. Dependency versions are locked in Cargo.lock and app/package-lock.json.
 
 From the repository root:
 

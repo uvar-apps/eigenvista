@@ -967,7 +967,11 @@ export default function App() {
                   }))}
                   onChange={(next) => {
                     setShaderEditor(next);
-                    if (appliedShader) {
+                    if (
+                      appliedShader &&
+                      appliedShader.vertexSource === next.vertex?.source &&
+                      appliedShader.fragmentSource === next.fragment?.source
+                    ) {
                       setAppliedShader({
                         ...appliedShader,
                         target: next.target,
@@ -1009,6 +1013,7 @@ export default function App() {
                   }}
                   onClear={() => {
                     setAppliedShader(null);
+                    setShaderEditor({ vertex: null, fragment: null, values: {}, target: "all" });
                     setShaderStatus("Cleared custom surface shader");
                     setShaderError("");
                   }}

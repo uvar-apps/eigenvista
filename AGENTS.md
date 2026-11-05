@@ -84,13 +84,7 @@ Never use system `/tmp` for tests, screenshots, or build staging. Do not set
 One-time setup (Apple Silicon macOS is the exercised platform):
 
 ```sh
-rustup toolchain install 1.92.0
-export RUSTUP_TOOLCHAIN=1.92.0
-# Add the wasm target to the toolchain you will actually build with. `rustup
-# target add` follows RUSTUP_TOOLCHAIN when it is set, so name the toolchain
-# explicitly here rather than relying on the ambient pin. Do not assume one
-# toolchain's target covers the other.
-rustup target add wasm32-unknown-unknown --toolchain 1.92.0
+rustup show  # selects/installs Rust 1.99.0 plus declared components and WASM target
 cargo install wasm-bindgen-cli --version 0.2.108 --locked   # must match the pinned crate
 npm --prefix app ci
 ```
@@ -138,15 +132,15 @@ Standard verification order for runtime changes (details and coverage map in
 - **wasm-bindgen CLI version is pinned** to the crate (`=0.2.108`). Never update
   one side of the bridge alone; do not commit generated bindings.
 - **`wasm32-unknown-unknown` must be installed for the toolchain you build with.**
-  `rustup target add` follows `RUSTUP_TOOLCHAIN` when set, so exporting the pin
-  before adding the target installs it on `1.92.0`, while adding it with the pin
-  unset installs it on `stable`. The two do not cover each other. If the target is
+  `rust-toolchain.toml` selects Rust 1.99.0 and its WASM target. An explicit
+  `RUSTUP_TOOLCHAIN` overrides this selection; unset it for normal builds. Targets
+  belong to their individual toolchains. If the target is
   missing for the active toolchain, `npm --prefix app run build` fails in the
   WASM step with `error[E0463]: can't find crate for 'std'` while every
   host-target check (`cargo test`, `clippy`) still passes — that host-only
   failure mode means a missing target, not a code defect. Inspect with
-  `rustup target list --installed --toolchain 1.92.0` and fix with
-  `rustup target add wasm32-unknown-unknown --toolchain 1.92.0`.
+  `rustup target list --installed --toolchain 1.99.0` and fix with
+  `rustup target add wasm32-unknown-unknown --toolchain 1.99.0`.
 - Do not stop/restart the user's app or an unknown server. Check port ownership
   first; a server in another checkout is not this app.
 - Treat imported documents as untrusted. Keep validation, allocation bounds,

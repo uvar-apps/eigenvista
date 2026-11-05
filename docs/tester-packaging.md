@@ -16,6 +16,8 @@ relative to itself, not the current directory. Run
 - Xcode command-line tools, Rust/rustup, and wasm-bindgen CLI 0.2.108 as described
   in the [development guide](development.md).
 - Internet access for locked npm/Cargo dependencies and initial tooling setup.
+- Repository-selected Rust 1.99.0 and declared components from `rust-toolchain.toml`;
+  unset `RUSTUP_TOOLCHAIN` when building with that selection.
 - No Apple account, paid membership, signing certificate, or notary credentials.
 
 The command installs npm dependencies from the lockfile and installs pinned
