@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 21 October 2026 for live calculation progress and release 0.5.11; the dated
+Updated 5 November 2026 for priority fixes at 0.5.11; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
@@ -9,6 +9,33 @@ The current application is **EigenVista**, version **0.5.11**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Issue priorities
+
+The first repair batch is implemented in
+[PR #25](https://github.com/uvar-apps/eigenvista/pull/25), developed on
+`codex/priority-integrity-and-shader-fixes` from `38caf41`: #11 checked column
+indices, #9 shader parameter validation/source replacement, #10 native `.params`
+export, and #8 the Rust 1.99.0 selector. See the PR for current merge/issue state
+and [status](status.md#priority-fixes-5-november-2026) for verification and gaps.
+Next outstanding priorities are #12 and #2, followed by worker ownership (#6)
+before cache identity (#5). The review below preserves the original triage.
+
+The [5 November issue review](reviews/2026-11-05-issue-priorities.md) covers all
+16 initially open GitHub issues at `38caf41` (then matching main and origin main),
+version 0.5.11. Its first batch was #11 (WASM column-index wrapping), #9 (shader
+parameter crash), #10 (native parameter export), and supporting #8 (compiler policy).
+Focused in-memory checks reproduced basis-center swapping in the existing WASM
+and the shader-panel exception. The user approved the tracker updates: #16 is
+closed as completed using the shipped fix, then leaving 15 open issues. #11 was raised to
+P1 with `kind:scientific`; #19 is P2; #3/#6 were lowered to P2 pending stronger
+failure/overlap evidence. Each changed issue has a rationale comment. The review
+records the applied changes, acceptance checks, and remaining dependencies.
+
+The initial triage ran only the focused reproductions; its subsequent repair
+checks are recorded separately in status. Version remains 0.5.11; the published
+tag and tester ZIP predate these fixes. Preserve the user's untracked
+`docs/references/`; the checkout-local `1AON.pdb` exclusion is unchanged.
 
 ## Current release
 
@@ -105,9 +132,9 @@ That archive is historical; use the restart snapshot for the latest package. See
 The 12 October 2026 follow-up fixes Rust 1.99 strict Clippy failures and stale
 columnar-atom checks in the macOS packager, tracked by issues #13 and #14.
 See [the verification record](status.md#rust-199-compatibility-and-packaging-fixes)
-before continuing. Those fixes were made at version 0.5.3; toolchain pinning is
-still a separate decision under issue #8, and the setup instructions still
-select Rust 1.92.0.
+before continuing. Those fixes were made at version 0.5.3; toolchain pinning was
+then a separate decision under issue #8, and setup selected Rust 1.92.0. The
+5 November repair batch above selects Rust 1.99.0 for #8.
 
 Version 0.5.3 makes large structures practical. Atoms and bonds render as
 instanced meshes (121,525 → 1.8 draw calls per frame, 3.2 GB → 40 MB heap on a

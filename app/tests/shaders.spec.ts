@@ -255,8 +255,10 @@ test("changing a shader uniform kind resets its editor value without breaking th
   await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "simple.vert", mimeType: "text/plain", buffer: Buffer.from("void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
   await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "scalar.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
   await page.getByLabel("amount", { exact: true }).fill("0.8");
+  const original = await pixels(page);
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
   await expect(page.locator(".shader-status")).toContainText("Applied");
+  await expect.poll(async () => (await pixels(page)).checksum).not.toBe(original.checksum);
   const before = await pixels(page);
   await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "vector.frag", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}") });
   await expect(page.getByLabel("amount[0]", { exact: true })).toHaveValue("0");
@@ -269,7 +271,61 @@ test("changing a shader uniform kind resets its editor value without breaking th
   await expect(page.getByRole("button", { name: "simple.vert", exact: true })).toBeVisible();
   await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "scalar-again.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
   await expect(page.getByLabel("amount", { exact: true })).toHaveValue("0");
+  await page.getByRole("button", { name: "Clear shader", exact: true }).click();
+  await expect(page.locator(".shader-log")).toHaveCount(0);
+  await expect(page.getByLabel("amount", { exact: true })).toHaveCount(0);
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "shared.vert", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "shared.frag", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}") });
+  await page.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "changed-shared.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await expect(page.locator(".shader-log")).toContainText("conflicting shader types");
+  await page.getByRole("button", { name: "Clear shader", exact: true }).click();
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "new-shared.vert", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "new-shared.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await page.getByLabel("amount", { exact: true }).fill("0.5");
+  await page.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await expect(page.locator(".shader-log")).toHaveCount(0);
   expect(errors).toEqual([]);
+});
+
+test("out-of-order shader reads compose and Clear discards pending reads", async ({ page }) => {
+  await page.addInitScript(() => {
+    const state = globalThis as unknown as {
+      releaseShaderRead: () => void;
+      pendingShaderRead: string;
+      finishedShaderRead: string;
+    };
+    const read = File.prototype.text;
+    File.prototype.text = async function () {
+      const source = await read.call(this);
+      if (this.name === "delayed.vert" || this.name === "cleared.vert") {
+        state.pendingShaderRead = this.name;
+        await new Promise<void>((resolve) => { state.releaseShaderRead = resolve; });
+        state.finishedShaderRead = this.name;
+      }
+      return source;
+    };
+  });
+  await ready(page);
+  const vertex = Buffer.from("void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}");
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "delayed.vert", mimeType: "text/plain", buffer: vertex });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "fast.frag", mimeType: "text/plain", buffer: Buffer.from("void main(){gl_FragColor=vec4(1.,0.,0.,1.);}") });
+  await expect(page.getByRole("button", { name: "fast.frag", exact: true })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { pendingShaderRead: string }).pendingShaderRead)).toBe("delayed.vert");
+  await page.evaluate(() => (globalThis as unknown as { releaseShaderRead: () => void }).releaseShaderRead());
+  await expect(page.getByRole("button", { name: "delayed.vert", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "cleared.vert", mimeType: "text/plain", buffer: vertex });
+  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { pendingShaderRead: string }).pendingShaderRead)).toBe("cleared.vert");
+  await page.getByRole("button", { name: "Clear shader", exact: true }).click();
+  await page.evaluate(() => (globalThis as unknown as { releaseShaderRead: () => void }).releaseShaderRead());
+  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { finishedShaderRead: string }).finishedShaderRead)).toBe("cleared.vert");
+  await page.evaluate(() => new Promise(requestAnimationFrame));
+  await expect(page.getByRole("button", { name: "Apply shader", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "delayed.vert", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "cleared.vert", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "fast.frag", exact: true })).toHaveCount(0);
+  await expect(page.locator(".shader-log")).toHaveCount(0);
 });
 
 for (const outcome of ["saved", "cancelled", "failed"] as const) {

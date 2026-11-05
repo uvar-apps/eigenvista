@@ -67,6 +67,15 @@ export function ShaderPanel({
   const fragmentInput = useRef<HTMLInputElement>(null);
   const paramsInput = useRef<HTMLInputElement>(null);
   const [paramsError, setParamsError] = useState("");
+  const latest = useRef({ state, onChange });
+  latest.current = { state, onChange };
+  const reads = useRef({ vertex: 0, fragment: 0, params: 0 });
+
+  function publish(next: ShaderEditorState) {
+    // File reads can complete before React renders the preceding update.
+    latest.current.state = next;
+    latest.current.onChange(next);
+  }
 
   // One source of truth for which files each picker accepts: the browser
   // uses it as the input accept list, the native dialog uses it as the file
@@ -82,20 +91,24 @@ export function ShaderPanel({
     accept[kind].split(",").map((extension) => extension.slice(1));
 
   function changeShader(kind: "vertex" | "fragment", name: string, source: string) {
-    const next = { ...state, [kind]: { name, source } };
+    const previous = latest.current.state;
+    const previousDefs = parseUniforms(
+      previous.vertex?.source ?? "", previous.fragment?.source ?? "",
+    );
+    const next = { ...previous, [kind]: { name, source } };
     const defs = parseUniforms(
       next.vertex?.source ?? "", next.fragment?.source ?? "",
     );
     const retained: Record<string, UniformValue> = {};
     for (const def of defs) {
       if (
-        uniforms.some((old) => old.name === def.name && old.kind === def.kind) &&
-        state.values[def.name] !== undefined
+        previousDefs.some((old) => old.name === def.name && old.kind === def.kind) &&
+        previous.values[def.name] !== undefined
       )
-        retained[def.name] = state.values[def.name];
+        retained[def.name] = previous.values[def.name];
     }
     const values = mergeUniformValues(defs, defaultValues(defs), retained);
-    onChange({ ...next, values });
+    publish({ ...next, values });
     setParamsError("");
   }
 
@@ -104,19 +117,25 @@ export function ShaderPanel({
     file: File | undefined,
   ) {
     if (!file) return;
+    const token = ++reads.current[kind];
     try {
-      changeShader(kind, file.name, await file.text());
+      const source = await file.text();
+      if (token === reads.current[kind]) changeShader(kind, file.name, source);
     } catch (e) {
-      setParamsError(String(e));
+      if (token === reads.current[kind]) setParamsError(String(e));
     }
   }
 
   function applyParams(text: string) {
     try {
-      const values = parseParams(text, uniforms);
-      const merged = mergeUniformValues(uniforms, state.values, values);
+      const previous = latest.current.state;
+      const defs = parseUniforms(
+        previous.vertex?.source ?? "", previous.fragment?.source ?? "",
+      );
+      const values = parseParams(text, defs);
+      const merged = mergeUniformValues(defs, previous.values, values);
       setParamsError("");
-      onChange({ ...state, values: merged });
+      publish({ ...previous, values: merged });
     } catch (e) {
       setParamsError(String(e));
     }
@@ -124,24 +143,32 @@ export function ShaderPanel({
 
   async function loadParams(file: File | undefined) {
     if (!file) return;
+    const token = ++reads.current.params;
     try {
-      applyParams(await file.text());
+      const text = await file.text();
+      if (token === reads.current.params) applyParams(text);
     } catch (e) {
-      setParamsError(String(e));
+      if (token === reads.current.params) setParamsError(String(e));
     }
   }
 
   async function pickNativeText(kind: "vertex" | "fragment" | "params") {
-    const [picked] = await pickNative(
-      false,
-      extensions(kind),
-      kind === "params" ? "Shader parameters" : "GLSL shaders",
-    );
-    if (!picked) return;
-    const bytes = await picked.read();
-    const text = new TextDecoder().decode(bytes);
-    if (kind === "params") applyParams(text);
-    else changeShader(kind, picked.name, text);
+    const token = ++reads.current[kind];
+    try {
+      const [picked] = await pickNative(
+        false,
+        extensions(kind),
+        kind === "params" ? "Shader parameters" : "GLSL shaders",
+      );
+      if (!picked || token !== reads.current[kind]) return;
+      const bytes = await picked.read();
+      if (token !== reads.current[kind]) return;
+      const text = new TextDecoder().decode(bytes);
+      if (kind === "params") applyParams(text);
+      else changeShader(kind, picked.name, text);
+    } catch (e) {
+      if (token === reads.current[kind]) setParamsError(String(e));
+    }
   }
 
   function chooseFile(kind: "vertex" | "fragment" | "params") {
@@ -166,8 +193,9 @@ export function ShaderPanel({
 
   function setValue(name: string, kind: UniformDef["kind"], raw: UniformValue) {
     try {
-      const values = mergeUniformValues(uniforms, state.values, { [name]: raw });
-      onChange({ ...state, values });
+      const previous = latest.current.state;
+      const values = mergeUniformValues(uniforms, previous.values, { [name]: raw });
+      publish({ ...previous, values });
       setParamsError("");
     } catch (e) {
       setParamsError(String(e));
@@ -354,7 +382,18 @@ export function ShaderPanel({
         >
           Save parameters
         </button>
-        <button type="button" disabled={!ready} onClick={onClear}>
+        <button
+          type="button"
+          disabled={!state.vertex && !state.fragment}
+          onClick={() => {
+            ++reads.current.vertex;
+            ++reads.current.fragment;
+            ++reads.current.params;
+            latest.current.state = { vertex: null, fragment: null, values: {}, target: "all" };
+            setParamsError("");
+            onClear();
+          }}
+        >
           Clear shader
         </button>
       </div>

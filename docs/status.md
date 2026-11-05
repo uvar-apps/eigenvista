@@ -8,6 +8,48 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Priority fixes: 5 November 2026
+
+First repair batch at source version 0.5.11 in
+[PR #25](https://github.com/uvar-apps/eigenvista/pull/25), developed on
+`codex/priority-integrity-and-shader-fixes` from `38caf41`. Fixes #11, #9, #10,
+and #8; the PR records current merge/issue state. The published `v0.5.11` tag
+and release ZIP remain the 21 October artifacts, before these changes.
+
+- Indexed-column references use a checked u64-to-usize conversion, retaining
+  row bounds and single-use checks. Native and actual-WASM regressions cover
+  oversized/invalid indices and wrapped swaps without changing valid science.
+- Shader parameter types and component counts are checked before publication;
+  source changes reconcile compatible values and keep the old applied pair
+  separate. Clear shader resets the files/values for safe pair replacement.
+- Native `.params` export has its own command, 128 KiB text bound, extension
+  check, and sibling write/sync/replacement. Errors reach the panel; the native
+  molecular-document save command retains its decoder and source protections.
+- `rust-toolchain.toml` selects Rust 1.99.0, Clippy, Rustfmt, and the WASM target.
+  Fresh checks ran with `RUSTUP_TOOLCHAIN` unset; rustup confirms file selection.
+  Dependency lockfiles and source versions are unchanged.
+
+Verification: 147 workspace Rust tests including the desktop shell, strict
+workspace/all-target Clippy, Rustfmt, 13 packaging tests, production WASM/
+TypeScript/Vite build passed. The latest full Chromium/WebKit run passed 171 of
+172 cases; a new pixel probe captured the pre-Apply frame. After correcting the
+probe to wait for the applied frame, all 20 format/shader cases passed in both
+engines. Together these runs cover all 172 cases, not a single uninterrupted
+172-case green run. Source-switch recovery and controlled out-of-order reads
+also passed three repeats per engine (12 checks). Desktop/mobile rejection
+screenshots were inspected, and 252 local documentation targets verified. Tests exercise
+real native text writes and browser native-IPC success/cancel/error simulation.
+They do not drive an OS save dialog. Native dialog interaction, clean-Mac
+installation, and Linux/Windows remain separate unverified acceptance gates.
+
+The Apple Silicon app was rebuilt with the repository-selected compiler and
+ad-hoc signing at `target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+Strict signature and current embedded frontend (`assets/index-kr9FAYSB.js`) checks pass.
+It is a local development build at 0.5.11; no new distributable archive or tag
+was created. The preview runs at `http://127.0.0.1:5178/`. The original release's
+notarization and scientific qualification boundaries still apply. User-owned
+`docs/references/`, private chats, and the local `1AON.pdb` are preserved.
+
 ## Version 0.5.11
 
 Date: 21 October 2026. Released live calculation progress (#24) at commit

@@ -417,7 +417,8 @@ Display→Shaders:
    `.params` save dialog; the browser downloads the file. Cancelling is harmless;
    a write failure appears in the shader panel. Native export has a 128 KiB text
    limit and writes a complete replacement file. **Clear shader** restores
-   Diffuse / Blinn-Phong materials.
+   Diffuse / Blinn-Phong materials and clears the loaded files and parameters.
+   Use it before loading a different pair when shared uniform types conflict.
 
 Classic GLSL 1.x shaders that use `ftransform()`, `gl_Vertex`, `gl_Normal`,
 `gl_Color`, `gl_ClipVertex`, `gl_FogFragCoord`, and `gl_NormalMatrix` are mapped

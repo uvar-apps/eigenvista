@@ -38,6 +38,7 @@ limits of opening new saves in older builds.
 | Cross-platform checks and absence of active hosted CI | [Portability checks](../ci/README.md) |
 | Design decisions, rejected alternatives, and their reasoning before implementation | [Design records](design/README.md) |
 | Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
+| Issue triage, repair order, and first batch in PR #25 | [2026-11-05 issue review](reviews/2026-11-05-issue-priorities.md) |
 | Issue triage conventions — area, kind, and priority label axes | [Issue label taxonomy](labels.md) |
 | Fast project overview | [Rewrite README](../README.md) |
 

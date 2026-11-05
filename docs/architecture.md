@@ -368,6 +368,9 @@ values are published. Uniform merging/serialization also validates finite scalar
 types and exact vector lengths. Conflicting declarations are rejected. A source
 change reconciles editor defaults by declared kind; the applied pair keeps its
 own values until Apply. Live edits update only a pair with matching sources.
+File reads compose against the latest validated editor state and carry per-input
+generations; Clear invalidates pending reads and resets both staged files and
+values, so delayed completions cannot restore a cleared pair.
 
 Indexed numeric-column references are converted from `u64` with checked
 `usize::try_from` before bounds and single-consumption checks. Malformed oversized

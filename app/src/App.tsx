@@ -1013,6 +1013,7 @@ export default function App() {
                   }}
                   onClear={() => {
                     setAppliedShader(null);
+                    setShaderEditor({ vertex: null, fragment: null, values: {}, target: "all" });
                     setShaderStatus("Cleared custom surface shader");
                     setShaderError("");
                   }}

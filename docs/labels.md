@@ -79,9 +79,11 @@ in new issues. `bug` and `enhancement` are not used on issues that already carry
 `kind:` label — two overlapping classifications on the same axis is worse than
 either one alone.
 
-## Current issues
+## Initial review snapshot
 
-The eight issues filed with the 0.5.3 review follow this taxonomy:
+The eight issues filed with the 0.5.3 review used the following labels. This is
+the initial snapshot; subsequent priorities and closures are recorded in the
+[5 November review](reviews/2026-11-05-issue-priorities.md) and live GitHub issues.
 
 | Issue | Labels |
 | --- | --- |
@@ -94,6 +96,7 @@ The eight issues filed with the 0.5.3 review follow this taxonomy:
 | [#7](https://github.com/uvar-apps/eigenvista/issues/7) `preserveDrawingBuffer` retention | `area:renderer` `kind:memory` `priority:P3` |
 | [#8](https://github.com/uvar-apps/eigenvista/issues/8) No `rust-toolchain.toml` | `area:tooling` `kind:dx` `priority:P2` `good first issue` |
 
-No issue currently carries `kind:scientific`. That is not because the category is
-unimportant — it is the one this project most needs — but because the review that
-produced these issues found no open numerical-accuracy defect.
+That initial review filed no `kind:scientific` issues. Later issues #19
+(declared mmCIF connections) and #11 (WASM column-index integrity) use that
+label. Consult the live tracker for current state rather than inferring that
+scientific defects are absent from this historical table.
