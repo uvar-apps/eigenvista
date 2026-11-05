@@ -10,9 +10,11 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Worker ownership and registration: 6 November 2026
 
-Third repair batch at source version 0.5.11 on
-`codex/worker-ownership-and-cache`, based on merged main `c5ebcbb`, addresses
-#6 and #5. The [design record](design/2026-11-06-worker-ownership-and-registration.md)
+Third repair batch at source version 0.5.11 in
+[PR #27](https://github.com/uvar-apps/eigenvista/pull/27), developed on
+`codex/worker-ownership-and-cache` from merged main `c5ebcbb`; runtime/test
+changes are commit `b701efe`. Fixes #6 and #5. The
+[design record](design/2026-11-06-worker-ownership-and-registration.md)
 records ownership, alternatives, validation, and the immutable-input contract.
 
 - One FIFO bridge posts one job at a time. App and Convert Files own separate

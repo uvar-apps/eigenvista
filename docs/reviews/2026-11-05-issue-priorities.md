@@ -19,7 +19,8 @@ on `codex/next-rendering-fixes`; its
 [verification](../status.md#rendering-fixes-6-november-2026) record the explicit
 alpha policy, voxel-relative quality, empty-brick skipping, and measurements.
 The rendering batch merged as `c5ebcbb`, closing both issues. The third batch
-implements #6 then #5 on `codex/worker-ownership-and-cache`; see its
+implements #6 then #5 in [PR #27](https://github.com/uvar-apps/eigenvista/pull/27),
+developed on `codex/worker-ownership-and-cache`; see its
 [design](../design/2026-11-06-worker-ownership-and-registration.md) and
 [verification](../status.md#worker-ownership-and-registration-6-november-2026).
 The table preserves the original ordering. Next outstanding: measured

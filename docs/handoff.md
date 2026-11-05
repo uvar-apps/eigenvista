@@ -12,8 +12,10 @@ code. The icon and logo are unchanged.
 
 ## Issue priorities
 
-The current batch implements #6 and #5 on `codex/worker-ownership-and-cache`
-from merged main `c5ebcbb`. One shared FIFO worker has explicit scene/conversion
+The worker batch implements #6 and #5 in
+[PR #27](https://github.com/uvar-apps/eigenvista/pull/27), developed on
+`codex/worker-ownership-and-cache` from merged main `c5ebcbb`; runtime/test
+changes are commit `b701efe`. One shared FIFO worker has explicit scene/conversion
 owners and per-request AbortSignals. Cancelling active work restarts blocked
 WASM while retaining other owners' queued jobs; fatal failures reject all.
 Chromium message-error delivery uses an event listener, and initialization
