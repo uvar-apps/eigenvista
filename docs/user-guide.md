@@ -325,6 +325,14 @@ field, or resolution again.
 The raycast isovalue control updates the sampled preview directly, but previously
 generated meshes still require regeneration.
 
+**Sampling quality** appears in both sampled modes: **Draft**, **Standard**
+(default), and **Fine** use 1, 2, and 4 samples per voxel-distance along the ray.
+Changing it redraws the existing grid without a worker calculation, generating
+meshes, changing scientific resolution/data, or marking the document unsaved.
+The choice survives mode switches, is hidden in mesh mode, and is not saved in
+`.eigenvista`. Fine can reduce missed crossings between display samples, but
+cannot recover features absent from the grid or guarantee detection of tangencies.
+
 The original cube data is f64, while rendering and current meshing use f32.
 If a finite grid overflows the preview's numeric range, an error is shown; its
 document, bonds, and existing meshes still open and remain savable. Saving
@@ -420,6 +428,14 @@ Display→Shaders:
    Diffuse / Blinn-Phong materials and clears the loaded files and parameters.
    Use it before loading a different pair when shared uniform types conflict.
 
+**Shader transparency** is checked by default and blends the fragment shader's
+alpha, even when document opacity is 100%. Uncheck it for opaque rendering:
+the final alpha is forced to 1 and depth writes are enabled. The control updates
+an applied pair live and resets to checked with **Clear shader**. It is a session
+preference, saved in neither `.eigenvista` nor `.params` files. Transparent
+surfaces still use ordinary object sorting; intersecting layers may show ordering
+artifacts.
+
 Classic GLSL 1.x shaders that use `ftransform()`, `gl_Vertex`, `gl_Normal`,
 `gl_Color`, `gl_ClipVertex`, `gl_FogFragCoord`, and `gl_NormalMatrix` are mapped
 onto Three.js/WebGL2 built-ins (including writable clip/fog outputs). Surface
@@ -431,8 +447,9 @@ panel (red). Shaders and uniform values are session-only and are not stored in
 `.eigenvista` documents. Invalid GLSL is reported there; apply a corrected
 pair or **Clear shader** to restore the built-in materials.
 
-Raycasting can miss crossings, marching cubes is not topology-certified, and
-transparent/volume overlaps have known limitations. These modes are experimental,
+Raycasting can miss tangencies or unresolved crossings, marching cubes is not
+topology-certified, and opaque objects inside volumes and interpenetrating
+transparent layers are not correctly integrated. These modes are experimental,
 not publication-quality guarantees. Shrinkwrap and a transfer-function editor
 are not available yet.
 

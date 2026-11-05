@@ -6,7 +6,8 @@ with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
 Current source version: **0.5.11**, including live orbital/density calculation
-progress. Check the [living handoff](handoff.md) and [status](status.md) for
+progress, voxel-relative sampled preview quality, and explicit custom shader
+transparency. Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.
 
@@ -38,7 +39,8 @@ limits of opening new saves in older builds.
 | Cross-platform checks and absence of active hosted CI | [Portability checks](../ci/README.md) |
 | Design decisions, rejected alternatives, and their reasoning before implementation | [Design records](design/README.md) |
 | Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
-| Issue triage, repair order, and first batch in PR #25 | [2026-11-05 issue review](reviews/2026-11-05-issue-priorities.md) |
+| Sampled preview quality, conservative brick skipping, and shader alpha policy | [Rendering decisions](design/2026-11-06-rendering-quality.md) |
+| Issue triage, repair order, and completed batches | [2026-11-05 issue review](reviews/2026-11-05-issue-priorities.md) |
 | Issue triage conventions — area, kind, and priority label axes | [Issue label taxonomy](labels.md) |
 | Fast project overview | [Rewrite README](../README.md) |
 

@@ -88,6 +88,12 @@ release. It includes source and notices under the [application license](LICENSE)
 - Volume and raycast previews can sample an orbital or density directly, without
   generating meshes first. Field/resolution changes run in the cancellable worker;
   cancellation or failure preserves the prior preview and saved surfaces.
+- Sampled previews offer Draft/Standard/Fine display sampling (1/2/4 samples per
+  voxel-distance, default Standard) and conservatively skip empty eight-cell
+  bricks. Quality is session-only; changing it reuses the grid without scientific
+  recalculation, meshing, or changing the saved document.
+- Custom surface shaders have an explicit **Shader transparency** control,
+  enabled by default; disabling it forces opaque alpha and depth writes.
 - Self-contained `.eigenvista` preview files containing quantum data, binary numeric arrays, saved meshes, isovalues, grid geometry, scientific hashes, provenance, and material settings. Reopen displays saved geometry without recomputation.
 - Native Save dialog with validated sibling-file replacement; browser file download. Native Open dialog and browser file selection.
 - Conventional single-frame XYZ and PDB import with automatic coordinate-based bonds, PDB alternate/model handling, and retained explicit connections. [Import policy and algorithm](docs/structure-imports.md).
@@ -110,7 +116,13 @@ release. It includes source and notices under the [application license](LICENSE)
 
 The mesher is the MIT-licensed Rust `mcubes` 0.1.7 library, not MC33. Its classic table is not topology-certified. The numerical evaluator is a scalar Rust reference implementation, not an optimized collocation kernel. Neither substitution closes the relevant scientific/performance gates.
 
-Raycasting uses bounded step sampling and bracket refinement. It can miss tangencies or multiple crossings between steps. Transparency uses ordinary mesh compositing and an experimental single-volume pass; opaque objects inside volumes and interpenetrating transparent layers are not yet correctly integrated. Do not treat these previews as publication-quality rendering.
+Raycasting uses bounded, voxel-relative step sampling and bracket refinement.
+It can miss tangencies or unresolved features and crossings between samples;
+finer display sampling cannot recover features absent from the grid.
+Transparency uses ordinary mesh sorting and an experimental single-volume pass;
+opaque objects inside volumes and interpenetrating transparent layers are not
+yet correctly integrated. Do not treat these previews as publication-quality
+rendering.
 
 The format's named preview profile is intentionally narrower than the proposed full format. It has whole-array ZIP entries and a 128 MiB file/inflated-byte cap; it is not a streaming/chunked large-data implementation. Saving may need several in-memory copies. Camera and transient volume state are not yet persisted. See [format profile](docs/preview-format.md).
 

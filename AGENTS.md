@@ -125,6 +125,14 @@ Standard verification order for runtime changes (details and coverage map in
 
 ## Traps
 
+- Sampled preview quality (Draft/Standard/Fine) and custom shader transparency
+  are session display settings, not scientific edits or persisted document
+  fields. Preview min/max ranges are cached by immutable sampled-value buffer
+  and dimensions; replace the buffer when changing values. Dispose both field
+  and range textures when replacing scenes. See
+  [rendering decisions](docs/design/2026-11-06-rendering-quality.md) and the
+  adaptive-volume, volume-ranges, volume-quality-controls, and shader-transparency
+  browser specs before changing marching or blending.
 - **Port 5178 is strict.** Keep [vite](app/vite.config.ts), Tauri `devUrl`
   ([tauri.conf.json](app/src-tauri/tauri.conf.json)), and both Playwright URLs
   ([playwright.config.ts](app/playwright.config.ts)) aligned if you move it.

@@ -16,6 +16,7 @@ export interface ShaderPair {
   fragmentSource: string;
   uniforms: UniformDef[];
   values: Record<string, UniformValue>;
+  transparent?: boolean;
 }
 
 const UNIFORM_RE =
@@ -99,7 +100,12 @@ export function parseParams(
         `Parameter "${name}" expects ${def.kind}, got ${kind} at ${where}.`,
       );
     const sizes: Record<string, number> = {
-      float: 1, int: 1, bool: 1, vec2: 2, vec3: 3, vec4: 4,
+      float: 1,
+      int: 1,
+      bool: 1,
+      vec2: 2,
+      vec3: 3,
+      vec4: 4,
     };
     const size = sizes[kind];
     if (size !== undefined && rest.length !== size)
@@ -245,14 +251,40 @@ export function buildSurfaceMaterial(
     const value = pair.values[def.name] ?? defaultValue(def.kind, def.name);
     uniforms[def.name] = { value: toUniformValue(def.kind, value) };
   }
-  return new THREE.ShaderMaterial({
-    transparent: surface.opacity < 1,
+  const material = new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
-    depthWrite: surface.opacity >= 1,
     uniforms,
     vertexShader: prepareVertexSource(pair.vertexSource),
-    fragmentShader: prepareFragmentSource(pair.fragmentSource),
+    fragmentShader: `#define main eigenvista_custom_fragment_main
+${prepareFragmentSource(pair.fragmentSource)}
+#undef main
+void main() {
+  eigenvista_custom_fragment_main();
+  #ifdef EIGENVISTA_OPAQUE_SHADER_ALPHA
+    gl_FragColor.a = 1.0;
+  #endif
+}`,
   });
+  applyShaderTransparency(material, pair.transparent !== false);
+  return material;
+}
+
+export function applyShaderTransparency(
+  material: THREE.ShaderMaterial,
+  transparent: boolean,
+) {
+  const opaqueAlpha = material.defines.EIGENVISTA_OPAQUE_SHADER_ALPHA === 1;
+  if (
+    material.transparent === transparent &&
+    material.depthWrite === !transparent &&
+    opaqueAlpha === !transparent
+  )
+    return;
+  material.transparent = transparent;
+  material.depthWrite = !transparent;
+  if (transparent) delete material.defines.EIGENVISTA_OPAQUE_SHADER_ALPHA;
+  else material.defines.EIGENVISTA_OPAQUE_SHADER_ALPHA = 1;
+  material.needsUpdate = true;
 }
 
 export function applyUniformValues(
@@ -315,7 +347,13 @@ export function validateUniformValues(
     const value = values[def.name];
     if (value === undefined) continue;
     const size =
-      def.kind === "vec2" ? 2 : def.kind === "vec3" ? 3 : def.kind === "vec4" ? 4 : 0;
+      def.kind === "vec2"
+        ? 2
+        : def.kind === "vec3"
+          ? 3
+          : def.kind === "vec4"
+            ? 4
+            : 0;
     const valid = size
       ? Array.isArray(value) &&
         value.length === size &&

@@ -1,5 +1,12 @@
 import * as THREE from "three";
 import type { SampledGrid, RenderMode, SurfaceShading } from "./types";
+import { volumeBrickRanges, type VolumeBrickRanges } from "./volumeRanges";
+
+export type VolumeQuality = 1 | 2 | 4;
+const rangeCache = new WeakMap<
+  Float32Array,
+  { shape: string; ranges: VolumeBrickRanges }
+>();
 
 export function volumeObject(
   grid: SampledGrid,
@@ -10,7 +17,23 @@ export function volumeObject(
   opacity: number,
   filtered: boolean,
   shading: SurfaceShading,
+  samplesPerVoxel: VolumeQuality = 2,
 ) {
+  if (![1, 2, 4].includes(samplesPerVoxel))
+    throw new Error("Unsupported volume sampling quality");
+  const shape = grid.dims.join(",");
+  let cached = rangeCache.get(grid.values);
+  if (cached?.shape !== shape) {
+    cached = { shape, ranges: volumeBrickRanges(grid) };
+    rangeCache.set(grid.values, cached);
+  }
+  const ranges = cached.ranges;
+  const rangesTexture = new THREE.Data3DTexture(ranges.values, ...ranges.dims);
+  rangesTexture.format = THREE.RGFormat;
+  rangesTexture.type = THREE.FloatType;
+  rangesTexture.minFilter = rangesTexture.magFilter = THREE.NearestFilter;
+  rangesTexture.unpackAlignment = 1;
+  rangesTexture.needsUpdate = true;
   const [nx, ny, nz] = grid.dims;
   const texture = new THREE.Data3DTexture(grid.values, nx, ny, nz);
   texture.format = THREE.RedFormat;
@@ -44,11 +67,15 @@ export function volumeObject(
     transparent: true,
     depthWrite: mode === "raycast",
     defines: {
+      SKIP_EMPTY_BRICKS: 1,
       ...(filtered ? { FILTERED_FIELD: 1 } : {}),
       ...(shading === "blinn-phong" ? { SURFACE_BLINN_PHONG: 1 } : {}),
     },
     uniforms: {
       field: { value: texture },
+      brickRanges: { value: rangesTexture },
+      brickSize: { value: ranges.cellSize },
+      samplesPerVoxel: { value: samplesPerVoxel },
       gridSize: { value: new THREE.Vector3(nx, ny, nz) },
       worldToGrid: { value: transform.clone().invert() },
       vp: { value: new THREE.Matrix4() },
@@ -69,6 +96,7 @@ export function volumeObject(
       out vec4 outputColor;
       #define gl_FragColor outputColor
       uniform sampler3D field; uniform vec3 gridSize; uniform mat4 worldToGrid; uniform mat4 vp;
+      uniform sampler3D brickRanges; uniform float brickSize; uniform float samplesPerVoxel;
       uniform vec3 positiveColor; uniform vec3 negativeColor; uniform float iso; uniform float opacity;
       uniform bool volumeMode; uniform float epsilon; in vec3 worldPoint;
       float scalar(vec3 p) {
@@ -86,6 +114,9 @@ export function volumeObject(
       }
       vec3 gradient(vec3 p) {return vec3(scalar(p+vec3(epsilon,0,0))-scalar(p-vec3(epsilon,0,0)),
         scalar(p+vec3(0,epsilon,0))-scalar(p-vec3(0,epsilon,0)),scalar(p+vec3(0,0,epsilon))-scalar(p-vec3(0,0,epsilon)));}
+      void composite(inout vec4 accum,vec3 color,float alpha) {
+        accum.rgb+=(1.0-accum.a)*color*alpha;accum.a+=(1.0-accum.a)*alpha;
+      }
       void main() {
         vec3 direction=normalize(worldPoint-cameraPosition);
         vec3 o=(worldToGrid*vec4(cameraPosition,1)).xyz;vec3 d=(worldToGrid*vec4(direction,0)).xyz;
@@ -94,38 +125,83 @@ export function volumeObject(
         vec3 low=min(ta,tb);vec3 high=max(ta,tb);
         float start=max(0.0,max(low.x,max(low.y,low.z)));float end=min(high.x,min(high.y,high.z));
         if(end<=start)discard;
-        float stepSize=(end-start)/160.0;
+        vec3 voxelDirection=d*(gridSize-1.0);
+        float stepCount = ceil(length(voxelDirection) * (end-start) * samplesPerVoxel);
+        float stepSize=(end-start)/max(stepCount,1.0);
         vec4 accum=vec4(0);float first=-1.0;float prev=scalar(cameraPosition+direction*start);
-        for(int i=1;i<=160;i++) {
-          float t=start+float(i)*stepSize;vec3 p=cameraPosition+direction*t;float value=scalar(p);
-          vec3 color=value>=0.0?positiveColor:negativeColor;float alpha=0.0;float hit=t;
+        float t=start;
+        for(int i=0;i<4096;i++) {
+          if(t>=end)break;
+          #if SKIP_EMPTY_BRICKS
+            vec3 voxel=clamp((o+d*t)*(gridSize-1.0),vec3(0),gridSize-1.0);
+            ivec3 brick=clamp(ivec3(floor(voxel/brickSize)),ivec3(0),textureSize(brickRanges,0)-1);
+            vec2 range=texelFetch(brickRanges,brick,0).rg;
+            float pad=max(max(abs(range.x),abs(range.y)),iso)*1e-6+1e-30;
+            bool empty=volumeMode
+              ? max(abs(range.x),abs(range.y))+pad<iso*0.3
+              : !((range.x-pad<=iso&&range.y+pad>=iso)||(range.x-pad<=-iso&&range.y+pad>=-iso));
+            if(empty) {
+              vec3 lowFace=vec3(brick)*brickSize;
+              vec3 highFace=min(lowFace+brickSize,gridSize-1.0);
+              vec3 face=vec3(voxelDirection.x<0.0?lowFace.x:highFace.x,
+                voxelDirection.y<0.0?lowFace.y:highFace.y,voxelDirection.z<0.0?lowFace.z:highFace.z);
+              vec3 distanceToFace=vec3(voxelDirection.x==0.0?1e30:(face.x-voxel.x)/voxelDirection.x,
+                voxelDirection.y==0.0?1e30:(face.y-voxel.y)/voxelDirection.y,
+                voxelDirection.z==0.0?1e30:(face.z-voxel.z)/voxelDirection.z);
+              float nextBrick=min(end,t+min(distanceToFace.x,min(distanceToFace.y,distanceToFace.z)));
+              if(nextBrick>t) {
+                t=nextBrick;prev=scalar(cameraPosition+direction*t);continue;
+              }
+            }
+          #endif
+          // Resume on the global sample lattice after an exact brick-face jump.
+          float nextT=min(end,start+(floor((t-start)/stepSize)+1.0)*stepSize);
+          if(nextT<=t)nextT=min(end,t+stepSize);
+          if(nextT<=t)break;
+          float segment=nextT-t;
+          vec3 p=cameraPosition+direction*nextT;float value=scalar(p);
           if(volumeMode) {
             float band=smoothstep(iso*0.3,iso,max(abs(value),0.0));
-            alpha=1.0-exp(-band*opacity*stepSize*1.4);
+            float alpha=1.0-exp(-band*opacity*segment*1.4);
+            if(alpha>0.001&&first<0.0)first=nextT;
+            composite(accum,value>=0.0?positiveColor:negativeColor,alpha);
           } else {
-            bool pos=(prev-iso)*(value-iso)<0.0;bool neg=(prev+iso)*(value+iso)<0.0;
+            bool pos=(prev<iso&&value>=iso)||(prev>iso&&value<=iso)||(t==start&&prev==iso&&value!=prev);
+            bool neg=(prev<-iso&&value>=-iso)||(prev>-iso&&value<=-iso)||(t==start&&prev==-iso&&value!=prev);
             if(pos||neg) {
-              float level=pos?iso:-iso;float lo=t-stepSize;float hi=t;float vl=prev-level;
-              for(int j=0;j<9;j++) {float mid=(lo+hi)*0.5;float vm=scalar(cameraPosition+direction*mid)-level;
-                if(vl*vm<=0.0)hi=mid;else{lo=mid;vl=vm;}}
-              hit=(lo+hi)*0.5;p=cameraPosition+direction*hit;
-              vec3 grad=gradient(p);vec3 n=length(grad)>1e-12?normalize(grad):vec3(0,1,0);
-              #ifdef SURFACE_BLINN_PHONG
-                vec3 L=normalize(vec3(0.4,0.7,1.0));
-                vec3 V=normalize(cameraPosition-p);
-                vec3 H=normalize(L+V);
-                float ndl=abs(dot(n,L));
-                float ndh=pow(max(abs(dot(n,H)),0.0),64.0);
-                float light=0.22+0.48*ndl+1.1*ndh;
-              #else
-                float light=0.4+0.6*abs(dot(n,normalize(vec3(0.4,0.7,1.0))));
-              #endif
-              color=(pos?positiveColor:negativeColor)*light;alpha=opacity;
+              bool both=pos&&neg;
+              float firstLevel=both?(prev<value?-iso:iso):(pos?iso:-iso);
+              vec2 levels=vec2(firstLevel,-firstLevel);vec2 hits=vec2(t);
+              for(int crossing=0;crossing<2;crossing++) {
+                if(crossing==1&&!both)break;
+                float level=levels[crossing];float lo=t;float hi=nextT;float vl=prev-level;
+                if(vl==0.0)hi=lo;
+                for(int j=0;j<9;j++) {float mid=(lo+hi)*0.5;float vm=scalar(cameraPosition+direction*mid)-level;
+                  if(vl*vm<=0.0)hi=mid;else{lo=mid;vl=vm;}}
+                hits[crossing]=(lo+hi)*0.5;
+              }
+              if(both&&hits.y<hits.x){hits=hits.yx;levels=levels.yx;}
+              for(int crossing=0;crossing<2;crossing++) {
+                if(crossing==1&&!both)break;
+                float hit=hits[crossing];p=cameraPosition+direction*hit;
+                vec3 grad=gradient(p);vec3 n=length(grad)>1e-12?normalize(grad):vec3(0,1,0);
+                #ifdef SURFACE_BLINN_PHONG
+                  vec3 L=normalize(vec3(0.4,0.7,1.0));
+                  vec3 V=normalize(cameraPosition-p);
+                  vec3 H=normalize(L+V);
+                  float ndl=abs(dot(n,L));
+                  float ndh=pow(max(abs(dot(n,H)),0.0),64.0);
+                  float light=0.22+0.48*ndl+1.1*ndh;
+                #else
+                  float light=0.4+0.6*abs(dot(n,normalize(vec3(0.4,0.7,1.0))));
+                #endif
+                if(opacity>0.001&&first<0.0)first=hit;
+                composite(accum,(levels[crossing]>0.0?positiveColor:negativeColor)*light,opacity);
+                if(accum.a>0.99)break;
+              }
             }
           }
-          if(alpha>0.001&&first<0.0)first=hit;
-          accum.rgb+=(1.0-accum.a)*color*alpha;accum.a+=(1.0-accum.a)*alpha;
-          if(accum.a>0.99)break;prev=value;
+          if(accum.a>0.99)break;prev=value;t=nextT;
         }
         if(accum.a<0.005||first<0.0)discard;
         vec4 clip=vp*vec4(cameraPosition+direction*first,1.0);gl_FragDepth=0.5*(clip.z/clip.w)+0.5;
@@ -141,5 +217,6 @@ export function volumeObject(
       camera.matrixWorldInverse,
     );
   mesh.userData.texture = texture;
+  mesh.userData.rangesTexture = rangesTexture;
   return mesh;
 }

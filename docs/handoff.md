@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 5 November 2026 for priority fixes at 0.5.11; the dated
+Updated 6 November 2026 for rendering fixes at 0.5.11; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
@@ -12,14 +12,33 @@ code. The icon and logo are unchanged.
 
 ## Issue priorities
 
-The first repair batch is implemented in
+The rendering batch implements #12 and #2 in
+[PR #26](https://github.com/uvar-apps/eigenvista/pull/26), developed on
+`codex/next-rendering-fixes` from merged main `31c4876`; runtime/test changes are
+commit `c9ca60f`. Custom shaders have an explicit live transparency
+policy, independent of document opacity; opaque mode forces final alpha one.
+Sampled previews use voxel-relative Draft/Standard/Fine quality and conservative
+eight-cell min/max bricks. Both signed crossings within one coarse ray segment
+are composited in depth order. Settings are session-only, without worker
+requests, scientific changes, mesh generation, or dirty-state changes. See the
+[design decisions](design/2026-11-06-rendering-quality.md) and current
+[verification](status.md#rendering-fixes-6-november-2026).
+Fresh checks pass: 147 workspace Rust tests including desktop, strict Clippy,
+Rustfmt, 13 packaging tests, production WASM/frontend build, and all 190 browser
+cases in one Chromium/WebKit run. Desktop/mobile controls were inspected. The
+Apple Silicon app was rebuilt and verified; no new tag or ZIP was created.
+Published `v0.5.11` artifacts still predate both repair batches. Native interactive
+rendering and clean-Mac/platform acceptance remain separate gaps.
+Next: worker ownership (#6) before cache identity (#5), then bond-search
+measurement (#3) and declared mmCIF connectivity (#19).
+
+The first repair batch was merged as `31c4876` in
 [PR #25](https://github.com/uvar-apps/eigenvista/pull/25), developed on
 `codex/priority-integrity-and-shader-fixes` from `38caf41`: #11 checked column
 indices, #9 shader parameter validation/source replacement, #10 native `.params`
-export, and #8 the Rust 1.99.0 selector. See the PR for current merge/issue state
-and [status](status.md#priority-fixes-5-november-2026) for verification and gaps.
-Next outstanding priorities are #12 and #2, followed by worker ownership (#6)
-before cache identity (#5). The review below preserves the original triage.
+export, and #8 the Rust 1.99.0 selector. All four issues are closed. See
+[status](status.md#priority-fixes-5-november-2026) for verification and gaps.
+The review below preserves the original triage.
 
 The [5 November issue review](reviews/2026-11-05-issue-priorities.md) covers all
 16 initially open GitHub issues at `38caf41` (then matching main and origin main),
@@ -36,6 +55,8 @@ The initial triage ran only the focused reproductions; its subsequent repair
 checks are recorded separately in status. Version remains 0.5.11; the published
 tag and tester ZIP predate these fixes. Preserve the user's untracked
 `docs/references/`; the checkout-local `1AON.pdb` exclusion is unchanged.
+The existing CIF browser test also emits `app/artifacts/cif-1bh3-desktop.png`;
+that generated image is preserved and locally excluded from Git/source packaging.
 
 ## Current release
 

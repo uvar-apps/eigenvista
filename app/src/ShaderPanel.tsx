@@ -22,6 +22,7 @@ export interface ShaderEditorState {
   fragment: ShaderFileState | null;
   values: Record<string, UniformValue>;
   target: string;
+  transparent?: boolean;
 }
 
 function components(kind: UniformDef["kind"]) {
@@ -90,19 +91,27 @@ export function ShaderPanel({
   const extensions = (kind: keyof typeof accept) =>
     accept[kind].split(",").map((extension) => extension.slice(1));
 
-  function changeShader(kind: "vertex" | "fragment", name: string, source: string) {
+  function changeShader(
+    kind: "vertex" | "fragment",
+    name: string,
+    source: string,
+  ) {
     const previous = latest.current.state;
     const previousDefs = parseUniforms(
-      previous.vertex?.source ?? "", previous.fragment?.source ?? "",
+      previous.vertex?.source ?? "",
+      previous.fragment?.source ?? "",
     );
     const next = { ...previous, [kind]: { name, source } };
     const defs = parseUniforms(
-      next.vertex?.source ?? "", next.fragment?.source ?? "",
+      next.vertex?.source ?? "",
+      next.fragment?.source ?? "",
     );
     const retained: Record<string, UniformValue> = {};
     for (const def of defs) {
       if (
-        previousDefs.some((old) => old.name === def.name && old.kind === def.kind) &&
+        previousDefs.some(
+          (old) => old.name === def.name && old.kind === def.kind,
+        ) &&
         previous.values[def.name] !== undefined
       )
         retained[def.name] = previous.values[def.name];
@@ -130,7 +139,8 @@ export function ShaderPanel({
     try {
       const previous = latest.current.state;
       const defs = parseUniforms(
-        previous.vertex?.source ?? "", previous.fragment?.source ?? "",
+        previous.vertex?.source ?? "",
+        previous.fragment?.source ?? "",
       );
       const values = parseParams(text, defs);
       const merged = mergeUniformValues(defs, previous.values, values);
@@ -194,7 +204,9 @@ export function ShaderPanel({
   function setValue(name: string, kind: UniformDef["kind"], raw: UniformValue) {
     try {
       const previous = latest.current.state;
-      const values = mergeUniformValues(uniforms, previous.values, { [name]: raw });
+      const values = mergeUniformValues(uniforms, previous.values, {
+        [name]: raw,
+      });
       publish({ ...previous, values });
       setParamsError("");
     } catch (e) {
@@ -270,6 +282,21 @@ export function ShaderPanel({
             </option>
           ))}
         </select>
+      </label>
+      <label className="shader-uniform">
+        <span>Shader transparency</span>
+        <input
+          type="checkbox"
+          aria-label="Shader transparency"
+          title="Blend alpha from the custom shader"
+          checked={state.transparent !== false}
+          onChange={(event) =>
+            publish({
+              ...latest.current.state,
+              transparent: event.target.checked,
+            })
+          }
+        />
       </label>
       {uniforms.length > 0 && (
         <div className="shader-uniforms">
@@ -389,7 +416,12 @@ export function ShaderPanel({
             ++reads.current.vertex;
             ++reads.current.fragment;
             ++reads.current.params;
-            latest.current.state = { vertex: null, fragment: null, values: {}, target: "all" };
+            latest.current.state = {
+              vertex: null,
+              fragment: null,
+              values: {},
+              target: "all",
+            };
             setParamsError("");
             onClear();
           }}
