@@ -57,6 +57,7 @@ by native saving. There is no calculation server, remote service, or database.
 | [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
 | [Worker client](../app/src/science.ts) and [worker](../app/src/science.worker.ts) | Request lifecycle, WASM initialization, single sampled-grid cache, cancellation |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
+| [Preview brick ranges](../app/src/volumeRanges.ts) | Conservative min/max bounds over sampled f32 values for renderer-only empty-space skipping |
 | [Element display table](../app/src/elements.ts) | Symbol and van der Waals display radius for elements 1-118. Presentation data only; [element_display.rs](../crates/eigenvista-core/tests/element_display.rs) re-derives every radius from the `pdbtbx` source tables so the table cannot drift. Carries no colour — that lives in `atom-colors.json` |
 | [Atom colour palette](../app/src/atom-colors.json) and [loader](../app/src/atomColors.ts) | Single source of truth for the default per-element colour. `parseAtomColors` validates a loaded file and rejects it whole; `resolveAtomColor` resolves session override → bundled default → `#b294b9` sentinel. Session-only, never persisted to `.eigenvista`. See the [design record](design/2026-10-12-atom-colors-from-file.md) |
 | [File adapter](../app/src/files.ts) | Browser file/download versus native dialog/read/save |
@@ -285,6 +286,24 @@ single-volume compositing do not correctly solve all mixed-scene overlaps.
 Skewed and reflected affine grids use the full grid transform; reflected box
 winding is corrected for back-face ray-entry rendering, including inside views.
 
+Display steps follow ray length in voxel coordinates, with Draft/Standard/Fine
+using 1/2/4 samples per voxel-distance (default 2). Traversal is bounded to 4096
+iterations, including empty-brick jumps. Quality changes reuse the current grid
+without worker requests, scientific edits, mesh generation, or serialization.
+Bracket refinement still cannot guarantee tangencies, multiple unseen crossings,
+or features unresolved by the sampled grid.
+
+The renderer bounds each eight-cell brick using all its f32 vertices, including
+shared faces and partial tail bricks. Padded min/max comparisons skip only bricks
+that exclude both signed raycast isovalues or the volume opacity band. The
+sampling lattice is preserved across jumps. Dimensions are checked at 2..256
+per axis; the maximum 32-cubed range array is 256 KiB, with an accompanying RG
+3D texture. A weak cache keyed by immutable sampled-value arrays and dimensions
+reuses CPU ranges on scene rebuilds; replace the array when values change.
+Each scene object owns its field and range textures, and the viewport disposes
+both on replacement. These display bounds do not modify authoritative data or
+persist in documents.
+
 Choosing a sampled mode without a current display grid sends only `sample`,
 not `generate`; the worker skips marching cubes. In a sampled mode, field and
 resolution changes also use `sample`. The UI stages the requested field,
@@ -327,7 +346,8 @@ are not yet implemented. Never discard saved meshes as disposable cache data.
 
 Persistent view settings include representation, active field selection, colors,
 opacity, and isovalue. Camera, active render mode, surface shading, custom
-surface shader sources/uniforms, grid-resolution control, orbital-browser
+surface shader sources/uniforms/transparency, sampled preview quality,
+grid-resolution control, orbital-browser
 checkbox selection, worker cache, transient display grid, and dirty state are
 not persisted. Multi-orbital selection produces independent
 saved meshes, not a new combined orbital/density or multiple active volumes. A
@@ -371,6 +391,17 @@ own values until Apply. Live edits update only a pair with matching sources.
 File reads compose against the latest validated editor state and carry per-input
 generations; Clear invalidates pending reads and resets both staged files and
 values, so delayed completions cannot restore a cleared pair.
+
+Custom shader transparency is explicit and defaults on: arbitrary fragment alpha
+is blended and depth writes are disabled, independently of document opacity or
+an `opacity` uniform. Disabling it forces final alpha to 1 and enables depth
+writes through a shader define and material update. The checkbox updates a
+matching applied pair live and Clear resets it; built-in materials are unchanged.
+The supported fragment output is ShaderMaterial's `gl_FragColor`: the wrapper
+calls the user main function, then overrides that output's alpha in opaque mode.
+This session setting is absent from native documents and parameter files.
+Ordinary transparent-object sorting still cannot resolve intersecting layers or
+the sampled volume's mixed opaque/transparent overlaps.
 
 Indexed numeric-column references are converted from `u64` with checked
 `usize::try_from` before bounds and single-consumption checks. Malformed oversized

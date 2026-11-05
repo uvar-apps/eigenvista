@@ -10,13 +10,14 @@ import type {
 } from "./types";
 import {
   applyUniformValues,
+  applyShaderTransparency,
   attachSurfaceColors,
   buildSurfaceMaterial,
   formatShaderLog,
   validateShaderMaterial,
   type ShaderPair,
 } from "./shaderTools";
-import { volumeObject } from "./volume";
+import { volumeObject, type VolumeQuality } from "./volume";
 import { elementDisplay } from "./elements";
 import { resolveAtomColor, type AtomPalette } from "./atomColors";
 
@@ -46,6 +47,7 @@ function dispose(group: THREE.Object3D) {
       for (const m of Array.isArray(o.material) ? o.material : [o.material])
         m.dispose();
       o.userData.texture?.dispose();
+      o.userData.rangesTexture?.dispose();
     }
   });
 }
@@ -108,6 +110,7 @@ export function Viewport({
   doc,
   grid,
   mode,
+  volumeQuality = 2,
   shading,
   shader,
   atomPalette,
@@ -118,6 +121,7 @@ export function Viewport({
   doc: EigenVistaDocument;
   grid: SampledGrid | null;
   mode: RenderMode;
+  volumeQuality?: VolumeQuality;
   shading: SurfaceShading;
   shader: (ShaderPair & { target: string }) | null;
   atomPalette?: AtomPalette;
@@ -291,7 +295,9 @@ export function Viewport({
       // 66k-atom structure; this renders the same scene in one draw call.
       if (atomCount > 0) {
         const atomGeometry = new THREE.SphereGeometry(1, 24, 16);
-        const atomMaterial = new THREE.MeshStandardMaterial({ roughness: 0.34 });
+        const atomMaterial = new THREE.MeshStandardMaterial({
+          roughness: 0.34,
+        });
         const atoms = new THREE.InstancedMesh(
           atomGeometry,
           atomMaterial,
@@ -331,7 +337,8 @@ export function Viewport({
         group.add(atoms);
       }
       if (doc.view.representation !== "space-fill") {
-        const bondRadius = doc.view.representation === "liquorice" ? 0.28 : 0.105;
+        const bondRadius =
+          doc.view.representation === "liquorice" ? 0.28 : 0.105;
         const from = new THREE.Vector3();
         const to = new THREE.Vector3();
         const delta = new THREE.Vector3();
@@ -427,6 +434,7 @@ export function Viewport({
             doc.view.opacity,
             e.renderer.extensions.has("OES_texture_float_linear"),
             shading,
+            volumeQuality,
           ),
         );
     } catch (error) {
@@ -445,6 +453,7 @@ export function Viewport({
     doc,
     grid,
     mode,
+    volumeQuality,
     shading,
     shader?.vertexSource,
     shader?.fragmentSource,
@@ -461,10 +470,11 @@ export function Viewport({
         obj.material instanceof THREE.ShaderMaterial
       ) {
         applyUniformValues(obj.material, active.uniforms, active.values);
+        applyShaderTransparency(obj.material, active.transparent !== false);
       }
     });
     e.needsRender = true;
-  }, [shader?.values]);
+  }, [shader?.values, shader?.transparent]);
   /**
    * Re-tint atoms in place when the palette changes. Geometry is untouched: the
    * rebuild effect reads the palette through `paletteRef` and so is not keyed on

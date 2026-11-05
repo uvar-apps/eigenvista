@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { request, cancel } from "./science";
+import type { VolumeQuality } from "./volume";
 import {
   CalculationProgress,
   type CalculationState,
@@ -66,6 +67,7 @@ export default function App() {
   const [status, setStatus] = useState("");
   const [resolution, setResolution] = useState(40);
   const [mode, setMode] = useState<RenderMode>("mesh");
+  const [volumeQuality, setVolumeQuality] = useState<VolumeQuality>(2);
   const [surfaceShading, setSurfaceShading] =
     useState<SurfaceShading>("diffuse");
   const [shaderEditor, setShaderEditor] = useState<ShaderEditorState>({
@@ -73,6 +75,7 @@ export default function App() {
     fragment: null,
     values: {},
     target: "all",
+    transparent: true,
   });
   const [appliedShader, setAppliedShader] = useState<
     (ShaderPair & { target: string }) | null
@@ -737,6 +740,7 @@ export default function App() {
               doc={doc}
               grid={grid}
               mode={mode}
+              volumeQuality={volumeQuality}
               shading={surfaceShading}
               shader={appliedShader}
               atomPalette={atomPalette}
@@ -781,6 +785,25 @@ export default function App() {
                   </option>
                 </select>
               </label>
+              {mode !== "mesh" && (
+                <label>
+                  Sampling quality
+                  <select
+                    aria-label="Preview sampling quality"
+                    value={volumeQuality}
+                    disabled={!!busy}
+                    onChange={(event) => {
+                      const value = Number(event.target.value);
+                      if (value === 1 || value === 2 || value === 4)
+                        setVolumeQuality(value);
+                    }}
+                  >
+                    <option value="1">Draft</option>
+                    <option value="2">Standard</option>
+                    <option value="4">Fine</option>
+                  </select>
+                </label>
+              )}
               <label>
                 Isovalue
                 <input
@@ -976,6 +999,7 @@ export default function App() {
                         ...appliedShader,
                         target: next.target,
                         values: next.values,
+                        transparent: next.transparent !== false,
                       });
                     }
                   }}
@@ -999,6 +1023,7 @@ export default function App() {
                         uniforms,
                         values,
                         target: shaderEditor.target,
+                        transparent: shaderEditor.transparent !== false,
                       };
                       setShaderEditor({ ...shaderEditor, values });
                       setAppliedShader(pair);
@@ -1013,7 +1038,12 @@ export default function App() {
                   }}
                   onClear={() => {
                     setAppliedShader(null);
-                    setShaderEditor({ vertex: null, fragment: null, values: {}, target: "all" });
+                    setShaderEditor({
+                      vertex: null,
+                      fragment: null,
+                      values: {},
+                      target: "all",
+                    });
                     setShaderStatus("Cleared custom surface shader");
                     setShaderError("");
                   }}

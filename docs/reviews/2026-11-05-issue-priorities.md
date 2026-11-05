@@ -10,10 +10,15 @@ approved the tracker changes recorded below.
 ## Applied triage
 
 Implementation follow-up: the first batch (#11, #9, #10, and supporting #8) is
-implemented in [PR #25](https://github.com/uvar-apps/eigenvista/pull/25), with
-verification in [status](../status.md#priority-fixes-5-november-2026). Check that
-PR for merge/closure state. The table preserves the original ordering;
-the next outstanding work is #12 and #2.
+merged in [PR #25](https://github.com/uvar-apps/eigenvista/pull/25) at `31c4876`,
+closing all four issues, with verification in
+[status](../status.md#priority-fixes-5-november-2026). The second batch addresses
+#12 and #2 on `codex/next-rendering-fixes`; its
+[design](../design/2026-11-06-rendering-quality.md) and
+[verification](../status.md#rendering-fixes-6-november-2026) record the explicit
+alpha policy, voxel-relative quality, empty-brick skipping, and measurements.
+The table preserves the original ordering. Next outstanding: #6 before #5,
+then measured bond-search work (#3) and declared mmCIF connections (#19).
 
 On 5 November 2026, closed [#16 as completed](https://github.com/uvar-apps/eigenvista/issues/16#issuecomment-6661704198)
 using the shipped 0.5.7/0.5.8 fixes and the current 118-colour check. There were

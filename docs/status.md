@@ -8,6 +8,75 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Rendering fixes: 6 November 2026
+
+Second repair batch at source version 0.5.11 on `codex/next-rendering-fixes`,
+based on merged main `31c4876`, addresses #12 and #2. The
+[design record](design/2026-11-06-rendering-quality.md) explains the decisions
+and remaining numerical/rendering limits.
+
+- Custom mesh shaders have a live **Shader transparency** switch, enabled by
+  default, independent of document opacity and uniform names. Enabled uses
+  alpha blending without depth writes; disabled writes depth and forces final
+  alpha one. Built-in material behavior is unchanged.
+- Sampled volume and raycast use voxel-relative Draft/Standard/Fine quality
+  (1/2/4 samples per voxel; Standard default), with full inverse affine axes
+  and a 4,096-iteration bound. Eight-cell min/max bricks include shared boundary
+  vertices; conservative skipping retains the global sample lattice. Both signed
+  roots within one segment are refined and composited in depth order, including
+  entry equality without a false constant-field surface.
+- Settings are session-only. Tests verify no scientific worker request, dirty
+  state, generated mesh, or decoded saved-document change. Immutable sampled
+  buffers reuse bounded CPU ranges; scene disposal releases both 3D textures.
+  At 256 cubed, ranges add 262,144 CPU bytes and the same GPU texture size.
+
+Fresh checks: 147 workspace Rust tests including desktop, strict
+workspace/all-target Clippy, Rustfmt, 13 packaging tests, and the production
+WASM/TypeScript/Vite build pass. All 190 Chromium/WebKit cases passed in one
+uninterrupted 5.7-minute run. Tests include real shader alpha/depth pixels,
+thin positive/negative fields missed by a fixed160 control, affine/reflected/
+inside-camera views, dense/skip agreement, independent signed-root compositing
+and depth probes, and exact-entry thresholds. Desktop/mobile screenshots of
+both controls were inspected in both engines. All 345 local Markdown targets
+resolve, and source/test formatting and whitespace checks pass. Versions,
+lockfiles, scientific fixtures, icon, and document format are unchanged.
+
+The Apple Silicon app was rebuilt with repository-selected Rust 1.99.0 and the
+sanitized tester environment at
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`. Strict deep
+signature verification passes; the 0.5.11 bundle embeds current frontend
+`assets/index-Ch9iuff6.js`. The running web preview remains on port 5178.
+No new tag, release, or tester ZIP was created; the published archive predates
+both repair batches. Native interactive rendering was not exercised.
+
+Four direct Node/V8 calls per size measured CPU range construction at
+3.49–10.80 ms for 128 cubed and 31.96–41.32 ms for 256 cubed on this Mac,
+excluding texture upload, scientific sampling, and rendering. The timings were
+recorded in session output, not a persisted benchmark report. Construction runs
+synchronously once per immutable display buffer in the application.
+Warmed synchronized GPU/readback measurements compare fixed160, dense adaptive,
+and skipped adaptive rendering on a sparse planar 256-slice field at 129²
+pixels. The fixed160 control uses the current shader kernel with a fixed count,
+not an exact old-release shader. These diagnostics are not general molecule/
+frame-rate guarantees. Standard/Fine can cost more than fixed160. Generated results
+are under `artifacts/adaptive-volume-{chromium,webkit}-{thin-field-pixels,measurements,signed-crossing-depth}.json`.
+
+Standard-quality diagnostics from the final suite, median milliseconds per
+synchronized render/readback (WebKit timer resolution is coarse):
+
+| Engine / mode | Fixed160 control | Dense adaptive | Skipped adaptive |
+| --- | ---: | ---: | ---: |
+| Chromium volume | 16.50 | 51.47 | 25.87 |
+| Chromium raycast | 8.23 | 19.57 | 6.83 |
+| WebKit volume | 0.67 | 1.00 | 0.67 |
+| WebKit raycast | 0.67 | 0.67 | 0.33 |
+
+Finite sampling can still miss tangencies or sub-segment structure. Ordinary
+transparent-surface sorting and single-volume/opaque-object overlap limitations
+remain. Native interactive acceptance, clean-Mac installation, and Linux/Windows
+remain unverified. Preserve user-owned `docs/references/`, private chats, and
+the locally excluded `1AON.pdb`. Next: #6 before #5, then #3 and #19.
+
 ## Priority fixes: 5 November 2026
 
 First repair batch at source version 0.5.11 in

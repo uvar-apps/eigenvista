@@ -28,7 +28,7 @@ All-pairs distance testing is quadratic and unsuitable for large structures. Cel
 
 The preview uses the existing Rust `kiddo` 5.2.4 immutable k-d tree with exact squared-Euclidean radius queries. It was selected for reusable, tested spatial indexing, successful native/WASM builds, and the measured workloads below. It avoids an application-specific spatial-tree implementation. Approximate-nearest-neighbor search is not used. [Kiddo documentation](https://docs.rs/crate/kiddo/5.2.4).
 
-The distance test uses the Pyykko-Atsumi single-bond covalent radii for elements 1-118, as supplied by pinned `pdbtbx` 0.12.0. These are distinct from the viewer's van der Waals display radii, which come from Alvarez (2013) and Rahm-Hoffmann-Ashcroft (2016) and are pinned against the same `pdbtbx` tables by [element_display.rs](crates/eigenvista-core/tests/element_display.rs). [Original radii publication](https://chemistry-europe.onlinelibrary.wiley.com/doi/10.1002/chem.200800987), [PDB Toolbox](https://docs.rs/pdbtbx/0.12.0/pdbtbx/).
+The distance test uses the Pyykko-Atsumi single-bond covalent radii for elements 1-118, as supplied by pinned `pdbtbx` 0.12.0. These are distinct from the viewer's van der Waals display radii, which come from Alvarez (2013) and Rahm-Hoffmann-Ashcroft (2016) and are pinned against the same `pdbtbx` tables by [element_display.rs](../crates/eigenvista-core/tests/element_display.rs). [Original radii publication](https://chemistry-europe.onlinelibrary.wiley.com/doi/10.1002/chem.200800987), [PDB Toolbox](https://docs.rs/pdbtbx/0.12.0/pdbtbx/).
 
 1. Convert the model's bohr coordinates to angstroms for the geometric test.
 2. Preserve and deduplicate explicit connections first, including bonds longer than the automatic cutoff.
