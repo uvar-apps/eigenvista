@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 6 November 2026 for rendering fixes at 0.5.11; the dated
+Updated 6 November 2026 for worker ownership/registration at 0.5.11; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
@@ -11,6 +11,32 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+The worker batch implements #6 and #5 in
+[PR #27](https://github.com/uvar-apps/eigenvista/pull/27), developed on
+`codex/worker-ownership-and-cache` from merged main `c5ebcbb`; runtime/test
+changes are commit `b701efe`. One shared FIFO worker has explicit scene/conversion
+owners and per-request AbortSignals. Cancelling active work restarts blocked
+WASM while retaining other owners' queued jobs; fatal failures reject all.
+Chromium message-error delivery uses an event listener, and initialization
+failure permits a fresh worker/fetch. UI generation tokens remain necessary.
+One validated Rust `RegisteredDocument` owns immutable source data and one
+sampled field; repeat requests carry small parameters instead of the full
+scientific document. Replace affected top-level source arrays/objects when
+editing: in-place mutation does not invalidate reference identity. Internal
+registration IDs never replace scientific hashes or native save validation.
+See the [design](design/2026-11-06-worker-ownership-and-registration.md) and
+[fresh verification](status.md#worker-ownership-and-registration-6-november-2026).
+Fresh checks pass: all 147 workspace Rust tests including desktop, strict Clippy,
+Rustfmt, 13 packaging tests, production WASM/frontend build, and all 226 browser
+cases in one Chromium/WebKit run. Current desktop/mobile screenshots were
+inspected, and local documentation links resolve. Isolated Node/WASM benchmarks
+measure registration/cached-mesh costs with exact parity; they do not establish
+end-to-end speedups or platform qualification.
+The native app was rebuilt at 0.5.11 and verified; published ZIP/tag remain
+unchanged and predate all three repair batches. Preserve user references and
+local data; `.serena/` is checkout-local ignored tooling, not packaged source.
+Next: measured bond-search work (#3), then declared mmCIF connectivity (#19).
 
 The rendering batch implements #12 and #2 in
 [PR #26](https://github.com/uvar-apps/eigenvista/pull/26), developed on
@@ -29,8 +55,8 @@ cases in one Chromium/WebKit run. Desktop/mobile controls were inspected. The
 Apple Silicon app was rebuilt and verified; no new tag or ZIP was created.
 Published `v0.5.11` artifacts still predate both repair batches. Native interactive
 rendering and clean-Mac/platform acceptance remain separate gaps.
-Next: worker ownership (#6) before cache identity (#5), then bond-search
-measurement (#3) and declared mmCIF connectivity (#19).
+That batch was merged in `c5ebcbb`; both issues are closed. Its subsequent
+worker ownership/cache batch is described above.
 
 The first repair batch was merged as `31c4876` in
 [PR #25](https://github.com/uvar-apps/eigenvista/pull/25), developed on

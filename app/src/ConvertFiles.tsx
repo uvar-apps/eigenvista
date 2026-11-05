@@ -16,7 +16,7 @@ import {
   saveBytes,
   type SourceFile,
 } from "./files";
-import { cancel, request } from "./science";
+import { createScienceClient } from "./science";
 import type { ImportResult } from "./types";
 
 type State =
@@ -54,6 +54,7 @@ export function ConvertFiles({
   open: boolean;
   onClose: () => void;
 }) {
+  const [{ request, cancel }] = useState(createScienceClient);
   const dialog = useRef<HTMLDialogElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const nextId = useRef(0);
@@ -64,6 +65,14 @@ export function ConvertFiles({
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
   const busy = running || saving;
+
+  useEffect(
+    () => () => {
+      ++run.current;
+      cancel();
+    },
+    [cancel],
+  );
 
   useEffect(() => {
     if (open) dialog.current?.showModal();

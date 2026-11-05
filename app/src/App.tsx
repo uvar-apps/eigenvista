@@ -16,7 +16,7 @@ import {
   ListChecks,
   X,
 } from "lucide-react";
-import { request, cancel } from "./science";
+import { createScienceClient } from "./science";
 import type { VolumeQuality } from "./volume";
 import {
   CalculationProgress,
@@ -60,6 +60,7 @@ import type {
 } from "./types";
 
 export default function App() {
+  const [{ request, cancel }] = useState(createScienceClient);
   const [doc, setDoc] = useState<EigenVistaDocument | null>(null);
   const [busy, setBusy] = useState("Opening scientific core");
   const [calculation, setCalculation] = useState<CalculationState | null>(null);

@@ -80,6 +80,9 @@ release. It includes source and notices under the [application license](LICENSE)
 - Live calculation progress shows the current field and orbital batch position,
   completed sampling slices, per-phase percentage, signed mesh-pass checkpoints,
   and elapsed time. Cancellation remains available throughout worker jobs.
+- Calculation and conversion clients share one queued scientific worker.
+  Cancelling one client's work preserves unrelated queued requests; scientific
+  operations still run one at a time.
 - Searchable orbital table with energy, occupation, spin, and saved-surface counts;
   select up to 32 orbitals per batch to generate persistent signed meshes together.
   Cancel or failure preserves prior geometry, and successful batches retain
@@ -140,15 +143,20 @@ and domain validation. There is no estimated CPU-work cutoff or silent
 resolution reduction for analytic sampling. Scalar sampling avoids unused
 gradients and folds density-matrix pairs. The WASM worker keeps the f64 sampled
 grid and transfers full-resolution f32 display values without serializing the
-large sample array through JSON.
+large sample array through JSON. One validated resident document supplies the
+sampled cache; repeated requests with unchanged source inputs omit the full
+scientific payload. Appearance and isovalue changes can reuse its field samples.
 
 A 256 cubed field contains 16,777,216 samples: 128 MiB for f64 values plus
 64 MiB for f32 display values, before meshes, additional copies, and GPU memory.
 Larger jobs may take longer. Percentages measure completed sampling slices or
 signed mesh passes, not overall time remaining; preparation, transfer, and
 validation are indeterminate. There is no ETA or intra-pass mesher percentage.
-Cancel terminates the worker, retaining previous geometry, and recoverable
-errors leave the previous document intact. Allocation checks cannot guarantee
+Cancelling active work terminates the worker, retaining previous geometry;
+unrelated queued work continues on a replacement worker. Cancelling queued work
+does not interrupt the active request. Fatal worker failures reject all pending
+jobs, while recoverable errors leave the previous document intact. Allocation
+checks cannot guarantee
 recovery from every library, browser, GPU, or system out-of-memory failure;
 these bounds do not guarantee latency or maximum process memory usage.
 

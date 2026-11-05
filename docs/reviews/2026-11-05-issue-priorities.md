@@ -18,8 +18,13 @@ on `codex/next-rendering-fixes`; its
 [design](../design/2026-11-06-rendering-quality.md) and
 [verification](../status.md#rendering-fixes-6-november-2026) record the explicit
 alpha policy, voxel-relative quality, empty-brick skipping, and measurements.
-The table preserves the original ordering. Next outstanding: #6 before #5,
-then measured bond-search work (#3) and declared mmCIF connections (#19).
+The rendering batch merged as `c5ebcbb`, closing both issues. The third batch
+implements #6 then #5 in [PR #27](https://github.com/uvar-apps/eigenvista/pull/27),
+developed on `codex/worker-ownership-and-cache`; see its
+[design](../design/2026-11-06-worker-ownership-and-registration.md) and
+[verification](../status.md#worker-ownership-and-registration-6-november-2026).
+The table preserves the original ordering. Next outstanding: measured
+bond-search work (#3), then declared mmCIF connections (#19).
 
 On 5 November 2026, closed [#16 as completed](https://github.com/uvar-apps/eigenvista/issues/16#issuecomment-6661704198)
 using the shipped 0.5.7/0.5.8 fixes and the current 118-colour check. There were

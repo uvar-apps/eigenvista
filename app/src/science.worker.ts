@@ -1,11 +1,11 @@
 import init, * as core from "./wasm/eigenvista_wasm";
-import type { EigenVistaDocument, SampledGrid } from "./types";
+import type { SampledGrid } from "./types";
 
 const ready = init();
-let cached: { key: string; field: core.SampledField } | null = null;
+let registered: { id: number; document: core.RegisteredDocument } | null = null;
 function clearCache() {
-  cached?.field.free();
-  cached = null;
+  registered?.document.free();
+  registered = null;
 }
 self.onmessage = async (event: MessageEvent) => {
   const { id, action, args } = event.data;
@@ -20,8 +20,10 @@ self.onmessage = async (event: MessageEvent) => {
       }
     };
   };
+  let initialized = false;
   try {
     await ready;
+    initialized = true;
     let result: unknown;
     const transfer: Transferable[] = [];
     switch (action) {
@@ -50,43 +52,39 @@ self.onmessage = async (event: MessageEvent) => {
         break;
       case "sample":
       case "generate": {
-        const doc = args.doc as EigenVistaDocument;
-        const json = JSON.stringify(doc);
-        core.validate(json);
-        const key = JSON.stringify([
-          doc.basis,
-          doc.orbitals,
-          doc.densities,
-          doc.grids,
-          args.field,
-          args.resolution,
-        ]);
-        if (cached?.key !== key) {
+        if (args.doc) {
           clearCache();
-          cached = {
-            key,
-            field: core.SampledField.with_progress(
-              json,
-              args.field,
-              args.resolution,
-              measuredProgress("sampling"),
-            ),
+          registered = {
+            id: args.registration,
+            document: new core.RegisteredDocument(JSON.stringify(args.doc)),
           };
         }
+        if (!registered || registered.id !== args.registration)
+          throw new Error(
+            "Scientific document registration is unavailable; retry the calculation",
+          );
+        const document = registered.document;
+        document.prepare(
+          args.field,
+          args.resolution,
+          measuredProgress("sampling"),
+        );
         const surfaces =
           action === "generate"
             ? JSON.parse(
-                cached.field.surfaces_with_progress(
-                  json,
+                document.surfaces(
                   args.iso,
+                  args.appearance.positive_color,
+                  args.appearance.negative_color,
+                  args.appearance.opacity,
                   measuredProgress("meshing"),
                 ),
               )
             : null;
         progress("transferring");
         const grid: SampledGrid = {
-          ...JSON.parse(cached.field.metadata()),
-          values: cached.field.display_values(),
+          ...JSON.parse(document.metadata()),
+          values: document.display_values(),
         };
         transfer.push(grid.values.buffer);
         result = action === "sample" ? grid : { grid, surfaces };
@@ -99,7 +97,9 @@ self.onmessage = async (event: MessageEvent) => {
   } catch (e) {
     // A trapped allocator/runtime must not be reused for the next calculation.
     const fatal =
-      e instanceof WebAssembly.RuntimeError || e instanceof RangeError;
+      !initialized ||
+      e instanceof WebAssembly.RuntimeError ||
+      e instanceof RangeError;
     if (!fatal) clearCache();
     self.postMessage({
       id,

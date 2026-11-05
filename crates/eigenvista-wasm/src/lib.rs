@@ -1,4 +1,4 @@
-use eigenvista_core::{Document, Grid, compute, fixtures};
+use eigenvista_core::{Document, Grid, View, compute, fixtures, valid_color};
 use wasm_bindgen::prelude::*;
 fn err(e: impl ToString) -> JsValue {
     JsValue::from_str(&e.to_string())
@@ -48,7 +48,7 @@ pub fn surfaces(json: &str, grid_json: &str, field: &str, iso: f64) -> Result<St
     let d = parse(json)?;
     let g = serde_json::from_str(grid_json).map_err(err)?;
     let hash = compute::source_hash(&d, field).map_err(err)?;
-    mesh_surfaces(&d, &g, field, &hash, iso, |_, _| Ok(()))
+    mesh_surfaces(&d.view, &g, field, &hash, iso, |_, _| Ok(()))
 }
 
 fn report_progress(
@@ -67,7 +67,7 @@ fn report_progress(
 }
 
 fn mesh_surfaces(
-    d: &Document,
+    view: &View,
     g: &Grid,
     field: &str,
     hash: &str,
@@ -76,14 +76,11 @@ fn mesh_surfaces(
 ) -> Result<String, JsValue> {
     let mut surfaces = vec![];
     progress(0, 2)?;
-    for (index, (level, color)) in [
-        (iso, &d.view.positive_color),
-        (-iso, &d.view.negative_color),
-    ]
-    .into_iter()
-    .enumerate()
+    for (index, (level, color)) in [(iso, &view.positive_color), (-iso, &view.negative_color)]
+        .into_iter()
+        .enumerate()
     {
-        let s = compute::mesh(g, level, field, hash, color, d.view.opacity).map_err(err)?;
+        let s = compute::mesh(g, level, field, hash, color, view.opacity).map_err(err)?;
         if !s.indices.is_empty() {
             surfaces.push(s);
         }
@@ -100,6 +97,26 @@ pub struct SampledField {
     hash: String,
 }
 
+impl SampledField {
+    fn from_document(
+        document: &Document,
+        field: &str,
+        resolution: usize,
+        progress: Option<js_sys::Function>,
+    ) -> Result<Self, JsValue> {
+        let hash = compute::source_hash(document, field).map_err(err)?;
+        Ok(Self {
+            grid: compute::sample_with_progress(document, field, resolution, |done, total| {
+                report_progress(&progress, done, total)
+                    .map_err(|error| format!("Progress callback failed: {error:?}"))
+            })
+            .map_err(err)?,
+            field: field.into(),
+            hash,
+        })
+    }
+}
+
 #[wasm_bindgen]
 impl SampledField {
     #[wasm_bindgen(constructor)]
@@ -114,16 +131,7 @@ impl SampledField {
         progress: Option<js_sys::Function>,
     ) -> Result<SampledField, JsValue> {
         let document = parse(json)?;
-        let hash = compute::source_hash(&document, field).map_err(err)?;
-        Ok(Self {
-            grid: compute::sample_with_progress(&document, field, resolution, |done, total| {
-                report_progress(&progress, done, total)
-                    .map_err(|error| format!("Progress callback failed: {error:?}"))
-            })
-            .map_err(err)?,
-            field: field.into(),
-            hash,
-        })
+        Self::from_document(&document, field, resolution, progress)
     }
 
     pub fn metadata(&self) -> Result<String, JsValue> {
@@ -167,7 +175,7 @@ impl SampledField {
             ));
         }
         mesh_surfaces(
-            &document,
+            &document.view,
             &self.grid,
             &self.field,
             &self.hash,
@@ -176,6 +184,105 @@ impl SampledField {
         )
     }
 }
+
+/// A validated immutable source and one sampled field, scoped to a worker lifetime.
+#[wasm_bindgen]
+pub struct RegisteredDocument {
+    document: Document,
+    cached: Option<(usize, SampledField)>,
+}
+
+impl RegisteredDocument {
+    fn sampled(&self) -> Result<&SampledField, JsValue> {
+        self.cached
+            .as_ref()
+            .map(|(_, field)| field)
+            .ok_or_else(|| err("No sampled field is prepared"))
+    }
+}
+
+#[wasm_bindgen]
+impl RegisteredDocument {
+    #[wasm_bindgen(constructor)]
+    pub fn new(json: &str) -> Result<Self, JsValue> {
+        let mut document = parse(json)?;
+        // Saved geometry was validated above, but cannot affect a new field.
+        document.surfaces = Vec::new();
+        Ok(Self {
+            document,
+            cached: None,
+        })
+    }
+
+    /// Return true only when sampling ran; field/resolution hits emit no progress.
+    pub fn prepare(
+        &mut self,
+        field: &str,
+        resolution: usize,
+        progress: Option<js_sys::Function>,
+    ) -> Result<bool, JsValue> {
+        if self
+            .cached
+            .as_ref()
+            .is_some_and(|(cached_resolution, cached)| {
+                *cached_resolution == resolution && cached.field == field
+            })
+        {
+            return Ok(false);
+        }
+        // Drop the previous f64 allocation before attempting its replacement.
+        self.cached = None;
+        let sampled = SampledField::from_document(&self.document, field, resolution, progress)?;
+        self.cached = Some((resolution, sampled));
+        Ok(true)
+    }
+
+    pub fn metadata(&self) -> Result<String, JsValue> {
+        self.sampled()?.metadata()
+    }
+
+    pub fn display_values(&self) -> Result<Vec<f32>, JsValue> {
+        self.sampled()?.display_values()
+    }
+
+    /// Mesh the owned samples using validated current presentation, without source JSON.
+    pub fn surfaces(
+        &self,
+        iso: f64,
+        positive_color: &str,
+        negative_color: &str,
+        opacity: f64,
+        progress: Option<js_sys::Function>,
+    ) -> Result<String, JsValue> {
+        if !valid_color(positive_color)
+            || !valid_color(negative_color)
+            || !opacity.is_finite()
+            || !(0. ..=1.).contains(&opacity)
+            || !iso.is_finite()
+            || iso <= 0.
+            || !(iso as f32).is_finite()
+        {
+            return Err(err("Invalid surface view settings"));
+        }
+        let sampled = self.sampled()?;
+        let view = View {
+            positive_color: positive_color.into(),
+            negative_color: negative_color.into(),
+            opacity,
+            isovalue: iso,
+            ..self.document.view.clone()
+        };
+        mesh_surfaces(
+            &view,
+            &sampled.grid,
+            &sampled.field,
+            &sampled.hash,
+            iso,
+            |done, total| report_progress(&progress, done, total),
+        )
+    }
+}
+
 #[wasm_bindgen]
 pub fn point(json: &str, field: &str, x: f64, y: f64, z: f64) -> Result<f64, JsValue> {
     compute::evaluate(&parse(json)?, field, [x, y, z])
