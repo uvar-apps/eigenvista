@@ -12,8 +12,10 @@ code. The icon and logo are unchanged.
 
 ## Issue priorities
 
-The rendering batch addresses #12 and #2 on `codex/next-rendering-fixes`, based
-on merged main `31c4876`. Custom shaders have an explicit live transparency
+The rendering batch implements #12 and #2 in
+[PR #26](https://github.com/uvar-apps/eigenvista/pull/26), developed on
+`codex/next-rendering-fixes` from merged main `31c4876`; runtime/test changes are
+commit `c9ca60f`. Custom shaders have an explicit live transparency
 policy, independent of document opacity; opaque mode forces final alpha one.
 Sampled previews use voxel-relative Draft/Standard/Fine quality and conservative
 eight-cell min/max bricks. Both signed crossings within one coarse ray segment

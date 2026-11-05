@@ -12,8 +12,9 @@ approved the tracker changes recorded below.
 Implementation follow-up: the first batch (#11, #9, #10, and supporting #8) is
 merged in [PR #25](https://github.com/uvar-apps/eigenvista/pull/25) at `31c4876`,
 closing all four issues, with verification in
-[status](../status.md#priority-fixes-5-november-2026). The second batch addresses
-#12 and #2 on `codex/next-rendering-fixes`; its
+[status](../status.md#priority-fixes-5-november-2026). The second batch implements
+#12 and #2 in [PR #26](https://github.com/uvar-apps/eigenvista/pull/26), developed
+on `codex/next-rendering-fixes`; its
 [design](../design/2026-11-06-rendering-quality.md) and
 [verification](../status.md#rendering-fixes-6-november-2026) record the explicit
 alpha policy, voxel-relative quality, empty-brick skipping, and measurements.

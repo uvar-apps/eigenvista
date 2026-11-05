@@ -10,8 +10,10 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Rendering fixes: 6 November 2026
 
-Second repair batch at source version 0.5.11 on `codex/next-rendering-fixes`,
-based on merged main `31c4876`, addresses #12 and #2. The
+Second repair batch at source version 0.5.11 in
+[PR #26](https://github.com/uvar-apps/eigenvista/pull/26), developed on
+`codex/next-rendering-fixes` from merged main `31c4876`; runtime/test changes are
+commit `c9ca60f`. Fixes #12 and #2. The
 [design record](design/2026-11-06-rendering-quality.md) explains the decisions
 and remaining numerical/rendering limits.
 
