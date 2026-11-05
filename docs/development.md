@@ -11,9 +11,10 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 ## Prerequisites
 
 The exercised environment is an Apple Silicon Mac running macOS 27, Rust
-1.92.0, arm64 Node.js 26 with npm, and wasm-bindgen CLI **0.2.108**. These are
+1.99.0, arm64 Node.js 26 with npm, and wasm-bindgen CLI **0.2.108**. These are
 recorded tested versions, not a fully qualified minimum-version matrix. Cargo
-and npm dependencies are locked; there is no checked-in Rust toolchain selector.
+and npm dependencies are locked. The checked-in `rust-toolchain.toml` selects
+Rust 1.99.0, Clippy, Rustfmt, and `wasm32-unknown-unknown` for repository commands.
 
 - Install Rust/rustup and Node.js/npm, and make their executables available in
   the shell. An arm64 Node installation is required by the tester packager.
@@ -39,17 +40,16 @@ as the root; it includes required test fixtures but no Git history.
 ```sh
 mkdir -p tmp
 export TMPDIR="$PWD/tmp" TMP="$PWD/tmp" TEMP="$PWD/tmp"
-rustup toolchain install 1.92.0
-export RUSTUP_TOOLCHAIN=1.92.0
-rustup target add wasm32-unknown-unknown
+rustup show  # installs/selects the repository toolchain and declared components
 cargo install wasm-bindgen-cli --version 0.2.108 --locked
 npm --prefix app ci
 ```
 
 Keep the temporary-directory environment in every build/test shell. **Never
 use system `/tmp`.** Project wrappers also create/use the repository's ignored
-`tmp/`, including child build tools. `RUSTUP_TOOLCHAIN` selects the documented
-toolchain for this shell without changing another project's default. Installing
+`tmp/`, including child build tools. An explicit `RUSTUP_TOOLCHAIN` environment
+variable overrides the repository selection; unset it for normal pinned builds
+or record it when deliberately testing a different compiler. Installing
 the CLI is needed once; its version must match the pinned wasm-bindgen crate.
 
 Useful checks are `rustc --version`, `node --version`, `node -p process.arch`,
@@ -170,6 +170,8 @@ cargo check --manifest-path Cargo.toml --locked -p eigenvista-desktop
 | Cube fields and all-import bonds | [Cube regressions](../crates/eigenvista-core/tests/cube_import.rs), shared importer/CLI tests, and [browser cube workflows](../app/tests/cube.spec.ts); analytic signed/skewed grid, negative atom counts, source preservation, native bond backfill, reflected rendering, precision rejection |
 | Molden and converter | [Independent imports](../crates/eigenvista-import/tests/independent_molden.rs), parser unit tests, [CLI regressions](../crates/eigenvista-convert/tests/cli.rs), [fixtures/provenance](../fixtures/molden/README.md) |
 | Container/native saving | Format unit tests and [reference roundtrips](../crates/eigenvista-format/tests/reference_roundtrips.rs) |
+| Indexed-column validation | [Native column regressions](../crates/eigenvista-format/tests/columnar_packing.rs) and [actual WASM decoding](../app/tests/format-validation.spec.ts): oversized/wrapped indices, swapped/duplicate rows, invalid reference forms, and valid roundtrips |
+| Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations/budgets. Native dialog interaction remains a separate acceptance check. |
 | Browser workflows/numerics | [Playwright tests](../app/tests): Chromium/WebKit, real file input/download, pixels, camera, desktop/mobile layout |
 | Direct field previews | [Sampling-only workflows](../app/tests/field-preview.spec.ts): real `molden.input` orbital/density volume and raycast without meshing, field/resolution changes, transient cache reuse, save/reopen, cancellation and worker-failure recovery |
 | Live calculation progress | [Rust slice counts/parity](../crates/eigenvista-core/tests/sampling_progress.rs) and [browser progress workflows](../app/tests/progress.spec.ts): real in-flight updates, batch position, WASM numerical/mesh parity, cancellation/error cleanup, stale events, cached mesh progress, and desktop/mobile layout |
