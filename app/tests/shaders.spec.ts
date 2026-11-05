@@ -213,3 +213,97 @@ test("a malformed parameter file is rejected instead of pushing NaN into a unifo
   );
   await page.screenshot({ path: "../artifacts/malformed-params.png" });
 });
+
+test("parameter type and arity failures retain the applied shader and document", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await ready(page);
+  await loadShaderFiles(page, path.join(shadersDir, "surface-lambert.vert"), path.join(shadersDir, "surface-lambert.frag"), path.join(shadersDir, "surface-lambert.params"));
+  await page.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await expect(page.locator(".shader-status")).toContainText("Applied");
+  const before = await pixels(page);
+  for (const [text, message] of [
+    ["float saturation 0\nfloat lightDir 1\n", "expects vec3"],
+    ["float saturation 0\nvec3 lightDir 1 0\n", "expects 3 components"],
+    ["vec4 lightDir 1 0 0 1\n", "expects vec3"],
+    ["bool lightDir true\n", "expects vec3"],
+  ]) {
+    await page.locator('[data-shader-input="params"]').setInputFiles({ name: "mismatch.params", mimeType: "text/plain", buffer: Buffer.from(text) });
+    await expect(page.locator(".shader-log")).toContainText(message);
+    await expect(page.getByLabel("lightDir[0]", { exact: true })).toHaveValue("0");
+    await expect(page.getByLabel("saturation", { exact: true })).toHaveValue("1");
+    await expect(page.locator("h1")).toHaveText("EigenVista");
+    expect((await pixels(page)).checksum).toBe(before.checksum);
+  }
+  await page.screenshot({ path: "../artifacts/shader-type-rejection-desktop.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "../artifacts/shader-type-rejection-mobile.png", fullPage: true });
+  await page.locator('[data-shader-input="params"]').setInputFiles({ name: "valid.params", mimeType: "text/plain", buffer: Buffer.from("vec3 lightDir 1 0 0\nfloat saturation 0.5\n") });
+  await expect(page.locator(".shader-log")).toHaveCount(0);
+  await expect(page.getByLabel("lightDir[0]", { exact: true })).toHaveValue("1");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Save document" }).click();
+  const saved = await download;
+  expect(saved.suggestedFilename()).toMatch(/\.eigenvista$/);
+  expect(errors).toEqual([]);
+});
+
+test("changing a shader uniform kind resets its editor value without breaking the applied shader", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await ready(page);
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "simple.vert", mimeType: "text/plain", buffer: Buffer.from("void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "scalar.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await page.getByLabel("amount", { exact: true }).fill("0.8");
+  await page.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await expect(page.locator(".shader-status")).toContainText("Applied");
+  const before = await pixels(page);
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "vector.frag", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}") });
+  await expect(page.getByLabel("amount[0]", { exact: true })).toHaveValue("0");
+  await page.getByLabel("amount[0]", { exact: true }).fill("1");
+  expect((await pixels(page)).checksum).toBe(before.checksum);
+  await page.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await expect.poll(async () => (await pixels(page)).checksum).not.toBe(before.checksum);
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "conflict.vert", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
+  await expect(page.locator(".shader-log")).toContainText("conflicting shader types");
+  await expect(page.getByRole("button", { name: "simple.vert", exact: true })).toBeVisible();
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "scalar-again.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await expect(page.getByLabel("amount", { exact: true })).toHaveValue("0");
+  expect(errors).toEqual([]);
+});
+
+for (const outcome of ["saved", "cancelled", "failed"] as const) {
+  test(`native parameter export uses its text command and handles ${outcome}`, async ({ page }) => {
+    await page.addInitScript((outcome) => {
+      const state = globalThis as unknown as { isTauri: boolean; __TAURI_INTERNALS__: unknown; parameterExports: { command: string; args: { text: string } }[] };
+      state.isTauri = true;
+      state.parameterExports = [];
+      state.__TAURI_INTERNALS__ = {
+        invoke: async (command: string, args: { text: string }) => {
+          if (command !== "save_shader_parameters") throw new Error(`Unexpected native command: ${command}`);
+          state.parameterExports.push({ command, args });
+          if (outcome === "failed") throw new Error("Deliberate parameter write failure");
+          return outcome === "saved";
+        },
+      };
+    }, outcome);
+    await ready(page);
+    await loadShaderFiles(page, path.join(shadersDir, "surface-lambert.vert"), path.join(shadersDir, "surface-lambert.frag"), path.join(shadersDir, "surface-lambert.params"));
+    const status = await page.locator("footer [role=status]").innerText();
+    await page.getByRole("button", { name: "Save parameters", exact: true }).click();
+    if (outcome === "failed") await expect(page.locator(".shader-log")).toContainText("Deliberate parameter write failure");
+    else await expect(page.locator(".shader-log")).toHaveCount(0);
+    await expect.poll(() => page.evaluate(() => (globalThis as unknown as { parameterExports: unknown[] }).parameterExports.length)).toBe(1);
+    const saved = await page.evaluate(() => (globalThis as unknown as { parameterExports: { args: { text: string } }[] }).parameterExports[0]);
+    expect(saved.args.text).toContain("vec3 lightDir\t0 0 1");
+    const roundtrip = await page.evaluate(async (text) => {
+      const url = "/src/shaderTools.ts";
+      const { parseParams, serializeParams } = await import(/* @vite-ignore */ url);
+      const defs = [{ name: "lightDir", kind: "vec3" }, { name: "enabled", kind: "bool" }, { name: "count", kind: "int" }];
+      const values = { ...parseParams(text), enabled: true, count: 3 };
+      return parseParams(serializeParams(defs, values), defs);
+    }, saved.args.text);
+    expect(roundtrip).toEqual({ lightDir: [0, 0, 1], enabled: true, count: 3 });
+    await expect(page.locator("footer [role=status]")).toHaveText(status);
+  });
+}

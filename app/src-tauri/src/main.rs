@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri_plugin_dialog::DialogExt;
+mod shader_parameters;
 
 fn validate_save_destination(
     path: &std::path::Path,
@@ -87,6 +88,27 @@ mod tests {
 }
 
 #[tauri::command]
+async fn save_shader_parameters(app: tauri::AppHandle, text: String) -> Result<bool, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        shader_parameters::validate_text(&text)?;
+        let Some(path) = app
+            .dialog()
+            .file()
+            .add_filter("Shader parameters", &["params"])
+            .set_file_name("surface-shader.params")
+            .blocking_save_file()
+        else {
+            return Ok(false);
+        };
+        let path = path.into_path().map_err(|e| e.to_string())?;
+        shader_parameters::save(&path, &text)?;
+        Ok(true)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 fn scientific_core_version() -> &'static str {
     concat!("eigenvista-core ", env!("CARGO_PKG_VERSION"))
 }
@@ -97,7 +119,8 @@ fn main() {
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             scientific_core_version,
-            save_native
+            save_native,
+            save_shader_parameters
         ])
         .run(tauri::generate_context!())
         .expect("EigenVista desktop failed to start");

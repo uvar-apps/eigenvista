@@ -404,13 +404,19 @@ Display→Shaders:
 1. Choose a **Vertex shader** and **Fragment shader** file (`.vert` / `.frag` /
    `.glsl`, or any text).
 2. Optionally load a **Parameters file** (`.params`) with default uniform values.
-   A file containing a non-numeric value or an unsupported kind is rejected with
-   the parameter name and line number, and your current values are left unchanged.
+   A file containing a non-numeric value, an unsupported or mismatched kind, or
+   the wrong component count is rejected with the parameter name and line
+   number. Your current values and applied shader are retained.
 3. Pick **Apply to**: all surfaces or a single saved surface.
 4. Click **Apply shader**. Uniforms parsed from the sources appear as live
-   controls; edits update the scene immediately.
-5. **Save parameters** downloads the current uniform values as a Molekel-style
-   `.params` file (`float name<TAB>value` per line). **Clear shader** restores
+   controls; edits update the scene immediately. Loading new shader sources
+   retains values whose uniform types match and resets changed types to defaults.
+   The previously applied shader remains active until you apply the new pair.
+5. **Save parameters** saves the current uniform values as a Molekel-style
+   `.params` file (`float name<TAB>value` per line). The Mac application opens a
+   `.params` save dialog; the browser downloads the file. Cancelling is harmless;
+   a write failure appears in the shader panel. Native export has a 128 KiB text
+   limit and writes a complete replacement file. **Clear shader** restores
    Diffuse / Blinn-Phong materials.
 
 Classic GLSL 1.x shaders that use `ftransform()`, `gl_Vertex`, `gl_Normal`,

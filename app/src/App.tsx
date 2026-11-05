@@ -967,7 +967,11 @@ export default function App() {
                   }))}
                   onChange={(next) => {
                     setShaderEditor(next);
-                    if (appliedShader) {
+                    if (
+                      appliedShader &&
+                      appliedShader.vertexSource === next.vertex?.source &&
+                      appliedShader.fragmentSource === next.fragment?.source
+                    ) {
                       setAppliedShader({
                         ...appliedShader,
                         target: next.target,

@@ -3,11 +3,14 @@ import {
   parseParams,
   serializeParams,
   defaultValue,
+  defaultValues,
+  parseUniforms,
+  mergeUniformValues,
   isColorName,
   type UniformDef,
   type UniformValue,
 } from "./shaderTools";
-import { saveBytes, native, pickNative } from "./files";
+import { saveShaderParameters, native, pickNative } from "./files";
 
 export interface ShaderFileState {
   name: string;
@@ -78,8 +81,22 @@ export function ShaderPanel({
   const extensions = (kind: keyof typeof accept) =>
     accept[kind].split(",").map((extension) => extension.slice(1));
 
-  async function readText(file: File): Promise<string> {
-    return file.text();
+  function changeShader(kind: "vertex" | "fragment", name: string, source: string) {
+    const next = { ...state, [kind]: { name, source } };
+    const defs = parseUniforms(
+      next.vertex?.source ?? "", next.fragment?.source ?? "",
+    );
+    const retained: Record<string, UniformValue> = {};
+    for (const def of defs) {
+      if (
+        uniforms.some((old) => old.name === def.name && old.kind === def.kind) &&
+        state.values[def.name] !== undefined
+      )
+        retained[def.name] = state.values[def.name];
+    }
+    const values = mergeUniformValues(defs, defaultValues(defs), retained);
+    onChange({ ...next, values });
+    setParamsError("");
   }
 
   async function loadShader(
@@ -87,20 +104,17 @@ export function ShaderPanel({
     file: File | undefined,
   ) {
     if (!file) return;
-    const source = await readText(file);
-    onChange({
-      ...state,
-      [kind]: { name: file.name, source },
-    });
+    try {
+      changeShader(kind, file.name, await file.text());
+    } catch (e) {
+      setParamsError(String(e));
+    }
   }
 
   function applyParams(text: string) {
     try {
-      const values = parseParams(text);
-      const merged = { ...state.values };
-      for (const def of uniforms) {
-        if (values[def.name] !== undefined) merged[def.name] = values[def.name];
-      }
+      const values = parseParams(text, uniforms);
+      const merged = mergeUniformValues(uniforms, state.values, values);
       setParamsError("");
       onChange({ ...state, values: merged });
     } catch (e) {
@@ -110,7 +124,11 @@ export function ShaderPanel({
 
   async function loadParams(file: File | undefined) {
     if (!file) return;
-    applyParams(await readText(file));
+    try {
+      applyParams(await file.text());
+    } catch (e) {
+      setParamsError(String(e));
+    }
   }
 
   async function pickNativeText(kind: "vertex" | "fragment" | "params") {
@@ -123,12 +141,12 @@ export function ShaderPanel({
     const bytes = await picked.read();
     const text = new TextDecoder().decode(bytes);
     if (kind === "params") applyParams(text);
-    else onChange({ ...state, [kind]: { name: picked.name, source: text } });
+    else changeShader(kind, picked.name, text);
   }
 
   function chooseFile(kind: "vertex" | "fragment" | "params") {
     if (native) {
-      void pickNativeText(kind);
+      void pickNativeText(kind).catch((e) => setParamsError(String(e)));
       return;
     }
     if (kind === "vertex") vertexInput.current?.click();
@@ -137,12 +155,23 @@ export function ShaderPanel({
   }
 
   async function saveParams() {
-    const text = serializeParams(uniforms, state.values);
-    await saveBytes(new TextEncoder().encode(text), "surface-shader.params");
+    try {
+      const text = serializeParams(uniforms, state.values);
+      await saveShaderParameters(text);
+      setParamsError("");
+    } catch (e) {
+      setParamsError(String(e));
+    }
   }
 
   function setValue(name: string, kind: UniformDef["kind"], raw: UniformValue) {
-    onChange({ ...state, values: { ...state.values, [name]: raw } });
+    try {
+      const values = mergeUniformValues(uniforms, state.values, { [name]: raw });
+      onChange({ ...state, values });
+      setParamsError("");
+    } catch (e) {
+      setParamsError(String(e));
+    }
   }
 
   const ready = !!(state.vertex && state.fragment);

@@ -29,6 +29,8 @@ export function parseUniforms(...sources: string[]): UniformDef[] {
     while ((match = UNIFORM_RE.exec(source))) {
       const kind = match[1] as UniformKind;
       const name = match[2];
+      if (found.has(name) && found.get(name)!.kind !== kind)
+        throw new Error(`Uniform "${name}" has conflicting shader types.`);
       if (!found.has(name)) found.set(name, { name, kind });
     }
   }
@@ -78,7 +80,10 @@ function finiteComponent(
   return value;
 }
 
-export function parseParams(text: string): Record<string, UniformValue> {
+export function parseParams(
+  text: string,
+  defs: UniformDef[] = [],
+): Record<string, UniformValue> {
   const values: Record<string, UniformValue> = {};
   const lines = text.split(/\r?\n/);
   for (let index = 0; index < lines.length; index++) {
@@ -88,6 +93,19 @@ export function parseParams(text: string): Record<string, UniformValue> {
     if (parts.length < 2) continue;
     const [kind, name, ...rest] = parts;
     const where = `line ${index + 1}`;
+    const def = defs.find((d) => d.name === name);
+    if (def && def.kind !== kind)
+      throw new Error(
+        `Parameter "${name}" expects ${def.kind}, got ${kind} at ${where}.`,
+      );
+    const sizes: Record<string, number> = {
+      float: 1, int: 1, bool: 1, vec2: 2, vec3: 3, vec4: 4,
+    };
+    const size = sizes[kind];
+    if (size !== undefined && rest.length !== size)
+      throw new Error(
+        `Parameter "${name}" expects ${size} components at ${where}.`,
+      );
     if (kind === "float") values[name] = finiteComponent(rest, 0, name, where);
     else if (kind === "int")
       values[name] = Math.trunc(finiteComponent(rest, 0, name, where));
@@ -110,6 +128,7 @@ export function serializeParams(
   defs: UniformDef[],
   values: Record<string, UniformValue>,
 ): string {
+  validateUniformValues(defs, values);
   const lines: string[] = [];
   for (const def of defs) {
     const value = values[def.name] ?? defaultValue(def.kind, def.name);
@@ -284,7 +303,30 @@ export function mergeUniformValues(
   for (const def of defs) {
     if (patch[def.name] !== undefined) next[def.name] = patch[def.name];
   }
+  validateUniformValues(defs, next);
   return next;
+}
+
+export function validateUniformValues(
+  defs: UniformDef[],
+  values: Record<string, UniformValue>,
+) {
+  for (const def of defs) {
+    const value = values[def.name];
+    if (value === undefined) continue;
+    const size =
+      def.kind === "vec2" ? 2 : def.kind === "vec3" ? 3 : def.kind === "vec4" ? 4 : 0;
+    const valid = size
+      ? Array.isArray(value) &&
+        value.length === size &&
+        value.every((v) => typeof v === "number" && Number.isFinite(v))
+      : def.kind === "bool"
+        ? typeof value === "boolean"
+        : typeof value === "number" &&
+          Number.isFinite(value) &&
+          (def.kind !== "int" || Number.isInteger(value));
+    if (!valid) throw new Error(`Parameter "${def.name}" expects ${def.kind}.`);
+  }
 }
 
 /**
