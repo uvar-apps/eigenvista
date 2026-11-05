@@ -125,6 +125,21 @@ Standard verification order for runtime changes (details and coverage map in
 
 ## Traps
 
+- Scientific worker clients own cancellation: App and Convert Files each keep a
+  stable `createScienceClient()` instance. Keep pipeline generation/run tokens
+  as well. The FIFO bridge posts one job; active cancel restarts blocked WASM
+  while preserving other clients' queued jobs, and fatal failure rejects all.
+  Use `addEventListener("messageerror", ...)`; Chromium does not dispatch the
+  assigned `onmessageerror` property. See the
+  [ownership/registration design](docs/design/2026-11-06-worker-ownership-and-registration.md).
+- Registered scientific inputs are immutable snapshots. Replace the affected
+  top-level `basis`, `orbitals`, `densities`, `grids`, `bonds`, or `provenance`
+  array (or `atoms` object) when editing; mutating nested values in place will
+  not invalidate reference identity. Appearance/saved-mesh changes preserve
+  these references. One worker-local Rust `RegisteredDocument` owns validated
+  source data and one sampled field; registration IDs never replace persisted
+  Rust source hashes. Worker restart/error requires fresh registration. Keep
+  the legacy `SampledField` APIs/source checks and bounded disposal intact.
 - Sampled preview quality (Draft/Standard/Fine) and custom shader transparency
   are session display settings, not scientific edits or persisted document
   fields. Preview min/max ranges are cached by immutable sampled-value buffer

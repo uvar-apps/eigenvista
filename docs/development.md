@@ -163,6 +163,21 @@ its platform prerequisites. A focused shell check is:
 cargo check --manifest-path Cargo.toml --locked -p eigenvista-desktop
 ```
 
+Scientific consumers create one stable `createScienceClient()` per pipeline.
+Its `cancel()` affects that owner's jobs; use the optional fourth request argument
+`{ signal: controller.signal }` to cancel one request. The bridge serializes work
+through one worker; active cancellation restarts it while unrelated queued jobs
+survive. Keep UI generation tokens for file reads and staged publication, and
+keep fatal teardown distinct from user cancellation. Existing module-level
+request/cancel exports share a default compatibility owner.
+
+Registered source inputs are immutable snapshots. Replace affected source arrays
+or objects for scientific/metadata edits; view and saved-mesh edits can reuse
+registration. Never mutate nested scientific arrays in place or use document IDs
+as content hashes. Only one resident document/sample is kept, and a worker restart
+requires fresh registration. The [design record](design/2026-11-06-worker-ownership-and-registration.md)
+explains ownership, validation, and cache boundaries.
+
 | Coverage | Location and meaning |
 | --- | --- |
 | Scientific model/evaluator | Core unit tests plus [independent references](../crates/eigenvista-core/tests/independent_references.rs) |
@@ -175,6 +190,9 @@ cargo check --manifest-path Cargo.toml --locked -p eigenvista-desktop
 | Custom shader transparency | [Alpha/depth and UI regressions](../app/tests/shader-transparency.spec.ts): fragment alpha independent of document opacity, view-dependent alpha, opaque depth writes, unchanged built-in materials, live checkbox changes, and Clear reset |
 | Browser workflows/numerics | [Playwright tests](../app/tests): Chromium/WebKit, real file input/download, pixels, camera, desktop/mobile layout |
 | Direct field previews | [Sampling-only workflows](../app/tests/field-preview.spec.ts): real `molden.input` orbital/density volume and raycast without meshing, field/resolution changes, transient cache reuse, save/reopen, cancellation and worker-failure recovery |
+| Worker ownership and cancellation | [Real worker regressions](../app/tests/worker-ownership.spec.ts): independent clients, FIFO ordering, queued/active/idle/signalled cancellation, stale events, fatal/transport failures, constructor/posting errors, and recovery |
+| Worker registration messages | [Registration workflows](../app/tests/worker-registration.spec.ts): observed real Molden/cube payloads, no full scientific document on reuse, current appearance, source replacement, worker restart, and preserved saved-document data |
+| Resident WASM document | [Registered-owner regressions](../app/tests/registered-document.spec.ts): real Molden/cube sample/mesh/metadata/source-hash/native parity, field/resolution/source invalidation, immutable ownership, invalid inputs/materials, progress callback errors, and recovery; legacy SampledField stale-source checks remain covered by sampled-field.spec.ts |
 | Adaptive sampled rendering | [Renderer regressions](../app/tests/adaptive-volume.spec.ts): signed features missed by fixed-160 traversal, affine/inside-camera views, signed roots, empty-brick versus dense traversal, and warmed rendering timings. [Brick bounds](../app/tests/volume-ranges.spec.ts): shared faces, partial tails, 1,090 independent trilinear samples, and invalid dimensions/layout/nonfinite values |
 | Sampled quality controls | [Real cube/UI workflows](../app/tests/volume-quality-controls.spec.ts): Draft/Standard/Fine and mode switches, observed real worker messages, no calculation/dirty/scientific changes, identical decoded saves, and desktop/mobile pixels/layout |
 | Live calculation progress | [Rust slice counts/parity](../crates/eigenvista-core/tests/sampling_progress.rs) and [browser progress workflows](../app/tests/progress.spec.ts): real in-flight updates, batch position, WASM numerical/mesh parity, cancellation/error cleanup, stale events, cached mesh progress, and desktop/mobile layout |

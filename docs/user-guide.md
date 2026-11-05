@@ -157,10 +157,11 @@ all 24 orbitals and their imported metadata.
 scene. Add files, click **Convert**, review each result, then use its **Save**
 button. Desktop Save asks for a destination; browser Save requests a download.
 Conversion alone writes nothing. Failed rows show individual errors and do not
-discard successful results. **Cancel** stops pending work and keeps completed
-results. Closing the window preserves its results in memory; **Clear** discards
-them. Saved/downloaded bytes are released. Unwritten results do not survive
-closing the application. The queue allows 32 files and up to 128 MiB of retained
+discard successful results. **Cancel** stops that conversion queue's pending
+work and keeps completed results. Closing the window preserves its results in
+memory; **Clear** discards them. Saved/downloaded bytes are released. Unwritten
+results do not survive closing the application. The queue allows 32 files and
+up to 128 MiB of retained
 outputs. Save or clear completed results before processing more.
 
 ORCA's `orca_2mkl` can export Molden, so a direct ORCA reader is not needed for
@@ -280,9 +281,9 @@ lower the chosen resolution. Higher resolutions, including those for the
 repository's `fixtures/legacy/data/molden.input` density, can be requested subject to numerical,
 geometry, and file-size limits. A larger calculation may take longer, even
 while the same phase remains displayed. **Cancel** terminates the calculation
-worker; the next request starts a new worker. Existing completed geometry is
-retained. Fewer orbitals or a lower resolution can help when a remaining limit
-is reached.
+and retains existing completed geometry. Other queued operations continue in order;
+the application runs one scientific operation at a time. Fewer orbitals or a
+lower resolution can help when a remaining limit is reached.
 
 At 256 cubed, one field has **16,777,216 samples**. Its f64 calculation values
 occupy **128 MiB**, and its f32 display values another **64 MiB**, before meshes,
@@ -301,6 +302,11 @@ Generate surfaces replaces the meshes for that field;
 meshes belonging to other fields remain. Save separate documents to preserve
 multiple isovalues of the same field. The isovalue recorded on each saved
 surface is its actual generation value, not a later edited control value.
+For unchanged scientific inputs, the last field at the same resolution can be
+reused when generating another isovalue or changing appearance. This transient
+cache is replaced when another field/resolution is sampled and cleared when
+active calculation cancellation or a worker failure restarts the scientific
+worker. Saved meshes remain independent of this cache.
 
 Orbital values use `bohr^-3/2`; density controls show electrons per `bohr^3`.
 Imported scalar grids have unspecified scalar units: consult their source.

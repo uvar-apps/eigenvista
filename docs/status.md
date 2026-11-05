@@ -8,6 +8,85 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Worker ownership and registration: 6 November 2026
+
+Third repair batch at source version 0.5.11 on
+`codex/worker-ownership-and-cache`, based on merged main `c5ebcbb`, addresses
+#6 and #5. The [design record](design/2026-11-06-worker-ownership-and-registration.md)
+records ownership, alternatives, validation, and the immutable-input contract.
+
+- One FIFO bridge posts one job at a time. App and Convert Files own separate
+  clients; client cancellation removes only its jobs, and AbortSignal cancels
+  one request. Active cancellation interrupts synchronous WASM, then resumes
+  other owners' queued jobs on a replacement worker. Queued/idle cancellation
+  leaves active work alone. Small queued parameters are captured at submission.
+- Fatal errors reject every owner through separate teardown. Chromium needs an
+  actual `messageerror` event listener; assigning the property was ineffective.
+  Failed WASM initialization also tears down the unusable worker and permits a
+  replacement fetch. Late worker messages/progress/errors cannot affect new jobs.
+- One Rust `RegisteredDocument` owns validated immutable inputs and one sampled
+  field/resolution cache. Repeated requests omit the scientific payload and
+  avoid full-source JSON parsing/hash lookup for cached meshing. Fresh samples
+  retain Rust source hashes; legacy `SampledField` stale-source checks, native
+  validation, numerical behavior, progress, and allocation bounds remain.
+- Registration requires matching source references as well as ID/title values.
+  Scientific edits must replace affected top-level source arrays/objects.
+  Appearance and saved-mesh changes preserve identity; current small appearance
+  parameters are validated in Rust. Replacements/errors/restarts discard old
+  registration, with no history of resident documents or sample caches.
+
+Fresh Rustfmt, strict workspace/all-target Clippy, all 147 workspace Rust tests
+including desktop, 13 packaging tests, production WASM/TypeScript/Vite, and
+Apple Silicon native build pass with repository-selected Rust 1.99.0. Focused
+browser checks pass all 36 new cases across Chromium/WebKit, including real
+overlapping consumers, aborted WASM fetch/retry, direct legacy API parity,
+observed registration packets, scientific replacements, native encoding parity,
+and submitted argument snapshots. Message-error/init recovery also passed two
+repeats per engine (8 checks). All 226 browser cases passed in one uninterrupted
+6.1-minute Chromium/WebKit run. Desktop/mobile progress, previews, and conversion
+screenshots were inspected in both engines; all 360 local documentation targets
+resolve. Source/test formatting and whitespace checks pass. Dependency lockfiles,
+source versions, scientific fixtures, icon assets, and the document format are unchanged.
+
+The ad-hoc-signed 0.5.11 app at
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app` passes strict
+deep signature checks and embeds current frontend `assets/index-By9RGElF.js`.
+The preview remains on port 5178. No version/tag/release/ZIP was created; the
+published 21 October archive predates all three repair batches. Native
+interactive acceptance, clean-Mac installation, and Linux/Windows remain
+unverified. User-owned `docs/references/`, private chats, and locally excluded
+`1AON.pdb` are untouched. Local Serena metadata is ignored, not source/package data.
+
+Diagnostic measurements used Node 26/V8 with release-profile WASM before and
+after this change on this Apple Silicon Mac: one warm-up and seven calls per operation, with exact
+Molden/cube sample, metadata, and mesh parity guards. Baseline medians in ms:
+
+| Input | Clone | Full document JSON | Scientific key JSON | Rust validation |
+| --- | ---: | ---: | ---: | ---: |
+| `molden.input` | 0.70 | 0.89 | 0.75 | 2.06 |
+| Water density cube, 64k samples | 0.89 | 1.03 | 0.99 | 2.08 |
+| Benzene cube, 216k samples | 3.67 | 4.14 | 3.58 | 7.63 |
+
+Actual resident registration and cached meshing at resolution 48, median ms:
+
+| Input | Registration | Resident cached mesh | Legacy cached mesh |
+| --- | ---: | ---: | ---: |
+| `molden.input` | 2.11 | 1.88 | 4.33 |
+| Water density cube | 2.12 | 2.08 | 7.59 |
+| Benzene cube | 7.50 | 2.82 | 29.51 |
+
+Registration timing excludes initial JS clone/stringify; cached-mesh timings
+include real WASM meshing and mesh JSON, excluding UI messaging/rendering/export.
+Near-zero cache-hit timings approach timer resolution. These isolated diagnostics
+do not establish end-to-end latency or general speedups. Scripts/raw reports
+remain under `tmp/cache-{baseline,resident}-2026-11-06.{mjs,json}` with method,
+source/binary identity, and individual calls. Full validation/encoding still
+processes complete documents; conservative registration can invalidate for an
+unrelated source edit. Ordinary appearance sliders already avoided worker jobs.
+
+Next priorities: benchmark bond-search candidates (#3), then implement declared
+mmCIF connections (#19); the original order is retained in the issue review.
+
 ## Rendering fixes: 6 November 2026
 
 Second repair batch at source version 0.5.11 in

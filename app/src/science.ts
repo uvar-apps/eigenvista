@@ -1,25 +1,74 @@
-let worker: Worker | null = null;
+import { ScienceRegistration } from "./scienceRegistration";
+
 export type WorkProgress = { completed: number; total: number };
+type Progress = (stage: string, counts?: WorkProgress) => void;
+export interface RequestOptions {
+  signal?: AbortSignal;
+}
+interface Job {
+  id: number;
+  owner: symbol;
+  action: string;
+  args: Record<string, unknown>;
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
+  onProgress?: Progress;
+  cleanup?: () => void;
+  registration?: ReturnType<ScienceRegistration["prepare"]>["registration"];
+}
+
+let worker: Worker | null = null;
+let active: Job | undefined;
 let nextId = 0;
-const pending = new Map<
-  number,
-  {
-    resolve: (v: unknown) => void;
-    reject: (e: Error) => void;
-    onProgress?: (stage: string, counts?: WorkProgress) => void;
+const pending = new Map<number, Job>();
+const registration = new ScienceRegistration();
+const asError = (error: unknown) =>
+  error instanceof Error ? error : new Error(String(error));
+
+function releaseWorker() {
+  const instance = worker;
+  worker = null;
+  registration.clear();
+  instance?.terminate();
+}
+
+function settle(job: Job, error?: Error, result?: unknown) {
+  if (!pending.delete(job.id)) return;
+  job.cleanup?.();
+  if (active === job) active = undefined;
+  if (error) job.reject(error);
+  else job.resolve(result);
+  queueMicrotask(pump);
+}
+
+/** Fatal runtime/transport failures invalidate every owner, unlike user cancel. */
+function failWorker(error: Error) {
+  releaseWorker();
+  active = undefined;
+  const jobs = [...pending.values()];
+  pending.clear();
+  for (const job of jobs) {
+    job.cleanup?.();
+    job.reject(error);
   }
->();
+}
+
+function cancelJob(job: Job, reason: Error) {
+  if (!pending.has(job.id)) return;
+  if (active === job) releaseWorker();
+  settle(job, reason);
+}
+
 function start() {
   const instance = new Worker(new URL("./science.worker.ts", import.meta.url), {
     type: "module",
   });
   worker = instance;
   instance.onmessage = ({ data }) => {
-    if (worker !== instance) return;
-    const p = pending.get(data.id);
-    if (!p) return;
+    const job = active;
+    if (worker !== instance || !job || job.id !== data.id) return;
     if (data.fatal) {
-      cancel(new Error(data.error || "Scientific worker failed"));
+      failWorker(new Error(data.error || "Scientific worker failed"));
       return;
     }
     if (typeof data.progress === "string") {
@@ -31,59 +80,104 @@ function start() {
         data.completed <= data.total
           ? { completed: data.completed, total: data.total }
           : undefined;
-      p.onProgress?.(data.progress, counts);
+      try {
+        job.onProgress?.(data.progress, counts);
+      } catch (error) {
+        cancelJob(job, asError(error));
+      }
       return;
     }
-    pending.delete(data.id);
-    if (data.error) p.reject(new Error(data.error));
-    else p.resolve(data.result);
+    if (data.error) registration.clear();
+    else registration.commit(job.registration);
+    settle(job, data.error ? new Error(data.error) : undefined, data.result);
   };
   instance.onerror = (event) => {
     event.preventDefault();
     if (worker === instance)
-      cancel(
+      failWorker(
         new Error(
           event.message ||
             "Scientific worker failed; reduce the grid resolution and retry",
         ),
       );
   };
-  instance.onmessageerror = () => {
+  // Chromium dispatches this event without exposing an onmessageerror property.
+  instance.addEventListener("messageerror", () => {
     if (worker === instance)
-      cancel(
+      failWorker(
         new Error(
           "Unable to receive calculation results; reduce the grid resolution and retry",
         ),
       );
-  };
-}
-export function cancel(reason = new Error("Calculation cancelled")) {
-  worker?.terminate();
-  worker = null;
-  for (const p of pending.values()) p.reject(reason);
-  pending.clear();
-}
-export function request<T>(
-  action: string,
-  args: Record<string, unknown>,
-  onProgress?: (stage: string, counts?: WorkProgress) => void,
-): Promise<T> {
-  const id = ++nextId;
-  // Worker construction and posting happen inside the executor so any failure
-  // rejects this promise instead of throwing synchronously out of request(),
-  // which a caller's .catch() would never see.
-  return new Promise<T>((resolve, reject) => {
-    pending.set(id, { resolve: (v) => resolve(v as T), reject, onProgress });
-    try {
-      if (!worker) start();
-      const instance = worker;
-      if (!instance)
-        throw new Error(
-          "Scientific worker is unavailable; retry the calculation",
-        );
-      instance.postMessage({ id, action, args });
-    } catch (error) {
-      cancel(error instanceof Error ? error : new Error(String(error)));
-    }
   });
 }
+
+/** Only one request is posted: queued jobs survive another owner's cancellation. */
+function pump() {
+  if (active || !pending.size) return;
+  const job = pending.values().next().value!;
+  active = job;
+  try {
+    if (!worker) start();
+    const prepared = registration.prepare(job.action, job.args);
+    job.registration = prepared.registration;
+    worker!.postMessage({
+      id: job.id,
+      action: job.action,
+      args: prepared.args,
+    });
+  } catch (error) {
+    registration.clear();
+    settle(job, asError(error));
+  }
+}
+
+/** A consumer owns cancellation across its import/sample/mesh/validation pipeline. */
+export function createScienceClient() {
+  const owner = Symbol("scientific consumer");
+  return {
+    cancel(reason = new Error("Calculation cancelled")) {
+      for (const job of [...pending.values()])
+        if (job.owner === owner) cancelJob(job, reason);
+    },
+    request<T>(
+      action: string,
+      args: Record<string, unknown>,
+      onProgress?: Progress,
+      options: RequestOptions = {},
+    ): Promise<T> {
+      // Construction, preparation and posting must reject a promise, never
+      // escape synchronously before a caller can attach its error handler.
+      return new Promise<T>((resolve, reject) => {
+        const signal = options.signal;
+        if (signal?.aborted) {
+          reject(asError(signal.reason ?? new Error("Calculation cancelled")));
+          return;
+        }
+        const job: Job = {
+          id: ++nextId,
+          owner,
+          action,
+          args: { ...args },
+          onProgress,
+          resolve: (value) => resolve(value as T),
+          reject,
+        };
+        if (signal) {
+          const abort = () =>
+            cancelJob(
+              job,
+              asError(signal.reason ?? new Error("Calculation cancelled")),
+            );
+          signal.addEventListener("abort", abort, { once: true });
+          job.cleanup = () => signal.removeEventListener("abort", abort);
+        }
+        pending.set(job.id, job);
+        pump();
+      });
+    },
+  };
+}
+
+// Compatibility callers share one default owner; UI components use their own.
+export const { request, cancel } = createScienceClient();

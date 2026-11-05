@@ -23,7 +23,7 @@ file input / downloads           Tauri 2 / system WebView / native dialogs
            |                   |
            |                   +--> Three.js / WebGL2 (Viewport.tsx, volume.ts)
            v
-     request IDs + Web Worker (science.ts, science.worker.ts)
+     owned clients + FIFO + one Web Worker (science.ts, science.worker.ts)
            |
      wasm-bindgen document/byte/typed-array bridge (eigenvista-wasm)
            |
@@ -52,10 +52,10 @@ by native saving. There is no calculation server, remote service, or database.
 | [Converter CLI](../crates/eigenvista-convert/src/main.rs) | Bounded file reads, batch/JSON/check mode, destination preflight and no-clobber saves |
 | [Connectivity](../crates/eigenvista-core/src/bonds.rs) | Exact k-d-tree neighbors, explicit-plus-inferred display bonds |
 | [Native format](../crates/eigenvista-format/src/lib.rs) and [filesystem adapter](../crates/eigenvista-format/src/native.rs) | Portable container, checksums/validation, atomic native writes |
-| [WASM bridge](../crates/eigenvista-wasm/src/lib.rs) | Document import/validation/encoding, Rust-owned sampled-grid cache, typed display buffers, compatibility JSON sampling/meshing and point/gradient probes |
+| [WASM bridge](../crates/eigenvista-wasm/src/lib.rs) | Document import/validation/encoding, immutable registered document with one sampled-field cache, typed display buffers, compatibility JSON sampling/meshing and point/gradient probes |
 | [Document UI](../app/src/App.tsx) and [types](../app/src/types.ts) | Document state, controls, dirty state, generation replacement, error recovery |
 | [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
-| [Worker client](../app/src/science.ts) and [worker](../app/src/science.worker.ts) | Request lifecycle, WASM initialization, single sampled-grid cache, cancellation |
+| [Worker client](../app/src/science.ts), [registration identity](../app/src/scienceRegistration.ts), and [worker](../app/src/science.worker.ts) | Owned FIFO requests, per-request abort, worker lifecycle, bounded resident registration/cache |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
 | [Preview brick ranges](../app/src/volumeRanges.ts) | Conservative min/max bounds over sampled f32 values for renderer-only empty-space skipping |
 | [Element display table](../app/src/elements.ts) | Symbol and van der Waals display radius for elements 1-118. Presentation data only; [element_display.rs](../crates/eigenvista-core/tests/element_display.rs) re-derives every radius from the `pdbtbx` source tables so the table cannot drift. Carries no colour — that lives in `atom-colors.json` |
@@ -111,8 +111,9 @@ is an authoritative grid, Open prepares its bounded display sample immediately;
 without saved meshes the initial mode is volume. A sampling failure still opens
 the validated document in mesh mode with an error, so its full data can be saved.
 An import failure leaves the previous document available and shows an error.
-Opening another document cancels pending worker jobs. Generation tokens and a
-live unsaved-edit check protect the entire read/import/sample sequence.
+Opening another document cancels the scene client's pending worker jobs.
+Generation tokens and a live unsaved-edit check protect the entire
+read/import/sample sequence.
 External imports start dirty. Native imports supplement missing display bonds
 while preserving explicit bonds and their order, scientific inputs, and saved
 meshes. Additions produce a warning and `requires_save: true`; otherwise the
@@ -138,8 +139,10 @@ and [independent producer fixtures](../fixtures/molden/README.md).
 The [Convert Files dialog](../app/src/ConvertFiles.tsx) uses the same worker and
 library, serializing imports and retaining bounded encoded outputs separately
 from the open document. It requires explicit per-result Save, supports cancellation,
-and does not replace the scene. The modal excludes concurrent scene jobs because
-cancellation terminates the shared worker. Its outputs are transient until saved.
+and does not replace the scene. Scene and conversion pipelines have separate
+request owners; cancellation of one cannot reject the other's queued work.
+The existing modal and busy controls remain in place, so this is not a new
+concurrent UI workflow. Its outputs are transient until saved.
 The UI links the Rust library through WASM; it does not spawn the CLI or invoke
 vendor programs. The CLI is a separate headless frontend for scripts/batches.
 
@@ -166,11 +169,16 @@ not part of this increment. Qualified ORCA Molden exports use the shared library
 ## Generation, cache, and rendering
 
 1. The UI requests `sample` or `generate` for the selected field and resolution,
-   with an isovalue for generation, omitting existing meshes from the request.
-2. The worker validates the document. Its cache key includes basis, orbital,
-   density, grid data, selected field, and resolution. Appearance and isovalue
-   are excluded, allowing the Rust/WASM-owned f64 sampled grid to be reused when
-   only those change. The worker owns one cached sampled grid at a time.
+   with an isovalue for generation. The bridge compares immutable source
+   references against its one current worker registration. New inputs include
+   the document without saved meshes; a hit sends only registration identity,
+   field, resolution, isovalue, and current appearance.
+2. New registration parses and validates the document in Rust. Its
+   `RegisteredDocument` owns immutable inputs and one f64 sampled field, keyed
+   by field/resolution. Appearance and isovalue changes reuse those samples;
+   meshing validates small current color/opacity/isovalue arguments without
+   cloning, reparsing, or hashing full scientific JSON on a hit. A fresh sample
+   still receives its scientific source hash from Rust.
 3. Rust evaluates an analytic field on a bounded domain or resamples an imported
    grid. Analytic domain sizing currently uses the most diffuse Gaussian
    exponent; it is a preview heuristic, not a proven surface-containment bound.
@@ -255,9 +263,10 @@ request that emitted them. Stage events keep the string `progress` field, with
 optional integer `completed`/`total` counts validated by the client. Rust
 `sample_with_progress` reports zero and each finished z slice; imported-grid
 copies report start/end and resampling reports its actual output slice count.
-The original `sample` entry point remains a no-observer wrapper. The WASM
-`SampledField.with_progress` and `surfaces_with_progress` APIs use optional
-JavaScript callbacks; old constructors/methods remain supported. Callback errors
+The original `sample` entry point remains a no-observer wrapper. The resident
+owner's preparation/meshing methods and compatibility `SampledField.with_progress`
+and `surfaces_with_progress` APIs use optional JavaScript callbacks; old
+constructors/methods retain their stale-source checks. Callback errors
 return errors without publishing a partial result. `js-sys` 0.3.85 is now a
 direct dependency at its already-locked version; no registry package was upgraded.
 
@@ -270,13 +279,33 @@ container validation are indeterminate, and cached sampling is skipped. This
 is measured work, not an ETA or an overall-job percentage. Fast phases may not
 paint before the next phase. No additional field arrays or meshes are allocated
 for progress. Stale progress is ignored through request and generation-token
-checks, just like stale completion. Cancellation terminates the same Web Worker,
-rejects outstanding work, and clears its cache; it does not cooperatively stop
-inside a Rust loop. The next request starts a new worker. Previous completed
-geometry remains intact, and cancellation is not a resumable checkpoint.
+checks, just like stale completion.
 Progress UI state is cleared on success, cancellation, and failure; it is not
-persisted in native documents. The existing global pending-request cancellation
-behavior remains tracked separately by issue #6.
+persisted in native documents.
+
+App and Convert Files each create a stable scientific client. The bridge keeps
+one FIFO queue and posts only one request at a time. A client's `cancel()` removes
+only its jobs; the fourth request argument accepts `{ signal }` for a single
+request's AbortSignal. Removing a queued job leaves active work alone. Cancelling
+an active job terminates synchronous WASM and clears the worker/cache, then starts
+unaffected queued jobs on a replacement. It does not cooperatively interrupt a
+Rust loop or provide resumable checkpoints. Runtime/transport failure uses a
+separate fatal teardown that rejects all owners. Constructor/posting failures
+settle the affected request; stale worker-instance messages cannot settle later
+jobs. The module's original request/cancel exports share a default compatibility
+owner. UI generation tokens still protect asynchronous pipelines outside the
+worker, and previous completed geometry remains intact.
+
+Registration observes id/title values and the references of atoms, bonds, basis,
+orbitals, densities, grids, and provenance. Scientific inputs and nested entries
+are immutable snapshots: future edits must replace the affected top-level
+arrays/objects. Reference identity cannot detect in-place mutation. View settings
+and saved meshes do not alter registration identity. Registration is committed
+only after successful worker completion and reset on errors or worker replacement;
+only the current registration is retained. Rust drops the old sampled allocation
+before sampling a replacement. Internal IDs identify worker-owned snapshots, not
+scientific content; persisted source hashes and full native validation/encoding
+remain unchanged. See the [ownership/registration decisions](design/2026-11-06-worker-ownership-and-registration.md).
 
 Mesh mode renders durable surface records. Sampled raycast and volume modes
 use a 3D texture and replace the selected field's mesh display. Other fields'
