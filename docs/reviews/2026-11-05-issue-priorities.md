@@ -23,8 +23,12 @@ implements #6 then #5 in [PR #27](https://github.com/uvar-apps/eigenvista/pull/2
 developed on `codex/worker-ownership-and-cache`; see its
 [design](../design/2026-11-06-worker-ownership-and-registration.md) and
 [verification](../status.md#worker-ownership-and-registration-6-november-2026).
-The table preserves the original ordering. Next outstanding: measured
-bond-search work (#3), then declared mmCIF connections (#19).
+The third batch merged as `58d835b`, closing #6 and #5. The fourth batch implements
+#3 and #19 on `codex/bonds-and-cif-connections`; see the
+[design](../design/2026-11-06-bond-search-and-cif-connections.md) and
+[verification](../status.md#bond-search-and-mmcif-connections-6-november-2026).
+The table preserves the original ordering. Remaining P3 work follows #21, #7,
+#4, #20, and #22.
 
 On 5 November 2026, closed [#16 as completed](https://github.com/uvar-apps/eigenvista/issues/16#issuecomment-6661704198)
 using the shipped 0.5.7/0.5.8 fixes and the current 118-colour check. There were

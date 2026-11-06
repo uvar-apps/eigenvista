@@ -10,13 +10,16 @@
 //! `loop_` categories, quoted fields, `;` text blocks, and the `?`/`.` null
 //! markers. That is tokenized here directly, with every value checked before use.
 //!
-//! Scope is the `_atom_site` category. Crystallographic extras are recorded as
-//! provenance but not acted on: no symmetry-mate generation, no periodic
-//! boundary handling, and `struct_conn` connections are not read, so
-//! connectivity is perceived from coordinates as it is for PDB.
+//! Selected `_atom_site` rows anchor declared `_struct_conn` connections.
+//! Covalent/disulfide/metal links supplement exact coordinate perception;
+//! unsupported references and images remain explicit provenance, without
+//! symmetry-mate generation or periodic boundary expansion.
+
+mod connections;
 
 use crate::{Atom, BOHR_TO_ANGSTROM, Document, Result, bonds};
-use std::collections::BTreeMap;
+use connections::{ConnectionRow, SiteIdentity};
+use std::collections::{BTreeMap, BTreeSet};
 
 /// mmCIF is markedly more verbose than legacy PDB for the same structure, so
 /// this budget is larger than the PDB one while staying under the 128 MiB
@@ -25,6 +28,8 @@ const MAX_CIF_BYTES: usize = 64 * 1024 * 1024;
 
 /// Allocation bound on the atom collection, independent of file size.
 const MAX_ATOMS: usize = 250_000;
+const MAX_CIF_COLUMNS: usize = 256;
+const MAX_LINE_FIELDS: usize = 1_000_000;
 
 /// Coordinates beyond this are treated as invalid rather than trusted.
 const MAX_COORDINATE_ANGSTROM: f64 = 1.0e9;
@@ -43,11 +48,25 @@ fn is_null(value: &str) -> bool {
     value == "?" || value == "." || value.is_empty()
 }
 
-/// Split a data line into fields, honouring single- and double-quoted values.
-///
-/// A quoted field ends at its matching quote only when that quote is followed by
-/// whitespace or the end of the line, so `don't` inside double quotes is fine.
-fn tokenize(line: &str) -> Result<Vec<&str>> {
+/// Quotedness keeps tag-like identifiers distinct from CIF control tokens.
+struct Token<'a> {
+    value: &'a str,
+    quoted: bool,
+}
+
+fn control_token(value: &str) -> bool {
+    value.starts_with('_')
+        || ["loop_", "stop_", "global_"]
+            .iter()
+            .any(|k| value.eq_ignore_ascii_case(k))
+        || value
+            .get(..5)
+            .is_some_and(|p| p.eq_ignore_ascii_case("data_") || p.eq_ignore_ascii_case("save_"))
+}
+
+/// Tokenize within a pre-allocation field bound; a closing quote must be
+/// followed by whitespace or end of line.
+fn tokens(line: &str, limit: usize) -> Result<Vec<Token<'_>>> {
     let bytes = line.as_bytes();
     let mut fields = Vec::new();
     let mut i = 0;
@@ -55,6 +74,12 @@ fn tokenize(line: &str) -> Result<Vec<&str>> {
         if bytes[i].is_ascii_whitespace() {
             i += 1;
             continue;
+        }
+        if bytes[i] == b'#' {
+            break;
+        }
+        if fields.len() >= limit {
+            return Err("mmCIF line/header exceeds the field budget".into());
         }
         if bytes[i] == b'\'' || bytes[i] == b'"' {
             let quote = bytes[i];
@@ -71,24 +96,56 @@ fn tokenize(line: &str) -> Result<Vec<&str>> {
                 }
                 end += 1;
             }
-            fields.push(&line[start..end]);
+            fields.push(Token {
+                value: &line[start..end],
+                quoted: true,
+            });
             i = end + 1;
         } else {
             let start = i;
             while i < bytes.len() && !bytes[i].is_ascii_whitespace() {
                 i += 1;
             }
-            fields.push(&line[start..i]);
+            fields.push(Token {
+                value: &line[start..i],
+                quoted: false,
+            });
         }
     }
     Ok(fields)
+}
+
+/// Bound headers before allocating owned names, and never drop extra columns.
+fn header_tags(tags: &mut Vec<String>, line: &str) -> Result<()> {
+    let fields = tokens(line, MAX_CIF_COLUMNS.saturating_sub(tags.len()))?;
+    for token in fields {
+        if token.quoted || !token.value.starts_with('_') {
+            return Err("mmCIF loop headers require unquoted column names; rows must start on a following line".into());
+        }
+        tags.push(token.value.to_ascii_lowercase());
+    }
+    Ok(())
+}
+
+/// The preview does not parse further tokens after a text/block boundary.
+/// Reject them rather than silently losing references or namespace constraints.
+fn boundary_line_end(remainder: &str) -> Result<()> {
+    if !remainder.is_empty() && !remainder.as_bytes()[0].is_ascii_whitespace() {
+        return Err("mmCIF boundary must be followed by whitespace or end of line".into());
+    }
+    let rest = remainder.trim_start_matches(|c: char| c.is_ascii_whitespace());
+    if !rest.is_empty() && !rest.starts_with('#') {
+        return Err("Inline mmCIF tokens after a text/block boundary are unsupported".into());
+    }
+    Ok(())
 }
 
 /// Skip a multi-line `;` text block. The opening `;` line has already been
 /// consumed; this consumes through the closing line that starts with `;`.
 fn skip_text_block<'a>(lines: &mut std::iter::Peekable<std::str::Lines<'a>>) -> Result<()> {
     for line in lines.by_ref() {
-        if line.starts_with(';') {
+        if let Some(remainder) = line.strip_prefix(';') {
+            boundary_line_end(remainder)?;
             return Ok(());
         }
     }
@@ -112,14 +169,24 @@ fn scalar_value(
     line: &str,
     lines: &mut std::iter::Peekable<std::str::Lines<'_>>,
 ) -> Result<Option<String>> {
-    let fields = tokenize(line)?;
+    let value = raw_scalar_value(line, lines)?;
+    Ok(if is_null(&value) { None } else { Some(value) })
+}
+
+/// Read a parsed scalar value, preserving explicit null markers for provenance.
+fn raw_scalar_value(
+    line: &str,
+    lines: &mut std::iter::Peekable<std::str::Lines<'_>>,
+) -> Result<String> {
+    let fields = tokens(line, 2)?;
     if fields.len() >= 2 {
-        let value = fields[1];
-        return Ok(if is_null(value) {
-            None
-        } else {
-            Some(value.trim_matches('\'').trim_matches('"').to_string())
-        });
+        if fields.len() != 2 {
+            return Err("mmCIF scalar must contain exactly one value".into());
+        }
+        if !fields[1].quoted && control_token(fields[1].value) {
+            return Err("Missing mmCIF scalar value before a control token".into());
+        }
+        return Ok(fields[1].value.to_string());
     }
     // Value may be on the next non-comment line.
     while let Some(next) = lines.peek() {
@@ -128,19 +195,71 @@ fn scalar_value(
             lines.next();
             continue;
         }
-        if let Some(block) = next.strip_prefix(';') {
-            // Text block: the value begins immediately after the opening `;`
-            // on that same line. The whole block must then be consumed through
-            // its closing `;`, otherwise that terminator would later be
-            // misread as the start of a new block and never terminate.
-            let value = block.to_string();
+        if next.starts_with(';') {
+            let opening = *next;
             lines.next();
-            skip_text_block(&mut *lines)?;
-            return Ok(if is_null(&value) { None } else { Some(value) });
+            return text_block_value(opening, lines);
         }
-        break;
+        let keyword = trimmed.split_whitespace().next().unwrap_or_default();
+        if trimmed.starts_with('_')
+            || keyword
+                .get(..5)
+                .is_some_and(|p| p.eq_ignore_ascii_case("data_"))
+            || keyword.eq_ignore_ascii_case("loop_")
+            || keyword.eq_ignore_ascii_case("stop_")
+        {
+            break;
+        }
+        let fields = tokens(next, 1)?;
+        if fields.len() != 1 {
+            return Err("mmCIF scalar must contain exactly one value".into());
+        }
+        if !fields[0].quoted && control_token(fields[0].value) {
+            return Err("Missing mmCIF scalar value before a control token".into());
+        }
+        let value = fields[0].value.to_string();
+        lines.next();
+        return Ok(value);
     }
-    Ok(None)
+    Err("Missing mmCIF scalar value".into())
+}
+
+/// Retain multi-line connection values rather than discarding their contents.
+fn text_block_value(
+    opening: &str,
+    lines: &mut std::iter::Peekable<std::str::Lines<'_>>,
+) -> Result<String> {
+    let mut value = opening[1..].to_string();
+    for line in lines.by_ref() {
+        if let Some(remainder) = line.strip_prefix(';') {
+            boundary_line_end(remainder)?;
+            return Ok(value);
+        }
+        value.push('\n');
+        value.push_str(line);
+    }
+    Err("Unterminated text block in mmCIF".into())
+}
+
+/// CIF loops may wrap rows or contain multiple rows on one line.
+fn connection_value(
+    value: String,
+    header: &LoopHeader,
+    fields: &mut Vec<String>,
+    rows: &mut Vec<ConnectionRow>,
+    budget: &mut usize,
+) -> Result<()> {
+    fields.push(value);
+    if fields.len() == header.tags.len() {
+        let row = header
+            .tags
+            .iter()
+            .map(|tag| tag["_struct_conn.".len()..].to_string())
+            .zip(fields.drain(..))
+            .collect();
+        connections::push_row(rows, row, budget)?;
+    }
+    Ok(())
 }
 
 /// Cheap content check so a file with a `.cif` extension that is not actually
@@ -151,19 +270,30 @@ fn scalar_value(
 /// 1BH3), because the header carries many other categories first.
 fn looks_like_mmcif(text: &str) -> bool {
     text.lines().take(4096).any(|line| {
-        line.trim_start()
-            .strip_prefix("data_")
-            .is_some_and(|rest| !rest.trim().is_empty())
-    }) && text.contains("_atom_site.")
+        let token = line.split_whitespace().next().unwrap_or_default();
+        token.len() > 5
+            && token
+                .get(..5)
+                .is_some_and(|p| p.eq_ignore_ascii_case("data_"))
+    }) && text.lines().any(|line| {
+        line.split_whitespace().any(|token| {
+            token
+                .get(..11)
+                .is_some_and(|p| p.eq_ignore_ascii_case("_atom_site."))
+        })
+    })
 }
 
 /// One parsed `_atom_site` row, before selection.
+type ResidueKey = (String, String, String, String, Option<String>);
+
 struct Site {
     z: u16,
     position: [f64; 3],
     occupancy: f64,
     alt: Option<String>,
-    key: (String, String, String, String),
+    key: ResidueKey,
+    identity: SiteIdentity,
 }
 
 /// Read the first model's geometry, select one occupancy-ranked alternate
@@ -186,10 +316,16 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
     let mut skipped_other_models = 0usize;
     let mut unknown_elements = 0usize;
     let mut discarded = 0usize;
+    let mut declarations = Vec::new();
+    let mut declaration_budget = 0;
+    let mut connection_fields = Vec::new();
+    let mut scalar_connection = ConnectionRow::new();
+    let mut block = 0usize;
+    let mut atom_blocks = BTreeSet::new();
+    let mut connection_blocks = BTreeSet::new();
 
     let mut lines = text.lines().peekable();
-    // The atom_site loop header, once seen, drives row parsing until the next
-    // tag/loop/block boundary.
+    // Relevant loop headers drive atom rows or wrapped connection records.
     let mut atom_loop: Option<LoopHeader> = None;
 
     while let Some(raw) = lines.next() {
@@ -200,36 +336,100 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             continue;
         }
         if line.starts_with(';') {
-            skip_text_block(&mut lines)?;
+            if let Some(header) = atom_loop
+                .as_ref()
+                .filter(|h| h.tags[0].starts_with("_struct_conn."))
+            {
+                let value = text_block_value(raw, &mut lines)?;
+                connection_value(
+                    value,
+                    header,
+                    &mut connection_fields,
+                    &mut declarations,
+                    &mut declaration_budget,
+                )?;
+            } else {
+                if atom_loop.is_some() {
+                    return Err("Multiline _atom_site rows are unsupported; no partial geometry was imported".into());
+                }
+                skip_text_block(&mut lines)?;
+                atom_loop = None;
+            }
+            continue;
+        }
+        let keyword = trimmed.split_whitespace().next().unwrap_or_default();
+        if keyword.eq_ignore_ascii_case("global_")
+            || keyword
+                .get(..5)
+                .is_some_and(|p| p.eq_ignore_ascii_case("save_"))
+        {
+            return Err("mmCIF data-file import does not support save/global frames".into());
+        }
+        let loop_start = keyword.eq_ignore_ascii_case("loop_");
+        let data_start = keyword
+            .get(..5)
+            .is_some_and(|p| p.eq_ignore_ascii_case("data_"));
+        let stop = keyword.eq_ignore_ascii_case("stop_");
+        let boundary = data_start || loop_start || stop || trimmed.starts_with('_');
+        if boundary && !connection_fields.is_empty() {
+            return Err("Incomplete mmCIF _struct_conn loop row".into());
+        }
+        if boundary
+            && !trimmed.to_ascii_lowercase().starts_with("_struct_conn.")
+            && !scalar_connection.is_empty()
+        {
+            connections::push_row(
+                &mut declarations,
+                std::mem::take(&mut scalar_connection),
+                &mut declaration_budget,
+            )?;
+        }
+        if data_start {
+            boundary_line_end(&trimmed[keyword.len()..])?;
+            block += 1;
             atom_loop = None;
             continue;
         }
-        if trimmed.starts_with("data_") {
+        if stop {
+            boundary_line_end(&trimmed[keyword.len()..])?;
             atom_loop = None;
             continue;
         }
-        if trimmed == "loop_" || trimmed.starts_with("loop_ ") {
+        if loop_start {
             // Collect the tags of this loop.
             let mut tags = Vec::new();
-            let extra = trimmed.strip_prefix("loop_").map(str::trim).unwrap_or("");
+            let extra = trimmed["loop_".len()..].trim();
             if !extra.is_empty() {
-                tags.extend(tokenize(extra)?.into_iter().map(str::to_string));
+                header_tags(&mut tags, extra)?;
             }
             while let Some(peek) = lines.peek() {
                 let p = peek.trim_start();
                 if p.starts_with('_') {
-                    let tag = p
-                        .split_whitespace()
-                        .next()
-                        .unwrap_or_default()
-                        .to_ascii_lowercase();
-                    tags.push(tag);
+                    header_tags(&mut tags, p)?;
                     lines.next();
                 } else {
                     break;
                 }
             }
-            if tags.iter().any(|t| t.starts_with("_atom_site.")) {
+            let atoms = tags.iter().any(|t| t.starts_with("_atom_site."));
+            let connections = tags.iter().any(|t| t.starts_with("_struct_conn."));
+            if atoms || connections {
+                let prefix = if atoms {
+                    "_atom_site."
+                } else {
+                    "_struct_conn."
+                };
+                if tags.len() > MAX_CIF_COLUMNS
+                    || tags.iter().any(|tag| !tag.starts_with(prefix))
+                    || tags.iter().collect::<BTreeSet<_>>().len() != tags.len()
+                {
+                    return Err("Invalid, mixed, duplicate, or excessive mmCIF loop columns".into());
+                }
+                if atoms {
+                    atom_blocks.insert(block);
+                } else {
+                    connection_blocks.insert(block);
+                }
                 atom_loop = Some(LoopHeader { tags });
             } else {
                 atom_loop = None;
@@ -246,6 +446,17 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             // A tag inside the atom_site loop ends its rows: this is a new
             // category or a key/value pair.
             atom_loop = None;
+            if let Some(column) = tag.strip_prefix("_struct_conn.") {
+                let value = raw_scalar_value(line, &mut lines)?;
+                if scalar_connection
+                    .insert(column.to_string(), value)
+                    .is_some()
+                {
+                    return Err("Duplicate mmCIF _struct_conn scalar column".into());
+                }
+                connection_blocks.insert(block);
+                continue;
+            }
             match tag.as_str() {
                 "_cell.length_a" | "_cell.length_b" | "_cell.length_c" | "_cell.angle_alpha"
                 | "_cell.angle_beta" | "_cell.angle_gamma" => {
@@ -283,7 +494,31 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         let Some(header) = atom_loop.as_ref() else {
             continue;
         };
-        let fields = tokenize(line)?;
+        let limit = if header.tags[0].starts_with("_struct_conn.") {
+            MAX_LINE_FIELDS
+        } else {
+            header.tags.len()
+        };
+        let parsed = tokens(line, limit)?;
+        if parsed
+            .iter()
+            .any(|token| !token.quoted && control_token(token.value))
+        {
+            return Err("Inline mmCIF control tokens are unsupported; place category/loop controls on their own lines".into());
+        }
+        if header.tags[0].starts_with("_struct_conn.") {
+            for token in parsed {
+                connection_value(
+                    token.value.to_string(),
+                    header,
+                    &mut connection_fields,
+                    &mut declarations,
+                    &mut declaration_budget,
+                )?;
+            }
+            continue;
+        }
+        let fields: Vec<_> = parsed.iter().map(|token| token.value).collect();
         if fields.len() != header.tags.len() {
             return Err(format!(
                 "mmCIF _atom_site row has {} fields but {} columns declared: {line:?}",
@@ -361,11 +596,49 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             ));
         }
 
+        let identity = SiteIdentity {
+            id: field("_atom_site.id").to_string(),
+            label: [
+                "_atom_site.label_asym_id",
+                "_atom_site.label_comp_id",
+                "_atom_site.label_seq_id",
+                "_atom_site.label_atom_id",
+            ]
+            .map(|tag| field(tag).to_string()),
+            author: [
+                "_atom_site.auth_asym_id",
+                "_atom_site.auth_comp_id",
+                "_atom_site.auth_seq_id",
+                "_atom_site.auth_atom_id",
+            ]
+            .map(|tag| field(tag).to_string()),
+            alt: alt.clone(),
+            insertion: match field("_atom_site.pdbx_pdb_ins_code") {
+                value if is_null(value) => None,
+                value => Some(value.to_string()),
+            },
+        };
+        // Non-polymers commonly have label_seq_id='.'. Their author residue
+        // number and insertion distinguish different waters/ligands before
+        // choosing alternates. Label identifiers remain preferred when present.
+        let choose = |label: &str, author: &str| {
+            if is_null(label) {
+                author.to_string()
+            } else {
+                label.to_string()
+            }
+        };
+        let sequence = if is_null(&identity.label[2]) {
+            format!("author:{}", identity.author[2])
+        } else {
+            format!("label:{}", identity.label[2])
+        };
         let key = (
             field("_atom_site.label_entity_id").to_string(),
-            field("_atom_site.label_asym_id").to_string(),
-            field("_atom_site.label_seq_id").to_string(),
-            field("_atom_site.auth_comp_id").to_string(),
+            choose(&identity.label[0], &identity.author[0]),
+            sequence,
+            choose(&identity.label[1], &identity.author[1]),
+            identity.insertion.clone(),
         );
         sites.push(Site {
             z,
@@ -373,7 +646,22 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             occupancy,
             alt,
             key,
+            identity,
         });
+    }
+
+    if !connection_fields.is_empty() {
+        return Err("Incomplete mmCIF _struct_conn loop row".into());
+    }
+    if !scalar_connection.is_empty() {
+        connections::push_row(
+            &mut declarations,
+            scalar_connection,
+            &mut declaration_budget,
+        )?;
+    }
+    if !declarations.is_empty() && (atom_blocks.len() != 1 || connection_blocks != atom_blocks) {
+        return Err("mmCIF connections across multiple data blocks are unsupported".into());
     }
 
     if sites.is_empty() {
@@ -390,7 +678,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
     // alternate location are always kept; among alternates within a residue,
     // keep the group with the highest mean occupancy, alphabetically first on
     // a tie.
-    let mut groups: BTreeMap<&(String, String, String, String), Vec<usize>> = BTreeMap::new();
+    let mut groups: BTreeMap<&ResidueKey, Vec<usize>> = BTreeMap::new();
     for (index, site) in sites.iter().enumerate() {
         groups.entry(&site.key).or_default().push(index);
     }
@@ -443,10 +731,19 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
     if doc.atoms.is_empty() {
         return Err("mmCIF has no atoms after alternate-location/occupancy selection".into());
     }
+    if doc.atoms.len() > 100_000 {
+        return Err("mmCIF exceeds the 100000 selected-atom preview budget".into());
+    }
 
-    // `struct_conn` is not read, so connectivity is perceived from coordinates
-    // exactly as it is for a PDB file with no CONECT records.
-    let connectivity = bonds::perceive(&doc.atoms, &[])?;
+    let selected: Vec<_> = sites
+        .iter()
+        .zip(&keep)
+        .filter(|(_, keep)| **keep)
+        .enumerate()
+        .map(|(atom, (site, _))| (&site.identity, atom))
+        .collect();
+    let declared = connections::resolve(&declarations, &selected)?;
+    let connectivity = bonds::perceive(&doc.atoms, &declared.explicit)?;
     let connectivity_description = connectivity.description();
     doc.bonds = connectivity.bonds;
 
@@ -467,6 +764,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         ),
         connectivity_description,
     ];
+    provenance.extend(declared.provenance);
     if unknown_elements > 0 {
         provenance.push(format!(
             "Skipped {unknown_elements} atoms with an unrecognised element symbol; unknown elements are not guessed."
@@ -484,7 +782,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         ));
     }
     provenance.push(
-        "Structure-only import: residue/chain labels, occupancy, B-factors, formal charges and connections from struct_conn are not retained; no quantum data fabricated."
+        "Structure-only import: residue/chain labels, occupancy, B-factors and formal charges are not retained as atom attributes; declared connection metadata is retained in provenance, without bond orders or quantum data being fabricated."
             .into(),
     );
     doc.provenance = provenance;

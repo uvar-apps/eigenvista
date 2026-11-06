@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 6 November 2026 for worker ownership/registration at 0.5.11; the dated
+Updated 6 November 2026 for bond search/mmCIF connections at 0.5.11; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
@@ -11,6 +11,29 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+The bond/mmCIF batch implements #3 and #19 on `codex/bonds-and-cif-connections`
+from merged main `58d835b`. Exact 0.5-angstrom radius buckets reduce broad
+neighbor visits while preserving pair acceptance, ordering, and limits. mmCIF
+selected source identities resolve declared covalent/disulfide/metal connections
+before perception fills gaps. Raw ID/type/order/columns and omissions persist in
+bounded provenance. Noncovalent/third-partner and unavailable-image semantics
+remain explicit rather than fabricated. A reproduced non-polymer alternate
+grouping defect is fixed with author residue/insertion fallback. The bounded
+lexer handles wrapped/scalar connections and rejects unsupported layouts and
+trailing constraints safely. Cumulative JSON preflight bounds repeated selected
+atom-site IDs before allocating provenance strings.
+See the [design](design/2026-11-06-bond-search-and-cif-connections.md) and
+[fresh verification](status.md#bond-search-and-mmcif-connections-6-november-2026).
+Fresh checks pass all 180 workspace Rust tests, strict Clippy, Rustfmt, production
+builds, 13 packaging tests, and all 230 Chromium/WebKit cases in one run.
+Desktop/mobile connection screenshots were inspected; 384 local documentation
+targets resolve. The native app is rebuilt/verified at 0.5.11, with no
+new tag/release/ZIP; published artifacts predate all four repair batches.
+All 27 independent `1AON.cif` connections survive, adding ten previously missed
+long Mg–O edges (59,317 total bonds); `1BH3.cif` keeps 2,372 atoms/2,270 bonds.
+Preserve source fixtures, user references/local data, and platform acceptance
+boundaries. Next remaining P3 order: #21, #7, #4, #20, #22.
 
 The worker batch implements #6 and #5 in
 [PR #27](https://github.com/uvar-apps/eigenvista/pull/27), developed on
@@ -36,7 +59,8 @@ end-to-end speedups or platform qualification.
 The native app was rebuilt at 0.5.11 and verified; published ZIP/tag remain
 unchanged and predate all three repair batches. Preserve user references and
 local data; `.serena/` is checkout-local ignored tooling, not packaged source.
-Next: measured bond-search work (#3), then declared mmCIF connectivity (#19).
+That batch merged as `58d835b`, closing both issues. Its successor is described
+above; the original issue review below preserves the earlier triage.
 
 The rendering batch implements #12 and #2 in
 [PR #26](https://github.com/uvar-apps/eigenvista/pull/26), developed on

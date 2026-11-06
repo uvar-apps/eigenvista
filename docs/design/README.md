@@ -23,6 +23,7 @@ fact*; this directory records *decisions before the fact*.
 
 | Date | Design | Status | Issue |
 | --- | --- | --- | --- |
+| 2026-11-06 | [Bond search and declared mmCIF connections](2026-11-06-bond-search-and-cif-connections.md) | implemented | [#3](https://github.com/uvar-apps/eigenvista/issues/3), [#19](https://github.com/uvar-apps/eigenvista/issues/19) |
 | 2026-11-06 | [Worker ownership and resident registration](2026-11-06-worker-ownership-and-registration.md) | implemented | [#6](https://github.com/uvar-apps/eigenvista/issues/6), [#5](https://github.com/uvar-apps/eigenvista/issues/5) |
 | 2026-11-06 | [Sampled rendering quality and shader alpha](2026-11-06-rendering-quality.md) | implemented | [#12](https://github.com/uvar-apps/eigenvista/issues/12), [#2](https://github.com/uvar-apps/eigenvista/issues/2) |
 | 2026-10-12 | [Atom colours from a file](2026-10-12-atom-colors-from-file.md) | implemented | [#17](https://github.com/uvar-apps/eigenvista/issues/17) |

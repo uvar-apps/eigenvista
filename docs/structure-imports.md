@@ -32,13 +32,13 @@ The distance test uses the Pyykko-Atsumi single-bond covalent radii for elements
 
 1. Convert the model's bohr coordinates to angstroms for the geometric test.
 2. Preserve and deduplicate explicit connections first, including bonds longer than the automatic cutoff.
-3. Query each atom with radius `r_i + max(r_j) + 0.45 angstrom`, then retain pairs with `0.4 <= distance <= r_i + r_j + 0.45 angstrom`. Evaluate each unordered pair once. The search radius has a small numerical guard; acceptance uses the actual pair cutoff.
+3. Partition target atoms into 0.5-angstrom covalent-radius buckets, each with an exact k-d tree. Query every nonempty bucket with radius `r_i + observed_maximum_in_bucket + 0.45 angstrom`, then retain pairs with `0.4 <= distance <= r_i + r_j + 0.45 angstrom`. Every target occurs in one bucket, and its observed maximum conservatively includes every accepted pair; the bucket width changes indexing rather than the chemical cutoff. Evaluate each unordered pair once. The search radius has a small numerical guard; acceptance uses the actual pair cutoff.
 4. Sort candidates by increasing `distance / (r_i + r_j)`, with deterministic index tie-breaks. Limit inferred coordination to one for H/F, four for B/C/N, and three for O. Existing explicit bonds consume coordination slots but are never removed. Other elements have no chemistry-specific cap, avoiding a blanket organic-valence rule for metals/hypervalent species.
 5. Return sorted, unique endpoint pairs with no self-bonds. Report the method and any coordination rejections in provenance. Native import uses these pairs only to append missing bonds, preserving the existing list as described above.
 
 This is a geometric display-connectivity heuristic, not electronic bond-order perception. The minimum-distance and light-element coordination filters avoid common false connections and overlaps. They do not establish aromaticity, oxidation state, metal coordination, hydrogen bonds, or chemical validity in arbitrary geometries. Open Babel likewise separates proximity-based connections from subsequent bond-order handling and applies minimum-distance/valence checks. The Rust implementation does not link to Open Babel. [Open Babel `ConnectTheDots`](https://openbabel.org/api/3.0/classOpenBabel_1_1OBMol.shtml).
 
-Bounds are explicit: 100,000 atoms, 600,000 output connections, 2,000,000 candidates, and 10,000,000 visited neighbors. Excessively dense or invalid inputs fail rather than silently returning a partial bond list. Each radius-query result is at most the input atom count. Coordinates must be finite and within 1e9 angstrom of the origin. These are numerical/resource limits, not a claim that the current individual-mesh renderer is interactive at the maximum atom count.
+Bounds are explicit: 100,000 atoms, 600,000 output connections, 2,000,000 candidates, and 10,000,000 visited neighbors. These limits are unchanged by radius partitioning. Excessively dense or invalid inputs fail rather than silently returning a partial bond list. Each radius-query result is at most the input atom count. Coordinates must be finite and within 1e9 angstrom of the origin. These are numerical/resource limits, not a guarantee of interactive rendering at the maximum atom count.
 
 ## PDB profile
 
@@ -74,7 +74,7 @@ What is read, from the `_atom_site` category:
 
 - `Cartn_x/y/z` in angstrom, converted to bohr like every other importer. Values must parse as finite and stay within 1e9 angstrom; a row that fails is an error, not a fabricated position.
 - `type_symbol` resolved case-insensitively against the core element table. An unrecognised symbol is **skipped with a recorded count**, never guessed into some other element.
-- `label_alt_id` and `occupancy` drive the same alternate-location policy as PDB: common atoms plus one conformer per residue, highest mean occupancy, alphabetically first label on a tie. Zero-occupancy atoms are dropped. Grouping is by entity/asym/sequence/component rather than residue object.
+- `label_alt_id` and `occupancy` drive the same alternate-location policy as PDB: common atoms plus one conformer per residue, highest mean occupancy, alphabetically first label on a tie. Zero-occupancy atoms are dropped. Grouping uses entity/asym/sequence/component and insertion identity. For a non-polymer with inapplicable label sequence, author residue/insertion identity keeps separate waters/ligands from sharing one alternate-selection group.
 - `pdbx_PDB_model_num` selects the first model only; later models are skipped and counted in provenance. Models are never merged.
 - A row whose field count differs from its declared column count fails rather than being partially read.
 
@@ -82,13 +82,52 @@ Unit cell (`_cell`) and space group (`_symmetry.space_group_name_H-M`) are read
 and reported in provenance but **not applied**: no symmetry-mate generation, no
 periodic boundary handling, no wrapped distances.
 
-`struct_conn` is not read. `pdbtbx` does not surface it either — both fixtures
-report zero bonds through that path — so connectivity is perceived from
-coordinates exactly as it is for a PDB file with no `CONECT` records. Reading
-`struct_conn` is a separate follow-up.
+`_struct_conn` is resolved against retained source rows after model/alternate
+selection. Supplied label and author identifiers must agree; explicit alternate
+and insertion references are honored. Omitted conformers are not redirected to
+selected alternatives, and ambiguous, absent, or contradictory endpoints remain
+reported unresolved declarations. No nonstandard direct atom-site-ID field is
+invented.
 
-Budgets: 64 MiB per file (mmCIF is markedly more verbose than PDB for the same
-structure) and 250,000 atoms, both enforced before unbounded allocation.
+Declared pair types `covale`, `disulf`, and `metalc` are explicit display edges,
+even beyond the geometric cutoff. They take precedence and perception fills
+missing pairs. Rods remain untyped connectivity: deposited orders are retained
+without creating a bond-order model. Other types, including hydrogen/salt links,
+and declarations with a third partner are recorded without forcing a pair edge;
+independent coordinate perception can still find those pairs.
+
+Matching valid symmetry-operation/translation codes on both partners represent
+one common isometry, so the pair maps back to the selected sites. Both omitted
+or `.` images also use this selected-site profile. Unknown `?`, different codes,
+and mixed specified/unspecified images are reported and omitted. No code is
+assumed to name the identity operation, and no unavailable symmetry mates are
+generated.
+
+Each declaration has a `mmCIF struct_conn: ` JSON provenance record containing
+full source columns (including type/order), selected partner indices and source
+row IDs when resolved, its canonical edge when retained, and a status/reason.
+Duplicate declarations keep their records without duplicate bonds. Human-readable
+policy/count summaries and parser loss notices make omissions visible. This
+uses existing provenance strings and survives native save/reopen without a
+document-schema change. Files without declarations retain coordinate perception;
+the `1BH3.cif` baseline keeps its atom/bond counts. Independent inspection of
+`1AON.cif` finds 27 selected metal links, ten beyond the Mg–O cutoff of 2.47 Å.
+
+The lexical profile accepts loop/scalar connection categories, wrapped connection
+values, quoted literals, and text blocks; atom rows remain line-aligned.
+Headers retain at most 256 columns, and a connection data line at most one million
+tokens. Header/data mixtures, inline category controls, save/global frames,
+multiline atom rows, trailing tokens after text/data/stop boundaries, and
+connection references across data blocks are rejected explicitly. Separated
+boundary comments are supported. These checks are not full CIF dictionary validation.
+
+Budgets: 64 MiB per file, 250,000 parsed sites from the first model before
+alternate selection, 100,000 selected atoms,
+100,000 declarations, 2,000,000 reference-candidate visits, and 4 MiB serialized
+connection provenance, including outer manifest-string escaping. Cumulative record
+size is checked before allocating JSON strings, including repeated selected
+atom-site IDs. Malformed or excessive input fails rather than being truncated;
+the native manifest limit remains 8 MiB.
 
 Out of scope: BinaryCIF (`.bcif`), full dictionary validation against
 `mmcif_pdbx.dic`, symmetry expansion, and writing/exporting mmCIF.
@@ -97,13 +136,30 @@ Out of scope: BinaryCIF (`.bcif`), full dictionary validation against
 
 Tests cover water/methane XYZ, disconnected fragments, element alignment, model/alternate selection, explicit-plus-inferred connections, duplicate suppression, malformed input, dense-input budgets, coincident/planar/collinear points, and an independent exhaustive pair-distance comparison. Browser tests open XYZ/PDB through the actual file input, inspect rendered pixels, save/reopen connectivity, and check mobile layout and recovery after malformed imports.
 
+[Radius-query regressions](../crates/eigenvista-core/tests/bond_radius_queries.rs)
+add four cases spanning all 118 elements, cutoff/minimum boundaries, translated
+coordinates, explicit precedence/ties, and an exactly 100,000-atom outlier stress
+that formerly exceeded the neighbor budget. The hydrogen lattice is deliberately
+coordinate-valid synthetic input, not a physical material reference.
+[Declared-connection regressions](../crates/eigenvista-import/tests/cif_connections.rs)
+cover reference identity, alternate/non-polymer selection, duplicates/types/images,
+bounded malformed layouts, and native persistence; the resolver also has seven
+module tests. [CLI regressions](../crates/eigenvista-convert/tests/cli.rs) exercise
+real conversion/check/JSON/native paths, and
+[browser workflows](../app/tests/cif-connections.spec.ts) exercise Open, provenance,
+conversion, save/reopen, retained-scene errors, and desktop/mobile rendering.
+
 [Cube regressions](../crates/eigenvista-core/tests/cube_import.rs) cover both density
 and single-orbital imports with automatic bonds. Shared-import and CLI tests
 check native missing-bond backfill, retained explicit connections, unchanged
 scientific grids/meshes, and idempotent reopen. See [cube import](cube-import.md)
 and [Molden import](molden-import.md) for those formats' profiles and evidence.
 
-Repository fixtures, read without modification:
+Repository fixtures, read without modification. Current WASM verification keeps
+`1BH3.cif` at 2,372 atoms/2,270 bonds with no declarations. `1AON.cif` now has
+59,317 bonds, compared with the historical 59,307 coordinate-perceived baseline:
+the ten additional pairs come from retained deposited links beyond the cutoff.
+See [status](status.md) for dated verification.
 
 | File | Selected atoms | Bonds |
 | --- | ---: | ---: |
@@ -111,8 +167,8 @@ Repository fixtures, read without modification:
 | `fixtures/legacy/data/3POR.pdb` | 2,325 | 2,285 |
 | `fixtures/legacy/data/URIDINE-VANADATE.pdb` | 31 | 33 |
 | `fixtures/legacy/data/alaninemulti.pdb` | 66 (first structure only) | 65 |
-| `fixtures/cif/1BH3.cif` | 2,372 (from 2,395 rows) | 2,270 |
-| `fixtures/cif/1AON.cif` | 58,870 | 59,307 |
+| `fixtures/cif/1BH3.cif` | 2,372 (from 2,383 source rows) | 2,270 |
+| `fixtures/cif/1AON.cif` | 58,870 | 59,317 |
 
 Single release-build measurements on the development Apple Silicon Mac, 3 October 2026, using `cargo run --locked --release -p molekel-core --example bond_benchmark`:
 
@@ -123,3 +179,10 @@ Single release-build measurements on the development Apple Silicon Mac, 3 Octobe
 | Synthetic 100,000-atom lattice, connectivity only | 96.10 ms | 676,000 | 4,999,950,000 |
 
 These are bounded development measurements, not universal performance promises or renderer benchmarks. The lattice is a spatial-index stress input, not a chemically meaningful bonding reference. Bond orders and broader structure-conversion profiles remain separate work.
+
+The current radius-bucket comparison is repeatable with
+`cargo run --locked --release -p eigenvista-core --example bond_radius_benchmark`.
+It reports old/global and bucketed neighbor counts separately from timing:
+old-query time excludes pair acceptance/sorting, while bucketed-full time includes
+them. Those timings have different scopes and are not direct speedup ratios.
+Fresh workload measurements and limitations are in [status](status.md).

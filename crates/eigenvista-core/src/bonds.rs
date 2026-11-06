@@ -2,12 +2,41 @@
 use crate::{Atom, BOHR_TO_ANGSTROM, MAX_BONDS, Result};
 use kiddo::{ImmutableKdTree, SquaredEuclidean};
 use pdbtbx::Element;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub const TOLERANCE_ANGSTROM: f64 = 0.45;
 pub const MIN_DISTANCE_ANGSTROM: f64 = 0.4;
 const MAX_CANDIDATES: usize = 2_000_000;
 const MAX_NEIGHBOR_VISITS: usize = 10_000_000;
+// This partitions the index, not the chemical cutoff. Each query still uses
+// the actual largest covalent radius in its destination bucket.
+const RADIUS_BUCKET_WIDTH_ANGSTROM: f64 = 0.5;
+
+struct RadiusBucket {
+    tree: ImmutableKdTree<f64, 3>,
+    indices: Vec<usize>,
+    max_radius: f64,
+}
+
+fn radius_buckets(radii: &[f64], positions: &[[f64; 3]]) -> Vec<RadiusBucket> {
+    let mut groups = BTreeMap::<usize, Vec<usize>>::new();
+    for (i, radius) in radii.iter().enumerate() {
+        let key = (radius / RADIUS_BUCKET_WIDTH_ANGSTROM).floor() as usize;
+        groups.entry(key).or_default().push(i);
+    }
+    groups
+        .into_values()
+        .map(|indices| {
+            let points: Vec<_> = indices.iter().map(|&i| positions[i]).collect();
+            let max_radius = indices.iter().map(|&i| radii[i]).fold(0., f64::max);
+            RadiusBucket {
+                tree: ImmutableKdTree::new_from_slice(&points),
+                indices,
+                max_radius,
+            }
+        })
+        .collect()
+}
 
 pub struct PerceivedBonds {
     pub bonds: Vec<[usize; 2]>,
@@ -74,32 +103,36 @@ pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBond
     if atoms.len() < 2 {
         return Ok(result);
     }
-    let max_radius = radii.iter().copied().fold(0., f64::max);
-    let tree = ImmutableKdTree::<f64, 3>::new_from_slice(&positions);
+    let buckets = radius_buckets(&radii, &positions);
     let mut candidates = Vec::new();
     for (i, p) in positions.iter().enumerate() {
-        let search_radius = radii[i] + max_radius + TOLERANCE_ANGSTROM;
-        // The index uses squared Euclidean distances, including its radius argument.
-        for neighbor in tree.within_unsorted::<SquaredEuclidean>(
-            p,
-            search_radius.powi(2) * (1. + 8. * f64::EPSILON),
-        ) {
-            result.neighbor_visits += 1;
-            if result.neighbor_visits > MAX_NEIGHBOR_VISITS {
-                return Err("Bond detection exceeded the neighbor budget; coordinates may be excessively dense".into());
-            }
-            let j = neighbor.item as usize;
-            if j <= i || bonds.contains(&[i, j]) {
-                continue;
-            }
-            let sum = radii[i] + radii[j];
-            if neighbor.distance >= MIN_DISTANCE_ANGSTROM.powi(2)
-                && neighbor.distance <= (sum + TOLERANCE_ANGSTROM).powi(2)
-            {
-                if candidates.len() == MAX_CANDIDATES {
-                    return Err("Bond detection exceeded the candidate budget; coordinates may be excessively dense".into());
+        for bucket in &buckets {
+            // Every atom belongs to one bucket and r_j <= its observed maximum,
+            // so this bound includes every possible accepted pair, even when a
+            // large-radius outlier is far from the common small-radius atoms.
+            let search_radius = radii[i] + bucket.max_radius + TOLERANCE_ANGSTROM;
+            // The index uses squared Euclidean distances, including its radius argument.
+            for neighbor in bucket.tree.within_unsorted::<SquaredEuclidean>(
+                p,
+                search_radius.powi(2) * (1. + 8. * f64::EPSILON),
+            ) {
+                result.neighbor_visits += 1;
+                if result.neighbor_visits > MAX_NEIGHBOR_VISITS {
+                    return Err("Bond detection exceeded the neighbor budget; coordinates may be excessively dense".into());
                 }
-                candidates.push((neighbor.distance / sum.powi(2), i, j));
+                let j = bucket.indices[neighbor.item as usize];
+                if j <= i || bonds.contains(&[i, j]) {
+                    continue;
+                }
+                let sum = radii[i] + radii[j];
+                if neighbor.distance >= MIN_DISTANCE_ANGSTROM.powi(2)
+                    && neighbor.distance <= (sum + TOLERANCE_ANGSTROM).powi(2)
+                {
+                    if candidates.len() == MAX_CANDIDATES {
+                        return Err("Bond detection exceeded the candidate budget; coordinates may be excessively dense".into());
+                    }
+                    candidates.push((neighbor.distance / sum.powi(2), i, j));
+                }
             }
         }
     }

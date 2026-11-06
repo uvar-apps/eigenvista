@@ -125,6 +125,14 @@ Standard verification order for runtime changes (details and coverage map in
 
 ## Traps
 
+- Bond queries use exact radius-bucket trees with each bucket's observed maximum;
+  preserve pair cutoffs, deterministic ordering, explicit precedence, and work/
+  allocation guards. mmCIF declarations resolve only against selected source
+  rows, with consistent label/author/alternate/insertion constraints. Keep raw
+  connection provenance, type/order, loss reporting, and the conservative common-
+  image policy; display rods do not imply bond orders or symmetry expansion.
+  See the [bond/mmCIF decisions](docs/design/2026-11-06-bond-search-and-cif-connections.md)
+  and independent real-file, brute-force, CLI, and browser regressions.
 - Scientific worker clients own cancellation: App and Convert Files each keep a
   stable `createScienceClient()` instance. Keep pipeline generation/run tokens
   as well. The FIFO bridge posts one job; active cancel restarts blocked WASM

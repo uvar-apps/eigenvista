@@ -182,6 +182,8 @@ explains ownership, validation, and cache boundaries.
 | --- | --- |
 | Scientific model/evaluator | Core unit tests plus [independent references](../crates/eigenvista-core/tests/independent_references.rs) |
 | XYZ/PDB and connectivity | [Connectivity regressions](../crates/eigenvista-core/tests/connectivity.rs), including read-only legacy fixtures |
+| Radius-bucket bond queries | Four [independent exhaustive/stress regressions](../crates/eigenvista-core/tests/bond_radius_queries.rs): all 118 elements, minimum/cutoff boundaries, translated coordinates, explicit/tied/duplicate pairs, and a 100,000-atom outlier budget case; existing guards and chemistry remain unchanged |
+| Declared mmCIF connectivity | Eight [resolver module tests](../crates/eigenvista-core/src/import/cif/connections.rs), 20 [shared-import regressions](../crates/eigenvista-import/tests/cif_connections.rs), real CLI coverage within the 13-case [converter suite](../crates/eigenvista-convert/tests/cli.rs), and two [browser workflows](../app/tests/cif-connections.spec.ts) per engine (four total): selected source identity, types/order/provenance, precedence/gap fill, alternates/non-polymers/models, common/different images, bounded lexical errors, trailing constraints, repeated long IDs, native roundtrips, and retained scenes |
 | Cube fields and all-import bonds | [Cube regressions](../crates/eigenvista-core/tests/cube_import.rs), shared importer/CLI tests, and [browser cube workflows](../app/tests/cube.spec.ts); analytic signed/skewed grid, negative atom counts, source preservation, native bond backfill, reflected rendering, precision rejection |
 | Molden and converter | [Independent imports](../crates/eigenvista-import/tests/independent_molden.rs), parser unit tests, [CLI regressions](../crates/eigenvista-convert/tests/cli.rs), [fixtures/provenance](../fixtures/molden/README.md) |
 | Container/native saving | Format unit tests and [reference roundtrips](../crates/eigenvista-format/tests/reference_roundtrips.rs) |
@@ -219,7 +221,14 @@ benchmark is:
 
 ```sh
 cargo run --manifest-path Cargo.toml --locked --release -p eigenvista-core --example bond_benchmark
+cargo run --manifest-path Cargo.toml --locked --release -p eigenvista-core --example bond_radius_benchmark
 ```
+
+The radius benchmark compares old/global and bucketed neighbor counts. Its
+old-query timing excludes pair acceptance/sorting, while bucketed-full timing
+includes them; these are different scopes, not direct speedup ratios. Synthetic
+lattices test spatial work limits rather than physical bonding. Use
+[status](status.md) for dated measurements and exact verification counts.
 
 There is no active hosted rewrite CI workflow. [Portability checks](../ci/README.md)
 are commands to run, not evidence that Linux or Windows has passed them.

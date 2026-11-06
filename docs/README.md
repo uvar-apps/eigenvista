@@ -8,6 +8,8 @@ with the [user guide](user-guide.md) to use the program, or the
 Current source version: **0.5.11**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
+Bond search uses conservative radius buckets, and mmCIF declared connections
+are retained with source provenance.
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.
@@ -42,6 +44,7 @@ limits of opening new saves in older builds.
 | Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
 | Sampled preview quality, conservative brick skipping, and shader alpha policy | [Rendering decisions](design/2026-11-06-rendering-quality.md) |
 | Scientific worker ownership, cancellation, and resident cache registration | [Worker decisions](design/2026-11-06-worker-ownership-and-registration.md) |
+| Conservative bond-query bounds and declared mmCIF connectivity | [Bond/mmCIF decisions](design/2026-11-06-bond-search-and-cif-connections.md) |
 | Issue triage, repair order, and completed batches | [2026-11-05 issue review](reviews/2026-11-05-issue-priorities.md) |
 | Issue triage conventions — area, kind, and priority label axes | [Issue label taxonomy](labels.md) |
 | Fast project overview | [Rewrite README](../README.md) |

@@ -8,6 +8,89 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Bond search and mmCIF connections: 6 November 2026
+
+Fourth repair batch at source version 0.5.11 on
+`codex/bonds-and-cif-connections`, based on merged main `58d835b`, addresses
+#3 and #19. The [design record](design/2026-11-06-bond-search-and-cif-connections.md)
+defines conservative indexing, declared/perceived precedence, source identity,
+link-type/image policy, lexical scope, and metadata bounds.
+
+- Target atoms are indexed in 0.5-angstrom covalent-radius buckets. Each query
+  uses its target bucket's observed maximum, preserving every actual pair cutoff,
+  minimum distance, deterministic candidate order/ties, explicit precedence,
+  coordination rule, and guard. No arbitrary smaller plausible radius is used.
+- mmCIF `covale`, `disulf`, and `metalc` declarations seed explicit untyped
+  display edges; coordinate perception fills missing pairs. Deposited IDs,
+  types/orders, complete parsed columns, selected row/atom identities, and status/
+  reasons persist in bounded JSON provenance without changing the native schema.
+  Other types and third-partner declarations are recorded without forcing rods.
+- Consistent label/author references resolve only against selected first-model/
+  alternate rows. Unknown, contradictory, ambiguous, omitted-alternate, or
+  unavailable-image references are reported. Matching common images map back to
+  selected sites; no identity operator or missing symmetry mate is guessed.
+  Non-polymer null label-sequence grouping now uses author residue/insertion
+  identity; a new regression first reproduced incorrect cross-water alternate
+  selection, then passed with the corrected fallback.
+- Loop/scalar connection values, wrapped rows, text blocks, and quoted identifiers
+  are supported. Header bounds apply before owned allocation and retain all
+  column names. Unsupported inline controls/frames/multiline atom rows fail
+  explicitly. Source/record/reference-work and 4 MiB provenance bounds protect
+  imports and the unchanged 8 MiB native manifest limit. Final-review regressions
+  reproduced dropped constraints after text closers; closers and data/stop
+  boundaries now reject trailing tokens while allowing separated comments.
+  Cumulative record size is stream-checked before JSON-string allocation, so
+  repeated long selected atom-site IDs cannot bypass the source-row budget.
+
+Fresh verification: all 180 workspace Rust tests including desktop, strict
+workspace/all-target Clippy, Rustfmt, production WASM/TypeScript/Vite build,
+13 packaging tests, and the Apple Silicon native build pass with Rust 1.99.0.
+The four new browser cases pass in Chromium/WebKit with actual bond pixels,
+native save/reopen, conversion, malformed-input recovery, and inspected desktop/
+mobile layouts. All 230 browser cases passed in one uninterrupted 6.2-minute
+Chromium/WebKit run. All 384 local targets across 33 public Markdown files
+resolve; source/test formatting and whitespace checks pass.
+
+The 0.5.11 ad-hoc-signed app at
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app` passes strict
+deep signature verification and embeds current frontend `assets/index-DhfZYEqR.js`.
+The preview stays on port 5178. Native interactive acceptance, clean-Mac
+installation, and Linux/Windows remain separate unverified gates. No version,
+dependency/lockfile, icon, tag, release, or tester-ZIP change was requested;
+the published 21 October ZIP predates all four repair batches. User references,
+private chats, local `1AON.pdb`, and frozen fixtures remain untouched.
+
+Independent source-row inspection and current WASM import agree on all 27
+selected `1AON.cif` metal links. Ten are beyond the 2.47-angstrom Mg–O perception
+cutoff. Current results: 58,870 atoms/59,317 bonds, versus historical 59,307
+perceived bonds. `1BH3.cif` has 2,383 source rows, no declarations, and retains
+2,372 selected atoms/2,270 bonds. Native/CLI regressions preserve the original
+source records and exact selected endpoint pairs. Counts are recorded in
+`tmp/cif-current-counts-2026-11-06.json`; independent mappings and method are in
+`tmp/cif-connection-reference-2026-11-06.{mjs,json}`.
+
+Bond-query diagnostics on this Apple Silicon Mac with the pinned dependency
+lockfile retain identical candidate pairs, independently checked against
+exhaustive enumeration across all 118 elements and boundary/explicit cases:
+
+| Workload | Atoms | Old global visits | Bucketed visits |
+| --- | ---: | ---: | ---: |
+| 4PJ1 | 65,963 | 376,802 | 199,218 |
+| Synthetic carbon/Cs outlier | 100,000 | 5,153,840 | 675,994 |
+| Synthetic hydrogen/Cs outlier | 100,000 | 20,832,964 | 675,994 |
+
+The hydrogen stress now succeeds with 49,743 bonds; old queries exceed the
+10-million-visit guard. This is coordinate-valid, deliberately nonphysical
+synthetic input, not a real-structure failure. Locked like-for-like prototype
+query/build medians (three calls) for 4PJ1 were 24.08 ms global and 18.46 ms
+bucketed. Raw measurements are in `tmp/bond-query-baseline-locked.jsonl`.
+The permanent `bond_radius_benchmark` example separately labels old-query-only
+and new-full-perception timing scopes; do not compare those as speedup ratios.
+No general latency, chemical validity, or renderer performance guarantee follows.
+
+Remaining issues follow the original P3 order: BinaryCIF (#21), drawing-buffer
+retention (#7), native platform wording (#4), symmetry (#20), and mmCIF export (#22).
+
 ## Worker ownership and registration: 6 November 2026
 
 Third repair batch at source version 0.5.11 in

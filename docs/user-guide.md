@@ -111,15 +111,18 @@ choices do not affect it.
 | `.molden`, `.molf`, `.molden.input` or recognized Molden header | Geometry, Gaussian basis, real orbitals, energies, occupations, and occupation-derived density matrices | Canonical S/P/D/F/G and SP; explicitly identified ORCA exports currently S/P/spherical D only |
 | `.xyz` | One conventional atom-count/comment/coordinate frame, in angstroms | Geometry and automatically inferred bonds; multiple frames and extended XYZ are rejected |
 | `.pdb` | Selected ATOM/HETATM geometry and explicit plus inferred bonds | First model/structure and one alternate conformer per residue |
-| `.cif`, `.mcif`, `.pdbx` (mmCIF) | `_atom_site` geometry in angstroms, with bonds perceived from coordinates | First model and one alternate conformer per residue; cell and symmetry are recorded but not applied, and `struct_conn` is not read |
+| `.cif`, `.mcif`, `.pdbx` (mmCIF) | Selected `_atom_site` geometry, declared pair connections, and coordinate-based gap filling | First model/alternate selection; declared covalent/disulfide/metal links are untyped display connections, with source details in provenance; no symmetry-mate expansion |
 | `.cube`, `.cub` | One scalar field, bohr geometry, and computed bonds; includes single-orbital cubes | Multi-field and alternative-unit cube profiles are not supported |
 
 PDB selection keeps common atoms and chooses the alternate with the highest
 mean occupancy per residue; zero-occupancy atoms are omitted. mmCIF follows the
-same alternate-location policy. Neither format preserves chain/residue labels,
-occupancies, B-factors, formal charges, isotope identity, cell/symmetry, or
-secondary-structure information after selection, and neither expands crystal
-images. Compressed PDB and BinaryCIF (`.bcif`) are not supported.
+same alternate-location policy. Non-polymer mmCIF rows with no label sequence
+use author residue/insertion identity to keep separate waters/ligands distinct.
+The atom model does not retain the full hierarchy, occupancies, B-factors,
+formal charges, or secondary-structure information. mmCIF connection records
+retain their deposited references, types, and orders in Provenance; cell/symmetry
+are reported without crystal-image expansion. Compressed PDB and BinaryCIF
+(`.bcif`) are not supported.
 
 An element symbol mmCIF does not recognise is skipped and reported rather than
 guessed, so a mistyped symbol cannot silently change the structure.
@@ -127,6 +130,14 @@ guessed, so a mistyped symbol cannot silently change the structure.
 Bonds are a distance-and-coordination heuristic for display, not bond orders,
 aromaticity, hydrogen-bond analysis, or proof of chemical validity. PDB `CONECT`
 connections are retained and supplemented with coordinate-based connections.
+mmCIF `covale`, `disulf`, and `metalc` declarations likewise take precedence,
+including links longer than the automatic distance cutoff. Other types and
+three-partner declarations are recorded without forcing rods; independent
+coordinate perception can still find the same pair. Read Provenance for each
+declaration's source columns, selected endpoints, and retained/duplicate/omitted
+status. Unknown or different symmetry images are reported without guessing mates.
+The [mmCIF profile](structure-imports.md#mmcif-profile) details supported layouts
+and import limits; this is a bounded reader rather than full dictionary validation.
 All supported imports compute bonds automatically, including cube and Molden.
 Opening an older `.molekel` or `.eigenvista` preview file also fills in missing
 display bonds while
