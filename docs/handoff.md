@@ -1,11 +1,11 @@
 # Development handoff
 
-Updated 6 November 2026 for BinaryCIF and viewer capture at 0.5.11; the dated
+Updated 6 November 2026 for the 0.5.12 release; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.11**, in the standalone
+The current application is **EigenVista**, version **0.5.12**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
@@ -145,6 +145,26 @@ The existing CIF browser test also emits `app/artifacts/cif-1bh3-desktop.png`;
 that generated image is preserved and locally excluded from Git/source packaging.
 
 ## Current release
+
+Version 0.5.12 collects all five repair batches below/above, through merged
+main `e9c7675` (PR #29). It includes BinaryCIF/raw-gzip import, declared mmCIF
+connections, tighter exact bond queries, safe shader/parameter workflows,
+voxel-relative preview quality, scoped worker cancellation and resident input
+reuse, PNG capture without retained drawing buffers, and a neutral native badge.
+Source versions and lockfiles are 0.5.12. Fresh post-bump checks pass all 208
+workspace Rust tests, strict Clippy/Rustfmt, and the production WASM/frontend
+build. Tagging, redistributable rebuilding, and post-build browser verification
+are in progress; use
+[status](status.md#version-0512) for the artifact checkpoint. Published 0.5.11
+artifacts remain historical. Preserve timestamped restart snapshots.
+
+The user's `docs/references/` remains untouched and is now locally excluded via
+`.git/info/exclude`, along with local `1AON.pdb` and generated tooling/screenshots,
+so these files cannot enter the release source snapshot. Do not remove those
+checkout-local exclusions or read/include private chats. Work stays in
+EigenVista; Molekel remains read-only reference.
+
+## Previous release: 0.5.11
 
 Issue [#24](https://github.com/uvar-apps/eigenvista/issues/24) adds real-time
 progress for surface generation and sampling-only previews. Release commit

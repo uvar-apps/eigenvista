@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version 0.5.11 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
+**Status:** version 0.5.12 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
 
 ## Start here
 
@@ -65,7 +65,7 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-Download the current [0.5.11 tester release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.11)
+Download the current [0.5.12 tester release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.12)
 for the ZIP, checksum, and build metadata.
 The ZIP is a development build for Apple Silicon Macs, not an Apple-notarized
 release. It includes source and notices under the [application license](LICENSE).

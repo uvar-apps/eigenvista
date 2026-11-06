@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.5.11 development preview, not the complete
+This describes the 0.5.12 development preview, not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 

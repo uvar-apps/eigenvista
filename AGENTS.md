@@ -39,6 +39,12 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Version 0.5.12 collects the five repair batches after 0.5.11: validated native
+  parameter export/shader controls, the pinned compiler, sampled preview quality,
+  scoped worker cancellation/resident inputs, exact radius-bucket bonds and
+  declared mmCIF links, BinaryCIF raw/gzip import, and current-frame PNG export.
+  Current release/artifact verification belongs in `docs/handoff.md` and
+  `docs/status.md`; keep dated 0.5.11 evidence and restart snapshots historical.
 - Version 0.5.11 adds live calculation progress (#24). Rust sampling observers
   report actual completed z slices; optional WASM callbacks feed throttled worker
   events. The UI shows per-phase counts/percentage, field/batch position, and

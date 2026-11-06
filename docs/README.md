@@ -5,7 +5,7 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
-Current source version: **0.5.11**, including live orbital/density calculation
+Current source version: **0.5.12**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections

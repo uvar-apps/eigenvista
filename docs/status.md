@@ -8,6 +8,29 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.12
+
+Release preparation: 6 November 2026, from merged main `e9c7675` (PR #29).
+All Rust workspace packages/lockfile entries, npm manifests/lockfile root, Tauri,
+and current user/agent documentation are updated to 0.5.12. External dependency
+versions and the icon/logo are unchanged. This release collects all five repair
+batches since 0.5.11, including the import/rendering/worker and validation fixes
+recorded below. Remaining open issues are #20 (crystal symmetry) and #22 (mmCIF
+export); release work does not claim those features or completion of v1.
+
+Fresh post-bump release checks pass all 208 workspace Rust tests including
+desktop, strict workspace/all-target Clippy, Rustfmt, and the production WASM/
+TypeScript/Vite build. Package and post-build browser verification are pending.
+The previous runtime checkpoint passed 254 Chromium/WebKit cases and 13 packaging
+checks; those results predate this bump and are separate from the release results
+to follow. The repository-local tester workflow rebuilds the
+Apple Silicon app, standalone converter, source bundle, notices, and examples
+inside a ZIP plus checksum/build metadata. User-owned `docs/references/` is now
+locally excluded from Git/source packaging without reading or changing its
+contents. Private chats, other local inputs, old packages, and dated snapshots
+are preserved. No native GUI/HiDPI, clean-Mac, or Linux/Windows qualification is
+implied by build/signature checks.
+
 ## BinaryCIF and viewer polish: 6 November 2026
 
 Fifth repair batch at source version 0.5.11 in
