@@ -111,9 +111,11 @@ release. It includes source and notices under the [application license](LICENSE)
   and a tested ORCA S/P/spherical-D export subset are supported with explicit
   normalization and loss reports. [Molden profile and converter](docs/molden-import.md).
 - mmCIF structure import (`.cif`, `.mcif`, `.pdbx`) through the same Open path as
-  legacy PDB, so entries the PDB no longer distributes in legacy format are
-  viewable. Coordinates, alternates, and perceived bonds only; cell and symmetry
-  are recorded but not expanded. [mmCIF profile](docs/structure-imports.md#mmcif-profile).
+  PDB and the shared converter. Selected coordinates retain declared covalent,
+  disulfide, and metal-coordination connections; coordinate perception fills
+  missing pairs. Deposited types, orders, references, and omissions remain in
+  provenance. Cell/symmetry are recorded without generating crystal mates.
+  [mmCIF profile](docs/structure-imports.md#mmcif-profile).
 
 ## Boundaries
 

@@ -374,3 +374,117 @@ fn force_batch_rejects_preexisting_unicode_aliases_before_writing() {
     );
     assert_eq!(fs::read_dir(dir.0.join("out")).unwrap().count(), 1);
 }
+
+#[test]
+fn mmcif_cli_retains_declared_coordination_and_source_records_through_native_roundtrip() {
+    let dir = Scratch::new();
+    let source = "data_COORDINATION\n#\nloop_\n\
+_atom_site.group_PDB\n_atom_site.id\n_atom_site.type_symbol\n\
+_atom_site.label_atom_id\n_atom_site.label_alt_id\n_atom_site.label_comp_id\n\
+_atom_site.label_asym_id\n_atom_site.label_entity_id\n_atom_site.label_seq_id\n\
+_atom_site.auth_atom_id\n_atom_site.auth_comp_id\n_atom_site.auth_asym_id\n\
+_atom_site.auth_seq_id\n_atom_site.Cartn_x\n_atom_site.Cartn_y\n\
+_atom_site.Cartn_z\n_atom_site.occupancy\n_atom_site.B_iso_or_equiv\n\
+_atom_site.pdbx_PDB_model_num\n\
+HETATM 7 Mg MG . LIG A 1 1 MG LIG X 5 0 0 0 1 0 1\n\
+HETATM 23 O O1 . LIG A 1 1 O1 LIG X 5 3.1 0 0 1 0 1\n#\nloop_\n\
+_struct_conn.id\n_struct_conn.conn_type_id\n\
+_struct_conn.ptnr1_label_asym_id\n_struct_conn.ptnr1_label_comp_id\n\
+_struct_conn.ptnr1_label_seq_id\n_struct_conn.ptnr1_label_atom_id\n\
+_struct_conn.ptnr1_symmetry\n_struct_conn.ptnr2_label_asym_id\n\
+_struct_conn.ptnr2_label_comp_id\n_struct_conn.ptnr2_label_seq_id\n\
+_struct_conn.ptnr2_label_atom_id\n_struct_conn.ptnr2_symmetry\n\
+_struct_conn.pdbx_value_order\n_struct_conn.pdbx_details\n\
+mg_o metalc A LIG 1 MG 1_555 A LIG 1 O1 1_555 sing 'curated Mg--O'\n#\n";
+    fs::write(dir.0.join("coordination.cif"), source).unwrap();
+    let checked = dir.run(&["coordination.cif", "--check", "--json"]);
+    assert!(
+        checked.status.success(),
+        "{}",
+        String::from_utf8_lossy(&checked.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&checked.stdout).unwrap();
+    assert_eq!(report[0]["status"], "validated");
+    assert_eq!(report[0]["report"]["format"], "cif");
+    assert_eq!(report[0]["atoms"], 2);
+    assert!(!dir.0.join("coordination.eigenvista").exists());
+
+    let converted = dir.run(&["coordination.cif", "--json"]);
+    assert!(
+        converted.status.success(),
+        "{}",
+        String::from_utf8_lossy(&converted.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&converted.stdout).unwrap();
+    assert_eq!(report[0]["status"], "converted");
+    assert_eq!(report[0]["report"]["requires_save"], true);
+    let encoded = fs::read(dir.0.join("coordination.eigenvista")).unwrap();
+    let document = eigenvista_format::decode(&encoded).unwrap();
+    assert_eq!(document.bonds, [[0, 1]]);
+    assert!(
+        eigenvista_core::bonds::perceive(&document.atoms, &[])
+            .unwrap()
+            .bonds
+            .is_empty()
+    );
+    let record = document
+        .provenance
+        .iter()
+        .find_map(|line| line.strip_prefix("mmCIF struct_conn: "))
+        .expect("declared connection provenance");
+    let record: serde_json::Value = serde_json::from_str(record).unwrap();
+    assert_eq!(record["status"], "retained");
+    assert_eq!(record["bond"], serde_json::json!([0, 1]));
+    assert_eq!(
+        record["selected_atom_site_ids"],
+        serde_json::json!(["7", "23"])
+    );
+    assert_eq!(record["source"]["id"], "mg_o");
+    assert_eq!(record["source"]["conn_type_id"], "metalc");
+    assert_eq!(record["source"]["pdbx_value_order"], "sing");
+    assert_eq!(record["source"]["pdbx_details"], "curated Mg--O");
+
+    let roundtrip = dir.run(&[
+        "coordination.eigenvista",
+        "--output",
+        "roundtrip.eigenvista",
+        "--json",
+    ]);
+    assert!(
+        roundtrip.status.success(),
+        "{}",
+        String::from_utf8_lossy(&roundtrip.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&roundtrip.stdout).unwrap();
+    assert_eq!(report[0]["report"]["format"], "eigenvista");
+    assert_eq!(report[0]["report"]["requires_save"], false);
+    assert_eq!(
+        eigenvista_format::decode(&fs::read(dir.0.join("roundtrip.eigenvista")).unwrap()).unwrap(),
+        document
+    );
+
+    fs::write(
+        dir.0.join("broken.cif"),
+        source.replace("mg_o metalc", "mg_o ?"),
+    )
+    .unwrap();
+    let failed = dir.run(&["broken.cif", "--json"]);
+    assert_eq!(failed.status.code(), Some(1));
+    let report: serde_json::Value = serde_json::from_slice(&failed.stdout).unwrap();
+    assert_eq!(report[0]["status"], "failed");
+    assert!(
+        report[0]["error"]
+            .as_str()
+            .unwrap()
+            .contains("conn_type_id")
+    );
+    assert!(!dir.0.join("broken.eigenvista").exists());
+    assert_eq!(
+        fs::read(dir.0.join("coordination.eigenvista")).unwrap(),
+        encoded
+    );
+    assert_eq!(
+        fs::read(dir.0.join("coordination.cif")).unwrap(),
+        source.as_bytes()
+    );
+}

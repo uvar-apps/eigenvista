@@ -149,10 +149,32 @@ vendor programs. The CLI is a separate headless frontend for scripts/batches.
 All supported imports compute display bonds from positions, including cube and
 native documents. XYZ/PDB convert angstrom positions to bohr. PDB uses `pdbtbx`
 plus bounded compatibility preflight and explicit
-connection handling. `kiddo` supplies an exact immutable k-d tree; covalent
-cutoffs and deterministic coordination filtering supplement explicit bonds.
+connection handling. `kiddo` supplies exact immutable k-d trees partitioned by
+0.5-angstrom covalent-radius buckets. Each query uses that bucket's observed
+maximum radius, then the unchanged pair cutoff and deterministic coordination
+filtering supplement explicit bonds. The partition tightens conservative queries
+around heterogeneous radii without lowering chemistry or work/allocation bounds.
 See [structure imports](structure-imports.md) for the scientific tradeoffs,
 selection policy, loss notices, and exhaustive-neighbor comparisons.
+
+The mmCIF tokenizer retains `_atom_site` source identity through first-model and
+occupancy/alternate selection. Non-polymer null label sequences fall back to
+author residue/insertion grouping. The
+[connection resolver](../crates/eigenvista-core/src/import/cif/connections.rs)
+matches supplied label/author/alternate/insertion references against those selected
+rows. `covale`, `disulf`, and `metalc` pairs seed explicit untyped edges before
+perception fills gaps; other types or three-partner declarations are recorded
+without forcing rods. Perception can independently add the same pair.
+
+One bounded JSON provenance record per declaration retains raw columns,
+type/order, selected source row IDs/atom indices, edge, and status/reason. This
+preserves import provenance through existing native encoding without a schema or
+typed-renderer change. Matching valid image codes, or both omitted/inapplicable
+images, map to selected-site pairs; unknown/different/mixed images are reported
+without symmetry expansion. The bounded lexer rejects unsupported layouts rather
+than silently dropping columns; it is not a general CIF dictionary validator.
+See the [design record](design/2026-11-06-bond-search-and-cif-connections.md) for
+limits, common-image reasoning, and declared/perceived precedence.
 
 Cube imports preserve the authoritative affine scalar grid, converting source
 z-fastest ordering into model x-fastest ordering. Single-field density cubes and
@@ -355,8 +377,9 @@ New scene geometry is staged before replacing the prior scene;
 recoverable construction errors keep that prior scene visible and report an
 error without unmounting the interface. Render and image-export exceptions are
 also reported, separate from the existing graphics-context-loss warning.
-Scene objects are rebuilt on document/grid/mode changes; atoms
-and bonds are individual meshes, not a qualified large-structure instancing path.
+Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
+instanced meshes with per-instance atom picking. Rendering at every maximum
+input size still requires separate platform acceptance.
 
 ## Persistence versus transient state
 

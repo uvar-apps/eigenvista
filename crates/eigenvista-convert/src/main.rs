@@ -16,7 +16,7 @@ Usage: eigenvista-convert [OPTIONS] INPUT...
 Read supported Molden, XYZ, PDB, mmCIF, cube, or native documents and write .eigenvista.
 Explicit .molekel destinations remain accepted for filename compatibility.
 Molden is detected by its [Molden Format] header, including .molden.input files.
-mmCIF is read from .cif, .mcif, and .pdbx files (_atom_site coordinates).
+mmCIF .cif/.mcif/.pdbx inputs retain coordinates and declared pair connections.
 
   -o, --output FILE     Destination for one input (default: INPUT.eigenvista)
       --output-dir DIR Destination directory, required for multiple inputs
