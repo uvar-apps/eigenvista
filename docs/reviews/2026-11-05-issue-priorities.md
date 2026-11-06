@@ -24,7 +24,8 @@ developed on `codex/worker-ownership-and-cache`; see its
 [design](../design/2026-11-06-worker-ownership-and-registration.md) and
 [verification](../status.md#worker-ownership-and-registration-6-november-2026).
 The third batch merged as `58d835b`, closing #6 and #5. The fourth batch implements
-#3 and #19 on `codex/bonds-and-cif-connections`; see the
+#3 and #19 in [PR #28](https://github.com/uvar-apps/eigenvista/pull/28), developed
+on `codex/bonds-and-cif-connections`; runtime/test changes are commit `1c0f638`. See the
 [design](../design/2026-11-06-bond-search-and-cif-connections.md) and
 [verification](../status.md#bond-search-and-mmcif-connections-6-november-2026).
 The table preserves the original ordering. Remaining P3 work follows #21, #7,

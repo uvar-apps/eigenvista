@@ -12,8 +12,10 @@ code. The icon and logo are unchanged.
 
 ## Issue priorities
 
-The bond/mmCIF batch implements #3 and #19 on `codex/bonds-and-cif-connections`
-from merged main `58d835b`. Exact 0.5-angstrom radius buckets reduce broad
+The bond/mmCIF batch implements #3 and #19 in
+[PR #28](https://github.com/uvar-apps/eigenvista/pull/28), developed on
+`codex/bonds-and-cif-connections` from merged main `58d835b`; runtime/test changes
+are commit `1c0f638`. Exact 0.5-angstrom radius buckets reduce broad
 neighbor visits while preserving pair acceptance, ordering, and limits. mmCIF
 selected source identities resolve declared covalent/disulfide/metal connections
 before perception fills gaps. Raw ID/type/order/columns and omissions persist in

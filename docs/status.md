@@ -10,9 +10,11 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Bond search and mmCIF connections: 6 November 2026
 
-Fourth repair batch at source version 0.5.11 on
-`codex/bonds-and-cif-connections`, based on merged main `58d835b`, addresses
-#3 and #19. The [design record](design/2026-11-06-bond-search-and-cif-connections.md)
+Fourth repair batch at source version 0.5.11 in
+[PR #28](https://github.com/uvar-apps/eigenvista/pull/28), developed on
+`codex/bonds-and-cif-connections` from merged main `58d835b`; runtime/test changes
+are commit `1c0f638`. Fixes #3 and #19. The
+[design record](design/2026-11-06-bond-search-and-cif-connections.md)
 defines conservative indexing, declared/perceived precedence, source identity,
 link-type/image policy, lexical scope, and metadata bounds.
 
