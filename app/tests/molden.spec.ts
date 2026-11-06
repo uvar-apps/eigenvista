@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -59,34 +60,8 @@ async function delayMoldenRead(page: Page) {
 }
 
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate((canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const values = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      values,
-    );
-    let colored = 0;
-    let checksum = 0;
-    for (let i = 0; i < values.length; i += 4) {
-      if (
-        Math.max(values[i], values[i + 1], values[i + 2]) -
-          Math.min(values[i], values[i + 1], values[i + 2]) >
-        30
-      )
-        colored++;
-      checksum =
-        (checksum + values[i] * ((i % 97) + 1) + values[i + 1]) % 2147483647;
-    }
-    return { colored, checksum };
-  });
+  const { colored, checksum } = await scenePixels(page);
+  return { colored, checksum };
 }
 
 async function decode(

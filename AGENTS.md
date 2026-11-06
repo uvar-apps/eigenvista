@@ -125,6 +125,19 @@ Standard verification order for runtime changes (details and coverage map in
 
 ## Traps
 
+- BinaryCIF transport belongs in `eigenvista-import`, before UTF-8 dispatch.
+  Keep MessagePack/decompression/column/output bounds before allocation, the
+  original input-byte digest, and shared core mmCIF scientific interpretation.
+  String indices below the `-1` sentinel are errors; IntegerPacking produces
+  signed Int32 values even when its packed words are unsigned. Preserve source
+  float widths and Unicode dictionary boundaries. See the
+  [BinaryCIF/capture decisions](docs/design/2026-11-06-binarycif-and-capture.md)
+  and independently encoded [fixtures](fixtures/bcif/README.md).
+- The viewport deliberately uses `preserveDrawingBuffer: false`. PNG export
+  renders and reads synchronously in the same task. Asynchronous backbuffer
+  reads are not reliable evidence: existing browser pixel tests use the
+  compositor via `app/tests/scenePixels.ts`, with an independent PNG oracle.
+  Keep idle/camera/resize/signed-field export and visible-error recovery checks.
 - Bond queries use exact radius-bucket trees with each bucket's observed maximum;
   preserve pair cutoffs, deterministic ordering, explicit precedence, and work/
   allocation guards. mmCIF declarations resolve only against selected source

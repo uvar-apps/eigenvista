@@ -157,7 +157,7 @@ export function Viewport({
     try {
       renderer = new THREE.WebGLRenderer({
         antialias: true,
-        preserveDrawingBuffer: true,
+        preserveDrawingBuffer: false,
       });
     } catch {
       setError(
@@ -501,11 +501,21 @@ export function Viewport({
     const e = engine.current;
     if (!e) return;
     try {
+      if (e.renderer.getContext().isContextLost())
+        throw new Error("Graphics context is lost");
+      // Read the freshly rendered frame in the same task, before the browser
+      // can discard this non-preserved drawing buffer. Export needs no
+      // persistent render target and does not change the camera or document.
       e.renderer.render(e.scene, e.camera);
       const a = document.createElement("a");
       a.download = "eigenvista-view.png";
       a.href = e.renderer.domElement.toDataURL("image/png");
+      if (!a.href.startsWith("data:image/png;"))
+        throw new Error("The scene image could not be encoded as PNG");
       a.click();
+      setError((current) =>
+        current.startsWith("Unable to export the scene image:") ? "" : current,
+      );
     } catch (error) {
       setError(`Unable to export the scene image: ${String(error)}.`);
     }

@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -53,30 +54,8 @@ async function save(page: Page, filename: string): Promise<EigenVistaDocument> {
 }
 
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate((canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const values = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      values,
-    );
-    let positive = 0,
-      checksum = 0;
-    for (let i = 0; i < values.length; i += 4) {
-      if (values[i + 1] > values[i] + 20 && values[i + 1] > values[i + 2] + 8)
-        positive++;
-      checksum =
-        (checksum + values[i] * ((i % 97) + 1) + values[i + 1]) % 2147483647;
-    }
-    return { positive, checksum };
-  });
+  const { positive, checksum } = await scenePixels(page);
+  return { positive, checksum };
 }
 
 async function rotate(page: Page) {

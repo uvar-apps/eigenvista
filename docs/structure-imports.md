@@ -1,6 +1,6 @@
 # Structure imports and automatic bonds
 
-All supported formats, including XYZ, PDB, mmCIF, Molden, Gaussian cube, and native
+All supported formats, including XYZ, PDB, mmCIF/BinaryCIF, Molden, Gaussian cube, and native
 `.eigenvista` and legacy `.molekel` preview files, automatically compute display
 connectivity through the shared Rust
 import path. This applies to the native application, browser, and converter CLI.
@@ -129,8 +129,64 @@ size is checked before allocating JSON strings, including repeated selected
 atom-site IDs. Malformed or excessive input fails rather than being truncated;
 the native manifest limit remains 8 MiB.
 
-Out of scope: BinaryCIF (`.bcif`), full dictionary validation against
-`mmcif_pdbx.dic`, symmetry expansion, and writing/exporting mmCIF.
+Out of scope: full dictionary validation against `mmcif_pdbx.dic`, symmetry
+expansion, and writing/exporting mmCIF. BinaryCIF input is described below.
+
+## BinaryCIF profile
+
+The shared import library accepts raw `.bcif` and gzip-wrapped `.bcif.gz`
+documents. MessagePack-map and gzip signatures are checked before text decoding,
+so either form can be detected under another filename. The report format is
+`bcif`. Gzip is accepted only as a BinaryCIF wrapper; it does not add compressed
+PDB or compressed text-mmCIF support.
+
+The decoder supports BinaryCIF **0.3.x with exactly one data block**. Its checked
+inverse pipelines implement `ByteArray`, `Delta`, `RunLength`, `IntegerPacking`,
+`FixedPoint`, `IntervalQuantization`, and `StringArray`, including presence masks
+`0` (present), `1` (inapplicable), and `2` (unknown). String dictionaries borrow
+the input text and translate only requested Unicode boundaries to UTF-8 byte
+offsets; consistent UTF-16 and code-point offset profiles are handled without
+splitting surrogate pairs. Producer quantization cannot restore digits absent
+from the stored data.
+
+Only `atom_site`, `struct_conn`, `cell`, `symmetry`, and `space_group` columns
+are expanded. Other categories are not column-decoded or retained as full source
+metadata; their strings and byte payloads remain borrowed within the bounded
+MessagePack tree. Interpreted values are written to
+bounded canonical CIF text and passed to the existing core reader, preserving
+one implementation of first-model, occupancy/alternate, unknown-element,
+declared-connection, and bond-perception decisions. The same limitations on atom
+attributes and crystal images apply. Native provenance keeps those decisions,
+the original BinaryCIF version/block name, and the original input-byte SHA-256,
+including compressed bytes for gzip inputs; the source file is not embedded.
+
+The outer import limit remains 128 MiB. BinaryCIF additionally bounds payload
+bytes after gzip expansion and canonical CIF text separately at **64 MiB**.
+MessagePack containers are checked before allocation: **1,000,000 nodes** and
+**64 nesting levels**. Interpreted columns share a cumulative **16 × 1024²
+decoded-value** budget, including intermediate transforms, masks, dictionary
+indices, and offset boundaries; pipelines allow at most **16 transforms** and
+**8 nested string-encoding levels**. Each interpreted category has 1–256 columns;
+`atom_site` allows **250,000 total rows before model/alternate selection**,
+`struct_conn` allows 100,000 rows, and interpreted cell/symmetry categories allow
+one row. The shared 100,000 selected-atom and connection-provenance limits still
+apply. Malformed lengths, invalid masks/indices, arithmetic overflow, unsupported
+versions/encodings, and excessive expansion report errors rather than truncate.
+These bounds are not a peak-memory guarantee.
+
+[Independent BinaryCIF fixtures](../fixtures/bcif/README.md) provide the deposited
+1CRN text/binary twins and a separately encoded selection/connection diagnostic.
+The real structure has 327 atoms and three declared disulfides; the policy twin
+tests occupancy, alternates, null masks, unknown elements, later models, Unicode
+names, retained long links, and unresolved discarded references. Molstar was an
+offline fixture tool, not a runtime or normal-test dependency.
+
+From the repository root, with the temporary-directory variables from the
+[development guide](development.md), inspect a real input without writing output:
+
+```sh
+cargo run --locked -p eigenvista-convert -- fixtures/bcif/1crn.bcif --check --json
+```
 
 ## Verification
 
@@ -143,11 +199,18 @@ that formerly exceeded the neighbor budget. The hydrogen lattice is deliberately
 coordinate-valid synthetic input, not a physical material reference.
 [Declared-connection regressions](../crates/eigenvista-import/tests/cif_connections.rs)
 cover reference identity, alternate/non-polymer selection, duplicates/types/images,
-bounded malformed layouts, and native persistence; the resolver also has seven
+bounded malformed layouts, and native persistence; the resolver also has eight
 module tests. [CLI regressions](../crates/eigenvista-convert/tests/cli.rs) exercise
 real conversion/check/JSON/native paths, and
 [browser workflows](../app/tests/cif-connections.spec.ts) exercise Open, provenance,
 conversion, save/reopen, retained-scene errors, and desktop/mobile rendering.
+
+[BinaryCIF contracts](../crates/eigenvista-import/tests/bcif_import.rs),
+[bounded codec/MessagePack regressions](../crates/eigenvista-import/src/bcif/tests.rs),
+the same CLI suite, and [BinaryCIF browser workflows](../app/tests/bcif.spec.ts)
+cover independent twin parity, source-byte hashes, raw/gzip detection, bounded
+malformed inputs, native persistence, conversion, file filters, and visible
+desktop/mobile geometry. See [status](status.md) for dated results and gaps.
 
 [Cube regressions](../crates/eigenvista-core/tests/cube_import.rs) cover both density
 and single-orbital imports with automatic bonds. Shared-import and CLI tests

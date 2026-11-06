@@ -1121,7 +1121,7 @@ export default function App() {
         <span role="status">{busy || status || "Ready"}</span>
         <span className="runtime">
           <Box size={13} />
-          Rust / {native ? "macOS desktop" : "WebAssembly"}
+          Rust / {native ? "Native (Tauri)" : "WebAssembly"}
         </span>
       </footer>
     </div>

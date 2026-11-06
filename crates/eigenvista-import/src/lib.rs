@@ -1,5 +1,6 @@
 //! Bounded, shared file detection and conversion for the viewer and command line.
 
+mod bcif;
 mod molden;
 #[cfg(test)]
 mod tests;
@@ -72,6 +73,12 @@ pub fn import_bytes(bytes: &[u8], name: &str) -> Result<ImportResult, String> {
     if bytes.starts_with(b"PK\x03\x04") {
         return native(bytes);
     }
+    if bcif::candidate(bytes) || suffix == "bcif" || name.to_ascii_lowercase().ends_with(".bcif.gz")
+    {
+        let document = bcif::parse(bytes, name)?;
+        let warnings = cif_warnings(&document);
+        return imported(document, "bcif", warnings, bytes, name);
+    }
     let text = match std::str::from_utf8(bytes) {
         Ok(text) => text.trim_start_matches('\u{feff}'),
         Err(_) if matches!(suffix.as_str(), "eigenvista" | "molekel") => return native(bytes),
@@ -82,7 +89,7 @@ pub fn import_bytes(bytes: &[u8], name: &str) -> Result<ImportResult, String> {
         .find(|line| !line.trim().is_empty())
         .unwrap_or("")
         .trim();
-    let (mut document, format, warnings) = if first.eq_ignore_ascii_case("[molden format]")
+    let (document, format, warnings) = if first.eq_ignore_ascii_case("[molden format]")
         || matches!(suffix.as_str(), "molden" | "mold" | "molden_input")
     {
         let (document, warnings) = molden::parse(text, name)?;
@@ -98,25 +105,39 @@ pub fn import_bytes(bytes: &[u8], name: &str) -> Result<ImportResult, String> {
             }
             "cif" | "mcif" | "pdbx" => {
                 let document = import::cif(text, name)?;
-                let warnings = document
-                    .provenance
-                    .iter()
-                    .filter(|entry| {
-                        entry.starts_with("Structure-only")
-                            || entry.starts_with("mmCIF parser:")
-                            || entry.starts_with("Skipped ")
-                    })
-                    .cloned()
-                    .collect();
+                let warnings = cif_warnings(&document);
                 (document, "cif", warnings)
             }
             "cube" | "cub" => {
                 let document = import::cube(text, name)?;
                 (document, "cube", vec!["Cube scalar meaning and units are unspecified; only the sampled field is available.".into()])
             }
-            _ => return Err("Unsupported file. Open .eigenvista (or legacy .molekel), Molden, .xyz, .pdb/.ent, .cif (mmCIF), or .cube/.cub; Molden content is detected by [Molden Format].".into()),
+            _ => return Err("Unsupported file. Open .eigenvista (or legacy .molekel), Molden, .xyz, .pdb/.ent, .cif (mmCIF), .bcif/.bcif.gz (BinaryCIF), or .cube/.cub; Molden content is detected by [Molden Format].".into()),
         }
     };
+    imported(document, format, warnings, bytes, name)
+}
+
+fn cif_warnings(document: &Document) -> Vec<String> {
+    document
+        .provenance
+        .iter()
+        .filter(|entry| {
+            entry.starts_with("Structure-only")
+                || entry.starts_with("mmCIF parser:")
+                || entry.starts_with("Skipped ")
+        })
+        .cloned()
+        .collect()
+}
+
+fn imported(
+    mut document: Document,
+    format: &str,
+    warnings: Vec<String>,
+    bytes: &[u8],
+    name: &str,
+) -> Result<ImportResult, String> {
     document.provenance.push(format!(
         "Import source: {name}; SHA-256 {:x}; eigenvista-import {}.",
         Sha256::digest(bytes),

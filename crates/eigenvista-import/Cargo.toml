@@ -9,6 +9,7 @@ eigenvista-core = { path = "../eigenvista-core" }
 eigenvista-format = { path = "../eigenvista-format" }
 serde.workspace = true
 sha2.workspace = true
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 
 [dev-dependencies]
 serde_json.workspace = true

@@ -3,7 +3,8 @@
 ## What this program does
 
 EigenVista displays molecular structures and quantum-chemistry fields in an
-interactive 3D scene. You can open Molden wavefunctions, PDB/mmCIF/XYZ structures, and
+interactive 3D scene. You can open Molden wavefunctions,
+PDB/mmCIF/BinaryCIF/XYZ structures, and
 Gaussian cube scalar fields, inspect automatically computed bonds, display
 supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
@@ -74,6 +75,9 @@ are not implemented.
 
 On a narrow browser window these areas rearrange; scrolling may be needed.
 Toolbar icons show their names on hover.
+The runtime badge reads **Native (Tauri)** in the desktop shell and
+**WebAssembly** in the browser. It identifies the runtime, not verified support
+for additional operating systems.
 
 ## Moving and inspecting the scene
 
@@ -87,7 +91,10 @@ Toolbar icons show their names on hover.
 - **Fit scene** and **Reset view** currently do the same thing: fit all displayed
   objects and restore the default viewing direction.
 - **Export image** requests a PNG download of the current viewport, named
-  `eigenvista-view.png`. It uses the browser/WebView download mechanism, not the
+  `eigenvista-view.png`. It redraws the current camera view before capturing,
+  including after idle periods, zooming, or resizing. A failed export reports an
+  error without replacing the document; you can retry an encoding failure.
+  It uses the browser/WebView download mechanism, not the
   native document Save dialog; download handling varies by host. Browser export
   is the reference path, and native image-download handling still needs qualification.
 
@@ -112,6 +119,7 @@ choices do not affect it.
 | `.xyz` | One conventional atom-count/comment/coordinate frame, in angstroms | Geometry and automatically inferred bonds; multiple frames and extended XYZ are rejected |
 | `.pdb` | Selected ATOM/HETATM geometry and explicit plus inferred bonds | First model/structure and one alternate conformer per residue |
 | `.cif`, `.mcif`, `.pdbx` (mmCIF) | Selected `_atom_site` geometry, declared pair connections, and coordinate-based gap filling | First model/alternate selection; declared covalent/disulfide/metal links are untyped display connections, with source details in provenance; no symmetry-mate expansion |
+| `.bcif`, `.bcif.gz` (BinaryCIF) | The same selected geometry, declared connections, and provenance policy as text mmCIF | Bounded BinaryCIF 0.3.x, one data block; raw and gzip-wrapped content are detected independently of filename; no quantum data or symmetry expansion |
 | `.cube`, `.cub` | One scalar field, bohr geometry, and computed bonds; includes single-orbital cubes | Multi-field and alternative-unit cube profiles are not supported |
 
 PDB selection keeps common atoms and chooses the alternate with the highest
@@ -121,8 +129,10 @@ use author residue/insertion identity to keep separate waters/ligands distinct.
 The atom model does not retain the full hierarchy, occupancies, B-factors,
 formal charges, or secondary-structure information. mmCIF connection records
 retain their deposited references, types, and orders in Provenance; cell/symmetry
-are reported without crystal-image expansion. Compressed PDB and BinaryCIF
-(`.bcif`) are not supported.
+are reported without crystal-image expansion. BinaryCIF uses these same rules.
+Gzip support is limited to BinaryCIF; compressed PDB and gzip-wrapped text mmCIF
+are not supported. The `.gz` file-picker option does not enable other compressed
+formats.
 
 An element symbol mmCIF does not recognise is skipped and reported rather than
 guessed, so a mistyped symbol cannot silently change the structure.
@@ -136,8 +146,12 @@ three-partner declarations are recorded without forcing rods; independent
 coordinate perception can still find the same pair. Read Provenance for each
 declaration's source columns, selected endpoints, and retained/duplicate/omitted
 status. Unknown or different symmetry images are reported without guessing mates.
-The [mmCIF profile](structure-imports.md#mmcif-profile) details supported layouts
-and import limits; this is a bounded reader rather than full dictionary validation.
+The [mmCIF profile](structure-imports.md#mmcif-profile) and
+[BinaryCIF profile](structure-imports.md#binarycif-profile) detail supported
+layouts and import limits; these are bounded readers rather than full dictionary
+validation. Use **Open** or **Convert files** for either format. The import report
+identifies BinaryCIF as `bcif`; source hashes refer to the actual input bytes,
+including the gzip wrapper when present.
 All supported imports compute bonds automatically, including cube and Molden.
 Opening an older `.molekel` or `.eigenvista` preview file also fills in missing
 display bonds while
@@ -146,8 +160,8 @@ bonds are added, a report appears and the document is marked unsaved; Save
 explicitly to retain them. Opening does not overwrite the source file.
 
 OBJ, atom-color text files, direct ORCA output/GBW, and Gaussian logs are **not
-implemented**. A PDB or XYZ
-file correctly shows **No quantum fields**; coordinates alone cannot supply
+implemented**. PDB, XYZ, and mmCIF/BinaryCIF files correctly show
+**No quantum fields**; coordinates alone cannot supply
 orbitals or a density matrix.
 
 ## Importing and converting Molden
@@ -506,12 +520,12 @@ Keep original data and backups because the native preview schema is not frozen.
 
 | Symptom | What to check |
 | --- | --- |
-| Generate surfaces is disabled | PDB/XYZ contain no quantum fields; open Molden, a native field document, cube, or example |
+| Generate surfaces is disabled | PDB/mmCIF/BinaryCIF/XYZ contain no quantum fields; open Molden, a native field document, cube, or example |
 | Generate selected is disabled | Check between 1 and 32 orbitals and enter a finite positive isovalue |
 | Raycast/volume choices are disabled | Select a document with quantum fields; controls are also disabled while another operation is running. Orbital/density previews do not require meshes |
 | Cube opens but no field is visible | Check the isovalue and scalar range, Fit scene, and any preview error; an all-zero grid has no nonzero surface |
 | Structure seems missing | Use Fit scene; try Ball and stick; check atom counts and error messages |
-| Unexpected PDB atom/bond count | Read Provenance; first-model/alternate/occupancy selection and heuristic bonds affect counts |
+| Unexpected structure atom/bond count | Read Provenance; first-model/alternate/occupancy selection, declared connections, and heuristic bonds affect counts |
 | Calculation takes too long | Check the progress panel's phase, counts, and elapsed time; meshing updates only between signed passes. Cancel preserves prior surfaces, then retry at a lower resolution or with fewer orbitals |
 | Mesh allocation or file-size error | Lower grid resolution or generate fewer orbitals; numerical, geometry, and persistence bounds remain |
 | File rejected | Check format/profile and exact message; do not strip validation metadata or rename unsupported data |
@@ -519,7 +533,8 @@ Keep original data and backups because the native preview schema is not frozen.
 | Graphics context lost | Save if possible, then restart/reload; unsaved data may be lost |
 
 Current guards include a 128 MiB file/inflated-array budget, a 32 MiB PDB text
-budget, 100,000 atoms, 600,000 bonds, 256 basis functions, 64 primitives per
+budget, separate 64 MiB BinaryCIF payload and expanded-text limits,
+100,000 selected atoms, 600,000 bonds, 256 basis functions, 64 primitives per
 basis function, 128 cubed total imported/native grid samples, 256 cubed transient
 samples, a two-million-vertex mesh-output bound, and 128 saved surfaces.
 Meshing counts the actual cell cases before extraction rather than rejecting

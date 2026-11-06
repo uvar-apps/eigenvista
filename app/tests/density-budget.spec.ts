@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -195,31 +196,8 @@ test("a real high-resolution density worker leaves the scene responsive and can 
 });
 
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate((canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const values = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      values,
-    );
-    let positive = 0,
-      checksum = 0;
-    for (let i = 0; i < values.length; i += 4) {
-      const r = values[i],
-        g = values[i + 1],
-        b = values[i + 2];
-      if (g > r + 20 && g > b + 8) positive++;
-      checksum = (checksum + r * ((i % 97) + 1) + g) % 2147483647;
-    }
-    return { positive, checksum };
-  });
+  const { positive, checksum } = await scenePixels(page);
+  return { positive, checksum };
 }
 
 async function rendered(page: Page) {

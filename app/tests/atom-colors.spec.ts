@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -20,28 +21,7 @@ async function ready(page: Page) {
  * atom colours, so the frame contents must change; a reset must restore them.
  */
 async function frameChecksum(page: Page): Promise<number> {
-  return page.locator("canvas").evaluate(async (canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const buffer = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    await new Promise((r) => requestAnimationFrame(r));
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      buffer,
-    );
-    let sum = 0;
-    for (let i = 0; i < buffer.length; i += 4)
-      sum =
-        (sum + buffer[i] * 3 + buffer[i + 1] * 5 + buffer[i + 2] * 7) %
-        2147483647;
-    return sum;
-  });
+  return (await scenePixels(page)).rgbChecksum;
 }
 
 /**

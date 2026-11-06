@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
@@ -14,45 +15,8 @@ async function ready(page: Page) {
 }
 
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate(async (canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const data = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    const read = () => {
-      gl.readPixels(
-        0,
-        0,
-        gl.drawingBufferWidth,
-        gl.drawingBufferHeight,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        data,
-      );
-      let colorful = 0,
-        checksum = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        if (
-          Math.max(data[i], data[i + 1], data[i + 2]) -
-            Math.min(data[i], data[i + 1], data[i + 2]) >
-          30
-        )
-          colorful++;
-        checksum =
-          (checksum + data[i] * ((i % 97) + 1) + data[i + 1]) % 2147483647;
-      }
-      return { colorful, checksum };
-    };
-    // The scene draws on an animation loop, so a single read can land before the
-    // first frame reaches the buffer. Poll until a frame is present; a genuinely
-    // blank canvas still reports 0 and fails the caller's threshold.
-    let last = read();
-    for (let attempt = 0; attempt < 60 && last.colorful === 0; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      last = read();
-    }
-    return last;
-  });
+  const { colorful, checksum } = await scenePixels(page);
+  return { colorful, checksum };
 }
 
 async function loadShaderFiles(

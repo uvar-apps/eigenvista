@@ -15,6 +15,7 @@ Direct dependency versions are resolved in the committed lockfiles `Cargo.lock` 
 | serde / serde_json | Structured model serialization | MIT OR Apache-2.0 |
 | sha2 | Scientific and binary-array hashes | MIT OR Apache-2.0 |
 | zip | Portable native document container | MIT |
+| flate2 (Rust backend) | Bounded gzip-wrapped BinaryCIF input | MIT OR Apache-2.0 |
 | wasm-bindgen 0.2.108 | Shared Rust browser bindings | MIT OR Apache-2.0 |
 | Tauri 2 and its dialog/fs plugins | Desktop shell and local file selection | MIT OR Apache-2.0 |
 | React / React DOM | Interface | MIT |
@@ -47,3 +48,19 @@ and attribution in [fixtures/molden/third-party](../fixtures/molden/third-party/
 They are source/test data, not linked runtime code or the packaged water example.
 Tester archives retain these notices separately under `Third-party-notices/Molden-test-data`
 and in the source snapshot. This does not change the application's license.
+
+The BinaryCIF transport is new Rust in `eigenvista-import`: a bounded borrowing
+MessagePack reader and checked column transforms, sharing the existing mmCIF
+scientific importer. It adds no runtime dependency on Molstar, `python-mmcif`,
+or another CIF/MessagePack library. `flate2`, already present transitively in
+the locked dependency graph, is now a direct import-crate dependency with
+default features disabled and `rust_backend` enabled; no scientific C library
+or external decompression program is introduced.
+
+[BinaryCIF fixtures](../fixtures/bcif/README.md) include original RCSB PDB 1CRN
+text/binary data under the wwPDB CC0 policy, plus original GPL-2.0-or-later
+selection/connection policy data. Independent fixture checks and policy encoding
+used MIT-licensed Molstar 5.13.1 only offline under repository-local `tmp/`.
+Normal builds/tests use the frozen bytes and checksums without installing or
+running that encoder. Fixture notices and original deposited metadata are
+preserved; the application license is unchanged.
