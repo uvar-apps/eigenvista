@@ -13,10 +13,11 @@ const HELP: &str = "EigenVista file converter
 
 Usage: eigenvista-convert [OPTIONS] INPUT...
 
-Read supported Molden, XYZ, PDB, mmCIF, cube, or native documents and write .eigenvista.
+Read supported Molden, XYZ, PDB, mmCIF/BinaryCIF, cube, or native documents and write .eigenvista.
 Explicit .molekel destinations remain accepted for filename compatibility.
 Molden is detected by its [Molden Format] header, including .molden.input files.
 mmCIF .cif/.mcif/.pdbx inputs retain coordinates and declared pair connections.
+BinaryCIF .bcif and gzip-wrapped .bcif.gz inputs use the same mmCIF policies.
 
   -o, --output FILE     Destination for one input (default: INPUT.eigenvista)
       --output-dir DIR Destination directory, required for multiple inputs

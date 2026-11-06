@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -39,33 +40,8 @@ async function openCube(page: Page) {
 }
 
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate((canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const values = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    gl.readPixels(
-      0,
-      0,
-      gl.drawingBufferWidth,
-      gl.drawingBufferHeight,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      values,
-    );
-    let positive = 0,
-      negative = 0,
-      checksum = 0;
-    for (let i = 0; i < values.length; i += 4) {
-      const r = values[i],
-        g = values[i + 1],
-        b = values[i + 2];
-      if (g > r + 20 && g > b + 8) positive++;
-      if (r > g + 20 && b > g + 8) negative++;
-      checksum = (checksum + r * ((i % 97) + 1) + g) % 2147483647;
-    }
-    return { positive, negative, checksum };
-  });
+  const { positive, negative, checksum } = await scenePixels(page);
+  return { positive, negative, checksum };
 }
 
 async function signedPixels(page: Page, minimum = 100) {

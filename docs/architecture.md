@@ -48,7 +48,7 @@ by native saving. There is no calculation server, remote service, or database.
 | [Core model](../crates/eigenvista-core/src/model.rs) | `Document`, validation, explicit scientific units, affine grid geometry, resource limits |
 | [Computation](../crates/eigenvista-core/src/compute.rs) | AO/field values and gradients, sampling/resampling, source hashes, classic marching cubes |
 | [Imports](../crates/eigenvista-core/src/import.rs), [PDB importer](../crates/eigenvista-core/src/import/pdb.rs) and [mmCIF importer](../crates/eigenvista-core/src/import/cif.rs) | Supported text profiles and recorded conversion losses |
-| [Import library](../crates/eigenvista-import/src/lib.rs) | Shared byte detection/dispatch, Molden conventions, import reports, source-byte digest |
+| [Import library](../crates/eigenvista-import/src/lib.rs) and [BinaryCIF transport](../crates/eigenvista-import/src/bcif/mod.rs) | Shared byte detection/dispatch, bounded binary decoding, Molden conventions, import reports, source-byte digest |
 | [Converter CLI](../crates/eigenvista-convert/src/main.rs) | Bounded file reads, batch/JSON/check mode, destination preflight and no-clobber saves |
 | [Connectivity](../crates/eigenvista-core/src/bonds.rs) | Exact k-d-tree neighbors, explicit-plus-inferred display bonds |
 | [Native format](../crates/eigenvista-format/src/lib.rs) and [filesystem adapter](../crates/eigenvista-format/src/native.rs) | Portable container, checksums/validation, atomic native writes |
@@ -103,9 +103,11 @@ missing wavefunctions, or infer a density matrix from a PDB file.
 ## Import and open flow
 
 The file adapter obtains bytes. The shared `eigenvista-import::import_bytes`
-returns a validated document and structured format/warning/`requires_save` report. Native ZIPs
-go through bounded decoding; the Molden header takes precedence over a text
-filename. Other supported extensions use existing Rust importers. Successful loading
+returns a validated document and structured format/warning/`requires_save` report.
+Native ZIPs go through bounded decoding. BinaryCIF map/gzip signatures are handled
+before UTF-8 text decoding, independently of filename; gzip is restricted to that
+transport. The Molden header takes precedence over a text filename. Other
+supported extensions use existing Rust importers. Successful loading
 replaces the document and resets the camera/render mode. If the selected field
 is an authoritative grid, Open prepares its bounded display sample immediately;
 without saved meshes the initial mode is volume. A sampling failure still opens
@@ -175,6 +177,19 @@ without symmetry expansion. The bounded lexer rejects unsupported layouts rather
 than silently dropping columns; it is not a general CIF dictionary validator.
 See the [design record](design/2026-11-06-bond-search-and-cif-connections.md) for
 limits, common-image reasoning, and declared/perceived precedence.
+
+BinaryCIF transport lives in the import library, separately from scientific
+selection. Its borrowing MessagePack tree and checked inverse column pipelines
+expand only `atom_site`, `struct_conn`, and supported cell/symmetry categories
+into bounded canonical CIF text. That text enters the same core tokenizer and
+connection resolver described above. Unused category columns are not expanded,
+and no Molstar or external MessagePack/CIF runtime is required. `flate2` uses
+its pure Rust backend for bounded gzip expansion. Source hashes always identify
+the received raw/compressed bytes, not the canonical intermediate text.
+The single-block 0.3.x profile has separate 64 MiB payload/text caps plus node,
+depth, decoded-value, column, and row budgets; see the exact
+[BinaryCIF limits](structure-imports.md#binarycif-profile) and
+[independent twins](../fixtures/bcif/README.md).
 
 Cube imports preserve the authoritative affine scalar grid, converting source
 z-fastest ordering into model x-fastest ordering. Single-field density cubes and
@@ -377,9 +392,20 @@ New scene geometry is staged before replacing the prior scene;
 recoverable construction errors keep that prior scene visible and report an
 error without unmounting the interface. Render and image-export exceptions are
 also reported, separate from the existing graphics-context-loss warning.
+The renderer is created with `preserveDrawingBuffer: false`. PNG export renders
+the current scene/camera and reads `toDataURL("image/png")` synchronously in the
+same task, before presentation can discard that buffer. It needs no permanent
+offscreen target and changes neither camera nor document. Lost contexts and
+invalid/failed encoding report errors; a successful retry clears only an earlier
+export error. No GPU-memory reduction has been measured or promised.
 Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
 instanced meshes with per-instance atom picking. Rendering at every maximum
 input size still requires separate platform acceptance.
+
+The footer uses `Native (Tauri)` for the desktop shell and `WebAssembly` for the
+browser. This neutral label describes the runtime rather than guessing the OS;
+scientific work still uses WASM in both shells. It adds no platform plugin or
+Linux/Windows qualification.
 
 ## Persistence versus transient state
 

@@ -57,6 +57,8 @@ fn help_version_and_invalid_options_are_explicit() {
     assert!(help.contains("--output-dir"));
     assert!(help.contains("EigenVista file converter"));
     assert!(help.contains("default: INPUT.eigenvista"));
+    assert!(help.contains("BinaryCIF .bcif"));
+    assert!(help.contains("gzip-wrapped .bcif.gz"));
     let version = dir.run(&["--version"]);
     assert!(version.status.success());
     assert_eq!(
@@ -487,4 +489,91 @@ mg_o metalc A LIG 1 MG 1_555 A LIG 1 O1 1_555 sing 'curated Mg--O'\n#\n";
         fs::read(dir.0.join("coordination.cif")).unwrap(),
         source.as_bytes()
     );
+}
+
+#[test]
+fn binarycif_cli_check_conversion_and_native_roundtrip_preserve_real_structure() {
+    let dir = Scratch::new();
+    let source = include_bytes!("../../../fixtures/bcif/1crn.bcif");
+    fs::write(dir.0.join("crambin.bcif"), source).unwrap();
+    let expected = eigenvista_import::import_bytes(source, "crambin.bcif")
+        .unwrap()
+        .document;
+    let checked = dir.run(&["crambin.bcif", "--check", "--json"]);
+    assert!(
+        checked.status.success(),
+        "{}",
+        String::from_utf8_lossy(&checked.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&checked.stdout).unwrap();
+    assert_eq!(report[0]["status"], "validated");
+    assert_eq!(report[0]["report"]["format"], "bcif");
+    assert_eq!(report[0]["atoms"], 327);
+    assert_eq!(report[0]["orbitals"], 0);
+    assert_eq!(report[0]["densities"], 0);
+    assert!(!dir.0.join("crambin.eigenvista").exists());
+
+    let converted = dir.run(&["crambin.bcif", "--json"]);
+    assert!(
+        converted.status.success(),
+        "{}",
+        String::from_utf8_lossy(&converted.stderr)
+    );
+    let report: serde_json::Value = serde_json::from_slice(&converted.stdout).unwrap();
+    assert_eq!(report[0]["status"], "converted");
+    assert_eq!(report[0]["report"]["requires_save"], true);
+    let document =
+        eigenvista_format::decode(&fs::read(dir.0.join("crambin.eigenvista")).unwrap()).unwrap();
+    assert_eq!(document, expected);
+    for pair in [[19, 281], [25, 228], [115, 187]] {
+        assert!(document.bonds.contains(&pair));
+    }
+    assert_eq!(
+        document
+            .provenance
+            .iter()
+            .filter(|line| line.starts_with("mmCIF struct_conn: "))
+            .count(),
+        3
+    );
+
+    let reopened = dir.run(&[
+        "crambin.eigenvista",
+        "--output",
+        "roundtrip.eigenvista",
+        "--json",
+    ]);
+    assert!(reopened.status.success());
+    let report: serde_json::Value = serde_json::from_slice(&reopened.stdout).unwrap();
+    assert_eq!(report[0]["report"]["requires_save"], false);
+    assert_eq!(
+        eigenvista_format::decode(&fs::read(dir.0.join("roundtrip.eigenvista")).unwrap()).unwrap(),
+        expected
+    );
+
+    fs::write(dir.0.join("download.payload"), source).unwrap();
+    let detected = dir.run(&["download.payload", "--check", "--json"]);
+    assert!(detected.status.success());
+    let report: serde_json::Value = serde_json::from_slice(&detected.stdout).unwrap();
+    assert_eq!(report[0]["report"]["format"], "bcif");
+    assert_eq!(report[0]["atoms"], 327);
+    assert_eq!(fs::read(dir.0.join("crambin.bcif")).unwrap(), source);
+}
+
+#[test]
+fn malformed_binarycif_does_not_replace_an_existing_native_output() {
+    let dir = Scratch::new();
+    let source = include_bytes!("../../../fixtures/bcif/1crn.bcif");
+    fs::write(dir.0.join("crambin.bcif"), source).unwrap();
+    assert!(dir.run(&["crambin.bcif"]).status.success());
+    let saved = fs::read(dir.0.join("crambin.eigenvista")).unwrap();
+    let truncated = &source[..source.len() / 2];
+    fs::write(dir.0.join("crambin.bcif"), truncated).unwrap();
+    let failed = dir.run(&["crambin.bcif", "--force", "--json"]);
+    assert_eq!(failed.status.code(), Some(1));
+    let report: serde_json::Value = serde_json::from_slice(&failed.stdout).unwrap();
+    assert_eq!(report[0]["status"], "failed");
+    assert!(!report[0]["error"].as_str().unwrap().is_empty());
+    assert_eq!(fs::read(dir.0.join("crambin.eigenvista")).unwrap(), saved);
+    assert_eq!(fs::read(dir.0.join("crambin.bcif")).unwrap(), truncated);
 }

@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -79,30 +80,8 @@ async function open(page: Page, name: string, text: string, bonds: number) {
 
 /** Equal atom sizes make the fitted camera target the midpoint of the two sites. */
 async function connectorPixels(page: Page) {
-  return page.locator("canvas").evaluate((canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2");
-    if (!gl) throw new Error("WebGL2 context unavailable");
-    const pixels = new Uint8Array(31 * 31 * 4);
-    gl.readPixels(
-      Math.floor(gl.drawingBufferWidth / 2) - 15,
-      Math.floor(gl.drawingBufferHeight / 2) - 15,
-      31,
-      31,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      pixels,
-    );
-    let foreground = 0;
-    for (let i = 0; i < pixels.length; i += 4)
-      if (
-        Math.abs(pixels[i] - 232) +
-          Math.abs(pixels[i + 1] - 237) +
-          Math.abs(pixels[i + 2] - 239) >
-        30
-      )
-        foreground++;
-    return { foreground, error: gl.getError() };
-  });
+  const { centerForeground, error } = await scenePixels(page);
+  return { foreground: centerForeground, error };
 }
 
 async function decode(page: Page, file: string): Promise<EigenVistaDocument> {

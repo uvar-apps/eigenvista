@@ -1,0 +1,2 @@
+# Preserve the unmodified deposited fixture, including its original whitespace.
+fixtures/bcif/1crn.cif -whitespace

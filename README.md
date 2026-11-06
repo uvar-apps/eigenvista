@@ -75,7 +75,9 @@ release. It includes source and notices under the [application license](LICENSE)
 - Analytic two-center and fractional-open-shell fixtures, clearly identified as mathematical models rather than chemistry calculations.
 - Frozen independent PySCF references for closed/open-shell molecules and Cartesian/spherical general contractions through G, with native/WASM value and gradient checks. [Reference suite and example documents](fixtures/pyscf/README.md).
 - Explicit Gaussian-polynomial basis evaluation and gradients through G, signed orbitals, and supplied real density matrices in Rust/f64.
-- Ball-and-stick, liquorice, and space-filling representations; camera controls, atom picking, and image export.
+- Ball-and-stick, liquorice, and space-filling representations; camera controls,
+  atom picking, and PNG export of a freshly rendered current view, including
+  after the scene has become idle.
 - Rust marching-cubes mesh extraction, signed colors, opacity, visibility, deletion, sampling/meshing/validation progress, worker cancellation, and sampled-field reuse.
 - Live calculation progress shows the current field and orbital batch position,
   completed sampling slices, per-phase percentage, signed mesh-pass checkpoints,
@@ -110,12 +112,16 @@ release. It includes source and notices under the [application license](LICENSE)
   plus a standalone `eigenvista-convert` CLI. Canonical Gaussian shells through G
   and a tested ORCA S/P/spherical-D export subset are supported with explicit
   normalization and loss reports. [Molden profile and converter](docs/molden-import.md).
-- mmCIF structure import (`.cif`, `.mcif`, `.pdbx`) through the same Open path as
-  PDB and the shared converter. Selected coordinates retain declared covalent,
+- Text mmCIF (`.cif`, `.mcif`, `.pdbx`) and BinaryCIF (`.bcif`, `.bcif.gz`)
+  structure import through Open and the shared converter. BinaryCIF content is
+  detected independently of its filename; gzip support is specific to BinaryCIF.
+  Both transports use the same selection and connection rules. Selected
+  coordinates retain declared covalent,
   disulfide, and metal-coordination connections; coordinate perception fills
   missing pairs. Deposited types, orders, references, and omissions remain in
   provenance. Cell/symmetry are recorded without generating crystal mates.
-  [mmCIF profile](docs/structure-imports.md#mmcif-profile).
+  [mmCIF profile](docs/structure-imports.md#mmcif-profile) and
+  [bounded BinaryCIF profile](docs/structure-imports.md#binarycif-profile).
 
 ## Boundaries
 

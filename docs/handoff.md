@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 6 November 2026 for bond search/mmCIF connections at 0.5.11; the dated
+Updated 6 November 2026 for BinaryCIF and viewer capture at 0.5.11; the dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
@@ -11,6 +11,40 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+The fifth repair batch implements #21, #7, and #4 in
+[PR #29](https://github.com/uvar-apps/eigenvista/pull/29), developed on
+`codex/bcif-import-and-viewer-polish` from merged main `44d73d7`; runtime/test
+changes are commit `3ed46b5`. The bounded
+Rust BinaryCIF reader handles raw/gzip 0.3.x input, all seven transforms, null
+masks, Unicode dictionaries, and original-byte source hashes. Canonical CIF
+feeds the existing scientific importer, including alternate/model selection,
+declared connections, and automatic bonds. It supports one block and the
+documented structure profile, without recovering absent quantum data or
+expanding crystal images. See the [design](design/2026-11-06-binarycif-and-capture.md)
+and [profile](structure-imports.md#binarycif-profile).
+
+The viewport drops drawing-buffer preservation; PNG export explicitly renders
+and synchronously captures the current frame. Browser pixel evidence now comes
+from compositor captures instead of discarded buffers. The native runtime badge
+is neutral `Native (Tauri)`; `WebAssembly` remains the browser label. The real
+1CRN binary/text twin has 327 atoms/337 bonds and three independently mapped
+disulfides; the Molstar-encoded policy twin covers masks, alternates, omissions,
+Unicode, compressed transforms, and one retained long-range connection.
+
+Fresh focused verification passes 22 codec/protocol cases, four public import
+cases, all 15 CLI tests, six BinaryCIF browser cases, four runtime-label cases,
+and 168 affected renderer cases including 14 new PNG cases. Strict Clippy,
+Rustfmt, production WASM/frontend and Apple Silicon native builds, and 13
+packaging tests pass, as do all 208 workspace Rust tests including desktop and
+all 254 Chromium/WebKit cases in one run. Desktop/mobile previews/exports were
+inspected; 421 local documentation targets and four fixture input hashes verify.
+Full evidence is maintained in
+[status](status.md#binarycif-and-viewer-polish-6-november-2026).
+The rebuilt native app is signature/frontend verified at 0.5.11; no tag, release,
+or ZIP was requested. Published artifacts predate all five repair batches.
+After this batch, the remaining issue order is crystal symmetry (#20), then
+mmCIF export (#22), both larger research/design activities.
 
 The bond/mmCIF batch implements #3 and #19 in
 [PR #28](https://github.com/uvar-apps/eigenvista/pull/28), developed on
@@ -35,7 +69,7 @@ new tag/release/ZIP; published artifacts predate all four repair batches.
 All 27 independent `1AON.cif` connections survive, adding ten previously missed
 long Mg–O edges (59,317 total bonds); `1BH3.cif` keeps 2,372 atoms/2,270 bonds.
 Preserve source fixtures, user references/local data, and platform acceptance
-boundaries. Next remaining P3 order: #21, #7, #4, #20, #22.
+boundaries. It merged as `44d73d7`, closing both issues; its successor is above.
 
 The worker batch implements #6 and #5 in
 [PR #27](https://github.com/uvar-apps/eigenvista/pull/27), developed on

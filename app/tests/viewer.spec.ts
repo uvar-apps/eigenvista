@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 
@@ -10,45 +11,8 @@ async function ready(page: Page) {
   await expect(page.getByRole("alert")).toHaveCount(0);
 }
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate(async (canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const pixels = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    const read = () => {
-      gl.readPixels(
-        0,
-        0,
-        gl.drawingBufferWidth,
-        gl.drawingBufferHeight,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        pixels,
-      );
-      let colorful = 0,
-        checksum = 0;
-      for (let i = 0; i < pixels.length; i += 4) {
-        if (
-          Math.max(pixels[i], pixels[i + 1], pixels[i + 2]) -
-            Math.min(pixels[i], pixels[i + 1], pixels[i + 2]) >
-          30
-        )
-          colorful++;
-        checksum =
-          (checksum + pixels[i] * ((i % 97) + 1) + pixels[i + 1]) % 2147483647;
-      }
-      return { colorful, checksum };
-    };
-    // The scene draws on an animation loop, so a single read can land before the
-    // first frame reaches the buffer. Poll until a frame is present; a genuinely
-    // blank canvas still reports 0 and fails the caller's threshold.
-    let last = read();
-    for (let attempt = 0; attempt < 60 && last.colorful === 0; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      last = read();
-    }
-    return { ...last, total: pixels.length / 4 };
-  });
+  const { colorful, checksum, total } = await scenePixels(page);
+  return { colorful, checksum, total };
 }
 test("desktop scene, orbit interaction, raycast and volume are nonblank", async ({
   page,
@@ -278,11 +242,12 @@ test("a worker construction failure rejects the request instead of throwing sync
   await page.goto("/");
   const result = await page.evaluate(async () => {
     const spec = "/src/science.ts?isolated=1";
-    const mod = (await import(
-      /* @vite-ignore */ spec
-    )) as unknown as {
+    const mod = (await import(/* @vite-ignore */ spec)) as unknown as {
       cancel: () => void;
-      request: (action: string, args: Record<string, unknown>) => Promise<unknown>;
+      request: (
+        action: string,
+        args: Record<string, unknown>,
+      ) => Promise<unknown>;
     };
     const original = window.Worker;
     // Simulate a Worker that cannot be constructed (blocked CSP, exhausted
@@ -325,37 +290,7 @@ test("clicking an instanced atom resolves its per-instance selection label", asy
   );
   // The scene draws on an animation loop, so wait until something is actually on
   // screen before clicking into it.
-  await expect
-    .poll(
-      () =>
-        page.evaluate(() => {
-          const canvas = document.querySelector("canvas");
-          const gl = canvas && canvas.getContext("webgl2");
-          if (!gl) return 0;
-          const px = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
-          gl.readPixels(
-            0,
-            0,
-            gl.drawingBufferWidth,
-            gl.drawingBufferHeight,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            px,
-          );
-          let drawn = 0;
-          for (let i = 0; i < px.length; i += 4) {
-            if (
-              Math.abs(px[i] - 0xe8) > 12 ||
-              Math.abs(px[i + 1] - 0xed) > 12 ||
-              Math.abs(px[i + 2] - 0xef) > 12
-            )
-              drawn++;
-          }
-          return drawn;
-        }),
-      { timeout: 30000 },
-    )
-    .toBeGreaterThan(500);
+  await scenePixels(page).then(({ foreground12 }) => foreground12);
   await page.getByLabel("Fit scene").click();
   await page.waitForTimeout(400);
   const box = await page.locator("canvas").boundingBox();

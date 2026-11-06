@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 
 type CameraProbe = Window & {
@@ -52,46 +53,8 @@ async function settled(page: Page) {
 }
 
 async function pixels(page: Page) {
-  return page.locator("canvas").evaluate(async (canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const values = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-    );
-    const read = () => {
-      gl.readPixels(
-        0,
-        0,
-        gl.drawingBufferWidth,
-        gl.drawingBufferHeight,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        values,
-      );
-      let colorful = 0;
-      let checksum = 0;
-      for (let i = 0; i < values.length; i += 4) {
-        if (
-          Math.max(values[i], values[i + 1], values[i + 2]) -
-            Math.min(values[i], values[i + 1], values[i + 2]) >
-          30
-        )
-          colorful++;
-        checksum =
-          (checksum + values[i] * ((i % 97) + 1) + values[i + 1]) % 2147483647;
-      }
-      return { colorful, checksum };
-    };
-    // The scene draws on an animation loop, so a single read can land before the
-    // first frame reaches the buffer. Poll until a frame is present; a genuinely
-    // blank canvas still reports 0 and fails the caller's threshold. This also
-    // keeps before/after ratio checks from passing against a blank baseline.
-    let last = read();
-    for (let attempt = 0; attempt < 60 && last.colorful === 0; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      last = read();
-    }
-    return last;
-  });
+  const { colorful, checksum } = await scenePixels(page);
+  return { colorful, checksum };
 }
 
 async function zoom(

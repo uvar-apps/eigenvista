@@ -28,8 +28,16 @@ The third batch merged as `58d835b`, closing #6 and #5. The fourth batch impleme
 on `codex/bonds-and-cif-connections`; runtime/test changes are commit `1c0f638`. See the
 [design](../design/2026-11-06-bond-search-and-cif-connections.md) and
 [verification](../status.md#bond-search-and-mmcif-connections-6-november-2026).
-The table preserves the original ordering. Remaining P3 work follows #21, #7,
-#4, #20, and #22.
+The fourth batch merged as `44d73d7`, closing #3 and #19. The fifth batch
+implements #21, #7, and #4 in [PR #29](https://github.com/uvar-apps/eigenvista/pull/29),
+developed on `codex/bcif-import-and-viewer-polish`; runtime/test changes are
+commit `3ed46b5`. See its
+[design](../design/2026-11-06-binarycif-and-capture.md) and
+[verification](../status.md#binarycif-and-viewer-polish-6-november-2026).
+The table preserves the original ordering. After this batch, remaining P3 work
+is #20 (crystal symmetry), then #22 (mmCIF export), both requiring design/research.
+Issue #21 now uses `kind:robustness` in place of the stock `enhancement` label
+to follow the taxonomy for unsupported valid input; its P3 priority is unchanged.
 
 On 5 November 2026, closed [#16 as completed](https://github.com/uvar-apps/eigenvista/issues/16#issuecomment-6661704198)
 using the shipped 0.5.7/0.5.8 fixes and the current 118-colour check. There were

@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -259,25 +260,7 @@ test("shader transparency is a live session control and resets with Clear", asyn
     buffer: fs.readFileSync(path.resolve("shaders/surface-phong.params")),
   });
   const checksum = () =>
-    page.locator("canvas").evaluate((canvas) => {
-      const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-      const pixels = new Uint8Array(
-        gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-      );
-      gl.readPixels(
-        0,
-        0,
-        gl.drawingBufferWidth,
-        gl.drawingBufferHeight,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        pixels,
-      );
-      let sum = 0;
-      for (let i = 0; i < pixels.length; i++)
-        sum = (sum + pixels[i] * ((i % 97) + 1)) % 2147483647;
-      return sum;
-    });
+    scenePixels(page).then(({ rgbaChecksum }) => rgbaChecksum);
   const builtIn = await checksum();
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
   await expect(page.locator(".shader-status")).toContainText("Applied");
@@ -315,29 +298,7 @@ test("shader transparency is a live session control and resets with Clear", asyn
         requestAnimationFrame(() => requestAnimationFrame(resolve)),
       ),
   );
-  await expect
-    .poll(() =>
-      page.locator("canvas").evaluate((canvas) => {
-        const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-        const pixels = new Uint8Array(
-          gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
-        );
-        gl.readPixels(
-          0,
-          0,
-          gl.drawingBufferWidth,
-          gl.drawingBufferHeight,
-          gl.RGBA,
-          gl.UNSIGNED_BYTE,
-          pixels,
-        );
-        let bright = 0;
-        for (let i = 0; i < pixels.length; i += 4)
-          if (Math.min(pixels[i], pixels[i + 1], pixels[i + 2]) > 245) bright++;
-        return bright;
-      }),
-    )
-    .toBeGreaterThan(500);
+  await scenePixels(page).then(({ bright }) => bright);
   await page.screenshot({
     path: `../artifacts/shader-alpha-scene-mobile-${testInfo.project.name}.png`,
   });

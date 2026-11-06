@@ -1,3 +1,4 @@
+import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -48,29 +49,7 @@ test("mmCIF opens through the same path as PDB and reports the structure", async
   expect(summary).toMatch(/\d+ bonds/);
 
   // The structure must actually render, not just parse.
-  const canvasNonBlank = await page.locator("canvas").evaluate((canvas) => {
-    const gl = (canvas as HTMLCanvasElement).getContext("webgl2")!;
-    const buffer = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
-    return new Promise<boolean>((resolve) => {
-      requestAnimationFrame(() => {
-        gl.readPixels(
-          0,
-          0,
-          gl.drawingBufferWidth,
-          gl.drawingBufferHeight,
-          gl.RGBA,
-          gl.UNSIGNED_BYTE,
-          buffer,
-        );
-        for (let i = 0; i < buffer.length; i += 4) {
-          if (buffer[i] !== 0 || buffer[i + 1] !== 0 || buffer[i + 2] !== 0) {
-            return resolve(true);
-          }
-        }
-        resolve(false);
-      });
-    });
-  });
+  const canvasNonBlank = (await scenePixels(page)).colorful > 500;
   expect(canvasNonBlank).toBe(true);
 
   expect(errors).toEqual([]);
@@ -92,19 +71,19 @@ test("a file labelled .cif that is not mmCIF is rejected without losing the curr
   await ready(page);
 
   // Establish a known-good document first.
-  await page
-    .getByLabel("Open molecular file")
-    .setInputFiles({
-      name: "water.xyz",
-      mimeType: "chemical/x-xyz",
-      buffer: Buffer.from("2\nWater\nH 0 0 0\nH 0 0 0.74\n", "utf8"),
-    });
+  await page.getByLabel("Open molecular file").setInputFiles({
+    name: "water.xyz",
+    mimeType: "chemical/x-xyz",
+    buffer: Buffer.from("2\nWater\nH 0 0 0\nH 0 0 0.74\n", "utf8"),
+  });
   await expect(page.locator(".document-summary")).toContainText("2 atoms");
 
   // Now a file with a .cif extension that is not mmCIF.
   await page
     .getByLabel("Open molecular file")
-    .setInputFiles(cifUpload("fake.cif", "this is not a crystallographic file\n"));
+    .setInputFiles(
+      cifUpload("fake.cif", "this is not a crystallographic file\n"),
+    );
 
   await expect(page.getByRole("alert")).not.toHaveCount(0, { timeout: 15000 });
   // The prior document must survive a rejected import untouched.

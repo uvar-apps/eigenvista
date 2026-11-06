@@ -8,6 +8,67 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## BinaryCIF and viewer polish: 6 November 2026
+
+Fifth repair batch at source version 0.5.11 in
+[PR #29](https://github.com/uvar-apps/eigenvista/pull/29), developed on
+`codex/bcif-import-and-viewer-polish` from merged main `44d73d7`; runtime/test
+changes are commit `3ed46b5`. Fixes #21, #7, and #4. See the
+[design](design/2026-11-06-binarycif-and-capture.md),
+[BinaryCIF profile](structure-imports.md#binarycif-profile), and
+[independent fixtures](../fixtures/bcif/README.md).
+
+- Raw MessagePack-map and gzip signatures precede text decoding. A borrowed
+  MessagePack parser bounds lengths/nodes/nesting before allocating containers;
+  checked inverse pipelines cover all seven BinaryCIF transforms. Dictionary
+  slices stay borrowed, Unicode offsets cannot split surrogate pairs, masks
+  retain all three states, and signed Int32 packing bounds are explicit.
+- Gzip output and canonical CIF text each have a 64 MiB limit; cumulative
+  decoded values, transform/nesting lengths, category columns, and row counts
+  are bounded. One 0.3.x block is supported. Interpreted atom/connection/cell/
+  symmetry data use the existing core CIF validation, selection, provenance,
+  and bond perception. Unused categories are not column-expanded. Raw original
+  bytes, including gzip framing, remain the source-hash input.
+- Library source evaluation found pre-limit allocation/cache paths in
+  `mmcif-cif` 0.3.2 and pre-validation deserialization in `molframe-bcif` 0.7.0.
+  No upstream decoder source was copied. `flate2` is newly direct but was already
+  locked transitively; no external dependency version changed. Molstar 5.13.1
+  is an offline independent fixture producer/oracle, not a runtime dependency.
+- The viewport context has `preserveDrawingBuffer: false`; PNG export renders
+  and synchronously reads its current frame, with visible encoding/context-loss
+  errors and retry. No permanent capture render target is added. Existing pixel
+  regressions inspect the compositor; an independent PNG oracle has positive
+  and blank controls. Native uses `Native (Tauri)` instead of a hard-coded OS.
+
+Fresh focused checks pass: 22 codec/protocol tests, four public import cases,
+15 real CLI tests, six BinaryCIF browser cases, four runtime-label cases, and
+168 affected Chromium/WebKit rendering cases in one 5.1-minute run (including
+14 new PNG cases). The real RCSB 1CRN twin yields 327 atoms/337 bonds and the
+three independently mapped disulfides; the independent policy twin retains
+four atoms and one explicit bond. Input SHA-256 digests, native roundtrips,
+conversion/retained-scene failures, picker filters, null/alternate/model policy,
+all numeric source widths, Unicode, invalid expansions/counts/masks/indices,
+truncation/trailing data, gzip CRC/members/expansion, quoting, and single-atom
+geometry are covered. All 208 workspace Rust tests including desktop and all
+254 Chromium/WebKit cases pass on the final runtime source. The full browser
+run completed uninterrupted in 6.7 minutes. All 421 local documentation targets
+across 35 public Markdown files resolve. Source/test formatting and whitespace
+checks pass; the unmodified deposited CIF retains its original whitespace via
+a narrowly scoped Git attribute. All four new fixture input hashes match their
+recorded source manifest.
+
+Fresh Rustfmt/strict workspace-all-target Clippy, production WASM/TypeScript/Vite
+and Apple Silicon native builds, and 13 packaging checks pass. The ad-hoc-signed
+app at `target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app` passes
+strict deep signature verification and embeds current frontend
+`assets/index-CT2OlWaI.js`. Source version stays 0.5.11; no new tag/release/ZIP.
+The existing EigenVista preview stays on port 5178. Inspected desktop/mobile
+PNG exports and UI in both engines, plus the new real-structure previews.
+Native interactive capture, dedicated HiDPI acceptance, clean-Mac installation,
+and Linux/Windows remain unverified. GPU memory savings were not measured.
+User references/private chats/local data, old fixtures, and dated restart
+snapshots remain untouched. Remaining tracked work after this batch: #20/#22.
+
 ## Bond search and mmCIF connections: 6 November 2026
 
 Fourth repair batch at source version 0.5.11 in

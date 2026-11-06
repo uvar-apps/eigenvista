@@ -1,0 +1,29 @@
+{
+  "retrieved": "2026-11-06",
+  "files": [
+    {
+      "file": "1crn.cif",
+      "bytes": 69506,
+      "sha256": "23787562c427d7c1abe5420e86d5f1d0a6c7007dec1e8ce85645a6d69c32e8ba",
+      "source": "https://files.rcsb.org/download/1CRN.cif"
+    },
+    {
+      "file": "1crn.bcif",
+      "bytes": 151351,
+      "sha256": "9b0b12f855cbe1ec15b45d893e28c8f22cf4a616565474dae85d69af30648d86",
+      "source": "https://models.rcsb.org/1crn.bcif"
+    },
+    {
+      "file": "policy.cif",
+      "bytes": 1881,
+      "sha256": "a818e1aa85f7f9b964899af5aa54e20214017195804ebb271534bc128224b608",
+      "source": "Original EigenVista diagnostic text"
+    },
+    {
+      "file": "policy.bcif",
+      "bytes": 13972,
+      "sha256": "3d8de34fbd989ac5644dd4d1d276090180fa42f0c29ab7ce8ad6708abd63473a",
+      "source": "Independent Molstar5.13.1 encoding of policy.cif"
+    }
+  ]
+}
