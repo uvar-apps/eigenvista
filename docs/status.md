@@ -10,9 +10,11 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## BinaryCIF and viewer polish: 6 November 2026
 
-Fifth repair batch at source version 0.5.11, developed on
-`codex/bcif-import-and-viewer-polish` from merged main `44d73d7`, addresses #21,
-#7, and #4. See the [design](design/2026-11-06-binarycif-and-capture.md),
+Fifth repair batch at source version 0.5.11 in
+[PR #29](https://github.com/uvar-apps/eigenvista/pull/29), developed on
+`codex/bcif-import-and-viewer-polish` from merged main `44d73d7`; runtime/test
+changes are commit `3ed46b5`. Fixes #21, #7, and #4. See the
+[design](design/2026-11-06-binarycif-and-capture.md),
 [BinaryCIF profile](structure-imports.md#binarycif-profile), and
 [independent fixtures](../fixtures/bcif/README.md).
 

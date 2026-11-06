@@ -12,8 +12,10 @@ code. The icon and logo are unchanged.
 
 ## Issue priorities
 
-The fifth repair batch addresses #21, #7, and #4 on
-`codex/bcif-import-and-viewer-polish` from merged main `44d73d7`. The bounded
+The fifth repair batch implements #21, #7, and #4 in
+[PR #29](https://github.com/uvar-apps/eigenvista/pull/29), developed on
+`codex/bcif-import-and-viewer-polish` from merged main `44d73d7`; runtime/test
+changes are commit `3ed46b5`. The bounded
 Rust BinaryCIF reader handles raw/gzip 0.3.x input, all seven transforms, null
 masks, Unicode dictionaries, and original-byte source hashes. Canonical CIF
 feeds the existing scientific importer, including alternate/model selection,

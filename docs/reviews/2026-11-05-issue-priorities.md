@@ -29,7 +29,9 @@ on `codex/bonds-and-cif-connections`; runtime/test changes are commit `1c0f638`.
 [design](../design/2026-11-06-bond-search-and-cif-connections.md) and
 [verification](../status.md#bond-search-and-mmcif-connections-6-november-2026).
 The fourth batch merged as `44d73d7`, closing #3 and #19. The fifth batch
-addresses #21, #7, and #4 on `codex/bcif-import-and-viewer-polish`; see its
+implements #21, #7, and #4 in [PR #29](https://github.com/uvar-apps/eigenvista/pull/29),
+developed on `codex/bcif-import-and-viewer-polish`; runtime/test changes are
+commit `3ed46b5`. See its
 [design](../design/2026-11-06-binarycif-and-capture.md) and
 [verification](../status.md#binarycif-and-viewer-polish-6-november-2026).
 The table preserves the original ordering. After this batch, remaining P3 work
