@@ -1,6 +1,6 @@
 # Implementation status
 
-Date: 4 October 2026. Standalone repository: `uvar-apps/eigenvista`, initially on
+Initial snapshot: 4 October 2026. Standalone repository: `uvar-apps/eigenvista`, initially on
 `main`. Application source is at the repository root without legacy application
 code. [AGENTS.md](../AGENTS.md) is the self-contained entry point. Temporary
 storage remains repository-local ignored `tmp/`.
@@ -10,7 +10,7 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Version 0.5.12
 
-Release preparation: 6 November 2026, from merged main `e9c7675` (PR #29).
+Released 6 November 2026, from merged main `e9c7675` (PR #29).
 All Rust workspace packages/lockfile entries, npm manifests/lockfile root, Tauri,
 and current user/agent documentation are updated to 0.5.12. External dependency
 versions and the icon/logo are unchanged. This release collects all five repair
@@ -19,13 +19,45 @@ recorded below. Remaining open issues are #20 (crystal symmetry) and #22 (mmCIF
 export); release work does not claim those features or completion of v1.
 
 Fresh post-bump release checks pass all 208 workspace Rust tests including
-desktop, strict workspace/all-target Clippy, Rustfmt, and the production WASM/
-TypeScript/Vite build. Package and post-build browser verification are pending.
-The previous runtime checkpoint passed 254 Chromium/WebKit cases and 13 packaging
-checks; those results predate this bump and are separate from the release results
-to follow. The repository-local tester workflow rebuilds the
-Apple Silicon app, standalone converter, source bundle, notices, and examples
-inside a ZIP plus checksum/build metadata. User-owned `docs/references/` is now
+desktop, strict workspace/all-target Clippy, Rustfmt, the production WASM/
+TypeScript/Vite build, all 254 Chromium/WebKit cases in one uninterrupted
+6.8-minute run, and 13 packaging tests. Inspected current desktop/mobile preview
+and PNG exports; all 422 local documentation targets resolve. Version agreement
+and unchanged external dependency versions are verified.
+
+Release commit `cf0db097a9a35ea9907ed4937abcba9a30c5e7a4` and annotated
+`v0.5.12` are pushed; the
+[GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.12)
+has all three assets, with matching GitHub/local SHA-256 digests. This doc-only
+follow-up records the completed package without retagging the release.
+
+The tester workflow rebuilt the Apple Silicon app, optimized standalone
+converter, source/dependency bundles, notices, documentation, and examples.
+Verified archive:
+`artifacts/distributions/EigenVista-0.5.12-apple-silicon-20261106T030153Z-cf0db09.zip`
+(44,118,491 bytes). ZIP SHA-256:
+`e12930ee0875d62ef1864be1f8c77c6e62b5e01c10257e067be80512007d8688`.
+The companion `.zip.sha256` and same-stem `.json` are alongside it. Build metadata
+records version 0.5.12, clean source `cf0db09`, Rust 1.99.0, Node 26,
+wasm-bindgen 0.2.108, cargo-about 0.9.1, arm64, macOS minimum 13/build host 27.0,
+and ad-hoc signing without notarization. The rebuilt
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app` embeds current
+frontend `assets/index-BWeZGJaH.js`.
+
+The packager passes strict signatures, architecture/system-library checks,
+sample PDB/XYZ/Molden/cube imports, signed cube meshes, and native/legacy naming
+and converter/WASM roundtrips both before and after ZIP extraction. Independent
+audit additionally verifies extracted bytes/modes, app/CLI version/signatures,
+all 255 archived source files against all 255 tagged Git blobs, four pinned
+BinaryCIF inputs, absence of excluded local/private files, actual extracted
+optimized raw/gzip BinaryCIF conversion and clean native reopen (327 atoms,
+337 bonds, three disulfides), the compressed/null-mask/alternate/Unicode policy
+(four atoms, one bond), and exact release-WASM parity. Evidence remains at
+`tmp/release-0.5.12-audit-65PXR6/REPORT.json` and release logs under
+`tmp/2026-11-06-release-0512-*`; package staging is retained at
+`tmp/eigenvista-package-wxxAeg`.
+
+User-owned `docs/references/` is now
 locally excluded from Git/source packaging without reading or changing its
 contents. Private chats, other local inputs, old packages, and dated snapshots
 are preserved. No native GUI/HiDPI, clean-Mac, or Linux/Windows qualification is

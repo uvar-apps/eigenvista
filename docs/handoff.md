@@ -151,12 +151,25 @@ main `e9c7675` (PR #29). It includes BinaryCIF/raw-gzip import, declared mmCIF
 connections, tighter exact bond queries, safe shader/parameter workflows,
 voxel-relative preview quality, scoped worker cancellation and resident input
 reuse, PNG capture without retained drawing buffers, and a neutral native badge.
-Source versions and lockfiles are 0.5.12. Fresh post-bump checks pass all 208
-workspace Rust tests, strict Clippy/Rustfmt, and the production WASM/frontend
-build. Tagging, redistributable rebuilding, and post-build browser verification
-are in progress; use
-[status](status.md#version-0512) for the artifact checkpoint. Published 0.5.11
-artifacts remain historical. Preserve timestamped restart snapshots.
+Release commit `cf0db09` and annotated tag `v0.5.12` are pushed. The
+[0.5.12 GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.12)
+contains the verified ZIP, checksum, and build metadata. Source versions and
+lockfiles are 0.5.12; this documentation follow-up does not move the release tag.
+Fresh post-bump checks pass 208 workspace Rust tests, strict Clippy/Rustfmt,
+production WASM/frontend/native builds, all 254 Chromium/WebKit cases in one
+6.8-minute run, and 13 packaging tests. Current screenshots/PNG exports were
+inspected, and 422 local documentation targets resolve.
+
+Package: `artifacts/distributions/EigenVista-0.5.12-apple-silicon-20261106T030153Z-cf0db09.zip`.
+The app, standalone converter, source/dependency bundles, examples, and notices
+were rebuilt from clean `cf0db09`. Signatures, extracted bytes/modes, all 255
+archived source files against tagged Git blobs, four BinaryCIF fixture hashes,
+actual optimized raw/gzip/policy conversions and release-WASM parity verify.
+GitHub asset digests match the local ZIP/checksum/metadata. See
+[status](status.md#version-0512) for checksums and evidence. Native GUI/HiDPI,
+clean-Mac, and Linux/Windows acceptance remain separate gaps. The build is
+ad-hoc signed, not notarized. Old artifacts and timestamped snapshots remain
+historical and untouched.
 
 The user's `docs/references/` remains untouched and is now locally excluded via
 `.git/info/exclude`, along with local `1AON.pdb` and generated tooling/screenshots,
