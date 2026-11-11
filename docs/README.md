@@ -49,7 +49,9 @@ limits of opening new saves in older builds.
 | Scientific worker ownership, cancellation, and resident cache registration | [Worker decisions](design/2026-11-06-worker-ownership-and-registration.md) |
 | Conservative bond-query bounds and declared mmCIF connectivity | [Bond/mmCIF decisions](design/2026-11-06-bond-search-and-cif-connections.md) |
 | Bounded BinaryCIF transport, current-frame PNG export, and runtime labels | [BinaryCIF/capture decisions](design/2026-11-06-binarycif-and-capture.md) |
-| Issue triage, repair order, and completed batches | [2026-11-05 issue review](reviews/2026-11-05-issue-priorities.md) |
+| Current review triage: confirmed bugs, scoped improvements, research priorities and repair plan | [2026-11-11 issue priorities](reviews/2026-11-11-issue-priorities.md) |
+| Native close/quit decisions, save preservation and actual Molden capacity | [Lifecycle and limits decisions](design/2026-11-11-native-lifecycle-and-molden-limits.md) |
+| Previous issue triage and completed repair batches | [2026-11-05 issue review](reviews/2026-11-05-issue-priorities.md) |
 | Issue triage conventions — area, kind, and priority label axes | [Issue label taxonomy](labels.md) |
 | Fast project overview | [Rewrite README](../README.md) |
 

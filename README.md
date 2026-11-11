@@ -13,6 +13,10 @@ a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
 **Status:** version 0.5.12 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
 
+Current source adds native close/quit protection and corrects the documented
+Molden limits (#30/#31). The published 0.5.12 tester ZIP predates these fixes;
+this repair does not create a new release or redistributable archive.
+
 ## Start here
 
 - **Using the application:** [User guide](docs/user-guide.md), including Mac
@@ -145,9 +149,14 @@ and native authoritative grids. The two-million-vertex mesher limit now checks
 the actual case counts before extraction, using the pinned `mcubes` behavior;
 it is not a new meshing algorithm or topology guarantee.
 
-Other limits remain: 256 AOs, 64 primitives per AO, 128 saved surfaces, 32
-orbitals per batch, and 128 MiB geometry/native-container bounds, plus numerical
-and domain validation. There is no estimated CPU-work cutoff or silent
+Other limits remain: 1,024 AOs, 512 MOs in total across all spin blocks,
+64 primitives per AO, 128 saved surfaces, 32 orbitals per batch, and 128 MiB
+geometry/native-container bounds, plus numerical and domain validation. The AO
+and MO caps are independent: a complete one-MO-per-AO spatial set fits through
+512 AOs, and complete alpha and beta sets through 256 AOs. Partial exports can
+use a larger basis within the same caps; missing orbitals are not recovered.
+See the [Molden limits](docs/molden-import.md#limits-and-verification).
+There is no estimated CPU-work cutoff or silent
 resolution reduction for analytic sampling. Scalar sampling avoids unused
 gradients and folds density-matrix pairs. The WASM worker keeps the f64 sampled
 grid and transfers full-resolution f32 display values without serializing the

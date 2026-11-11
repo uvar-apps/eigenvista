@@ -18,6 +18,7 @@ Direct dependency versions are resolved in the committed lockfiles `Cargo.lock` 
 | flate2 (Rust backend) | Bounded gzip-wrapped BinaryCIF input | MIT OR Apache-2.0 |
 | wasm-bindgen 0.2.108 | Shared Rust browser bindings | MIT OR Apache-2.0 |
 | Tauri 2 and its dialog/fs plugins | Desktop shell and local file selection | MIT OR Apache-2.0 |
+| objc2 0.6.4 / objc2-app-kit 0.3.2 (macOS only) | Typed native termination/delegate integration | MIT / Zlib OR Apache-2.0 OR MIT |
 | React / React DOM | Interface | MIT |
 | Three.js | Scene graph, camera controls, WebGL2 renderer | MIT |
 | lucide-react | Interface icons | ISC |
@@ -26,6 +27,11 @@ Direct dependency versions are resolved in the committed lockfiles `Cargo.lock` 
 | Prettier | Source formatting | MIT |
 
 The app icon is newly authored in `app/src-tauri/icons/source.svg`; bitmap/native icon formats are generated with the Tauri icon tool. It is not copied from the legacy application.
+
+The native lifecycle fix makes the already-locked objc2/AppKit bindings direct
+macOS-only dependencies. Their external versions are unchanged; they do not add
+a scientific C library or a browser dependency. The small Rust delegate hook is
+documented in the [lifecycle decisions](design/2026-11-11-native-lifecycle-and-molden-limits.md).
 
 Independent numerical reference generation uses PySCF 2.14.0 (Apache-2.0) in an ignored development-only Python environment under repository `tmp/`. Its compiled numerical libraries are not linked into EigenVista or shipped in the desktop/browser builds. The frozen generated data and conventions are documented in [fixtures/pyscf/README.md](../fixtures/pyscf/README.md); generator dependencies are pinned in `tools/reference-requirements.txt`. Normal tests require only Rust and the existing frontend toolchain.
 

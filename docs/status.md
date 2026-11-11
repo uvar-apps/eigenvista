@@ -8,6 +8,67 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Native lifecycle and Molden limits: 11 November 2026
+
+Issues [#30](https://github.com/uvar-apps/eigenvista/issues/30) and
+[#31](https://github.com/uvar-apps/eigenvista/issues/31) are implemented on
+`codex/native-exit-and-molden-contract` from `fa76ac4`. Source version remains
+0.5.12; the 6 November tag/ZIP predates these repairs. The
+[decision record](design/2026-11-11-native-lifecycle-and-molden-limits.md)
+documents the native protocol, macOS hook and unchanged scientific limits.
+
+The owned native WKWebView probe reproduced dirty-document termination through
+the default AppKit Quit selector without a Tauri ExitRequested event. The fix
+adds a main-thread, layout-compatible delegate hook alongside the Tauri close/
+exit guards. One native request token reaches the in-app Save/Discard/Cancel
+dialog; initialization/cancellation races resynchronize, late document changes
+require fresh confirmation, and only a successful current-document save permits
+Save and Quit. Unsaved conversion results and all pending native exports are
+included; explicit discard invalidates/cancels both worker clients. Capability
+permissions, scientific data, native profiles and numerical algorithms are
+unchanged. The objc2/AppKit dependencies were already locked; no external package
+version/checksum changed.
+
+README, Molden and user guides now document independent 1,024-AO/512-total-MO
+caps and complete spatial/two-spin consequences. Three actual-parser/core tests
+cover exact/one-past limits and 300-AO/600-MO rejection without truncation or
+invented densities. Capacity expansion remains #35, not part of this fix.
+
+Fresh verification on Apple Silicon macOS 27 / Rust 1.99.0:
+
+- All **216 workspace Rust tests**, including seven desktop tests, pass.
+- Rustfmt and strict workspace/all-target Clippy pass, including native examples.
+- Production WASM/TypeScript/Vite and the debug arm64 `.app` build pass. The
+  rebuilt app is `target/debug/bundle/macos/EigenVista.app`, version 0.5.12;
+  no new tester ZIP/tag/release was requested.
+- All **290 Chromium/WebKit cases** pass in one **7.4-minute** run. Eighteen new
+  cases per engine cover token races, browser beforeunload, Save cancellation/
+  failure/retry, delayed saves, late generation and conversion/output retention.
+  Fifty focused adapter/lifecycle cases also passed. Desktop/mobile dialog
+  screenshots were inspected; the backdrop blocks editing and actions fit.
+- All **13 packaging support tests** pass. Documentation targets/anchors and
+  working-tree whitespace checks pass; the original local review is preserved.
+- Four real native probe scenarios pass: close, programmatic exit, AppKit
+  terminate and clean close. All **60 final JSONL observations** succeed,
+  including dirty edits, deduplication, Cancel retention, new tokens and
+  approved termination. These use embedded production assets, not a dev server.
+
+Evidence is retained under `tmp/2026-11-11-native-molden/` (workspace, Clippy,
+production/native builds, browser and packaging logs). Native probe logs are
+`tmp/lifecycle-smoke-78242-close.jsonl`, `78259-exit.jsonl`,
+`78273-terminate.jsonl` and `78288-clean-close.jsonl` with the same prefix.
+The failing pre-hook Quit observation is
+`tmp/lifecycle-smoke-75860-terminate.jsonl`. Dialog captures are
+`artifacts/native-exit-{chromium,webkit}-{desktop,mobile}.png`.
+
+Physical close-button/Cmd+Q/Dock clicks and native Save-dialog interaction remain
+manual qualification, as do native listener-startup timing, clean-Mac/HiDPI and
+Linux/Windows acceptance. Browser IPC doubles, Rust filesystem tests and the
+real native event-loop probe establish different layers; none substitutes for
+that manual platform matrix. No hosted CI was added (#32). The remaining review
+order is #32, #33 and #34, then P3 research/feature work; see the
+[triage plan](reviews/2026-11-11-issue-priorities.md).
+
 ## Version 0.5.12
 
 Released 6 November 2026, from merged main `e9c7675` (PR #29).
@@ -15,8 +76,9 @@ All Rust workspace packages/lockfile entries, npm manifests/lockfile root, Tauri
 and current user/agent documentation are updated to 0.5.12. External dependency
 versions and the icon/logo are unchanged. This release collects all five repair
 batches since 0.5.11, including the import/rendering/worker and validation fixes
-recorded below. Remaining open issues are #20 (crystal symmetry) and #22 (mmCIF
-export); release work does not claim those features or completion of v1.
+recorded below. At release, remaining open issues were #20 (crystal symmetry)
+and #22 (mmCIF export); release work did not claim those features or completion
+of v1. The later review queue and repair evidence are above.
 
 Fresh post-bump release checks pass all 208 workspace Rust tests including
 desktop, strict workspace/all-target Clippy, Rustfmt, the production WASM/

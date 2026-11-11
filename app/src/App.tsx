@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type SetStateAction,
+} from "react";
+import { NativeExitGuard } from "./NativeExitGuard";
+import { hasNativeSave, subscribeNativeSaves } from "./nativeSaveActivity";
 import {
   Atom,
   FolderOpen,
@@ -61,8 +70,8 @@ import type {
 
 export default function App() {
   const [{ request, cancel }] = useState(createScienceClient);
-  const [doc, setDoc] = useState<EigenVistaDocument | null>(null);
-  const [busy, setBusy] = useState("Opening scientific core");
+  const [doc, setDocument] = useState<EigenVistaDocument | null>(null);
+  const [busy, setBusyState] = useState("Opening scientific core");
   const [calculation, setCalculation] = useState<CalculationState | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
@@ -92,9 +101,20 @@ export default function App() {
   const [grid, setGrid] = useState<SampledGrid | null>(null);
   const [reset, setReset] = useState(0);
   const [inspected, setInspected] = useState("");
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirtyState] = useState(false);
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const [converterOpen, setConverterOpen] = useState(false);
+  const [conversionPending, setConversionPending] = useState(false);
+  const conversionActivity = useRef(false);
+  const cancelConversion = useRef<(() => void) | null>(null);
+  const conversionChanged = useCallback((pending: boolean) => {
+    conversionActivity.current = pending;
+    setConversionPending(pending);
+  }, []);
+  const nativeSaving = useSyncExternalStore(
+    subscribeNativeSaves,
+    hasNativeSave,
+  );
   const [orbitalsOpen, setOrbitalsOpen] = useState(false);
   const [protectedSourcePath, setProtectedSourcePath] = useState<
     string | undefined
@@ -103,8 +123,23 @@ export default function App() {
   const generation = useRef(0);
   const current = useRef(doc);
   const unsaved = useRef(dirty);
-  current.current = doc;
-  unsaved.current = dirty;
+  const activity = useRef(true);
+  const saving = useRef(false);
+  // Lifecycle decisions must see accepted edits even before React renders them.
+  function setDoc(update: SetStateAction<EigenVistaDocument | null>) {
+    const next =
+      typeof update === "function" ? update(current.current) : update;
+    current.current = next;
+    setDocument(next);
+  }
+  function setDirty(value: boolean) {
+    unsaved.current = value;
+    setDirtyState(value);
+  }
+  function setBusy(value: string) {
+    activity.current = Boolean(value);
+    setBusyState(value);
+  }
   /**
    * Apply a palette file. A rejected file leaves the current palette untouched
    * and only the message changes, so a bad load can never half-colour the scene.
@@ -327,14 +362,15 @@ export default function App() {
     };
   }, []);
   useEffect(() => {
+    if (native) return;
     const guard = (e: BeforeUnloadEvent) => {
-      if (dirty) {
+      if (unsaved.current) {
         e.preventDefault();
       }
     };
     window.addEventListener("beforeunload", guard);
     return () => window.removeEventListener("beforeunload", guard);
-  }, [dirty]);
+  }, []);
   function editView(values: Partial<EigenVistaDocument["view"]>) {
     setDoc((d) =>
       d
@@ -501,26 +537,32 @@ export default function App() {
       if (token === generation.current) setError(String(e));
     }
   }
-  async function save() {
-    if (!doc) return;
+  async function save(): Promise<boolean> {
+    const snapshot = current.current;
+    if (!snapshot || activity.current || saving.current || hasNativeSave())
+      return false;
+    saving.current = true;
     setBusy("Saving document");
     setError("");
-    const snapshot = doc;
     try {
-      const bytes = await request<Uint8Array>("encode", { doc });
+      const bytes = await request<Uint8Array>("encode", { doc: snapshot });
       if (
         await saveBytes(
           bytes,
-          `${doc.title.replace(/[^a-z0-9-]+/gi, "-").toLowerCase()}.eigenvista`,
+          `${snapshot.title.replace(/[^a-z0-9-]+/gi, "-").toLowerCase()}.eigenvista`,
           protectedSourcePath ? [protectedSourcePath] : [],
         )
       ) {
         if (current.current === snapshot) setDirty(false);
         setStatus("Saved quantum data, surfaces and appearance");
+        return current.current === snapshot;
       }
+      return false;
     } catch (e) {
       setError(String(e));
+      return false;
     } finally {
+      saving.current = false;
       setBusy("");
     }
   }
@@ -538,6 +580,25 @@ export default function App() {
     : "";
   return (
     <div className="application">
+      <NativeExitGuard
+        snapshot={() => ({
+          document: current.current,
+          dirty: unsaved.current,
+          busy:
+            activity.current || conversionActivity.current || hasNativeSave(),
+          saving: saving.current || hasNativeSave(),
+          conversionPending,
+        })}
+        save={save}
+        beforeExit={() => {
+          ++generation.current;
+          cancel();
+          cancelConversion.current?.();
+          setBusy("");
+          setCalculation(null);
+        }}
+        onError={setError}
+      />
       <header className="topbar">
         <div className="brand">
           <Atom size={27} strokeWidth={1.5} />
@@ -564,7 +625,7 @@ export default function App() {
           </button>
           <button
             onClick={save}
-            disabled={!doc || !!busy}
+            disabled={!doc || !!busy || nativeSaving}
             title="Save document"
           >
             <Save size={17} />
@@ -587,6 +648,8 @@ export default function App() {
       <ConvertFiles
         open={converterOpen}
         onClose={() => setConverterOpen(false)}
+        onActivityChange={conversionChanged}
+        exitCancel={cancelConversion}
       />
       {orbitalsOpen && doc && (
         <OrbitalBrowser

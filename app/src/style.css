@@ -1158,3 +1158,27 @@ footer [role="status"] {
     width: 100%;
   }
 }
+.native-exit-dialog {
+  max-width: min(30rem, calc(100vw - 3rem));
+  border: 1px solid #586579;
+  border-radius: 0.6rem;
+  padding: 1.5rem;
+  background: #17202d;
+  color: #e7edf5;
+}
+.native-exit-dialog::backdrop {
+  background: rgb(0 0 0 / 60%);
+}
+.native-exit-dialog h2 {
+  margin-top: 0;
+}
+.native-exit-dialog p {
+  overflow-wrap: anywhere;
+}
+.native-exit-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}

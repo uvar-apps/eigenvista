@@ -248,15 +248,28 @@ qualification.
 
 The shared byte limit is 128 MiB, with stricter existing XYZ/PDB/Cube limits
 still enforced by their parsers. Molden additionally bounds 500,000 lines,
-16,384 bytes per line, 128 sections, 100,000 atoms, 256 expanded AOs, 64
-primitives per AO, 512 MOs, and 256 bytes per MO header value. Core resource,
+16,384 bytes per line, 128 sections, 100,000 atoms, 1,024 expanded AOs, 64
+primitives per AO, 512 MOs in total across all spin blocks and `[MO]` sections,
+and 256 bytes per MO header value. Core resource,
 relationship, finite-number, and format checks apply afterward. Limits are not
 interactive-performance promises. Input is in-memory, not streaming.
+
+The AO and MO caps are independent. A complete spatial set containing one MO
+per AO fits through 512 AOs; complete alpha and beta sets, each containing one
+MO per AO, fit through 256 AOs. For example, a 300-AO unrestricted export with
+300 alpha and 300 beta MOs exceeds the 512-MO cap. A partial export can contain
+up to 1,024 AOs and at most 512 listed MOs, subject to the other budgets. The
+importer retains every listed MO or rejects the input; it does not silently
+choose an orbital window. Missing orbitals cannot be recovered, and any
+occupation-derived density describes only the listed orbitals.
 
 The [parser unit tests](../crates/eigenvista-import/src/tests.rs) exercise content
 detection, units, references, SP, sparse coefficients, mixed angular flags,
 fractional/spin densities, missing data, reported losses, resource bounds,
 malformed input, native preservation, and profile rejection.
+The [capacity tests](../crates/eigenvista-import/tests/molden_capacity.rs)
+exercise exact AO/MO limits and one past each, importer/core agreement, complete
+spatial/two-spin sets, and the rejected 300-AO/600-MO unrestricted case.
 
 The [independent tests](../crates/eigenvista-import/tests/independent_molden.rs)
 and [fixture guide](../fixtures/molden/README.md) cover RHF water, UHF hydroxyl,

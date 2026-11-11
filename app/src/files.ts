@@ -1,6 +1,7 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
+import { trackNativeSave } from "./nativeSaveActivity";
 
 export const native = isTauri();
 export const molecularExtensions =
@@ -51,11 +52,13 @@ export async function saveBytes(
   protectedPaths: string[] = [],
 ) {
   if (native) {
-    return invoke<boolean>("save_native", {
-      bytes: Array.from(bytes),
-      name,
-      protectedPaths,
-    });
+    return trackNativeSave(() =>
+      invoke<boolean>("save_native", {
+        bytes: Array.from(bytes),
+        name,
+        protectedPaths,
+      }),
+    );
   } else {
     const url = URL.createObjectURL(
       new Blob([bytes.slice().buffer], { type: "application/octet-stream" }),
@@ -70,6 +73,9 @@ export async function saveBytes(
 }
 
 export async function saveShaderParameters(text: string) {
-  if (native) return invoke<boolean>("save_shader_parameters", { text });
+  if (native)
+    return trackNativeSave(() =>
+      invoke<boolean>("save_shader_parameters", { text }),
+    );
   return saveBytes(new TextEncoder().encode(text), "surface-shader.params");
 }

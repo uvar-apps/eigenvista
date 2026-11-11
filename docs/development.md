@@ -249,6 +249,30 @@ are commands to run, not evidence that Linux or Windows has passed them.
 
 ## Manual native acceptance
 
+The development-only native lifecycle probe embeds the production frontend and
+reuses the actual Rust lifecycle module. With the repository temporary-directory
+variables set and `RUSTUP_TOOLCHAIN` unset, build the frontend, then run each
+scenario in its own process:
+
+```sh
+npm --prefix app run build
+cargo run --locked -p eigenvista-desktop --example lifecycle_smoke --features tauri/custom-protocol -- close
+cargo run --locked -p eigenvista-desktop --example lifecycle_smoke --features tauri/custom-protocol -- exit
+cargo run --locked -p eigenvista-desktop --example lifecycle_smoke --features tauri/custom-protocol -- terminate
+cargo run --locked -p eigenvista-desktop --example lifecycle_smoke --features tauri/custom-protocol -- clean-close
+```
+
+`terminate` requires macOS and invokes AppKit's normal Quit selector in the probe's
+own application. `close` and `exit` send real native window/application events.
+The probe edits the real UI, checks modal deduplication/Cancel retention and
+confirmed termination, and writes checked JSONL observations under repository
+`tmp/`. It controls no existing app and needs no Accessibility permission.
+Its test commands are compiled only into this example, never production.
+Read the JSONL log as well as checking the exit code; all assertions and the final
+expected native-exit observation must succeed. Browser IPC doubles are a separate
+test layer. None of these observations establishes physical close-button/Cmd+Q
+interaction or native file-dialog behavior.
+
 For a change to file handling or packaging, separately verify the actual native
 bundle: launch it, open the included water PDB/XYZ, check 3 atoms/2 bonds, save
 to a new path, reopen, cancel a save, and exercise replacement/close behavior
