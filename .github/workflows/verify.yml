@@ -1,0 +1,174 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+env:
+  CI: "true"
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  rust-linux:
+    name: Rust / Ubuntu 24.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare repository temporary storage
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tmp"
+          for variable in TMPDIR TMP TEMP; do
+            printf '%s=%s/tmp\n' "$variable" "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          done
+      - name: Install Tauri Linux prerequisites
+        run: |
+          sudo --preserve-env=TMPDIR,TMP,TEMP apt-get update
+          sudo --preserve-env=TMPDIR,TMP,TEMP apt-get install --no-install-recommends -y \
+            build-essential curl wget file pkg-config libwebkit2gtk-4.1-dev \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+      - name: Install and inspect the repository-selected Rust toolchain
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          rustup show
+          rustc --version
+          cargo --version
+      - name: Check Rust formatting
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          cargo fmt --manifest-path Cargo.toml --all --check 2>&1 | tee "$TMPDIR/rust-fmt.log"
+      - name: Test default Rust workspace members
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          cargo test --manifest-path Cargo.toml --locked 2>&1 | tee "$TMPDIR/rust-tests.log"
+      - name: Lint every workspace crate and target, including the desktop shell
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          cargo clippy --manifest-path Cargo.toml --locked --workspace --all-targets -- -D warnings 2>&1 | tee "$TMPDIR/rust-clippy.log"
+      - name: Retain Rust failure logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rust-linux-failure
+          path: tmp/rust-*.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  desktop-macos:
+    name: Desktop tests / macOS 15 arm64
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare repository temporary storage
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tmp"
+          for variable in TMPDIR TMP TEMP; do
+            printf '%s=%s/tmp\n' "$variable" "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          done
+      - name: Install and inspect the repository-selected Rust toolchain
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          rustup show
+          rustc --version
+          cargo --version
+      - name: Test the desktop shell explicitly
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          cargo test --manifest-path Cargo.toml --locked -p eigenvista-desktop 2>&1 | tee "$TMPDIR/desktop-tests.log"
+      - name: Retain desktop failure logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: desktop-macos-failure
+          path: tmp/desktop-tests.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+  browser-linux:
+    name: WASM, browsers and packaging / Ubuntu 24.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Prepare repository temporary storage
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tmp"
+          for variable in TMPDIR TMP TEMP; do
+            printf '%s=%s/tmp\n' "$variable" "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          done
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+          package-manager-cache: false
+      - name: Install and inspect the repository-selected Rust toolchain
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          rustup show
+          rustc --version
+          cargo --version
+          rustup target list --installed
+      - name: Install the matching wasm-bindgen CLI
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          cargo install wasm-bindgen-cli --version 0.2.108 --locked
+          wasm-bindgen --version
+      - name: Install locked frontend dependencies
+        run: |
+          node --version
+          npm --version
+          npm --prefix app ci
+      - name: Run packaging support tests
+        run: npm --prefix app run test:packaging 2>&1 | tee "$TMPDIR/packaging-tests.log"
+      - name: Build production WASM and frontend
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          npm --prefix app run build 2>&1 | tee "$TMPDIR/frontend-build.log"
+      - name: Install Chromium, WebKit and their Linux dependencies
+        run: |
+          sudo --preserve-env=TMPDIR,TMP,TEMP "$(command -v node)" app/node_modules/playwright/cli.js install-deps chromium webkit
+          npm --prefix app exec -- playwright install chromium webkit
+      - name: Build derived native reference documents from frozen fixtures
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          cargo run --manifest-path Cargo.toml --locked -p eigenvista-format --example reference_documents
+      - name: Run the full Chromium and WebKit suite
+        working-directory: app
+        run: |
+          unset RUSTUP_TOOLCHAIN
+          ./node_modules/.bin/playwright test --config ../ci/playwright.config.mts 2>&1 | tee "$TMPDIR/browser-tests.log"
+      - name: Retain browser and build failure diagnostics
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: browser-linux-failure
+          path: |
+            tmp/packaging-tests.log
+            tmp/frontend-build.log
+            tmp/browser-tests.log
+            app/playwright-report/
+            app/test-results/
+            artifacts/*.png
+            app/artifacts/*.png
+          if-no-files-found: ignore
+          retention-days: 7
