@@ -34,6 +34,13 @@ transport waits to 30 seconds; each dependency-install step has a ten-minute
 limit. Setup/install output joins the failure logs. This follows the image's
 [mirror configuration](https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/configure-apt-sources.sh)
 and Ubuntu's [APT configuration](https://manpages.ubuntu.com/manpages/noble/man5/apt.conf.5.html).
+If installation fails, a [read-only network probe](diagnose-linux-network.sh)
+compares DNS lookup and non-verbose curl results as the runner, root and `_apt`,
+including a direct connection that ignores proxies. It records proxy variable
+names/presence, public DNS results, HTTP status/timings and exit codes, never
+proxy values or response headers. Each lookup/request has its own deadline;
+the diagnostic step is limited to five minutes and joins the failure artifact.
+It changes no DNS, signature-verification or apt sandbox settings.
 The browser [configuration](playwright.config.mts) imports the
 normal application config, retaining the full test set, engines, single worker
 and timeouts. It refuses to reuse another server, rejects focused tests and adds
