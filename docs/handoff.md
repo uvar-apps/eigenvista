@@ -19,18 +19,29 @@ code. The icon and logo are unchanged.
 `codex/ci-and-import-validation-performance`, implements #32/#33/#34. Hosted
 Verify jobs use pinned tools, read-only permissions, repository-local temporary
 storage and bounded failure artifacts. A clean-run Node type declaration gap
-and the hosted image's broken Azure apt mirror are repaired without changing
-existing dependency/compiler versions. Check the [actual PR jobs](https://github.com/uvar-apps/eigenvista/pull/45/checks)
+is repaired without changing existing dependency/compiler versions. Initial
+Linux runs encountered DNS failures for Azure and official Ubuntu package
+archives, while an AWS provider mirror worked. Package setup preserves working
+sources and adds a fixed HTTPS Ubuntu mirror only after preferred-host DNS
+failure and a successful bounded TLS probe, with normal archive signatures.
+Strict deadlines and read-only failure probes remain.
+Check the [actual PR jobs](https://github.com/uvar-apps/eigenvista/pull/45/checks)
 at the reviewed head; all three must succeed before merge. The initial failure
 and successful macOS/diagnostic-upload observations are recorded in
 [status](status.md#ci-and-importpublication-performance-11-november-2026).
+The initial Linux browser run also exposed test scheduling assumptions: camera
+checks now settle real draws/verify the target; density checks distinguish
+active-work responsiveness from cancellation of a real unpublished result.
+Unchanged 256-cubed checks still interrupt unfinished computation. The CI browser
+step has a 35-minute deadline, retaining time for failure uploads within its job.
 
 Molden skips exactly zero contributions while retaining/validating all orbitals.
 Publication calls the format's exact shared preflight without compression;
 Save and the model-only legacy WASM validation contract remain distinct.
 Source hashes, profile/layout and resource limits are preserved. Local checks
 pass 226 Rust tests, strict Clippy/Rustfmt, clean npm/WASM/frontend and debug
-arm64 app builds, 294 browser cases and 13 packaging tests. Native measurements
+arm64 app builds, all 294 browser cases in a final 7.8-minute run and 13 packaging
+tests. Fourteen focused camera/density/cancellation checks also pass. Native measurements
 show scoped import/preflight timing gains with similar process memory; see
 [decisions and provenance](design/2026-11-11-ci-and-publication-preflight.md).
 Source stays 0.5.12 and existing ZIP/tag artifacts are unchanged.

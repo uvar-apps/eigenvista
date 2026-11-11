@@ -12,7 +12,7 @@ probe() {
       printf '%s: unset or empty\n' "$variable"
     fi
   done
-  for host in archive.ubuntu.com security.ubuntu.com packages.microsoft.com; do
+  for host in archive.ubuntu.com security.ubuntu.com mirrors.edge.kernel.org packages.microsoft.com; do
     printf '\ngetent: %s\n' "$host"
     if timeout 5s getent ahosts "$host"; then
       printf 'getent exit: 0\n'
@@ -29,7 +29,7 @@ probe() {
       # Suppress headers and error strings, which may contain proxy values.
       # Only status, timings and exit codes enter the diagnostic artifact.
       if curl --disable --silent --head --location --output /dev/null \
-        --connect-timeout 5 --max-time 10 \
+        --connect-timeout 4 --max-time 8 \
         --write-out 'http=%{http_code} dns=%{time_namelookup} connect=%{time_connect} total=%{time_total}\n' \
         "${curl_options[@]}" "https://$host/"; then
         printf 'curl exit: 0\n'
@@ -53,7 +53,9 @@ fi
 script=$(realpath "${BASH_SOURCE[0]}")
 probe runner
 for account in root _apt; do
-  if sudo --preserve-env=TMPDIR,TMP,TEMP -u "$account" bash "$script" --probe "$account"; then
+  # Feed the script through stdin: the runner's workspace may not be traversable
+  # by _apt, and diagnostics must not broaden its filesystem permissions.
+  if sudo --preserve-env=TMPDIR,TMP,TEMP -u "$account" bash -s -- --probe "$account" < "$script"; then
     continue
   else
     status=$?

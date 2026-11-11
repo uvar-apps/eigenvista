@@ -1,4 +1,4 @@
-import { scenePixels } from "./scenePixels";
+import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -8,6 +8,7 @@ type DensityWorkerProbe = {
   request: number | null;
   sampling: boolean;
   completed: boolean;
+  held: boolean;
   terminated: boolean;
 };
 type ProbedWindow = Window & { densityWorkerProbe: DensityWorkerProbe };
@@ -28,49 +29,68 @@ async function save(page: Page, filename: string): Promise<EigenVistaDocument> {
   );
 }
 
-test("a real high-resolution density worker leaves the scene responsive and can be cancelled without changing saved meshes", async ({
+test("real density sampling stays responsive and cancellation discards its held result without changing saved meshes", async ({
   page,
 }, testInfo) => {
   test.setTimeout(120_000);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("dialog", (dialog) => dialog.accept());
+  await trackSceneDraws(page);
   await page.addInitScript(() => {
     const control = window as unknown as ProbedWindow;
     control.densityWorkerProbe = {
       request: null,
       sampling: false,
       completed: false,
+      held: false,
       terminated: false,
     };
     let generatingWorker: Worker | null = null;
-    const post = Worker.prototype.postMessage;
-    const terminate = Worker.prototype.terminate;
-    Worker.prototype.postMessage = function (
-      message,
-      options?: StructuredSerializeOptions | Transferable[],
-    ) {
-      if (message.action === "generate" && message.args.resolution === 48) {
-        generatingWorker = this;
-        control.densityWorkerProbe.request = message.id;
-        this.addEventListener("message", ({ data }) => {
-          if (data.id !== message.id) return;
+    const NativeWorker = window.Worker;
+    window.Worker = class DensityWorker extends NativeWorker {
+      private generationId: number | null = null;
+      constructor(url: string | URL, options?: WorkerOptions) {
+        super(url, options);
+        // Observe real sampling before the bridge receives progress. Hold only
+        // a terminal result so variable camera/render latency cannot publish it
+        // before Cancel; the calculation itself is neither delayed nor replaced.
+        this.addEventListener("message", (event: MessageEvent) => {
+          const { data } = event;
+          if (data.id !== this.generationId) return;
           if (data.progress === "sampling")
             control.densityWorkerProbe.sampling = true;
           if ("result" in data || "error" in data)
             control.densityWorkerProbe.completed = true;
+          if (Object.hasOwn(data, "result")) {
+            control.densityWorkerProbe.held = true;
+            event.stopImmediatePropagation();
+          }
         });
       }
-      post.call(
-        this,
-        message,
-        Array.isArray(options) ? { transfer: options } : options,
-      );
-    };
-    Worker.prototype.terminate = function () {
-      if (this === generatingWorker)
-        control.densityWorkerProbe.terminated = true;
-      terminate.call(this);
+      postMessage(
+        message: {
+          id: number;
+          action: string;
+          args: { resolution?: number };
+        },
+        options?: StructuredSerializeOptions | Transferable[],
+      ) {
+        if (message.action === "generate" && message.args.resolution === 48) {
+          generatingWorker = this;
+          this.generationId = message.id;
+          control.densityWorkerProbe.request = message.id;
+        }
+        super.postMessage(
+          message,
+          Array.isArray(options) ? { transfer: options } : options,
+        );
+      }
+      terminate() {
+        if (this === generatingWorker)
+          control.densityWorkerProbe.terminated = true;
+        super.terminate();
+      }
     };
   });
   await page.goto("/");
@@ -104,6 +124,7 @@ test("a real high-resolution density worker leaves the scene responsive and can 
   await expect
     .poll(async () => (await pixels(page)).positive)
     .toBeGreaterThan(250);
+  await settleScene(page);
   const beforeRotation = await pixels(page);
   await page.getByLabel("Grid resolution", { exact: true }).selectOption("48");
   await page
@@ -115,7 +136,8 @@ test("a real high-resolution density worker leaves the scene responsive and can 
   await expect(page.locator("footer [role=status]")).toContainText(
     "Sampling field",
   );
-  // Observe the actual worker, without delaying or substituting its calculation.
+  // This early heartbeat observes genuine sampling in the real worker; the
+  // terminal-result hold does not delay or substitute the calculation.
   const response = await page.evaluate(async () => {
     let frames = 0;
     let timer = false;
@@ -143,11 +165,24 @@ test("a real high-resolution density worker leaves the scene responsive and can 
   await expect(
     page.getByRole("button", { name: "Cancel", exact: true }),
   ).toBeEnabled();
-  const canvas = (await page.locator("canvas").boundingBox())!;
-  await page.mouse.move(
-    canvas.x + canvas.width * 0.4,
-    canvas.y + canvas.height * 0.5,
-  );
+  // Separately exercise cancellation of completed-but-unpublished work. Waiting
+  // for this real result makes the camera interaction independent of relative
+  // evaluator/rendering speed; no synthetic result enters the request.
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () => (window as unknown as ProbedWindow).densityWorkerProbe.held,
+        ),
+      { timeout: 90_000 },
+    )
+    .toBe(true);
+  const scene = page.getByLabel("Molecular scene", { exact: true });
+  const dimensions = (await scene.boundingBox())!;
+  await scene.hover({
+    position: { x: dimensions.width * 0.4, y: dimensions.height * 0.5 },
+  });
+  const canvas = (await scene.boundingBox())!;
   await page.mouse.down();
   await page.mouse.move(
     canvas.x + canvas.width * 0.65,
@@ -155,14 +190,18 @@ test("a real high-resolution density worker leaves the scene responsive and can 
     { steps: 3 },
   );
   await page.mouse.up();
-  await expect
-    .poll(async () => (await pixels(page)).checksum)
-    .not.toBe(beforeRotation.checksum);
-  expect(
-    await page.evaluate(
-      () => (window as unknown as ProbedWindow).densityWorkerProbe.completed,
-    ),
-  ).toBeFalsy();
+  await settleScene(page);
+  expect((await pixels(page)).checksum).not.toBe(beforeRotation.checksum);
+  // The actual calculation is complete, but its held result must remain
+  // unpublished. Active 256-cubed interruption is covered separately in
+  // high-resolution.spec.ts.
+  const pending = await page.evaluate(
+    () => (window as unknown as ProbedWindow).densityWorkerProbe,
+  );
+  expect(pending).toMatchObject({ completed: true, held: true });
+  await expect(
+    page.getByRole("button", { name: "Cancel", exact: true }),
+  ).toBeEnabled();
   const cancelled = Date.now();
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.locator("footer [role=status]")).toContainText(
@@ -175,7 +214,8 @@ test("a real high-resolution density worker leaves the scene responsive and can 
     ),
   ).toMatchObject({
     sampling: true,
-    completed: false,
+    completed: true,
+    held: true,
     terminated: true,
   });
   await expect(page.getByRole("alert")).toHaveCount(0);

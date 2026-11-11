@@ -38,6 +38,8 @@ jobs:
             printf '%s=%s/tmp\n' "$variable" "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
           done
       - name: Configure bounded Ubuntu package downloads
+        id: linux_package_setup
+        timeout-minutes: 2
         run: bash ci/prepare-linux-packages.sh 2>&1 | tee "$TMPDIR/rust-package-setup.log"
       - name: Install Tauri Linux prerequisites
         id: linux_dependencies
@@ -48,7 +50,7 @@ jobs:
             build-essential curl wget file pkg-config libwebkit2gtk-4.1-dev \
             libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev 2>&1 | tee -a "$TMPDIR/rust-package-install.log"
       - name: Diagnose Linux package network failures
-        if: ${{ failure() && steps.linux_dependencies.outcome == 'failure' }}
+        if: ${{ failure() && (steps.linux_package_setup.outcome == 'failure' || steps.linux_dependencies.outcome == 'failure') }}
         timeout-minutes: 5
         run: bash ci/diagnose-linux-network.sh 2>&1 | tee "$TMPDIR/rust-package-network.log"
       - name: Install and inspect the repository-selected Rust toolchain
@@ -153,6 +155,8 @@ jobs:
           unset RUSTUP_TOOLCHAIN
           npm --prefix app run build 2>&1 | tee "$TMPDIR/frontend-build.log"
       - name: Configure bounded Ubuntu package downloads
+        id: linux_package_setup
+        timeout-minutes: 2
         run: bash ci/prepare-linux-packages.sh 2>&1 | tee "$TMPDIR/browser-package-setup.log"
       - name: Install Chromium, WebKit and their Linux dependencies
         id: linux_dependencies
@@ -161,7 +165,7 @@ jobs:
           sudo --preserve-env=TMPDIR,TMP,TEMP "$(command -v node)" app/node_modules/playwright/cli.js install-deps chromium webkit 2>&1 | tee "$TMPDIR/browser-package-install.log"
           npm --prefix app exec -- playwright install chromium webkit 2>&1 | tee -a "$TMPDIR/browser-package-install.log"
       - name: Diagnose Linux package network failures
-        if: ${{ failure() && steps.linux_dependencies.outcome == 'failure' }}
+        if: ${{ failure() && (steps.linux_package_setup.outcome == 'failure' || steps.linux_dependencies.outcome == 'failure') }}
         timeout-minutes: 5
         run: bash ci/diagnose-linux-network.sh 2>&1 | tee "$TMPDIR/browser-package-network.log"
       - name: Build derived native reference documents from frozen fixtures
@@ -169,6 +173,7 @@ jobs:
           unset RUSTUP_TOOLCHAIN
           cargo run --manifest-path Cargo.toml --locked -p eigenvista-format --example reference_documents
       - name: Run the full Chromium and WebKit suite
+        timeout-minutes: 35
         working-directory: app
         run: |
           unset RUSTUP_TOOLCHAIN

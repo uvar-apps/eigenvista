@@ -27,20 +27,39 @@ runtime, compiler and dependency versions remain unchanged.
 Linux Clippy installs Tauri's WebKitGTK 4.1 development dependencies. The browser
 job installs only the locked Playwright package's Chromium/WebKit engines and
 their native dependencies. A [CI-only package setup](prepare-linux-packages.sh)
-removes the runner image's Azure mirror after the initial hosted run could not
-resolve it, retaining the image's official HTTPS Ubuntu archives and signature
-checks. APT fails on any index-update error, retries once, and limits HTTP/HTTPS
-transport waits to 30 seconds; each dependency-install step has a ten-minute
-limit. Setup/install output joins the failure logs. This follows the image's
-[mirror configuration](https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/configure-apt-sources.sh)
-and Ubuntu's [APT configuration](https://manpages.ubuntu.com/manpages/noble/man5/apt.conf.5.html).
+preserves provider-specific sources. Observed AWS jobs used inherited HTTP EC2
+and security sources successfully; Azure jobs could not resolve Ubuntu archive
+domains. Where an image mirrorlist exists, the helper checks its preferred
+Ubuntu host with a five-second DNS deadline. Only if that lookup fails and a
+ten-second normal-TLS InRelease probe succeeds, it adds the fixed
+`https://mirrors.edge.kernel.org/ubuntu/` fallback at explicit `priority:0`.
+Existing entries/priorities remain; images without that file retain their
+sources. No DNS, TLS, GPG/keyring or sandbox policy is relaxed. APT itself must
+validate signed indexes successfully before installing packages.
+
+Kernel.org appears in Ubuntu's [registered archive list](https://launchpad.net/ubuntu/+archivemirrors),
+and its [operator documents the HTTPS service](https://mirrors.edge.kernel.org/).
+Local normal-TLS checks fetched Noble and Noble-security InRelease successfully;
+hosted selection/installation remains a separate gate in the status record.
+APT's [mirror format](https://manpages.ubuntu.com/manpages/noble/man1/apt-transport-mirror.1.html)
+tries lower priorities first; its [implementation](https://github.com/Debian/apt/blob/main/methods/mirror.cc)
+parses explicit zero, while omitted priorities use the maximum unsigned value.
+The earlier [Azure image setup](https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/configure-apt-sources.sh)
+is evidence for that image only, not every provider's configuration.
+
+APT fails on any index-update error, retries once, and limits HTTP/HTTPS
+transport waits to 30 seconds. Package-source setup has a two-minute deadline,
+and each dependency-install step has ten minutes. Setup/install output joins
+the failure logs; see [APT configuration](https://manpages.ubuntu.com/manpages/noble/man5/apt.conf.5.html).
 If installation fails, a [read-only network probe](diagnose-linux-network.sh)
 compares DNS lookup and non-verbose curl results as the runner, root and `_apt`,
 including a direct connection that ignores proxies. It records proxy variable
 names/presence, public DNS results, HTTP status/timings and exit codes, never
 proxy values or response headers. Each lookup/request has its own deadline;
 the diagnostic step is limited to five minutes and joins the failure artifact.
-It changes no DNS, signature-verification or apt sandbox settings.
+It includes Kernel.org reachability and changes no DNS, signature-verification
+or apt sandbox settings. Probes are fed through stdin so `_apt` does not need
+permission to traverse the runner's workspace.
 The browser [configuration](playwright.config.mts) imports the
 normal application config, retaining the full test set, engines, single worker
 and timeouts. It refuses to reuse another server, rejects focused tests and adds
@@ -55,6 +74,9 @@ documents, private exports, source archives and packaged applications are not
 uploaded. The workflow builds no tester ZIP and publishes no release. It uses no
 dependency/build/browser caches, so a cache hit is never required for correctness.
 Superseded runs for the same pull request or branch are cancelled.
+The browser-test step has a 35-minute deadline inside its 60-minute job, leaving
+time for failure artifact upload if the suite stalls. This bounds the process
+without changing individual test timeouts, assertions or the full test selection.
 
 Actions are pinned to full commit SHAs, resolved from the official repositories'
 release tags on 11 November 2026:

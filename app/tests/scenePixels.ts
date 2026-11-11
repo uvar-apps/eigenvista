@@ -1,5 +1,48 @@
 import type { Page } from "@playwright/test";
 
+type DrawProbedWindow = Window & { sceneDraws: number };
+
+/** Observe real draws before app startup, without changing rendering behavior. */
+export async function trackSceneDraws(page: Page) {
+  await page.addInitScript(() => {
+    const state = window as unknown as DrawProbedWindow;
+    state.sceneDraws = 0;
+    const prototype = WebGL2RenderingContext.prototype as unknown as Record<
+      string,
+      (...args: unknown[]) => void
+    >;
+    for (const name of [
+      "drawElements",
+      "drawArrays",
+      "drawElementsInstanced",
+      "drawArraysInstanced",
+    ]) {
+      const original = prototype[name];
+      prototype[name] = function (this: WebGL2RenderingContext, ...args) {
+        state.sceneDraws++;
+        return Reflect.apply(original, this, args);
+      };
+    }
+  });
+}
+
+/** Let camera fitting/damping finish before comparing real interaction frames. */
+export async function settleScene(page: Page) {
+  await page.evaluate(async () => {
+    let previous = -1;
+    let stable = 0;
+    for (let frame = 0; frame < 240; frame++) {
+      await new Promise(requestAnimationFrame);
+      const draws = (window as unknown as DrawProbedWindow).sceneDraws;
+      if (draws === undefined) throw new Error("Scene draw probe not installed");
+      stable = draws === previous ? stable + 1 : 0;
+      previous = draws;
+      if (stable === 4) return;
+    }
+    throw new Error("Scene did not settle within 240 animation frames");
+  });
+}
+
 /** Inspect actual PNG bytes, independently of the WebGL backbuffer lifetime. */
 export async function pngPixels(page: Page, png: Buffer) {
   return page.evaluate(async (base64) => {

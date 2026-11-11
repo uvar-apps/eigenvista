@@ -25,12 +25,40 @@ all three jobs must pass before merge. The first setup run at `b13dae6` proved
 clean hosted Rust 1.99.0 installation and passed all seven macOS shell tests.
 It also exposed two infrastructure/build problems: missing declared Node types
 and an unresolvable Azure Ubuntu mirror. Node declarations now match the
-previously inherited 26.1.2 version and are locked locally; both Linux jobs use
-the runner's official HTTPS Ubuntu mirrors, normal signatures, strict update
-errors and bounded retries/timeouts. The failed browser job successfully uploaded
+previously inherited 26.1.2 version and are locked locally. Linux package setup
+preserves working provider sources, normal signatures, strict update errors and
+bounded retries/timeouts. The failed browser job successfully uploaded
 only its two diagnostic logs with the configured seven-day retention; the
-downloaded archive matched GitHub's reported checksum. No local system settings
-were changed by the CI-only Linux setup helper.
+downloaded archive matched GitHub's reported checksum. Fresh Linux retries
+also encountered DNS failures for the official Ubuntu archives. Bounded,
+read-only failure probes compare runner/root/apt DNS and HTTP access, exposing
+only proxy presence rather than values. One failing runner showed Ubuntu DNS
+timeouts as runner/root, no configured proxies, and successful Microsoft DNS/
+HTTPS; a separate AWS browser runner installed Ubuntu dependencies from its
+preferred EC2 mirror successfully. Final setup preserves existing entries and
+priorities. Only when the preferred Ubuntu host fails bounded DNS lookup and
+a normal-TLS probe of the fixed Kernel.org Ubuntu mirror succeeds does it add
+that fallback with higher APT preference. Apt still verifies signed indexes;
+local probe success alone does not establish hosted installation success.
+An initial apt-user probe could not read the private workspace, so subsequent
+probes receive the script through stdin without changing permissions or the
+apt sandbox. Configuration changes alone do not establish that connectivity or
+the hosted gates pass. No local system settings were changed by the CI-only
+Linux setup helper.
+
+The first usable Linux browser run progressed through Chromium case 144/294
+before diagnostic cancellation to retrieve its log. Two camera polls timed out
+without a completed image comparison; their enclosing five-second deadline
+could expire during compositor capture, rather than demonstrate an unchanged
+camera. A late density assertion also assumed computation remained unfinished
+during camera/pixel roundtrips. Tests now settle real draw activity, verify the
+drag target and compare completed captures outside the nested poll, retaining
+the image-change assertions. The density test retains its early real-work
+heartbeat, then explicitly holds a real result for cancellation before
+publication. Unchanged 256-cubed tests still assert interruption of unfinished
+computation. No application defect was reproduced; assertions and per-test
+timeouts remain. The 35-minute browser step deadline leaves upload time inside
+the 60-minute job; externally cancelled diagnostics did not upload screenshots.
 
 Zero-occupation Molden contractions are skipped after full input validation;
 all virtual orbital data and existing allocations remain. Full publication
@@ -42,8 +70,10 @@ and their type dependency were added to the npm lock.
 
 Fresh local checks pass all **226 workspace Rust tests**, strict workspace/
 all-target Clippy, Rustfmt, a clean locked npm install and production WASM/
-TypeScript/Vite build. All **294 Chromium/WebKit cases** pass in one **7.3-minute**
+TypeScript/Vite build. All **294 Chromium/WebKit cases** pass in one **7.8-minute**
 run, including four new actual-WASM/worker publication/recovery/cancel cases.
+This final run includes the hosted-test synchronization changes; 14 focused
+camera/density/active-cancellation cases also pass across both engines.
 The original uncompressed manifest/decoder compatibility test passes after
 refining the contract to exclude compression bytes. All **13 packaging support
 tests** pass; the debug Apple Silicon app is rebuilt. Browser screenshots and

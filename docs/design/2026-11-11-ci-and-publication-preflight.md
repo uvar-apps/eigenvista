@@ -16,12 +16,36 @@ same engines, workers and test selection while owning its server and recording
 failure screenshots/traces/reports. It does not require caches, secrets or
 changes to scientific references. See [CI details](../../ci/README.md).
 
+Hosted package setup retains provider-specific sources. Repeated Azure Ubuntu
+DNS failures and a successful AWS EC2 mirror established a provider difference,
+not a general DNS failure. A bounded preferred-host lookup may select the fixed
+Kernel.org Ubuntu HTTPS fallback only after a successful normal-TLS InRelease
+probe. Existing entries/priorities, signed-index validation and the apt sandbox
+remain; strict update errors prevent stale indexes from hiding setup failures.
+Failure probes compare public hosts as runner/root/apt without exposing proxy
+values. Local mirror probes and hosted installation are distinct evidence.
+
 Clean hosted installation exposed an undeclared dependency: local TypeScript
 had found Node declarations in an enclosing home-directory node_modules.
 The project now explicitly locks @types/node 26.1.2, the same declarations
 previously exercised locally, and enables Node types for tests/configuration.
 Existing dependency versions, Node/Rust compiler pins and runtime packages are
 unchanged. This build repair is part of #32, not a suppression of type checks.
+
+The first usable Linux browser run also exposed existing test timing assumptions.
+Two camera checks now wait for real draw activity to settle and target the
+actionable canvas before dragging, retaining their image-change assertions.
+Their hosted poll errors did not contain a completed comparison: a slow
+compositor capture could exhaust the enclosing five-second poll before its
+first sample. Settled captures now run outside that nested poll, within the
+existing test/capture budgets; the checks still require changed image bytes.
+The density test retains its early actual-sampling/timer/frame heartbeat, then
+holds only a real terminal result to test cancellation before publication after
+variable camera work. It explicitly distinguishes that stage from the unchanged
+256-cubed checks, which cancel real unfinished computation. No application
+camera/cancellation defect was reproduced by this investigation; no production
+behavior or individual test timeout was changed. A separate 35-minute CI test
+step deadline leaves time for failure diagnostics within the 60-minute job.
 
 Molden density construction skips only exactly zero occupations after full
 orbital parsing and validation. It retains every listed orbital and its
