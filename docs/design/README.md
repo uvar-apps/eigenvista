@@ -23,6 +23,7 @@ fact*; this directory records *decisions before the fact*.
 
 | Date | Design | Status | Issue |
 | --- | --- | --- | --- |
+| 2026-11-11 | [Hosted verification and exact publication preflight](2026-11-11-ci-and-publication-preflight.md) | implemented | [#32](https://github.com/uvar-apps/eigenvista/issues/32), [#33](https://github.com/uvar-apps/eigenvista/issues/33), [#34](https://github.com/uvar-apps/eigenvista/issues/34) |
 | 2026-11-11 | [Native lifecycle and Molden capacity contracts](2026-11-11-native-lifecycle-and-molden-limits.md) | implemented | [#30](https://github.com/uvar-apps/eigenvista/issues/30), [#31](https://github.com/uvar-apps/eigenvista/issues/31) |
 | 2026-11-06 | [BinaryCIF import and viewer capture](2026-11-06-binarycif-and-capture.md) | implemented | [#21](https://github.com/uvar-apps/eigenvista/issues/21), [#7](https://github.com/uvar-apps/eigenvista/issues/7), [#4](https://github.com/uvar-apps/eigenvista/issues/4) |
 | 2026-11-06 | [Bond search and declared mmCIF connections](2026-11-06-bond-search-and-cif-connections.md) | implemented | [#3](https://github.com/uvar-apps/eigenvista/issues/3), [#19](https://github.com/uvar-apps/eigenvista/issues/19) |

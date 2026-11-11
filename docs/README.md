@@ -42,7 +42,8 @@ limits of opening new saves in older builds.
 | Libraries, provenance, licensing | [Dependency record](dependencies.md) and [license](../LICENSE) |
 | Independent scientific references and regeneration | [PySCF fixtures](../fixtures/pyscf/README.md) |
 | Large-structure rendering and format regression input (RCSB PDB 4PJ1) | [Large-structure fixtures](../fixtures/large-structure/README.md) |
-| Cross-platform checks and absence of active hosted CI | [Portability checks](../ci/README.md) |
+| Hosted verification jobs, failure artifacts and local portability checks | [CI guide](../ci/README.md) |
+| Zero-occupation import, exact non-compressing publication validation and measurements | [CI/preflight decisions](design/2026-11-11-ci-and-publication-preflight.md) |
 | Design decisions, rejected alternatives, and their reasoning before implementation | [Design records](design/README.md) |
 | Dated independent review, verification evidence, and prioritised findings | [2026-10-04 code review](reviews/2026-10-04-code-review.md) |
 | Sampled preview quality, conservative brick skipping, and shader alpha policy | [Rendering decisions](design/2026-11-06-rendering-quality.md) |

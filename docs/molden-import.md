@@ -186,6 +186,12 @@ produce alpha, beta, total, and alpha-minus-beta spin matrices. A single spatial
 set produces one `total`-kind matrix; beta-only produces one `beta` matrix.
 If any occupation is missing, no derived density is made.
 
+Exactly zero occupations, including negative zero, contribute nothing to density
+construction and skip the outer-product work. Their orbitals, coefficients and
+metadata are still fully validated and retained for listing, rendering and saving.
+Every nonzero fractional occupation contributes as before; this is not screening
+or a change to the numerical density definition.
+
 These fields are labelled **Occupation-derived ... (listed orbitals)** and
 carry a warning. They are not independently supplied correlated, difference,
 or transition density matrices. Incomplete orbital exports, ECP core electrons,

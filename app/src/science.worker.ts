@@ -38,8 +38,8 @@ self.onmessage = async (event: MessageEvent) => {
         break;
       case "validate":
         progress("validating");
-        // Check source identity and native container budgets before publication.
-        core.encode(JSON.stringify(args.doc));
+        // Share Save's exact source/array/manifest budgets without ZIP compression.
+        core.validate_document(JSON.stringify(args.doc));
         result = null;
         break;
       case "import":

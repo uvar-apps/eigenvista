@@ -767,6 +767,10 @@ fn finish_orbitals(document: &mut Document, warnings: &mut Vec<String>) -> Resul
         let mut beta = vec![0.; size];
         for orbital in &document.orbitals {
             let occupation = orbital.occupation.unwrap();
+            // Virtual orbitals retain their validated metadata and coefficients.
+            if occupation == 0. {
+                continue;
+            }
             let target = if orbital.spin == "beta" {
                 &mut beta
             } else {

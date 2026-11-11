@@ -282,11 +282,14 @@ Multi-orbital generation uses the same `generate` operation serially for up to
 32 distinct orbital IDs in document order. The parent rechecks the selection
 and stages all results without publishing partial meshes. The retained plus
 generated geometry is bounded by 128 surfaces and an estimated 128 MiB of
-f64 positions/normals and u32 indices. The worker's `validate` operation also
-encodes the complete combined document through the Rust native format and
-discards the output, checking model and native-container budgets with all
-retained scientific inputs before commit. This persistence preflight has an
-additional encoding/memory cost but writes no file. These are preview rejection
+f64 positions/normals and u32 indices. The worker's `validate` operation calls the
+Rust format's full `validate_document` preflight, shared with Save. It checks
+model/source identity, array-entry count, exact manifest bytes and total
+uncompressed bytes including all retained scientific inputs before commit.
+It builds the existing serde/array representation and hashes without creating
+or compressing a ZIP. Save still compresses the same prepared entries. The older
+WASM `validate` API remains model-only and is not the publication guard. Preflight
+still scales with retained data and allocates temporary arrays; these are preview rejection
 budgets, not guarantees of acceptable memory use or latency. Cancellation or
 a recoverable batch error leaves previous surfaces untouched. A successful batch replaces
 only selected fields' meshes, keeps unrelated saved meshes, and enters mesh mode.

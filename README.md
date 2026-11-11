@@ -13,9 +13,10 @@ a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
 **Status:** version 0.5.12 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
 
-Current source adds native close/quit protection and corrects the documented
-Molden limits (#30/#31). The published 0.5.12 tester ZIP predates these fixes;
-this repair does not create a new release or redistributable archive.
+Current source adds native close/quit protection, correct Molden limits, hosted
+verification, and reduced Molden-import/surface-publication work (#30–#34).
+The published 0.5.12 tester ZIP predates these repairs; they do not create a new
+release or redistributable archive.
 
 ## Start here
 

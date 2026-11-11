@@ -8,6 +8,101 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## CI and import/publication performance: 11 November 2026
+
+Issues [#32](https://github.com/uvar-apps/eigenvista/issues/32),
+[#33](https://github.com/uvar-apps/eigenvista/issues/33) and
+[#34](https://github.com/uvar-apps/eigenvista/issues/34) are implemented in
+[PR #45](https://github.com/uvar-apps/eigenvista/pull/45), developed on
+`codex/ci-and-import-validation-performance` from merged main `3fef7d4`.
+Version remains 0.5.12; published 6 November artifacts predate these changes.
+See the [decision/measurement record](design/2026-11-11-ci-and-publication-preflight.md).
+
+Verify CI runs pinned Linux Rust/WASM/browser/package gates and explicit macOS
+desktop tests, with read-only permissions and seven-day failure artifacts.
+Canonical hosted head/job evidence is the [PR checks](https://github.com/uvar-apps/eigenvista/pull/45/checks);
+all three jobs must pass before merge. The first setup run at `b13dae6` proved
+clean hosted Rust 1.99.0 installation and passed all seven macOS shell tests.
+It also exposed two infrastructure/build problems: missing declared Node types
+and an unresolvable Azure Ubuntu mirror. Node declarations now match the
+previously inherited 26.1.2 version and are locked locally. Linux package setup
+preserves working provider sources, normal signatures, strict update errors and
+bounded retries/timeouts. The failed browser job successfully uploaded
+only its two diagnostic logs with the configured seven-day retention; the
+downloaded archive matched GitHub's reported checksum. Fresh Linux retries
+also encountered DNS failures for the official Ubuntu archives. Bounded,
+read-only failure probes compare runner/root/apt DNS and HTTP access, exposing
+only proxy presence rather than values. One failing runner showed Ubuntu DNS
+timeouts as runner/root, no configured proxies, and successful Microsoft DNS/
+HTTPS; a separate AWS browser runner installed Ubuntu dependencies from its
+preferred EC2 mirror successfully. Final setup preserves existing entries and
+priorities. Only when the preferred Ubuntu host fails bounded DNS lookup and
+a normal-TLS probe of the fixed Kernel.org Ubuntu mirror succeeds does it add
+that fallback with higher APT preference. Apt still verifies signed indexes;
+local probe success alone does not establish hosted installation success.
+An initial apt-user probe could not read the private workspace, so subsequent
+probes receive the script through stdin without changing permissions or the
+apt sandbox. Configuration changes alone do not establish that connectivity or
+the hosted gates pass. No local system settings were changed by the CI-only
+Linux setup helper.
+
+The first usable Linux browser run progressed through Chromium case 144/294
+before diagnostic cancellation to retrieve its log. Two camera polls timed out
+without a completed image comparison; their enclosing five-second deadline
+could expire during compositor capture, rather than demonstrate an unchanged
+camera. A late density assertion also assumed computation remained unfinished
+during camera/pixel roundtrips. Tests now settle real draw activity, verify the
+drag target and compare completed captures outside the nested poll, retaining
+the image-change assertions. The density test retains its early real-work
+heartbeat, then explicitly holds a real result for cancellation before
+publication. Unchanged 256-cubed tests still assert interruption of unfinished
+computation. No application defect was reproduced; assertions and per-test
+timeouts remain. The 35-minute browser step deadline leaves upload time inside
+the 60-minute job; externally cancelled diagnostics did not upload screenshots.
+
+Zero-occupation Molden contractions are skipped after full input validation;
+all virtual orbital data and existing allocations remain. Full publication
+validation shares exact semantic/source/entry/manifest/uncompressed budgets with
+Save, without constructing/compressing a ZIP. The older model-only WASM API
+remains distinct. Scientific limits, hashes/profiles and existing dependency/
+compiler/runtime versions are unchanged; only missing Node development types
+and their type dependency were added to the npm lock.
+
+Fresh local checks pass all **226 workspace Rust tests**, strict workspace/
+all-target Clippy, Rustfmt, a clean locked npm install and production WASM/
+TypeScript/Vite build. All **294 Chromium/WebKit cases** pass in one **7.8-minute**
+run, including four new actual-WASM/worker publication/recovery/cancel cases.
+This final run includes the hosted-test synchronization changes; 14 focused
+camera/density/active-cancellation cases also pass across both engines.
+The original uncompressed manifest/decoder compatibility test passes after
+refining the contract to exclude compression bytes. All **13 packaging support
+tests** pass; the debug Apple Silicon app is rebuilt. Browser screenshots and
+documentation links/commands are reviewed separately from native GUI acceptance.
+
+Scoped optimized native measurements on Apple M4/macOS 27/Rust 1.99.0:
+
+- Synthetic UHF import (512 AOs/512 listed MOs/40 occupied): median process mean
+  **56.781 to 5.792 ms**, about 9.8x for this stress input. The frozen small
+  hydroxyl fixture has no meaningful timing gain. Density hashes match and
+  process RSS is effectively unchanged; no memory reduction is claimed.
+- First/later retained-mesh publication checks: original encode medians
+  **29.534/52.197/88.296 ms** versus non-compressing validation
+  **9.350/13.099/22.345 ms** for 1/15/31 meshes. Maximum process RSS is similar,
+  approximately 58–98 MB. Original/new Save bytes match for all three documents.
+  These isolate native format work, not end-to-end browser generation.
+
+Raw measurement provenance/commands and limitations are in the decision record;
+integration logs remain in `tmp/2026-11-11-ci-import-validation/`, import logs
+in `tmp/issue33-*` and publication logs/old archives in `tmp/publication-validation/`.
+No input/reference answer was regenerated. The original review remains untracked.
+
+Clean npm installation reports existing Vite development-tool advisories;
+[#46](https://github.com/uvar-apps/eigenvista/issues/46) tracks their assessment
+and patch planning separately. No project-specific exposure is reproduced and
+Vite was not upgraded by this batch. Physical macOS controls/native dialogs,
+HiDPI, clean-machine installation and Linux/Windows distribution qualification
+remain separate gates; hosted tests do not establish them.
+
 ## Native lifecycle and Molden limits: 11 November 2026
 
 Issues [#30](https://github.com/uvar-apps/eigenvista/issues/30) and

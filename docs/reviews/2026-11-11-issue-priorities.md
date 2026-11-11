@@ -29,6 +29,24 @@ After this batch, next work is #32, #33 and #34, then the P3 investigations and
 existing #20/#22. No implementation of those remaining issues is authorized by
 the #30/#31 request. The table below preserves initial classifications/priorities.
 
+## Batch B/C implementation follow-up
+
+The user next authorized #32/#33/#34 through a separate branch and PR.
+[PR #45](https://github.com/uvar-apps/eigenvista/pull/45) implements hosted
+verification, the exact zero-occupation import optimization and shared full
+publication preflight without compression. The
+[decision/measurement record](../design/2026-11-11-ci-and-publication-preflight.md)
+and [status](../status.md#ci-and-importpublication-performance-11-november-2026)
+record scoped measurements, fresh local checks and hosted evidence locations.
+Clean hosted installation also exposed the missing Node type dependency and
+broken preferred Ubuntu mirror; both setup defects are handled under #32.
+
+After merging this batch, #35–#43 and existing #20/#22 remain P3, plus the
+new [#46 Vite advisory assessment](https://github.com/uvar-apps/eigenvista/issues/46).
+Known affected upstream development-tool versions are recorded there; an
+EigenVista exposure is not reproduced. Remaining feature/research work is not
+authorized by the #32/#33/#34 request. The original queue below is historical.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

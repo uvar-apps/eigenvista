@@ -1,4 +1,4 @@
-import { scenePixels } from "./scenePixels";
+import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -12,6 +12,7 @@ const upload = {
 };
 
 async function ready(page: Page) {
+  await trackSceneDraws(page);
   await page.goto("/");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   page.on("dialog", (dialog) => dialog.accept());
@@ -139,12 +140,14 @@ test("cube Open renders both scalar signs directly in volume and raycast on desk
       path: `../artifacts/cube-${testInfo.project.name}-${mode}-desktop.png`,
     });
   }
+  await settleScene(page);
   const before = await pixels(page);
-  const canvas = (await page.locator("canvas").boundingBox())!;
-  await page.mouse.move(
-    canvas.x + canvas.width * 0.4,
-    canvas.y + canvas.height * 0.5,
-  );
+  const scene = page.getByLabel("Molecular scene", { exact: true });
+  const dimensions = (await scene.boundingBox())!;
+  await scene.hover({
+    position: { x: dimensions.width * 0.4, y: dimensions.height * 0.5 },
+  });
+  const canvas = (await scene.boundingBox())!;
   await page.mouse.down();
   await page.mouse.move(
     canvas.x + canvas.width * 0.7,
@@ -152,9 +155,13 @@ test("cube Open renders both scalar signs directly in volume and raycast on desk
     { steps: 12 },
   );
   await page.mouse.up();
-  await expect
-    .poll(async () => (await pixels(page)).checksum)
-    .not.toBe(before.checksum);
+  await settleScene(page);
+  // Complete the compositor read before asserting, rather than expiring a poll
+  // deadline while its first image is still being captured.
+  const rotated = await pixels(page);
+  expect(rotated.checksum).not.toBe(before.checksum);
+  expect(rotated.positive).toBeGreaterThan(100);
+  expect(rotated.negative).toBeGreaterThan(100);
   await page.getByLabel("Grid resolution").selectOption("24");
   await expect(
     page.getByRole("button", { name: "Generate surfaces" }),
@@ -175,9 +182,9 @@ test("cube Open renders both scalar signs directly in volume and raycast on desk
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBeTruthy();
-  const scene = (await page.locator("canvas").boundingBox())!;
+  const sceneBounds = (await page.locator("canvas").boundingBox())!;
   const panel = (await page.locator(".left-panel").boundingBox())!;
-  expect(scene.y + scene.height).toBeLessThanOrEqual(panel.y);
+  expect(sceneBounds.y + sceneBounds.height).toBeLessThanOrEqual(panel.y);
   expect(errors).toEqual([]);
 });
 

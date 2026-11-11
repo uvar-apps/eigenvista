@@ -1,4 +1,4 @@
-import { scenePixels } from "./scenePixels";
+import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -28,6 +28,7 @@ type CacheProbedWindow = Window & {
 };
 
 async function ready(page: Page) {
+  await trackSceneDraws(page);
   page.on("dialog", (dialog) => dialog.accept());
   await page.goto("/");
   await expect(page.locator("footer [role=status]")).toContainText(
@@ -59,12 +60,14 @@ async function pixels(page: Page) {
 }
 
 async function rotate(page: Page) {
+  await settleScene(page);
   const initial = await pixels(page);
-  const canvas = (await page.locator("canvas").boundingBox())!;
-  await page.mouse.move(
-    canvas.x + canvas.width * 0.4,
-    canvas.y + canvas.height * 0.5,
-  );
+  const scene = page.getByLabel("Molecular scene", { exact: true });
+  const dimensions = (await scene.boundingBox())!;
+  await scene.hover({
+    position: { x: dimensions.width * 0.4, y: dimensions.height * 0.5 },
+  });
+  const canvas = (await scene.boundingBox())!;
   await page.mouse.down();
   await page.mouse.move(
     canvas.x + canvas.width * 0.65,
@@ -72,9 +75,11 @@ async function rotate(page: Page) {
     { steps: 3 },
   );
   await page.mouse.up();
-  await expect
-    .poll(async () => (await pixels(page)).checksum)
-    .not.toBe(initial.checksum);
+  await settleScene(page);
+  // Keep the actual compositor read outside the short predicate deadline.
+  const rotated = await pixels(page);
+  expect(rotated.checksum).not.toBe(initial.checksum);
+  expect(rotated.positive).toBeGreaterThan(250);
 }
 
 async function generate(page: Page, resolution: number) {
