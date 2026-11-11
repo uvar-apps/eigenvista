@@ -12,7 +12,9 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 Issues [#30](https://github.com/uvar-apps/eigenvista/issues/30) and
 [#31](https://github.com/uvar-apps/eigenvista/issues/31) are implemented on
-`codex/native-exit-and-molden-contract` from `fa76ac4`. Source version remains
+`codex/native-exit-and-molden-contract` from `fa76ac4` in
+[PR #44](https://github.com/uvar-apps/eigenvista/pull/44), runtime/test commit
+`36c8491`. Source version remains
 0.5.12; the 6 November tag/ZIP predates these repairs. The
 [decision record](design/2026-11-11-native-lifecycle-and-molden-limits.md)
 documents the native protocol, macOS hook and unchanged scientific limits.

@@ -15,13 +15,15 @@ code. The icon and logo are unchanged.
 
 ### Native lifecycle/Molden limits repair: 11 November 2026
 
-The batch on `codex/native-exit-and-molden-contract` implements
+The batch in [PR #44](https://github.com/uvar-apps/eigenvista/pull/44), developed
+on `codex/native-exit-and-molden-contract` from `fa76ac4`, implements
 [#30 native close/quit protection](https://github.com/uvar-apps/eigenvista/issues/30)
 and [#31 Molden limit documentation](https://github.com/uvar-apps/eigenvista/issues/31).
 The native probe reproduced a default macOS Quit bypass of Tauri ExitRequested;
 the fix adds an AppKit delegate hook plus tokenized current-document decisions,
 Save/Discard/Cancel, late-result checks and conversion/native-save coordination.
 Molden caps/science remain unchanged; boundary tests and current docs now agree.
+Runtime/test changes are commit `36c8491`; subsequent edits only record evidence.
 See the [decisions](design/2026-11-11-native-lifecycle-and-molden-limits.md) and
 [fresh evidence](status.md#native-lifecycle-and-molden-limits-11-november-2026).
 

@@ -15,7 +15,8 @@ previous, completed repair batches; it is not the current queue.
 ## Batch A implementation follow-up
 
 The user subsequently authorized #30/#31 on a separate branch and through a PR.
-Both are implemented on `codex/native-exit-and-molden-contract`. A real native
+Both are implemented in [PR #44](https://github.com/uvar-apps/eigenvista/pull/44)
+on `codex/native-exit-and-molden-contract`, runtime/test commit `36c8491`. A real native
 probe reproduced dirty-document loss through AppKit's default Quit selector,
 which bypassed the proposed Tauri ExitRequested-only guard. The fix includes the
 macOS delegate hook, shared native token protocol and current-document modal
