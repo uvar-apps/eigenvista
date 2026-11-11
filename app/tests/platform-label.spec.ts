@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { installNativeIpc } from "./nativeIpc";
 
 for (const native of [false, true]) {
   test(`runtime badge describes ${native ? "Tauri" : "browser"} without a platform support claim`, async ({
@@ -6,6 +7,7 @@ for (const native of [false, true]) {
   }) => {
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    if (native) await installNativeIpc(page);
     await page.addInitScript((native) => {
       (globalThis as unknown as { isTauri: boolean }).isTauri = native;
     }, native);

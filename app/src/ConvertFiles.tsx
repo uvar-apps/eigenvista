@@ -50,18 +50,51 @@ const queueLimit = 32;
 export function ConvertFiles({
   open,
   onClose,
+  onActivityChange,
+  exitCancel,
 }: {
   open: boolean;
   onClose: () => void;
+  onActivityChange: (pending: boolean) => void;
+  exitCancel: { current: (() => void) | null };
 }) {
   const [{ request, cancel }] = useState(createScienceClient);
   const dialog = useRef<HTMLDialogElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const nextId = useRef(0);
   const run = useRef(0);
-  const [items, setItems] = useState<Conversion[]>([]);
-  const [running, setRunning] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [items, setItemState] = useState<Conversion[]>([]);
+  const [running, setRunningState] = useState(false);
+  const [saving, setSavingState] = useState(false);
+  const live = useRef({ items, running, saving });
+  function publishActivity() {
+    onActivityChange(
+      live.current.running ||
+        live.current.saving ||
+        live.current.items.some((item) =>
+          ["queued", "converting", "ready", "saving"].includes(item.state),
+        ),
+    );
+  }
+  function setItems(
+    update: Conversion[] | ((items: Conversion[]) => Conversion[]),
+  ) {
+    const next =
+      typeof update === "function" ? update(live.current.items) : update;
+    live.current.items = next;
+    setItemState(next);
+    publishActivity();
+  }
+  function setRunning(value: boolean) {
+    live.current.running = value;
+    setRunningState(value);
+    publishActivity();
+  }
+  function setSaving(value: boolean) {
+    live.current.saving = value;
+    setSavingState(value);
+    publishActivity();
+  }
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
   const busy = running || saving;
@@ -183,6 +216,7 @@ export function ConvertFiles({
     setRunning(false);
     setProgress("Conversion cancelled; completed results retained");
   }
+  exitCancel.current = stop;
   async function save(item: Conversion) {
     if (!item.bytes) return;
     setSaving(true);

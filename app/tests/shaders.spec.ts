@@ -1,4 +1,5 @@
 import { scenePixels } from "./scenePixels";
+import { installNativeIpc } from "./nativeIpc";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
@@ -294,19 +295,7 @@ test("out-of-order shader reads compose and Clear discards pending reads", async
 
 for (const outcome of ["saved", "cancelled", "failed"] as const) {
   test(`native parameter export uses its text command and handles ${outcome}`, async ({ page }) => {
-    await page.addInitScript((outcome) => {
-      const state = globalThis as unknown as { isTauri: boolean; __TAURI_INTERNALS__: unknown; parameterExports: { command: string; args: { text: string } }[] };
-      state.isTauri = true;
-      state.parameterExports = [];
-      state.__TAURI_INTERNALS__ = {
-        invoke: async (command: string, args: { text: string }) => {
-          if (command !== "save_shader_parameters") throw new Error(`Unexpected native command: ${command}`);
-          state.parameterExports.push({ command, args });
-          if (outcome === "failed") throw new Error("Deliberate parameter write failure");
-          return outcome === "saved";
-        },
-      };
-    }, outcome);
+    await installNativeIpc(page, { parameterOutcome: outcome });
     await ready(page);
     await loadShaderFiles(page, path.join(shadersDir, "surface-lambert.vert"), path.join(shadersDir, "surface-lambert.frag"), path.join(shadersDir, "surface-lambert.params"));
     const status = await page.locator("footer [role=status]").innerText();

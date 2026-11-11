@@ -131,6 +131,13 @@ Standard verification order for runtime changes (details and coverage map in
 
 ## Traps
 
+- Native close/quit protection spans `lifecycle.rs`, the macOS AppKit delegate
+  hook, and `NativeExitGuard.tsx`. The default macOS Quit selector can bypass
+  Tauri `ExitRequested`; keep the delegate hook and real native smoke checks.
+  Preserve token resynchronization, synchronous document/dirty/activity refs,
+  current-revision Save and conversion/native-save coordination. Browser IPC
+  tests do not establish physical Cmd+Q or native file-dialog acceptance. See
+  [the lifecycle decisions](docs/design/2026-11-11-native-lifecycle-and-molden-limits.md).
 - BinaryCIF transport belongs in `eigenvista-import`, before UTF-8 dispatch.
   Keep MessagePack/decompression/column/output bounds before allocation, the
   original input-byte digest, and shared core mmCIF scientific interpretation.

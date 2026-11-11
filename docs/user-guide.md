@@ -511,9 +511,19 @@ memory. They reach disk only when you Save. Camera position, active render
 mode, and transient sampling cache are not saved. Each mesh keeps its generation
 grid metadata, but the grid-resolution control itself resets on a new app session.
 
-Save before closing or replacing a document. The preview asks before replacing
-modified content and registers a browser close warning, but native window-close
-protection has not been fully verified. There is no autosave or crash recovery.
+On desktop, closing the window or quitting checks for unsaved document changes,
+unfinished operations, and converted files that have not been saved. Choose
+**Cancel** to keep working, **Discard and Quit** to cancel work and quit without
+saving, or **Save and Quit** to save the current document before quitting.
+Cancelled or failed saves keep the document open. If the document changes while
+the prompt is open, review the refreshed prompt before quitting. Finish or cancel
+an existing native save first. Save converted files from their conversion queue;
+**Save and Quit** is unavailable while that queue has unfinished or unsaved work.
+
+The preview also asks before replacing modified content. Browsers use their own
+close warning; confirm that downloads finish before closing the tab. Physical
+native close/Cmd+Q and file-dialog qualification is recorded separately in
+[status](status.md). There is no autosave or crash recovery.
 Keep original data and backups because the native preview schema is not frozen.
 
 ## Problems and limits
@@ -534,14 +544,20 @@ Keep original data and backups because the native preview schema is not frozen.
 
 Current guards include a 128 MiB file/inflated-array budget, a 32 MiB PDB text
 budget, separate 64 MiB BinaryCIF payload and expanded-text limits,
-100,000 selected atoms, 600,000 bonds, 256 basis functions, 64 primitives per
-basis function, 128 cubed total imported/native grid samples, 256 cubed transient
+100,000 selected atoms, 600,000 bonds, 1,024 basis functions, 512 total molecular
+orbitals across all spin blocks, 64 primitives per basis function,
+128 cubed total imported/native grid samples, 256 cubed transient
 samples, a two-million-vertex mesh-output bound, and 128 saved surfaces.
 Meshing counts the actual cell cases before extraction rather than rejecting
 every large grid on an all-cells worst-case estimate. Generation also checks an
 estimated 128 MiB geometry budget before native-format validation. These are
 rejection limits, not recommended workloads or guarantees of total memory use;
 large calculations can be slow well below them.
+
+For complete Molden sets with one orbital per AO, the orbital cap permits up to
+512 AOs for one spatial set or 256 AOs for separate alpha/beta sets. Partial
+listed orbital sets can reach the separate basis cap, subject to other budgets;
+omitted orbitals are not recovered. See [Molden limits](molden-import.md#limits-and-verification).
 
 For a problem report, include the package filename or `BUILD-INFO.json`, Mac
 model/processor, OS version, exact error, steps, and screenshot. Include a small

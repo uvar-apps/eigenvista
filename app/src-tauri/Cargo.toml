@@ -14,3 +14,7 @@ tauri-plugin-fs = "2"
 eigenvista-core = { path = "../../crates/eigenvista-core" }
 eigenvista-format = { path = "../../crates/eigenvista-format" }
 serde_json.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "=0.6.4"
+objc2-app-kit = { version = "=0.3.2", default-features = false, features = ["std", "NSApplication", "NSResponder"] }

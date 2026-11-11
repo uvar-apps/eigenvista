@@ -788,6 +788,8 @@ version = "0.5.12"
 dependencies = [
  "eigenvista-core",
  "eigenvista-format",
+ "objc2",
+ "objc2-app-kit",
  "serde_json",
  "tauri",
  "tauri-build",

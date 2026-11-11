@@ -1,6 +1,7 @@
 # Development handoff
 
-Updated 6 November 2026 for the 0.5.12 release; the dated
+Updated 11 November 2026 for the native lifecycle/Molden limits repair from `fa76ac4`;
+version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
 [development commands](development.md).
@@ -11,6 +12,51 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### Native lifecycle/Molden limits repair: 11 November 2026
+
+The batch in [PR #44](https://github.com/uvar-apps/eigenvista/pull/44), developed
+on `codex/native-exit-and-molden-contract` from `fa76ac4`, implements
+[#30 native close/quit protection](https://github.com/uvar-apps/eigenvista/issues/30)
+and [#31 Molden limit documentation](https://github.com/uvar-apps/eigenvista/issues/31).
+The native probe reproduced a default macOS Quit bypass of Tauri ExitRequested;
+the fix adds an AppKit delegate hook plus tokenized current-document decisions,
+Save/Discard/Cancel, late-result checks and conversion/native-save coordination.
+Molden caps/science remain unchanged; boundary tests and current docs now agree.
+Runtime/test changes are commit `36c8491`; subsequent edits only record evidence.
+See the [decisions](design/2026-11-11-native-lifecycle-and-molden-limits.md) and
+[fresh evidence](status.md#native-lifecycle-and-molden-limits-11-november-2026).
+
+Fresh checks pass 216 workspace Rust tests, strict Clippy/Rustfmt, production
+WASM/frontend and debug Apple Silicon `.app` builds, 13 packaging tests and all
+290 Chromium/WebKit cases in one run. Four actual native scenarios produce
+60 passing observations; the pre-hook AppKit terminate case failed as expected.
+Physical shortcut/button/Dock clicks, native file dialogs, native startup timing
+and clean-Mac/platform qualification remain separate gaps. Version/tag/ZIP stay
+at 0.5.12; the published ZIP predates these fixes. The supplied original review
+remains unchanged and untracked, outside the repair commit.
+
+### Remaining review queue: 11 November 2026
+
+The [November review triage and repair plan](reviews/2026-11-11-issue-priorities.md)
+supersedes the earlier queue. Fourteen issues were initially opened with verified
+bodies/titles/labels. After merging #30/#31, fourteen remain including existing
+#20/#22; verify live GitHub state when continuing. Intentional AO/MO limits are
+not themselves a scientific bug. Next are P2 engineering improvements:
+[#32 hosted CI](https://github.com/uvar-apps/eigenvista/issues/32),
+[#33 zero-occupation import contractions](https://github.com/uvar-apps/eigenvista/issues/33),
+and [#34 validation without discarded ZIP compression](https://github.com/uvar-apps/eigenvista/issues/34).
+
+Issues #35–#43 are P3 with `needs-research`: larger Molden capacity, sampling,
+indexed meshes, typed worker outputs, explicit format encoding/fixtures,
+hash allocations, native save policy, diffuse domains and anisotropy validation.
+They are not confirmed output bugs; measurements, compatibility decisions or
+reproductions must precede implementation. #20/#22 remain P3 design work.
+See the plan for dependencies, acceptance gates and corrections to unsafe or
+unproven review proposals. The initial triage changed no application code; the
+subsequently authorized #30/#31 implementation/evidence is recorded above.
+
+### Completed repair batches: 5–6 November 2026
 
 The fifth repair batch implements #21, #7, and #4 in
 [PR #29](https://github.com/uvar-apps/eigenvista/pull/29), developed on
@@ -43,8 +89,9 @@ Full evidence is maintained in
 [status](status.md#binarycif-and-viewer-polish-6-november-2026).
 The rebuilt native app is signature/frontend verified at 0.5.11; no tag, release,
 or ZIP was requested. Published artifacts predate all five repair batches.
-After this batch, the remaining issue order is crystal symmetry (#20), then
-mmCIF export (#22), both larger research/design activities.
+At that 6 November checkpoint, the remaining issue order was crystal symmetry
+(#20), then mmCIF export (#22), both larger research/design activities. The
+11 November queue above now takes precedence.
 
 The bond/mmCIF batch implements #3 and #19 in
 [PR #28](https://github.com/uvar-apps/eigenvista/pull/28), developed on
@@ -553,6 +600,9 @@ tests and the native destination-guard unit test are separate evidence. The
 existing running app was not restarted during this change.
 
 ## Plan and next work
+
+Use the [11 November repair queue](reviews/2026-11-11-issue-priorities.md) for
+immediate priorities and the table below for longer-term targets.
 
 The [original implementation plan](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/09-implementation-plan.md)
 remains the full target. [Status](status.md) is the authoritative progress table:

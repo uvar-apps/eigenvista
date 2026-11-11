@@ -5,6 +5,7 @@ import path from "node:path";
 import { gzipSync } from "node:zlib";
 import type { EigenVistaDocument } from "../src/types";
 import { scenePixels } from "./scenePixels";
+import { installNativeIpc } from "./nativeIpc";
 
 const raw = readFileSync(path.resolve("../fixtures/bcif/1crn.bcif"));
 const policy = readFileSync(path.resolve("../fixtures/bcif/policy.bcif"));
@@ -251,27 +252,7 @@ test("content and gzip conversion retain the active document and truncated Binar
 test("native Open and Convert pickers both offer BinaryCIF and gzip extensions", async ({
   page,
 }) => {
-  await page.addInitScript(() => {
-    type Options = {
-      multiple: boolean;
-      filters: { name: string; extensions: string[] }[];
-    };
-    const state = globalThis as unknown as {
-      isTauri: boolean;
-      nativePicks: Options[];
-      __TAURI_INTERNALS__: unknown;
-    };
-    state.isTauri = true;
-    state.nativePicks = [];
-    state.__TAURI_INTERNALS__ = {
-      invoke: async (command: string, args: { options: Options }) => {
-        if (command !== "plugin:dialog|open")
-          throw new Error(`Unexpected native command: ${command}`);
-        state.nativePicks.push(args.options);
-        return null; // Cancel the real adapter's dialog request; no import is simulated.
-      },
-    };
-  });
+  await installNativeIpc(page);
   await ready(page);
   await page.getByRole("button", { name: "Open", exact: true }).click();
   await page

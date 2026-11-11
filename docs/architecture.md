@@ -445,6 +445,21 @@ and syncs a new sibling file, then renames it into place. Cancellation or failed
 validation does not replace the existing file. Windows replacement semantics
 need separate qualification. File-format tests are not proof that native
 window close, Save dialog, or download interactions all work end to end.
+
+Native lifecycle protection vetoes window close and application exit until a
+tokenized decision for the current document is resolved. Rust coalesces repeated
+requests; the frontend listener recovers pending requests during initialization
+and cancellation races. The modal Save/Discard/Cancel prompt blocks editing,
+rechecks document identity after asynchronous saves and late calculation results,
+and never authorizes exit after a cancelled/failed save. Persistent document,
+dirty and activity refs update synchronously, before React rendering. Native save
+activity covers document, converted-file and shader-parameter writes; unresolved
+saves block discard. Unwritten conversion results require an explicit discard
+or a return to the queue to save them. Approval invalidates/cancels both worker
+owners before releasing the native exit. Browser beforeunload remains separate.
+See the [lifecycle decision record](design/2026-11-11-native-lifecycle-and-molden-limits.md)
+for native platform integration and the distinction between automated and physical
+GUI acceptance. Scientific/format contracts and capability permissions are unchanged.
 Desktop destinations default to `.eigenvista` and may use the legacy `.molekel`
 suffix. Encoding always writes EigenVista identifiers even with that old suffix,
 so new saves are not guaranteed readable in previous Molekel builds. No automatic
