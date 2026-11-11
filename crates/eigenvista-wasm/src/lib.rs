@@ -21,9 +21,16 @@ pub fn example(open_shell: bool) -> String {
 pub fn validate(json: &str) -> Result<(), JsValue> {
     parse(json).map(|_| ())
 }
+/// Check publication against the same scientific and native budgets as Save.
+#[wasm_bindgen]
+pub fn validate_document(json: &str) -> Result<(), JsValue> {
+    let doc = serde_json::from_str(json).map_err(err)?;
+    eigenvista_format::validate_document(&doc).map_err(err)
+}
 #[wasm_bindgen]
 pub fn encode(json: &str) -> Result<Vec<u8>, JsValue> {
-    eigenvista_format::encode(&parse(json)?).map_err(err)
+    let doc = serde_json::from_str(json).map_err(err)?;
+    eigenvista_format::encode(&doc).map_err(err)
 }
 #[wasm_bindgen]
 pub fn decode(bytes: &[u8]) -> Result<String, JsValue> {

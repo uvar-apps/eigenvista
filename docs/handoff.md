@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 11 November 2026 for the native lifecycle/Molden limits repair from `fa76ac4`;
+Updated 11 November 2026 for CI/import/publication work from merged main `3fef7d4`;
 version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
@@ -12,6 +12,34 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### CI/import/publication batch: 11 November 2026
+
+[PR #45](https://github.com/uvar-apps/eigenvista/pull/45), developed on
+`codex/ci-and-import-validation-performance`, implements #32/#33/#34. Hosted
+Verify jobs use pinned tools, read-only permissions, repository-local temporary
+storage and bounded failure artifacts. A clean-run Node type declaration gap
+and the hosted image's broken Azure apt mirror are repaired without changing
+existing dependency/compiler versions. Check the [actual PR jobs](https://github.com/uvar-apps/eigenvista/pull/45/checks)
+at the reviewed head; all three must succeed before merge. The initial failure
+and successful macOS/diagnostic-upload observations are recorded in
+[status](status.md#ci-and-importpublication-performance-11-november-2026).
+
+Molden skips exactly zero contributions while retaining/validating all orbitals.
+Publication calls the format's exact shared preflight without compression;
+Save and the model-only legacy WASM validation contract remain distinct.
+Source hashes, profile/layout and resource limits are preserved. Local checks
+pass 226 Rust tests, strict Clippy/Rustfmt, clean npm/WASM/frontend and debug
+arm64 app builds, 294 browser cases and 13 packaging tests. Native measurements
+show scoped import/preflight timing gains with similar process memory; see
+[decisions and provenance](design/2026-11-11-ci-and-publication-preflight.md).
+Source stays 0.5.12 and existing ZIP/tag artifacts are unchanged.
+
+After this batch, remaining work is P3 research/features #35–#43, #20/#22 and
+the newly recorded Vite advisory assessment #46. They need their own evidence/
+scope decision; this request does not authorize implementing them. Native GUI,
+clean-Mac/HiDPI and Linux/Windows release qualification remain open. Preserve
+the original untracked review and local diagnostics.
 
 ### Native lifecycle/Molden limits repair: 11 November 2026
 
@@ -42,10 +70,11 @@ The [November review triage and repair plan](reviews/2026-11-11-issue-priorities
 supersedes the earlier queue. Fourteen issues were initially opened with verified
 bodies/titles/labels. After merging #30/#31, fourteen remain including existing
 #20/#22; verify live GitHub state when continuing. Intentional AO/MO limits are
-not themselves a scientific bug. Next are P2 engineering improvements:
+not themselves a scientific bug. The next P2 engineering batch was:
 [#32 hosted CI](https://github.com/uvar-apps/eigenvista/issues/32),
 [#33 zero-occupation import contractions](https://github.com/uvar-apps/eigenvista/issues/33),
 and [#34 validation without discarded ZIP compression](https://github.com/uvar-apps/eigenvista/issues/34).
+Its implementation/evidence is now recorded above.
 
 Issues #35–#43 are P3 with `needs-research`: larger Molden capacity, sampling,
 indexed meshes, typed worker outputs, explicit format encoding/fixtures,

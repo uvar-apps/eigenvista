@@ -10,6 +10,8 @@ use zip::{CompressionMethod, ZipArchive, ZipWriter, write::SimpleFileOptions};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native;
+#[cfg(test)]
+mod preflight_tests;
 
 const BUDGET: usize = 128 * 1024 * 1024;
 const MANIFEST_BUDGET: usize = 8 * 1024 * 1024;
@@ -188,13 +190,34 @@ fn pack(
     Ok(())
 }
 
-pub fn encode(doc: &Document) -> Result<Vec<u8>> {
+#[derive(Clone, Copy)]
+struct PreviewBudget {
+    array_entries: usize,
+    manifest_bytes: usize,
+    total_bytes: usize,
+}
+
+const PREVIEW_BUDGET: PreviewBudget = PreviewBudget {
+    // The manifest occupies the remaining slot in the 8192-entry ZIP limit.
+    array_entries: 8191,
+    manifest_bytes: MANIFEST_BUDGET,
+    total_bytes: BUDGET,
+};
+
+struct PreparedDocument {
+    manifest: Vec<u8>,
+    entries: Vec<(String, Vec<u8>)>,
+}
+
+// Keep packing and exact serialized-size accounting shared with Save. This
+// deliberately retains the current generic serde/array representation and hashes.
+fn preflight(doc: &Document, budget: PreviewBudget) -> Result<PreparedDocument> {
     doc.validate()?;
     let mut value = serde_json::to_value(doc).map_err(|e| e.to_string())?;
     let mut arrays = BTreeMap::new();
     let mut entries = vec![];
     pack(&mut value, &mut arrays, &mut entries)?;
-    if entries.len() >= 8192 {
+    if entries.len() > budget.array_entries {
         return Err("Document has too many array entries for the preview profile".into());
     }
     let manifest = Manifest {
@@ -206,11 +229,29 @@ pub fn encode(doc: &Document) -> Result<Vec<u8>> {
         document: value,
     };
     let manifest = serde_json::to_vec(&manifest).map_err(|e| e.to_string())?;
-    if manifest.len() > MANIFEST_BUDGET
-        || entries.iter().map(|e| e.1.len()).sum::<usize>() + manifest.len() > BUDGET
+    if manifest.len() > budget.manifest_bytes
+        || entries.iter().map(|e| e.1.len()).sum::<usize>() + manifest.len() > budget.total_bytes
     {
         return Err("Native document exceeds preview budget".into());
     }
+    Ok(PreparedDocument { manifest, entries })
+}
+
+/// Validate scientific inputs, saved-surface identity and exact native budgets.
+///
+/// Builds the same uncompressed entries and manifest as `encode`, without ZIP
+/// construction or compression. Retained scientific inputs and meshes are still
+/// visited, serialized and hashed; this is not a constant-cost mesh-only check.
+pub fn validate_document(doc: &Document) -> Result<()> {
+    preflight(doc, PREVIEW_BUDGET).map(|_| ())
+}
+
+pub fn encode(doc: &Document) -> Result<Vec<u8>> {
+    encode_prepared(preflight(doc, PREVIEW_BUDGET)?)
+}
+
+fn encode_prepared(prepared: PreparedDocument) -> Result<Vec<u8>> {
+    let PreparedDocument { manifest, entries } = prepared;
     let mut zip = ZipWriter::new(Cursor::new(vec![]));
     let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
     zip.start_file("manifest.json", options)

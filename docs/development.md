@@ -244,8 +244,17 @@ includes them; these are different scopes, not direct speedup ratios. Synthetic
 lattices test spatial work limits rather than physical bonding. Use
 [status](status.md) for dated measurements and exact verification counts.
 
-There is no active hosted rewrite CI workflow. [Portability checks](../ci/README.md)
-are commands to run, not evidence that Linux or Windows has passed them.
+The [Verify workflow](../.github/workflows/verify.yml) runs the pinned checks on
+pull requests and main. [CI details](../ci/README.md) describe Linux Rust/WASM/
+Chromium/WebKit/package checks, explicit macOS desktop tests, local equivalents,
+temporary storage and seven-day failure artifacts. Consult dated [status](status.md)
+for actual passing run evidence; CI does not qualify a packaged Linux/Windows
+release or physical macOS controls/dialogs.
+
+Node declarations are an explicit locked development dependency because tests
+and Vite/Playwright configuration use Node APIs. Run `npm --prefix app ci` to
+exercise the project lockfile; declarations from an enclosing home-directory
+`node_modules` are not part of this project's setup.
 
 ## Manual native acceptance
 

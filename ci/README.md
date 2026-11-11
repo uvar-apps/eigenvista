@@ -16,12 +16,25 @@ Every project command runs after creating repository-local `tmp/` and exporting
 `TMPDIR`, `TMP`, and `TEMP`; elevated dependency installers preserve these
 variables. Rust commands unset `RUSTUP_TOOLCHAIN`, so `rustup show` installs and
 exercises `rust-toolchain.toml` rather than a runner's default compiler. Rust,
-Cargo and Node/npm versions are printed in the run logs. The workflow does not
-change compiler versions, dependency locks or frozen scientific fixtures.
+Cargo and Node/npm versions are printed in the run logs. Workflow commands
+preserve compiler versions, dependency locks and frozen scientific fixtures.
+The first clean hosted build exposed missing Node type declarations previously
+resolved from outside the application workspace. The CI integration batch adds
+the exact development dependency `@types/node` 26.1.2 and enables Node types in
+TypeScript, matching the declarations already exercised locally; existing
+runtime, compiler and dependency versions remain unchanged.
 
 Linux Clippy installs Tauri's WebKitGTK 4.1 development dependencies. The browser
 job installs only the locked Playwright package's Chromium/WebKit engines and
-their native dependencies. Its [configuration](playwright.config.mts) imports the
+their native dependencies. A [CI-only package setup](prepare-linux-packages.sh)
+removes the runner image's Azure mirror after the initial hosted run could not
+resolve it, retaining the image's official HTTPS Ubuntu archives and signature
+checks. APT fails on any index-update error, retries once, and limits HTTP/HTTPS
+transport waits to 30 seconds; each dependency-install step has a ten-minute
+limit. Setup/install output joins the failure logs. This follows the image's
+[mirror configuration](https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/configure-apt-sources.sh)
+and Ubuntu's [APT configuration](https://manpages.ubuntu.com/manpages/noble/man5/apt.conf.5.html).
+The browser [configuration](playwright.config.mts) imports the
 normal application config, retaining the full test set, engines, single worker
 and timeouts. It refuses to reuse another server, rejects focused tests and adds
 failure screenshots, traces without embedded source files, and an HTML report.
@@ -74,14 +87,17 @@ From the repository root:
 ```sh
 mkdir -p tmp
 export TMPDIR="$PWD/tmp" TMP="$PWD/tmp" TEMP="$PWD/tmp"
+unset RUSTUP_TOOLCHAIN
 cargo fmt --all --check
 cargo test --locked
 cargo clippy --locked --workspace --all-targets -- -D warnings
+cargo test --locked -p eigenvista-desktop
 cd app
 npm ci
 npm run build
 npm exec playwright -- install chromium webkit
 npm run test:e2e
+npm run test:packaging
 ```
 
 The independent chemistry fixtures are frozen test data, so Python/PySCF is not required in CI. The browser test runner first builds three native `.eigenvista` reference documents under ignored `artifacts/references/`, then checks native-to-browser persistence and the Rust/WASM results against those references. See [fixture provenance and regeneration](../fixtures/pyscf/README.md).

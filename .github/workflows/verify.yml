@@ -37,12 +37,15 @@ jobs:
           for variable in TMPDIR TMP TEMP; do
             printf '%s=%s/tmp\n' "$variable" "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
           done
+      - name: Configure bounded Ubuntu package downloads
+        run: bash ci/prepare-linux-packages.sh 2>&1 | tee "$TMPDIR/rust-package-setup.log"
       - name: Install Tauri Linux prerequisites
+        timeout-minutes: 10
         run: |
-          sudo --preserve-env=TMPDIR,TMP,TEMP apt-get update
+          sudo --preserve-env=TMPDIR,TMP,TEMP apt-get update 2>&1 | tee "$TMPDIR/rust-package-install.log"
           sudo --preserve-env=TMPDIR,TMP,TEMP apt-get install --no-install-recommends -y \
             build-essential curl wget file pkg-config libwebkit2gtk-4.1-dev \
-            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev 2>&1 | tee -a "$TMPDIR/rust-package-install.log"
       - name: Install and inspect the repository-selected Rust toolchain
         run: |
           unset RUSTUP_TOOLCHAIN
@@ -144,10 +147,13 @@ jobs:
         run: |
           unset RUSTUP_TOOLCHAIN
           npm --prefix app run build 2>&1 | tee "$TMPDIR/frontend-build.log"
+      - name: Configure bounded Ubuntu package downloads
+        run: bash ci/prepare-linux-packages.sh 2>&1 | tee "$TMPDIR/browser-package-setup.log"
       - name: Install Chromium, WebKit and their Linux dependencies
+        timeout-minutes: 10
         run: |
-          sudo --preserve-env=TMPDIR,TMP,TEMP "$(command -v node)" app/node_modules/playwright/cli.js install-deps chromium webkit
-          npm --prefix app exec -- playwright install chromium webkit
+          sudo --preserve-env=TMPDIR,TMP,TEMP "$(command -v node)" app/node_modules/playwright/cli.js install-deps chromium webkit 2>&1 | tee "$TMPDIR/browser-package-install.log"
+          npm --prefix app exec -- playwright install chromium webkit 2>&1 | tee -a "$TMPDIR/browser-package-install.log"
       - name: Build derived native reference documents from frozen fixtures
         run: |
           unset RUSTUP_TOOLCHAIN
@@ -166,6 +172,7 @@ jobs:
             tmp/packaging-tests.log
             tmp/frontend-build.log
             tmp/browser-tests.log
+            tmp/browser-package-*.log
             app/playwright-report/
             app/test-results/
             artifacts/*.png

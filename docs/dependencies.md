@@ -24,6 +24,7 @@ Direct dependency versions are resolved in the committed lockfiles `Cargo.lock` 
 | lucide-react | Interface icons | ISC |
 | Vite / TypeScript | Frontend build | MIT / Apache-2.0 |
 | Playwright | Browser workflow and rendering checks | Apache-2.0 |
+| @types/node 26.1.2 and its undici-types dependency | Development declarations for Node-based tests/configuration | MIT |
 | Prettier | Source formatting | MIT |
 
 The app icon is newly authored in `app/src-tauri/icons/source.svg`; bitmap/native icon formats are generated with the Tauri icon tool. It is not copied from the legacy application.

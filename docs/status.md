@@ -8,6 +8,71 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## CI and import/publication performance: 11 November 2026
+
+Issues [#32](https://github.com/uvar-apps/eigenvista/issues/32),
+[#33](https://github.com/uvar-apps/eigenvista/issues/33) and
+[#34](https://github.com/uvar-apps/eigenvista/issues/34) are implemented in
+[PR #45](https://github.com/uvar-apps/eigenvista/pull/45), developed on
+`codex/ci-and-import-validation-performance` from merged main `3fef7d4`.
+Version remains 0.5.12; published 6 November artifacts predate these changes.
+See the [decision/measurement record](design/2026-11-11-ci-and-publication-preflight.md).
+
+Verify CI runs pinned Linux Rust/WASM/browser/package gates and explicit macOS
+desktop tests, with read-only permissions and seven-day failure artifacts.
+Canonical hosted head/job evidence is the [PR checks](https://github.com/uvar-apps/eigenvista/pull/45/checks);
+all three jobs must pass before merge. The first setup run at `b13dae6` proved
+clean hosted Rust 1.99.0 installation and passed all seven macOS shell tests.
+It also exposed two infrastructure/build problems: missing declared Node types
+and an unresolvable Azure Ubuntu mirror. Node declarations now match the
+previously inherited 26.1.2 version and are locked locally; both Linux jobs use
+the runner's official HTTPS Ubuntu mirrors, normal signatures, strict update
+errors and bounded retries/timeouts. The failed browser job successfully uploaded
+only its two diagnostic logs with the configured seven-day retention; the
+downloaded archive matched GitHub's reported checksum. No local system settings
+were changed by the CI-only Linux setup helper.
+
+Zero-occupation Molden contractions are skipped after full input validation;
+all virtual orbital data and existing allocations remain. Full publication
+validation shares exact semantic/source/entry/manifest/uncompressed budgets with
+Save, without constructing/compressing a ZIP. The older model-only WASM API
+remains distinct. Scientific limits, hashes/profiles and existing dependency/
+compiler/runtime versions are unchanged; only missing Node development types
+and their type dependency were added to the npm lock.
+
+Fresh local checks pass all **226 workspace Rust tests**, strict workspace/
+all-target Clippy, Rustfmt, a clean locked npm install and production WASM/
+TypeScript/Vite build. All **294 Chromium/WebKit cases** pass in one **7.3-minute**
+run, including four new actual-WASM/worker publication/recovery/cancel cases.
+The original uncompressed manifest/decoder compatibility test passes after
+refining the contract to exclude compression bytes. All **13 packaging support
+tests** pass; the debug Apple Silicon app is rebuilt. Browser screenshots and
+documentation links/commands are reviewed separately from native GUI acceptance.
+
+Scoped optimized native measurements on Apple M4/macOS 27/Rust 1.99.0:
+
+- Synthetic UHF import (512 AOs/512 listed MOs/40 occupied): median process mean
+  **56.781 to 5.792 ms**, about 9.8x for this stress input. The frozen small
+  hydroxyl fixture has no meaningful timing gain. Density hashes match and
+  process RSS is effectively unchanged; no memory reduction is claimed.
+- First/later retained-mesh publication checks: original encode medians
+  **29.534/52.197/88.296 ms** versus non-compressing validation
+  **9.350/13.099/22.345 ms** for 1/15/31 meshes. Maximum process RSS is similar,
+  approximately 58–98 MB. Original/new Save bytes match for all three documents.
+  These isolate native format work, not end-to-end browser generation.
+
+Raw measurement provenance/commands and limitations are in the decision record;
+integration logs remain in `tmp/2026-11-11-ci-import-validation/`, import logs
+in `tmp/issue33-*` and publication logs/old archives in `tmp/publication-validation/`.
+No input/reference answer was regenerated. The original review remains untracked.
+
+Clean npm installation reports existing Vite development-tool advisories;
+[#46](https://github.com/uvar-apps/eigenvista/issues/46) tracks their assessment
+and patch planning separately. No project-specific exposure is reproduced and
+Vite was not upgraded by this batch. Physical macOS controls/native dialogs,
+HiDPI, clean-machine installation and Linux/Windows distribution qualification
+remain separate gates; hosted tests do not establish them.
+
 ## Native lifecycle and Molden limits: 11 November 2026
 
 Issues [#30](https://github.com/uvar-apps/eigenvista/issues/30) and

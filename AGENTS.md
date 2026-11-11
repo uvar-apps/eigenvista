@@ -208,8 +208,18 @@ Standard verification order for runtime changes (details and coverage map in
   run Chromium/WebKit e2e and actually inspect desktop/mobile screenshots, canvas
   pixels, and camera interaction. Screenshots land under `artifacts/` and can be
   overwritten by the second engine.
-- No hosted CI exists (`ci/README.md` is local portability commands). Linux/Windows
-  are unverified — do not claim platform support.
+- The [Verify workflow](.github/workflows/verify.yml) checks Linux Rust/WASM/
+  browser/package gates and explicit macOS desktop tests. Preserve pinned tools,
+  local temporary storage, read-only permissions and bounded failure artifacts.
+  Inspect actual runs at the PR head before merging; configuration alone is not
+  a passed gate. Hosted tests do not qualify packaged Linux/Windows releases or
+  physical macOS lifecycle/file-dialog interactions. See [CI](ci/README.md).
+- Publication uses `eigenvista_format::validate_document` through the distinct
+  WASM export, sharing exact semantic/entry/manifest/uncompressed-byte preflight
+  with Save without ZIP compression. The older WASM `validate` remains model-only.
+  Keep both contracts, source hashes and format limits; never replace publication
+  validation with only a mesh-size estimate. Zero-occupation Molden terms may be
+  skipped only after full orbital validation; virtual orbitals stay in documents.
 - This is a development preview, not v1 or the historical M0-M7 plan. Do not mark
   those complete from preview checks. Record evidence in `docs/status.md` and
   behavior changes in the user/architecture docs.

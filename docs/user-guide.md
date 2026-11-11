@@ -173,6 +173,10 @@ an orbital or density and generate surfaces normally. Save creates a native
 document is marked unsaved until saved. A failed import leaves the previous
 document intact. **Import report** and Provenance retain decisions and losses.
 
+Virtual orbitals with zero occupation remain listed and can be rendered or saved.
+They contribute zero to the occupation-derived density; importing them does not
+compute those zero contributions. Fractional occupations remain unchanged.
+
 The ZIP includes `Examples/water.molden`, a calculated RHF water wavefunction
 with 24 basis functions, 24 spatial orbitals, and a total density. This is a
 useful first check for orbital and density surfaces. **Orbitals (24)** shows

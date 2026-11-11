@@ -85,6 +85,14 @@ This is reported as an unsaved change, never silently written back to the
 source. Scientific arrays, grids, and cached surface records remain unchanged;
 bonds are not part of a field's scientific hash.
 
+Surface publication and encoding share `validate_document` preflight: model and
+source-hash checks, at most 8,191 array entries plus the manifest, an 8 MiB
+manifest cap and a 128 MiB total uncompressed-byte cap. Publication prepares the
+same array bytes/hashes and exact manifest without creating or compressing a ZIP;
+Save compresses those entries. This keeps the current profile/layout and still
+requires serde/array allocations. The older WASM `validate` export checks only
+the scientific model; it is not a replacement for native-format preflight.
+
 Native saves validate the encoded document, write and sync a newly created sibling file, then rename it into place. Failure leaves the original file intact. Windows overwrite semantics still need a dedicated implementation/test before a Windows release. Browser saves produce the same container through a download.
 
 Source identity uses SHA-256 over serde_json's explicitly sorted-key encoding of the basis and selected source record. Floating-point negative zero is canonicalized to positive zero for this hash because JavaScript JSON transport folds their signs; this does not change the represented real field. The native binary format retains f64 bit patterns, but the current browser JSON bridge does not retain the sign of zero when saving. Numeric tests and browser roundtrips compare against the JSON-canonical input. This is a local preview contract, not a published cross-language canonical-JSON standard. Pinning and documenting a formal canonical representation is an M1 gate.
