@@ -112,6 +112,13 @@ replacement format is scheduled under that issue. Current verification and
 the mesh research disposition belong in [status](../status.md) and
 [Plan 003](../../plans/003-indexed-mesh-qualification.md).
 
+Actual hosted verification then exposed a combined-suite capacity defect:
+350 cases hit the 35-minute deadline after 318 starts, without a finalized
+report or explicit assertion failure. [#54](https://github.com/uvar-apps/eigenvista/issues/54)
+tracks the P2 CI repair in PR #53: independent Chromium/WebKit runners, unchanged
+tests/guards and four actual job results required. This is a verification
+scheduling defect, not a newly demonstrated scientific-output bug.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

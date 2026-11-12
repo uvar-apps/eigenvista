@@ -49,10 +49,24 @@ production decision. #38 remains deferred; existing hash allocations are #40.
 
 Fresh local verification and actual reviewed-head hosted results belong in
 [status](status.md#sidebar-disclosures-and-mesh-qualification-12-november-2026)
-and [PR #53](https://github.com/uvar-apps/eigenvista/pull/53). All three hosted
+and [PR #53](https://github.com/uvar-apps/eigenvista/pull/53). All four hosted
 jobs must pass before merge. This increment
 does not bump version, tag, release or rebuild the tester ZIP. Preserve the
 original untracked review, private exports and repository-local raw evidence.
+
+The first hosted run at `a95ee3f`,
+[43240917646](https://github.com/uvar-apps/eigenvista/actions/runs/43240917646),
+hit the combined browser step's 35-minute deadline after 318 test starts, with
+no explicit assertion failure logged. Final result counts were interrupted;
+do not claim those starts passed. Linux Rust 230, macOS seven and packaging 13
+passed. Local traced verification passed all 350 cases in 11.4 minutes.
+[#54](https://github.com/uvar-apps/eigenvista/issues/54) tracks the required CI
+capacity repair in the same PR: separate Chromium/WebKit matrix runners, 175
+cases each, fail-fast disabled and distinct failure artifacts. Test sources,
+one worker and every existing timeout/assertion remain unchanged. The four
+actual final-head results, not the failed combined run, are the merge gate.
+See the [decision](design/2026-11-12-browser-project-isolation.md). Preserve the
+checksum-verified original failure artifact under repository tmp.
 
 The prior typed writer/test-repair increment is merged in
 [PR #50](https://github.com/uvar-apps/eigenvista/pull/50), main `2f7aeec`, closing

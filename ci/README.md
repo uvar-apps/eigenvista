@@ -3,14 +3,21 @@
 See the [development guide](../docs/development.md) for prerequisites, exact
 root-relative commands, outputs, troubleshooting, and manual native acceptance.
 The [Verify workflow](../.github/workflows/verify.yml) runs on pull requests,
-pushes to `main`, and manual dispatch. Its three jobs have independent time
+pushes to `main`, and manual dispatch. Its four job runs have independent time
 limits and run without secrets or repository write permissions:
 
 | Job                    | Runner           | Checks                                                                                                                                             | Limit      |
 | ---------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | Rust                   | Ubuntu 24.04 x64 | Rustfmt, locked default-member tests, strict workspace/all-target Clippy including the desktop crate                                               | 45 minutes |
 | Desktop                | macOS 15 arm64   | Explicit locked `eigenvista-desktop` tests                                                                                                         | 45 minutes |
-| WASM/browser/packaging | Ubuntu 24.04 x64 | Node 26, locked npm install, 13 packaging support tests, exact wasm-bindgen CLI 0.2.108, production WASM/frontend build, all Chromium/WebKit tests | 60 minutes |
+| WASM/Chromium/packaging | Ubuntu 24.04 x64 | Clean pinned setup, 13 packaging support tests, production WASM/frontend build, all 175 Chromium cases | 60 minutes |
+| WASM/WebKit/packaging | Ubuntu 24.04 x64 | Clean pinned setup, 13 packaging support tests, production WASM/frontend build, all 175 WebKit cases | 60 minutes |
+
+The browser rows use the same job definition with a two-engine matrix. Each
+gets its own clean runner, Node 26, locked npm install and matching wasm-bindgen
+CLI 0.2.108. `fail-fast: false` preserves the other engine's result if one fails.
+Both rows, Rust and macOS must pass at the reviewed head before merge. See the
+[#54 decision](../docs/design/2026-11-12-browser-project-isolation.md).
 
 Every project command runs after creating repository-local `tmp/` and exporting
 `TMPDIR`, `TMP`, and `TEMP`; elevated dependency installers preserve these
@@ -25,7 +32,7 @@ TypeScript, matching the declarations already exercised locally; existing
 runtime, compiler and dependency versions remain unchanged.
 
 Linux Clippy installs Tauri's WebKitGTK 4.1 development dependencies. The browser
-job installs only the locked Playwright package's Chromium/WebKit engines and
+rows each install the locked Playwright package's selected engine and
 their native dependencies. A [CI-only package setup](prepare-linux-packages.sh)
 preserves provider-specific sources. Observed AWS jobs used inherited HTTP EC2
 and security sources successfully; Azure jobs could not resolve Ubuntu archive
@@ -64,6 +71,8 @@ The browser [configuration](playwright.config.mts) imports the
 normal application config, retaining the full test set, engines, single worker
 and timeouts. It refuses to reuse another server, rejects focused tests and adds
 failure screenshots, traces without embedded source files, and an HTML report.
+Hosted rows select only their engine with `--project`; their disjoint union is
+the same complete 350-case suite. The local command still runs both engines.
 The native `.eigenvista` reference documents are derived by the same Rust example
 as `npm --prefix app run test:e2e`; independent expected scientific answers remain
 frozen and are never regenerated.
@@ -74,9 +83,11 @@ documents, private exports, source archives and packaged applications are not
 uploaded. The workflow builds no tester ZIP and publishes no release. It uses no
 dependency/build/browser caches, so a cache hit is never required for correctness.
 Superseded runs for the same pull request or branch are cancelled.
-The browser-test step has a 35-minute deadline inside its 60-minute job, leaving
+Each engine's browser-test step has a 35-minute deadline inside its 60-minute job, leaving
 time for failure artifact upload if the suite stalls. This bounds the process
 without changing individual test timeouts, assertions or the full test selection.
+Failure artifacts are named `browser-linux-chromium-failure` and
+`browser-linux-webkit-failure` to keep each runner's evidence distinct.
 
 Actions are pinned to full commit SHAs, resolved from the official repositories'
 release tags on 11 November 2026:

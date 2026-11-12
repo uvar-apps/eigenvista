@@ -234,6 +234,12 @@ node node_modules/@playwright/test/cli.js test --config ../ci/playwright.config.
   tests/adaptive-volume.spec.ts tests/cube.spec.ts tests/progress.spec.ts tests/viewer.spec.ts
 ```
 
+Hosted CI selects `--project=chromium` and `--project=webkit` in two independent
+matrix jobs, with the same one-worker configuration and existing deadlines.
+Their complete union is 350 cases (175 each); the default local command still
+runs both. Require both engine results and the Rust/macOS results. See the
+[project-isolation decision](design/2026-11-12-browser-project-isolation.md).
+
 For an additional controlled software-rendering check, derive a temporary config
 under repository tmp from that CI config and give its Chromium project launch
 arguments `--use-gl=angle` and `--use-angle=swiftshader`. Use the pinned bundled

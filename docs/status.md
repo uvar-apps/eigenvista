@@ -67,12 +67,31 @@ desktop tests. Rustfmt, strict all-target Clippy, production WASM/TypeScript/Vit
 debug native build and 13 packaging tests pass. Consult
 [PR #53](https://github.com/uvar-apps/eigenvista/pull/53) for the full **350-case**
 browser run and actual hosted results; these are
-separate merge gates, and all three hosted jobs at the reviewed head must pass
+separate merge gates, and all four hosted jobs at the reviewed head must pass
 before merging. Raw measurements,
 traces, initial test-harness corrections and captures are under
 `tmp/2026-11-12-panels-mesh37/`. Preserve the untracked original review and private
 exports. #47 is closed at the user's request: existing native container layout
 meets the asset-layout goal.
+
+The initial hosted [run 43240917646](https://github.com/uvar-apps/eigenvista/actions/runs/43240917646)
+at `a95ee3f` failed the combined browser step's **global 35-minute timeout**.
+It logged 318 starts (175 Chromium/143 WebKit), without an explicit assertion
+or individual-test timeout. Reporting was interrupted; exact final pass counts
+are unavailable. Rust 230, desktop seven and packaging 13 passed. Original logs
+and the checksum-verified 22,145,868-byte artifact are preserved in repository
+tmp. This is not a successful merge gate or evidence of a scientific defect.
+
+[#54](https://github.com/uvar-apps/eigenvista/issues/54) repairs CI capacity in
+the same PR with independent Chromium/WebKit matrix runners, 175 cases each.
+Fail-fast is disabled; failure artifacts are distinct. Test sources/configuration,
+worker count, individual timeout overrides, per-engine 35-minute test-step and
+60-minute job bounds, pins, permissions and diagnostics policy are unchanged.
+See the [decision](design/2026-11-12-browser-project-isolation.md). The local
+full run passed **350/350**, zero skipped/flaky/unexpected results, in 11.4
+minutes; final actual four-job hosted evidence belongs in PR #53 and #54 before
+merge. Changing scheduling does not require repeating unchanged runtime tests;
+project-discovery equivalence and fresh actual hosted execution are required.
 
 ## Typed native encoding: 12 November 2026
 

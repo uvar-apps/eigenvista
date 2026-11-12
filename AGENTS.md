@@ -246,6 +246,10 @@ Standard verification order for runtime changes (details and coverage map in
   Inspect actual runs at the PR head before merging; configuration alone is not
   a passed gate. Hosted tests do not qualify packaged Linux/Windows releases or
   physical macOS lifecycle/file-dialog interactions. See [CI](ci/README.md).
+  Require all four job results: Linux Rust, macOS desktop, Chromium and WebKit.
+  Browser projects run on independent runners with one worker each, unchanged
+  35-minute test-step/60-minute job bounds and distinct failure artifacts. Do
+  not treat one successful engine or a partially timed-out suite as a full pass.
 - Publication uses `eigenvista_format::validate_document` through the distinct
   WASM export, sharing exact semantic/entry/manifest/uncompressed-byte preflight
   with Save without ZIP compression. The older WASM `validate` remains model-only.

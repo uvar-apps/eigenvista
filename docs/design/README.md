@@ -23,6 +23,7 @@ fact*; this directory records *decisions before the fact*.
 
 | Date | Design | Status | Issue |
 | --- | --- | --- | --- |
+| 2026-11-12 | [Independent hosted browser projects](2026-11-12-browser-project-isolation.md) | implemented | [#54](https://github.com/uvar-apps/eigenvista/issues/54), integration for #48/#37 |
 | 2026-11-12 | [Sidebar disclosures](2026-11-12-sidebar-disclosures.md) | implemented | [#48](https://github.com/uvar-apps/eigenvista/issues/48); reordering deferred to #52 |
 | 2026-11-12 | [Exact indexed-mesh qualification](2026-11-12-indexed-mesh-qualification.md) | proposed production contract; qualification only | [#37](https://github.com/uvar-apps/eigenvista/issues/37) remains open |
 | 2026-11-12 | [Completed-work browser verification](2026-11-12-browser-verification-scheduling.md) | implemented | [#51](https://github.com/uvar-apps/eigenvista/issues/51), integration gate for [#39](https://github.com/uvar-apps/eigenvista/issues/39) |
