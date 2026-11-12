@@ -14,6 +14,13 @@ previous matched identifiers, `format: molekel` with
 preview documents. Mixing old and new identifiers is not a supported profile.
 This compatibility does not extend to arbitrary files from legacy C++ Molekel.
 
+The [frozen native corpus](../fixtures/native/README.md) records authentic
+older/current producer archives, logical manifests/entries and semantic
+expectations. Native and actual-WASM/worker tests read those committed inputs
+directly; normal tests do not regenerate them with the encoder under test.
+Fixture coverage complements identifier-negative and malformed-container tests.
+It does not introduce a new writer, profile, source hash or precision policy.
+
 The rename leaves the `[0, 1]` document shape, scientific arrays, field/source
 hashes, and cached mesh semantics unchanged. Decoding an old file does not
 rewrite it or require regeneration of its surfaces. Open still applies the

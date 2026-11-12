@@ -47,6 +47,35 @@ Known affected upstream development-tool versions are recorded there; an
 EigenVista exposure is not reproduced. Remaining feature/research work is not
 authorized by the #32/#33/#34 request. The original queue below is historical.
 
+## Research follow-up: 12 November 2026
+
+The authorized research pass at merged main `06ecbb9` investigated #46, #39,
+#37, #38 and #35 without application changes. The
+[research index](../../plans/README.md) and
+[evidence report](../../plans/2026-11-12-research.md) now supersede the initial
+P3 ordering for those topics. Recommend the bounded Vite patch first and genuine
+compatibility fixtures second. Qualify exact mesh indexing with shader identity
+and extraction-peak contracts, then remeasure typed transfer on the smaller
+payload. Larger Molden limits need a real target workload and actual browser/
+persistence budgets; a constant increase alone is not supported by the evidence.
+
+These remain maintenance, compatibility, optimization and capability activities,
+not newly proven scientific-output bugs. Priorities stay P3. The original
+classifications below remain historical; current implementation/readiness and
+labels are recorded in the live issues. New #47/#48 proposals are separate from
+this `needs-research` selection.
+
+## Maintenance/fixture implementation follow-up
+
+The user subsequently authorized #46 and only #39's immutable fixture phase in
+[PR #49](https://github.com/uvar-apps/eigenvista/pull/49). Vite is upgraded only
+to 7.3.8; the four small old/current archives and native/WASM/worker/UI tests now
+freeze the agreed compatibility contract. [Status](../status.md#vite-maintenance-and-native-fixtures-12-november-2026)
+and [handoff](../handoff.md) record verification and remaining platform gates.
+#39's later typed writer stays open; #35/#37/#38/#40–#43, #20/#22/#47/#48 are not
+implemented by this batch. Current labels/issues, not the historical initial
+table, determine the remaining queue.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

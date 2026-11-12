@@ -1,0 +1,82 @@
+{
+  "id": "compatibility-structure-v0.5.12",
+  "title": "Frozen structure and scalar layout probes",
+  "atoms": {
+    "elements": [
+      6,
+      8
+    ],
+    "positions": [
+      [
+        -0.0,
+        1.0,
+        2.0
+      ],
+      [
+        1.25,
+        1.0,
+        2.0
+      ]
+    ]
+  },
+  "bonds": [],
+  "basis": [],
+  "orbitals": [],
+  "densities": [],
+  "grids": [
+    {
+      "id": "layout-scalar",
+      "label": "Constructed scalar layout probe",
+      "quantity": "generic",
+      "origin": [
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "axes": [
+        [
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "dims": [
+        2,
+        2,
+        2
+      ],
+      "values": [
+        -0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ]
+    }
+  ],
+  "surfaces": [],
+  "view": {
+    "representation": "ball-stick",
+    "positive_color": "#259d86",
+    "negative_color": "#cb4e72",
+    "opacity": 0.78,
+    "isovalue": 0.08,
+    "field": null
+  },
+  "provenance": [
+    "Constructed compatibility layout data, not a quantum-chemistry calculation. Coordinates are bohr; generic scalar values have no assigned physical units."
+  ]
+}
