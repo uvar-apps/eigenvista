@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 12 November 2026 for the research pass at merged main `06ecbb9`;
+Updated 12 November 2026 for Vite maintenance/native fixtures from main `06ecbb9`;
 version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
@@ -12,6 +12,39 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### Vite maintenance and fixture phase: 12 November 2026
+
+The user authorized #46 and only the fixture phase of #39 in
+[PR #49](https://github.com/uvar-apps/eigenvista/pull/49), developed on
+`codex/vite-maintenance-and-native-fixtures`. Vite is now declared
+`^7.3.8` and locked/installed at 7.3.8. Clean install/audit reports zero
+vulnerabilities; every other npm package entry is unchanged. The installed Vite
+license and generated runtime notices are byte-identical. Rust, bindgen,
+scientific dependencies, application version, icon and release artifacts stay
+unchanged.
+
+The [native fixture corpus](../fixtures/native/README.md) freezes four small
+archives: genuine reconstructed 0.3.2 H2 and current structure/RHF/UHF examples,
+with producer provenance, exact logical manifests, numeric entry digests and
+semantic documents. Test setup never regenerates input archives. The new native
+checks distinguish signed-zero bits from browser JSON canonical Save; the actual
+WASM/worker/UI checks preserve cached meshes without sampling/re-meshing and
+test Save/reopen, missing-bond supplementation and malformed-source recovery.
+The 12 focused Chromium/WebKit cases pass. Fresh workspace verification passes
+232 Rust tests, Rustfmt/strict Clippy, production WASM/frontend and debug native
+builds, 13 packaging tests and 26 real embedded-native observations across clean
+and dirty close/Cancel/Discard. Current desktop/mobile fixture captures were
+inspected. The full 306-case browser run and actual reviewed-head hosted evidence
+are recorded in [PR #49](https://github.com/uvar-apps/eigenvista/pull/49); all three
+hosted jobs must pass before merge. Integration evidence is also
+maintained in [status](status.md#vite-maintenance-and-native-fixtures-12-november-2026).
+
+See the [decisions](design/2026-11-12-vite-and-native-fixtures.md) and updated
+[plan index](../plans/README.md). #39 remains open for typed encoding and its
+remaining design; no writer, profile, hash, numeric precision or resource-limit
+change is included. No version/tag/release/ZIP was requested. Preserve the
+untracked original review and repository-local research/integration logs.
 
 ### Research follow-up: 12 November 2026
 
@@ -27,7 +60,8 @@ Application code, dependency locks, limits and frozen fixtures are unchanged;
 research scripts/archives live only under ignored `tmp/2026-11-12-research/`.
 No implementation, Git publication or release was performed for this pass.
 
-Recommended next work is the bounded Vite 7.3.8 maintenance patch (#46), then
+At that research checkpoint, recommended next work was the bounded Vite 7.3.8
+maintenance patch (#46), then
 authentic compatibility fixtures (first phase of #39). Exact indexed meshes
 (#37) show useful retained/storage savings, but need explicit shader vertex-ID
 and extraction-peak contracts. Typed output transport (#38) improves an isolated

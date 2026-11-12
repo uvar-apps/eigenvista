@@ -3,9 +3,12 @@
 Planned at `06ecbb9cef6e52a99417f88856cb98cffc3e9df2`, 12 November 2026.
 Issue: first phase of [#39](https://github.com/uvar-apps/eigenvista/issues/39).
 Priority P3; effort S–M; risk low; dependencies: none.
-Status TODO, fixture phase ready. Typed encoding is explicitly outside this phase.
+Status: fixture phase implemented on `codex/vite-maintenance-and-native-fixtures`
+after user authorization. Acceptance evidence is in [current status](../docs/status.md#vite-maintenance-and-native-fixtures-12-november-2026)
+and the implementation PR checks. Typed encoding remains outside this phase and
+the larger #39 stays open. The planning baseline/recipe below is historical.
 
-## Current state
+## Planning baseline
 
 The native format is already a ZIP containing manifest.json and binary numeric
 entries. `crates/eigenvista-format/src/lib.rs` recognizes matched EigenVista and

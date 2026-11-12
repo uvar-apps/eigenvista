@@ -74,6 +74,12 @@ documents; older `.molekel` preview documents remain readable. Check
 - `fixtures/legacy/` is frozen data-only regression input (plus license), not app
   code. Never regenerate expected scientific results to make a test pass; independent
   references are deliberately generated offline (Python/PySCF), not at test time.
+- `fixtures/native/` freezes authentic older/current Rust-producer archives and
+  logical entry/semantic expectations. Normal tests must read those bytes, never
+  manufacture compatibility input with today's encoder. Preserve producer
+  provenance and native f64 signed-zero bits; browser JSON Save intentionally
+  uses the separately documented zero-canonical contract. See its README before
+  changing writers, source hashes, mesh layout, dtypes or profile identifiers.
 
 ## Commands (from the repository root)
 

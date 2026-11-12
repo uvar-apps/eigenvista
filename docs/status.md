@@ -8,6 +8,49 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Vite maintenance and native fixtures: 12 November 2026
+
+From main `06ecbb9`, [PR #49](https://github.com/uvar-apps/eigenvista/pull/49),
+developed on `codex/vite-maintenance-and-native-fixtures`, implements
+[#46](https://github.com/uvar-apps/eigenvista/issues/46) and the fixture phase of
+[#39](https://github.com/uvar-apps/eigenvista/issues/39). Version remains 0.5.12;
+published 6 November artifacts predate these source changes. See the
+[decision record](design/2026-11-12-vite-and-native-fixtures.md).
+
+The only changed npm package is Vite 7.3.6→7.3.8, with declaration `^7.3.8`.
+Clean installation and npm audit pass with zero reported vulnerabilities. Vite's
+license text and generated runtime notices are unchanged; compiler/scientific
+dependencies and application logic are unchanged.
+
+Four committed archive inputs total 72,053 bytes. The authentic old producer
+archive retains its researched SHA-256; current structure/RHF/UHF files freeze
+layout, f64/u32 types, signed-zero bits, empty arrays, nonuniform primitive rows,
+authoritative grids, signed cached meshes and source associations. Their
+[provenance and test contract](../fixtures/native/README.md) distinguish native
+binary bit preservation, browser JSON zero canonicalization, and Open's reported
+bond supplementation. Normal tests read frozen bytes without regenerating them.
+
+Fresh local checks pass all **232 workspace Rust tests**, Rustfmt and strict
+workspace/all-target Clippy, the production WASM/TypeScript/Vite build and debug
+Apple Silicon app build. All **13 packaging support tests** pass. Two owned
+embedded-production native probes (clean close and dirty close/Cancel/Discard)
+pass all **26 JSONL observations**, including actual worker/frontend readiness.
+
+All **12 focused Chromium/WebKit fixture cases** pass, including actual WASM/worker
+decode/validation/Save, UI cached rendering without sampling, desktop/mobile
+reopen, supplementation, source mismatch and corruption recovery. Desktop/mobile
+captures were inspected. The full **306-case** Chromium/WebKit suite and the
+reviewed source head's hosted results are recorded in
+[PR #49](https://github.com/uvar-apps/eigenvista/pull/49) and its
+[checks](https://github.com/uvar-apps/eigenvista/pull/49/checks); all three hosted
+jobs must pass before merge. Physical macOS controls/dialogs, clean-machine/HiDPI and
+Linux/Windows distribution qualification remain separate gates.
+
+#39's typed writer remains outside this completed fixture scope; source hashes,
+schema/profile, precision and budgets are unchanged. No new tag, release or ZIP
+is included. Logs are under `tmp/2026-11-12-vite-fixtures/`; the original review
+remains untracked.
+
 ## Selected-issue research: 12 November 2026
 
 At source `06ecbb9` / version 0.5.12, research covered #46, #39, #37, #38 and #35.

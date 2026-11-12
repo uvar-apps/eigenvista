@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "description": "Frozen native preview compatibility inputs; tests do not regenerate these archives.",
+  "fixtures": [
+    {
+      "id": "legacy-h2-0.3.2",
+      "archive": "legacy-h2-0.3.2.molekel",
+      "document": "legacy-h2-0.3.2.document.json",
+      "manifest": "legacy-h2-0.3.2.manifest.json",
+      "archive_bytes": 29673,
+      "archive_sha256": "d82999469208e83662b8aec951e68a8307823f00556cfbc513a0760abafdfee7",
+      "document_sha256": "0cc1390100a8d2975e8e128ec8ec4a56f6d6eb5746b496b0941a4c2e5693949e",
+      "manifest_sha256": "5eb2ced209b29612146a904a67b55d3f44380e06ac2865c6cb11288b9e57da90",
+      "format": "molekel",
+      "required_features": [
+        "molekel-preview-polynomial-v1"
+      ],
+      "array_count": 36,
+      "counts": {
+        "atoms": 2,
+        "bonds": 1,
+        "basis": 2,
+        "orbitals": 2,
+        "densities": 1,
+        "grids": 1,
+        "surfaces": 3
+      },
+      "producer": {
+        "repository": "ugovaretto/molekel",
+        "revision": "24d270e4589642f741ab438d6850f56a768cb66c",
+        "tag": "v0.3.2",
+        "version": "0.3.2",
+        "reconstruction": true,
+        "compiler": "rustc 1.99.0",
+        "platform": "Apple M4 / macOS 27.0",
+        "generator": "produce-legacy-0.3.2.rs",
+        "generator_sha256": "0697627d9968bfbd890dc0b3e9704915c137588664acef9fd674a36e5f5f2be5"
+      }
+    },
+    {
+      "id": "structure-0.5.12",
+      "archive": "structure-0.5.12.eigenvista",
+      "document": "structure-0.5.12.document.json",
+      "manifest": "structure-0.5.12.manifest.json",
+      "archive_bytes": 1722,
+      "archive_sha256": "3932a224555ff5b29ee6af2a2de6cd74cecee7d96a888c6236aa0626da7be0bd",
+      "document_sha256": "0c7a4cefa56d2006f1177f2255d5c60cad3946a7b9134f68332c105ce43550d2",
+      "manifest_sha256": "9127d8d3840226082e5d47815ae424a0bf14fdcb47a83273525954a049284765",
+      "format": "eigenvista",
+      "required_features": [
+        "eigenvista-preview-polynomial-v1"
+      ],
+      "array_count": 6,
+      "counts": {
+        "atoms": 2,
+        "bonds": 0,
+        "basis": 0,
+        "orbitals": 0,
+        "densities": 0,
+        "grids": 1,
+        "surfaces": 0
+      },
+      "producer": {
+        "repository": "uvar-apps/eigenvista",
+        "revision": "06ecbb9cef6e52a99417f88856cb98cffc3e9df2",
+        "version": "0.5.12",
+        "compiler": "rustc 1.99.0",
+        "platform": "Apple M4 / macOS 27.0",
+        "generator": "produce-current.rs",
+        "generator_sha256": "fd2bba9f9549ec1c77c281fa1fb51e82c2f8424f1f9767bb649584971f4b94b2",
+        "cargo_lock_sha256": "b290c02f02abdf2203e58510b4f6d1165e938d32ac6de2c510c3b195543a579d"
+      },
+      "imported_bonds": [
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "id": "water-rhf-0.5.12",
+      "archive": "water-rhf-0.5.12.eigenvista",
+      "document": "water-rhf-0.5.12.document.json",
+      "manifest": "water-rhf-0.5.12.manifest.json",
+      "archive_bytes": 27433,
+      "archive_sha256": "7636d13004419e0e92f58115744db65c17bf18113c1471cc6cc3127d9e98fe78",
+      "document_sha256": "c5f44f732c3fed74a2e47af24d9e44bda7189733f64fbc11c02d72ad6a01498c",
+      "manifest_sha256": "b4ed500243a789dc1ec01b9ca19150ca879598ab62bb8ea0851f77badd6d21fb",
+      "format": "eigenvista",
+      "required_features": [
+        "eigenvista-preview-polynomial-v1"
+      ],
+      "array_count": 94,
+      "counts": {
+        "atoms": 3,
+        "bonds": 2,
+        "basis": 24,
+        "orbitals": 24,
+        "densities": 1,
+        "grids": 1,
+        "surfaces": 3
+      },
+      "producer": {
+        "repository": "uvar-apps/eigenvista",
+        "revision": "06ecbb9cef6e52a99417f88856cb98cffc3e9df2",
+        "version": "0.5.12",
+        "compiler": "rustc 1.99.0",
+        "platform": "Apple M4 / macOS 27.0",
+        "generator": "produce-current.rs",
+        "generator_sha256": "fd2bba9f9549ec1c77c281fa1fb51e82c2f8424f1f9767bb649584971f4b94b2",
+        "cargo_lock_sha256": "b290c02f02abdf2203e58510b4f6d1165e938d32ac6de2c510c3b195543a579d"
+      },
+      "source_document": "../pyscf/water-rhf-ccpvdz.json",
+      "source_document_sha256": "652d05b44035be4c0ce153f96939f28301ae54c4f6e4afefaeae338afc364dc7",
+      "science_policy": "Basis, orbitals, density matrices and authoritative reference grid copied unchanged. Only display bonds, view appearance and cached meshes added."
+    },
+    {
+      "id": "hydroxyl-uhf-0.5.12",
+      "archive": "hydroxyl-uhf-0.5.12.eigenvista",
+      "document": "hydroxyl-uhf-0.5.12.document.json",
+      "manifest": "hydroxyl-uhf-0.5.12.manifest.json",
+      "archive_bytes": 13225,
+      "archive_sha256": "d0614a59a9a30b47473d3cbed1b2390112cc9659f0faab3bf7a8bad30071838d",
+      "document_sha256": "119913ab26e0be7ff39d0af1c3020da15ca1256ae9487a63453c870f8af79379",
+      "manifest_sha256": "cbadeec5e0c4b10dba17fef791402ffcbfc87d2897cd38226623bcb34aef4f70",
+      "format": "eigenvista",
+      "required_features": [
+        "eigenvista-preview-polynomial-v1"
+      ],
+      "array_count": 30,
+      "counts": {
+        "atoms": 2,
+        "bonds": 1,
+        "basis": 6,
+        "orbitals": 12,
+        "densities": 4,
+        "grids": 1,
+        "surfaces": 3
+      },
+      "producer": {
+        "repository": "uvar-apps/eigenvista",
+        "revision": "06ecbb9cef6e52a99417f88856cb98cffc3e9df2",
+        "version": "0.5.12",
+        "compiler": "rustc 1.99.0",
+        "platform": "Apple M4 / macOS 27.0",
+        "generator": "produce-current.rs",
+        "generator_sha256": "fd2bba9f9549ec1c77c281fa1fb51e82c2f8424f1f9767bb649584971f4b94b2",
+        "cargo_lock_sha256": "b290c02f02abdf2203e58510b4f6d1165e938d32ac6de2c510c3b195543a579d"
+      },
+      "source_document": "../pyscf/hydroxyl-uhf-sto3g.json",
+      "source_document_sha256": "574a7ae2ea8f9e72e63e9b87c0ff00896be1d9285da4bd13a52e6db95d2bd146",
+      "science_policy": "Basis, orbitals, density matrices and authoritative reference grid copied unchanged. Only display bonds, view appearance and cached meshes added."
+    }
+  ]
+}

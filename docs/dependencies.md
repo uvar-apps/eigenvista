@@ -22,10 +22,18 @@ Direct dependency versions are resolved in the committed lockfiles `Cargo.lock` 
 | React / React DOM | Interface | MIT |
 | Three.js | Scene graph, camera controls, WebGL2 renderer | MIT |
 | lucide-react | Interface icons | ISC |
-| Vite / TypeScript | Frontend build | MIT / Apache-2.0 |
+| Vite 7.3.8 / TypeScript | Frontend build | MIT / Apache-2.0 |
 | Playwright | Browser workflow and rendering checks | Apache-2.0 |
 | @types/node 26.1.2 and its undici-types dependency | Development declarations for Node-based tests/configuration | MIT |
 | Prettier | Source formatting | MIT |
+
+The 12 November 2026 maintenance patch updates only the Vite lock entry from
+7.3.6 to 7.3.8 and raises its declared minimum to `^7.3.8`; other npm package
+entries retain their versions and integrity values. Clean installation and the
+current npm audit pass with no reported advisories. The installed Vite MIT
+license and generated runtime dependency notices are byte-identical to the
+previous resolution. See [#46](https://github.com/uvar-apps/eigenvista/issues/46)
+for the upstream advisory assessment and implementation verification.
 
 The app icon is newly authored in `app/src-tauri/icons/source.svg`; bitmap/native icon formats are generated with the Tauri icon tool. It is not copied from the legacy application.
 

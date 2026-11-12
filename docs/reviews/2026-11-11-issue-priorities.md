@@ -65,6 +65,17 @@ classifications below remain historical; current implementation/readiness and
 labels are recorded in the live issues. New #47/#48 proposals are separate from
 this `needs-research` selection.
 
+## Maintenance/fixture implementation follow-up
+
+The user subsequently authorized #46 and only #39's immutable fixture phase in
+[PR #49](https://github.com/uvar-apps/eigenvista/pull/49). Vite is upgraded only
+to 7.3.8; the four small old/current archives and native/WASM/worker/UI tests now
+freeze the agreed compatibility contract. [Status](../status.md#vite-maintenance-and-native-fixtures-12-november-2026)
+and [handoff](../handoff.md) record verification and remaining platform gates.
+#39's later typed writer stays open; #35/#37/#38/#40–#43, #20/#22/#47/#48 are not
+implemented by this batch. Current labels/issues, not the historical initial
+table, determine the remaining queue.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

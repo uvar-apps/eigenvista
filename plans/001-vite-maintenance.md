@@ -3,9 +3,12 @@
 Planned at `06ecbb9cef6e52a99417f88856cb98cffc3e9df2`, 12 November 2026.
 Issue: [#46](https://github.com/uvar-apps/eigenvista/issues/46).
 Priority P3; effort S; implementation risk low–medium; dependencies: none.
-Status TODO, research ready. This file authorizes no implementation or Git action.
+Status: implemented on `codex/vite-maintenance-and-native-fixtures` after user
+authorization. Acceptance evidence is in [current status](../docs/status.md#vite-maintenance-and-native-fixtures-12-november-2026)
+and the implementation PR checks. The planning baseline below is historical;
+this plan alone does not authorize further Git publication or upgrades.
 
-## Current state and intent
+## Planning baseline and intent
 
 The source is a Rust/WASM scientific library with a React/Three UI and Tauri
 shell. Work only in `/Users/ugo/projects/eigenvista`; Molekel is read-only.
