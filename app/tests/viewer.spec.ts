@@ -1,4 +1,4 @@
-import { scenePixels } from "./scenePixels";
+import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 
@@ -22,7 +22,9 @@ test("desktop scene, orbit interaction, raycast and volume are nonblank", async 
   page.on("console", (msg) => {
     if (msg.type() === "error") errors.push(msg.text());
   });
+  await trackSceneDraws(page);
   await ready(page);
+  await settleScene(page);
   const initial = await pixels(page);
   expect(initial.colorful).toBeGreaterThan(initial.total * 0.01);
   await page.screenshot({ path: "../artifacts/desktop.png" });
@@ -38,24 +40,31 @@ test("desktop scene, orbit interaction, raycast and volume are nonblank", async 
     { steps: 15 },
   );
   await page.mouse.up();
-  await expect
-    .poll(async () => (await pixels(page)).checksum)
-    .not.toBe(initial.checksum);
+  // Finish the real gesture and Fit damping while mesh rendering is still
+  // active. Entering raycast mid-damping otherwise makes every expensive
+  // software-GL frame compete with the compositor pixel capture.
+  await settleScene(page);
+  expect((await pixels(page)).checksum).not.toBe(initial.checksum);
   await page.getByRole("button", { name: "Fit scene", exact: true }).click();
+  await settleScene(page);
   for (const mode of ["raycast", "volume"]) {
+    const previousDraws = await page.evaluate(
+      () => (window as unknown as { sceneDraws: number }).sceneDraws,
+    );
     await page.getByLabel("Rendering mode").selectOption(mode);
     await expect(page.locator(".scene-label")).toContainText(
       mode === "raycast" ? "Sampled raycast" : "Volume preview",
     );
-    await page.evaluate(
-      () =>
-        new Promise((resolve) =>
-          requestAnimationFrame(() => requestAnimationFrame(resolve)),
-        ),
+    await page.waitForFunction(
+      (before) =>
+        (window as unknown as { sceneDraws: number }).sceneDraws > before,
+      previousDraws,
+      { timeout: 20000 },
     );
-    await expect
-      .poll(async () => (await pixels(page)).colorful, { timeout: 20000 })
-      .toBeGreaterThan(500);
+    // Complete one actual compositor capture before asserting. A screenshot
+    // callback that has not returned is not a failed nonblank-pixel predicate.
+    const rendered = await pixels(page);
+    expect(rendered.colorful).toBeGreaterThan(500);
     await page.screenshot({ path: `../artifacts/${mode}.png` });
   }
   expect(errors).toEqual([]);

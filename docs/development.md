@@ -140,6 +140,72 @@ sets that location and uses an architecture-specific release subdirectory.
 Generated outputs, downloaded dependencies, reports, and staging are ignored.
 Keep `Cargo.lock` and `app/package-lock.json` under version control.
 
+## Native encoding measurements
+
+The [encoding example](../crates/eigenvista-format/examples/encoding_benchmark.rs)
+samples a fixed 128³ analytic H2 field and retains it as an authoritative grid.
+It performs one encode or publication preflight per process and prints JSON
+input identities, sample count and timing. After the usual repository-local
+temporary-directory setup, on macOS:
+
+```sh
+cargo build --locked --release -p eigenvista-format --example encoding_benchmark
+eigenvista_measure_dir=$(mktemp -d "$PWD/tmp/encoding-rss.XXXXXX")
+for run in 1 2 3; do
+  /usr/bin/time -l target/release/examples/encoding_benchmark encode \
+    "$eigenvista_measure_dir/grid-$run.eigenvista" \
+    > "$eigenvista_measure_dir/run-$run.json" \
+    2> "$eigenvista_measure_dir/run-$run.time"
+done
+```
+
+The output archive is optional; supplied destinations use create-new semantics.
+Use `validate` without an archive argument to measure the shared preflight.
+For before/after work, preserve a copy of the original executable under repository
+tmp before changing the implementation. Use the same example, locked toolchain
+and input identities, and three independent optimized processes per version.
+Do not substitute a repeated in-process loop for independent maximum-RSS samples.
+
+The timer excludes sampling, input hashing, JSON output and file writing.
+macOS `time -l` reports whole-process maximum RSS in bytes, including sampling,
+allocation retention and ZIP compression. Linux reports require its own units
+and tools. This native workload has no cached meshes, so it does not measure
+saved-surface source hashing's remaining JSON costs. It does not establish
+browser/WASM peak memory, OOM recovery or a universal workload improvement.
+See the [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
+and current [status](status.md) for recorded comparisons and qualification limits.
+
+## Browser scheduling and software-rendered checks
+
+Use [ci/playwright.config.mts](../ci/playwright.config.mts) to exercise the same tracing, failure screenshots
+and owned-server setup as hosted tests. From `app/`, after the repository-local
+temporary-directory setup and checking that port 5178 is free:
+
+```sh
+node node_modules/@playwright/test/cli.js test --config ../ci/playwright.config.mts \
+  tests/adaptive-volume.spec.ts tests/cube.spec.ts tests/progress.spec.ts tests/viewer.spec.ts
+```
+
+For an additional controlled software-rendering check, derive a temporary config
+under repository tmp from that CI config and give its Chromium project launch
+arguments `--use-gl=angle` and `--use-angle=swiftshader`. Use the pinned bundled
+browser, a fresh owned server/output directory and no production configuration
+changes. Confirm the actual WebGL `UNMASKED_RENDERER_WEBGL` result; flags alone
+are not proof of the backend. The measured repair used Chromium 153.0.8010.12
+and reported ANGLE/SwiftShader. See
+[Chromium's instructions](https://github.com/chromium/chromium/blob/main/docs/gpu/swiftshader.md)
+and [Playwright launch arguments](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-option-args).
+This controlled local check does not replace actual hosted results.
+
+The [scheduling decision](design/2026-11-12-browser-verification-scheduling.md)
+explains why progress waits for actual results/checkpoints, captures happen
+after real draws, and expensive GPU matrices are independent bounded cases.
+Keep all numerical/pixel/sign/interaction and warmed timing coverage; do not
+make a failed gate green by lowering resolution, disabling damping or retries.
+Adaptive evidence is now six `measurements-MODE-QUALITY` files per engine,
+covering the same 24 comparisons and 14 timing configurations. The normal full
+suite has **320 cases**; consult current status/PR checks for actual outcomes.
+
 ## Verification commands
 
 Use the root-shell temporary-directory setup above, then:

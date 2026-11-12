@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 12 November 2026 for Vite maintenance/native fixtures from main `06ecbb9`;
+Updated 12 November 2026 for typed native encoding from main `f92e063`;
 version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
@@ -12,6 +12,67 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### Typed native encoding: 12 November 2026
+
+The user authorized #39's remaining encoding phase on
+`codex/typed-native-encoding`. The [typed writer](../crates/eigenvista-format/src/typed.rs)
+now emits numerical bytes directly, retaining small metadata/reference JSON.
+Publication and Save share exact preflight; decoder, profile IDs, f64 bits,
+source hashes, logical layout, scientific code, dependencies and limits stay
+unchanged. No profile migration is needed. The frozen corpus is untouched.
+
+All **44 format tests** pass, including four new edge tests with seven layout
+hashes captured before the refactor, two checked-buffer safety tests and the six
+frozen compatibility tests. Exhaustive model destructuring exposes new schema
+fields at compile time. Independent review found no remaining issues.
+
+Three fresh native release processes per version on the same 128³ authoritative
+grid measure median whole-process peak RSS **182,304,768→47,480,832 bytes**
+(73.96% lower). Median encode times are 261.057→252.110 ms; timing ranges overlap,
+so do not claim a general speedup. All six archives have identical manifests
+and decompressed entry bytes. Source/binary/input identities and raw results are
+retained in `tmp/2026-11-12-typed39/memory/`; the committed
+[example and procedure](development.md#native-encoding-measurements) allow new
+measurements. This workload excludes saved meshes; existing source hashing still
+allocates numeric JSON. Browser/WASM peak memory and universal OOM recovery are
+not established.
+
+Fresh local checks pass **238 Rust tests**, strict Clippy/Rustfmt, production
+WASM/frontend and debug native builds, **13 packaging tests** and **26 real
+embedded-native observations**. Full 306-case two-engine/capture results and the
+actual reviewed-head hosted run are recorded in
+[#39](https://github.com/uvar-apps/eigenvista/issues/39) and its implementation PR;
+all three hosted jobs must pass before merge. See [status](status.md#typed-native-encoding-12-november-2026)
+and the [decision](design/2026-11-12-typed-native-encoding.md).
+
+Initial hosted run [43208190349](https://github.com/uvar-apps/eigenvista/actions/runs/43208190349)
+at `9ecb720` failed six existing progress/rendering checks (300 passed, 33.2 min).
+Linux 229 Rust/Clippy, macOS seven desktop tests, production build, packaging and
+all 12 frozen-file browser cases passed. The first local 306-case pass is
+historical evidence for that initial head, not a green hosted gate.
+
+Required test repairs are tracked in [#51](https://github.com/uvar-apps/eigenvista/issues/51)
+on PR #50. Progress now waits for real worker results/checkpoints and completed
+publication; cancellation snapshots identify the active worker/request. GPU
+cases preserve all comparisons/timing draws while dividing the aggregate work.
+Cube retains loaded desktop-to-mobile resize and real damping; viewer captures
+follow actual settled draws. Focused CI-traced Chromium passes **30/30** cases
+with a verified ANGLE/SwiftShader renderer in 2.1 minutes; the six GPU evidence
+files still contain all 24 comparisons and 14 distinct timing configurations.
+Independent final reviews found no remaining blockers. The corrected full
+inventory is **320 cases**. See the
+[decision](design/2026-11-12-browser-verification-scheduling.md) and current
+issue/PR evidence for software-rendered/traced, full local and actual final-head
+hosted results. All three jobs must pass before merging. Runtime/writer hashes,
+frozen data and the native memory measurements remain unchanged by these test
+repairs. Preserve the initial failure artifact under repository tmp.
+
+This completes the writer scope begun after PR #49's fixture checkpoint, subject
+to those integration gates. The older entries below describe their dated scope;
+their then-future typed phase is this increment. No version/tag/release/ZIP was
+requested. Preserve the untracked original review and private exports. Future
+#37/#38/#40 work remains separate.
 
 ### Vite maintenance and fixture phase: 12 November 2026
 

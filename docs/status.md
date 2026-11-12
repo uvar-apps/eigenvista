@@ -8,6 +8,90 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Typed native encoding: 12 November 2026
+
+From main `f92e063`, branch `codex/typed-native-encoding` implements the remaining
+encoding phase of [#39](https://github.com/uvar-apps/eigenvista/issues/39).
+Version remains 0.5.12; the existing release/tag/ZIP artifacts are unchanged.
+The [decision](design/2026-11-12-typed-native-encoding.md) and
+[plan](../plans/004-typed-native-encoding.md) describe the preservation contract.
+
+Numeric arrays now emit directly from typed model slices into checked, fallibly
+reserved binary buffers. Whole-document numeric JSON trees and flattened numeric
+clones are removed. Small metadata/reference JSON, prepared binary entries and
+ZIP output remain. Publication and Save still share exact model/source, entry,
+manifest and total-byte preflight. The decoder, source hashes, scientific code,
+profiles, precision, dependencies and resource limits are unchanged.
+
+The four frozen input archives are untouched. All **44 format tests** pass,
+including six frozen compatibility regressions, four new edge tests with seven
+logical-layout hashes captured from the unchanged `f92e063` writer, and two
+checked-buffer tests. Coverage includes singleton/coalesced/empty/nonuniform
+arrays, nested powers, flat grid shape, signed zero, metadata/nulls and the
+existing oversized-unsigned f64 fallback. Independent review found no remaining
+issues. New model fields are exposed by exhaustive writer destructuring.
+
+Fresh isolated optimized native measurements on Apple M4/macOS 27.0, Rust 1.99.0:
+
+| Run | Prior encode ms | Typed encode ms | Prior peak RSS bytes | Typed peak RSS bytes |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 257.256 | 251.281 | 182,353,920 | 47,480,832 |
+| 2 | 261.395 | 252.110 | 182,304,768 | 47,480,832 |
+| 3 | 261.057 | 258.880 | 182,288,384 | 47,480,832 |
+
+Median whole-process peak RSS falls **73.96%**, from 182,304,768 to 47,480,832
+bytes. Median encode time is 261.057 versus 252.110 ms; the small observed timing
+difference and overlapping ranges are not a general throughput claim. The same
+[driver](../crates/eigenvista-format/examples/encoding_benchmark.rs), toolchain
+and exact 2,097,152-sample input were used in three fresh processes per version.
+Independent ZIP decoding verifies identical manifests and all decompressed entries
+across the six archives: 15 entries, 16,781,174 uncompressed bytes and 9,822,901
+archive bytes. Observed compressed-byte equality is not a new format contract.
+
+Encode timing excludes sampling, input identification and file writing; maximum
+RSS covers the whole process. The workload has no saved meshes and therefore
+does not measure saved-source validation's remaining JSON hash allocations.
+This is not a browser/WASM memory bound or an OOM guarantee. See the
+[measurement procedure](development.md#native-encoding-measurements).
+
+Fresh local verification passes **238 workspace Rust tests**, Rustfmt and strict
+workspace/all-target Clippy, production WASM/TypeScript/frontend and debug native
+builds, **13 packaging tests**, and **26 embedded-native observations** across
+clean and dirty close/Cancel/Discard. The full **306-case** Chromium/WebKit run,
+current capture inspection and actual reviewed-head hosted evidence are recorded
+in [#39](https://github.com/uvar-apps/eigenvista/issues/39) and its implementation
+PR. All three actual hosted jobs must pass before merge. Physical native
+dialogs/shortcuts and distribution qualification remain separate gates.
+
+The initial hosted run at `9ecb720`,
+[43208190349](https://github.com/uvar-apps/eigenvista/actions/runs/43208190349),
+then failed **6 existing browser checks**, with 300 passing in 33.2 minutes.
+Linux Rust/Clippy (229 tests), macOS desktop (7), production build, packaging
+(13), and all 12 frozen-file browser cases passed. Original failure traces and
+images are retained; this is not counted as a successful merge gate.
+
+[#51](https://github.com/uvar-apps/eigenvista/issues/51) tracks the required
+[verification repair](design/2026-11-12-browser-verification-scheduling.md).
+Progress waits for actual results/checkpoints and UI publication completion;
+cancellation observes the current worker/request at real termination. GPU work
+is divided into independent cases while preserving all 24 comparisons, 14 timing
+configurations, warmups and nine measurement draws. Cube checks retain desktop,
+loaded-scene mobile resize and real damped rotation; viewer captures follow
+completed camera/draw work. Pixel thresholds, numerical checks, resolutions,
+animation and global CI deadlines remain unchanged. The corrected inventory is
+**320 browser cases**. A focused **30/30 Chromium** run with CI tracing and a
+verified ANGLE/SwiftShader renderer passes in 2.1 minutes after independent
+review fixes. Its six evidence files retain all 24 comparisons and 14 distinct
+timing configurations. Current full local, software-rendered/traced and fresh
+reviewed-head hosted evidence is linked from #51 and PR #50; all three hosted
+jobs must pass before merge. The original 306-case local pass above belongs to
+the initial head. Production code and measured writer hashes are unchanged by
+this verification repair.
+
+Logs and preserved before/after binaries are under
+`tmp/2026-11-12-typed39/`. The original review remains untracked. Completion here
+does not implement #37/#38 mesh storage/transport or #40 source hashing.
+
 ## Vite maintenance and native fixtures: 12 November 2026
 
 From main `06ecbb9`, [PR #49](https://github.com/uvar-apps/eigenvista/pull/49),

@@ -76,6 +76,25 @@ and [handoff](../handoff.md) record verification and remaining platform gates.
 implemented by this batch. Current labels/issues, not the historical initial
 table, determine the remaining queue.
 
+## Typed-writer implementation follow-up
+
+The user then authorized #39's remaining encoding phase on
+`codex/typed-native-encoding`. The [decision](../design/2026-11-12-typed-native-encoding.md)
+and [status](../status.md#typed-native-encoding-12-november-2026) record direct typed
+numeric emission, exact logical compatibility, native allocation measurements
+and verification. The profile decision is resolved by preserving existing bytes;
+`needs-research` is removed from #39. This is a memory/verification improvement,
+not a newly demonstrated scientific-output bug. Other research priorities remain
+unchanged, including #40's separate source-hashing allocations.
+
+Initial hosted verification for #39 also exposed existing progress/capture
+scheduling assumptions. [#51](https://github.com/uvar-apps/eigenvista/issues/51)
+tracks that P2 verification defect in the same PR #50. The
+[decision](../design/2026-11-12-browser-verification-scheduling.md) records the
+failed run, trace evidence and preserved coverage. This establishes incorrect
+test assumptions, not a new scientific or product-rendering regression. Final source-head
+checks remain required before both issues close.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

@@ -5,8 +5,10 @@ Issue: first phase of [#39](https://github.com/uvar-apps/eigenvista/issues/39).
 Priority P3; effort S–M; risk low; dependencies: none.
 Status: fixture phase implemented on `codex/vite-maintenance-and-native-fixtures`
 after user authorization. Acceptance evidence is in [current status](../docs/status.md#vite-maintenance-and-native-fixtures-12-november-2026)
-and the implementation PR checks. Typed encoding remains outside this phase and
-the larger #39 stays open. The planning baseline/recipe below is historical.
+and the implementation PR checks. Typed encoding was outside this fixture phase;
+its subsequently authorized implementation is recorded in
+[Plan 004](004-typed-native-encoding.md). The planning baseline/recipe below is
+historical, including its instructions to leave #39 open at the fixture checkpoint.
 
 ## Planning baseline
 
