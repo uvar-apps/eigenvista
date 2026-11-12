@@ -97,8 +97,25 @@ source-hash checks, at most 8,191 array entries plus the manifest, an 8 MiB
 manifest cap and a 128 MiB total uncompressed-byte cap. Publication prepares the
 same array bytes/hashes and exact manifest without creating or compressing a ZIP;
 Save compresses those entries. This keeps the current profile/layout and still
-requires serde/array allocations. The older WASM `validate` export checks only
+requires metadata and binary-array allocations. The older WASM `validate` export checks only
 the scientific model; it is not a replacement for native-format preflight.
+
+The [typed writer](../crates/eigenvista-format/src/typed.rs) emits numeric bytes
+directly from the model instead of first constructing and flattening numeric
+JSON values. It preserves the prior writer's manifest/decompressed-entry bytes,
+including empty inline arrays, nonuniform rows, uniform-column ordering and
+flat vector shapes. Metadata retains sorted keys and explicit nulls. Scientific
+f64 values retain their bits; unsigned arrays retain the existing whole-array
+f64 fallback if a value exceeds u32. In particular, this preserves the current
+writer behavior for oversized surface resolutions without expanding the
+decoder's numeric capabilities. No identifier/profile or hash migration is
+introduced. See the [decision](design/2026-11-12-typed-native-encoding.md).
+
+Before emitting an entry, checked shape/byte arithmetic and fallible reservation
+bound its binary buffer against the existing preflight budget. Exact manifest
+and total accounting remain shared by publication and Save. This does not remove
+all allocations: model/source validation, metadata, prepared arrays, compression
+and decoding still use memory. Source hashing's numeric JSON is unchanged.
 
 Native saves validate the encoded document, write and sync a newly created sibling file, then rename it into place. Failure leaves the original file intact. Windows overwrite semantics still need a dedicated implementation/test before a Windows release. Browser saves produce the same container through a download.
 

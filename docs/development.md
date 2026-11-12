@@ -140,6 +140,41 @@ sets that location and uses an architecture-specific release subdirectory.
 Generated outputs, downloaded dependencies, reports, and staging are ignored.
 Keep `Cargo.lock` and `app/package-lock.json` under version control.
 
+## Native encoding measurements
+
+The [encoding example](../crates/eigenvista-format/examples/encoding_benchmark.rs)
+samples a fixed 128³ analytic H2 field and retains it as an authoritative grid.
+It performs one encode or publication preflight per process and prints JSON
+input identities, sample count and timing. After the usual repository-local
+temporary-directory setup, on macOS:
+
+```sh
+cargo build --locked --release -p eigenvista-format --example encoding_benchmark
+eigenvista_measure_dir=$(mktemp -d "$PWD/tmp/encoding-rss.XXXXXX")
+for run in 1 2 3; do
+  /usr/bin/time -l target/release/examples/encoding_benchmark encode \
+    "$eigenvista_measure_dir/grid-$run.eigenvista" \
+    > "$eigenvista_measure_dir/run-$run.json" \
+    2> "$eigenvista_measure_dir/run-$run.time"
+done
+```
+
+The output archive is optional; supplied destinations use create-new semantics.
+Use `validate` without an archive argument to measure the shared preflight.
+For before/after work, preserve a copy of the original executable under repository
+tmp before changing the implementation. Use the same example, locked toolchain
+and input identities, and three independent optimized processes per version.
+Do not substitute a repeated in-process loop for independent maximum-RSS samples.
+
+The timer excludes sampling, input hashing, JSON output and file writing.
+macOS `time -l` reports whole-process maximum RSS in bytes, including sampling,
+allocation retention and ZIP compression. Linux reports require its own units
+and tools. This native workload has no cached meshes, so it does not measure
+saved-surface source hashing's remaining JSON costs. It does not establish
+browser/WASM peak memory, OOM recovery or a universal workload improvement.
+See the [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
+and current [status](status.md) for recorded comparisons and qualification limits.
+
 ## Verification commands
 
 Use the root-shell temporary-directory setup above, then:

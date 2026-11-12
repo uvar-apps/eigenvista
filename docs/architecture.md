@@ -286,8 +286,11 @@ f64 positions/normals and u32 indices. The worker's `validate` operation calls t
 Rust format's full `validate_document` preflight, shared with Save. It checks
 model/source identity, array-entry count, exact manifest bytes and total
 uncompressed bytes including all retained scientific inputs before commit.
-It builds the existing serde/array representation and hashes without creating
-or compressing a ZIP. Save still compresses the same prepared entries. The older
+Its [typed writer](../crates/eigenvista-format/src/typed.rs) emits binary arrays
+directly from the Rust model and builds metadata/reference JSON, without a
+per-number JSON tree or flattened numeric clones. Preflight hashes these entries
+without creating or compressing a ZIP. Save still compresses the same prepared
+entries. The older
 WASM `validate` API remains model-only and is not the publication guard. Preflight
 still scales with retained data and allocates temporary arrays; these are preview rejection
 budgets, not guarantees of acceptable memory use or latency. Cancellation or
@@ -417,6 +420,15 @@ and checksummed, little-endian f64/u32 arrays. It is **not** the full proposed
 schema, a streaming container, or a backward-compatible reader for every
 historical Molekel file. Arrays are whole entries and saves can make multiple
 in-memory copies.
+
+The [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
+preserves the earlier writer's exact logical bytes: sorted metadata, array IDs,
+column-before-row coalescing, flat shapes, f64 bits, integer fallback and hashes.
+No schema/profile migration is introduced. Checked byte accounting and fallible
+binary-buffer reservation preserve the existing preflight thresholds. Metadata,
+prepared arrays, ZIP output and unchanged decoder allocations remain; saved-source
+validation still uses core's separate JSON-based hashing. The native benchmark
+and its measurement limits are documented in [development](development.md#native-encoding-measurements).
 
 Saved meshes include field ID, source hash, signed isovalue, mesher/version,
 grid geometry, precision, vertices/normals/indices, and appearance. The associated

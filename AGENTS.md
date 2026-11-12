@@ -80,6 +80,13 @@ documents; older `.molekel` preview documents remain readable. Check
   provenance and native f64 signed-zero bits; browser JSON Save intentionally
   uses the separately documented zero-canonical contract. See its README before
   changing writers, source hashes, mesh layout, dtypes or profile identifiers.
+- Native encoding uses a model-aware typed writer with exhaustive model
+  destructuring. Keep its metadata keys, column-before-row emission, inline empty
+  arrays, flat shapes and unsigned-to-f64 fallback aligned with the existing
+  profile. Adding model fields requires updating this writer as well as Serde
+  and TypeScript. Frozen inputs and the pre-typed edge hashes must not be
+  regenerated to accommodate accidental drift. Source validation still uses
+  core's existing JSON-based hashes; typed encoding does not optimize those.
 
 ## Commands (from the repository root)
 

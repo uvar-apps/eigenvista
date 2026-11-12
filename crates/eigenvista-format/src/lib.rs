@@ -12,6 +12,7 @@ use zip::{CompressionMethod, ZipArchive, ZipWriter, write::SimpleFileOptions};
 pub mod native;
 #[cfg(test)]
 mod preflight_tests;
+mod typed;
 
 const BUDGET: usize = 128 * 1024 * 1024;
 const MANIFEST_BUDGET: usize = 8 * 1024 * 1024;
@@ -40,156 +41,6 @@ fn digest(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 
-fn numeric_shape(v: &Value) -> Option<Vec<usize>> {
-    match v {
-        Value::Number(_) => Some(vec![]),
-        Value::Array(a) if !a.is_empty() => {
-            let child = numeric_shape(&a[0])?;
-            if a.iter()
-                .skip(1)
-                .any(|v| numeric_shape(v).as_ref() != Some(&child))
-            {
-                return None;
-            }
-            Some(std::iter::once(a.len()).chain(child).collect())
-        }
-        _ => None,
-    }
-}
-fn flatten(v: &Value, out: &mut Vec<Value>) {
-    if let Value::Array(a) = v {
-        for v in a {
-            flatten(v, out);
-        }
-    } else {
-        out.push(v.clone());
-    }
-}
-
-/// Pack already-flattened numeric values into one binary entry and return its id.
-fn emit_entry(
-    flat: &[Value],
-    shape: Vec<usize>,
-    arrays: &mut BTreeMap<String, Array>,
-    entries: &mut Vec<(String, Vec<u8>)>,
-) -> Result<String> {
-    let integer = flat
-        .iter()
-        .all(|v| v.as_u64().is_some_and(|n| n <= u32::MAX as u64));
-    let mut bytes = vec![];
-    for v in flat {
-        if integer {
-            bytes.extend((v.as_u64().ok_or("Invalid integer")? as u32).to_le_bytes());
-        } else {
-            bytes.extend(v.as_f64().ok_or("Invalid float")?.to_le_bytes());
-        }
-    }
-    let id = format!("a{}", arrays.len());
-    let entry = format!("arrays/{id}/0.bin");
-    arrays.insert(
-        id.clone(),
-        Array {
-            dtype: if integer { "u32" } else { "f64" }.into(),
-            shape,
-            entry: entry.clone(),
-            bytes: bytes.len(),
-            sha256: digest(&bytes),
-        },
-    );
-    entries.push((entry, bytes));
-    Ok(id)
-}
-
-/// Coalesce a column of identically-shaped numeric arrays into one blob.
-///
-/// A row-wise collection such as `atoms: [{element, position:[f64;3]}, …]` would
-/// otherwise cost one ZIP entry, one manifest record, and one decode buffer per
-/// row. When every row carries the same numeric shape under a key, that key is
-/// stored once as a `[rows, …inner]` column and each row keeps a `{array,index}`
-/// pointer into it. This turns N entries per column into a single entry.
-fn coalesce_columns(
-    items: &mut [Value],
-    arrays: &mut BTreeMap<String, Array>,
-    entries: &mut Vec<(String, Vec<u8>)>,
-) -> Result<()> {
-    if items.len() < 2 {
-        return Ok(());
-    }
-    let Some(first) = items[0].as_object() else {
-        return Ok(());
-    };
-    let mut columns: Vec<(String, Vec<usize>)> = Vec::new();
-    for (key, value) in first {
-        let Some(shape) = numeric_shape(value) else {
-            continue;
-        };
-        // Only array-valued keys can form a column; scalars have an empty shape.
-        if shape.is_empty() {
-            continue;
-        }
-        let uniform = items.iter().all(|item| {
-            item.as_object()
-                .and_then(|o| o.get(key))
-                .and_then(numeric_shape)
-                .as_ref()
-                == Some(&shape)
-        });
-        if uniform {
-            columns.push((key.clone(), shape));
-        }
-    }
-    for (key, shape) in columns {
-        let rows = items.len();
-        let mut flat = Vec::with_capacity(rows * shape.iter().product::<usize>());
-        for item in items.iter() {
-            let value = item
-                .as_object()
-                .and_then(|o| o.get(&key))
-                .ok_or("Missing coalesced column")?;
-            flatten(value, &mut flat);
-        }
-        let column_shape = std::iter::once(rows).chain(shape).collect();
-        let id = emit_entry(&flat, column_shape, arrays, entries)?;
-        for (row, item) in items.iter_mut().enumerate() {
-            if let Some(object) = item.as_object_mut() {
-                object.insert(key.clone(), json!({"$array": id, "$index": row}));
-            }
-        }
-    }
-    Ok(())
-}
-
-fn pack(
-    v: &mut Value,
-    arrays: &mut BTreeMap<String, Array>,
-    entries: &mut Vec<(String, Vec<u8>)>,
-) -> Result<()> {
-    if v.is_array()
-        && let Some(shape) = numeric_shape(v)
-    {
-        let mut flat = vec![];
-        flatten(v, &mut flat);
-        let id = emit_entry(&flat, shape, arrays, entries)?;
-        *v = json!({"$array":id});
-        return Ok(());
-    }
-    match v {
-        Value::Array(items) => {
-            coalesce_columns(items, arrays, entries)?;
-            for item in items.iter_mut() {
-                pack(item, arrays, entries)?;
-            }
-        }
-        Value::Object(o) => {
-            for v in o.values_mut() {
-                pack(v, arrays, entries)?;
-            }
-        }
-        _ => {}
-    }
-    Ok(())
-}
-
 #[derive(Clone, Copy)]
 struct PreviewBudget {
     array_entries: usize,
@@ -209,24 +60,22 @@ struct PreparedDocument {
     entries: Vec<(String, Vec<u8>)>,
 }
 
-// Keep packing and exact serialized-size accounting shared with Save. This
-// deliberately retains the current generic serde/array representation and hashes.
+// Publication and Save use the same typed packing and exact manifest accounting.
+// The existing preview layout, numeric bits and source hashes remain unchanged.
 fn preflight(doc: &Document, budget: PreviewBudget) -> Result<PreparedDocument> {
     doc.validate()?;
-    let mut value = serde_json::to_value(doc).map_err(|e| e.to_string())?;
-    let mut arrays = BTreeMap::new();
-    let mut entries = vec![];
-    pack(&mut value, &mut arrays, &mut entries)?;
-    if entries.len() > budget.array_entries {
-        return Err("Document has too many array entries for the preview profile".into());
-    }
+    let typed::PackedDocument {
+        document,
+        arrays,
+        entries,
+    } = typed::pack(doc, budget)?;
     let manifest = Manifest {
         format: "eigenvista".into(),
         version: [0, 1],
         required_features: vec![PROFILE.into()],
         coordinate_unit: "bohr".into(),
         arrays,
-        document: value,
+        document,
     };
     let manifest = serde_json::to_vec(&manifest).map_err(|e| e.to_string())?;
     if manifest.len() > budget.manifest_bytes

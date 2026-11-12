@@ -23,6 +23,7 @@ fact*; this directory records *decisions before the fact*.
 
 | Date | Design | Status | Issue |
 | --- | --- | --- | --- |
+| 2026-11-12 | [Typed native encoding](2026-11-12-typed-native-encoding.md) | implemented | [#39](https://github.com/uvar-apps/eigenvista/issues/39) |
 | 2026-11-12 | [Vite maintenance and immutable native fixtures](2026-11-12-vite-and-native-fixtures.md) | implemented | [#46](https://github.com/uvar-apps/eigenvista/issues/46), fixture phase of [#39](https://github.com/uvar-apps/eigenvista/issues/39) |
 | 2026-11-11 | [Hosted verification and exact publication preflight](2026-11-11-ci-and-publication-preflight.md) | implemented | [#32](https://github.com/uvar-apps/eigenvista/issues/32), [#33](https://github.com/uvar-apps/eigenvista/issues/33), [#34](https://github.com/uvar-apps/eigenvista/issues/34) |
 | 2026-11-11 | [Native lifecycle and Molden capacity contracts](2026-11-11-native-lifecycle-and-molden-limits.md) | implemented | [#30](https://github.com/uvar-apps/eigenvista/issues/30), [#31](https://github.com/uvar-apps/eigenvista/issues/31) |
