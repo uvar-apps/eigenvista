@@ -75,6 +75,19 @@ are not implemented.
 
 On a narrow browser window these areas rearrange; scrolling may be needed.
 Toolbar icons show their names on hover.
+Click a sidebar section's heading to collapse or expand its controls. Keyboard
+users can focus the heading with Tab and activate it with Enter or Space.
+Collapsing a section retains its current settings and selections. The eight
+sections start expanded; your choices are remembered in this browser or desktop
+profile across Open, Clear and restart. They are interface preferences, separate
+from the saved molecular document. If profile storage is unavailable, the
+choices last for the current session.
+
+**Field rendering** stays expanded while a calculation is running, so its
+progress report and **Cancel** button remain available. Its previous expansion
+choice returns when the calculation finishes or is cancelled. Sections have a
+fixed order; drag-and-drop reordering is not yet implemented.
+
 The runtime badge reads **Native (Tauri)** in the desktop shell and
 **WebAssembly** in the browser. It identifies the runtime, not verified support
 for additional operating systems.

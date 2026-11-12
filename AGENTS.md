@@ -195,6 +195,17 @@ Standard verification order for runtime changes (details and coverage map in
   [rendering decisions](docs/design/2026-11-06-rendering-quality.md) and the
   adaptive-volume, volume-ranges, volume-quality-controls, and shader-transparency
   browser specs before changing marching or blending.
+- Sidebar disclosures keep their bodies mounted. Expansion is a bounded profile
+  preference, separate from `Document`, scientific worker inputs and dirty state.
+  Keep Field rendering open while busy so progress and Cancel remain available.
+  Preserve keyboard access, shader/form state and Open/Clear behavior; see
+  `app/tests/panels.spec.ts` and the sidebar design record.
+- #37 remains qualification-only: the production mesher still emits raw corners.
+  The format example's `test = true` runs its exact-bit native self-check in the
+  default/hosted suite; measurements are opt-in. Preserve the separately frozen
+  `fixtures/indexed-mesh-qualification/` corpus and raw/custom-shader identity
+  negative controls. See Plan 003 before implementing packing; unconditional
+  automatic packing is NO-GO without a bounded benefit/budget raw-fallback policy.
 - **Port 5178 is strict.** Keep [vite](app/vite.config.ts), Tauri `devUrl`
   ([tauri.conf.json](app/src-tauri/tauri.conf.json)), and both Playwright URLs
   ([playwright.config.ts](app/playwright.config.ts)) aligned if you move it.

@@ -1,0 +1,8 @@
+# Preserve exact immutable corpus/oracle bytes on every checkout.
+*.eigenvista -text
+*.json -text
+*.json.gz -text
+*.md text eol=lf
+*.mjs text eol=lf
+LICENSE text eol=lf
+.gitattributes text eol=lf

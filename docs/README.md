@@ -13,6 +13,8 @@ are retained with source provenance.
 BinaryCIF raw/gzip input shares those scientific rules. PNG export captures an
 explicitly rendered frame without retaining the viewport drawing buffer, and
 the native runtime badge is platform-neutral.
+Sidebar headings collapse their controls independently, retain their settings,
+and remember expansion in the current application profile.
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.

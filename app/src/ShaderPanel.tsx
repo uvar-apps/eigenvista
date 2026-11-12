@@ -11,6 +11,7 @@ import {
   type UniformValue,
 } from "./shaderTools";
 import { saveShaderParameters, native, pickNative } from "./files";
+import { PanelSection } from "./PanelSection";
 
 export interface ShaderFileState {
   name: string;
@@ -46,6 +47,8 @@ function fromNumberArray(
 }
 
 export function ShaderPanel({
+  expanded,
+  onToggle,
   uniforms,
   state,
   surfaceOptions,
@@ -55,6 +58,8 @@ export function ShaderPanel({
   status,
   error,
 }: {
+  expanded: boolean;
+  onToggle: () => void;
   uniforms: UniformDef[];
   state: ShaderEditorState;
   surfaceOptions: { id: string; label: string }[];
@@ -217,8 +222,13 @@ export function ShaderPanel({
   const ready = !!(state.vertex && state.fragment);
 
   return (
-    <section className="shader-panel">
-      <h2>Surface shader</h2>
+    <PanelSection
+      id="surface-shader"
+      title="Surface shader"
+      className="shader-panel"
+      expanded={expanded}
+      onToggle={onToggle}
+    >
       <p className="empty">
         Optional vertex + fragment GLSL (classic Molekel-style or Three.js).
         Uniforms become live controls; parameters load/save as{" "}
@@ -435,6 +445,6 @@ export function ShaderPanel({
           {[paramsError, error].filter(Boolean).join("\n")}
         </pre>
       )}
-    </section>
+    </PanelSection>
   );
 }

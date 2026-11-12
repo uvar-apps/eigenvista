@@ -10,6 +10,10 @@ The improve skill supplied the initial research/plan structure.
 The user then authorized the remaining typed-encoding phase of #39, implemented
 in [Plan 004](004-typed-native-encoding.md). Current evidence is in
 [status](../docs/status.md#typed-native-encoding-12-november-2026).
+The next authorized batch implements #48's sidebar disclosures and performs
+only #37's shader/memory qualification. Its [decision](../docs/design/2026-11-12-indexed-mesh-qualification.md)
+rejects unconditional automatic packing; #37 remains open for a bounded
+benefit/budget fallback policy and later implementation.
 
 Read the [findings and reproducible evidence](2026-11-12-research.md) first.
 Issue comments hold the published research disposition. Existing priorities
@@ -20,7 +24,7 @@ remain P3; none of these measurements establishes a scientific-output bug.
 | 1 | [001: bounded Vite maintenance](001-vite-maintenance.md), #46 | Implemented; acceptance in status/PR checks | Only Vite changes; clean install/audit and license comparison are verified. |
 | 2 | [002: authentic compatibility fixtures](002-format-compatibility-fixtures.md), first phase of #39 | Implemented; acceptance in status/PR checks | Four frozen archives and native/actual-WASM/worker/UI regressions preserve authentic old/current behavior. |
 | 3 | [004: typed native encoding](004-typed-native-encoding.md), remaining #39 | Implemented; acceptance in status/issue/PR checks | Direct typed numeric emission preserves the frozen logical layout and substantially reduces measured native encode peak RSS. |
-| 4 | [003: indexed-mesh qualification](003-indexed-mesh-qualification.md), #37 | BLOCKED: shader identity policy and extraction peak | Exact tuple sharing is useful, but custom shader vertex IDs and temporary-map allocations need explicit acceptance. |
+| 4 | [003: indexed-mesh qualification](003-indexed-mesh-qualification.md), #37 | Qualification recorded; automatic packing NO-GO | Shader identity is reconstructible only for explicitly identified generated layouts; no-sharing peak rejects unconditional packing. Select a bounded benefit/budget fallback before production implementation. |
 | Later | #38 typed mesh outputs | DEFERRED until after #37 | Two-engine transfer measurements are positive but small; remeasure after reducing mesh payload. |
 | Later | #35 complete Molden spin sets | BLOCKED: agreed real workload and browser memory | Current input-line and persistence limits independently constrain expansion. |
 
@@ -35,8 +39,10 @@ artifacts.
 
 ## Dependencies
 
-Compatibility fixtures precede indexed storage, typed encoding, any source-hash
-migration, and a future #47 asset-layout decision. Vite maintenance is independent.
+Compatibility fixtures precede indexed storage, typed encoding and any source-hash
+migration. The user closed #47 because the existing ZIP/manifest/array layout
+already meets the requested asset-container goal; no format redesign is pending
+under that issue. Vite maintenance is independent.
 Mesh compaction should precede a production transfer optimization so its benefit
 is measured on the remaining payload. Capacity changes require agreed workloads
 and separate import, transport, rendering and persistence budgets.

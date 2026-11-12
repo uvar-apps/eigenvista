@@ -45,6 +45,7 @@ import { OrbitalBrowser, maxOrbitalBatch } from "./OrbitalBrowser";
 import { gridResolutions, isGridResolution } from "./resolution";
 import { Viewport } from "./Viewport";
 import { ShaderPanel, type ShaderEditorState } from "./ShaderPanel";
+import { PanelSection, usePanelExpansion } from "./PanelSection";
 import {
   defaultValues,
   mergeUniformValues,
@@ -69,6 +70,7 @@ import type {
 } from "./types";
 
 export default function App() {
+  const panels = usePanelExpansion();
   const [{ request, cancel }] = useState(createScienceClient);
   const [doc, setDocument] = useState<EigenVistaDocument | null>(null);
   const [busy, setBusyState] = useState("Opening scientific core");
@@ -693,9 +695,12 @@ export default function App() {
       {doc ? (
         <main>
           <aside className="left-panel">
-            <section>
-              <div className="section-title">
-                <h2>Document</h2>
+            <PanelSection
+              id="document"
+              title="Document"
+              expanded={panels.expanded.document}
+              onToggle={() => panels.toggle("document")}
+              headerAction={
                 <details className="examples">
                   <summary title="Open example">
                     <FlaskConical size={16} />
@@ -710,7 +715,8 @@ export default function App() {
                     </button>
                   </div>
                 </details>
-              </div>
+              }
+            >
               <div className="document-summary">
                 <Atom size={19} />
                 <div>
@@ -734,9 +740,14 @@ export default function App() {
                   <option value="space-fill">Van der Waals</option>
                 </select>
               </label>
-            </section>
-            <section className="field-section">
-              <h2>Quantum fields</h2>
+            </PanelSection>
+            <PanelSection
+              id="quantum-fields"
+              title="Quantum fields"
+              className="field-section"
+              expanded={panels.expanded["quantum-fields"]}
+              onToggle={() => panels.toggle("quantum-fields")}
+            >
               {[
                 { name: "Orbitals", fields: doc.orbitals },
                 { name: "Density matrices", fields: doc.densities },
@@ -791,13 +802,18 @@ export default function App() {
                   ),
               )}
               {!doc.view.field && <p className="empty">No quantum fields</p>}
-            </section>
-            <section className="provenance">
-              <h2>Provenance</h2>
+            </PanelSection>
+            <PanelSection
+              id="provenance"
+              title="Provenance"
+              className="provenance"
+              expanded={panels.expanded.provenance}
+              onToggle={() => panels.toggle("provenance")}
+            >
               {doc.provenance.map((p, i) => (
                 <p key={i}>{p}</p>
               ))}
-            </section>
+            </PanelSection>
           </aside>
           <div className="viewport-column">
             <Viewport
@@ -828,8 +844,13 @@ export default function App() {
             </div>
           </div>
           <aside className="right-panel">
-            <section>
-              <h2>Field rendering</h2>
+            <PanelSection
+              id="field-rendering"
+              title="Field rendering"
+              expanded={panels.expanded["field-rendering"]}
+              onToggle={() => panels.toggle("field-rendering")}
+              forceOpen={!!busy}
+            >
               <label>
                 Mode
                 <select
@@ -943,9 +964,13 @@ export default function App() {
                   progress={calculation}
                 />
               )}
-            </section>
-            <section>
-              <h2>Appearance</h2>
+            </PanelSection>
+            <PanelSection
+              id="appearance"
+              title="Appearance"
+              expanded={panels.expanded.appearance}
+              onToggle={() => panels.toggle("appearance")}
+            >
               <div className="color-pair">
                 <label>
                   <input
@@ -997,9 +1022,13 @@ export default function App() {
                   <option value="blinn-phong">Blinn-Phong</option>
                 </select>
               </label>
-            </section>
-            <section>
-              <h2>Atom colours</h2>
+            </PanelSection>
+            <PanelSection
+              id="atom-colours"
+              title="Atom colours"
+              expanded={panels.expanded["atom-colours"]}
+              onToggle={() => panels.toggle("atom-colours")}
+            >
               <p className="empty">
                 {atomPalette
                   ? `Overridden by ${atomPaletteName}`
@@ -1035,7 +1064,7 @@ export default function App() {
                   {atomPaletteError}
                 </pre>
               )}
-            </section>
+            </PanelSection>
             {(() => {
               const defs =
                 shaderEditor.vertex && shaderEditor.fragment
@@ -1046,6 +1075,8 @@ export default function App() {
                   : [];
               return (
                 <ShaderPanel
+                  expanded={panels.expanded["surface-shader"]}
+                  onToggle={() => panels.toggle("surface-shader")}
                   uniforms={defs}
                   state={shaderEditor}
                   surfaceOptions={doc.surfaces.map((s) => ({
@@ -1116,10 +1147,14 @@ export default function App() {
                 />
               );
             })()}
-            <section className="surfaces">
-              <h2>
-                Saved surfaces <span>{doc.surfaces.length}</span>
-              </h2>
+            <PanelSection
+              id="saved-surfaces"
+              title="Saved surfaces"
+              className="surfaces"
+              count={doc.surfaces.length}
+              expanded={panels.expanded["saved-surfaces"]}
+              onToggle={() => panels.toggle("saved-surfaces")}
+            >
               {doc.surfaces.length === 0 && (
                 <p className="empty">No surfaces</p>
               )}
@@ -1170,7 +1205,7 @@ export default function App() {
                   </button>
                 </div>
               ))}
-            </section>
+            </PanelSection>
           </aside>
         </main>
       ) : (

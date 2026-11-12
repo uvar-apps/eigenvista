@@ -95,6 +95,23 @@ failed run, trace evidence and preserved coverage. This establishes incorrect
 test assumptions, not a new scientific or product-rendering regression. Final source-head
 checks remain required before both issues close.
 
+## Sidebar implementation and mesh qualification follow-up
+
+The next authorized batch implements [#48](https://github.com/uvar-apps/eigenvista/issues/48)
+on `codex/collapsible-panels-and-mesh-qualification`, together with **qualification
+only** for [#37](https://github.com/uvar-apps/eigenvista/issues/37). Sidebar
+collapse is a P3 interface enhancement. Its lower-priority reordering request is
+now [#52](https://github.com/uvar-apps/eigenvista/issues/52). Mesh indexing remains
+a performance/memory improvement, without a newly reproduced scientific bug.
+Production compaction, renderer changes and larger mesh limits are outside this
+batch; #37 stays open for its later implementation and acceptance gates.
+
+The user closed [#47](https://github.com/uvar-apps/eigenvista/issues/47): the
+existing ZIP/manifest/array container meets the requested asset layout. No
+replacement format is scheduled under that issue. Current verification and
+the mesh research disposition belong in [status](../status.md) and
+[Plan 003](../../plans/003-indexed-mesh-qualification.md).
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

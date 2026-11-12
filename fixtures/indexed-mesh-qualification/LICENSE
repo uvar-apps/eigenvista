@@ -1,0 +1,10 @@
+EigenVista indexed-mesh qualification fixtures
+Copyright (C) 2026 Ugo Varetto
+
+SPDX-License-Identifier: GPL-2.0-or-later
+
+The constructed scalar data, generated mesh fixtures, metadata and test material
+in this directory are part of EigenVista. They may be redistributed and modified
+under version 2 of the GNU General Public License or, at your option, any later
+version. They are provided WITHOUT ANY WARRANTY. See ../../LICENSE for the full
+license. No external quantum-chemistry dataset or legacy C++ code is included.

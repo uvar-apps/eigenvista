@@ -8,6 +8,71 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Sidebar disclosures and mesh qualification: 12 November 2026
+
+From merged main `2f7aeec`, branch
+`codex/collapsible-panels-and-mesh-qualification` implements #48 and qualifies
+#37 without enabling production mesh compaction. Version remains 0.5.12; existing
+release/tag/tester ZIP artifacts are unchanged.
+
+All eight sidebar sections collapse with accessible heading buttons and mounted
+bodies. Bounded profile preferences survive Open/Clear/reload and storage
+failures. Controls, field/material/shader state, scientific worker inputs,
+dirty state and saved document data are preserved. Busy Field rendering stays
+open with progress/Cancel accessible, then restores the preference. Reordering
+is tracked in #52. See the [sidebar decision](design/2026-11-12-sidebar-disclosures.md)
+and updated user guide/architecture.
+
+The [native driver](../crates/eigenvista-format/examples/indexed_mesh_qualification.rs),
+[new frozen corpus](../fixtures/indexed-mesh-qualification/README.md) and browser
+shader checks qualify exact six-f64-bit tuple sharing and marker-only raw
+vertex-order/IBO reconstruction. Native checks cover signs, skew/reflection,
+normal seams, signed zero, large-origin precision and old arbitrary indexed
+Save. Browser checks use actual production material construction, WASM/worker
+Save, bounded real GPU draws and application Open/custom shader/Save/reopen,
+with compact and reflected naive-expansion negative controls.
+
+All **36 isolated optimized native processes** succeed: three fresh processes
+for each of nine workload/method pairs, plus nine separately labelled single
+publication probes. Retained numeric **and capacity** bytes fall
+4,432,272→1,058,064 for H2 and 4,577,040→1,258,032 for water's 31 meshes. H2
+extraction still dominates requested peak at about 33.82 MB. Water sorted
+median RSS falls 14,270,464→11,714,560 bytes; a near-limit no-sharing synthetic
+control instead rises 107,216,896→219,332,608 sorted or 458,457,088 hashed bytes.
+The [full result/decision](design/2026-11-12-indexed-mesh-qualification.md) records
+all three RSS samples, actual raw capacities and overlap, first/later retained
+passes, publication probes, input/source/binary identities and limitations.
+
+**NO-GO for unconditional automatic compaction.** #37 stays open with
+`needs-research` for a concrete production memory budget and benefit-before-output
+raw-fallback design, then actual worker, shader-expansion and publication gates.
+The 512 MiB prototype bound is research-only. Raw extraction, old-file limits,
+f64 precision, hashes, profiles, production renderer/writer/dependencies and
+`fixtures/native/` are unchanged. No browser/WASM/GPU memory bound, maximum-cap
+extraction benchmark or universal OOM recovery is claimed. Existing source-hash
+JSON allocations remain #40; #38 transport work stays deferred.
+
+Focused sidebar checks pass **20/20 Chromium/WebKit cases**, plus four refreshed
+animation-settled desktop/mobile captures inspected by the implementation and
+reviewing agents. **10/10 shader/persistence cases** pass across both engines:
+raw/restored differs by zero pixels, compact by 17,281–17,385 pixels, and
+reflected naive expansion by 17,379–17,385 pixels. Actual Chromium reports
+ANGLE/SwiftShader; WebKit reports Apple GPU. Real application captures were
+inspected, and all 17 native archives/five original semantic documents were
+independently byte-verified after lossless gzip packaging.
+
+Fresh **239 Rust checks** pass: 232 default-member tests, including the new
+example's native self-check now enabled by `test = true`, plus seven explicit
+desktop tests. Rustfmt, strict all-target Clippy, production WASM/TypeScript/Vite,
+debug native build and 13 packaging tests pass. Consult the issues/implementation
+PR for the full **350-case** browser run and actual hosted results; these are
+separate merge gates, and all three hosted jobs at the reviewed head must pass
+before merging. Raw measurements,
+traces, initial test-harness corrections and captures are under
+`tmp/2026-11-12-panels-mesh37/`. Preserve the untracked original review and private
+exports. #47 is closed at the user's request: existing native container layout
+meets the asset-layout goal.
+
 ## Typed native encoding: 12 November 2026
 
 From main `f92e063`, branch `codex/typed-native-encoding` implements the remaining

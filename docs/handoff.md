@@ -1,6 +1,7 @@
 # Development handoff
 
-Updated 12 November 2026 for typed native encoding from main `f92e063`;
+Updated 12 November 2026 for sidebar disclosures and indexed-mesh qualification
+from main `2f7aeec`;
 version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
@@ -12,6 +13,52 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### Sidebar disclosures and mesh qualification: 12 November 2026
+
+The user authorized #48 and **only the qualification phase** of #37 on
+`codex/collapsible-panels-and-mesh-qualification`. All eight sidebar sections
+now have keyboard-accessible disclosure headings with hidden, mounted bodies.
+Bounded profile preferences survive Open/Clear/reload without touching scientific
+data, dirty state or worker inputs. Field rendering stays open while busy so
+progress and Cancel remain accessible, then restores the user's preference.
+See the [user guide](user-guide.md#finding-your-way-around) and
+[decision](design/2026-11-12-sidebar-disclosures.md). Reordering is deferred to
+[#52](https://github.com/uvar-apps/eigenvista/issues/52).
+
+The separate [qualification record](design/2026-11-12-indexed-mesh-qualification.md)
+and [Plan 003](../plans/003-indexed-mesh-qualification.md) cover exact tuple
+sharing, original shader vertex-ID reconstruction, frozen signed/reflected
+layout inputs and real native memory measurements. Production core, mesher,
+renderer, writer/decoder, hashes, profiles, precision, dependencies and limits
+are unchanged. Only the research harness and fixtures use the prototype layout marker;
+it is not a supported production format promise. Old arbitrary indexed meshes
+retain their existing arrays and shader identity. Keep `fixtures/native/`
+and the new adopted qualification corpus immutable.
+
+Retained H2/water geometry shrinks substantially, but unchanged H2 extraction
+dominates peak and a near-limit no-sharing control increases median RSS from
+107,216,896 bytes to 219,332,608 sorted or 458,457,088 hashed. **NO-GO for automatic
+unconditional packing.** #37 stays open with `needs-research`: choose a concrete
+whole-application budget and savings-before-output/raw-fallback policy, then
+qualify actual custom-shader expansion, WASM/worker/publication/cancellation
+before enabling anything. The prototype's 512 MiB scratch guard is not that
+production decision. #38 remains deferred; existing hash allocations are #40.
+
+Fresh local verification and actual reviewed-head hosted results belong in
+[status](status.md#sidebar-disclosures-and-mesh-qualification-12-november-2026)
+and the issues/PR. All three hosted jobs must pass before merge. This increment
+does not bump version, tag, release or rebuild the tester ZIP. Preserve the
+original untracked review, private exports and repository-local raw evidence.
+
+The prior typed writer/test-repair increment is merged in
+[PR #50](https://github.com/uvar-apps/eigenvista/pull/50), main `2f7aeec`, closing
+#39/#51 after all three jobs passed in
+[run 43217008177](https://github.com/uvar-apps/eigenvista/actions/runs/43217008177).
+Its final full inventory was 320 browser cases. The user also closed #47 because
+the existing ZIP/manifest/arrays meet the requested container goal; no new
+directory/container redesign is pending. Older entries below are dated evidence
+and then-current priorities, not the current open-issue queue.
 
 ### Typed native encoding: 12 November 2026
 

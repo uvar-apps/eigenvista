@@ -15,8 +15,11 @@ a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
 Current source adds native close/quit protection, correct Molden limits, hosted
 verification, and reduced Molden-import/surface-publication work (#30–#34).
-The published 0.5.12 tester ZIP predates these repairs; they do not create a new
-release or redistributable archive.
+It also includes the bounded Vite maintenance update, authentic native-file
+regressions, typed numerical encoding and collapsible sidebar sections.
+Indexed meshes remain a qualification experiment; production generation is
+unchanged. The published 0.5.12 tester ZIP predates these changes; they do not
+create a new release or redistributable archive.
 
 ## Start here
 
@@ -104,6 +107,9 @@ release. It includes source and notices under the [application license](LICENSE)
   recalculation, meshing, or changing the saved document.
 - Custom surface shaders have an explicit **Shader transparency** control,
   enabled by default; disabling it forces opaque alpha and depth writes.
+- Collapse sidebar sections with their heading buttons. Controls retain their
+  state, expansion is remembered in the current profile, and calculation
+  progress/Cancel stay visible while busy.
 - Self-contained `.eigenvista` preview files containing quantum data, binary numeric arrays, saved meshes, isovalues, grid geometry, scientific hashes, provenance, and material settings. Reopen displays saved geometry without recomputation.
 - Native Save dialog with validated sibling-file replacement; browser file download. Native Open dialog and browser file selection.
 - Conventional single-frame XYZ and PDB import with automatic coordinate-based bonds, PDB alternate/model handling, and retained explicit connections. [Import policy and algorithm](docs/structure-imports.md).
