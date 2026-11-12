@@ -16,7 +16,8 @@ code. The icon and logo are unchanged.
 
 ### Sidebar disclosures and mesh qualification: 12 November 2026
 
-The user authorized #48 and **only the qualification phase** of #37 on
+The user authorized #48 and **only the qualification phase** of #37 in
+[PR #53](https://github.com/uvar-apps/eigenvista/pull/53), developed on
 `codex/collapsible-panels-and-mesh-qualification`. All eight sidebar sections
 now have keyboard-accessible disclosure headings with hidden, mounted bodies.
 Bounded profile preferences survive Open/Clear/reload without touching scientific
@@ -31,7 +32,8 @@ and [Plan 003](../plans/003-indexed-mesh-qualification.md) cover exact tuple
 sharing, original shader vertex-ID reconstruction, frozen signed/reflected
 layout inputs and real native memory measurements. Production core, mesher,
 renderer, writer/decoder, hashes, profiles, precision, dependencies and limits
-are unchanged. Only the research harness and fixtures use the prototype layout marker;
+are unchanged. Only the research harness and fixtures use the prototype layout
+marker;
 it is not a supported production format promise. Old arbitrary indexed meshes
 retain their existing arrays and shader identity. Keep `fixtures/native/`
 and the new adopted qualification corpus immutable.
@@ -47,7 +49,8 @@ production decision. #38 remains deferred; existing hash allocations are #40.
 
 Fresh local verification and actual reviewed-head hosted results belong in
 [status](status.md#sidebar-disclosures-and-mesh-qualification-12-november-2026)
-and the issues/PR. All three hosted jobs must pass before merge. This increment
+and [PR #53](https://github.com/uvar-apps/eigenvista/pull/53). All three hosted
+jobs must pass before merge. This increment
 does not bump version, tag, release or rebuild the tester ZIP. Preserve the
 original untracked review, private exports and repository-local raw evidence.
 

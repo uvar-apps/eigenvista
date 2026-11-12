@@ -10,8 +10,8 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Sidebar disclosures and mesh qualification: 12 November 2026
 
-From merged main `2f7aeec`, branch
-`codex/collapsible-panels-and-mesh-qualification` implements #48 and qualifies
+From merged main `2f7aeec`, [PR #53](https://github.com/uvar-apps/eigenvista/pull/53),
+developed on `codex/collapsible-panels-and-mesh-qualification`, implements #48 and qualifies
 #37 without enabling production mesh compaction. Version remains 0.5.12; existing
 release/tag/tester ZIP artifacts are unchanged.
 
@@ -64,8 +64,9 @@ independently byte-verified after lossless gzip packaging.
 Fresh **239 Rust checks** pass: 232 default-member tests, including the new
 example's native self-check now enabled by `test = true`, plus seven explicit
 desktop tests. Rustfmt, strict all-target Clippy, production WASM/TypeScript/Vite,
-debug native build and 13 packaging tests pass. Consult the issues/implementation
-PR for the full **350-case** browser run and actual hosted results; these are
+debug native build and 13 packaging tests pass. Consult
+[PR #53](https://github.com/uvar-apps/eigenvista/pull/53) for the full **350-case**
+browser run and actual hosted results; these are
 separate merge gates, and all three hosted jobs at the reviewed head must pass
 before merging. Raw measurements,
 traces, initial test-harness corrections and captures are under
