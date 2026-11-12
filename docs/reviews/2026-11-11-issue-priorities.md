@@ -47,6 +47,24 @@ Known affected upstream development-tool versions are recorded there; an
 EigenVista exposure is not reproduced. Remaining feature/research work is not
 authorized by the #32/#33/#34 request. The original queue below is historical.
 
+## Research follow-up: 12 November 2026
+
+The authorized research pass at merged main `06ecbb9` investigated #46, #39,
+#37, #38 and #35 without application changes. The
+[research index](../../plans/README.md) and
+[evidence report](../../plans/2026-11-12-research.md) now supersede the initial
+P3 ordering for those topics. Recommend the bounded Vite patch first and genuine
+compatibility fixtures second. Qualify exact mesh indexing with shader identity
+and extraction-peak contracts, then remeasure typed transfer on the smaller
+payload. Larger Molden limits need a real target workload and actual browser/
+persistence budgets; a constant increase alone is not supported by the evidence.
+
+These remain maintenance, compatibility, optimization and capability activities,
+not newly proven scientific-output bugs. Priorities stay P3. The original
+classifications below remain historical; current implementation/readiness and
+labels are recorded in the live issues. New #47/#48 proposals are separate from
+this `needs-research` selection.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

@@ -1,6 +1,6 @@
 # Development handoff
 
-Updated 11 November 2026 for CI/import/publication work from merged main `3fef7d4`;
+Updated 12 November 2026 for the research pass at merged main `06ecbb9`;
 version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
@@ -12,6 +12,39 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### Research follow-up: 12 November 2026
+
+PR #45 merged as `06ecbb9`, closing #32/#33/#34 after all three hosted PR checks
+passed at `f6df89ff`; the [recorded run](https://github.com/uvar-apps/eigenvista/actions/runs/43045984314)
+includes Linux Rust/Clippy, seven macOS desktop tests and all 294 browser cases.
+Those remain historical implementation checks, not a new full-suite run today.
+
+The user then authorized selecting and investigating `needs-research` issues.
+The [research index and plans](../plans/README.md) and
+[measurements/decisions](../plans/2026-11-12-research.md) cover #46/#39/#37/#38/#35.
+Application code, dependency locks, limits and frozen fixtures are unchanged;
+research scripts/archives live only under ignored `tmp/2026-11-12-research/`.
+No implementation, Git publication or release was performed for this pass.
+
+Recommended next work is the bounded Vite 7.3.8 maintenance patch (#46), then
+authentic compatibility fixtures (first phase of #39). Exact indexed meshes
+(#37) show useful retained/storage savings, but need explicit shader vertex-ID
+and extraction-peak contracts. Typed output transport (#38) improves an isolated
+phase in both engines; remeasure after compaction rather than promising whole-app
+or browser-memory gains. Keep capacity expansion (#35) behind an agreed larger
+real workload: MO count, dense input lines, JSON memory and persistence all bind.
+No scientific correctness defect or project-specific Vite exploit was reproduced.
+
+Fresh research verifies a reconstructed genuine old 0.3.2 producer archive with
+current WASM, eight original/indexed archive decodes, 20 actual two-engine worker
+transport samples, precision/capacity guards and isolated native timing/RSS.
+It does not qualify a Vite upgrade, production transport/indexing implementation,
+new capacity, packaged GUI or browser peak memory. See the report for exact
+inputs, hashes, commands and limitations. Full runtime tests were not rerun.
+The new #47 asset-layout and #48 collapsible-pane proposals are open; #48 has a
+clear UI scope, while #47 needs comparison with the existing ZIP/manifest layout.
+Preserve the untracked original review, private exports and local research data.
 
 ### CI/import/publication batch: 11 November 2026
 

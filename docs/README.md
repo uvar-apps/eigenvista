@@ -32,6 +32,7 @@ limits of opening new saves in older builds.
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |
 | Agent continuation, current baseline, priorities, verification gaps | [Handoff](handoff.md) and [root AGENTS.md](../AGENTS.md) |
+| Latest selected-issue research, measured tradeoffs and follow-up plans | [Research index](../plans/README.md) and [12 November findings](../plans/2026-11-12-research.md) |
 | Standalone repository provenance, extracted history, legacy fixture boundary | [Migration record](migration.md) |
 | Implemented features, test evidence, M0-M7 progress | [Implementation status](status.md) |
 | Repeatable Apple Silicon tester ZIP, contents, signing boundaries | [Tester packaging](tester-packaging.md) |

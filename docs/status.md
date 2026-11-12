@@ -8,6 +8,30 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Selected-issue research: 12 November 2026
+
+At source `06ecbb9` / version 0.5.12, research covered #46, #39, #37, #38 and #35.
+The [findings](../plans/2026-11-12-research.md) record measured evidence, primary
+references, reproduction artifacts and untested limits; the
+[plan index](../plans/README.md) gives the recommended order.
+
+Vite 7.3.8 is a bounded maintenance candidate: isolated locks change only Vite
+and candidate audits are clear, while the installed application remains 7.3.6.
+A reconstructed genuine 0.3.2 native archive opens and re-saves through current
+WASM with science/source associations intact. Exact mesh sharing significantly
+reduces measured geometry/storage, but f64 precision, normal seams, custom shader
+IDs and raw allocation limits must be preserved. Twenty real Chromium/WebKit
+worker samples support a narrower typed-output experiment; browser peak memory
+and whole-app gains remain unmeasured. Capacity experiments expose independent
+500,000-line and 128 MiB persistence constraints, beyond the 512-MO cap.
+
+This pass changes research/planning/current handoff documentation only. Source,
+locks, scientific limits, existing fixtures and release artifacts are unchanged.
+No feature/patch is implemented, no full runtime suite or new hosted run is
+claimed, and no scientific output bug or project-specific exploit was reproduced.
+Owned experimental browsers/workers/dynamic server were closed; artifacts are
+under repository `tmp/2026-11-12-research/`. The original review stays untracked.
+
 ## CI and import/publication performance: 11 November 2026
 
 Issues [#32](https://github.com/uvar-apps/eigenvista/issues/32),
