@@ -175,6 +175,54 @@ browser/WASM peak memory, OOM recovery or a universal workload improvement.
 See the [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
 and current [status](status.md) for recorded comparisons and qualification limits.
 
+## Indexed-mesh qualification measurements
+
+[#37](https://github.com/uvar-apps/eigenvista/issues/37) is qualification only;
+production mesh generation and drawing remain unchanged. After the usual
+repository-local temporary-directory setup, with other builds/browser workloads
+stopped, on macOS:
+
+```sh
+cargo test --locked -p eigenvista-format --example indexed_mesh_qualification
+cargo build --locked --release -p eigenvista-format --example indexed_mesh_qualification
+eigenvista_mesh_dir=$(mktemp -d "$PWD/tmp/indexed-mesh-rss.XXXXXX")
+target/release/examples/indexed_mesh_qualification self-check
+target/release/examples/indexed_mesh_qualification prepare "$eigenvista_mesh_dir/fixtures"
+for workload in h2 water worst; do
+  for method in raw hash sort; do
+    for run in 1 2 3; do
+      /usr/bin/time -l target/release/examples/indexed_mesh_qualification \
+        measure "$workload" "$method" \
+        > "$eigenvista_mesh_dir/$workload-$method-$run.json" \
+        2> "$eigenvista_mesh_dir/$workload-$method-$run.time"
+    done
+  done
+done
+```
+
+The prepared corpus uses create-new files under repository tmp. Normal browser
+tests read the already committed [qualification corpus](../fixtures/indexed-mesh-qualification/README.md);
+never regenerate expected files to accommodate a failure. Preserve source,
+binary, input and file hashes when recording new observations.
+
+`h2` samples 128³ and retains one surface. `water` samples independent PySCF
+water orbitals at 64³ and retains each nonempty signed mesh. `worst` constructs
+1,999,998 distinct raw corner tuples to stress postprocessing at the existing
+cap; it is **not** a maximum-cap extraction benchmark or a scientific field.
+`raw` retains unchanged arrays; `hash` and `sort` apply research-only exact
+first-seen packing. No restoration or Save runs in these measurement processes.
+
+Per-phase requested Rust live-byte observations include actual extraction and
+compaction, capacities and retained prior surfaces. macOS `time -l` separately
+reports whole-process peak RSS in bytes, including input preparation, sampling,
+source hashing, allocator retention, checking and JSON report output. Requested
+bytes exclude allocator overhead and transient copying inside System realloc;
+RSS does not identify which phase caused its peak. Separate validation probes
+must be labelled as such. Neither these native measurements nor the bounded
+pixel tests establish browser/WASM/GPU peak memory or universal OOM recovery.
+See the [decision record](design/2026-11-12-indexed-mesh-qualification.md) and
+[Plan 003](../plans/003-indexed-mesh-qualification.md) before production work.
+
 ## Browser scheduling and software-rendered checks
 
 Use [ci/playwright.config.mts](../ci/playwright.config.mts) to exercise the same tracing, failure screenshots
@@ -185,6 +233,12 @@ temporary-directory setup and checking that port 5178 is free:
 node node_modules/@playwright/test/cli.js test --config ../ci/playwright.config.mts \
   tests/adaptive-volume.spec.ts tests/cube.spec.ts tests/progress.spec.ts tests/viewer.spec.ts
 ```
+
+Hosted CI selects `--project=chromium` and `--project=webkit` in two independent
+matrix jobs, with the same one-worker configuration and existing deadlines.
+Their complete union is 350 cases (175 each); the default local command still
+runs both. Require both engine results and the Rust/macOS results. See the
+[project-isolation decision](design/2026-11-12-browser-project-isolation.md).
 
 For an additional controlled software-rendering check, derive a temporary config
 under repository tmp from that CI config and give its Chromium project launch
@@ -257,6 +311,8 @@ explains ownership, validation, and cache boundaries.
 | Indexed-column validation | [Native column regressions](../crates/eigenvista-format/tests/columnar_packing.rs) and [actual WASM decoding](../app/tests/format-validation.spec.ts): oversized/wrapped indices, swapped/duplicate rows, invalid reference forms, and valid roundtrips |
 | Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, controlled out-of-order reads and clearing, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations/budgets. Native dialog interaction remains a separate acceptance check. |
 | Custom shader transparency | [Alpha/depth and UI regressions](../app/tests/shader-transparency.spec.ts): fragment alpha independent of document opacity, view-dependent alpha, opaque depth writes, unchanged built-in materials, live checkbox changes, and Clear reset |
+| Sidebar disclosures | [Panel workflows](../app/tests/panels.spec.ts): all eight keyboard disclosures, mounted controls, field/shader state, clean/native-byte/worker isolation, profile persistence and storage failures, busy cancellation and mobile layout |
+| Indexed-mesh qualification only | [Frozen layout corpus](../fixtures/indexed-mesh-qualification/README.md), native research example and [real shader/Save checks](../app/tests/indexed-mesh-qualification.spec.ts): exact raw VBO/IBO restoration, both handednesses/signs and negative controls; no production compaction |
 | Browser workflows/numerics | [Playwright tests](../app/tests): Chromium/WebKit, real file input/download, pixels, camera, desktop/mobile layout |
 | Direct field previews | [Sampling-only workflows](../app/tests/field-preview.spec.ts): real `molden.input` orbital/density volume and raycast without meshing, field/resolution changes, transient cache reuse, save/reopen, cancellation and worker-failure recovery |
 | Worker ownership and cancellation | [Real worker regressions](../app/tests/worker-ownership.spec.ts): independent clients, FIFO ordering, queued/active/idle/signalled cancellation, stale events, fatal/transport failures, constructor/posting errors, and recovery |

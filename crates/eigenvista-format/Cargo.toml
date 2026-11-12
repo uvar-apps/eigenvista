@@ -10,3 +10,7 @@ serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
 zip = { version = "2.4", default-features = false, features = ["deflate"] }
+
+[[example]]
+name = "indexed_mesh_qualification"
+test = true

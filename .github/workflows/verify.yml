@@ -114,9 +114,15 @@ jobs:
           retention-days: 7
 
   browser-linux:
-    name: WASM, browsers and packaging / Ubuntu 24.04
+    name: WASM, ${{ matrix.browser }} and packaging / Ubuntu 24.04
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      EIGENVISTA_BROWSER_PROJECT: ${{ matrix.browser }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -158,12 +164,12 @@ jobs:
         id: linux_package_setup
         timeout-minutes: 2
         run: bash ci/prepare-linux-packages.sh 2>&1 | tee "$TMPDIR/browser-package-setup.log"
-      - name: Install Chromium, WebKit and their Linux dependencies
+      - name: Install ${{ matrix.browser }} and its Linux dependencies
         id: linux_dependencies
         timeout-minutes: 10
         run: |
-          sudo --preserve-env=TMPDIR,TMP,TEMP "$(command -v node)" app/node_modules/playwright/cli.js install-deps chromium webkit 2>&1 | tee "$TMPDIR/browser-package-install.log"
-          npm --prefix app exec -- playwright install chromium webkit 2>&1 | tee -a "$TMPDIR/browser-package-install.log"
+          sudo --preserve-env=TMPDIR,TMP,TEMP "$(command -v node)" app/node_modules/playwright/cli.js install-deps "$EIGENVISTA_BROWSER_PROJECT" 2>&1 | tee "$TMPDIR/browser-package-install.log"
+          npm --prefix app exec -- playwright install "$EIGENVISTA_BROWSER_PROJECT" 2>&1 | tee -a "$TMPDIR/browser-package-install.log"
       - name: Diagnose Linux package network failures
         if: ${{ failure() && (steps.linux_package_setup.outcome == 'failure' || steps.linux_dependencies.outcome == 'failure') }}
         timeout-minutes: 5
@@ -172,17 +178,17 @@ jobs:
         run: |
           unset RUSTUP_TOOLCHAIN
           cargo run --manifest-path Cargo.toml --locked -p eigenvista-format --example reference_documents
-      - name: Run the full Chromium and WebKit suite
+      - name: Run the full ${{ matrix.browser }} suite
         timeout-minutes: 35
         working-directory: app
         run: |
           unset RUSTUP_TOOLCHAIN
-          ./node_modules/.bin/playwright test --config ../ci/playwright.config.mts 2>&1 | tee "$TMPDIR/browser-tests.log"
+          ./node_modules/.bin/playwright test --config ../ci/playwright.config.mts --project="$EIGENVISTA_BROWSER_PROJECT" 2>&1 | tee "$TMPDIR/browser-tests.log"
       - name: Retain browser and build failure diagnostics
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: browser-linux-failure
+          name: browser-linux-${{ matrix.browser }}-failure
           path: |
             tmp/packaging-tests.log
             tmp/frontend-build.log

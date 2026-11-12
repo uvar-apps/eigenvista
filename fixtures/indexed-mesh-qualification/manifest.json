@@ -1,0 +1,221 @@
+{
+  "arbitrary_indexed": {
+    "bytes": 19063,
+    "case_file": "arbitrary-indexed.json.gz",
+    "case_sha256": "99cd0a49e58f2e3bb4c2433c0f433e4918cb0abe185402c7f523b9eb6bdf77e3",
+    "file": "arbitrary-indexed.eigenvista",
+    "oracle": {
+      "capacity_bytes": 52368,
+      "expanded_triangle_bits_sha256": "b725d6e26887c2821c6494ca334d20f7fa84ace730a2faec4621e28a7bd244c3",
+      "indices": 3756,
+      "indices_sha256": "6dfc2395282d3185653812a36ec270fb44d7e47764703cc033461df37d16daa6",
+      "numeric_bytes": 52368,
+      "vertex_bits_sha256": "13ea872f152c172f0dc648fbc9ab7cd06d85d3d85d5e886109d9f01f541d36f3",
+      "vertices": 778
+    },
+    "sha256": "a61e00af4254ab7f04cfc363f8b7d5ccee4bc017d8c6e6112652e53ae685ed08",
+    "case_uncompressed_sha256": "7306b3aa519843af182fd5e83604a7ea467ca1980be5d7de42c992368c598d70",
+    "case_uncompressed_bytes": 300204,
+    "case_bytes": 27593
+  },
+  "cases": [
+    {
+      "archives": {
+        "compact": {
+          "bytes": 19089,
+          "file": "ordinary-positive.compact.eigenvista",
+          "sha256": "c831e7aa11950dda9b94126609bf6925051084730e7c11dabdca4e45c06ac1d2"
+        },
+        "naive": {
+          "bytes": 31360,
+          "file": "ordinary-positive.naive.eigenvista",
+          "sha256": "f4736a2f37b8d4be232c2ced10f3ada337e4973157062f1436e2da9f41f203dc"
+        },
+        "raw": {
+          "bytes": 31350,
+          "file": "ordinary-positive.raw.eigenvista",
+          "sha256": "a734a99ef8e870178979cec8175a086b5e774783bcc1abb2f5d05335a47f2e68"
+        },
+        "restored": {
+          "bytes": 31350,
+          "file": "ordinary-positive.restored.eigenvista",
+          "sha256": "a734a99ef8e870178979cec8175a086b5e774783bcc1abb2f5d05335a47f2e68"
+        }
+      },
+      "case_file": "ordinary-positive.json.gz",
+      "case_sha256": "45d4c30de2cf1875b3cb0318d573ec4ce438c8103e27d8159181bc9ff383eb4d",
+      "id": "ordinary-positive",
+      "case_uncompressed_sha256": "8d65d4d9b1b909f68807ad9bb4e5be9b877175d0a846904ab39be7abbef3dcf5",
+      "case_uncompressed_bytes": 2898168,
+      "case_bytes": 180846
+    },
+    {
+      "archives": {
+        "compact": {
+          "bytes": 19083,
+          "file": "ordinary-negative.compact.eigenvista",
+          "sha256": "54c50cc42366344cb0ab15f1f6f78ad46b14a8c8f1c60d189bcd32aeb01da6ee"
+        },
+        "naive": {
+          "bytes": 31177,
+          "file": "ordinary-negative.naive.eigenvista",
+          "sha256": "4d30b42bb422faecf8d3097ef3262fdccf34bf4b95e524c0f3bf43f740b7ae66"
+        },
+        "raw": {
+          "bytes": 31166,
+          "file": "ordinary-negative.raw.eigenvista",
+          "sha256": "85deb0bb2f6686bfdf9954feed4a2fe9360e46e546e639a0afbbadd105ccc9e5"
+        },
+        "restored": {
+          "bytes": 31166,
+          "file": "ordinary-negative.restored.eigenvista",
+          "sha256": "85deb0bb2f6686bfdf9954feed4a2fe9360e46e546e639a0afbbadd105ccc9e5"
+        }
+      },
+      "case_file": "ordinary-negative.json.gz",
+      "case_sha256": "51585059dc24acac171463e36211b2aa123a1c43ec2de75aa2ea79f130be5079",
+      "id": "ordinary-negative",
+      "case_uncompressed_sha256": "821739de37719cceaee5053561e1b791fd23bd807fd8dcb1decc733f714e392e",
+      "case_uncompressed_bytes": 2909311,
+      "case_bytes": 180398
+    },
+    {
+      "archives": {
+        "compact": {
+          "bytes": 19148,
+          "file": "reflected-positive.compact.eigenvista",
+          "sha256": "8eb8be8960c61bd645120e14aa39a1c0a0ad020cda5aa038d893bc00eead391a"
+        },
+        "naive": {
+          "bytes": 31244,
+          "file": "reflected-positive.naive.eigenvista",
+          "sha256": "3e0e3cf96298b4ed3bf253a6d61efc3c2d700cc9c333d03a55c45aeef19324fc"
+        },
+        "raw": {
+          "bytes": 31265,
+          "file": "reflected-positive.raw.eigenvista",
+          "sha256": "f8ae2aafb37ac2c6506d675d58144a4197091a80caeeca5b77ad1039f3f39f45"
+        },
+        "restored": {
+          "bytes": 31265,
+          "file": "reflected-positive.restored.eigenvista",
+          "sha256": "f8ae2aafb37ac2c6506d675d58144a4197091a80caeeca5b77ad1039f3f39f45"
+        }
+      },
+      "case_file": "reflected-positive.json.gz",
+      "case_sha256": "40a87ef094ce44dcecc5a373551359ec333dee0b6b5636764f401f55487ceaab",
+      "id": "reflected-positive",
+      "case_uncompressed_sha256": "ad6b048fbee3df2ae3f5880ad96e6e42927078743569b020b95955692afe35f5",
+      "case_uncompressed_bytes": 2899617,
+      "case_bytes": 181796
+    },
+    {
+      "archives": {
+        "compact": {
+          "bytes": 19011,
+          "file": "reflected-negative.compact.eigenvista",
+          "sha256": "ab55e7a5a89e04d0795043be597a0098c50da55779b2d4e9397022a9008e8abd"
+        },
+        "naive": {
+          "bytes": 31100,
+          "file": "reflected-negative.naive.eigenvista",
+          "sha256": "352c11dc7cfa9536f03f063928c268a5455373f6f8e2d71fbab4543bbca21676"
+        },
+        "raw": {
+          "bytes": 31292,
+          "file": "reflected-negative.raw.eigenvista",
+          "sha256": "c319792b5b80db01f8fb66865abc1ce83ac93272e3eecd05c63cb00ecd573f1e"
+        },
+        "restored": {
+          "bytes": 31292,
+          "file": "reflected-negative.restored.eigenvista",
+          "sha256": "c319792b5b80db01f8fb66865abc1ce83ac93272e3eecd05c63cb00ecd573f1e"
+        }
+      },
+      "case_file": "reflected-negative.json.gz",
+      "case_sha256": "a5b2569942af8882b1b270f6bcea7b9ad960dc7f68d04e8f56852b9711cd02ae",
+      "id": "reflected-negative",
+      "case_uncompressed_sha256": "864f3f8192ba8eb4ad8511d0fa368e8ad8e8b5bd92d5d18afcfc8e6dee6cf2d6",
+      "case_uncompressed_bytes": 2907815,
+      "case_bytes": 181400
+    }
+  ],
+  "constructed_field": "x * exp(-0.5 * (x*x+y*y+z*z)); world coordinates, 17³, abs(iso)=0.12",
+  "prototype_algorithm": "qualification-mcubes-0.1.7-exact-tuples-v1",
+  "raw_indices": "sequential original corner order; each reflected triangle swaps index slots 1 and 2",
+  "restoration": "Only compact native arrays + explicit marker + determinant(grid_axes). Invert reflected swap to recover original RAW ordinal tuple; restore original IBO.",
+  "schema": "eigenvista-indexed-mesh-qualification-v1",
+  "self_check": {
+    "actual_mesh_affine_signed_cases": 8,
+    "large_origin_distinct_f64_positions": 649,
+    "large_origin_distinct_world_f32_positions": 1,
+    "malformed_tagged_count_index_first_seen_rejected": true,
+    "marker_free_arbitrary_indexed_save_reopen_unchanged": true,
+    "native_signed_zero_save_reopen": true,
+    "normal_seam_signed_zero_unique_tuples": 3
+  },
+  "source_base": "2f7aeec61ba871d8e52f6c7bf5b63aa8fb9a6b8b",
+  "producer": {
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.1",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "platform": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428",
+    "sources": [
+      {
+        "sha256": "d0263a86b0546fce16adbea720162b8e1c9d9073f05405c030a17f95fba585f1",
+        "path": "crates/eigenvista-format/examples/indexed_mesh_qualification.rs"
+      },
+      {
+        "sha256": "4b514890b320f43754321c9992b18385899f23dc6faf276663eed47bfd85744e",
+        "path": "crates/eigenvista-format/examples/indexed_mesh_qualification/allocation.rs"
+      },
+      {
+        "sha256": "d94371c4dd1f8a215a5239231d143a951520b1f22129eab2613b737dd7075cc7",
+        "path": "crates/eigenvista-format/examples/indexed_mesh_qualification/packing.rs"
+      },
+      {
+        "sha256": "896d5470096e564f6e20278bad126bf6f4bd6cf97358aaaa1dfde23a09c930f8",
+        "path": "crates/eigenvista-core/src/compute.rs"
+      },
+      {
+        "sha256": "5b220d17e420b6c1b7c4c083592ccdefa2bb6548e4487df308080eb38da3447e",
+        "path": "crates/eigenvista-core/src/model.rs"
+      },
+      {
+        "sha256": "9796729d26ff3705748d62bd100d1abcf607bb380757d6cbd8a9a60c774f0156",
+        "path": "crates/eigenvista-core/src/fixtures.rs"
+      },
+      {
+        "sha256": "4328e41fa4a05b78eb490b2b3f1adc14ddfedabe8a20248365924bf5ca419f50",
+        "path": "crates/eigenvista-format/src/lib.rs"
+      },
+      {
+        "sha256": "6b844dba083977842cdc6408c7b3c6f39ce0e5db9ed9ec162d02bee9e77c7146",
+        "path": "crates/eigenvista-format/src/typed.rs"
+      },
+      {
+        "sha256": "652d05b44035be4c0ce153f96939f28301ae54c4f6e4afefaeae338afc364dc7",
+        "path": "fixtures/pyscf/water-rhf-ccpvdz.json"
+      },
+      {
+        "sha256": "b290c02f02abdf2203e58510b4f6d1165e938d32ac6de2c510c3b195543a579d",
+        "path": "Cargo.lock"
+      },
+      {
+        "sha256": "534534eae843b71d7179bb84da66da314b53bded9c218bb1bb3f526008b27c87",
+        "path": "rust-toolchain.toml"
+      },
+      {
+        "path": "registry:mcubes-0.1.7/src/lib.rs",
+        "sha256": "27e79694c3303469a813c738d31d08130ffa443185ea03b201f4285bdb3f3cf0"
+      }
+    ],
+    "binary_sha256": "2f45c70631ecc897204de534c097f773d1f937405ba7759dd1e2e576ba4c15be",
+    "original_manifest_sha256": "fdd4460e4dc2c0c9510711a428aaf2fdbbcb6382452df01e2a07532a08312819"
+  },
+  "semantic_compression": {
+    "method": "gzipSync(original JSON bytes, {level: 9}); mtime=0; strict gunzip byte equality",
+    "node": "v26.0.0",
+    "zlib": "1.2.12",
+    "adapter_sha256": "f02d33549375c481ea6ae77564f5d37dd4546d63155786ff291c629325b17e3e"
+  }
+}

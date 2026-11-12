@@ -437,6 +437,14 @@ JSON keys, and canonicalize negative zero because the JavaScript JSON bridge
 folds its sign. A source mismatch is rejected; revision-aware historical assets
 are not yet implemented. Never discard saved meshes as disposable cache data.
 
+Production generation still stores raw triangle-corner arrays. The separate
+[#37 qualification](design/2026-11-12-indexed-mesh-qualification.md) demonstrates
+exact tuple sharing and generated-layout shader-ID reconstruction, but does not
+enable either. Unconditional postprocessing increases no-sharing peak memory;
+future compaction requires an explicit benefit/budget raw-fallback policy.
+Existing arbitrary indexed saved surfaces continue to draw their original
+arrays. Qualification markers in test fixtures are not a new supported profile.
+
 Persistent view settings include representation, active field selection, colors,
 opacity, and isovalue. Camera, active render mode, surface shading, custom
 surface shader sources/uniforms/transparency, sampled preview quality,
@@ -453,6 +461,16 @@ preview is a substitute for the complete authoritative grid saved in the file.
 The larger 256 cubed transient-grid limit does not extend native source-grid or
 128 MiB container limits; generated meshes can record their larger generation
 resolution without embedding the transient samples in `Document.grids`.
+
+Sidebar expansion is a separate profile preference, managed by
+[`PanelSection`](../app/src/PanelSection.tsx). Eight whitelisted booleans live
+under `eigenvista:panel-expansion:v1` in localStorage; reads are size-bounded and
+storage errors fall back to in-memory state. Accessible heading buttons control
+hidden, mounted bodies, retaining form and shader state. Layout changes never
+edit the scientific document, mark it dirty or request worker calculations.
+During scientific activity the Field rendering body is forced open and its
+disclosure disabled, without overwriting the user's preference. No section
+ordering is persisted.
 
 Browser saving encodes through WASM and requests a download. Desktop saving
 encodes through WASM, revalidates in native Rust, asks for a destination, writes

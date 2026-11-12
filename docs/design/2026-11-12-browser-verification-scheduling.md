@@ -55,3 +55,9 @@ product animation, change production code, increase global CI deadlines or
 replace assertion failures with retries. The first failure remains recorded.
 Current software-rendered/traced, full-suite and reviewed-head hosted results
 are maintained in the issues/PR and [status](../status.md).
+
+Subsequent #48/#37 work expanded the suite to 350 cases. Its combined hosted
+run exceeded the 35-minute step budget; [#54's project-isolation decision](2026-11-12-browser-project-isolation.md)
+splits engines onto independent runners while retaining the existing deadlines,
+one worker and every case/assertion. The 320-case and three-job evidence above
+describes PR #50, not the later matrix topology.

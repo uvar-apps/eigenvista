@@ -3,10 +3,51 @@
 Planned at `06ecbb9cef6e52a99417f88856cb98cffc3e9df2`, 12 November 2026.
 Issue: [#37](https://github.com/uvar-apps/eigenvista/issues/37).
 Priority P3; effort M; risk medium; dependency: Plan 002 compatibility fixtures.
-Status BLOCKED for production implementation: explicit custom-shader identity
-policy and extraction/compaction peak bounds remain to be accepted.
+Updated 12 November 2026 from merged baseline `2f7aeec` for the authorized
+qualification phase. Production remains **BLOCKED for automatic packing**:
+shader identity has a reproducible conservative policy, but no-sharing memory
+measurements reject unconditional postprocessing. No production compaction is
+enabled. See the [qualification record](../docs/design/2026-11-12-indexed-mesh-qualification.md)
+for exact results and the remaining bounded-fallback decision.
 
-## Findings and recommended boundary
+## Qualification disposition
+
+The separate [native research driver](../crates/eigenvista-format/examples/indexed_mesh_qualification.rs)
+and [immutable corpus](../fixtures/indexed-mesh-qualification/README.md) compare
+full f64 tuple sharing by bounded hash and ordinal-sort prototypes. The native
+oracle checks signed/skew/reflected cases, normal seams, signed zero, a
+large-origin/small-spacing precision control, strict native Save and old
+marker-free arbitrary indexed files. Four small signed/handedness cases provide
+raw, compact, naive and correctly restored variants for real browser shader
+and Save/reopen checks; current check results belong in status and the PR.
+
+Original raw vertex order **and IBO** can be reconstructed from compact data
+only when the layout is explicitly identified and its canonical first-seen
+convention validated. The proposed new-generated-only custom shader policy is
+therefore feasible; arbitrary old indexed meshes must retain existing arrays.
+No new format promise or renderer restoration is implemented in this phase.
+
+Three fresh optimized processes for each real workload/method show unchanged
+H2 extraction peak despite retained geometry 4,432,272→1,058,064 bytes. Water's
+31 meshes retain 4,577,040→1,258,032 bytes, and sorted whole-process median RSS
+falls 14,270,464→11,714,560 bytes. But a bounded 1,999,998-unique-corner control
+has **no retained saving** while median RSS rises 107,216,896→219,332,608 with
+sort or 458,457,088 with hash. All raw capacities, compaction scratch/output
+overlap and first/later retained passes are recorded separately. The synthetic
+control is not a maximum-cap extraction measurement. Source hashing and nine
+separate publication probes remain distinguishable from extraction/compaction.
+
+**NO-GO for unconditional automatic packing.** Next design: a bounded sort
+prepass, decide savings before allocating output, and keep raw output when the
+benefit/temporary-budget check or reservation fails. The prototype's 512 MiB
+scratch bound is not a production policy. A concrete whole-application budget,
+custom-shader expansion memory and actual WASM/worker/publication/cancellation
+verification remain gates for implementation. #37 stays open with
+`needs-research`; #38 transfer work remains deferred. Existing raw preflight,
+old-file limits, precision, hashes, frozen compatibility data and the current
+mesher/renderer remain unchanged.
+
+## Original findings and recommended boundary
 
 The pinned mcubes extractor emits one corner record per triangle corner.
 `compute.rs:394–453` counts raw corners before extraction and caps them at
@@ -17,7 +58,7 @@ preserving expanded triangle order/attributes. Water31 numeric bytes drop
 4,577,040→1,258,032; compressed whole-file savings are 17.1%, not a universal 3x.
 
 World precision and normal seams are preservation requirements, not options.
-The measured large-origin grid loses all 534 distinct positions when narrowed
+The initial research's large-origin grid loses all 534 distinct positions when narrowed
 to f32; position-only sharing also merges different normal bits. Retain every
 f64 attribute bit. Source hashes and profile stay unchanged. Do not rewrite
 old loaded surfaces on Open or implement a new extractor in this follow-up.
