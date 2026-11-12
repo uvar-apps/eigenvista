@@ -10,6 +10,8 @@ type Event = {
 };
 type ProbeWindow = Window & {
   progressEvents: Event[];
+  progressRequest?: number;
+  interruptedProgress?: { id: number; events: Event[] };
   calculationLabels: string[];
   progressFailure: () => void;
   staleProgress: () => void;
@@ -47,6 +49,7 @@ test("orbital batches report each field and finish without a stale progress pane
   await dialog
     .getByRole("button", { name: "Generate selected", exact: true })
     .click();
+  await waitForGenerationResults(page, 2);
   await expect(page.locator("footer [role=status]")).toContainText(
     "2 orbitals /",
   );
@@ -77,13 +80,34 @@ async function openMolden(page: Page) {
   await page.addInitScript(() => {
     const state = window as unknown as ProbeWindow;
     state.progressEvents = [];
+    let watchedWorker: Worker | null = null;
+    let watchedRequest: number | null = null;
     const post = Worker.prototype.postMessage;
+    const terminate = Worker.prototype.terminate;
+    Worker.prototype.terminate = function () {
+      // Observe the actual interruption, synchronously with the real UI handler.
+      // A screenshot/driver delay must not let a completed job count as Cancel.
+      if (this === watchedWorker && watchedRequest !== null) {
+        state.interruptedProgress = {
+          id: watchedRequest,
+          events: state.progressEvents.filter(
+            (event) => event.id === watchedRequest,
+          ),
+        };
+        watchedWorker = null;
+        watchedRequest = null;
+      }
+      terminate.call(this);
+    };
     Worker.prototype.postMessage = function (
       message,
       options?: StructuredSerializeOptions | Transferable[],
     ) {
       if (["sample", "generate"].includes(message.action)) {
         const instance = this;
+        watchedWorker = instance;
+        watchedRequest = message.id;
+        state.progressRequest = message.id;
         state.progressFailure = () =>
           instance.dispatchEvent(
             new ErrorEvent("error", {
@@ -102,14 +126,22 @@ async function openMolden(page: Page) {
             }),
           );
         this.addEventListener("message", ({ data }) => {
-          if (data.id === message.id)
-            state.progressEvents.push({
-              id: data.id,
-              progress: data.progress,
-              completed: data.completed,
-              total: data.total,
-              result: "result" in data ? true : undefined,
-            });
+          if (data.id !== message.id) return;
+          state.progressEvents.push({
+            id: data.id,
+            progress: data.progress,
+            completed: data.completed,
+            total: data.total,
+            result: "result" in data ? true : undefined,
+          });
+          if (
+            ("result" in data || "error" in data) &&
+            watchedWorker === instance &&
+            watchedRequest === message.id
+          ) {
+            watchedWorker = null;
+            watchedRequest = null;
+          }
         });
       }
       post.call(
@@ -128,8 +160,23 @@ async function openMolden(page: Page) {
     "Opened molden.input",
   );
   await page.evaluate(() => {
-    (window as unknown as ProbeWindow).progressEvents = [];
+    const state = window as unknown as ProbeWindow;
+    state.progressEvents = [];
+    state.progressRequest = undefined;
+    state.interruptedProgress = undefined;
   });
+}
+
+async function waitForGenerationResults(page: Page, count: number) {
+  // Real work is bounded by the existing test deadline, not the five-second
+  // UI assertion window. A previous footer can also outlive its generation.
+  await page.waitForFunction(
+    (expected) =>
+      (window as unknown as ProbeWindow).progressEvents.filter(
+        (event) => event.result === true,
+      ).length === expected,
+    count,
+  );
 }
 
 test("WASM progress callbacks preserve samples and meshes and reject callback failures", async ({
@@ -210,6 +257,20 @@ for (const failure of ["cancel", "worker-error"] as const) {
       name: "Sampling field",
       exact: true,
     });
+    // The worker throttles intermediate updates. The first positive progress
+    // value alone does not imply two intermediate checkpoints have arrived.
+    await page.waitForFunction(() => {
+      const events = (window as unknown as ProbeWindow).progressEvents;
+      const sampling = events.filter((event) => event.progress === "sampling");
+      const latest = sampling.at(-1);
+      return (
+        sampling.length > 2 &&
+        latest?.completed !== undefined &&
+        latest.completed > 0 &&
+        latest.completed < 256 &&
+        !events.some((event) => event.result)
+      );
+    });
     await expect
       .poll(async () => Number(await bar.getAttribute("value")))
       .toBeGreaterThan(0);
@@ -250,6 +311,23 @@ for (const failure of ["cancel", "worker-error"] as const) {
       await page.evaluate(() =>
         (window as unknown as ProbeWindow).progressFailure(),
       );
+    const { request, interrupted } = await page.evaluate(() => {
+      const state = window as unknown as ProbeWindow;
+      return {
+        request: state.progressRequest,
+        interrupted: state.interruptedProgress,
+      };
+    });
+    expect(request).toBeDefined();
+    expect(interrupted).toBeDefined();
+    expect(interrupted!.id).toBe(request);
+    expect(interrupted!.events.some((event) => event.result)).toBe(false);
+    const checkpoint = interrupted!.events
+      .filter((event) => event.progress === "sampling")
+      .at(-1)!;
+    expect(checkpoint.completed).toBeGreaterThan(0);
+    expect(checkpoint.completed).toBeLessThan(256);
+    expect(checkpoint.total).toBe(256);
     await expect(
       page.getByLabel("Calculation progress", { exact: true }),
     ).toHaveCount(0);
@@ -265,6 +343,10 @@ for (const failure of ["cancel", "worker-error"] as const) {
     await page
       .getByRole("button", { name: "Generate surfaces", exact: true })
       .click();
+    await waitForGenerationResults(page, 1);
+    await expect(
+      page.getByLabel("Calculation progress", { exact: true }),
+    ).toHaveCount(0);
     await expect(page.locator("footer [role=status]")).toContainText(
       "triangles",
     );
@@ -277,6 +359,10 @@ for (const failure of ["cancel", "worker-error"] as const) {
     await page
       .getByRole("button", { name: "Generate surfaces", exact: true })
       .click();
+    await waitForGenerationResults(page, 1);
+    await expect(
+      page.getByLabel("Calculation progress", { exact: true }),
+    ).toHaveCount(0);
     await expect(page.locator("footer [role=status]")).toContainText(
       "triangles",
     );

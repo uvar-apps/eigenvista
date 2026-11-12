@@ -63,6 +63,31 @@ in [#39](https://github.com/uvar-apps/eigenvista/issues/39) and its implementati
 PR. All three actual hosted jobs must pass before merge. Physical native
 dialogs/shortcuts and distribution qualification remain separate gates.
 
+The initial hosted run at `9ecb720`,
+[43208190349](https://github.com/uvar-apps/eigenvista/actions/runs/43208190349),
+then failed **6 existing browser checks**, with 300 passing in 33.2 minutes.
+Linux Rust/Clippy (229 tests), macOS desktop (7), production build, packaging
+(13), and all 12 frozen-file browser cases passed. Original failure traces and
+images are retained; this is not counted as a successful merge gate.
+
+[#51](https://github.com/uvar-apps/eigenvista/issues/51) tracks the required
+[verification repair](design/2026-11-12-browser-verification-scheduling.md).
+Progress waits for actual results/checkpoints and UI publication completion;
+cancellation observes the current worker/request at real termination. GPU work
+is divided into independent cases while preserving all 24 comparisons, 14 timing
+configurations, warmups and nine measurement draws. Cube checks retain desktop,
+loaded-scene mobile resize and real damped rotation; viewer captures follow
+completed camera/draw work. Pixel thresholds, numerical checks, resolutions,
+animation and global CI deadlines remain unchanged. The corrected inventory is
+**320 browser cases**. A focused **30/30 Chromium** run with CI tracing and a
+verified ANGLE/SwiftShader renderer passes in 2.1 minutes after independent
+review fixes. Its six evidence files retain all 24 comparisons and 14 distinct
+timing configurations. Current full local, software-rendered/traced and fresh
+reviewed-head hosted evidence is linked from #51 and PR #50; all three hosted
+jobs must pass before merge. The original 306-case local pass above belongs to
+the initial head. Production code and measured writer hashes are unchanged by
+this verification repair.
+
 Logs and preserved before/after binaries are under
 `tmp/2026-11-12-typed39/`. The original review remains untracked. Completion here
 does not implement #37/#38 mesh storage/transport or #40 source hashing.

@@ -221,6 +221,14 @@ Standard verification order for runtime changes (details and coverage map in
   run Chromium/WebKit e2e and actually inspect desktop/mobile screenshots, canvas
   pixels, and camera interaction. Screenshots land under `artifacts/` and can be
   overwritten by the second engine.
+- Browser verification must wait for real worker results/checkpoints and UI
+  publication completion, not stale success text or the first positive update.
+  Cancellation evidence must identify the current worker/request before its
+  result. Complete camera/draw work and expensive compositor captures before
+  pixel assertions; keep GPU matrices independently bounded without dropping
+  scenarios, timing samples, signs or thresholds. Use the traced CI config and
+  actual hosted results; see the
+  [browser-scheduling design](docs/design/2026-11-12-browser-verification-scheduling.md).
 - The [Verify workflow](.github/workflows/verify.yml) checks Linux Rust/WASM/
   browser/package gates and explicit macOS desktop tests. Preserve pinned tools,
   local temporary storage, read-only permissions and bounded failure artifacts.

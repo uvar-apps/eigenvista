@@ -13,10 +13,14 @@ async function saveEvidence(label: string, value: unknown) {
     .attach(label, { path: file, contentType: "application/json" });
 }
 
-async function exercise(page: Page, suite: "thin" | "skipping") {
+type Exercise =
+  | { suite: "thin" }
+  | { suite: "skipping"; mode: "volume" | "raycast"; quality: 1 | 2 | 4 };
+
+async function exercise(page: Page, exercise: Exercise) {
   await page.goto("/");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
-  return page.evaluate(async (suite) => {
+  return page.evaluate(async (exercise) => {
     const sourceUrl = "/src/volume.ts";
     const threeUrl = performance
       .getEntriesByType("resource")
@@ -191,7 +195,7 @@ async function exercise(page: Page, suite: "thin" | "skipping") {
       return values;
     };
     try {
-      if (suite === "thin") {
+      if (exercise.suite === "thin") {
         // Independent linear interpolation on the axial tent: the old center ray
         // samples closest at voxel 127.5, where its value is only 0.5.
         const legacyMaximum = Math.max(
@@ -224,6 +228,7 @@ async function exercise(page: Page, suite: "thin" | "skipping") {
       const values = makeValues((z) =>
         z >= 64 && z <= 96 ? 1 : z >= 160 && z <= 168 ? -1 : 0,
       );
+      const { mode, quality } = exercise;
       const comparisons = [];
       for (const profile of [
         profiles[0],
@@ -231,30 +236,28 @@ async function exercise(page: Page, suite: "thin" | "skipping") {
         profiles[4],
         profiles[5],
       ]) {
-        for (const mode of ["volume", "raycast"] as const)
-          for (const quality of [1, 2, 4] as const) {
-            const skipped = render(values, profile, mode, quality, true);
-            const dense = render(values, profile, mode, quality, false);
-            comparisons.push({
-              label: profile.label,
-              mode,
-              quality,
-              skipped,
-              dense,
-            });
-          }
+        const skipped = render(values, profile, mode, quality, true);
+        const dense = render(values, profile, mode, quality, false);
+        comparisons.push({
+          label: profile.label,
+          mode,
+          quality,
+          skipped,
+          dense,
+        });
       }
       const timings = [];
-      for (const mode of ["volume", "raycast"] as const) {
-        for (const quality of [1, 2, 4] as const)
-          for (const skip of [false, true])
-            timings.push({
-              mode,
-              quality,
-              skip,
-              legacy: false,
-              ...render(values, profiles[0], mode, quality, skip, false, true),
-            });
+      for (const skip of [false, true])
+        timings.push({
+          mode,
+          quality,
+          skip,
+          legacy: false,
+          ...render(values, profiles[0], mode, quality, skip, false, true),
+        });
+      // The fixed160 baseline is mode-dependent, not quality-dependent. Keep
+      // one fully warmed/measured baseline per mode in its first quality case.
+      if (quality === 1)
         timings.push({
           mode,
           quality: 0,
@@ -262,12 +265,11 @@ async function exercise(page: Page, suite: "thin" | "skipping") {
           legacy: true,
           ...render(values, profiles[0], mode, 2, false, true, true),
         });
-      }
       return { legacyMaximum: null, results: [], comparisons, timings };
     } finally {
       renderer.dispose();
     }
-  }, suite);
+  }, exercise);
 }
 
 test("voxel-aware raycasting resolves signed features missed by fixed160 across affine and inside-camera views", async ({
@@ -276,7 +278,7 @@ test("voxel-aware raycasting resolves signed features missed by fixed160 across 
   test.setTimeout(120000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  const result = await exercise(page, "thin");
+  const result = await exercise(page, { suite: "thin" });
   expect(result.legacyMaximum).toBeLessThan(0.7);
   for (const sample of result.results) {
     expect(sample.glError, JSON.stringify(sample)).toBe(0);
@@ -303,43 +305,55 @@ test("voxel-aware raycasting resolves signed features missed by fixed160 across 
   await saveEvidence("thin-field-pixels", result);
 });
 
-test("empty-brick skipping preserves dense traversal and reports warmed GPU completion timings", async ({
-  page,
-}) => {
-  test.setTimeout(120000);
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  const result = await exercise(page, "skipping");
-  for (const comparison of result.comparisons) {
-    expect(comparison.skipped.glError, JSON.stringify(comparison)).toBe(0);
-    expect(comparison.dense.glError, JSON.stringify(comparison)).toBe(0);
-    expect(
-      Math.max(...comparison.skipped.center.slice(0, 3)),
-      JSON.stringify(comparison),
-    ).toBeGreaterThan(30);
-    for (let i = 0; i < 4; i++)
-      expect(
-        Math.abs(comparison.skipped.center[i] - comparison.dense.center[i]),
-        JSON.stringify(comparison),
-      ).toBeLessThanOrEqual(5);
+// Each independent mode/quality case keeps the same pixel comparisons and all
+// timing draws. A software renderer must not complete the entire matrix within
+// one monolithic evaluate deadline before any case can report its result.
+for (const mode of ["volume", "raycast"] as const) {
+  for (const quality of [1, 2, 4] as const) {
+    test(
+      `empty-brick skipping preserves dense traversal and reports warmed GPU timings: ${mode} quality ${quality}`,
+      async ({ page }) => {
+        test.setTimeout(120000);
+        const errors: string[] = [];
+        page.on("pageerror", (e) => errors.push(e.message));
+        const result = await exercise(page, { suite: "skipping", mode, quality });
+        expect(result.comparisons.map((sample) => sample.label)).toEqual([
+          "outside", "brick-face", "skewed", "reflected-inside",
+        ]);
+        expect(result.timings).toHaveLength(quality === 1 ? 3 : 2);
+        for (const comparison of result.comparisons) {
+          expect(comparison.skipped.glError, JSON.stringify(comparison)).toBe(0);
+          expect(comparison.dense.glError, JSON.stringify(comparison)).toBe(0);
+          expect(
+            Math.max(...comparison.skipped.center.slice(0, 3)),
+            JSON.stringify(comparison),
+          ).toBeGreaterThan(30);
+          for (let i = 0; i < 4; i++)
+            expect(
+              Math.abs(comparison.skipped.center[i] - comparison.dense.center[i]),
+              JSON.stringify(comparison),
+            ).toBeLessThanOrEqual(5);
+        }
+        for (const measurement of result.timings)
+          expect(measurement.milliseconds).toBeGreaterThanOrEqual(0);
+        expect(errors).toEqual([]);
+        await saveEvidence(`measurements-${mode}-${quality}`, result);
+        console.log(
+          "Adaptive volume timings (median ms/frame with synchronized pixel readback):",
+          JSON.stringify(
+            result.timings.map(({ mode, quality, skip, legacy, milliseconds }) => ({
+              mode,
+              quality,
+              skip,
+              legacy,
+              milliseconds,
+            })),
+          ),
+        );
+      },
+    );
   }
-  for (const measurement of result.timings)
-    expect(measurement.milliseconds).toBeGreaterThanOrEqual(0);
-  expect(errors).toEqual([]);
-  await saveEvidence("measurements", result);
-  console.log(
-    "Adaptive volume timings (median ms/frame with synchronized pixel readback):",
-    JSON.stringify(
-      result.timings.map(({ mode, quality, skip, legacy, milliseconds }) => ({
-        mode,
-        quality,
-        skip,
-        legacy,
-        milliseconds,
-      })),
-    ),
-  );
-});
+}
 
 test("coarse ray segments composite both signed roots in order and retain exact-entry roots", async ({
   page,

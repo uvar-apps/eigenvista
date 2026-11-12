@@ -108,14 +108,21 @@ function assertScalarData(doc: EigenVistaDocument) {
       }
 }
 
-test("cube Open renders both scalar signs directly in volume and raycast on desktop/mobile", async ({
-  page,
-}, testInfo) => {
+function watchRenderingErrors(page: Page) {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
   });
+  return errors;
+}
+
+// Keep Open/render, mobile layout and real damped interaction independently
+// bounded instead of sharing one deadline across unrelated completed outcomes.
+test("cube Open renders both scalar signs directly in volume and raycast on desktop", async ({
+  page,
+}, testInfo) => {
+  const errors = watchRenderingErrors(page);
   await ready(page);
   await openCube(page);
   await expect(page.getByLabel("Rendering mode")).toHaveValue("volume");
@@ -140,6 +147,65 @@ test("cube Open renders both scalar signs directly in volume and raycast on desk
       path: `../artifacts/cube-${testInfo.project.name}-${mode}-desktop.png`,
     });
   }
+  await page.getByLabel("Grid resolution").selectOption("24");
+  await expect(
+    page.getByRole("button", { name: "Generate surfaces" }),
+  ).toBeEnabled();
+  await expect(page.locator(".surface-row")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("cube Open retains both scalar signs and mesh-free controls on mobile", async ({
+  page,
+}, testInfo) => {
+  const errors = watchRenderingErrors(page);
+  await ready(page);
+  await openCube(page);
+  await expect(page.getByLabel("Rendering mode")).toHaveValue("volume");
+  await expect(page.locator(".surface-row")).toHaveCount(0);
+  await expect(page.getByLabel("Unsaved changes")).toHaveCount(1);
+  await page.getByRole("slider", { name: "Opacity" }).press("End");
+  // Preserve the original post-desktop 24-grid selection before Fit/mobile modes.
+  await page.getByLabel("Grid resolution").selectOption("24");
+  await expect(
+    page.getByRole("button", { name: "Generate surfaces" }),
+  ).toBeEnabled();
+  await expect(page.locator(".surface-row")).toHaveCount(0);
+  // Exercise the loaded desktop scene's actual ResizeObserver transition.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Fit scene", exact: true }).click();
+  await settleScene(page);
+  for (const mode of ["raycast", "volume"]) {
+    await page.getByLabel("Rendering mode").selectOption(mode);
+    await signedPixels(page, 35);
+    await expect(page.locator(".surface-row")).toHaveCount(0);
+    await page.screenshot({
+      path: `../artifacts/cube-${testInfo.project.name}-${mode}-mobile.png`,
+      fullPage: true,
+    });
+  }
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBeTruthy();
+  const sceneBounds = (await page.locator("canvas").boundingBox())!;
+  const panel = (await page.locator(".left-panel").boundingBox())!;
+  expect(sceneBounds.y + sceneBounds.height).toBeLessThanOrEqual(panel.y);
+  expect(errors).toEqual([]);
+});
+
+test("cube raycast rotation settles and preserves both scalar signs", async ({ page }) => {
+  // Hosted rendering spent 13 s delivering the same 12-step gesture and more
+  // than 42 s finishing real damping draws. Give this independent interaction
+  // its own bounded budget without changing damping, geometry or pixel checks.
+  test.setTimeout(120000);
+  const errors = watchRenderingErrors(page);
+  await ready(page);
+  await openCube(page);
+  await page.getByRole("slider", { name: "Opacity" }).press("End");
+  await page.getByLabel("Rendering mode").selectOption("raycast");
+  await signedPixels(page);
   await settleScene(page);
   const before = await pixels(page);
   const scene = page.getByLabel("Molecular scene", { exact: true });
@@ -156,35 +222,10 @@ test("cube Open renders both scalar signs directly in volume and raycast on desk
   );
   await page.mouse.up();
   await settleScene(page);
-  // Complete the compositor read before asserting, rather than expiring a poll
-  // deadline while its first image is still being captured.
   const rotated = await pixels(page);
   expect(rotated.checksum).not.toBe(before.checksum);
   expect(rotated.positive).toBeGreaterThan(100);
   expect(rotated.negative).toBeGreaterThan(100);
-  await page.getByLabel("Grid resolution").selectOption("24");
-  await expect(
-    page.getByRole("button", { name: "Generate surfaces" }),
-  ).toBeEnabled();
-  await expect(page.locator(".surface-row")).toHaveCount(0);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Fit scene", exact: true }).click();
-  for (const mode of ["raycast", "volume"]) {
-    await page.getByLabel("Rendering mode").selectOption(mode);
-    await signedPixels(page, 35);
-    await page.screenshot({
-      path: `../artifacts/cube-${testInfo.project.name}-${mode}-mobile.png`,
-      fullPage: true,
-    });
-  }
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBeTruthy();
-  const sceneBounds = (await page.locator("canvas").boundingBox())!;
-  const panel = (await page.locator(".left-panel").boundingBox())!;
-  expect(sceneBounds.y + sceneBounds.height).toBeLessThanOrEqual(panel.y);
   expect(errors).toEqual([]);
 });
 

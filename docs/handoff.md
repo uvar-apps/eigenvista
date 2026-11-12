@@ -46,6 +46,28 @@ actual reviewed-head hosted run are recorded in
 all three hosted jobs must pass before merge. See [status](status.md#typed-native-encoding-12-november-2026)
 and the [decision](design/2026-11-12-typed-native-encoding.md).
 
+Initial hosted run [43208190349](https://github.com/uvar-apps/eigenvista/actions/runs/43208190349)
+at `9ecb720` failed six existing progress/rendering checks (300 passed, 33.2 min).
+Linux 229 Rust/Clippy, macOS seven desktop tests, production build, packaging and
+all 12 frozen-file browser cases passed. The first local 306-case pass is
+historical evidence for that initial head, not a green hosted gate.
+
+Required test repairs are tracked in [#51](https://github.com/uvar-apps/eigenvista/issues/51)
+on PR #50. Progress now waits for real worker results/checkpoints and completed
+publication; cancellation snapshots identify the active worker/request. GPU
+cases preserve all comparisons/timing draws while dividing the aggregate work.
+Cube retains loaded desktop-to-mobile resize and real damping; viewer captures
+follow actual settled draws. Focused CI-traced Chromium passes **30/30** cases
+with a verified ANGLE/SwiftShader renderer in 2.1 minutes; the six GPU evidence
+files still contain all 24 comparisons and 14 distinct timing configurations.
+Independent final reviews found no remaining blockers. The corrected full
+inventory is **320 cases**. See the
+[decision](design/2026-11-12-browser-verification-scheduling.md) and current
+issue/PR evidence for software-rendered/traced, full local and actual final-head
+hosted results. All three jobs must pass before merging. Runtime/writer hashes,
+frozen data and the native memory measurements remain unchanged by these test
+repairs. Preserve the initial failure artifact under repository tmp.
+
 This completes the writer scope begun after PR #49's fixture checkpoint, subject
 to those integration gates. The older entries below describe their dated scope;
 their then-future typed phase is this increment. No version/tag/release/ZIP was
