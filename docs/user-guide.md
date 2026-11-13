@@ -517,6 +517,18 @@ back to Molden/PDB/XYZ/cube and does not perform automatic background saving.
 Use a new `.eigenvista` filename; replacing an existing native file is an explicit
 Save-dialog choice, not an automatic result of Open or Convert.
 
+Native saving publishes a complete replacement file. On the tested APFS volume,
+an overwrite changes existing Unix permission bits to `0600` (owner read/write)
+rather than preserving them. Atomic replacement does not establish recovery
+after a crash or power loss; the current preview has no such guarantee.
+
+Command-line creation can fail with “operation not supported” on ExFAT because
+exclusive new-file publication is unavailable there. `--force` with a new filename
+does not change that behavior. Create the file on APFS and copy the completed
+output to the external drive. Desktop replacement Save uses a different path,
+which succeeded on the tested ExFAT image. See the
+[filesystem research](../plans/005-native-save-contract-research.md) for coverage.
+
 Older `.molekel` preview files open without a manual conversion or migration.
 Native Save also permits the old `.molekel` suffix, but every new save contains
 EigenVista format identifiers regardless of its filename. New saves are not
@@ -551,6 +563,7 @@ Keep original data and backups because the native preview schema is not frozen.
 | Generate selected is disabled | Check between 1 and 32 orbitals and enter a finite positive isovalue |
 | Raycast/volume choices are disabled | Select a document with quantum fields; controls are also disabled while another operation is running. Orbital/density previews do not require meshes |
 | Cube opens but no field is visible | Check the isovalue and scalar range, Fit scene, and any preview error; an all-zero grid has no nonzero surface |
+| Volume disappears when preview quality increases | [#55](https://github.com/uvar-apps/eigenvista/issues/55) tracks a confirmed opacity/quality interaction. Draft works for the reproduced case; the research has not changed the renderer |
 | Structure seems missing | Use Fit scene; try Ball and stick; check atom counts and error messages |
 | Unexpected structure atom/bond count | Read Provenance; first-model/alternate/occupancy selection, declared connections, and heuristic bonds affect counts |
 | Calculation takes too long | Check the progress panel's phase, counts, and elapsed time; meshing updates only between signed passes. Cancel preserves prior surfaces, then retry at a lower resolution or with fewer orbitals |

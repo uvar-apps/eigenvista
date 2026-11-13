@@ -479,6 +479,17 @@ validation does not replace the existing file. Windows replacement semantics
 need separate qualification. File-format tests are not proof that native
 window close, Save dialog, or download interactions all work end to end.
 
+The [save-contract investigation](../plans/005-native-save-contract-research.md)
+distinguishes atomic visibility from crash durability. Existing Unix staging
+mode `0600` replaces old mode/inode metadata; it is not a metadata-preserving
+overwrite contract. File sync precedes publication, with no later parent-directory
+sync. Exclusive new-file publication needs same-directory hard links; the actual
+converter fails safely on the tested ExFAT image even with `--force` when the
+destination is absent. Replacement and parameter saves use rename and succeeded
+there. The observations do not qualify power loss, ACLs, Windows, remote/provider
+filesystems or every possible sync/publish failure. No save behavior is changed
+by the research harness or its filesystem regression tests.
+
 Native lifecycle protection vetoes window close and application exit until a
 tokenized decision for the current document is resolved. Rust coalesces repeated
 requests; the frontend listener recovers pending requests during initialization

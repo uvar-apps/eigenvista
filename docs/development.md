@@ -175,6 +175,39 @@ browser/WASM peak memory, OOM recovery or a universal workload improvement.
 See the [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
 and current [status](status.md) for recorded comparisons and qualification limits.
 
+## Save and affine-rendering research probes
+
+[Plan 005](../plans/005-native-save-contract-research.md) documents #41's actual
+save/CLI/filesystem controls. After the usual repository-local temp setup:
+
+```sh
+cargo test --locked -p eigenvista-format --test save_contract_research
+cargo run --locked -p eigenvista-format --example save_contract_probe -- probe \
+  "$PWD/tmp/save-contract-unused-run"
+```
+
+The example refuses an existing output directory and requires a path below
+repository `tmp/`. Ordinary CI runs the bounded actual-writer regressions; mounted
+image/full-volume experiments are opt-in research, with independent capability
+controls and only newly owned images. Visibility checks do not qualify power loss.
+
+[Plan 006](../plans/006-anisotropic-rendering-research.md) documents #43's
+independent constant/linear/tent expectations and #55's confirmed opacity bug.
+After building WASM and native references, and verifying strict port 5178 is free:
+
+```sh
+cd app
+npx playwright test tests/anisotropy-research.spec.ts --config ../ci/playwright.config.mts
+# Opt-in known-bad correctness probe: four failures / exit 1 on unchanged product.
+npx playwright test --config research/playwright.config.ts
+```
+
+The 26 passing normative cases are part of normal Chromium/WebKit discovery.
+The separate probe lives outside that discovery and preserves its failures,
+JSON observations, diagnostic material identity and captures under repository
+tmp. Its in-memory causal control is explicitly labelled and never supplies
+expected results. A future #55 repair must also qualify depth/opaque occlusion.
+
 ## Indexed-mesh qualification measurements
 
 [#37](https://github.com/uvar-apps/eigenvista/issues/37) is qualification only;
@@ -312,6 +345,8 @@ explains ownership, validation, and cache boundaries.
 | Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, controlled out-of-order reads and clearing, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations/budgets. Native dialog interaction remains a separate acceptance check. |
 | Custom shader transparency | [Alpha/depth and UI regressions](../app/tests/shader-transparency.spec.ts): fragment alpha independent of document opacity, view-dependent alpha, opaque depth writes, unchanged built-in materials, live checkbox changes, and Clear reset |
 | Sidebar disclosures | [Panel workflows](../app/tests/panels.spec.ts): all eight keyboard disclosures, mounted controls, field/shader state, clean/native-byte/worker isolation, profile persistence and storage failures, busy cancellation and mobile layout |
+| Native save contract research | [Actual-writer regressions](../crates/eigenvista-format/tests/save_contract_research.rs) and [opt-in filesystem probe](../crates/eigenvista-format/examples/save_contract_probe.rs): modes, bytes, bounded complete-file visibility and unique no-clobber races; no crash-durability claim |
+| Anisotropic rendering research | [Normal analytic checks](../app/tests/anisotropy-research.spec.ts) with [independent physical oracle](../app/tests/anisotropyReference.ts); [separate failing #55 probe](../app/research/anisotropy.probe.ts), deliberately outside normal discovery |
 | Indexed-mesh qualification only | [Frozen layout corpus](../fixtures/indexed-mesh-qualification/README.md), native research example and [real shader/Save checks](../app/tests/indexed-mesh-qualification.spec.ts): exact raw VBO/IBO restoration, both handednesses/signs and negative controls; no production compaction |
 | Browser workflows/numerics | [Playwright tests](../app/tests): Chromium/WebKit, real file input/download, pixels, camera, desktop/mobile layout |
 | Direct field previews | [Sampling-only workflows](../app/tests/field-preview.spec.ts): real `molden.input` orbital/density volume and raycast without meshing, field/resolution changes, transient cache reuse, save/reopen, cancellation and worker-failure recovery |

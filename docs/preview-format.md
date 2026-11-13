@@ -117,6 +117,23 @@ and total accounting remain shared by publication and Save. This does not remove
 all allocations: model/source validation, metadata, prepared arrays, compression
 and decoding still use memory. Source hashing's numeric JSON is unchanged.
 
-Native saves validate the encoded document, write and sync a newly created sibling file, then rename it into place. Failure leaves the original file intact. Windows overwrite semantics still need a dedicated implementation/test before a Windows release. Browser saves produce the same container through a download.
+Native saves validate the encoded document, write and sync a newly created sibling
+file, then publish it by rename. The converter uses an exclusive hard-link
+publication when creating a new destination; unsupported capability is an error,
+not a fallback to a partially visible final file. Tested pre-publication
+validation/write/read-only failures preserve existing destination bytes.
+
+These are atomic-visibility observations on the tested local filesystems, not a
+power-loss/crash-durability guarantee. The pinned Rust 1.99 implementation uses
+`F_FULLFSYNC` on Apple for file `sync_all`; the adapters do not sync the parent
+directory after publication. New Unix staging files request mode `0600`; replacing
+an existing file creates a new inode and does not preserve its prior mode bits.
+ExFAT synthesizes permissions and does not support the converter's hard-link
+publication, although replacement saves worked in the bounded macOS image test.
+Windows, ACL/ownership inheritance, network/cloud filesystems and power-loss
+behavior remain separately unqualified. See the
+[save-contract research](../plans/005-native-save-contract-research.md) for exact
+observations and proposed follow-up. Browser downloads use the browser's own
+filesystem behavior.
 
 Source identity uses SHA-256 over serde_json's explicitly sorted-key encoding of the basis and selected source record. Floating-point negative zero is canonicalized to positive zero for this hash because JavaScript JSON transport folds their signs; this does not change the represented real field. The native binary format retains f64 bit patterns, but the current browser JSON bridge does not retain the sign of zero when saving. Numeric tests and browser roundtrips compare against the JSON-canonical input. This is a local preview contract, not a published cross-language canonical-JSON standard. Pinning and documenting a formal canonical representation is an M1 gate.

@@ -8,6 +8,41 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Save and anisotropic-rendering research: 13 November 2026
+
+From main `a3d71d0` on `codex/save-and-anisotropy-research`, #41/#43 add research
+probes, independent regressions and reports only. Production behavior and 0.5.12
+release artifacts are unchanged. [Plan 005](../plans/005-native-save-contract-research.md)
+records actual APFS/ExFAT/CLI/parameter saves, bounded races, complete-file reader
+observations and independently confirmed full/read-only failures. The APFS
+integration rerun independently observes one of 12 unique winners, 188 complete
+old and 206 complete new reads, and `0640` to `0600` replacement. ExFAT new CLI
+outputs fail explicitly without hard links; existing replacements succeed.
+Ordinary visibility is not power-loss durability; parent synchronization,
+permissions policy and unqualified platforms keep #41 open at P3.
+
+[Plan 006](../plans/006-anisotropic-rendering-research.md) records **26 passing
+normative browser cases** across both engines: independent constant-alpha,
+linear-field crossing/color/depth and equal-memory thin-feature controls,
+1,200 profile comparisons and four signed-tent checks. No anisotropic metric
+defect is established within this bounded envelope; no grid policy changes.
+#43 closes as investigated through the research PR. The investigation confirms
+**[#55](https://github.com/uvar-apps/eigenvista/issues/55), P2**: increased volume
+quality can make an aggregate-visible field blank, including on isotropic grids.
+The separate opt-in four-test probe intentionally fails; it retains 40 baseline
+observations (16 wrong) and 20 causal diagnostic observations (zero wrong).
+Its in-memory predicate change is not a qualified product fix or oracle.
+
+Fresh local integration passes **234 default Rust tests + seven desktop = 241**,
+Rustfmt, strict all-target workspace Clippy, production WASM/TypeScript/Vite and
+**13 packaging tests**. Independent parent APFS and focused GPU reruns agree.
+Normal browser inventory is **376**, 188 per engine. All four actual hosted
+results at the reviewed head are required before merge; see the research PR
+linked from [#43](https://github.com/uvar-apps/eigenvista/issues/43).
+Raw JSON, captures, initial failures, source identities and logs remain under
+`tmp/2026-11-13-research41-43/`. No crash/power-loss, Windows/network filesystem,
+physical native dialog or universal nonlinear/GPU qualification is claimed.
+
 ## Sidebar disclosures and mesh qualification: 12 November 2026
 
 From merged main `2f7aeec`, [PR #53](https://github.com/uvar-apps/eigenvista/pull/53),

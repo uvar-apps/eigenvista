@@ -1,7 +1,7 @@
 # Development handoff
 
-Updated 12 November 2026 for sidebar disclosures and indexed-mesh qualification
-from main `2f7aeec`;
+Updated 13 November 2026 for #41 save-contract and #43 anisotropic-rendering
+research from merged main `a3d71d0`, branch `codex/save-and-anisotropy-research`;
 version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
 entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
 then this document, [architecture](architecture.md), and
@@ -13,6 +13,55 @@ lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
 ## Issue priorities
+
+### Save and anisotropic-rendering research: 13 November 2026
+
+Research only: production writers, renderer, scientific hashes, grid/cache policy,
+limits, dependencies and frozen fixtures are unchanged. Read
+[Plan 005](../plans/005-native-save-contract-research.md) and
+[Plan 006](../plans/006-anisotropic-rendering-research.md) before continuing.
+
+- **#41 stays open at P3** for policy/platform follow-up. Actual APFS saves
+  replace complete files and change prepared `0640` mode to `0600`; one of 12
+  unique no-clobber contenders wins. Actual writers fail safely under confirmed
+  ENOSPC/EROFS. Real ExFAT lacks hard links: CLI initially absent outputs fail,
+  including `--force`; replacing an existing output succeeds. Desktop Save uses
+  the replacement writer. Neither these ordinary observations nor staging-file
+  sync establish power-loss durability. Parent directories are not explicitly
+  synced. Physical dialog cancellation, sync failure, ACL/ownership and other
+  platforms/filesystems remain unqualified. Never weaken no-clobber publication
+  with direct writes to the final name.
+- **#43's investigation is complete**; its research PR closes it as investigated.
+  Actual production draws pass 26 independent physical-space checks across
+  Chromium/WebKit, with 1,200 profile comparisons and four signed thin-feature
+  checks. The tested envelope finds no affine/anisotropic traversal defect.
+  An equal-memory isotropic allocation erases a resolved thin feature before
+  rendering. No automatic resampling/grid-policy change is justified.
+- **Next: [#55](https://github.com/uvar-apps/eigenvista/issues/55), P2 confirmed
+  renderer bug.** Increasing quality can make volume rendering blank even on
+  isotropic grids: per-segment alpha fails the first-marker threshold while
+  aggregate alpha should be visible. The opt-in probe retains 40 baseline
+  observations (16 wrong) and 20 separately labelled in-memory causal controls
+  (all correct); its four tests deliberately fail. This research does not fix
+  the product. A future repair must qualify depth testing/opaque occlusion as
+  well as opacity and preserve existing quality/empty-space/affine coverage.
+
+Fresh integration checks: **241 Rust tests** (234 default members plus seven
+explicit desktop), Rustfmt, strict workspace/all-target Clippy, production
+WASM/TypeScript/Vite and **13 packaging tests** pass. The focused normative
+browser suite passes **26/26**. Normal discovery totals **376** (188 per engine);
+the separate known-bad opt-in probe is outside normal CI and must not be skipped,
+marked expected-failure or used to generate expectations. All four actual hosted
+jobs at the reviewed PR head remain the merge gate; consult the research PR linked
+from [#43](https://github.com/uvar-apps/eigenvista/issues/43) and its check results.
+Local evidence and the independently repeated APFS probe are retained under
+`tmp/2026-11-13-research41-43/`. Only owned disk images/servers were used and
+stopped/detached. Version/tag/release/ZIP remain unchanged.
+
+#52 is the next optional UI enhancement; #37 still needs a bounded benefit/budget
+raw-fallback policy, #38 is deferred behind it, and #35/#36/#40/#42/#20 need their
+separate workloads/research. #22 remains a separate export feature. See the
+[current priority update](reviews/2026-11-11-issue-priorities.md#save-and-rendering-research-follow-up).
 
 ### Sidebar disclosures and mesh qualification: 12 November 2026
 
