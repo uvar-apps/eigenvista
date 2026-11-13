@@ -44,7 +44,7 @@ documents; older `.molekel` preview documents remain readable. Check
   bounded profile order stays separate from expansion and molecular documents.
   Stable keyed DOM order retains control/shader state, progress and Cancel.
   Read [release notes](docs/releases/0.5.15.md), current handoff and status for
-  release preparation, completed verification and artifact evidence. Scientific
+  published artifacts and completed verification evidence. Scientific
   data, file profiles, limits, precision, dependencies, compiler and icon/logo
   are unchanged by this release bump.
 - Version 0.5.14 ships #55: volume visibility and the representative depth share

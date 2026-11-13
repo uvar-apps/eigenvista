@@ -1,9 +1,9 @@
 # Development handoff
 
-Updated 13 November 2026 for release 0.5.15 preparation from main `e471cbd`
-(merged PR #58). This release includes #52 sidebar reordering. Release-source,
-package, tag and publication verification remain separate gates recorded below.
-Older dated entries retain their then-current source, version and artifact facts.
+Updated 13 November 2026 for published 0.5.15, tagged source `cf39343`.
+This post-tag documentation record identifies completed release verification
+without moving `v0.5.15`. Older dated entries retain their then-current source,
+version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
@@ -14,25 +14,39 @@ code. The icon and logo are unchanged.
 
 ## Release 0.5.15
 
-The user authorized version 0.5.15, commit, annotated tag, push and a GitHub
-prerelease with rebuilt normal redistributables. The release includes the merged
-[#52 sidebar reordering](design/2026-11-13-sidebar-reordering.md). Read the
-[release notes](releases/0.5.15.md) and
-[release record](status.md#version-0515) for behavior, limits and verification.
-The [planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15)
-will hold the verified ZIP, checksum and build metadata after publication.
+[Published GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15), annotated tag `v0.5.15`,
+source `cf39343c0a53c9ca1e162cf47b1f2eca2bd8392e`, published 13 November 2026
+at 15:18:27 UTC. This release includes
+[#52 sidebar reordering](design/2026-11-13-sidebar-reordering.md) in the rebuilt
+distribution and retains #55's volume visibility fix. [Release notes](releases/0.5.15.md)
+and the [release record](status.md#version-0515) describe behavior, limitations
+and completed artifact/verification evidence.
 
-The merged-feature baseline passed all four actual jobs at `0473c1b` in
-[run 43440036206](https://github.com/uvar-apps/eigenvista/actions/runs/43440036206):
-Linux 232 Rust tests/fmt/Clippy, macOS seven desktop tests, Chromium 223 and
-WebKit 223, with 13 packaging tests and production builds per browser job.
-Those results qualify the baseline, not a later release binary. Fresh
-release-head checks, clean committed source/package identity, extracted source/
-signature/native/WASM audit, tag identity and published/downloaded asset hashes
-are pending release gates; record their completed evidence in status.
-Preserve the original untracked review, private exports and older release
-artifacts. Tester signing stays ad-hoc; physical native/clean-Mac/HiDPI/cross-OS
-installation remains separately unqualified.
+All four actual release-head jobs pass in
+[run 43445458328](https://github.com/uvar-apps/eigenvista/actions/runs/43445458328):
+Linux 232 Rust tests/fmt/strict Clippy, macOS seven desktop tests, Chromium
+223/223 (26.9 minutes) and WebKit 223/223 (20.0 minutes), with 13 packaging tests
+and production builds per browser job. Fresh local checks pass 241 Rust tests,
+fmt/strict Clippy, 13 packaging tests and optimized app/CLI plus production
+WASM/TypeScript/Vite builds. Independent audit verifies all 366 eligible source
+blobs/modes, 59 payload files, signatures, seven extracted-converter/native/WASM
+cases and the new sidebar JS/WASM embedded in the actual Mac executable.
+The old 0.5.14 app fails the new sidebar-identity control; static byte identity
+does not replace native GUI testing. Remote tag, exact notes, all three GitHub
+asset digests and downloaded bytes match the verified local outputs.
+
+ZIP: `artifacts/distributions/EigenVista-0.5.15-apple-silicon-20261113T144337Z-cf39343.zip`
+(45,615,151 bytes), with checksum and build metadata sidecars.
+SHA-256: `ee9b49963b2a3fae3655c12075f048bafde9e25cd77337ea2badf17781375132`.
+Build metadata identifies clean source `cf39343`, arm64, ad-hoc signing and no
+notarization. Rebuilt release app:
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+Evidence: `tmp/2026-11-13-release-0.5.15/`; staging
+`tmp/eigenvista-package-CU6Rrj`. Preserve those, original untracked review,
+private exports and older releases. Physical native/clean-Mac/HiDPI/cross-OS
+installation, general scientific/rendering and power-loss qualification remain
+separate gates. Whole-ray opaque intersections and native-save/ExFAT limitations
+are unchanged. Timestamped restart files remain historical snapshots.
 
 ## Sidebar reordering before the 0.5.15 release
 

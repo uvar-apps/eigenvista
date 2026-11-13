@@ -10,24 +10,73 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Version 0.5.15
 
-Release prepared 13 November 2026 from main `e471cbd` (merged PR #58).
-Own version metadata and current user/agent guides move to 0.5.15. The release
-includes [#52 sidebar reordering](design/2026-11-13-sidebar-reordering.md);
-[notes](releases/0.5.15.md) describe within-pane drag, keyboard/tap controls,
+Published 13 November 2026 at 15:18:27 UTC, including merged PR #58's
+[#52 sidebar reordering](design/2026-11-13-sidebar-reordering.md). All eleven
+own version values and current user/agent guides agree on 0.5.15.
+[Release notes](releases/0.5.15.md) describe within-pane drag, keyboard/tap access,
 profile persistence and retained control/calculation state. Dependencies,
 compiler, scientific data/profiles/precision/limits and icon/logo are unchanged
-by the version bump. Older release and repair entries remain historical.
+by the version bump. The existing #55 fix remains included.
 
-The merged-feature baseline passed all four actual jobs at `0473c1b` in
-[run 43440036206](https://github.com/uvar-apps/eigenvista/actions/runs/43440036206):
-Linux 232 Rust tests/fmt/strict Clippy, macOS seven desktop tests, Chromium 223
-and WebKit 223, plus 13 packaging tests and production WASM/frontend builds
-per browser job. Release-head verification, rebuilt app/ZIP and complete eligible
-source audit, signatures, tag identity and published/downloaded asset hashes are
-separate pending gates; record their completed evidence here before the release
-task finishes. The
-[planned GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15)
-is not yet evidence of publication or verified artifacts.
+Release source `cf39343c0a53c9ca1e162cf47b1f2eca2bd8392e` and annotated `v0.5.15` are pushed. The
+[GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15) is published with its ZIP, checksum and
+build metadata. Remote annotated-tag object
+`694bc8ce5a138d7d7f2d234ece7295d90e1b4eb8` resolves to that source; exact notes,
+all three asset names/sizes/digests and independently downloaded bytes match
+the verified local outputs. This post-tag living-document record does not move
+the tag or rebuild the unchanged release binaries.
+
+All four actual release-head jobs pass in
+[run 43445458328](https://github.com/uvar-apps/eigenvista/actions/runs/43445458328):
+Linux **232 Rust tests**, Rustfmt and strict workspace/all-target Clippy;
+macOS **seven desktop tests**; Chromium **223/223** (26.9 minutes) and WebKit
+**223/223** (20.0 minutes), with **13 packaging tests** and production
+WASM/frontend builds per browser job. No skipped, flaky, unexpected results or
+timeouts. Fresh local checks pass **241 Rust tests** (234 default plus seven
+desktop), fmt, strict Clippy, 13 packaging tests and optimized app/CLI plus
+production WASM/TypeScript/Vite builds. PR #58's earlier verification remains
+separate baseline evidence, not a substitute for this release-head run.
+
+ZIP: `artifacts/distributions/EigenVista-0.5.15-apple-silicon-20261113T144337Z-cf39343.zip`
+(**45,615,151 bytes**). SHA-256:
+`ee9b49963b2a3fae3655c12075f048bafde9e25cd77337ea2badf17781375132`.
+The `.zip.sha256` and same-stem `.json` are alongside it. Build metadata records
+version 0.5.15, clean source `cf39343`, arm64, minimum macOS 13/build host 27.0,
+Rust 1.99.0, Node 26, wasm-bindgen 0.2.108, cargo-about 0.9.1, ad-hoc signing
+and no notarization. Rebuilt app:
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+
+The packager verifies source stability, architecture/system runtime links,
+strict app/CLI signatures, extracted bytes/modes and example roundtrips.
+Independent audit matches all **366** complete eligible Git blobs/modes and
+**59** payload files, with original-review/private-export exclusion. Seven
+actual extracted-converter inputs (water PDB/XYZ/Molden, signed-affine cube and
+raw/gzip/policy BinaryCIF) retain full release-WASM parity and clean native
+reopen. The 1crn inputs retain 327 atoms, 337 bonds and three declared connections;
+policy retains four atoms and one bond.
+
+Stored Brotli bytes inside the actual extracted signed Mac executable decode
+exactly to `assets/index-CVwiJmls.js` and the fresh release WASM. The archived
+PanelSidebar source equals the reviewed implementation; its compiled profile,
+drag and keyboard-control markers occur in that exact embedded JS. The old
+0.5.14 app lacks the new sidebar identity and fails the negative control without
+being executed or modified. Embedded production JS SHA-256:
+`912c35f8b09896b34fbc558381644b0736dacccede980b2ab669e11124c98a56`.
+Embedded WASM SHA-256:
+`705c14da16e7a9da5aab90c47bd97875cec8520d3c2c43264d5c8f91789d71fa`.
+This is static source/build/embedding evidence, separate from GPU results and
+native GUI qualification.
+
+Evidence: `tmp/2026-11-13-release-0.5.15/`, including local verification,
+`audit/REPORT.json`, exact-head CI proof/raw logs and
+`published-asset-verification.json`; staging remains at
+`tmp/eigenvista-package-CU6Rrj`. The untracked original review is preserved;
+its process-only source exclusion changes no persistent Git configuration.
+Previous tags/archives, release notes and private exports are unchanged.
+Whole-ray opaque intersections, native-save/ExFAT support, physical native
+interactions, clean-Mac/Gatekeeper/HiDPI installation, Linux/Windows packages,
+general scientific/rendering and power-loss qualification remain separate
+limitations/gates. This remains a development preview, not v1 completion.
 
 ## Sidebar reordering: 13 November 2026
 
