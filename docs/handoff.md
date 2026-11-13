@@ -1,11 +1,9 @@
 # Development handoff
 
-Updated 13 November 2026 for the 0.5.13 release, based on merged main `cd6fc8a`
-(PR #56). Source version metadata and current documentation are 0.5.13; the
-[release notes](releases/0.5.13.md) collect changes since 0.5.12 and known #55.
-Release build/publication evidence belongs in [status](status.md); older dated
-entries below describe their then-current 0.5.12 state. Start with
-[root AGENTS.md](../AGENTS.md), then this document,
+Updated 13 November 2026 for published 0.5.13, tagged source `8c09db2`.
+This post-tag documentation record identifies completed release checks and assets
+without moving `v0.5.13`. Older dated entries retain their then-current facts.
+Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
 The current application is **EigenVista**, version **0.5.13**, in the standalone
@@ -15,20 +13,35 @@ code. The icon and logo are unchanged.
 
 ## Release 0.5.13
 
-The user authorized version bump, commit, annotated tag, push and GitHub release
-with notes and rebuilt normal redistributables. Release preparation changes
-version metadata/documentation only; product changes already merged through
-PRs #44/#45/#49/#50/#53/#56. #43 is closed as investigated; #41 stays open for
-save policy/platform work and #55 is the next P2 renderer repair.
+[Published GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.13), annotated tag `v0.5.13`,
+source `8c09db29981023a95f855a41a079e831dc84a9ff`. [Release notes](releases/0.5.13.md) collect native exit protection,
+collapsible sidebar, import/publication/encoding work, compatibility/CI and
+research since 0.5.12. Version metadata and current guides agree; source profiles,
+precision/limits, dependency/toolchain versions and icon remain unchanged by the
+version bump. The current [release record](status.md#version-0513) holds details.
 
-The completed pre-release research baseline is main `cd6fc8a`, exact tree of
-reviewed PR head `2bb508a`, with all four jobs green in
-[run 43388050720](https://github.com/uvar-apps/eigenvista/actions/runs/43388050720):
-Linux232/fmt/Clippy, macOS7, Chromium188, WebKit188 and packaging13/builds.
-Those results are baseline evidence, not a claim that a later release binary
-has passed. Check the latest [release record](status.md#version-0513) and its
-artifact metadata before distributing. Preserve timestamped restart snapshots,
-untracked original review and private exports. Tester signing remains ad-hoc.
+All four actual jobs at the release source pass in
+[run 43402898985](https://github.com/uvar-apps/eigenvista/actions/runs/43402898985):
+Linux232/fmt/Clippy, macOS7, Chromium188 and WebKit188, packaging13/builds.
+Fresh local verification passes 241 Rust tests, 13 packaging tests, fmt/strict
+Clippy and optimized app/CLI plus production WASM/frontend. Independent package
+audit verifies all 358 source blobs/modes, 59 payload files, extracted signatures,
+BinaryCIF conversion and release-WASM/native parity. Published/downloaded asset
+hashes and the remote annotated tag match the exact verified release source.
+
+ZIP: `artifacts/distributions/EigenVista-0.5.13-apple-silicon-20261113T093740Z-8c09db2.zip`
+(45,586,584 bytes), with checksum and build metadata sidecars.
+SHA-256: `35a502024e3df91bccfa17b914aa2aeb351fa185d9007021c992a45697373418`.
+Source is clean; signing is ad-hoc, without notarization. Root release app is
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+Evidence: `tmp/2026-11-13-release-0.5.13/`; staging
+`tmp/eigenvista-package-QQwgNK`. Preserve those, the original untracked review
+and private exports. Physical native/clean-Mac/HiDPI/cross-OS installation remain
+separate gates. Timestamped restart files stay historical snapshots.
+
+#55 is the next open P2 renderer repair; it is documented and remains unfixed.
+#41 remains P3 for explicit save policy/platform work; #43 is closed as
+investigated. No production compaction or isotropic resampling was enabled.
 
 ## Issue priorities
 

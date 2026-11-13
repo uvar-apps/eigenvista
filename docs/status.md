@@ -10,19 +10,58 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Version 0.5.13
 
-Release prepared 13 November 2026 from merged main `cd6fc8a` (PR #56). Rust's
-workspace/six own lock entries, npm metadata/lockfile root, Tauri and current
-user/agent documents agree on 0.5.13. Dependencies, toolchain, scientific data,
-format profiles, limits, precision and logo are unchanged by this version bump.
-[Release notes](releases/0.5.13.md) record the shipped changes since 0.5.12 and
-known #55; #37's compaction remains qualification-only.
+Released 13 November 2026, collecting PRs #44/#45/#49/#50/#53/#56 since 0.5.12.
+All eleven own version values across Rust workspace/lock, npm metadata/lock and
+Tauri, plus current user/agent guides, agree on 0.5.13. External dependencies,
+compiler, scientific profiles/precision/limits and logo are unchanged by the
+release bump. [Release notes](releases/0.5.13.md) describe shipped changes and
+known #55; compaction and isotropic resampling remain research-only.
 
-The pre-release baseline passed all four actual jobs at `2bb508a` in
-[run 43388050720](https://github.com/uvar-apps/eigenvista/actions/runs/43388050720):
-Linux232/fmt/Clippy, macOS7, Chromium188, WebKit188, packaging13 and actual
-production builds. Release-commit verification, clean-source package identity,
-extracted binaries/sources and GitHub asset digests are separate release gates;
-record their completed evidence here before the task is finished.
+Release source `8c09db29981023a95f855a41a079e831dc84a9ff` and annotated `v0.5.13` are pushed. The
+[GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.13) is published with the ZIP, checksum and
+build metadata. Remote tag identity, exact published notes, GitHub asset
+sizes/digests and all three independently downloaded asset hashes match the
+verified local outputs. This post-tag documentation record does not move the tag.
+
+All four actual release-head jobs pass in
+[run 43402898985](https://github.com/uvar-apps/eigenvista/actions/runs/43402898985):
+Linux **232 Rust tests**, formatting and strict workspace/all-target Clippy;
+macOS **seven desktop tests**; Chromium **188/188** (16.8 minutes) and WebKit
+**188/188** (13.2 minutes), with all 13 new analytic cases per engine, no skips,
+and **13 packaging tests** plus production WASM/frontend builds in each browser
+job. Fresh local checks pass **241 Rust tests** (234 default members plus seven
+desktop), Rustfmt, strict Clippy, 13 packaging tests and the optimized app/CLI
+and production WASM/TypeScript/Vite build. Superseded builds/runs remain labelled
+separately; they are not the final release gate.
+
+Verified ZIP: `artifacts/distributions/EigenVista-0.5.13-apple-silicon-20261113T093740Z-8c09db2.zip`
+(**45,586,584 bytes**). SHA-256:
+`35a502024e3df91bccfa17b914aa2aeb351fa185d9007021c992a45697373418`.
+The `.zip.sha256` and same-stem `.json` are alongside it. Build metadata records
+clean source `8c09db2`, arm64, minimum macOS 13/build host 27.0, Rust 1.99.0,
+Node 26, wasm-bindgen 0.2.108, cargo-about 0.9.1, ad-hoc signing and no
+notarization. The rebuilt native app is
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`; production
+frontend is `assets/index-CiOIz4aM.js`.
+
+The packager verifies architecture, runtime links, signatures, source stability,
+all extracted payload bytes/modes, PDB/XYZ/Molden/cube examples, signed cube
+meshes and converter/native/WASM roundtrips. Independent audit checks **358/358**
+complete eligible source blobs and Git modes, all **59** payload files, no private
+exports/original untracked review, and actual extracted raw/gzip BinaryCIF
+conversion (327 atoms, 337 bonds, three retained disulfides), policy input
+(four atoms, one bond), full release-WASM parity and clean native reopen.
+The original review stays untracked and byte-identical; its process-only source
+exclusion changes no persistent Git config. Evidence is retained in
+`tmp/2026-11-13-release-0.5.13/`, including `audit/REPORT.json`, exact-head CI
+raw logs, local verification and published/downloaded asset proof. Package
+staging remains at `tmp/eigenvista-package-QQwgNK`.
+
+Known #55 is documented in the release notes/user guide; #41 remains a P3 policy
+and platform investigation. #43 is closed as investigated. Clean-Mac/Gatekeeper,
+physical native dialogs/shortcuts, HiDPI, Linux/Windows distributions, general
+nonlinear rendering and power-loss durability are separate qualification gates.
+The tester release does not establish v1/M0–M7 completion.
 
 ## Save and anisotropic-rendering research: 13 November 2026
 
