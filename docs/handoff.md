@@ -1,15 +1,53 @@
 # Development handoff
 
-Updated 13 November 2026 for published 0.5.13, tagged source `8c09db2`.
-This post-tag documentation record identifies completed release checks and assets
-without moving `v0.5.13`. Older dated entries retain their then-current facts.
-Start with [root AGENTS.md](../AGENTS.md), then this document,
+Updated 13 November 2026 for the #55 source fix on
+`codex/fix-volume-visibility`, based on main `5114cdc`. Source version remains
+0.5.13; the published tag/ZIP at `8c09db2` predates the repair and is unchanged.
+Older dated entries retain their then-current facts. Start with
+[root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
 The current application is **EigenVista**, version **0.5.13**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Current source: volume visibility and depth
+
+[#55](https://github.com/uvar-apps/eigenvista/issues/55) fixes the disappearance
+of volumes at finer preview qualities. A shared aggregate-alpha cutoff 0.005
+now determines both visibility and the first representative depth, interpolated
+inside the crossing segment. The alpha expression, raycast branch, filtering,
+brick skipping, grid/cache/scientific data and limits stay unchanged. Read the
+[decision](design/2026-11-13-volume-visibility.md) before changing this policy.
+
+A fresh old-shader run gives four failures and 16 wrong results among 40
+production observations. All 40 independent fixed expectations pass after the
+repair. The full focused run passes **78/78** across Chromium/WebKit: 52 new
+visibility/depth/prefix/cutoff tests and the unchanged 26 affine/tent cases,
+with 154 new and 56 existing bounded draws, zero skipped/flaky/unexpected tests.
+Normal discovery is **428** (214 per engine). The old counterfactual/probe is
+retired from current code, preserved in Git history. Diagnostic depth writes
+are labelled and separate from real production opaque-object scenes.
+
+Fresh local checks pass **234 default Rust tests**, Rustfmt, strict workspace/
+all-target Clippy, production WASM/TypeScript/Vite and **13 packaging tests**.
+All four actual final PR-head jobs remain the merge gate: Linux Rust, explicit
+macOS desktop and the complete Chromium/WebKit suites. Their results and the
+additional existing UI/camera checks are recorded in the PR linked from #55.
+Raw failures, source identities, metrics and captures remain under
+`tmp/2026-11-13-volume55/`. Preserve the original untracked review/private exports.
+
+Volume still integrates its whole ray before one depth test. Opaque objects
+inside an accepted ray can leave behind-object color in that result; this is
+an explicit existing limitation, not scene-depth-clipped compositing. The fix
+adds no prepass/buffers or scientific policy. No release/tag/ZIP rebuild is part
+of this issue. The published 0.5.13 package retains the old behavior.
+
+After this fix, optional #52 is the simplest UI enhancement. #37 needs a bounded
+benefit/memory raw-fallback policy, #40 profiling and #41 save-policy decisions;
+#38 stays behind #37. Other scientific/capacity/crystallography issues retain
+their existing research/scope gates.
 
 ## Release 0.5.13
 
@@ -39,9 +77,10 @@ Evidence: `tmp/2026-11-13-release-0.5.13/`; staging
 and private exports. Physical native/clean-Mac/HiDPI/cross-OS installation remain
 separate gates. Timestamped restart files stay historical snapshots.
 
-#55 is the next open P2 renderer repair; it is documented and remains unfixed.
-#41 remains P3 for explicit save policy/platform work; #43 is closed as
-investigated. No production compaction or isotropic resampling was enabled.
+#55 was still unfixed in the published 0.5.13 source; the subsequent repair
+is recorded above. #41 remains P3 for explicit save policy/platform work; #43
+is closed as investigated. No production compaction or isotropic resampling
+was enabled.
 
 ## Issue priorities
 

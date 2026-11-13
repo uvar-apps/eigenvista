@@ -15,6 +15,11 @@ only #37's shader/memory qualification. Its [decision](../docs/design/2026-11-12
 rejects unconditional automatic packing; #37 remains open for a bounded
 benefit/budget fallback policy and later implementation.
 
+The subsequent [#55 production fix](../docs/design/2026-11-13-volume-visibility.md)
+uses accumulated visibility for the volume depth marker and promotes the fixed
+research expectations into normal regressions. It changes no scientific grid
+policy; the published 0.5.13 tag/ZIP predates that source fix.
+
 Read the [findings and reproducible evidence](2026-11-12-research.md) first.
 Issue comments hold the published research disposition. Earlier priorities remain historical. The 13 November rendering research
 confirms the separate P2 product bug #55; the other measured tradeoffs do not
@@ -27,7 +32,7 @@ establish a scientific-output bug.
 | 3 | [004: typed native encoding](004-typed-native-encoding.md), remaining #39 | Implemented; acceptance in status/issue/PR checks | Direct typed numeric emission preserves the frozen logical layout and substantially reduces measured native encode peak RSS. |
 | 4 | [003: indexed-mesh qualification](003-indexed-mesh-qualification.md), #37 | Qualification recorded; automatic packing NO-GO | Shader identity is reconstructible only for explicitly identified generated layouts; no-sharing peak rejects unconditional packing. Select a bounded benefit/budget fallback before production implementation. |
 | 5 | [005: save contract](005-native-save-contract-research.md), #41 | Research recorded; P3 policy/platform follow-up stays open | APFS complete-file visibility/private replacement and actual ExFAT no-clobber limitation reproduced; no power-loss qualification or production change. |
-| 6 | [006: anisotropic rendering](006-anisotropic-rendering-research.md), #43 | Investigation complete; close through research PR | Independent affine-grid GPU checks pass; equal-memory isotropic allocation can erase a feature. Separate P2 #55 tracks the confirmed opacity/quality defect. |
+| 6 | [006: anisotropic rendering](006-anisotropic-rendering-research.md), #43 | Investigation complete; close through research PR | Independent affine-grid GPU checks pass; equal-memory isotropic allocation can erase a feature. The separate #55 production fix addresses the confirmed opacity/quality defect; see the newer decision. |
 | Later | #38 typed mesh outputs | DEFERRED until after #37 | Two-engine transfer measurements are positive but small; remeasure after reducing mesh payload. |
 | Later | #35 complete Molden spin sets | BLOCKED: agreed real workload and browser memory | Current input-line and persistence limits independently constrain expansion. |
 
@@ -64,7 +69,8 @@ and separate import, transport, rendering and persistence budgets.
   explicit rejection must not be replaced with silent clipping.
 - #43 anisotropy: Plan 006 completes the bounded investigation with actual GPU
   evidence. No grid-policy change is justified; repair the separate confirmed
-  opacity/quality bug #55 next, with depth/occlusion qualification.
+  opacity/quality bug #55 is addressed by the subsequent visibility/depth fix.
 
 The remaining deferrals do not establish that their issues are invalid. #43
-closes as investigated on its explicitly bounded evidence; #55 remains open.
+is closed as investigated on its explicitly bounded evidence; #55 has a
+separate production fix and its own acceptance gates.

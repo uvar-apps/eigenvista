@@ -15,8 +15,8 @@ import {
 } from "./anisotropyReference";
 
 // Every profile is a separate bounded case. These passing controls certify the
-// stated envelope; the independently discovered first-marker defect lives in
-// the opt-in research reproducer, whose fixed correctness assertions fail.
+// stated envelope; the independently discovered first-marker defect now has
+// fixed analytic regressions in volume-visibility.spec.ts.
 for (const profile of geometryCases) {
   for (const mode of ["volume", "raycast"] as const) {
     test(`${profile.id}: ${mode} agrees with independent physical-space reference`, async ({
@@ -47,7 +47,7 @@ for (const profile of geometryCases) {
           variant === 1,
         );
         expect(rendered.glError).toBe(0);
-        expect(rendered.firstMarkerControl).toBe(false);
+        expect(rendered.captureVolumeDepth).toBe(false);
         expect(rendered.renderedFragmentSha256).toBe(
           rendered.productionFragmentSha256,
         );

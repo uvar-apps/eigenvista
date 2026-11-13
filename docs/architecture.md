@@ -355,6 +355,18 @@ use a 3D texture and replace the selected field's mesh display. Other fields'
 meshes may remain. These shaders are bounded sampled previews, not direct
 analytic evaluation or robust root isolation. Ordinary mesh transparency and
 single-volume compositing do not correctly solve all mixed-scene overlaps.
+
+Volume visibility and representative depth share the aggregate alpha cutoff
+0.005. After the crossing segment is composited, the shader interpolates the
+first visible depth using its optical rate and clamps it to that segment.
+Individual segment alpha no longer gates volume visibility; finer sampling
+therefore cannot erase a meaningful aggregate solely for lack of a marker.
+Depth writes remain off for volume and on for raycast. Existing opaque depth
+still tests the representative point; accepted color still integrates the whole
+ray, including samples behind an interior opaque object. See the
+[visibility/depth decision](design/2026-11-13-volume-visibility.md) for the exact
+contract, floating-point limits and independent regressions.
+
 Skewed and reflected affine grids use the full grid transform; reflected box
 winding is corrected for back-face ray-entry rendering, including inside views.
 

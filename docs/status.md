@@ -8,6 +8,43 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Volume visibility and depth: 13 November 2026
+
+Implemented #55 on `codex/fix-volume-visibility` from main `5114cdc`, after the
+0.5.13 release. The old per-segment marker threshold could discard a visibly
+opaque aggregate at finer quality. The shader now uses its existing aggregate
+cutoff 0.005 for both display and representative depth, with within-segment
+optical interpolation/clamping. Alpha integration, raycast, grid/scientific
+identity, cache policy, filtering/skipping, precision and limits are unchanged.
+The [decision](design/2026-11-13-volume-visibility.md) defines the exact policy
+and retained whole-ray opaque-intersection limitation.
+
+The fresh unchanged-shader baseline preserves four failed tests and **16 wrong
+results among 40 production observations**. Promoted fixed-oracle controls all
+pass after the repair. The focused final-source run passes **78/78** in 173.2
+seconds, zero skipped/flaky/unexpected tests: **52 new normal cases** with 154
+bounded GPU draws plus **26 unchanged affine/tent cases** with 56 draws. It
+covers signs, qualities, isotropic/anisotropic grids, actual manual/hardware
+filtering, independent opacity/depth, real opaque plane/sphere/mesh scenes,
+camera-inside and near clamping, empty/faint prefixes and sensitive below/above
+visibility-cutoff controls. Expected values never come from a patched shader.
+Depth-write-only diagnostics are labelled separately from production depth tests.
+
+The opt-in probe/config and predicate counterfactual are retired from current
+source; the original evidence remains in Plan 006 and tagged v0.5.13 history.
+All old affine/tent expectations, ROI and numerical budgets remain intact.
+Normal discovery totals **428** (214 per engine); full actual hosted PR-head
+results and existing UI/camera checks are recorded through
+[#55](https://github.com/uvar-apps/eigenvista/issues/55) before merge. All four
+jobs must pass. Fresh local Rustfmt, **234 default Rust tests**, strict workspace/
+all-target Clippy, production WASM/TypeScript/Vite and **13 packaging tests** pass.
+Raw source identities, failures, metrics and captures remain in
+`tmp/2026-11-13-volume55/`; the original review/private exports are preserved.
+
+Version stays 0.5.13. Its published tag/ZIP are unchanged and predate this source
+fix. No new native package, physical native/clean-Mac qualification, general
+nonlinear accuracy, scene-depth clipping or v1 completion is claimed.
+
 ## Version 0.5.13
 
 Released 13 November 2026, collecting PRs #44/#45/#49/#50/#53/#56 since 0.5.12.

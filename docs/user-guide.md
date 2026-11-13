@@ -381,6 +381,12 @@ The choice survives mode switches, is hidden in mesh mode, and is not saved in
 `.eigenvista`. Fine can reduce missed crossings between display samples, but
 cannot recover features absent from the grid or guarantee detection of tangencies.
 
+Current source determines volume depth from accumulated visible opacity; its
+visibility threshold is unchanged. Opaque objects test that representative
+depth. Volume color still integrates the whole ray, so intersections with atoms
+or meshes inside a volume are approximate and can include color from behind
+those objects. See the [rendering decision](design/2026-11-13-volume-visibility.md).
+
 The original cube data is f64, while rendering and current meshing use f32.
 If a finite grid overflows the preview's numeric range, an error is shown; its
 document, bonds, and existing meshes still open and remain savable. Saving
@@ -563,7 +569,7 @@ Keep original data and backups because the native preview schema is not frozen.
 | Generate selected is disabled | Check between 1 and 32 orbitals and enter a finite positive isovalue |
 | Raycast/volume choices are disabled | Select a document with quantum fields; controls are also disabled while another operation is running. Orbital/density previews do not require meshes |
 | Cube opens but no field is visible | Check the isovalue and scalar range, Fit scene, and any preview error; an all-zero grid has no nonzero surface |
-| Volume disappears when preview quality increases | [#55](https://github.com/uvar-apps/eigenvista/issues/55) tracks a confirmed opacity/quality interaction. Draft works for the reproduced case; the research has not changed the renderer |
+| Volume disappears when preview quality increases | Fixed in current source ([#55](https://github.com/uvar-apps/eigenvista/issues/55)). The published 0.5.13 ZIP predates the fix; rebuild current source or use Draft for the reproduced case |
 | Structure seems missing | Use Fit scene; try Ball and stick; check atom counts and error messages |
 | Unexpected structure atom/bond count | Read Provenance; first-model/alternate/occupancy selection, declared connections, and heuristic bonds affect counts |
 | Calculation takes too long | Check the progress panel's phase, counts, and elapsed time; meshing updates only between signed passes. Cancel preserves prior surfaces, then retry at a lower resolution or with fewer orbitals |

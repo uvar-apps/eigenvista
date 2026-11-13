@@ -141,6 +141,30 @@ code outside normal CI. The 26 new passing analytic checks remain in normal
 Chromium/WebKit discovery. All four actual hosted jobs must pass at the reviewed
 head before merge; [status](../status.md) records fresh local evidence.
 
+## Volume visibility implementation follow-up
+
+The user next authorized [#55](https://github.com/uvar-apps/eigenvista/issues/55)
+on `codex/fix-volume-visibility`, from main `5114cdc` after the 0.5.13 release.
+The [decision](../design/2026-11-13-volume-visibility.md) defines one aggregate
+alpha cutoff for visibility and the first representative depth. Within-segment
+optical interpolation replaces the per-segment threshold; the alpha integrator,
+raycast path, scientific data, grid/cache policy and limits are unchanged.
+
+The original fixed-oracle failure is reproduced before the change, and its
+expectations are promoted into normal production tests. Depth qualification
+uses independent geometry/opacity, actual opaque plane/sphere/mesh scenes,
+camera-inside and faint-prefix controls, with separately labelled depth-write
+captures. Whole-ray integration still does not clip color at interior opaque
+depth. Full verification and all four actual final PR-head jobs remain the
+merge gate; the issue/PR and [status](../status.md) hold completed evidence.
+
+This source repair does not bump version, retag or rebuild the published
+0.5.13 ZIP. The preceding research table remains the historical discovery
+record. After #55, optional #52 is the simplest UI enhancement; #37 needs its
+bounded benefit/memory fallback policy, #40 needs profiling and #41 explicit
+save policy. #38 stays behind #37; capacity/scientific/crystallography work
+retains its existing research/scope gates.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

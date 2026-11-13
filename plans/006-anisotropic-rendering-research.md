@@ -7,6 +7,14 @@ policy, scientific fixtures, dependencies, limits, and release artifacts are
 unchanged. The fields below are manufactured mathematical controls, without a
 quantum-chemistry interpretation.
 
+Later implementation note (13 November 2026): the
+[#55 visibility/depth repair](../docs/design/2026-11-13-volume-visibility.md)
+promotes the fixed expectations into normal regressions and retires the opt-in
+counterfactual from current source. This report's measurements remain the
+historical baseline. Its old probe/configuration are preserved in
+[v0.5.13](https://github.com/uvar-apps/eigenvista/tree/v0.5.13/app/research);
+the historical commands below require that separate snapshot, not fixed main.
+
 ## Disposition
 
 The tested affine grids do not justify replacing the current grid with an
@@ -183,7 +191,7 @@ their separate fixed-160-step thin-feature negative controls unchanged.
 
 ## Confirmed first-marker defect and causal control (#55)
 
-The opt-in [anisotropy.probe.ts](../app/research/anisotropy.probe.ts) deliberately
+The opt-in [anisotropy.probe.ts](https://github.com/uvar-apps/eigenvista/blob/v0.5.13/app/research/anisotropy.probe.ts) deliberately
 keeps the closed-form correctness assertion. Its four tests (two signs, two
 engines) **exit with failure** on the unchanged product. It is outside normal
 `app/tests` discovery, with no skip or expected-failure annotation.
@@ -248,10 +256,12 @@ is supported by this research alone.
 
 ## Reproduction and retained evidence
 
-From this repository, with the documented dependencies/browser installations:
+Historical reproduction: use a separate checkout of v0.5.13 under repository
+`tmp/`, with the documented dependencies/browser installations. Run these
+commands from that checkout; current-source checks are in the newer decision:
 
 ```sh
-cd /Users/ugo/projects/eigenvista
+# From the separate v0.5.13 checkout
 mkdir -p tmp
 export TMPDIR="$PWD/tmp" TMP="$PWD/tmp" TEMP="$PWD/tmp"
 unset RUSTUP_TOOLCHAIN
