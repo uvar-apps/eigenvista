@@ -23,6 +23,8 @@ unchanged. Version 0.5.14 includes the volume opacity/quality fix
 visibility and representative depth across sampling qualities. See the
 [0.5.14 release notes](docs/releases/0.5.14.md) and
 [visibility/depth decision](docs/design/2026-11-13-volume-visibility.md).
+Current source also adds [#52 sidebar reordering](docs/design/2026-11-13-sidebar-reordering.md);
+this feature is not in the published 0.5.14 tester ZIP.
 
 ## Start here
 
@@ -112,7 +114,9 @@ release. It includes source and notices under the [application license](LICENSE)
   enabled by default; disabling it forces opaque alpha and depth writes.
 - Collapse sidebar sections with their heading buttons. Controls retain their
   state, expansion is remembered in the current profile, and calculation
-  progress/Cancel stay visible while busy.
+  progress/Cancel stay visible while busy. Reorder within each sidebar by
+  dragging a dedicated handle, using its arrow keys or clicking/tapping its
+  move controls; order is saved separately from molecular documents.
 - Self-contained `.eigenvista` preview files containing quantum data, binary numeric arrays, saved meshes, isovalues, grid geometry, scientific hashes, provenance, and material settings. Reopen displays saved geometry without recomputation.
 - Native Save dialog with validated sibling-file replacement; browser file download. Native Open dialog and browser file selection.
 - Conventional single-frame XYZ and PDB import with automatic coordinate-based bonds, PDB alternate/model handling, and retained explicit connections. [Import policy and algorithm](docs/structure-imports.md).

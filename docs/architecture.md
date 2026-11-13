@@ -1,6 +1,7 @@
 # As-built architecture
 
-This describes the 0.5.14 development preview, not the complete
+This describes the 0.5.14 development source plus the subsequent #52 sidebar
+reordering change, not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
@@ -481,8 +482,17 @@ storage errors fall back to in-memory state. Accessible heading buttons control
 hidden, mounted bodies, retaining form and shader state. Layout changes never
 edit the scientific document, mark it dirty or request worker calculations.
 During scientific activity the Field rendering body is forced open and its
-disclosure disabled, without overwriting the user's preference. No section
-ordering is persisted.
+disclosure disabled, without overwriting the user's preference.
+
+[PanelSidebar](../app/src/PanelSidebar.tsx) separately manages within-pane order
+under `eigenvista:panel-order:v1`. Only complete permutations of each pane's
+known IDs are accepted from bounded storage. Stable keyed React siblings are
+sorted in actual DOM order, preserving mounted controls (including ShaderPanel's
+local state), reading order and tab order. Reordering uses a dedicated drag handle
+or keyboard/tap move controls, announces positions, and retains keyboard focus.
+Cross-pane moves are rejected. The two pane memberships stay fixed on desktop
+and mobile; no scientific data or worker registration changes. See the
+[ordering decision](design/2026-11-13-sidebar-reordering.md).
 
 Browser saving encodes through WASM and requests a download. Desktop saving
 encodes through WASM, revalidates in native Rust, asks for a destination, writes

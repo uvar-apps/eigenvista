@@ -1,8 +1,9 @@
 # Development handoff
 
-Updated 13 November 2026 for published 0.5.14, tagged source `1c37e34`.
-This post-tag documentation record identifies completed release verification
-without moving `v0.5.14`. Older dated entries retain their then-current facts.
+Updated 13 November 2026 for #52 sidebar reordering after published 0.5.14,
+tagged release source `1c37e34`. Current source adds the feature below; the
+release tag and published package retain their original contents. Older dated
+entries retain their then-current facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
@@ -10,6 +11,32 @@ The current application is **EigenVista**, version **0.5.14**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Sidebar reordering: #52
+
+The user authorized [#52](https://github.com/uvar-apps/eigenvista/issues/52) on
+`codex/sidebar-reordering`, with issue tracking and a PR merge. The contract is
+within-pane ordering, stable mounted controls and actual DOM/tab order, a
+bounded profile preference separate from documents/expansion, and drag,
+keyboard and tap controls. Busy Field rendering retains progress and Cancel.
+Read the [decision](design/2026-11-13-sidebar-reordering.md).
+
+The implementation and independent source/test/doc review pass; focused browser
+checks pass **38/38**, with zero skipped/flaky/unexpected results. Actual native
+drag events, keyboard/tap access, stable file/error nodes, decoded Save parity
+and current-request cancellation are covered. Fresh local checks pass **234 Rust
+tests**, fmt, strict workspace/all-target Clippy, production WASM/TypeScript/Vite
+and **13 packaging tests**. Expanded/reordered desktop/mobile captures have been
+inspected. The unchanged camera/direct-preview/shader tests pass **20/20**,
+including real scene pixels and wheel/button/middle-drag camera changes, giving
+**58/58 local browser checks**. Normal discovery is **446** (223 per engine,
+38 spec files). Actual final PR-head hosted results are linked from the issue;
+all four jobs must succeed before merge. Evidence and acceptance gates are under
+`tmp/2026-11-13-sidebar52/`. Preserve the original untracked review;
+no private export, dependency, compiler, scientific profile, format, version,
+tag, release or distribution changes belong to this issue. The published
+0.5.14 package predates this feature. All four actual final PR-head hosted jobs
+remain required before merge.
 
 ## Release 0.5.14
 

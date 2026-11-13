@@ -46,6 +46,7 @@ import { gridResolutions, isGridResolution } from "./resolution";
 import { Viewport } from "./Viewport";
 import { ShaderPanel, type ShaderEditorState } from "./ShaderPanel";
 import { PanelSection, usePanelExpansion } from "./PanelSection";
+import { PanelSidebar, usePanelOrder } from "./PanelSidebar";
 import {
   defaultValues,
   mergeUniformValues,
@@ -71,6 +72,7 @@ import type {
 
 export default function App() {
   const panels = usePanelExpansion();
+  const panelOrder = usePanelOrder();
   const [{ request, cancel }] = useState(createScienceClient);
   const [doc, setDocument] = useState<EigenVistaDocument | null>(null);
   const [busy, setBusyState] = useState("Opening scientific core");
@@ -694,8 +696,13 @@ export default function App() {
       )}
       {doc ? (
         <main>
-          <aside className="left-panel">
+          <PanelSidebar
+            pane="left"
+            order={panelOrder.order.left}
+            onMove={panelOrder.move}
+          >
             <PanelSection
+              key="document"
               id="document"
               title="Document"
               expanded={panels.expanded.document}
@@ -742,6 +749,7 @@ export default function App() {
               </label>
             </PanelSection>
             <PanelSection
+              key="quantum-fields"
               id="quantum-fields"
               title="Quantum fields"
               className="field-section"
@@ -804,6 +812,7 @@ export default function App() {
               {!doc.view.field && <p className="empty">No quantum fields</p>}
             </PanelSection>
             <PanelSection
+              key="provenance"
               id="provenance"
               title="Provenance"
               className="provenance"
@@ -814,7 +823,7 @@ export default function App() {
                 <p key={i}>{p}</p>
               ))}
             </PanelSection>
-          </aside>
+          </PanelSidebar>
           <div className="viewport-column">
             <Viewport
               doc={doc}
@@ -843,8 +852,13 @@ export default function App() {
               <span>{doc.surfaces.length} saved surfaces</span>
             </div>
           </div>
-          <aside className="right-panel">
+          <PanelSidebar
+            pane="right"
+            order={panelOrder.order.right}
+            onMove={panelOrder.move}
+          >
             <PanelSection
+              key="field-rendering"
               id="field-rendering"
               title="Field rendering"
               expanded={panels.expanded["field-rendering"]}
@@ -966,6 +980,7 @@ export default function App() {
               )}
             </PanelSection>
             <PanelSection
+              key="appearance"
               id="appearance"
               title="Appearance"
               expanded={panels.expanded.appearance}
@@ -1024,6 +1039,7 @@ export default function App() {
               </label>
             </PanelSection>
             <PanelSection
+              key="atom-colours"
               id="atom-colours"
               title="Atom colours"
               expanded={panels.expanded["atom-colours"]}
@@ -1075,6 +1091,7 @@ export default function App() {
                   : [];
               return (
                 <ShaderPanel
+                  key="surface-shader"
                   expanded={panels.expanded["surface-shader"]}
                   onToggle={() => panels.toggle("surface-shader")}
                   uniforms={defs}
@@ -1148,6 +1165,7 @@ export default function App() {
               );
             })()}
             <PanelSection
+              key="saved-surfaces"
               id="saved-surfaces"
               title="Saved surfaces"
               className="surfaces"
@@ -1206,7 +1224,7 @@ export default function App() {
                 </div>
               ))}
             </PanelSection>
-          </aside>
+          </PanelSidebar>
         </main>
       ) : (
         <div className="loading">

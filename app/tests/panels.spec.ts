@@ -210,7 +210,7 @@ test("collapse preserves the selected orbital, sampled preview and real control 
   await expect(page.locator(".field-row.selected")).toHaveText(selected!);
 });
 
-test("nested shader state and file errors survive collapse, and Clear keeps other preferences", async ({
+test("nested shader state and file errors survive reorder and collapse, and Clear keeps preferences", async ({
   page,
 }) => {
   await ready(page);
@@ -240,6 +240,76 @@ test("nested shader state and file errors survive collapse, and Clear keeps othe
   const alert = page.locator(".shader-log");
   await expect(alert).toBeVisible();
   const error = await alert.textContent();
+  const errorNode = await alert.elementHandle();
+  const vertexInput = page.locator('[data-shader-input="vertex"]');
+  const paramsInput = page.locator('[data-shader-input="params"]');
+  const vertexNode = await vertexInput.elementHandle();
+  const paramsNode = await paramsInput.elementHandle();
+  const filesBefore = {
+    vertex: await vertexInput.evaluate((node) =>
+      Array.from((node as HTMLInputElement).files ?? [], (file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      })),
+    ),
+    params: await paramsInput.evaluate((node) =>
+      Array.from((node as HTMLInputElement).files ?? [], (file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      })),
+    ),
+  };
+  await page
+    .getByRole("button", { name: "Reorder Surface shader", exact: true })
+    .press("Home");
+  await expect(
+    page.locator(".right-panel [data-panel-id]").first(),
+  ).toHaveAttribute("data-panel-id", "surface-shader");
+  expect(
+    await errorNode!.evaluate(
+      (node) =>
+        node.isConnected && document.querySelector(".shader-log") === node,
+    ),
+  ).toBe(true);
+  expect(
+    await vertexNode!.evaluate(
+      (node) =>
+        node.isConnected &&
+        document.querySelector('[data-shader-input="vertex"]') === node,
+    ),
+  ).toBe(true);
+  expect(
+    await paramsNode!.evaluate(
+      (node) =>
+        node.isConnected &&
+        document.querySelector('[data-shader-input="params"]') === node,
+    ),
+  ).toBe(true);
+  expect(
+    await vertexInput.evaluate((node) =>
+      Array.from((node as HTMLInputElement).files ?? [], (file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      })),
+    ),
+  ).toEqual(filesBefore.vertex);
+  expect(
+    await paramsInput.evaluate((node) =>
+      Array.from((node as HTMLInputElement).files ?? [], (file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      })),
+    ),
+  ).toEqual(filesBefore.params);
+  await expect(alert).toHaveText(error!);
   await disclosure(page, "Appearance").click();
   await disclosure(page, "Surface shader").click();
   await expect(alert).toBeHidden();
@@ -268,6 +338,9 @@ test("nested shader state and file errors survive collapse, and Clear keeps othe
     "false",
   );
   await expect(page.locator(".dirty")).toHaveCount(0);
+  await expect(
+    page.locator(".right-panel [data-panel-id]").first(),
+  ).toHaveAttribute("data-panel-id", "surface-shader");
 });
 
 test("profile preferences survive opening another document, clearing selection and reloading", async ({
@@ -381,25 +454,32 @@ for (const failure of ["denied", "full"] as const) {
   });
 }
 
-test("background orbital work opens collapsed calculation controls until real cancellation", async ({
+test("background orbital work keeps reordered calculation controls open until current-job cancellation", async ({
   page,
 }) => {
   await page.addInitScript(() => {
     const state = window as unknown as {
-      panelJob?: { progress?: number; finished?: boolean; cancelled?: number };
+      panelJob?: {
+        id: number;
+        progress?: number;
+        finished?: boolean;
+        cancelled?: number;
+        cancelledId?: number;
+      };
     };
     const post = Worker.prototype.postMessage;
     const terminate = Worker.prototype.terminate;
-    let active: Worker | undefined;
+    let active: { worker: Worker; id: number } | undefined;
     Worker.prototype.postMessage = function (
       message,
       options?: StructuredSerializeOptions | Transferable[],
     ) {
       if (message.action === "generate") {
-        active = this;
-        state.panelJob = {};
+        active = { worker: this, id: message.id };
+        state.panelJob = { id: message.id };
         this.addEventListener("message", ({ data }) => {
-          if (data.id !== message.id) return;
+          if (data.id !== message.id || state.panelJob?.id !== message.id)
+            return;
           if (data.progress === "sampling")
             state.panelJob!.progress = data.completed;
           if ("result" in data || "error" in data) {
@@ -415,7 +495,10 @@ test("background orbital work opens collapsed calculation controls until real ca
       );
     };
     Worker.prototype.terminate = function () {
-      if (this === active) state.panelJob!.cancelled = state.panelJob!.progress;
+      if (this === active?.worker && state.panelJob?.id === active.id) {
+        state.panelJob.cancelled = state.panelJob.progress;
+        state.panelJob.cancelledId = active.id;
+      }
       terminate.call(this);
     };
   });
@@ -465,15 +548,39 @@ test("background orbital work opens collapsed calculation controls until real ca
   await expect(
     page.getByLabel("Calculation progress", { exact: true }),
   ).toBeVisible();
+  const activeId = await page.evaluate(
+    () => (window as unknown as { panelJob: { id: number } }).panelJob.id,
+  );
+  await page
+    .getByRole("button", { name: "Reorder Field rendering", exact: true })
+    .press("End");
+  await expect(
+    page.locator(".right-panel [data-panel-id]").last(),
+  ).toHaveAttribute("data-panel-id", "field-rendering");
+  await expect(disclosure(page, "Field rendering")).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  );
+  await expect(disclosure(page, "Field rendering")).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Cancel", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   const checkpoint = await page.evaluate(
     () =>
       (
         window as unknown as {
-          panelJob: { cancelled?: number; finished?: boolean };
+          panelJob: {
+            id: number;
+            cancelled?: number;
+            cancelledId?: number;
+            finished?: boolean;
+          };
         }
       ).panelJob,
   );
+  expect(checkpoint.id).toBe(activeId);
+  expect(checkpoint.cancelledId).toBe(activeId);
   expect(checkpoint.finished).not.toBe(true);
   expect(checkpoint.cancelled).toBeGreaterThan(0);
   expect(checkpoint.cancelled).toBeLessThan(256);
