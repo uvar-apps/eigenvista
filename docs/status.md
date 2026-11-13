@@ -20,10 +20,10 @@ Lambert materials, molecular-scale Auto/manual radius, bounded full-physical
 GTAO targets, exact borrowed-material restoration, deferred diagnostics and
 field/final-frame isolation. Published 0.5.15 predates the feature.
 
-Fresh local verification passes **98/98 browser cases** in **186.763 seconds**,
-zero skipped/flaky/unexpected: 18 AO, 72 unchanged camera/PNG/field/transparency/
+Fresh local verification passes **100/100 browser cases** in **194.985 seconds**,
+zero skipped/flaky/unexpected: 20 AO, 72 unchanged camera/PNG/field/transparency/
 sidebar and eight unchanged palette checks, both Chromium and WebKit. Normal
-inventory is **464**, 232 per engine across 39 files. Actual instanceof Lambert
+inventory is **466**, 233 per engine across 39 files. Actual instanceof Lambert
 and exact borrowed-reference controls complement a positive legacy gloss signal.
 The new directional/hemisphere-light test uses a declared deeper pocket with
 independent cosine visibility 0.6445 and an unobstructed camera ray; its existing
@@ -32,6 +32,14 @@ ambient, field, resource and dense geometry controls are preserved. Comparing
 two positive strengths on the same Lambert materials separates AO from removal
 of highlights. Auto checks cover the small-molecule clamp, manual 50 Å and a
 new two-atom import with independently expected automatic 10 Å.
+
+The five PNG/compositor samples are retained in two independent cases: three
+full-size desktop idle/repeated/zoom captures, then a bounded interaction/
+resize/Fit/zero case. Only the latter’s test render host is constrained
+(240×128 desktop→160×160 mobile CSS at DPR 2, actual 480×256→320×320 buffers);
+real window sizes/toolbar, actions, pixel thresholds, 32-idle/240-frame guard and
+60-second per-test limit stay unchanged. The 1024-cap resource test and actual
+unmodified 1AON desktop/mobile UI checks cover their separate contracts.
 
 Positive custom/volume/opaque-cover controls, exact Off/zero PNGs and picking,
 complete decoded Save equality and zero appearance-related worker posts,
@@ -74,11 +82,18 @@ software-backend probes are historical and do not qualify this more expensive
 existing whole-ray field intersections are unchanged.
 
 Evidence: `tmp/2026-11-14-molecular-ssao/revision-local-summary.json`,
-`revision-visual/final98-report.json`, frozen source hashes, primary1AON
+`revision-visual/final100-report.json`, frozen source hashes, primary1AON
 reports/captures, the public matrix diagnostic and secondary4PJ1 images. The
 initial indirect-only candidate `a6b58f3` was visually rejected (<1/255 mean
 luma change); its hosted run also had an unchanged density-heartbeat failure.
-Neither is used as the current gate. All diagnostic failures remain recorded.
+Neither is used as the current gate. Subsequent [run 43479687125](https://github.com/uvar-apps/eigenvista/actions/runs/43479687125)
+at `04c8c919` passed Linux 232, Mac seven and WebKit 232, but Chromium 231/232
+hit the unchanged 60-second limit in the combined AO PNG case. Its first three
+1000×1042 desktop captures matched exactly; slow drag/resize left Fit pending.
+The scoped split/bound above addresses the measured test scheduling cost,
+without changing production rendering or weakening a pixel/deadline oracle.
+All diagnostic failures remain recorded; actual new-head four-job success is
+required independently.
 No release/tag/archive rebuild, scientific/profile/precision/limit change,
 dependency/compiler update, fixture change or logo change belongs to this task.
 Original review/reference/private files and historical releases are preserved.

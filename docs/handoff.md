@@ -35,14 +35,14 @@ physical buffer, capped at 1024 per edge (ideal attachment payload at most
 [decision](design/2026-11-14-molecular-ambient-occlusion.md) before changing
 ownership, bounds, pass settings or deferred nonthrowing shader diagnostics.
 
-Fresh **98/98 local browser checks** pass (186.763 seconds), with zero
-skipped/flaky/unexpected results: 18 AO, 72 unchanged renderer/camera/PNG/sidebar
+Fresh **100/100 local browser checks** pass (194.985 seconds), with zero
+skipped/flaky/unexpected results: 20 AO, 72 unchanged renderer/camera/PNG/sidebar
 and eight unchanged palette cases. They enforce actual Lambert instances,
 positive legacy-gloss controls, independent recessed-versus-exposed geometry,
 exact original-reference/Off/zero restoration, field presence/isolation,
 physical PNG/compositor parity, Auto/manual/recompute behavior, Save/worker
 isolation, target lifecycle and labelled injected FBO/receiver-link recovery.
-Normal inventory is **464** (232 per engine, 39 files). Production
+Normal inventory is **466** (233 per engine, 39 files). Production
 WASM/TypeScript/Vite, final strict TypeScript/Prettier and 13 packaging tests
 pass. Earlier in this feature, 234 default Rust tests, fmt and strict Clippy
 passed; Rust sources, fixtures, locks and workflow budgets remain unchanged.
@@ -62,8 +62,18 @@ precondition. Keep their original failed reports; no test tolerance was relaxed.
 The unchanged 65,963-atom 4PJ1 structure remains secondary current visual proof.
 No FPS, total GPU-memory or all-device performance qualification is claimed.
 
+PNG automation separates three full-size desktop captures from a bounded
+interaction/resize case. The latter changes only the test render host at DPR 2
+(240×128→160×160 CSS; actual buffers 480×256→320×320), retaining the real
+window/toolbar, all five captures, camera/resize/Fit/zero actions and every
+pixel/idle/60-second deadline. The separate 1024-cap test and unmodified actual
+1AON UI qualification remain. Run 43479687125 at `04c8c919` passed Linux/Mac/
+WebKit but timed out in the formerly combined Chromium capture case (231/232);
+three completed large captures were exact. Preserve that diagnostic; it does
+not qualify the revised test head.
+
 Evidence: `tmp/2026-11-14-molecular-ssao/revision-local-summary.json` and
-`revision-visual/` (final98 report/source hashes, primary1AON captures, public
+`revision-visual/` (final100 report/source hashes, primary1AON captures, public
 GPU matrix observations and secondary4PJ1). The old head's CI had three green
 jobs and one unchanged density-heartbeat failure; it is historical, not the new
 head's gate. Preserve user review/reference files, private exports and earlier

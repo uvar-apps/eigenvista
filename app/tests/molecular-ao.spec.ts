@@ -286,7 +286,7 @@ async function save(page: Page, file: string) {
   );
 }
 
-async function capture(page: Page, file: string) {
+async function settleAoScene(page: Page) {
   await settleScene(page);
   // Contact AO can reveal residual OrbitControls motion below its per-update
   // change threshold. Require a longer real idle interval after the drag/fit
@@ -304,6 +304,10 @@ async function capture(page: Page, file: string) {
     }
     throw new Error("AO capture did not remain idle for32 animation frames");
   });
+}
+
+async function capture(page: Page, file: string) {
+  await settleAoScene(page);
   const pending = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export image", exact: true }).click();
   await (await pending).saveAs(file);
@@ -511,7 +515,7 @@ test("the real AO controls are session-only and preserve clean documents and sci
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
-test("AO PNGs match the actual current compositor after camera, strength and HiDPI resize changes", async ({
+test("AO desktop PNGs match the actual current compositor when idle, repeated and zoomed at HiDPI", async ({
   browser,
 }, info) => {
   const context = await browser.newContext({
@@ -529,6 +533,70 @@ test("AO PNGs match the actual current compositor after camera, strength and HiD
     await page.getByRole("button", { name: "Zoom in", exact: true }).click();
     const zoomed = await capture(page, info.outputPath("ao-zoomed.png"));
     expect(zoomed.bytes).not.toEqual(first.bytes);
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await info.attach("png-compositor-parity.json", {
+      body: JSON.stringify([
+        first.difference,
+        repeated.difference,
+        zoomed.difference,
+      ]),
+      contentType: "application/json",
+    });
+  } finally {
+    await context.close();
+  }
+});
+
+test("bounded AO PNGs match the actual current compositor after orbit, HiDPI resize and strength changes", async ({
+  browser,
+}, info) => {
+  const context = await browser.newContext({
+    viewport: { width: 900, height: 650 },
+    deviceScaleFactor: 2,
+    baseURL: "http://127.0.0.1:5178",
+  });
+  try {
+    const page = await context.newPage();
+    await ready(page);
+    // Bound only this interaction diagnostic's rendering work on software
+    // GPUs. The real toolbar/layout remains full-sized; the separate desktop
+    // case keeps all three original full-resolution PNG samples.
+    await page.addStyleTag({
+      content: `
+        .scene[data-testid="viewport"] {
+          right: auto;
+          bottom: auto;
+          width: 240px;
+          height: 128px;
+        }
+        @media (max-width: 720px) {
+          .scene[data-testid="viewport"] {
+            width: 160px;
+            height: 160px;
+          }
+        }
+      `,
+    });
+    await expect
+      .poll(() =>
+        page
+          .getByLabel("Molecular scene", { exact: true })
+          .evaluate((node) => ({
+            width: (node as HTMLCanvasElement).width,
+            height: (node as HTMLCanvasElement).height,
+          })),
+      )
+      .toEqual({ width: 480, height: 256 });
+    await page.getByLabel("Ambient occlusion", { exact: true }).check();
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await settleAoScene(page);
+    const beforeResize = await page
+      .getByLabel("Molecular scene", { exact: true })
+      .evaluate((node) => ({
+        width: (node as HTMLCanvasElement).width,
+        height: (node as HTMLCanvasElement).height,
+      }));
+    expect(beforeResize).toEqual({ width: 480, height: 256 });
     const canvas = (await page
       .getByLabel("Molecular scene", { exact: true })
       .boundingBox())!;
@@ -543,24 +611,20 @@ test("AO PNGs match the actual current compositor after camera, strength and HiD
       { steps: 3 },
     );
     await page.mouse.up();
-    // 52dvh gives an integral CSS drawing height at850. Fractional844px
-    // compositor resampling is retained as a separate manual diagnostic.
+    // Keep the original responsive browser layout while the fixture's render
+    // host changes aspect and size through the real viewport resize.
     await page.setViewportSize({ width: 390, height: 850 });
     await page.getByRole("button", { name: "Fit scene", exact: true }).click();
     const resized = await capture(page, info.outputPath("ao-mobile-hidpi.png"));
-    expect(resized.difference.width).toBeLessThan(first.difference.width);
+    expect(resized.difference).toMatchObject({ width: 320, height: 320 });
+    expect(resized.difference.width).toBeLessThan(beforeResize.width);
     await page.getByLabel("AO strength", { exact: true }).press("Home");
     const zero = await capture(page, info.outputPath("ao-zero-strength.png"));
+    expect(zero.difference).toMatchObject({ width: 320, height: 320 });
     expect(zero.bytes).not.toEqual(resized.bytes);
     await expect(page.getByRole("alert")).toHaveCount(0);
     await info.attach("png-compositor-parity.json", {
-      body: JSON.stringify([
-        first.difference,
-        repeated.difference,
-        zoomed.difference,
-        resized.difference,
-        zero.difference,
-      ]),
+      body: JSON.stringify([resized.difference, zero.difference]),
       contentType: "application/json",
     });
     await page.screenshot({

@@ -28,6 +28,17 @@ that rejected head. Fresh visual qualification and all four actual job results
 at the new final head are required; completed evidence and unresolved gaps belong in
 [status](../status.md) and the living handoff.
 
+The subsequent [Verify run 43479687125](https://github.com/uvar-apps/eigenvista/actions/runs/43479687125)
+at head `04c8c9194c129ae2fa9b1993145b9068d699c63c` also remains historical:
+Linux 232, Mac 7 and WebKit 232 passed, while Chromium finished 231 passed/1 failed.
+Its new combined AO PNG case exceeded the existing 60-second per-test limit
+during the zoom/orbit/resize sequence; this was not the earlier density heartbeat
+failure or the 35-minute suite limit. The three completed full-size desktop
+captures matched the compositor exactly (maximum 0, mean 0 at 1000×1042 physical
+pixels). The trace showed slow drag/release/resize operations and a pending
+Fit click, rather than a reported pixel mismatch. This head did not satisfy the
+four-job merge gate.
+
 ## Scope and rendering contract
 
 This optional display feature targets contact and broad fold/cavity cues for
@@ -123,6 +134,34 @@ field/depth/color preservation, PNG/camera, allocation/disposal and labelled
 injected faults belong in the normal bounded Chromium/WebKit suite. Removing a
 highlight alone must not count as AO localization: contact contrast requires
 its own independent control.
+
+### Bounded PNG verification
+
+The combined PNG workflow is split into two independently bounded tests.
+Case A retains the original three full-size desktop samples at DPR 2: idle,
+repeated and zoomed. Case B retains the real browser window, toolbar and actions,
+including zoom, the three-step orbit gesture, responsive window resize, Fit and
+zero strength. Test-only CSS bounds only its real `.scene` render host from
+240×128 to 160×160 CSS pixels at DPR 2. The test asserts actual canvas sizes of
+480×256 before resize and 320×320 afterward, then measures the mobile/zero
+samples through the unchanged capture helper.
+
+Together the cases retain all five original PNG parity samples, exact repeated
+identity, camera-change and zero-strength comparisons, and the existing pixel
+oracles. The full browser window and controls are not replaced with mocks.
+The separate allocation/resource case retains real 1024-cap coverage. These
+test dimensions do not change production resolution, AO quality, or actual-app
+1AON visual/performance qualification.
+
+One combined local run of the split completed 100/100 cases in 194.985 seconds,
+with zero skipped, flaky or unexpected cases. Production and helper hashes were
+unchanged; only the spec's scheduling/render-host bounds changed. The normal
+inventory is now 466 tests across both engines: 233 per engine, including 10 AO
+cases per engine. The existing 60-second per-test, 35-minute suite-step,
+60-minute job and one-worker limits remain unchanged. These local results do
+not replace all four actual CI job results at the new final PR head.
+
+### Real-file qualification and references
 
 The user's current primary real-file acceptance input is the existing
 [tracked 1AON mmCIF fixture](../../fixtures/cif/1AON.cif), SHA256

@@ -60,6 +60,18 @@ documents; older `.molekel` preview documents remain readable. Check
   #59/PR #60; all four jobs must pass before merge, independently of historical
   results.
 
+  AO PNG verification has two bounded cases: A retains all three full-size
+  desktop parity captures; B keeps the real browser window, toolbar, zoom/orbit,
+  responsive resize, Fit and strength actions, but bounds only the real `.scene`
+  render host to 240×128 → 160×160 CSS at DPR 2 (480×256 → 320×320 physical).
+  Preserve all five original PNG samples and every pixel/identity oracle.
+  Separate resource checks still exercise the 1024 cap, and actual-app tracked
+  1AON remains the primary visual qualification. The normal inventory is
+  466 tests, 233 per engine, including 10 AO cases per engine. Keep the existing
+  60-second per-test, 35-minute suite-step and 60-minute job limits with one
+  worker. The failed combined case at head `04c8c919` is historical evidence;
+  the split requires all four actual jobs at its new final head before merge.
+
 - Version 0.5.15 includes #52 sidebar reordering within each existing pane.
   Dedicated handles support native drag, keyboard moves and tap controls;
   bounded profile order stays separate from expansion and molecular documents.
