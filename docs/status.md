@@ -8,10 +8,33 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.15
+
+Release prepared 13 November 2026 from main `e471cbd` (merged PR #58).
+Own version metadata and current user/agent guides move to 0.5.15. The release
+includes [#52 sidebar reordering](design/2026-11-13-sidebar-reordering.md);
+[notes](releases/0.5.15.md) describe within-pane drag, keyboard/tap controls,
+profile persistence and retained control/calculation state. Dependencies,
+compiler, scientific data/profiles/precision/limits and icon/logo are unchanged
+by the version bump. Older release and repair entries remain historical.
+
+The merged-feature baseline passed all four actual jobs at `0473c1b` in
+[run 43440036206](https://github.com/uvar-apps/eigenvista/actions/runs/43440036206):
+Linux 232 Rust tests/fmt/strict Clippy, macOS seven desktop tests, Chromium 223
+and WebKit 223, plus 13 packaging tests and production WASM/frontend builds
+per browser job. Release-head verification, rebuilt app/ZIP and complete eligible
+source audit, signatures, tag identity and published/downloaded asset hashes are
+separate pending gates; record their completed evidence here before the release
+task finishes. The
+[planned GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15)
+is not yet evidence of publication or verified artifacts.
+
 ## Sidebar reordering: 13 November 2026
 
-[#52](https://github.com/uvar-apps/eigenvista/issues/52) is implemented on
-`codex/sidebar-reordering` after release 0.5.14. The
+[#52](https://github.com/uvar-apps/eigenvista/issues/52) was implemented on
+`codex/sidebar-reordering` after release 0.5.14 and merged through
+[PR #58](https://github.com/uvar-apps/eigenvista/pull/58) as main `e471cbd`.
+The
 [decision](design/2026-11-13-sidebar-reordering.md) defines within-pane order,
 profile persistence, stable mounted controls and drag/keyboard/tap access.
 
@@ -30,13 +53,15 @@ source/test/doc review is clear. Expanded and reordered desktop/mobile captures
 are inspected. The unchanged camera/direct-preview/shader regressions pass
 **20/20**, including actual pixels and wheel/button/middle-drag camera changes:
 **58/58 local browser checks** overall. Normal discovery is **446** (223 per
-engine, 38 files). All four actual final PR-head hosted jobs are required before
-merge; their results are linked from the tracking issue. Local evidence is
+engine, 38 files). All four actual reviewed-head jobs passed at `0473c1b` in
+[run 43440036206](https://github.com/uvar-apps/eigenvista/actions/runs/43440036206):
+Linux 232/fmt/Clippy, macOS seven, Chromium 223 and WebKit 223, plus packaging
+13/builds. #52 is closed through the merge. Local evidence is
 `tmp/2026-11-13-sidebar52/`.
 
-No release/version, dependency, toolchain, format, scientific or logo changes are
-part of this issue. The published 0.5.14 ZIP predates this feature. The original
-untracked review and private exports are preserved.
+No release/version, dependency, toolchain, format, scientific or logo changes
+were part of the implementation issue. The separate 0.5.15 release includes
+the feature. The original untracked review and private exports are preserved.
 
 ## Version 0.5.14
 

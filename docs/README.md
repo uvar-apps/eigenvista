@@ -5,7 +5,7 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
-Current source version: **0.5.14**, including live orbital/density calculation
+Current source version: **0.5.15**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections
@@ -16,7 +16,7 @@ the native runtime badge is platform-neutral.
 Sidebar headings collapse their controls independently, retain their settings,
 and remember expansion and within-pane order in the current application profile.
 Dedicated handles support dragging, keyboard moves and tap-accessible controls.
-This #52 source feature follows the published 0.5.14 ZIP and requires a source build.
+Version 0.5.15 includes this #52 feature; check status for release verification.
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.
@@ -32,7 +32,7 @@ limits of opening new saves in older builds.
 | Need | Read |
 | --- | --- |
 | Restart from a fresh coding-agent session without the old chat | [Session handoff](session-handoff-2026-10-21_173143-AWST.md) and [ready-to-use prompt](restart-prompt-2026-10-21_173143-AWST.md) |
-| Changes in the current release and known limitations | [0.5.14 release notes](releases/0.5.14.md) |
+| Changes in the current release and known limitations | [0.5.15 release notes](releases/0.5.15.md) |
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |

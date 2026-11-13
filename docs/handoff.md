@@ -1,21 +1,45 @@
 # Development handoff
 
-Updated 13 November 2026 for #52 sidebar reordering after published 0.5.14,
-tagged release source `1c37e34`. Current source adds the feature below; the
-release tag and published package retain their original contents. Older dated
-entries retain their then-current facts.
+Updated 13 November 2026 for release 0.5.15 preparation from main `e471cbd`
+(merged PR #58). This release includes #52 sidebar reordering. Release-source,
+package, tag and publication verification remain separate gates recorded below.
+Older dated entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.14**, in the standalone
+The current application is **EigenVista**, version **0.5.15**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
-## Sidebar reordering: #52
+## Release 0.5.15
+
+The user authorized version 0.5.15, commit, annotated tag, push and a GitHub
+prerelease with rebuilt normal redistributables. The release includes the merged
+[#52 sidebar reordering](design/2026-11-13-sidebar-reordering.md). Read the
+[release notes](releases/0.5.15.md) and
+[release record](status.md#version-0515) for behavior, limits and verification.
+The [planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15)
+will hold the verified ZIP, checksum and build metadata after publication.
+
+The merged-feature baseline passed all four actual jobs at `0473c1b` in
+[run 43440036206](https://github.com/uvar-apps/eigenvista/actions/runs/43440036206):
+Linux 232 Rust tests/fmt/Clippy, macOS seven desktop tests, Chromium 223 and
+WebKit 223, with 13 packaging tests and production builds per browser job.
+Those results qualify the baseline, not a later release binary. Fresh
+release-head checks, clean committed source/package identity, extracted source/
+signature/native/WASM audit, tag identity and published/downloaded asset hashes
+are pending release gates; record their completed evidence in status.
+Preserve the original untracked review, private exports and older release
+artifacts. Tester signing stays ad-hoc; physical native/clean-Mac/HiDPI/cross-OS
+installation remains separately unqualified.
+
+## Sidebar reordering before the 0.5.15 release
 
 The user authorized [#52](https://github.com/uvar-apps/eigenvista/issues/52) on
-`codex/sidebar-reordering`, with issue tracking and a PR merge. The contract is
+`codex/sidebar-reordering`, merged through
+[PR #58](https://github.com/uvar-apps/eigenvista/pull/58) as main `e471cbd`.
+The contract is
 within-pane ordering, stable mounted controls and actual DOM/tab order, a
 bounded profile preference separate from documents/expansion, and drag,
 keyboard and tap controls. Busy Field rendering retains progress and Cancel.
@@ -30,15 +54,15 @@ and **13 packaging tests**. Expanded/reordered desktop/mobile captures have been
 inspected. The unchanged camera/direct-preview/shader tests pass **20/20**,
 including real scene pixels and wheel/button/middle-drag camera changes, giving
 **58/58 local browser checks**. Normal discovery is **446** (223 per engine,
-38 spec files). Actual final PR-head hosted results are linked from the issue;
-all four jobs must succeed before merge. Evidence and acceptance gates are under
-`tmp/2026-11-13-sidebar52/`. Preserve the original untracked review;
-no private export, dependency, compiler, scientific profile, format, version,
-tag, release or distribution changes belong to this issue. The published
-0.5.14 package predates this feature. All four actual final PR-head hosted jobs
-remain required before merge.
+38 spec files). All four actual jobs passed at reviewed head `0473c1b` in
+[run 43440036206](https://github.com/uvar-apps/eigenvista/actions/runs/43440036206):
+Linux 232/fmt/Clippy, macOS seven, Chromium 223 and WebKit 223, with packaging
+13/builds. #52 is closed through the merge. Evidence and acceptance gates remain
+under `tmp/2026-11-13-sidebar52/`. No private export, dependency, compiler,
+scientific profile, format, version, tag or distribution changed in that repair
+batch; the separate 0.5.15 release preparation is above.
 
-## Release 0.5.14
+## Historical release 0.5.14
 
 [Published GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.14), annotated tag `v0.5.14`,
 source `1c37e34f7533e025c02342fbe89a6b887de19fe5`. This release includes the merged

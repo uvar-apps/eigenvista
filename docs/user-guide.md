@@ -10,12 +10,11 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.5.14, a development preview. Scientific calculations and
+This guide describes version 0.5.15, a development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
-The sidebar reordering described below is a subsequent source change (#52),
-not yet included in the published 0.5.14 tester ZIP.
+Version 0.5.15 includes the sidebar reordering described below (#52).
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
@@ -396,7 +395,7 @@ The choice survives mode switches, is hidden in mesh mode, and is not saved in
 `.eigenvista`. Fine can reduce missed crossings between display samples, but
 cannot recover features absent from the grid or guarantee detection of tangencies.
 
-Version 0.5.14 determines volume depth from accumulated visible opacity; its
+Since version 0.5.14, volume depth comes from accumulated visible opacity; its
 visibility threshold is unchanged. Opaque objects test that representative
 depth. Volume color still integrates the whole ray, so intersections with atoms
 or meshes inside a volume are approximate and can include color from behind

@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version 0.5.14 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
+**Status:** version 0.5.15 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
 
 Current source adds native close/quit protection, correct Molden limits, hosted
 verification, and reduced Molden-import/surface-publication work (#30–#34).
@@ -23,8 +23,9 @@ unchanged. Version 0.5.14 includes the volume opacity/quality fix
 visibility and representative depth across sampling qualities. See the
 [0.5.14 release notes](docs/releases/0.5.14.md) and
 [visibility/depth decision](docs/design/2026-11-13-volume-visibility.md).
-Current source also adds [#52 sidebar reordering](docs/design/2026-11-13-sidebar-reordering.md);
-this feature is not in the published 0.5.14 tester ZIP.
+Version 0.5.15 adds [#52 sidebar reordering](docs/design/2026-11-13-sidebar-reordering.md)
+with native drag, keyboard and tap controls, remembered profile order and
+preserved control/calculation state. See the [0.5.15 release notes](docs/releases/0.5.15.md).
 
 ## Start here
 
@@ -78,8 +79,9 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-Download the current [0.5.14 tester release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.14)
-for the ZIP, checksum, and build metadata.
+The [0.5.15 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15)
+is the download location for its ZIP, checksum and build metadata; check
+[status](docs/status.md#version-0515) for publication and verification state.
 The ZIP is a development build for Apple Silicon Macs, not an Apple-notarized
 release. It includes source and notices under the [application license](LICENSE).
 

@@ -39,6 +39,14 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Version 0.5.15 includes #52 sidebar reordering within each existing pane.
+  Dedicated handles support native drag, keyboard moves and tap controls;
+  bounded profile order stays separate from expansion and molecular documents.
+  Stable keyed DOM order retains control/shader state, progress and Cancel.
+  Read [release notes](docs/releases/0.5.15.md), current handoff and status for
+  release preparation, completed verification and artifact evidence. Scientific
+  data, file profiles, limits, precision, dependencies, compiler and icon/logo
+  are unchanged by this release bump.
 - Version 0.5.14 ships #55: volume visibility and the representative depth share
   the existing accumulated-alpha cutoff, with interpolation inside its crossing
   segment. Normal independent visibility/depth/prefix/cutoff tests cover both
