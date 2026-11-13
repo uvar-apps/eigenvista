@@ -1,9 +1,9 @@
 # Development handoff
 
-Updated 13 November 2026 for release 0.5.14, based on main `c30a916`
-(merged PR #57). This release includes #55 in the rebuilt distribution.
-Older dated entries retain their then-current source, version and artifact
-facts. Start with [root AGENTS.md](../AGENTS.md), then this document,
+Updated 13 November 2026 for published 0.5.14, tagged source `1c37e34`.
+This post-tag documentation record identifies completed release verification
+without moving `v0.5.14`. Older dated entries retain their then-current facts.
+Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
 The current application is **EigenVista**, version **0.5.14**, in the standalone
@@ -13,22 +13,38 @@ code. The icon and logo are unchanged.
 
 ## Release 0.5.14
 
-The user authorized version 0.5.14, commit, annotated tag, push and GitHub release
-with notes and rebuilt normal redistributables. This release ships the merged
-[#55 fix](design/2026-11-13-volume-visibility.md); the older 0.5.13 package remains
-historical. [Release notes](releases/0.5.14.md) and the
-[current release record](status.md#version-0514) describe the shipped behavior,
-whole-ray overlap limitation and exact completed artifact/verification evidence.
+[Published GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.14), annotated tag `v0.5.14`,
+source `1c37e34f7533e025c02342fbe89a6b887de19fe5`. This release includes the merged
+[#55 fix](design/2026-11-13-volume-visibility.md) in the rebuilt distribution.
+[Release notes](releases/0.5.14.md) and the
+[current release record](status.md#version-0514) describe behavior, limitations
+and the exact completed artifact/verification evidence.
 
-The merged-fix baseline passes all four actual jobs at `6f1aefa` in
-[run 43412554187](https://github.com/uvar-apps/eigenvista/actions/runs/43412554187):
-Linux 232/fmt/Clippy, macOS seven, Chromium 214 and WebKit 214, with packaging
-13/builds. Those checks describe the baseline, not a later release binary.
-Release-source checks, clean package provenance, extraction/source audit and
-published/downloaded asset hashes are separate gates, recorded in status.
-Preserve original untracked review/private exports and old release artifacts.
-Tester signing remains ad-hoc; physical native/clean-Mac/HiDPI/cross-OS
-installation remain separate qualification gates.
+All four actual release-head jobs pass in
+[run 43429204710](https://github.com/uvar-apps/eigenvista/actions/runs/43429204710):
+Linux 232 Rust tests/fmt/Clippy, macOS seven desktop tests, Chromium 214 and
+WebKit 214, with 13 packaging tests and production builds per browser job.
+Fresh local verification passes 241 Rust tests, 13 packaging tests, fmt/strict
+Clippy and optimized app/CLI plus production WASM/frontend. Independent audit
+verifies 362 source blobs/modes, 59 payload files, signatures, BinaryCIF/native/
+WASM parity and byte-identical fixed shader/JS and WASM embedded in the actual
+extracted Mac executable. The old 0.5.13 app fails the fixed-shader control.
+Remote tag, exact notes and all three published/downloaded asset hashes match.
+
+ZIP: `artifacts/distributions/EigenVista-0.5.14-apple-silicon-20261113T125509Z-1c37e34.zip`
+(45,597,944 bytes), with checksum and build metadata sidecars.
+SHA-256: `398591c604e70628f15229e82a585b261c677a3d8922424e3ffd4257fc0bad93`.
+Source is clean, signing ad-hoc, without notarization. Rebuilt release app:
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+Evidence: `tmp/2026-11-13-release-0.5.14/`; staging
+`tmp/eigenvista-package-jcaTVc`. Preserve original untracked review, private
+exports and older releases. No persistent Git exclusion was changed.
+
+#55 is closed and ships in 0.5.14. Optional #52, #37's bounded memory/fallback
+policy, #40 profiling and #41 save-policy work are next candidates; #38 stays
+behind #37. Whole-ray opaque intersections remain approximate, and physical
+native/clean-Mac/HiDPI/cross-OS installation remain separate qualification gates.
+Timestamped restart files stay historical snapshots.
 
 ## Volume visibility repair before the 0.5.14 release
 

@@ -10,20 +10,69 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Version 0.5.14
 
-Release prepared 13 November 2026 from main `c30a916` (merged PR #57).
-All eleven own version values across Rust workspace/lock, npm metadata/lock
-and Tauri, plus current user/agent guides, agree on 0.5.14. The release ships
-[#55](design/2026-11-13-volume-visibility.md); [notes](releases/0.5.14.md) describe
-visibility/depth behavior and the retained whole-ray overlap limitation.
-Dependencies, compiler, scientific data/profiles/precision/limits and logo are
-unchanged by this version bump. Older release/repair entries remain historical.
+Released 13 November 2026 from merged main `c30a916` (PR #57). This release
+ships the [#55 volume visibility/depth fix](design/2026-11-13-volume-visibility.md).
+All eleven own version values and current guides agree on 0.5.14. External
+dependencies, compiler, scientific data/profiles/precision/limits and icon/logo
+are unchanged by the version bump. [Release notes](releases/0.5.14.md) describe
+the repaired behavior and retained whole-ray opaque-intersection limitation.
 
-The merged-fix baseline passes all four actual jobs at `6f1aefa` in
-[run 43412554187](https://github.com/uvar-apps/eigenvista/actions/runs/43412554187):
-Linux 232/fmt/Clippy, macOS seven, Chromium 214, WebKit 214, packaging 13 and
-production builds. Release-head verification and rebuilt artifact/source/
-publication identities are separate gates; their completed evidence belongs
-in this release record before the release task finishes.
+Release source `1c37e34f7533e025c02342fbe89a6b887de19fe5` and annotated `v0.5.14` are pushed. The
+[GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.14) is published with all three verified assets.
+Remote tag identity, exact release notes, asset names/sizes/digests and all
+three independently downloaded asset hashes match the verified local outputs.
+This post-tag documentation follow-up records completion without moving the tag.
+
+All four actual release-head jobs pass in
+[run 43429204710](https://github.com/uvar-apps/eigenvista/actions/runs/43429204710):
+Linux **232 Rust tests**, Rustfmt and strict workspace/all-target Clippy;
+macOS **seven desktop tests**; Chromium **214/214** (19.7 minutes) and WebKit
+**214/214** (13.3 minutes), with all 26 new and 13 affine cases per engine,
+**13 packaging tests** and actual production WASM/frontend builds in each
+browser job. No skipped/flaky/expected failures. Fresh local release checks
+pass **241 Rust tests** (234 default members plus seven desktop), Rustfmt,
+strict Clippy, 13 packaging tests and optimized app/CLI plus production
+WASM/TypeScript/Vite builds. The prior PR #57 results remain separate baseline
+evidence, not a substitute for this exact release-head run.
+
+ZIP: `artifacts/distributions/EigenVista-0.5.14-apple-silicon-20261113T125509Z-1c37e34.zip`
+(**45,597,944 bytes**). SHA-256:
+`398591c604e70628f15229e82a585b261c677a3d8922424e3ffd4257fc0bad93`.
+The `.zip.sha256` and same-stem `.json` are alongside it. Build metadata records
+version 0.5.14, clean source `1c37e34`, arm64, minimum macOS 13/build host 27.0,
+Rust 1.99.0, Node 26, wasm-bindgen 0.2.108, cargo-about 0.9.1, ad-hoc signing
+and no notarization. Rebuilt app:
+`target/aarch64-apple-darwin/release/bundle/macos/EigenVista.app`.
+
+The packager verifies source stability, architecture/system runtime links,
+strict app/CLI signatures, extracted bytes/modes, PDB/XYZ/Molden/cube examples,
+signed cube meshes and converter/native/WASM roundtrips. Independent audit
+matches **362/362** complete eligible source blobs and Git modes, all **59**
+payload files, original-review/private-export exclusion, extracted versions/
+signatures and actual raw/gzip/policy BinaryCIF full-document release-WASM and
+native-reopen parity (327 atoms, 337 bonds, three disulfides; policy four atoms,
+one bond).
+
+The actual extracted Mac executable embeds stored Brotli assets whose decoded
+bytes exactly match `assets/index-W06H4doM.js` and the fresh release WASM.
+Its shader fragment matches archived/current source exactly, contains the
+cumulative visibility marker and lacks the old per-segment gate. The old
+0.5.13 app correctly fails this new identity control. Fragment SHA-256:
+`daf366852f9426043ac24d87a5ed6944bb9aac54bf65bb63f0c96530a6c74bb4`.
+Embedded WASM SHA-256:
+`1e9cce01d2fb019952ee99759c5fe2f4f229b7c784471891bd875df8b81b9462`.
+This is byte-level embedding evidence, separate from GPU tests and native GUI
+or clean-Mac installation qualification.
+
+Evidence: `tmp/2026-11-13-release-0.5.14/`, including `audit/REPORT.json`,
+`audit/embedded-negative-control.json`, exact-head CI raw logs, local checks and
+published/downloaded asset proof. Staging remains at
+`tmp/eigenvista-package-jcaTVc`. The original review is untracked and
+byte-identical; its process-only source exclusion changes no persistent Git
+configuration. Previous release tags/archives and private exports are preserved.
+Physical native interactions, clean-Mac/HiDPI installation, Linux/Windows
+packages, general nonlinear accuracy and scene-depth-clipped compositing remain
+separate gates; this development preview does not establish v1 completion.
 
 ## Volume visibility and depth: 13 November 2026
 
