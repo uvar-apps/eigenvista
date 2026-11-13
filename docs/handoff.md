@@ -1,18 +1,36 @@
 # Development handoff
 
-Updated 13 November 2026 for the #55 source fix on
-`codex/fix-volume-visibility`, based on main `5114cdc`. Source version remains
-0.5.13; the published tag/ZIP at `8c09db2` predates the repair and is unchanged.
-Older dated entries retain their then-current facts. Start with
-[root AGENTS.md](../AGENTS.md), then this document,
+Updated 13 November 2026 for release 0.5.14, based on main `c30a916`
+(merged PR #57). This release includes #55 in the rebuilt distribution.
+Older dated entries retain their then-current source, version and artifact
+facts. Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.13**, in the standalone
+The current application is **EigenVista**, version **0.5.14**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
-## Current source: volume visibility and depth
+## Release 0.5.14
+
+The user authorized version 0.5.14, commit, annotated tag, push and GitHub release
+with notes and rebuilt normal redistributables. This release ships the merged
+[#55 fix](design/2026-11-13-volume-visibility.md); the older 0.5.13 package remains
+historical. [Release notes](releases/0.5.14.md) and the
+[current release record](status.md#version-0514) describe the shipped behavior,
+whole-ray overlap limitation and exact completed artifact/verification evidence.
+
+The merged-fix baseline passes all four actual jobs at `6f1aefa` in
+[run 43412554187](https://github.com/uvar-apps/eigenvista/actions/runs/43412554187):
+Linux 232/fmt/Clippy, macOS seven, Chromium 214 and WebKit 214, with packaging
+13/builds. Those checks describe the baseline, not a later release binary.
+Release-source checks, clean package provenance, extraction/source audit and
+published/downloaded asset hashes are separate gates, recorded in status.
+Preserve original untracked review/private exports and old release artifacts.
+Tester signing remains ad-hoc; physical native/clean-Mac/HiDPI/cross-OS
+installation remain separate qualification gates.
+
+## Volume visibility repair before the 0.5.14 release
 
 [#55](https://github.com/uvar-apps/eigenvista/issues/55) fixes the disappearance
 of volumes at finer preview qualities. A shared aggregate-alpha cutoff 0.005
@@ -49,7 +67,7 @@ benefit/memory raw-fallback policy, #40 profiling and #41 save-policy decisions;
 #38 stays behind #37. Other scientific/capacity/crystallography issues retain
 their existing research/scope gates.
 
-## Release 0.5.13
+## Historical release 0.5.13
 
 [Published GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.13), annotated tag `v0.5.13`,
 source `8c09db29981023a95f855a41a079e831dc84a9ff`. [Release notes](releases/0.5.13.md) collect native exit protection,

@@ -4,6 +4,10 @@ Issue: [#55](https://github.com/uvar-apps/eigenvista/issues/55).
 Date: 13 November 2026. Baseline: main `5114cdc`, EigenVista 0.5.13.
 Implementation branch: `codex/fix-volume-visibility`.
 
+Later release note: version 0.5.14 includes this repair. The baseline and
+original repair-batch scope below remain historical; see the
+[release record](../status.md#version-0514) and [notes](../releases/0.5.14.md).
+
 ## Defect and selected contract
 
 The old shader set its first volume-depth marker only when one segment's alpha

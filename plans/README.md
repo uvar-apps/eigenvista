@@ -18,7 +18,8 @@ benefit/budget fallback policy and later implementation.
 The subsequent [#55 production fix](../docs/design/2026-11-13-volume-visibility.md)
 uses accumulated visibility for the volume depth marker and promotes the fixed
 research expectations into normal regressions. It changes no scientific grid
-policy; the published 0.5.13 tag/ZIP predates that source fix.
+policy; version 0.5.14 includes the repair, with release evidence in
+[status](../docs/status.md#version-0514).
 
 Read the [findings and reproducible evidence](2026-11-12-research.md) first.
 Issue comments hold the published research disposition. Earlier priorities remain historical. The 13 November rendering research

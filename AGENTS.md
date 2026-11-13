@@ -39,13 +39,20 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Version 0.5.14 ships #55: volume visibility and the representative depth share
+  the existing accumulated-alpha cutoff, with interpolation inside its crossing
+  segment. Normal independent visibility/depth/prefix/cutoff tests cover both
+  engines. Read [release notes](docs/releases/0.5.14.md), current handoff and
+  status for artifact/verification evidence. Whole-ray opaque intersections
+  remain approximate; scientific data, profiles, limits, precision, dependencies,
+  compiler and icon/logo are preserved.
 - Version 0.5.13 collects the native exit protection, corrected Molden limits,
   import/publication and typed-encoding improvements, authentic native-file
   compatibility fixtures, Vite maintenance, collapsible sidebar and research
   since 0.5.12. Read [release notes](docs/releases/0.5.13.md), current handoff and
-  status for verification/artifacts. Current source fixes #55 after that release;
-  the published 0.5.13 tag/ZIP retains the old volume visibility bug. Mesh
-  compaction and isotropic resampling are not enabled. Rust 1.99.0,
+  status for verification/artifacts. The historical 0.5.13 package lacks #55;
+  version 0.5.14 includes that repair. Mesh compaction and isotropic resampling
+  are not enabled. Rust 1.99.0,
   dependency locks, scientific profiles/precision and icon/logo are preserved.
 - Version 0.5.12 collects the five repair batches after 0.5.11: validated native
   parameter export/shader controls, the pinned compiler, sampled preview quality,

@@ -8,6 +8,23 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.14
+
+Release prepared 13 November 2026 from main `c30a916` (merged PR #57).
+All eleven own version values across Rust workspace/lock, npm metadata/lock
+and Tauri, plus current user/agent guides, agree on 0.5.14. The release ships
+[#55](design/2026-11-13-volume-visibility.md); [notes](releases/0.5.14.md) describe
+visibility/depth behavior and the retained whole-ray overlap limitation.
+Dependencies, compiler, scientific data/profiles/precision/limits and logo are
+unchanged by this version bump. Older release/repair entries remain historical.
+
+The merged-fix baseline passes all four actual jobs at `6f1aefa` in
+[run 43412554187](https://github.com/uvar-apps/eigenvista/actions/runs/43412554187):
+Linux 232/fmt/Clippy, macOS seven, Chromium 214, WebKit 214, packaging 13 and
+production builds. Release-head verification and rebuilt artifact/source/
+publication identities are separate gates; their completed evidence belongs
+in this release record before the release task finishes.
+
 ## Volume visibility and depth: 13 November 2026
 
 Implemented #55 on `codex/fix-volume-visibility` from main `5114cdc`, after the
