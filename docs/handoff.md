@@ -1,16 +1,34 @@
 # Development handoff
 
-Updated 13 November 2026 for #41 save-contract and #43 anisotropic-rendering
-research from merged main `a3d71d0`, branch `codex/save-and-anisotropy-research`;
-version 0.5.12 and its 6 November release/artifacts are unchanged. The dated
-entries below describe prior increments. Start with [root AGENTS.md](../AGENTS.md),
-then this document, [architecture](architecture.md), and
-[development commands](development.md).
+Updated 13 November 2026 for the 0.5.13 release, based on merged main `cd6fc8a`
+(PR #56). Source version metadata and current documentation are 0.5.13; the
+[release notes](releases/0.5.13.md) collect changes since 0.5.12 and known #55.
+Release build/publication evidence belongs in [status](status.md); older dated
+entries below describe their then-current 0.5.12 state. Start with
+[root AGENTS.md](../AGENTS.md), then this document,
+[architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application is **EigenVista**, version **0.5.12**, in the standalone
+The current application is **EigenVista**, version **0.5.13**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Release 0.5.13
+
+The user authorized version bump, commit, annotated tag, push and GitHub release
+with notes and rebuilt normal redistributables. Release preparation changes
+version metadata/documentation only; product changes already merged through
+PRs #44/#45/#49/#50/#53/#56. #43 is closed as investigated; #41 stays open for
+save policy/platform work and #55 is the next P2 renderer repair.
+
+The completed pre-release research baseline is main `cd6fc8a`, exact tree of
+reviewed PR head `2bb508a`, with all four jobs green in
+[run 43388050720](https://github.com/uvar-apps/eigenvista/actions/runs/43388050720):
+Linux232/fmt/Clippy, macOS7, Chromium188, WebKit188 and packaging13/builds.
+Those results are baseline evidence, not a claim that a later release binary
+has passed. Check the latest [release record](status.md#version-0513) and its
+artifact metadata before distributing. Preserve timestamped restart snapshots,
+untracked original review and private exports. Tester signing remains ad-hoc.
 
 ## Issue priorities
 

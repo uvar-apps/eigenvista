@@ -759,7 +759,7 @@ checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
 
 [[package]]
 name = "eigenvista-convert"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "eigenvista-core",
  "eigenvista-format",
@@ -771,7 +771,7 @@ dependencies = [
 
 [[package]]
 name = "eigenvista-core"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "kiddo",
  "lin_alg",
@@ -784,7 +784,7 @@ dependencies = [
 
 [[package]]
 name = "eigenvista-desktop"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "eigenvista-core",
  "eigenvista-format",
@@ -799,7 +799,7 @@ dependencies = [
 
 [[package]]
 name = "eigenvista-format"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "eigenvista-core",
  "serde",
@@ -810,7 +810,7 @@ dependencies = [
 
 [[package]]
 name = "eigenvista-import"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "eigenvista-core",
  "eigenvista-format",
@@ -823,7 +823,7 @@ dependencies = [
 
 [[package]]
 name = "eigenvista-wasm"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "eigenvista-core",
  "eigenvista-format",

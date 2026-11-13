@@ -39,6 +39,13 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Version 0.5.13 collects the native exit protection, corrected Molden limits,
+  import/publication and typed-encoding improvements, authentic native-file
+  compatibility fixtures, Vite maintenance, collapsible sidebar and research
+  since 0.5.12. Read [release notes](docs/releases/0.5.13.md), current handoff and
+  status for verification/artifacts. #55 remains an open P2 volume visibility
+  bug; mesh compaction and isotropic resampling are not enabled. Rust 1.99.0,
+  dependency locks, scientific profiles/precision and icon/logo are preserved.
 - Version 0.5.12 collects the five repair batches after 0.5.11: validated native
   parameter export/shader controls, the pinned compiler, sampled preview quality,
   scoped worker cancellation/resident inputs, exact radius-bucket bonds and

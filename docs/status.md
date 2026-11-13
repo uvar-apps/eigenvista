@@ -8,6 +8,22 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Version 0.5.13
+
+Release prepared 13 November 2026 from merged main `cd6fc8a` (PR #56). Rust's
+workspace/six own lock entries, npm metadata/lockfile root, Tauri and current
+user/agent documents agree on 0.5.13. Dependencies, toolchain, scientific data,
+format profiles, limits, precision and logo are unchanged by this version bump.
+[Release notes](releases/0.5.13.md) record the shipped changes since 0.5.12 and
+known #55; #37's compaction remains qualification-only.
+
+The pre-release baseline passed all four actual jobs at `2bb508a` in
+[run 43388050720](https://github.com/uvar-apps/eigenvista/actions/runs/43388050720):
+Linux232/fmt/Clippy, macOS7, Chromium188, WebKit188, packaging13 and actual
+production builds. Release-commit verification, clean-source package identity,
+extracted binaries/sources and GitHub asset digests are separate release gates;
+record their completed evidence here before the task is finished.
+
 ## Save and anisotropic-rendering research: 13 November 2026
 
 From main `a3d71d0` on `codex/save-and-anisotropy-research`, #41/#43 add research
