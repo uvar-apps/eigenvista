@@ -42,11 +42,23 @@ documents; older `.molekel` preview documents remain readable. Check
 - Current source after 0.5.15 adds #59 molecular screen-space ambient occlusion.
   The published 0.5.15 app predates it. Read the
   [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md): only
-  actual atom/bond instances participate, with indirect-light material hooks,
-  bounded/lazy GTAO targets and the original full-scene final draw. Preserve
-  field/custom-shader/depth/color isolation, session-only settings and a shared
-  animation/PNG frame path. Keep complete failure/state restoration and
-  pass-owned disposal, including the pinned addon’s missing material cleanup.
+  actual atom/bond instances participate, with owned MeshLambertMaterial
+  replacements, no specular highlights and illustrative AO on both diffuse
+  terms. The broad-fold candidate uses visibility exponent 6, GTAO sample
+  parameter 32/distance exponent 2, denoise 8/radius 4/luma rejection 0.25 and
+  full physical targets proportionally capped at 1024 (ideal payload at most
+  28 MiB). Automatic radius is 5% of the atom-coordinate box diagonal in
+  angstrom, rounded to a quarter angstrom and clamped to 1.5–30 Å; memoize by
+  atoms reference, independently of camera/fields. Manual radius spans
+  0.25–50 Å. Preserve exact original material references on Off/zero/failure,
+  field/custom-shader/depth/color isolation, session-only settings and the
+  shared animation/PNG frame path. Dispose owned Lambert/pass resources before
+  old-group disposal; do not mutate borrowed Standard materials or revive the
+  prototype's program-refresh workaround. The earlier indirect-only head was
+  visually rejected. Qualify actual-app 1AON as the primary visual case and
+  retain 4PJ1 as secondary evidence. Read the living handoff/status and actual final-head CI results linked from
+  #59/PR #60; all four jobs must pass before merge, independently of historical
+  results.
 
 - Version 0.5.15 includes #52 sidebar reordering within each existing pane.
   Dedicated handles support native drag, keyboard moves and tap controls;

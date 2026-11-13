@@ -27,9 +27,10 @@ Version 0.5.15 adds [#52 sidebar reordering](docs/design/2026-11-13-sidebar-reor
 with native drag, keyboard and tap controls, remembered profile order and
 preserved control/calculation state. See the [0.5.15 release notes](docs/releases/0.5.15.md).
 
-Current source also adds optional molecular ambient occlusion for dense structures
-([#59](https://github.com/uvar-apps/eigenvista/issues/59)); it is a subsequent source
-change and is not in the published 0.5.15 ZIP.
+Current source adds optional molecular ambient occlusion for dense
+structures ([#59](https://github.com/uvar-apps/eigenvista/issues/59)): matte Lambert
+shading, broad fold/cavity depth cues and an automatic radius based on molecular
+size. This subsequent source feature is not in the published 0.5.15 ZIP. See the [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md).
 
 ## Start here
 

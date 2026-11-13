@@ -439,12 +439,20 @@ document. There is no undo.
 
 ### Molecular ambient occlusion
 
-Under **Appearance**, enable **Ambient occlusion** to add contact/depth shading
-between atoms and bonds. This can make dense molecular structures easier to
-read, especially with **Representation → Van der Waals** (space-filling spheres).
-It starts off. **AO strength**
-controls the amount (0–100%); **AO radius (angstrom)** controls the neighborhood
-(0.25–4 Å, initially 1.5 Å). Zero strength restores the normal view.
+Under **Appearance**, enable **Ambient occlusion** for matte shading of atom
+contacts and the broad folds/cavities of dense molecules. Use
+**Representation → Van der Waals** for space-filling spheres. AO starts off.
+While active, atoms and bonds use **Lambert shading plus SSAO**, without specular
+highlights. **AO strength** controls the effect (0–100%); zero restores the normal
+view.
+
+**Automatic AO radius** starts checked. It chooses a neighborhood from the atom
+coordinates (1.5–30 Å), so a large protein gets broader shading than a small
+molecule. Camera zoom, field grids and representation changes do not change
+that radius. The **AO radius (angstrom)** readout shows the current choice.
+To adjust it, uncheck **Automatic AO radius**; the slider starts from the current
+automatic value and allows 0.25–50 Å in quarter-angstrom steps. A larger radius
+can emphasize broader recesses; a smaller one focuses on nearby contacts.
 
 These settings last for the session across Open and are independent of saved
 molecular data. Reload starts with AO off. PNG export includes the current
@@ -454,8 +462,9 @@ molecule through them.
 
 This is an approximate screen-space visual cue: hidden/offscreen geometry and
 camera changes affect it, and it does not indicate electron density or another
-computed property. It uses extra GPU work/memory; turn it off if navigation is
-slow. Off releases the AO image buffers. If the enhancement fails, a message
+computed property. The automatic radius stays fixed as the camera moves, while
+the visible screen-space shading can change. It uses extra GPU work/memory;
+turn it off if navigation is slow. Off releases the AO image buffers. If the enhancement fails, a message
 reports it and normal molecular rendering stays available; disable and
 re-enable it to retry. A lost graphics context still requires reloading.
 

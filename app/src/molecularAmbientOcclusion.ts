@@ -1,10 +1,35 @@
 import * as THREE from "three";
 import { GTAOPass } from "three/addons/postprocessing/GTAOPass.js";
 
+export const BOHR_ANGSTROM = 0.529177210903;
+
+/** Display radius for molecular folds, independent of camera and field bounds. */
+export function automaticMolecularAoRadiusAngstrom(
+  positions: readonly (readonly number[])[],
+): number {
+  if (positions.length === 0) return 1.5;
+  const low = [Infinity, Infinity, Infinity];
+  const high = [-Infinity, -Infinity, -Infinity];
+  for (const position of positions)
+    for (let axis = 0; axis < 3; axis++) {
+      low[axis] = Math.min(low[axis], position[axis]);
+      high[axis] = Math.max(high[axis], position[axis]);
+    }
+  const diagonal = Math.hypot(
+    high[0] - low[0],
+    high[1] - low[1],
+    high[2] - low[2],
+  );
+  return Math.max(
+    1.5,
+    Math.min(30, Math.round(diagonal * BOHR_ANGSTROM * 0.05 * 4) / 4),
+  );
+}
+
 const MOLECULE_LAYER = 1;
 const MAX_AO_EDGE = 1024;
 const AO_CHUNK = "#include <aomap_fragment>";
-const AO_PROGRAM_KEY = "eigenvista-molecular-ao-v1";
+const AO_PROGRAM_KEY = "eigenvista-molecular-ao-v5";
 
 export interface MolecularAmbientOcclusionOptions {
   enabled: boolean;
@@ -25,11 +50,7 @@ export class MolecularAmbientOcclusionError extends Error {
 }
 
 interface MaterialBinding {
-  material: THREE.MeshStandardMaterial;
-  beforeCompile: THREE.Material["onBeforeCompile"];
-  cacheKey: THREE.Material["customProgramCacheKey"];
-  hook: THREE.Material["onBeforeCompile"];
-  keyHook: THREE.Material["customProgramCacheKey"];
+  material: THREE.MeshLambertMaterial;
 }
 
 /**
@@ -41,6 +62,13 @@ export class MolecularAmbientOcclusion {
   private pass: GTAOPass | null = null;
   private masks = new Map<THREE.InstancedMesh, number>();
   private bindings: MaterialBinding[] = [];
+  private materialAssignments = new Map<
+    THREE.InstancedMesh,
+    {
+      original: THREE.Material | THREE.Material[];
+      active: THREE.Material | THREE.Material[];
+    }
+  >();
   private pendingShaderError: unknown = null;
   private failed = false;
   private disposed = false;
@@ -106,7 +134,7 @@ export class MolecularAmbientOcclusion {
             gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) as number,
           );
           const scale = Math.min(
-            0.5,
+            1,
             limit / Math.max(1, this.dimensions.x, this.dimensions.y),
           );
           const width = Math.max(1, Math.floor(this.dimensions.x * scale));
@@ -117,11 +145,16 @@ export class MolecularAmbientOcclusion {
             this.pass = new GTAOPass(this.scene, this.camera, width, height);
             this.pass.output = GTAOPass.OUTPUT.Off;
             this.pass.updateGtaoMaterial({
-              samples: 16,
+              samples: 32,
+              distanceExponent: 2,
               scale: 1,
               screenSpaceRadius: false,
             });
-            this.pass.updatePdMaterial({ samples: 8 });
+            this.pass.updatePdMaterial({
+              samples: 8,
+              radius: 4,
+              lumaPhi: 0.25,
+            });
             needsValidation = true;
           } else if (this.pass.width !== width || this.pass.height !== height) {
             this.pass.setSize(width, height);
@@ -206,38 +239,40 @@ export class MolecularAmbientOcclusion {
   }
 
   private attachMaterials(): void {
-    const materials = new Set<THREE.MeshStandardMaterial>();
-    for (const mesh of this.meshes) {
-      const candidates = Array.isArray(mesh.material)
-        ? mesh.material
-        : [mesh.material];
-      for (const material of candidates) {
-        if (!(material instanceof THREE.MeshStandardMaterial))
-          throw new Error(
-            "Molecular AO requires standard atom/bond materials.",
-          );
-        materials.add(material);
-      }
-    }
-    for (const material of materials) {
-      // The pinned renderer caches program variants but keeps one uniform map
-      // per material. A baseline draw between enables can replace that map;
-      // force fresh hook binding without replacing the material/instance data.
-      material.dispose();
-      const beforeCompile = material.onBeforeCompile;
-      const cacheKey = material.customProgramCacheKey;
+    const converted = new Map<THREE.Material, THREE.MeshLambertMaterial>();
+    const convert = (original: THREE.Material): THREE.MeshLambertMaterial => {
+      const existing = converted.get(original);
+      if (existing) return existing;
+      if (!(original instanceof THREE.MeshStandardMaterial))
+        throw new Error("Molecular AO requires standard atom/bond inputs.");
+      // Own only the active Lambert material; preserve the exact borrowed
+      // legacy material and the existing instance geometry/color buffers.
+      const material = new THREE.MeshLambertMaterial({
+        color: original.color,
+        emissive: original.emissive,
+        emissiveIntensity: original.emissiveIntensity,
+        opacity: original.opacity,
+        transparent: original.transparent,
+        side: original.side,
+        depthTest: original.depthTest,
+        depthWrite: original.depthWrite,
+        vertexColors: original.vertexColors,
+        flatShading: original.flatShading,
+        fog: original.fog,
+        toneMapped: original.toneMapped,
+      });
+      this.bindings.push({ material });
+      converted.set(original, material);
       const uniforms = this.uniforms;
       const controller = this;
       const hook: THREE.Material["onBeforeCompile"] = function (
         this: THREE.Material,
         shader,
-        renderer,
       ) {
         const vertexShader = shader.vertexShader;
         const fragmentShader = shader.fragmentShader;
         const originalUniforms = { ...shader.uniforms };
         try {
-          beforeCompile.call(this, shader, renderer);
           if (
             !shader.fragmentShader.includes(AO_CHUNK) ||
             shader.fragmentShader.indexOf(AO_CHUNK) !==
@@ -253,7 +288,13 @@ export class MolecularAmbientOcclusion {
             "uniform float eigenvistaMolecularAoStrength;\n" +
             shader.fragmentShader.replace(
               AO_CHUNK,
-              `${AO_CHUNK}\nreflectedLight.indirectDiffuse *= mix(1.0, clamp(texture2D(eigenvistaMolecularAo, gl_FragCoord.xy / eigenvistaMolecularAoViewport).r, 0.0, 1.0), eigenvistaMolecularAoStrength);`,
+              `${AO_CHUNK}\n// Illustrative matte contact shading: keep the visibility local to molecular
+// diffuse light, with enough contrast to survive the scene directional light.
+float eigenvistaVisibility = pow(clamp(texture2D(eigenvistaMolecularAo, gl_FragCoord.xy / eigenvistaMolecularAoViewport).r, 0.0, 1.0), 6.0);
+float eigenvistaContact = mix(1.0, eigenvistaVisibility, eigenvistaMolecularAoStrength);
+reflectedLight.directDiffuse *= eigenvistaContact;
+reflectedLight.indirectDiffuse *= eigenvistaContact;
+`,
             );
         } catch (error) {
           // Throwing through Three's compile/render callbacks can leave its
@@ -265,23 +306,19 @@ export class MolecularAmbientOcclusion {
           controller.pendingShaderError ??= error;
         }
       };
-      const keyHook: THREE.Material["customProgramCacheKey"] = function (
-        this: THREE.Material,
-      ) {
-        try {
-          return `${cacheKey.call(this)}|${AO_PROGRAM_KEY}`;
-        } catch (error) {
-          controller.pendingShaderError ??= error;
-          return `molecular-fallback|${AO_PROGRAM_KEY}`;
-        }
-      };
-      this.bindings.push({ material, beforeCompile, cacheKey, hook, keyHook });
       material.onBeforeCompile = hook;
-      material.customProgramCacheKey = keyHook;
-      material.needsUpdate = true;
+      material.customProgramCacheKey = () => AO_PROGRAM_KEY;
+      return material;
+    };
+    for (const mesh of this.meshes) {
+      const original = mesh.material;
+      const active = Array.isArray(original)
+        ? original.map(convert)
+        : convert(original);
+      this.materialAssignments.set(mesh, { original, active });
+      mesh.material = active;
     }
   }
-
   private withShaderDiagnostics(draw: () => void): void {
     const debug = this.renderer.debug;
     const checkShaderErrors = debug.checkShaderErrors;
@@ -392,30 +429,22 @@ export class MolecularAmbientOcclusion {
 
   private failure(error: unknown): MolecularAmbientOcclusionError {
     this.failed = true;
-    const releasePrograms = this.pendingShaderError !== null;
     this.pendingShaderError = null;
-    this.deactivate(releasePrograms);
+    this.deactivate();
     return error instanceof MolecularAmbientOcclusionError
       ? error
       : new MolecularAmbientOcclusionError(error);
   }
 
-  private deactivate(releasePrograms = false): void {
-    for (const { material, beforeCompile, cacheKey, hook, keyHook } of this
-      .bindings) {
-      if (material.onBeforeCompile === hook)
-        material.onBeforeCompile = beforeCompile;
-      if (material.customProgramCacheKey === keyHook)
-        material.customProgramCacheKey = cacheKey;
-      material.needsUpdate = true;
-      if (releasePrograms) {
-        // A failed linked program is cached by material even after removing the
-        // hook. Release those GPU programs so OFF/ON can retry the same object.
-        try {
-          material.dispose();
-        } catch {
-          // Keep cleanup nonthrowing; the caller still owns the material object.
-        }
+  private deactivate(): void {
+    for (const [mesh, { original, active }] of this.materialAssignments)
+      if (mesh.material === active) mesh.material = original;
+    this.materialAssignments.clear();
+    for (const { material } of this.bindings) {
+      try {
+        material.dispose();
+      } catch {
+        // Restore borrowed materials even after allocation/link/context failure.
       }
     }
     this.bindings = [];

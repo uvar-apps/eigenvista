@@ -18,11 +18,13 @@ import {
   type ShaderPair,
 } from "./shaderTools";
 import { volumeObject, type VolumeQuality } from "./volume";
-import { MolecularAmbientOcclusion } from "./molecularAmbientOcclusion";
+import {
+  MolecularAmbientOcclusion,
+  BOHR_ANGSTROM as BOHR,
+} from "./molecularAmbientOcclusion";
 import { elementDisplay } from "./elements";
 import { resolveAtomColor, type AtomPalette } from "./atomColors";
 
-const BOHR = 0.529177210903;
 export function symbol(z: number) {
   return elementDisplay(z).symbol;
 }
@@ -37,7 +39,7 @@ export interface AmbientOcclusionSettings {
 const DEFAULT_AMBIENT_OCCLUSION: AmbientOcclusionSettings = {
   enabled: false,
   strength: 1,
-  radiusAngstrom: 1.5,
+  radiusAngstrom: 3,
 };
 
 /**

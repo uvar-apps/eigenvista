@@ -7,6 +7,12 @@ export const neighbors: Point[] = [
   [2.3, 0, 0.65],
   [1, 1.3, 0.65],
 ];
+// The additional real-lighting case declares a genuinely deeper visible pocket.
+// Original ambient/field/resource/matte geometry above remains unchanged.
+export const litNeighbors: Point[] = [
+  [2.3, 0, 1.5],
+  [1, 1.3, 1.5],
+];
 const eye: Point = [0, 0, 14];
 
 const subtract = (a: Point, b: Point): Point =>
@@ -55,6 +61,20 @@ export function analyticVisibility(
   return visible / 256;
 }
 
+/** Positive camera-ray control, independently of the renderer/AO implementation. */
+export function cameraSeesReceiver(center: Point, occluders: Point[]): boolean {
+  const direction = unit(subtract(center, eye));
+  const receiverHit = Math.hypot(...subtract(center, eye)) - 1;
+  return !occluders.some((sphere) => {
+    const relative = subtract(eye, sphere),
+      b = dot(relative, direction);
+    const discriminant = b * b - dot(relative, relative) + 1;
+    if (discriminant < 0) return false;
+    const hit = -b - Math.sqrt(discriminant);
+    return hit > 0 && hit < receiverHit;
+  });
+}
+
 /** Perspective projection of a declared sphere-center ray, in bottom-left pixels. */
 function projected(center: Point, size = 256) {
   const focal = size / (2 * Math.tan(Math.PI / 8));
@@ -71,6 +91,12 @@ export interface ProbeFrame {
   background: number[];
   patches: Record<string, number>;
   colors: Record<string, number[]>;
+  materials: {
+    atomsLambert: boolean;
+    bondsLambert: boolean;
+    atomsOriginal: boolean;
+    bondsOriginal: boolean;
+  };
   instancedDraws: number;
   ordinaryDraws: number;
   error: number;
@@ -95,7 +121,13 @@ export interface MolecularProbeResult {
 
 export async function molecularProbe(
   page: Page,
-  kind: "contacts" | "fields" | "resources" | "dense" = "contacts",
+  kind:
+    | "contacts"
+    | "fields"
+    | "resources"
+    | "dense"
+    | "lit"
+    | "matte" = "contacts",
 ): Promise<MolecularProbeResult> {
   return page.evaluate(
     async ({ centers, patches, kind }) => {
@@ -110,7 +142,10 @@ export async function molecularProbe(
         preserveDrawingBuffer: false,
       });
       renderer.setSize(256, 256);
-      renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+      const productLighting = kind === "lit" || kind === "matte";
+      renderer.outputColorSpace = productLighting
+        ? THREE.SRGBColorSpace
+        : THREE.LinearSRGBColorSpace;
       renderer.setClearColor(new THREE.Color(0.9, 0.9, 0.9), 1);
       renderer.domElement.id = "molecular-ao-reference";
       const gl = renderer.getContext() as WebGL2RenderingContext;
@@ -180,7 +215,12 @@ export async function molecularProbe(
         allocations: [...allocations.values()],
       });
       const scene = new THREE.Scene();
-      scene.add(new THREE.AmbientLight(0xffffff, 2));
+      if (productLighting) {
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x6e7880, 2.4));
+        const key = new THREE.DirectionalLight(0xffffff, 3);
+        key.position.set(4, 6, 8);
+        scene.add(key);
+      } else scene.add(new THREE.AmbientLight(0xffffff, 2));
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 40);
       camera.position.set(0, 0, 14);
       camera.lookAt(0, 0, 0);
@@ -188,7 +228,7 @@ export async function molecularProbe(
       const geometry = new THREE.SphereGeometry(1, 24, 16);
       const material = new THREE.MeshStandardMaterial({
         color: 0xaaaaaa,
-        roughness: 1,
+        roughness: kind === "matte" ? 0.05 : 1,
       });
       const positions =
         kind === "dense"
@@ -216,7 +256,7 @@ export async function molecularProbe(
       const bondGeometry = new THREE.CylinderGeometry(1, 1, 1, 12);
       const bondMaterial = new THREE.MeshStandardMaterial({
         color: 0xaaaaaa,
-        roughness: 1,
+        roughness: kind === "matte" ? 0.05 : 1,
       });
       const bonds = new THREE.InstancedMesh(
         bondGeometry,
@@ -383,6 +423,13 @@ export async function molecularProbe(
           ),
           patches: means,
           colors,
+          materials: {
+            atomsLambert: atoms.material instanceof THREE.MeshLambertMaterial,
+            bondsLambert: bonds.material instanceof THREE.MeshLambertMaterial,
+            atomsOriginal: atoms.material === (freshMaterials[0] ?? material),
+            bondsOriginal:
+              bonds.material === (freshMaterials[1] ?? bondMaterial),
+          },
           instancedDraws,
           ordinaryDraws,
           error: gl.getError(),
@@ -404,6 +451,24 @@ export async function molecularProbe(
         draw("on", true);
         draw("restored", false);
         draw("zero", true, 0);
+        if (kind === "lit") {
+          // Both positive strengths activate the same Lambert style; their
+          // contact difference therefore cannot come from removing specular.
+          draw("lit-weak", true, 0.05);
+          draw("lit-full", true, 1);
+        }
+        if (kind === "matte") {
+          // Positive epsilon isolates active matte style from AO attenuation
+          // at RGBA8 precision without reimplementing either lighting shader.
+          draw("gloss-matte", true, 0.000001);
+          draw("gloss-restored", false);
+          material.roughness = bondMaterial.roughness = 1;
+          material.needsUpdate = bondMaterial.needsUpdate = true;
+          draw("rough-off", false);
+          draw("rough-matte", true, 0.000001);
+          draw("rough-restored", false);
+          draw("rough-zero", true, 0);
+        }
         if (kind === "fields" && cover) {
           cover.material.transparent = true;
           cover.material.opacity = 0.5;
@@ -468,7 +533,11 @@ export async function molecularProbe(
       }
     },
     {
-      centers: [receiver, ...neighbors, isolated],
+      centers: [
+        receiver,
+        ...(kind === "lit" ? litNeighbors : neighbors),
+        isolated,
+      ],
       patches: {
         contact: projected(receiver),
         isolated: projected(isolated),

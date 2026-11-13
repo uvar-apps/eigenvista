@@ -3,7 +3,9 @@ import fs from "node:fs";
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import {
   analyticVisibility,
+  cameraSeesReceiver,
   isolated,
+  litNeighbors,
   molecularProbe,
   neighbors,
   receiver,
@@ -22,12 +24,26 @@ test("molecular AO darkens geometric contacts rather than isolated patches and r
   expect(off.patches.contact).toBeGreaterThan(10);
   expect(off.patches.isolated).toBeGreaterThan(10);
   expect(contact).toBeGreaterThan(2);
+  expect(contact / off.patches.contact).toBeGreaterThanOrEqual(0.15);
   expect(alone).toBeLessThan(contact * 0.75);
   expect(on.background).toEqual(off.background);
   expect(restored.checksum).toBe(off.checksum);
   expect(zero.checksum).toBe(off.checksum);
   expect(restored.png).toBe(off.png);
   expect(zero.png).toBe(off.png);
+  expect(on.materials).toEqual({
+    atomsLambert: true,
+    bondsLambert: true,
+    atomsOriginal: false,
+    bondsOriginal: false,
+  });
+  for (const frame of [off, restored, zero])
+    expect(frame.materials).toEqual({
+      atomsLambert: false,
+      bondsLambert: false,
+      atomsOriginal: true,
+      bondsOriginal: true,
+    });
   expect(result.picks).toEqual([0, 0, 0, 0]);
   expect(result.frames.every((frame) => frame.error === 0)).toBe(true);
   expect(result.afterConstructor).toEqual(result.beforeConstructor);
@@ -41,6 +57,119 @@ test("molecular AO darkens geometric contacts rather than isolated patches and r
       {
         ...result,
         frames: result.frames.map(({ png: _png, ...frame }) => frame),
+      },
+      null,
+      2,
+    ),
+    contentType: "application/json",
+  });
+});
+
+test("Lambert AO gives substantial localized contact contrast under the real directional and hemisphere lighting", async ({
+  page,
+}, info) => {
+  // A deep, visible pocket is declared independently before rendering. The
+  // original shallow ambient-only fixture still has its separate unchanged gate.
+  expect(analyticVisibility(isolated, [receiver, ...litNeighbors])).toBe(1);
+  expect(analyticVisibility(receiver, litNeighbors)).toBeLessThan(0.7);
+  expect(cameraSeesReceiver(receiver, litNeighbors)).toBe(true);
+  await page.goto("/");
+  const result = await molecularProbe(page, "lit");
+  const [off, , restored, zero, weak, full] = result.frames;
+  const contact = weak.patches.contact - full.patches.contact;
+  const alone = weak.patches.isolated - full.patches.isolated;
+  for (const frame of result.frames)
+    await info.attach(`${frame.label}.png`, {
+      body: Buffer.from(frame.png, "base64"),
+      contentType: "image/png",
+    });
+  await info.attach("directional-contact-observations.json", {
+    body: JSON.stringify(
+      {
+        ...result,
+        frames: result.frames.map(({ png: _png, ...frame }) => frame),
+        contrast: { contact, alone, relative: contact / weak.patches.contact },
+      },
+      null,
+      2,
+    ),
+    contentType: "application/json",
+  });
+  expect(weak.patches.contact).toBeGreaterThan(50);
+  expect(contact).toBeGreaterThanOrEqual(12);
+  expect(contact / weak.patches.contact).toBeGreaterThanOrEqual(0.15);
+  expect(Math.abs(alone)).toBeLessThanOrEqual(2);
+  expect(alone).toBeLessThan(contact * 0.25);
+  expect(full.background).toEqual(weak.background);
+  expect(restored.png).toBe(off.png);
+  expect(zero.png).toBe(off.png);
+  expect(result.frames.every((frame) => frame.error === 0)).toBe(true);
+});
+
+test("active Lambert shading removes a positive legacy gloss signal independently of AO and restores both original roughness states", async ({
+  page,
+}, info) => {
+  await page.goto("/");
+  const result = await molecularProbe(page, "matte");
+  const frames = Object.fromEntries(
+    result.frames.map((frame) => [frame.label, frame]),
+  );
+  async function difference(a: string, b: string) {
+    return page.evaluate(
+      async ({ a, b }) => {
+        async function pixels(value: string) {
+          const image = new Image();
+          image.src = `data:image/png;base64,${value}`;
+          await image.decode();
+          const canvas = document.createElement("canvas");
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          const context = canvas.getContext("2d")!;
+          context.drawImage(image, 0, 0);
+          return context.getImageData(0, 0, canvas.width, canvas.height).data;
+        }
+        const first = await pixels(a),
+          second = await pixels(b);
+        let maximum = 0,
+          total = 0,
+          changed = 0;
+        for (let i = 0; i < first.length; i++) {
+          const delta = Math.abs(first[i] - second[i]);
+          maximum = Math.max(maximum, delta);
+          total += delta;
+          if (delta) changed++;
+        }
+        return { maximum, mean: total / first.length, changed };
+      },
+      { a, b },
+    );
+  }
+  const legacy = await difference(frames.off.png, frames["rough-off"].png);
+  expect(legacy.maximum).toBeGreaterThanOrEqual(20);
+  expect(legacy.changed).toBeGreaterThan(100);
+  const matte = await difference(
+    frames["gloss-matte"].png,
+    frames["rough-matte"].png,
+  );
+  expect(matte.maximum).toBeLessThanOrEqual(1);
+  expect(matte.mean).toBeLessThanOrEqual(0.01);
+  expect(frames.restored.png).toBe(frames.off.png);
+  expect(frames.zero.png).toBe(frames.off.png);
+  expect(frames["gloss-restored"].png).toBe(frames.off.png);
+  expect(frames["rough-restored"].png).toBe(frames["rough-off"].png);
+  expect(frames["rough-zero"].png).toBe(frames["rough-off"].png);
+  expect(result.frames.every((frame) => frame.error === 0)).toBe(true);
+  for (const frame of result.frames)
+    await info.attach(`${frame.label}.png`, {
+      body: Buffer.from(frame.png, "base64"),
+      contentType: "image/png",
+    });
+  await info.attach("matte-gloss-observations.json", {
+    body: JSON.stringify(
+      {
+        ...result,
+        frames: result.frames.map(({ png: _png, ...frame }) => frame),
+        differences: { legacy, matte },
       },
       null,
       2,
@@ -129,10 +258,10 @@ async function ready(page: Page) {
   await openContact(page, "ao-contact.xyz");
 }
 
-async function openContact(page: Page, name: string) {
+async function openContact(page: Page, name: string, buffer = xyz) {
   await page
     .getByLabel("Open molecular file")
-    .setInputFiles({ name, mimeType: "text/plain", buffer: xyz });
+    .setInputFiles({ name, mimeType: "text/plain", buffer });
   await expect(page.locator("footer [role=status]")).toContainText(
     `Opened ${name}`,
   );
@@ -294,9 +423,14 @@ test("the real AO controls are session-only and preserve clean documents and sci
   await expect(
     page.getByLabel("AO radius (angstrom)", { exact: true }),
   ).toHaveValue("1.5");
+  const automatic = page.getByLabel("Automatic AO radius", { exact: true });
+  await expect(automatic).toBeChecked();
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toBeDisabled();
   for (const [name, min, max, step] of [
     ["AO strength", "0", "1", "0.05"],
-    ["AO radius (angstrom)", "0.25", "4", "0.25"],
+    ["AO radius (angstrom)", "0.25", "50", "0.25"],
   ]) {
     await expect(page.getByLabel(name, { exact: true })).toHaveAttribute(
       "min",
@@ -321,6 +455,13 @@ test("the real AO controls are session-only and preserve clean documents and sci
   await settleScene(page);
   expect((await scenePixels(page)).checksum).toBe(off.checksum);
   await page.getByLabel("AO strength", { exact: true }).press("End");
+  await automatic.uncheck();
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toBeEnabled();
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toHaveValue("1.5");
   await page.getByLabel("AO radius (angstrom)", { exact: true }).press("End");
   await settleScene(page);
   await expect(page.locator(".dirty")).toHaveCount(0);
@@ -336,7 +477,28 @@ test("the real AO controls are session-only and preserve clean documents and sci
   ).toBeChecked();
   await expect(
     page.getByLabel("AO radius (angstrom)", { exact: true }),
-  ).toHaveValue("4");
+  ).toHaveValue("50");
+  await expect(automatic).not.toBeChecked();
+  await automatic.check();
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toHaveValue("1.5");
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toBeDisabled();
+  page.once("dialog", (dialog) => dialog.accept());
+  await openContact(
+    page,
+    "ao-automatic-scale.xyz",
+    Buffer.from("2\nKnown200angstrom atom extent\nC -100 0 0\nC 100 0 0\n"),
+  );
+  await expect(automatic).toBeChecked();
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toHaveValue("10");
+  await expect(
+    page.getByLabel("AO radius (angstrom)", { exact: true }),
+  ).toBeDisabled();
   await page.reload();
   await expect(page.locator("footer [role=status]")).toContainText(
     "triangles",
@@ -451,7 +613,7 @@ test("AO targets are lazy, capped in physical pixels and released through resize
   ).toBe(true);
   expect(
     byName["small-again"].resources.allocations.some(
-      (size) => size.width === 128 && size.height === 128,
+      (size) => size.width === 256 && size.height === 256,
     ),
   ).toBe(true);
   expect(byName["off-again"].resources.programs).toBe(

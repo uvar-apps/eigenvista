@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -44,6 +45,7 @@ import { ConvertFiles } from "./ConvertFiles";
 import { OrbitalBrowser, maxOrbitalBatch } from "./OrbitalBrowser";
 import { gridResolutions, isGridResolution } from "./resolution";
 import { Viewport, type AmbientOcclusionSettings } from "./Viewport";
+import { automaticMolecularAoRadiusAngstrom } from "./molecularAmbientOcclusion";
 import { ShaderPanel, type ShaderEditorState } from "./ShaderPanel";
 import { PanelSection, usePanelExpansion } from "./PanelSection";
 import { PanelSidebar, usePanelOrder } from "./PanelSidebar";
@@ -82,12 +84,24 @@ export default function App() {
   const [resolution, setResolution] = useState(40);
   const [mode, setMode] = useState<RenderMode>("mesh");
   const [volumeQuality, setVolumeQuality] = useState<VolumeQuality>(2);
+  const [automaticAoRadius, setAutomaticAoRadius] = useState(true);
   const [ambientOcclusion, setAmbientOcclusion] =
     useState<AmbientOcclusionSettings>({
       enabled: false,
       strength: 1,
-      radiusAngstrom: 1.5,
+      radiusAngstrom: 3,
     });
+  const automaticAoRadiusAngstrom = useMemo(
+    () => automaticMolecularAoRadiusAngstrom(doc?.atoms.positions ?? []),
+    [doc?.atoms],
+  );
+  const viewportAmbientOcclusion = useMemo(
+    () =>
+      automaticAoRadius
+        ? { ...ambientOcclusion, radiusAngstrom: automaticAoRadiusAngstrom }
+        : ambientOcclusion,
+    [ambientOcclusion, automaticAoRadius, automaticAoRadiusAngstrom],
+  );
   const [surfaceShading, setSurfaceShading] =
     useState<SurfaceShading>("diffuse");
   const [shaderEditor, setShaderEditor] = useState<ShaderEditorState>({
@@ -836,7 +850,7 @@ export default function App() {
               grid={grid}
               mode={mode}
               volumeQuality={volumeQuality}
-              ambientOcclusion={ambientOcclusion}
+              ambientOcclusion={viewportAmbientOcclusion}
               shading={surfaceShading}
               shader={appliedShader}
               atomPalette={atomPalette}
@@ -1060,7 +1074,9 @@ export default function App() {
               </label>
               {ambientOcclusion.enabled && (
                 <>
-                  <p className="empty">Depth shading for atoms and bonds.</p>
+                  <p className="empty">
+                    Lambert shading + SSAO for atoms and bonds.
+                  </p>
                   <label className="range-label">
                     AO strength
                     <output>
@@ -1081,18 +1097,35 @@ export default function App() {
                       }
                     />
                   </label>
+                  <label className="ambient-occlusion-toggle">
+                    Automatic AO radius
+                    <input
+                      aria-label="Automatic AO radius"
+                      type="checkbox"
+                      checked={automaticAoRadius}
+                      onChange={(event) => {
+                        if (!event.target.checked)
+                          setAmbientOcclusion((current) => ({
+                            ...current,
+                            radiusAngstrom: automaticAoRadiusAngstrom,
+                          }));
+                        setAutomaticAoRadius(event.target.checked);
+                      }}
+                    />
+                  </label>
                   <label className="range-label">
                     AO radius (angstrom)
                     <output>
-                      {ambientOcclusion.radiusAngstrom.toFixed(2)} Å
+                      {viewportAmbientOcclusion.radiusAngstrom.toFixed(2)} Å
                     </output>
                     <input
                       aria-label="AO radius (angstrom)"
                       type="range"
                       min="0.25"
-                      max="4"
+                      max="50"
                       step="0.25"
-                      value={ambientOcclusion.radiusAngstrom}
+                      disabled={automaticAoRadius}
+                      value={viewportAmbientOcclusion.radiusAngstrom}
                       onChange={(event) =>
                         setAmbientOcclusion((current) => ({
                           ...current,

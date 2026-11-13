@@ -11,63 +11,77 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 ## Molecular ambient occlusion: 14 November 2026
 
 [#59](https://github.com/uvar-apps/eigenvista/issues/59), developed on
-`codex/molecular-ssao`, adds optional molecular contact/depth shading in
-Appearance. The [decision](design/2026-11-14-molecular-ambient-occlusion.md)
-records the pinned GTAO producer, molecular-only indirect lighting, final
-scene/capture path, resource limits and deferred shader/FBO recovery contract.
-The published 0.5.15 package predates this source feature.
+`codex/molecular-ssao` through [PR #60](https://github.com/uvar-apps/eigenvista/pull/60),
+adds optional **Lambert shading + SSAO** for atoms and bonds, without specular
+highlights. The user supplied the original Molekel broad-cavity reference and
+requested **1AON** for testing. The
+[decision](design/2026-11-14-molecular-ambient-occlusion.md) records actual owned
+Lambert materials, molecular-scale Auto/manual radius, bounded full-physical
+GTAO targets, exact borrowed-material restoration, deferred diagnostics and
+field/final-frame isolation. Published 0.5.15 predates the feature.
 
-Fresh Chromium/WebKit checks pass **14/14** (seven per engine, 36.890 seconds),
-with zero skipped/flaky/unexpected results. Independent cosine-hemisphere
-geometry distinguishes contact pockets from isolated patches. Positive custom
-blue, production-volume green and opaque-cover controls establish that fields
-are drawn before checking their preserved pixels; transparent front fields
-legitimately blend the newly shaded molecular backdrop. Exact Off/zero PNGs,
-instance/bond picking, complete decoded Save equality and zero worker posts,
-session Open/reload, ON-first/Off/ON uniform refresh, capped resize/toggle/dispose
-allocations and dense 512-atom batching pass. Labelled fault tests inject FBO and
-actual receiver-program LINK_STATUS failures, then verify normal drawing,
-new-document recovery and successful retry. Actual hardware exhaustion is not
-claimed. Device-pixel PNG/compositor comparisons are exact in all five measured
-states, with unchanged max-channel≤2/mean≤0.1 gates and a stricter 32-stable-frame
-idle check inside the existing 240-frame bound.
+Fresh local verification passes **98/98 browser cases** in **186.763 seconds**,
+zero skipped/flaky/unexpected: 18 AO, 72 unchanged camera/PNG/field/transparency/
+sidebar and eight unchanged palette checks, both Chromium and WebKit. Normal
+inventory is **464**, 232 per engine across 39 files. Actual instanceof Lambert
+and exact borrowed-reference controls complement a positive legacy gloss signal.
+The new directional/hemisphere-light test uses a declared deeper pocket with
+independent cosine visibility 0.6445 and an unobstructed camera ray; its existing
+12-luma/15% contrast gates remain unchanged (43.8%/43.95% observed). Original
+ambient, field, resource and dense geometry controls are preserved. Comparing
+two positive strengths on the same Lambert materials separates AO from removal
+of highlights. Auto checks cover the small-molecule clamp, manual 50 Å and a
+new two-atom import with independently expected automatic 10 Å.
 
-The **72 unchanged** camera/PNG/direct-field-preview/custom-transparency/sidebar
-regressions also pass: **86/86 local browser checks** overall. Normal discovery
-is **460** (230 per engine, 39 files). Fresh **234 default Rust tests**, Rustfmt,
-strict workspace/all-target Clippy, **13 packaging tests**, production
-WASM/TypeScript/Vite, final strict TypeScript and Prettier pass. Independent
-source/test/design review is clear. All four actual final PR-head hosted jobs
-remain the merge gate; results are linked from the tracking issue.
+Positive custom/volume/opaque-cover controls, exact Off/zero PNGs and picking,
+complete decoded Save equality and zero appearance-related worker posts,
+physical PNG/compositor parity, real ON-first cycling, capped allocation/
+disposal and dense512 instancing pass. Labelled FBO and actual receiver-link
+fault injections verify direct recovery/retry without claiming physical GPU
+exhaustion. Existing references, deadlines and assertions were not weakened.
+Production WASM/TypeScript/Vite, final strict TypeScript/Prettier and **13
+packaging tests** pass. Earlier in this feature, **234 default Rust tests**,
+fmt and strict workspace/all-target Clippy passed; their Rust sources and pins
+remain unchanged. All four actual final-head hosted jobs remain required before
+merge; actual results and merge state are linked from #59/PR #60.
 
-Actual App qualification uses the unchanged **65,963-atom/66,610-bond 4PJ1**
-fixture on WebKit/Apple GPU at 360×360 pixels. Space-fill, ball-and-stick and a
-five-Zoom-in close-up pass with zero GL/page errors and byte-identical restored
-Off PNGs. Live texture/FBO counts return **5→11→5 / 3→6→3**. Space-fill draws go
-from one instanced batch to two plus two fullscreen passes; ball-and-stick from
-two to four plus two. Measured complete export wall observations are roughly
-75→102 ms, 77→104 ms and 96→124 ms for the close-up. These include browser/export
-work, are not a timing distribution, and **are not GPU timings or FPS**; coarse
-in-callback synchronized timer readings were zero. Chromium/SwiftShader's
-actual large import/first-draw probe was stopped at a fixed 128-second bound;
-its software GPU process reached about 786% CPU. Partial images/process records
-are retained, but that backend has no large-AO usability/FPS qualification.
-No atom geometry or fixture was simplified to make this probe pass.
+Primary real-file evaluation uses tracked **1AON.cif**, SHA256
+`6b202f340ffb9a1924d5315ce9e837e02cee1dbd745df675be76f6d4e1b8e66f`,
+all **58,870 atoms**, automatic **14.25 Å** radius, through actual App/UI on
+WebKit/Apple GPU. Root inspected default/side-orbit Lambert-only versus full-AO
+pairs and actual desktop/mobile controls against the supplied visual reference.
+Broad recessed regions darken clearly while exposed atom colors remain.
+The explicitly labelled Lambert-only diagnostic forces only the observed
+molecular AO-strength GL uniform to zero while retaining actual Lambert; real
+UI weak/full settings then positively restore the observed 0.05/1 values.
+Default-fit/desktop Off restoration is byte-identical, with no page/GL errors.
 
-Root and test reviewer inspected controlled-contact, large full-fit/close-up,
-and actual AO-enabled desktop/mobile UI images. Full-fit contact cues are
-subtle at this small viewport; zooming resolves them. The separate AO-Off 844px
-HiDPI diagnostic documents preexisting fractional CSS/backbuffer resampling;
-strict pixel parity uses an aligned 850px mobile viewport without changing
-production sizing, thresholds or old tests. Existing spec hashes are retained.
+Large side/mobile poses are visual qualification, not exact-restoration passes.
+A separate bounded same-task GPU observation found **957 changed pixels between
+two Off exports before AO was ever enabled**, with model-view delta **1.14e-5**;
+projection/viewport stayed identical. Initial-Off/restored-Off also had different
+model-view transforms. This establishes a changing-camera precondition in the
+rotated comparison independently of AO. Preserve the initial failed hash
+reports; no exact-pixel threshold or normal camera gate was relaxed. The normal
+strict camera/export tests and default real1AON exact checks pass separately.
 
-Evidence: `tmp/2026-11-14-molecular-ssao/`, including final receiver tests,
-unchanged regression reports, `RESULTS.md`, source hashes, raw captures,
-`large-app/`, `large-app-closeup/` and fractional/off controls. No version,
-release, dependency, compiler, file profile, precision/limit, frozen fixture or
-logo change belongs to this feature. Original review/private exports are
-preserved. It remains an approximate on-screen visual aid, with the existing
-whole-ray field intersection and platform/native-GUI qualification limits.
+Unchanged **4PJ1 (65,963 atoms/66,610 bonds)** remains secondary current
+Lambert-only/AO visual proof at automatic16.25 Å. Attachment payload is bounded,
+but total GPU memory, FPS, all-device navigation and physical native-GUI
+acceptance are not established by these checks. Earlier prototype timing and
+software-backend probes are historical and do not qualify this more expensive
+32-sample/full-resolution mode. It remains an approximate on-screen depth cue;
+existing whole-ray field intersections are unchanged.
+
+Evidence: `tmp/2026-11-14-molecular-ssao/revision-local-summary.json`,
+`revision-visual/final98-report.json`, frozen source hashes, primary1AON
+reports/captures, the public matrix diagnostic and secondary4PJ1 images. The
+initial indirect-only candidate `a6b58f3` was visually rejected (<1/255 mean
+luma change); its hosted run also had an unchanged density-heartbeat failure.
+Neither is used as the current gate. All diagnostic failures remain recorded.
+No release/tag/archive rebuild, scientific/profile/precision/limit change,
+dependency/compiler update, fixture change or logo change belongs to this task.
+Original review/reference/private files and historical releases are preserved.
 
 ## Version 0.5.15
 
