@@ -119,6 +119,28 @@ tracks the P2 CI repair in PR #53: independent Chromium/WebKit runners, unchange
 tests/guards and four actual job results required. This is a verification
 scheduling defect, not a newly demonstrated scientific-output bug.
 
+## Save and rendering research follow-up
+
+On 13 November the user authorized research for #41/#43 from main `a3d71d0`,
+branch `codex/save-and-anisotropy-research`. The measured
+[save contract](../../plans/005-native-save-contract-research.md) and
+[rendering report](../../plans/006-anisotropic-rendering-research.md) supersede
+source-only hypotheses for those issues; the initial classifications below
+remain historical.
+
+| Priority | Issue | Disposition / next action |
+| --- | --- | --- |
+| P2 | [#55](https://github.com/uvar-apps/eigenvista/issues/55) | Confirmed product bug: finer sampling can make a volume disappear despite analytically visible aggregate opacity. Reproduced on isotropic/anisotropic grids, both signs/engines and manual/hardware interpolation. Next repair should define depth/occlusion behavior and preserve existing renderer coverage. No product fix in this research PR. |
+| P3 | #41 | Keep open for save policy/platform follow-up. APFS complete visibility, private replacement and bounded races measured; actual ExFAT no-clobber incompatibility and ENOSPC/EROFS behavior reproduced. No corruption/power-loss result. Directory sync, metadata policy, physical dialog and other platforms remain separate gates. |
+| Investigated | #43 | Close through the research PR. Independent analytic affine/anisotropic tests pass; equal-budget sampling tradeoff measured; no automatic isotropic policy is justified. The confirmed opacity defect is isolated in #55. |
+| P3 | #52 / #22 | Optional sidebar reordering / mmCIF export features; separate from research or bug repair. |
+| P3, needs research | #37, #35, #36, #40, #42, #20 | Retain their existing budgets/workloads/scientific research gates; #38 stays behind #37. |
+
+The four-test opt-in #55 reproducer deliberately fails against unchanged product
+code outside normal CI. The 26 new passing analytic checks remain in normal
+Chromium/WebKit discovery. All four actual hosted jobs must pass at the reviewed
+head before merge; [status](../status.md) records fresh local evidence.
+
 ## What counts as a bug
 
 A **bug** violates intended behavior or a stated contract. Evidence can establish

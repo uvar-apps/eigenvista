@@ -35,6 +35,8 @@ limits of opening new saves in older builds.
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |
 | Agent continuation, current baseline, priorities, verification gaps | [Handoff](handoff.md) and [root AGENTS.md](../AGENTS.md) |
 | Latest selected-issue research, measured tradeoffs and follow-up plans | [Research index](../plans/README.md) and [12 November findings](../plans/2026-11-12-research.md) |
+| Native save visibility, permissions and actual filesystem limits | [Plan 005](../plans/005-native-save-contract-research.md): APFS/ExFAT, full/read-only, CLI and unchanged actual writers |
+| Affine/anisotropic rendering references and confirmed opacity/quality follow-up | [Plan 006](../plans/006-anisotropic-rendering-research.md): independent GPU comparisons, sampling tradeoff and #55 |
 | Exact indexed-mesh qualification, shader identity and measured memory limits | [Qualification decision](design/2026-11-12-indexed-mesh-qualification.md), [frozen layout corpus](../fixtures/indexed-mesh-qualification/README.md) and [Plan 003](../plans/003-indexed-mesh-qualification.md) |
 | Standalone repository provenance, extracted history, legacy fixture boundary | [Migration record](migration.md) |
 | Implemented features, test evidence, M0-M7 progress | [Implementation status](status.md) |

@@ -200,6 +200,16 @@ Standard verification order for runtime changes (details and coverage map in
   Keep Field rendering open while busy so progress and Cancel remain available.
   Preserve keyboard access, shader/form state and Open/Clear behavior; see
   `app/tests/panels.spec.ts` and the sidebar design record.
+- Save-contract research calls actual writers; image/full-volume probes are opt-in
+  and confined to owned repository-local artifacts. File sync and atomic
+  publication do not establish power-loss durability. Exclusive new CLI outputs
+  require hard links and fail on the tested ExFAT volume; never add a direct-write
+  fallback. See Plan 005 before changing save policy.
+- #43's passing affine/anisotropic oracle tests use unmodified production materials.
+  The separate `app/research/anisotropy.probe.ts` intentionally fails for #55 and
+  is outside normal discovery; preserve fixed analytic expectations and diagnostic
+  labelling. The in-memory causal predicate change is not a qualified fix: depth
+  testing/opaque occlusion must be checked separately. See Plan 006.
 - #37 remains qualification-only: the production mesher still emits raw corners.
   The format example's `test = true` runs its exact-bit native self-check in the
   default/hosted suite; measurements are opt-in. Preserve the separately frozen
