@@ -12,6 +12,17 @@ were read back from GitHub. At initial triage sixteen were open: #30–#43 plus 
 #20 and #22. The [5 November triage](2026-11-05-issue-priorities.md) records the
 previous, completed repair batches; it is not the current queue.
 
+## Selected UI follow-up: 13 November 2026
+
+After publishing 0.5.14 with #55 repaired, the user selected
+[#52](https://github.com/uvar-apps/eigenvista/issues/52) for implementation.
+It remains `area:ui`, `kind:polish`, `priority:P3`; selection does not turn
+it into a confirmed scientific or rendering bug. Work is on
+`codex/sidebar-reordering`, with within-pane drag/keyboard/tap ordering and
+a bounded profile preference. The [decision](../design/2026-11-13-sidebar-reordering.md),
+[current handoff](../handoff.md) and [status](../status.md) hold its verification
+and PR outcome. The dated queue below preserves earlier recommendations.
+
 ## Batch A implementation follow-up
 
 The user subsequently authorized #30/#31 on a separate branch and through a PR.

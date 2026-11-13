@@ -1,18 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
-
-const panelIds = [
-  "document",
-  "quantum-fields",
-  "provenance",
-  "field-rendering",
-  "appearance",
-  "atom-colours",
-  "surface-shader",
-  "saved-surfaces",
-] as const;
-
-type PanelId = (typeof panelIds)[number];
+import { panelIds, PanelReorderHandle, type PanelId } from "./PanelSidebar";
 type Expansion = Record<PanelId, boolean>;
 const storageKey = "eigenvista:panel-expansion:v1";
 
@@ -102,6 +90,7 @@ export function PanelSection({
           </button>
         </h2>
         {headerAction}
+        <PanelReorderHandle id={id} title={title} />
       </div>
       <div className="panel-body" id={contentId} hidden={!open}>
         {children}

@@ -14,6 +14,8 @@ This guide describes version 0.5.14, a development preview. Scientific calculati
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
+The sidebar reordering described below is a subsequent source change (#52),
+not yet included in the published 0.5.14 tester ZIP.
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
@@ -85,8 +87,21 @@ choices last for the current session.
 
 **Field rendering** stays expanded while a calculation is running, so its
 progress report and **Cancel** button remain available. Its previous expansion
-choice returns when the calculation finishes or is cancelled. Sections have a
-fixed order; drag-and-drop reordering is not yet implemented.
+choice returns when the calculation finishes or is cancelled.
+
+To reorder sections, drag a heading's **Reorder** handle onto the upper or lower
+half of another section to place it before or after that section in the same
+sidebar. The left and right sidebars keep their own sections.
+You can also click or tap the handle for **Move up** and **Move down**, or focus
+it with Tab and press Up/Down; Home/End moves to the start/end of that sidebar.
+The handle keeps keyboard focus and announces the new position. Escape closes
+the move controls and returns focus to the handle. In Safari on macOS, use
+Option-Tab to reach buttons if ordinary Tab skips them, or enable Keyboard
+Navigation ([Safari shortcuts](https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac)).
+Your order is
+remembered with this profile across Open, Clear and restart, independently of
+section expansion and saved molecular files. Reordering also works during a
+calculation; progress and Cancel remain available.
 
 The runtime badge reads **Native (Tauri)** in the desktop shell and
 **WebAssembly** in the browser. It identifies the runtime, not verified support

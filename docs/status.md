@@ -8,6 +8,36 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Sidebar reordering: 13 November 2026
+
+[#52](https://github.com/uvar-apps/eigenvista/issues/52) is implemented on
+`codex/sidebar-reordering` after release 0.5.14. The
+[decision](design/2026-11-13-sidebar-reordering.md) defines within-pane order,
+profile persistence, stable mounted controls and drag/keyboard/tap access.
+
+Fresh focused Chromium/WebKit verification passes **38/38**, zero skipped, flaky
+or unexpected results: nine new ordering cases plus ten existing panel cases per
+engine. This includes real trusted drag events in both directions/before/after,
+cross-pane/header rejection, actual visual/DOM/focus order, touch moves,
+Open/reload and bounded/denied/full storage, exact decoded Save and zero worker
+requests, same shader/file/error nodes and cancellation of the same unfinished
+request after moving busy Field rendering. Cocoa WebKit uses the independently
+verified Option-Tab convention; hosted non-Cocoa traversal still uses plain Tab.
+
+Fresh local **234 default Rust tests**, fmt, strict workspace/all-target Clippy,
+production WASM/TypeScript/Vite and **13 packaging tests** pass. Independent
+source/test/doc review is clear. Expanded and reordered desktop/mobile captures
+are inspected. The unchanged camera/direct-preview/shader regressions pass
+**20/20**, including actual pixels and wheel/button/middle-drag camera changes:
+**58/58 local browser checks** overall. Normal discovery is **446** (223 per
+engine, 38 files). All four actual final PR-head hosted jobs are required before
+merge; their results are linked from the tracking issue. Local evidence is
+`tmp/2026-11-13-sidebar52/`.
+
+No release/version, dependency, toolchain, format, scientific or logo changes are
+part of this issue. The published 0.5.14 ZIP predates this feature. The original
+untracked review and private exports are preserved.
+
 ## Version 0.5.14
 
 Released 13 November 2026 from merged main `c30a916` (PR #57). This release

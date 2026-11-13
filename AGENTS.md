@@ -214,7 +214,11 @@ Standard verification order for runtime changes (details and coverage map in
   preference, separate from `Document`, scientific worker inputs and dirty state.
   Keep Field rendering open while busy so progress and Cancel remain available.
   Preserve keyboard access, shader/form state and Open/Clear behavior; see
-  `app/tests/panels.spec.ts` and the sidebar design record.
+  `app/tests/panels.spec.ts`, `app/tests/panel-order.spec.ts` and the sidebar
+  design records. Ordering is a separate bounded profile preference in
+  `PanelSidebar.tsx`: retain fixed pane membership, stable React keys and actual
+  DOM/tab order. Keep drag, keyboard and tap controls accessible; never use CSS
+  order alone or remount scientific controls when moving sections.
 - Save-contract research calls actual writers; image/full-volume probes are opt-in
   and confined to owned repository-local artifacts. File sync and atomic
   publication do not establish power-loss durability. Exclusive new CLI outputs
