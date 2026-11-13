@@ -99,6 +99,7 @@ export function volumeObject(
       uniform sampler3D brickRanges; uniform float brickSize; uniform float samplesPerVoxel;
       uniform vec3 positiveColor; uniform vec3 negativeColor; uniform float iso; uniform float opacity;
       uniform bool volumeMode; uniform float epsilon; in vec3 worldPoint;
+      const float visibilityAlpha=0.005;
       float scalar(vec3 p) {
         vec3 g=clamp((worldToGrid*vec4(p,1.0)).xyz,0.0,1.0)*(gridSize-1.0);
         #ifdef FILTERED_FIELD
@@ -163,8 +164,14 @@ export function volumeObject(
           if(volumeMode) {
             float band=smoothstep(iso*0.3,iso,max(abs(value),0.0));
             float alpha=1.0-exp(-band*opacity*segment*1.4);
-            if(alpha>0.001&&first<0.0)first=nextT;
+            float before=accum.a;
             composite(accum,value>=0.0?positiveColor:negativeColor,alpha);
+            // Locate the first accumulated-visible depth within this segment.
+            float extinction=band*opacity*1.4;
+            if(first<0.0&&accum.a>=visibilityAlpha&&extinction>0.0) {
+              float offset=log((1.0-before)/(1.0-visibilityAlpha))/extinction;
+              first=clamp(t+offset,t,nextT);
+            }
           } else {
             bool pos=(prev<iso&&value>=iso)||(prev>iso&&value<=iso)||(t==start&&prev==iso&&value!=prev);
             bool neg=(prev<-iso&&value>=-iso)||(prev>-iso&&value<=-iso)||(t==start&&prev==-iso&&value!=prev);
@@ -203,7 +210,7 @@ export function volumeObject(
           }
           if(accum.a>0.99)break;prev=value;t=nextT;
         }
-        if(accum.a<0.005||first<0.0)discard;
+        if(accum.a<visibilityAlpha||first<0.0)discard;
         vec4 clip=vp*vec4(cameraPosition+direction*first,1.0);gl_FragDepth=0.5*(clip.z/clip.w)+0.5;
         gl_FragColor=vec4(accum.rgb/accum.a,accum.a);
         #include <tonemapping_fragment>

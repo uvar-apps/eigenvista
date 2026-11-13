@@ -2,7 +2,15 @@ import type { Page } from "@playwright/test";
 
 export type V3 = [number, number, number];
 export type Basis = [V3, V3, V3];
-export type FieldKind = "linear" | "positive-tent" | "negative-tent" | 1 | -1;
+export type FieldKind =
+  | "linear"
+  | "positive-tent"
+  | "negative-tent"
+  | "positive-zero-prefix"
+  | "negative-zero-prefix"
+  | "positive-small-prefix"
+  | "negative-small-prefix"
+  | number;
 export const dot = (a: V3, b: V3) => a.reduce((s, v, i) => s + v * b[i], 0);
 export const add = (a: V3, b: V3): V3 => a.map((v, i) => v + b[i]) as V3;
 export const scale = (a: V3, k: number): V3 => a.map((v) => v * k) as V3;
@@ -22,6 +30,18 @@ export interface GeometryCase {
   target: V3;
   up: V3;
   gradient: V3;
+}
+
+/** Opaque depth controls have analytic center-ray intersections in the tests. */
+export type OpaqueControl =
+  | { kind: "plane"; center: V3; normal: V3 }
+  | { kind: "sphere"; center: V3; radius: number }
+  | { kind: "mesh"; vertices: [V3, V3, V3] };
+
+export interface RenderControls {
+  opaque?: OpaqueControl;
+  /** Diagnostic only: expose the unchanged shader's otherwise unwritten depth. */
+  captureVolumeDepth?: boolean;
 }
 
 export function originOf(profile: GeometryCase): V3 {
@@ -263,13 +283,17 @@ export function fieldGrid(profile: GeometryCase, field: FieldKind) {
             ? dot(profile.gradient, add(position, scale(profile.center, -1)))
             : typeof field === "number"
               ? field
-              : (field === "negative-tent" ? -1 : 1) *
-                Math.max(
-                  0,
-                  1 -
-                    Math.abs(position[2] - profile.center[2] - 3 / 64) /
-                      (1 / 64),
-                );
+              : field.endsWith("prefix")
+                ? (field.startsWith("negative") ? -1 : 1) *
+                  ((field.includes("small") ? 0.08 : 0) +
+                    Math.max(0, profile.center[2] - position[2]))
+                : (field === "negative-tent" ? -1 : 1) *
+                  Math.max(
+                    0,
+                    1 -
+                      Math.abs(position[2] - profile.center[2] - 3 / 64) /
+                        (1 / 64),
+                  );
         const rounded = Math.fround(value);
         maximumNodeRounding = Math.max(
           maximumNodeRounding,
@@ -280,8 +304,8 @@ export function fieldGrid(profile: GeometryCase, field: FieldKind) {
   return { origin, axes, dims: profile.dims, values, maximumNodeRounding };
 }
 
-/** Actual production material. The explicit opt-in counterfactual is never used
- * by normative tests; it changes one in-memory predicate solely to isolate cause. */
+/** Actual production shader; optional depthWrite-only capture is labelled and
+ * never supplies an expected value or replaces production shader code. */
 export async function renderAnalyticField(
   page: Page,
   profile: GeometryCase,
@@ -291,7 +315,7 @@ export async function renderAnalyticField(
   opacity: number,
   size = 97,
   filtered = false,
-  firstMarkerControl = false,
+  controls: RenderControls = {},
 ) {
   const grid = fieldGrid(profile, field);
   const gpu = await page.evaluate(
@@ -303,7 +327,7 @@ export async function renderAnalyticField(
       opacity,
       size,
       filtered,
-      firstMarkerControl,
+      controls,
     }) => {
       const toolsUrl = "/src/volume.ts";
       const threeUrl = performance
@@ -352,21 +376,11 @@ export async function renderAnalyticField(
         quality,
       );
       const productionFragment = mesh.material.fragmentShader;
-      const predicate = "if(alpha>0.001&&first<0.0)first=nextT;";
-      if (firstMarkerControl) {
-        if (
-          mode !== "volume" ||
-          productionFragment.split(predicate).length !== 2
-        )
-          throw new Error(
-            "Counterfactual requires exactly one unchanged volume first-marker predicate",
-          );
-        mesh.material.fragmentShader = productionFragment.replace(
-          predicate,
-          "if(alpha>0.0&&first<0.0)first=nextT;",
-        );
-        mesh.material.needsUpdate = true;
-      }
+      const factoryDepthWrite = mesh.material.depthWrite;
+      if (controls.captureVolumeDepth && mode !== "volume")
+        throw new Error("Depth capture is only an explicit volume diagnostic");
+      // Changing depthWrite exposes gl_FragDepth without replacing shader code.
+      if (controls.captureVolumeDepth) mesh.material.depthWrite = true;
       const sha = async (source: string) =>
         Array.from(
           new Uint8Array(
@@ -381,6 +395,31 @@ export async function renderAnalyticField(
       const productionFragmentSha256 = await sha(productionFragment);
       const renderedFragmentSha256 = await sha(mesh.material.fragmentShader);
       scene.add(mesh);
+      let opaqueGeometry;
+      let opaqueMaterial;
+      if (controls.opaque) {
+        const input = controls.opaque;
+        opaqueGeometry =
+          input.kind === "plane"
+            ? new THREE.PlaneGeometry(4, 4)
+            : input.kind === "sphere"
+              ? new THREE.SphereGeometry(input.radius, 64, 32)
+              : new THREE.BufferGeometry();
+        if (input.kind === "mesh")
+          opaqueGeometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(input.vertices.flat(), 3),
+          );
+        opaqueMaterial = new THREE.MeshBasicMaterial({ color: "#0000ff" });
+        const opaque = new THREE.Mesh(opaqueGeometry, opaqueMaterial);
+        if (input.kind !== "mesh") opaque.position.set(...input.center);
+        if (input.kind === "plane")
+          opaque.quaternion.setFromUnitVectors(
+            new THREE.Vector3(0, 0, 1),
+            new THREE.Vector3(...input.normal),
+          );
+        scene.add(opaque);
+      }
       const gl = renderer.getContext();
       const extension = gl.getExtension("WEBGL_debug_renderer_info");
       const backend = extension
@@ -451,7 +490,9 @@ export async function renderAnalyticField(
           glError: gl.getError(),
           size,
           filtered: useFiltered,
-          firstMarkerControl,
+          captureVolumeDepth: !!controls.captureVolumeDepth,
+          factoryDepthWrite,
+          materialDepthWrite: mesh.material.depthWrite,
           productionFragmentSha256,
           renderedFragmentSha256,
           physicalBasis: profile.basis,
@@ -465,6 +506,8 @@ export async function renderAnalyticField(
         packed.dispose();
         readMaterial.dispose();
         readGeometry.dispose();
+        opaqueGeometry?.dispose();
+        opaqueMaterial?.dispose();
         mesh.geometry.dispose();
         mesh.material.dispose();
         mesh.userData.texture.dispose();
@@ -481,7 +524,7 @@ export async function renderAnalyticField(
       opacity,
       size,
       filtered,
-      firstMarkerControl,
+      controls,
     },
   );
   return { ...gpu, maximumNodeRounding: grid.maximumNodeRounding };

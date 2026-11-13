@@ -19,8 +19,10 @@ It also includes the bounded Vite maintenance update, authentic native-file
 regressions, typed numerical encoding and collapsible sidebar sections.
 Indexed meshes remain a qualification experiment; production generation is
 unchanged. See the [0.5.13 release notes](docs/releases/0.5.13.md) for changes
-since 0.5.12 and known limitations, including the open volume opacity/quality
-bug #55.
+since 0.5.12 and its known limitations. Current source fixes the volume
+opacity/quality bug [#55](https://github.com/uvar-apps/eigenvista/issues/55);
+the published 0.5.13 tag/ZIP predates that fix. See the
+[visibility/depth decision](docs/design/2026-11-13-volume-visibility.md).
 
 ## Start here
 

@@ -43,8 +43,9 @@ documents; older `.molekel` preview documents remain readable. Check
   import/publication and typed-encoding improvements, authentic native-file
   compatibility fixtures, Vite maintenance, collapsible sidebar and research
   since 0.5.12. Read [release notes](docs/releases/0.5.13.md), current handoff and
-  status for verification/artifacts. #55 remains an open P2 volume visibility
-  bug; mesh compaction and isotropic resampling are not enabled. Rust 1.99.0,
+  status for verification/artifacts. Current source fixes #55 after that release;
+  the published 0.5.13 tag/ZIP retains the old volume visibility bug. Mesh
+  compaction and isotropic resampling are not enabled. Rust 1.99.0,
   dependency locks, scientific profiles/precision and icon/logo are preserved.
 - Version 0.5.12 collects the five repair batches after 0.5.11: validated native
   parameter export/shader controls, the pinned compiler, sampled preview quality,
@@ -212,11 +213,14 @@ Standard verification order for runtime changes (details and coverage map in
   publication do not establish power-loss durability. Exclusive new CLI outputs
   require hard links and fail on the tested ExFAT volume; never add a direct-write
   fallback. See Plan 005 before changing save policy.
-- #43's passing affine/anisotropic oracle tests use unmodified production materials.
-  The separate `app/research/anisotropy.probe.ts` intentionally fails for #55 and
-  is outside normal discovery; preserve fixed analytic expectations and diagnostic
-  labelling. The in-memory causal predicate change is not a qualified fix: depth
-  testing/opaque occlusion must be checked separately. See Plan 006.
+- #55 uses one aggregate-alpha cutoff (0.005) for volume visibility and the first
+  representative depth, interpolated/clamped inside its crossing segment. Retain
+  the alpha expression, final cutoff, raycast path and depth-write states. Normal
+  volume-visibility tests use fixed independent alpha/depth/prefix expectations;
+  no diagnostic shader is their oracle. A labelled depth-write-only capture is
+  separate from production opaque-scene tests. The old opt-in reproducer lives
+  in Git history; see the [decision](docs/design/2026-11-13-volume-visibility.md).
+  Whole-ray color still does not clip at opaque depth inside the volume.
 - #37 remains qualification-only: the production mesher still emits raw corners.
   The format example's `test = true` runs its exact-bit native self-check in the
   default/hosted suite; measurements are opt-in. Preserve the separately frozen
