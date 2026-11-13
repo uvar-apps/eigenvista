@@ -8,6 +8,67 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Molecular ambient occlusion: 14 November 2026
+
+[#59](https://github.com/uvar-apps/eigenvista/issues/59), developed on
+`codex/molecular-ssao`, adds optional molecular contact/depth shading in
+Appearance. The [decision](design/2026-11-14-molecular-ambient-occlusion.md)
+records the pinned GTAO producer, molecular-only indirect lighting, final
+scene/capture path, resource limits and deferred shader/FBO recovery contract.
+The published 0.5.15 package predates this source feature.
+
+Fresh Chromium/WebKit checks pass **14/14** (seven per engine, 36.890 seconds),
+with zero skipped/flaky/unexpected results. Independent cosine-hemisphere
+geometry distinguishes contact pockets from isolated patches. Positive custom
+blue, production-volume green and opaque-cover controls establish that fields
+are drawn before checking their preserved pixels; transparent front fields
+legitimately blend the newly shaded molecular backdrop. Exact Off/zero PNGs,
+instance/bond picking, complete decoded Save equality and zero worker posts,
+session Open/reload, ON-first/Off/ON uniform refresh, capped resize/toggle/dispose
+allocations and dense 512-atom batching pass. Labelled fault tests inject FBO and
+actual receiver-program LINK_STATUS failures, then verify normal drawing,
+new-document recovery and successful retry. Actual hardware exhaustion is not
+claimed. Device-pixel PNG/compositor comparisons are exact in all five measured
+states, with unchanged max-channel≤2/mean≤0.1 gates and a stricter 32-stable-frame
+idle check inside the existing 240-frame bound.
+
+The **72 unchanged** camera/PNG/direct-field-preview/custom-transparency/sidebar
+regressions also pass: **86/86 local browser checks** overall. Normal discovery
+is **460** (230 per engine, 39 files). Fresh **234 default Rust tests**, Rustfmt,
+strict workspace/all-target Clippy, **13 packaging tests**, production
+WASM/TypeScript/Vite, final strict TypeScript and Prettier pass. Independent
+source/test/design review is clear. All four actual final PR-head hosted jobs
+remain the merge gate; results are linked from the tracking issue.
+
+Actual App qualification uses the unchanged **65,963-atom/66,610-bond 4PJ1**
+fixture on WebKit/Apple GPU at 360×360 pixels. Space-fill, ball-and-stick and a
+five-Zoom-in close-up pass with zero GL/page errors and byte-identical restored
+Off PNGs. Live texture/FBO counts return **5→11→5 / 3→6→3**. Space-fill draws go
+from one instanced batch to two plus two fullscreen passes; ball-and-stick from
+two to four plus two. Measured complete export wall observations are roughly
+75→102 ms, 77→104 ms and 96→124 ms for the close-up. These include browser/export
+work, are not a timing distribution, and **are not GPU timings or FPS**; coarse
+in-callback synchronized timer readings were zero. Chromium/SwiftShader's
+actual large import/first-draw probe was stopped at a fixed 128-second bound;
+its software GPU process reached about 786% CPU. Partial images/process records
+are retained, but that backend has no large-AO usability/FPS qualification.
+No atom geometry or fixture was simplified to make this probe pass.
+
+Root and test reviewer inspected controlled-contact, large full-fit/close-up,
+and actual AO-enabled desktop/mobile UI images. Full-fit contact cues are
+subtle at this small viewport; zooming resolves them. The separate AO-Off 844px
+HiDPI diagnostic documents preexisting fractional CSS/backbuffer resampling;
+strict pixel parity uses an aligned 850px mobile viewport without changing
+production sizing, thresholds or old tests. Existing spec hashes are retained.
+
+Evidence: `tmp/2026-11-14-molecular-ssao/`, including final receiver tests,
+unchanged regression reports, `RESULTS.md`, source hashes, raw captures,
+`large-app/`, `large-app-closeup/` and fractional/off controls. No version,
+release, dependency, compiler, file profile, precision/limit, frozen fixture or
+logo change belongs to this feature. Original review/private exports are
+preserved. It remains an approximate on-screen visual aid, with the existing
+whole-ray field intersection and platform/native-GUI qualification limits.
+
 ## Version 0.5.15
 
 Published 13 November 2026 at 15:18:27 UTC, including merged PR #58's

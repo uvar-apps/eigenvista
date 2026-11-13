@@ -17,6 +17,9 @@ Sidebar headings collapse their controls independently, retain their settings,
 and remember expansion and within-pane order in the current application profile.
 Dedicated handles support dragging, keyboard moves and tap-accessible controls.
 Version 0.5.15 includes this #52 feature; check status for release verification.
+Current source after 0.5.15 also adds optional molecular ambient occlusion;
+see the [decision](design/2026-11-14-molecular-ambient-occlusion.md). The published
+0.5.15 package predates this feature.
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.

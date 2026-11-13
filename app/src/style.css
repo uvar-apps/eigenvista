@@ -485,6 +485,13 @@ section {
   margin: 0;
   font-size: 10px;
 }
+.ambient-occlusion-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+}
 .range-label {
   margin-top: 20px;
 }

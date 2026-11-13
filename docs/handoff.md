@@ -1,9 +1,9 @@
 # Development handoff
 
-Updated 13 November 2026 for published 0.5.15, tagged source `cf39343`.
-This post-tag documentation record identifies completed release verification
-without moving `v0.5.15`. Older dated entries retain their then-current source,
-version and artifact facts.
+Updated 14 November 2026 for molecular ambient occlusion (#59) after published
+0.5.15, tagged release source `cf39343`. Current source adds the feature below;
+the release tag and package retain their original contents. Older dated entries
+retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
@@ -11,6 +11,52 @@ The current application is **EigenVista**, version **0.5.15**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Molecular ambient occlusion: #59
+
+The user authorized [#59](https://github.com/uvar-apps/eigenvista/issues/59) on
+`codex/molecular-ssao`, with issue tracking and a PR merge. Current source adds
+an optional session-only Appearance setting; published 0.5.15 predates it.
+Read the [decision](design/2026-11-14-molecular-ambient-occlusion.md), pinned
+adapter and browser cases before changing this renderer integration.
+
+Only existing instanced atoms/bonds feed GTAO and receive its indirect-light
+map. Full-scene final depth/color/transparency and field/custom materials retain
+the original direct render; animation and PNG share that frame. Targets are
+lazy, half the physical buffer and capped at 1024 per edge (ideal attachment
+payload at most 28 MiB before driver overhead). Off/zero frees owned pass
+resources. Normal material variants stay bounded, with fresh-attachment program
+refresh to avoid cached uniform-map reuse. Deferred diagnostics finish Three's
+calls before failing; support/FBO/reported shader failures preserve the normal
+view with a scoped alert. Actual lost contexts retain reload recovery.
+
+Fresh **14/14 new** Chromium/WebKit cases pass, including targeted receiver-link
+fault recovery, exact Off/zero pixels, field presence/exclusion, physical PNG/
+compositor parity, genuine ON-first cycling, Save/worker isolation and allocation
+bounds. The **72 unchanged** renderer/camera/PNG/sidebar tests pass too:
+**86/86 local browser checks**, no skipped/flaky/unexpected cases. Normal
+inventory is **460** (230 per engine, 39 files). Fresh 234 default Rust tests,
+fmt/strict Clippy, 13 packaging tests, production WASM/TypeScript/Vite and final
+TypeScript/Prettier pass. Independent source/test/design review is clear. The
+four actual final PR-head jobs remain required before merge; actual results are
+linked from the issue.
+
+Real unchanged **4PJ1 (65,963 atoms/66,610 bonds)** passes on WebKit/Apple GPU
+at 360², in space-fill/ball-stick and a zoomed close-up, with no GL/page errors
+and exact Off restoration. Textures/FBOs return 5→11→5 / 3→6→3. Export wall
+observations are about 75→102/77→104 ms and 96→124 ms close-up, not GPU timing,
+FPS or all-device navigation acceptance. The bounded Chromium/SwiftShader
+large-scene probe stopped at 128 seconds without a large-AO usability pass;
+preserve its partial/raw evidence. No geometry was reduced for the test.
+Root inspected actual contact, large-structure and desktop/mobile UI captures.
+
+Evidence/gates: `tmp/2026-11-14-molecular-ssao/` (`RESULTS.md`, final receiver
+and unchanged regression reports, source/capture hashes, large App/close-up and
+fractional-AO-Off diagnostics). Shader fault evidence is injected, not physical
+GPU exhaustion. Keep stricter camera settling and aligned physical-pixel capture
+without weakening old deadlines/oracles. Preserve original untracked review,
+private exports and earlier releases. No version/tag/archive or scientific/
+format/precision/dependency/compiler/logo change is part of this issue.
 
 ## Release 0.5.15
 

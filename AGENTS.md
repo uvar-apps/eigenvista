@@ -39,6 +39,15 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Current source after 0.5.15 adds #59 molecular screen-space ambient occlusion.
+  The published 0.5.15 app predates it. Read the
+  [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md): only
+  actual atom/bond instances participate, with indirect-light material hooks,
+  bounded/lazy GTAO targets and the original full-scene final draw. Preserve
+  field/custom-shader/depth/color isolation, session-only settings and a shared
+  animation/PNG frame path. Keep complete failure/state restoration and
+  pass-owned disposal, including the pinned addon’s missing material cleanup.
+
 - Version 0.5.15 includes #52 sidebar reordering within each existing pane.
   Dedicated handles support native drag, keyboard moves and tap controls;
   bounded profile order stays separate from expansion and molecular documents.

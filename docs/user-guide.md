@@ -14,7 +14,9 @@ This guide describes version 0.5.15, a development preview. Scientific calculati
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
-Version 0.5.15 includes the sidebar reordering described below (#52).
+Version 0.5.15 includes the sidebar reordering described below (#52). Molecular
+ambient occlusion (#59) is a subsequent source feature; use a source build until
+a later release packages it.
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
@@ -434,6 +436,28 @@ isosurfaces). Shading is a session display preference and is not written into
 `.eigenvista` files; molecular atoms and bonds keep their own material. Eye
 icons toggle individual mesh visibility; trash icons remove meshes from the
 document. There is no undo.
+
+### Molecular ambient occlusion
+
+Under **Appearance**, enable **Ambient occlusion** to add contact/depth shading
+between atoms and bonds. This can make dense molecular structures easier to
+read, especially with **Representation → Van der Waals** (space-filling spheres).
+It starts off. **AO strength**
+controls the amount (0–100%); **AO radius (angstrom)** controls the neighborhood
+(0.25–4 Å, initially 1.5 Å). Zero strength restores the normal view.
+
+These settings last for the session across Open and are independent of saved
+molecular data. Reload starts with AO off. PNG export includes the current
+shading. Element colors and picking remain available. Quantum fields and saved
+surfaces keep their own materials; transparent ones can show the shaded
+molecule through them.
+
+This is an approximate screen-space visual cue: hidden/offscreen geometry and
+camera changes affect it, and it does not indicate electron density or another
+computed property. It uses extra GPU work/memory; turn it off if navigation is
+slow. Off releases the AO image buffers. If the enhancement fails, a message
+reports it and normal molecular rendering stays available; disable and
+re-enable it to retry. A lost graphics context still requires reloading.
 
 ### Atom colours
 

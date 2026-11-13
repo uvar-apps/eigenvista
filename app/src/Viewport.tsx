@@ -18,6 +18,7 @@ import {
   type ShaderPair,
 } from "./shaderTools";
 import { volumeObject, type VolumeQuality } from "./volume";
+import { MolecularAmbientOcclusion } from "./molecularAmbientOcclusion";
 import { elementDisplay } from "./elements";
 import { resolveAtomColor, type AtomPalette } from "./atomColors";
 
@@ -27,6 +28,17 @@ export function symbol(z: number) {
 }
 
 const IDENTITY_QUATERNION = new THREE.Quaternion();
+
+export interface AmbientOcclusionSettings {
+  enabled: boolean;
+  strength: number;
+  radiusAngstrom: number;
+}
+const DEFAULT_AMBIENT_OCCLUSION: AmbientOcclusionSettings = {
+  enabled: false,
+  strength: 1,
+  radiusAngstrom: 1.5,
+};
 
 /**
  * Resolve the selection label for a raycast hit. Instanced meshes carry one label
@@ -111,6 +123,7 @@ export function Viewport({
   grid,
   mode,
   volumeQuality = 2,
+  ambientOcclusion = DEFAULT_AMBIENT_OCCLUSION,
   shading,
   shader,
   atomPalette,
@@ -122,6 +135,7 @@ export function Viewport({
   grid: SampledGrid | null;
   mode: RenderMode;
   volumeQuality?: VolumeQuality;
+  ambientOcclusion?: AmbientOcclusionSettings;
   shading: SurfaceShading;
   shader: (ShaderPair & { target: string }) | null;
   atomPalette?: AtomPalette;
@@ -136,6 +150,8 @@ export function Viewport({
     camera: THREE.PerspectiveCamera;
     controls: OrbitControls;
     group: THREE.Group;
+    ambientOcclusion: MolecularAmbientOcclusion;
+    draw: () => void;
     fit: () => void;
     needsRender: boolean;
   } | null>(null);
@@ -151,6 +167,9 @@ export function Viewport({
   const onShaderLogRef = useRef(onShaderLog);
   onShaderLogRef.current = onShaderLog;
   const [error, setError] = useState("");
+  const [occlusionError, setOcclusionError] = useState("");
+  const occlusionSettings = useRef(ambientOcclusion);
+  occlusionSettings.current = ambientOcclusion;
   useEffect(() => {
     const div = host.current!;
     let renderer: THREE.WebGLRenderer;
@@ -180,6 +199,25 @@ export function Viewport({
     controls.enableDamping = true;
     const group = new THREE.Group();
     scene.add(group);
+    const occlusion = new MolecularAmbientOcclusion(renderer, scene, camera);
+    // The viewport and synchronous PNG export must draw the same final frame.
+    const draw = () => {
+      const settings = occlusionSettings.current;
+      try {
+        occlusion.render({
+          enabled: settings.enabled,
+          strength: settings.strength,
+          radius: settings.radiusAngstrom / BOHR,
+        });
+      } catch (cause) {
+        setOcclusionError(
+          "Unable to apply ambient occlusion: " +
+            String(cause) +
+            ". Disable and re-enable Ambient occlusion to retry.",
+        );
+      }
+      renderer.render(scene, camera);
+    };
     const fit = () => {
       const box = new THREE.Box3().setFromObject(group);
       if (box.isEmpty()) return;
@@ -210,6 +248,8 @@ export function Viewport({
       camera,
       controls,
       group,
+      ambientOcclusion: occlusion,
+      draw,
       fit,
       needsRender: true,
     };
@@ -261,7 +301,7 @@ export function Viewport({
       const moved = controls.update();
       if (moved || engine.current?.needsRender) {
         try {
-          renderer.render(scene, camera);
+          draw();
         } catch (error) {
           setError(
             `Unable to render the scene: ${String(error)}. Try a lower grid resolution or fewer surfaces.`,
@@ -275,6 +315,7 @@ export function Viewport({
       resize.disconnect();
       controls.removeEventListener("change", invalidate);
       controls.dispose();
+      occlusion.dispose();
       dispose(group);
       renderer.dispose();
       div.removeChild(renderer.domElement);
@@ -444,6 +485,13 @@ export function Viewport({
       );
       return;
     }
+    e.ambientOcclusion.setMolecules(
+      group.children.filter(
+        (object): object is THREE.InstancedMesh =>
+          object instanceof THREE.InstancedMesh,
+      ),
+    );
+    setOcclusionError("");
     dispose(e.group);
     e.group.clear();
     e.group.add(group);
@@ -497,6 +545,20 @@ export function Viewport({
   useEffect(() => {
     engine.current?.fit();
   }, [reset, doc.id]);
+  useEffect(() => {
+    const current = engine.current;
+    if (!current) return;
+    if (!ambientOcclusion.enabled || ambientOcclusion.strength === 0) {
+      // Release targets immediately, including after a failed enable attempt.
+      current.ambientOcclusion.render({
+        enabled: false,
+        strength: 0,
+        radius: 1,
+      });
+      setOcclusionError("");
+    }
+    current.needsRender = true;
+  }, [ambientOcclusion]);
   function screenshot() {
     const e = engine.current;
     if (!e) return;
@@ -506,7 +568,7 @@ export function Viewport({
       // Read the freshly rendered frame in the same task, before the browser
       // can discard this non-preserved drawing buffer. Export needs no
       // persistent render target and does not change the camera or document.
-      e.renderer.render(e.scene, e.camera);
+      e.draw();
       const a = document.createElement("a");
       a.download = "eigenvista-view.png";
       a.href = e.renderer.domElement.toDataURL("image/png");
@@ -526,6 +588,11 @@ export function Viewport({
       {error && (
         <div className="viewport-error" role="alert">
           {error}
+        </div>
+      )}
+      {occlusionError && (
+        <div className="viewport-error" role="alert">
+          {occlusionError}
         </div>
       )}
       <div className="viewport-tools">

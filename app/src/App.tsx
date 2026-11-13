@@ -43,7 +43,7 @@ import {
 import { ConvertFiles } from "./ConvertFiles";
 import { OrbitalBrowser, maxOrbitalBatch } from "./OrbitalBrowser";
 import { gridResolutions, isGridResolution } from "./resolution";
-import { Viewport } from "./Viewport";
+import { Viewport, type AmbientOcclusionSettings } from "./Viewport";
 import { ShaderPanel, type ShaderEditorState } from "./ShaderPanel";
 import { PanelSection, usePanelExpansion } from "./PanelSection";
 import { PanelSidebar, usePanelOrder } from "./PanelSidebar";
@@ -82,6 +82,12 @@ export default function App() {
   const [resolution, setResolution] = useState(40);
   const [mode, setMode] = useState<RenderMode>("mesh");
   const [volumeQuality, setVolumeQuality] = useState<VolumeQuality>(2);
+  const [ambientOcclusion, setAmbientOcclusion] =
+    useState<AmbientOcclusionSettings>({
+      enabled: false,
+      strength: 1,
+      radiusAngstrom: 1.5,
+    });
   const [surfaceShading, setSurfaceShading] =
     useState<SurfaceShading>("diffuse");
   const [shaderEditor, setShaderEditor] = useState<ShaderEditorState>({
@@ -830,6 +836,7 @@ export default function App() {
               grid={grid}
               mode={mode}
               volumeQuality={volumeQuality}
+              ambientOcclusion={ambientOcclusion}
               shading={surfaceShading}
               shader={appliedShader}
               atomPalette={atomPalette}
@@ -1037,6 +1044,65 @@ export default function App() {
                   <option value="blinn-phong">Blinn-Phong</option>
                 </select>
               </label>
+              <label className="ambient-occlusion-toggle">
+                Ambient occlusion
+                <input
+                  aria-label="Ambient occlusion"
+                  type="checkbox"
+                  checked={ambientOcclusion.enabled}
+                  onChange={(event) =>
+                    setAmbientOcclusion((current) => ({
+                      ...current,
+                      enabled: event.target.checked,
+                    }))
+                  }
+                />
+              </label>
+              {ambientOcclusion.enabled && (
+                <>
+                  <p className="empty">Depth shading for atoms and bonds.</p>
+                  <label className="range-label">
+                    AO strength
+                    <output>
+                      {Math.round(ambientOcclusion.strength * 100)}%
+                    </output>
+                    <input
+                      aria-label="AO strength"
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={ambientOcclusion.strength}
+                      onChange={(event) =>
+                        setAmbientOcclusion((current) => ({
+                          ...current,
+                          strength: Number(event.target.value),
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className="range-label">
+                    AO radius (angstrom)
+                    <output>
+                      {ambientOcclusion.radiusAngstrom.toFixed(2)} Å
+                    </output>
+                    <input
+                      aria-label="AO radius (angstrom)"
+                      type="range"
+                      min="0.25"
+                      max="4"
+                      step="0.25"
+                      value={ambientOcclusion.radiusAngstrom}
+                      onChange={(event) =>
+                        setAmbientOcclusion((current) => ({
+                          ...current,
+                          radiusAngstrom: Number(event.target.value),
+                        }))
+                      }
+                    />
+                  </label>
+                </>
+              )}
             </PanelSection>
             <PanelSection
               key="atom-colours"

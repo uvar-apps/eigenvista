@@ -27,6 +27,10 @@ Version 0.5.15 adds [#52 sidebar reordering](docs/design/2026-11-13-sidebar-reor
 with native drag, keyboard and tap controls, remembered profile order and
 preserved control/calculation state. See the [0.5.15 release notes](docs/releases/0.5.15.md).
 
+Current source also adds optional molecular ambient occlusion for dense structures
+([#59](https://github.com/uvar-apps/eigenvista/issues/59)); it is a subsequent source
+change and is not in the published 0.5.15 ZIP.
+
 ## Start here
 
 - **Using the application:** [User guide](docs/user-guide.md), including Mac

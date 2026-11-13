@@ -413,13 +413,32 @@ error without unmounting the interface. Render and image-export exceptions are
 also reported, separate from the existing graphics-context-loss warning.
 The renderer is created with `preserveDrawingBuffer: false`. PNG export renders
 the current scene/camera and reads `toDataURL("image/png")` synchronously in the
-same task, before presentation can discard that buffer. It needs no permanent
-offscreen target and changes neither camera nor document. Lost contexts and
+same task, before presentation can discard that buffer. Export adds no persistent
+offscreen target of its own and changes neither camera nor document. Lost contexts and
 invalid/failed encoding report errors; a successful retry clears only an earlier
 export error. No GPU-memory reduction has been measured or promised.
 Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
 instanced meshes with per-instance atom picking. Rendering at every maximum
 input size still requires separate platform acceptance.
+
+Molecular ambient occlusion is an optional session display setting. The
+[controller](../app/src/molecularAmbientOcclusion.ts) uses the pinned GTAO addon
+as a molecule-only normal/depth and AO producer on reserved layer 1. It attaches
+screen-map uniforms only to the existing instanced atom/bond standard materials’
+indirect light. The final complete scene remains a direct render, preserving
+field/custom-shader and transparency/depth/color paths. Transparent-field
+pixels can change through the newly shaded molecular backdrop. No chemistry,
+worker registration, scientific source or document dirty state changes.
+
+Target dimensions are half the physical drawing buffer and at most 1024 per
+edge (ideal attachment payload at most 28 MiB plus noise/driver overhead).
+Off/zero allocates no pass; disabling releases owned pass resources. Normal
+material shader variants remain bounded until material disposal. Support/FBO
+checks, deferred shader diagnostics, scoped failures and finally restoration
+retain the normal view on enhancement failure. Actual context loss follows the
+existing reload path. Animation and PNG invoke one shared final-frame function.
+See the [decision](design/2026-11-14-molecular-ambient-occlusion.md) for exact
+ownership, limits, API pins and verification boundaries.
 
 The footer uses `Native (Tauri)` for the desktop shell and `WebAssembly` for the
 browser. This neutral label describes the runtime rather than guessing the OS;
