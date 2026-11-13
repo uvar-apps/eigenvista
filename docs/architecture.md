@@ -413,13 +413,48 @@ error without unmounting the interface. Render and image-export exceptions are
 also reported, separate from the existing graphics-context-loss warning.
 The renderer is created with `preserveDrawingBuffer: false`. PNG export renders
 the current scene/camera and reads `toDataURL("image/png")` synchronously in the
-same task, before presentation can discard that buffer. It needs no permanent
-offscreen target and changes neither camera nor document. Lost contexts and
+same task, before presentation can discard that buffer. Export adds no persistent
+offscreen target of its own and changes neither camera nor document. Lost contexts and
 invalid/failed encoding report errors; a successful retry clears only an earlier
 export error. No GPU-memory reduction has been measured or promised.
 Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
 instanced meshes with per-instance atom picking. Rendering at every maximum
 input size still requires separate platform acceptance.
+
+Molecular ambient occlusion is an optional session display setting. The
+[controller](../app/src/molecularAmbientOcclusion.ts) uses the pinned GTAO addon
+as a molecule-only normal/depth and AO producer on reserved layer 1. It attaches
+screen-map uniforms to owned MeshLambertMaterial replacements on the existing
+instanced atoms/bonds. Active SSAO uses Lambert diffuse shading without specular
+highlights; a visibility exponent of 6 and strength mixing modulate both diffuse
+light terms. This illustrative shading targets broad molecular folds and
+cavities. The final complete scene remains a direct render, preserving
+field/custom-shader and transparency/depth/color paths. Transparent-field
+pixels can change through the newly shaded molecular backdrop. No chemistry,
+worker registration, scientific source or document dirty state changes.
+
+Automatic radius defaults on and uses 5% of the atom-coordinate bounding-box
+diagonal, converted to angstrom, rounded to the nearest quarter angstrom and
+clamped to 1.5–30 Å. App memoizes it by the immutable atoms reference; camera,
+field bounds and display representation do not change it. Turning Auto off
+retains its current value for manual adjustment over 0.25–50 Å. This is a session
+display choice, not a scientific radius stored in the document.
+
+Target dimensions follow the full physical drawing buffer, capped proportionally
+at 1024 per edge (ideal attachment payload at most 28 MiB plus noise/driver overhead).
+GTAO uses sample parameter 32 and distance exponent 2; Poisson denoise uses
+8 samples, radius 4 and luma rejection 0.25. No half-resolution stage or beauty
+composer is used.
+Off/zero allocates no pass; disabling releases owned pass resources. Owned
+Lambert materials are disposed and the exact original material references are
+restored on Off/zero, failure or scene replacement before old-group disposal.
+Borrowed Standard materials, their hooks and programs remain unchanged; each
+enable owns fresh Lambert materials/uniforms. Support/FBO
+checks, deferred shader diagnostics, scoped failures and finally restoration
+retain the normal view on enhancement failure. Actual context loss follows the
+existing reload path. Animation and PNG invoke one shared final-frame function.
+See the [decision](design/2026-11-14-molecular-ambient-occlusion.md) for exact
+ownership, the rejected prototype, limits, API pins and verification boundaries.
 
 The footer uses `Native (Tauri)` for the desktop shell and `WebAssembly` for the
 browser. This neutral label describes the runtime rather than guessing the OS;

@@ -1,9 +1,9 @@
 # Development handoff
 
-Updated 13 November 2026 for published 0.5.15, tagged source `cf39343`.
-This post-tag documentation record identifies completed release verification
-without moving `v0.5.15`. Older dated entries retain their then-current source,
-version and artifact facts.
+Updated 14 November 2026 for molecular ambient occlusion (#59) after published
+0.5.15, tagged release source `cf39343`. Current source adds the feature below;
+the release tag and package retain their original contents. Older dated entries
+retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
@@ -11,6 +11,74 @@ The current application is **EigenVista**, version **0.5.15**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Molecular ambient occlusion: #59
+
+The user authorized [#59](https://github.com/uvar-apps/eigenvista/issues/59) on
+`codex/molecular-ssao`, through [PR #60](https://github.com/uvar-apps/eigenvista/pull/60).
+Current source adds **Lambert shading + SSAO** for existing atom/bond instances,
+without specular highlights. Published 0.5.15 predates this source feature. The
+user's [visual reference](https://ugovaretto.github.io/molekel/wiki/uploads/Main/Gallery/AO_AND_NOAO.png)
+requires broad fold/cavity shading; the initial indirect-light-only candidate
+`a6b58f3` was rejected and must not be treated as accepted source/evidence.
+
+Appearance starts with AO off. Automatic radius starts on: 5% of the atom-only
+coordinate-box diagonal, converted to angstrom, quarter-angstrom rounded and
+clamped to 1.5–30 Å. It is memoized by atoms reference, independent of fields or
+camera. Disabling Auto adopts the current value for manual 0.25–50 Å adjustment.
+Owned Lambert replacements receive illustrative visibility contrast on both
+diffuse terms; Off/zero/failure restores exact original material references
+before releasing owned resources. Field/custom shaders and the final direct
+scene/PNG depth/color/transparency path remain separate. Targets follow the
+physical buffer, capped at 1024 per edge (ideal attachment payload at most
+28 MiB before driver overhead). Read the
+[decision](design/2026-11-14-molecular-ambient-occlusion.md) before changing
+ownership, bounds, pass settings or deferred nonthrowing shader diagnostics.
+
+Fresh **100/100 local browser checks** pass (194.985 seconds), with zero
+skipped/flaky/unexpected results: 20 AO, 72 unchanged renderer/camera/PNG/sidebar
+and eight unchanged palette cases. They enforce actual Lambert instances,
+positive legacy-gloss controls, independent recessed-versus-exposed geometry,
+exact original-reference/Off/zero restoration, field presence/isolation,
+physical PNG/compositor parity, Auto/manual/recompute behavior, Save/worker
+isolation, target lifecycle and labelled injected FBO/receiver-link recovery.
+Normal inventory is **466** (233 per engine, 39 files). Production
+WASM/TypeScript/Vite, final strict TypeScript/Prettier and 13 packaging tests
+pass. Earlier in this feature, 234 default Rust tests, fmt and strict Clippy
+passed; Rust sources, fixtures, locks and workflow budgets remain unchanged.
+All four actual final PR-head jobs must pass before merge; their results and
+current merge state are linked from #59/PR #60 rather than inferred from config.
+
+Primary actual-App testing uses the unchanged tracked
+[1AON.cif](../fixtures/cif/1AON.cif), all **58,870 atoms**, automatic **14.25 Å**
+radius, WebKit/Apple GPU. Root inspected the default and genuine side-orbit
+Lambert-only/full-AO pairs plus desktop/mobile UI. Broad cavities visibly darken
+while exposed atom colors remain. Default-fit/desktop restored PNGs are exact.
+Rotated/mobile frames are visual evidence, not exact-restoration passes: an
+independent main-frame GPU diagnostic shows 957 pixels already changing between
+two Off captures with AO never enabled, with model-view delta 1.14e-5 and
+identical projection/viewport. Those comparisons did not hold the same-camera
+precondition. Keep their original failed reports; no test tolerance was relaxed.
+The unchanged 65,963-atom 4PJ1 structure remains secondary current visual proof.
+No FPS, total GPU-memory or all-device performance qualification is claimed.
+
+PNG automation separates three full-size desktop captures from a bounded
+interaction/resize case. The latter changes only the test render host at DPR 2
+(240×128→160×160 CSS; actual buffers 480×256→320×320), retaining the real
+window/toolbar, all five captures, camera/resize/Fit/zero actions and every
+pixel/idle/60-second deadline. The separate 1024-cap test and unmodified actual
+1AON UI qualification remain. Run 43479687125 at `04c8c919` passed Linux/Mac/
+WebKit but timed out in the formerly combined Chromium capture case (231/232);
+three completed large captures were exact. Preserve that diagnostic; it does
+not qualify the revised test head.
+
+Evidence: `tmp/2026-11-14-molecular-ssao/revision-local-summary.json` and
+`revision-visual/` (final100 report/source hashes, primary1AON captures, public
+GPU matrix observations and secondary4PJ1). The old head's CI had three green
+jobs and one unchanged density-heartbeat failure; it is historical, not the new
+head's gate. Preserve user review/reference files, private exports and earlier
+releases. No version/tag/archive or scientific/format/precision/dependency/
+compiler/logo change belongs to this issue.
 
 ## Release 0.5.15
 

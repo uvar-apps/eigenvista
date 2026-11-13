@@ -8,6 +8,96 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Molecular ambient occlusion: 14 November 2026
+
+[#59](https://github.com/uvar-apps/eigenvista/issues/59), developed on
+`codex/molecular-ssao` through [PR #60](https://github.com/uvar-apps/eigenvista/pull/60),
+adds optional **Lambert shading + SSAO** for atoms and bonds, without specular
+highlights. The user supplied the original Molekel broad-cavity reference and
+requested **1AON** for testing. The
+[decision](design/2026-11-14-molecular-ambient-occlusion.md) records actual owned
+Lambert materials, molecular-scale Auto/manual radius, bounded full-physical
+GTAO targets, exact borrowed-material restoration, deferred diagnostics and
+field/final-frame isolation. Published 0.5.15 predates the feature.
+
+Fresh local verification passes **100/100 browser cases** in **194.985 seconds**,
+zero skipped/flaky/unexpected: 20 AO, 72 unchanged camera/PNG/field/transparency/
+sidebar and eight unchanged palette checks, both Chromium and WebKit. Normal
+inventory is **466**, 233 per engine across 39 files. Actual instanceof Lambert
+and exact borrowed-reference controls complement a positive legacy gloss signal.
+The new directional/hemisphere-light test uses a declared deeper pocket with
+independent cosine visibility 0.6445 and an unobstructed camera ray; its existing
+12-luma/15% contrast gates remain unchanged (43.8%/43.95% observed). Original
+ambient, field, resource and dense geometry controls are preserved. Comparing
+two positive strengths on the same Lambert materials separates AO from removal
+of highlights. Auto checks cover the small-molecule clamp, manual 50 Å and a
+new two-atom import with independently expected automatic 10 Å.
+
+The five PNG/compositor samples are retained in two independent cases: three
+full-size desktop idle/repeated/zoom captures, then a bounded interaction/
+resize/Fit/zero case. Only the latter’s test render host is constrained
+(240×128 desktop→160×160 mobile CSS at DPR 2, actual 480×256→320×320 buffers);
+real window sizes/toolbar, actions, pixel thresholds, 32-idle/240-frame guard and
+60-second per-test limit stay unchanged. The 1024-cap resource test and actual
+unmodified 1AON desktop/mobile UI checks cover their separate contracts.
+
+Positive custom/volume/opaque-cover controls, exact Off/zero PNGs and picking,
+complete decoded Save equality and zero appearance-related worker posts,
+physical PNG/compositor parity, real ON-first cycling, capped allocation/
+disposal and dense512 instancing pass. Labelled FBO and actual receiver-link
+fault injections verify direct recovery/retry without claiming physical GPU
+exhaustion. Existing references, deadlines and assertions were not weakened.
+Production WASM/TypeScript/Vite, final strict TypeScript/Prettier and **13
+packaging tests** pass. Earlier in this feature, **234 default Rust tests**,
+fmt and strict workspace/all-target Clippy passed; their Rust sources and pins
+remain unchanged. All four actual final-head hosted jobs remain required before
+merge; actual results and merge state are linked from #59/PR #60.
+
+Primary real-file evaluation uses tracked **1AON.cif**, SHA256
+`6b202f340ffb9a1924d5315ce9e837e02cee1dbd745df675be76f6d4e1b8e66f`,
+all **58,870 atoms**, automatic **14.25 Å** radius, through actual App/UI on
+WebKit/Apple GPU. Root inspected default/side-orbit Lambert-only versus full-AO
+pairs and actual desktop/mobile controls against the supplied visual reference.
+Broad recessed regions darken clearly while exposed atom colors remain.
+The explicitly labelled Lambert-only diagnostic forces only the observed
+molecular AO-strength GL uniform to zero while retaining actual Lambert; real
+UI weak/full settings then positively restore the observed 0.05/1 values.
+Default-fit/desktop Off restoration is byte-identical, with no page/GL errors.
+
+Large side/mobile poses are visual qualification, not exact-restoration passes.
+A separate bounded same-task GPU observation found **957 changed pixels between
+two Off exports before AO was ever enabled**, with model-view delta **1.14e-5**;
+projection/viewport stayed identical. Initial-Off/restored-Off also had different
+model-view transforms. This establishes a changing-camera precondition in the
+rotated comparison independently of AO. Preserve the initial failed hash
+reports; no exact-pixel threshold or normal camera gate was relaxed. The normal
+strict camera/export tests and default real1AON exact checks pass separately.
+
+Unchanged **4PJ1 (65,963 atoms/66,610 bonds)** remains secondary current
+Lambert-only/AO visual proof at automatic16.25 Å. Attachment payload is bounded,
+but total GPU memory, FPS, all-device navigation and physical native-GUI
+acceptance are not established by these checks. Earlier prototype timing and
+software-backend probes are historical and do not qualify this more expensive
+32-sample/full-resolution mode. It remains an approximate on-screen depth cue;
+existing whole-ray field intersections are unchanged.
+
+Evidence: `tmp/2026-11-14-molecular-ssao/revision-local-summary.json`,
+`revision-visual/final100-report.json`, frozen source hashes, primary1AON
+reports/captures, the public matrix diagnostic and secondary4PJ1 images. The
+initial indirect-only candidate `a6b58f3` was visually rejected (<1/255 mean
+luma change); its hosted run also had an unchanged density-heartbeat failure.
+Neither is used as the current gate. Subsequent [run 43479687125](https://github.com/uvar-apps/eigenvista/actions/runs/43479687125)
+at `04c8c919` passed Linux 232, Mac seven and WebKit 232, but Chromium 231/232
+hit the unchanged 60-second limit in the combined AO PNG case. Its first three
+1000×1042 desktop captures matched exactly; slow drag/resize left Fit pending.
+The scoped split/bound above addresses the measured test scheduling cost,
+without changing production rendering or weakening a pixel/deadline oracle.
+All diagnostic failures remain recorded; actual new-head four-job success is
+required independently.
+No release/tag/archive rebuild, scientific/profile/precision/limit change,
+dependency/compiler update, fixture change or logo change belongs to this task.
+Original review/reference/private files and historical releases are preserved.
+
 ## Version 0.5.15
 
 Published 13 November 2026 at 15:18:27 UTC, including merged PR #58's
