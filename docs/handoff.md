@@ -490,7 +490,7 @@ tag and tester ZIP predate these fixes. Preserve the user's untracked
 The existing CIF browser test also emits `app/artifacts/cif-1bh3-desktop.png`;
 that generated image is preserved and locally excluded from Git/source packaging.
 
-## Current release
+## Historical release 0.5.12 (6 November 2026)
 
 Version 0.5.12 collects all five repair batches below/above, through merged
 main `e9c7675` (PR #29). It includes BinaryCIF/raw-gzip import, declared mmCIF
