@@ -10,8 +10,8 @@ limits and run without secrets or repository write permissions:
 | ---------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | Rust                   | Ubuntu 24.04 x64 | Rustfmt, locked default-member tests, strict workspace/all-target Clippy including the desktop crate                                               | 45 minutes |
 | Desktop                | macOS 15 arm64   | Explicit locked `eigenvista-desktop` tests                                                                                                         | 45 minutes |
-| WASM/Chromium/packaging | Ubuntu 24.04 x64 | Clean pinned setup, 13 packaging support tests, production WASM/frontend build, all 214 Chromium cases | 60 minutes |
-| WASM/WebKit/packaging | Ubuntu 24.04 x64 | Clean pinned setup, 13 packaging support tests, production WASM/frontend build, all 214 WebKit cases | 60 minutes |
+| WASM/Chromium/packaging | Ubuntu 24.04 x64 | Clean pinned setup, 13 packaging support tests, production WASM/frontend build, full Chromium project | 60 minutes |
+| WASM/WebKit/packaging | Ubuntu 24.04 x64 | Clean pinned setup, 13 packaging support tests, production WASM/frontend build, full WebKit project | 60 minutes |
 
 The browser rows use the same job definition with a two-engine matrix. Each
 gets its own clean runner, Node 26, locked npm install and matching wasm-bindgen
@@ -72,7 +72,10 @@ normal application config, retaining the full test set, engines, single worker
 and timeouts. It refuses to reuse another server, rejects focused tests and adds
 failure screenshots, traces without embedded source files, and an HTML report.
 Hosted rows select only their engine with `--project`; their disjoint union is
-the same complete 428-case suite. The local command still runs both engines.
+the same complete suite. The local command still runs both engines. See the
+[current implementation status](../docs/status.md) for the current inventory and
+the applicable source/verification ledger; historical counts do not limit test
+discovery.
 The 26 analytic #43 cases and 52 #55 visibility/depth regressions are included.
 The original opt-in failing reproducer was promoted into normal production
 regressions; historical code remains in the v0.5.13 research snapshot. Current
