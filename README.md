@@ -11,10 +11,10 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** source version **0.7.0** is an experimental
+**Status:** version **0.7.0** is published as an experimental
 Apple Silicon development preview, not v1 or completion of the M0-M7 plan.
 Fresh local macOS release checks passed, including all 504 browser cases.
-Rebuilt archives and publication remain pending. See
+Rebuilt Apple Silicon assets and downloaded hashes are verified. See
 [implementation status](docs/status.md#source-version-070) and the
 [0.7.0 release notes](docs/releases/0.7.0.md).
 
@@ -104,9 +104,10 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [planned 0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-will carry its rebuilt ZIP, checksum and build metadata after publication; check
-[status](docs/status.md#source-version-070) for actual verification and delivery.
+The [0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+provides the rebuilt ZIP, checksum and build metadata. Check
+[status](docs/status.md#source-version-070) for the verified source, SHA256 and
+local test/artifact evidence.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
 remains the earlier published package. Older packages remain historical and
 are not updated in place.

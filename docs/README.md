@@ -28,8 +28,10 @@ Version 0.7.0 includes biological metadata, chain/entity coloring, component
 selection and protein trace/tube/ribbon/cartoon views under issues #62–#66,
 merged through [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
 Fresh local macOS release verification passed, including all 504 browser cases.
-Rebuilt artifacts and publication remain pending; see
-the [0.7.0 release notes](releases/0.7.0.md) and current status. The published
+The rebuilt, independently audited Apple Silicon artifacts are published at the
+[0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0),
+with all three asset downloads verified. See the
+[0.7.0 release notes](releases/0.7.0.md) and current status. The published
 0.6.0 package predates these views. Read the
 [user workflow](user-guide.md#biological-structure-views),
 [import contract](structure-imports.md#biological-identities)

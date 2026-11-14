@@ -23,31 +23,69 @@ record of the completed checks.
 
 ## Source version 0.7.0
 
-14 November 2026: release preparation authorized. Version 0.7.0 brings the
-biological views and optional metadata merged through
-[PR #67](https://github.com/uvar-apps/eigenvista/pull/67), main `1e6881d`, into a
-new tester release. See the [release notes](releases/0.7.0.md) and
-[planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0).
-The planned page is not a publication claim.
+Published **2026-11-14T11:43:29Z** as a development
+[GitHub prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0).
+Annotated tag `v0.7.0`, object `d587bf48709ac4a22d98f9d11e7e809643d9b287`,
+was verified locally/remotely at source
+`d414bc7c92f83b640a682d8c053b681b31667051`. The release includes biological
+views and optional metadata from [PR #67](https://github.com/uvar-apps/eigenvista/pull/67),
+merged main `1e6881d`, and the guide-image packaging repair #69.
+See the [release notes](releases/0.7.0.md).
 
 Fresh automated local macOS verification passed: 272 default Rust tests, seven
 desktop tests, fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production
 build and 13 packaging checks. The full browser run passed 504 cases, 252 per
-engine, in 15.7 minutes with zero skipped, flaky or unexpected results. All runtime,
-test, fixture and generated-WASM hashes remained stable; Vite PID 48452 was
+engine, in 15.7 minutes with zero skipped, flaky or unexpected results and zero
+retries, using one worker. All runtime, test, fixture and generated-WASM hashes
+remained stable; Vite PID 48452 was
 preserved. These are fresh versioned-source results, separate from the earlier
-biological implementation checks below. Remaining artifact/native checks must
-also pass before pushing.
+biological implementation checks below. Eighteen production-browser captures
+passed, nine per engine, for full tracked 1AON, 4PJ1 and 1CRN. Actual production
+assets match the signed app; appearance was inspected. Hosted CI was not required
+or used for this release.
 
-Rebuilt app/converter/ZIP/checksum/build metadata, clean-source and embedded
-asset audit, actual native executable startup, annotated tag and remote
-publication/download verification are also pending. No new archive identity or
-release success is claimed here; completed results belong in
-`tmp/2026-11-14-release-0.7.0/` and this living section. Hosted CI is not required.
+The rebuilt app/converter/ZIP, clean-source and embedded-asset audit, actual
+extracted native startup and annotated-tag/publication/download checks passed.
+Retained ZIP is under `artifacts/distributions/`; staging is
+`tmp/eigenvista-package-jwYnQO`. All three published assets have matching GitHub
+digests and fresh downloaded bytes:
+
+| Asset | Bytes | SHA256 |
+| --- | ---: | --- |
+| `EigenVista-0.7.0-apple-silicon-20261114T112514Z-d414bc7.zip` | 46,375,930 | `24e21458a0567c03db6623f584d29e904dd7232ca7bf72b1a6417ca9f2e2c5b7` |
+| `EigenVista-0.7.0-apple-silicon-20261114T112514Z-d414bc7.zip.sha256` | 126 | `2c2297e33f141376aef8953bfb6a8e723c2e337f3f4039f323cda291c1c86e70` |
+| `EigenVista-0.7.0-apple-silicon-20261114T112514Z-d414bc7.json` | 1,463 | `ba1bde18f591be690f65b62a386b906c93b75d5d2afb9eceabd5c7e314357c48` |
+
+Build host is macOS 27.0, arm64 target with system-only runtime links, deployment
+minimum macOS 13.0, ad-hoc signing and no notarization. Independent extraction
+verified 404 eligible Git source blobs/modes and all 62 payload files. The actual
+Mach-O embeds the exact production assets; recovered embedded WASM matches the
+extracted converter on four examples, four BinaryCIF controls, four biological
+views, four microheterogeneity controls and four frozen native inputs. Source
+privacy exclusions were checked without reading protected/private originals.
 
 [#69](https://github.com/uvar-apps/eigenvista/issues/69) adds the existing guide
 illustrations/provenance to the tester payload. Their three direct offline guide
-references and source hashes remain part of the pending full ZIP audit.
+references resolve inside the extracted payload with exact committed bytes.
+Only these direct guide links are qualified; nested provenance backlinks and
+other older offline links are not broadly certified.
+
+The actual extracted native app passed startup after PID-validated activation:
+its own on-screen layer-zero 1320×860 window appeared and the process stayed
+alive for five seconds. Initial off-screen-window observations/failure are
+retained; no app patch was made. Only the owned PID 33158 received SIGTERM,
+and the existing Vite PID 48452 was preserved. This does not establish native
+file-dialog/molecular-loading/Cmd+Q interaction, clean-Mac/Gatekeeper/HiDPI
+installation or the full deployment-OS range.
+
+Evidence under `tmp/2026-11-14-release-0.7.0/` includes
+`package-result.json`, `artifact-audit-result.json`,
+`audit/run-20261114T112941787Z-d414bc7/REPORT.json`,
+`native-startup-result.json`, `production-views-result.json` and
+`published-release-verification.json`. The tag/source archive retain their
+pre-publication snapshot. This later documentation-only record does not retag,
+rerun runtime tests or rebuild those binaries. Current qualification is local
+macOS only; access to the future two local Linux machines is still pending.
 
 The previous 0.6.0 release remains available with its original source/assets,
 and predates biological views. Changing source versions does not update an
@@ -74,7 +112,7 @@ The optional biological native feature is explicit; metadata-free encoding,
 scientific hashes, numerical precision, dependencies and compiler stay
 unchanged. Protein secondary assignments come from deposited records, with
 missing/conflicting assignments left unknown. This implementation phase kept
-version 0.6.0; the separate 0.7.0 release preparation is recorded above. The
+version 0.6.0; the separate published 0.7.0 release is recorded above. The
 previously published 0.6.0 binary/ZIP predates these additions.
 
 Pre-bump local macOS implementation checks passed: 272 default Rust tests, seven explicit

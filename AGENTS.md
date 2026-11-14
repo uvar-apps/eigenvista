@@ -79,8 +79,15 @@ preserve those historical results as evidence of what ran at the time.
   for exact source, PR and local results. Fresh local macOS checks passed:
   272 default and seven desktop Rust tests, fmt/strict Clippy, WASM/TypeScript/
   production build, 13 packaging checks and all 504 browser cases (252 per
-  engine, zero skipped/flaky/unexpected/retries). Rebuilt artifacts and
-  publication remain pending; do not claim a release from the version alone.
+  engine, zero skipped/flaky/unexpected/retries). Release **v0.7.0** is published
+  at the [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0),
+  source `d414bc7c92f83b640a682d8c053b681b31667051`. The rebuilt Apple Silicon
+  app/converter/ZIP, independent source/embedded-asset audit, actual extracted
+  native startup and all three downloaded assets passed verification. Eighteen
+  production browser captures passed across both engines. Handoff/status record
+  exact artifacts, source, checks and qualification limits. The immutable tag/
+  archive retain their pre-publication snapshot; later living-document updates
+  do not retag or rebuild them. Current qualification remains local macOS only.
   The published 0.6.0 package predates these views and remains unchanged; source
   updates do not update installed apps.
   `Document.structure` is optional and indexes original selected atoms.

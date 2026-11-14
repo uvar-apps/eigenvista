@@ -24,8 +24,9 @@ unlike PDB, XYZ does not select the first of several frames.
 
 Version 0.7.0 includes optional biological metadata and structure views from
 issues #62–#66 / [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
-Release verification, rebuilt artifacts and publication are in preparation;
-the older published 0.6.0 ZIP predates this work. See the
+The rebuilt 0.7.0 release is published; [status](status.md#source-version-070)
+records local verification and artifact identity. The older published 0.6.0 ZIP
+predates this work. See the
 [user workflow](user-guide.md#biological-structure-views),
 [architecture contract](architecture.md#biological-structure-views) and
 [verification ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097).

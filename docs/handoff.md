@@ -1,9 +1,10 @@
 # Development handoff
 
-Updated 14 November 2026 for **0.7.0 release preparation**, including biological
+Updated 14 November 2026 for published **0.7.0**, including biological
 structure views (#62–#66), molecular ambient occlusion (#59) and sidebar controls.
-Fresh automated local checks passed; rebuilt artifacts, native startup and
-publication remain pending. The older
+Fresh local checks, rebuilt artifacts, extracted native startup and published
+asset downloads passed verification. Release source is `d414bc7`; this later
+living-document record does not retag or rebuild it. The older
 published 0.6.0 tag/package retain source `6cb678c`; earlier packages and dated
 entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
@@ -29,32 +30,60 @@ record of the completed checks.
 
 ## Source version 0.7.0
 
-Release preparation, 14 November 2026. The user authorized version 0.7.0,
-commit/tag/push/publication and rebuilt redistributables. The baseline is merged
-main `1e6881d` / [PR #67](https://github.com/uvar-apps/eigenvista/pull/67),
-covering #62–#66: optional selected biological metadata, chain/entity coloring,
-component selection and mixed views, protein traces/tubes and ribbons/cartoons.
-Read the [release notes](releases/0.7.0.md). The
-[planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-is a publication target, not evidence that a tag or asset exists.
+Published as a development prerelease at **2026-11-14T11:43:29Z** on the
+[0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0).
+Annotated tag `v0.7.0`, object `d587bf48709ac4a22d98f9d11e7e809643d9b287`,
+resolves locally and remotely to immutable source
+`d414bc7c92f83b640a682d8c053b681b31667051`. It includes the biological views
+merged as `1e6881d` / [PR #67](https://github.com/uvar-apps/eigenvista/pull/67)
+and the tester-guide image repair #69. Read the [release notes](releases/0.7.0.md).
 
 Fresh 0.7.0 automated local macOS checks passed: 272 default Rust tests, seven
 explicit desktop tests, formatting, strict workspace/all-targets Clippy,
 WASM/TypeScript/production build and 13 packaging checks. The complete browser
 suite passed 504 cases (252 Chromium and 252 WebKit) in 15.7 minutes, with zero
-skipped, flaky or unexpected results. Runtime/test/fixture/generated-WASM hashes
-and the owned Vite process remained unchanged during the run. All applicable
-checks, including the remaining artifact/native checks, must pass before pushing.
-The package must be rebuilt from its identified clean release commit and
-independently checked for source/payload identity, embedded JS/WASM, native
-version/signature, examples, privacy exclusions and actual executable startup.
-No 0.7.0 tag, rebuilt archive, checksum or publication is verified in this entry.
-Record those actual results after completion under
-`tmp/2026-11-14-release-0.7.0/` and in this living record. Hosted CI is not required.
+skipped, flaky or unexpected results and zero retries, using one worker.
+Runtime/test/fixture/generated-WASM hashes and the owned Vite process remained
+unchanged. Eighteen actual production-browser captures (nine per engine) passed
+using full tracked 1AON, 4PJ1 and 1CRN; their assets match the signed app, and the
+results were visually inspected. Hosted CI was not required or used for this release.
+
+Rebuilt ZIP: `artifacts/distributions/EigenVista-0.7.0-apple-silicon-20261114T112514Z-d414bc7.zip`,
+**46,375,930 bytes**, SHA256
+`24e21458a0567c03db6623f584d29e904dd7232ca7bf72b1a6417ca9f2e2c5b7`.
+The release also contains the same-stem `.zip.sha256` and `.json` build metadata;
+all three GitHub-reported digests and fresh downloaded bytes were verified.
+Retained staging: `tmp/eigenvista-package-jwYnQO`. Built on macOS 27.0 for arm64,
+deployment target macOS 13.0, with ad-hoc signing and no notarization.
+
+Independent audit verified all 404 eligible source blobs/modes, 62 payload files
+and actual Mach-O embedded production assets byte-for-byte, recovering the
+embedded WASM for extracted-CLI parity. Four examples, four BinaryCIF controls,
+four biological-view controls, four microheterogeneity controls and four frozen
+native inputs passed. Protected original/private paths were excluded without
+reading their contents.
+
+The actual extracted native app was launched and observed alive for five seconds
+with its own 1320×860 on-screen layer-zero window after PID-validated activation.
+The initial off-screen-window failure remains recorded; this was a diagnostic
+activation step, not an application patch. Cleanup terminated only the owned
+child PID 33158; the user's Vite PID 48452 remained untouched. This is native
+startup evidence, not physical file-dialog, molecular-loading, Cmd+Q, clean-Mac,
+Gatekeeper, HiDPI or complete-OS-range qualification.
 
 Packaging repair [#69](https://github.com/uvar-apps/eigenvista/issues/69) copies the
 existing biological-view illustrations/provenance beside the standalone guide.
-The rebuilt ZIP must verify those three direct references and exact source bytes.
+The extracted ZIP resolves those three direct guide references with exact
+committed image/provenance bytes. This does not certify every nested offline link.
+
+Evidence is under `tmp/2026-11-14-release-0.7.0/`: `package-result.json`,
+`published-release-verification.json`,
+`audit/run-20261114T112941787Z-d414bc7/REPORT.json`,
+`native-startup-result.json` and `production-views-result.json`.
+The tag/archive retain their truthful
+pre-publication snapshot; this post-tag living-document update does not retag,
+rerun runtime tests or rebuild the immutable app/archive. Current verification
+remains local macOS only; future local Linux validation awaits access.
 
 The feature's pre-bump local results are recorded below: 272 default plus seven
 desktop Rust tests, 504 browser cases, 40 focused checks and 18 actual-app visual
@@ -173,8 +202,8 @@ before pushing, including the real large-structure visual/compatibility checks
 applicable to this implementation. Hosted checks are optional under the current
 policy above; earlier hosted runs are historical evidence, not a merge gate.
 Consult the linked ledger for PR #67’s actual merge revision and delivery state.
-The implementation batch kept version 0.6.0; the separate 0.7.0 release
-preparation is recorded above. Existing tags/releases, scientific inputs/precision,
+The implementation batch kept version 0.6.0; the separate published 0.7.0
+release is recorded above. Existing tags/releases, scientific inputs/precision,
 compiler/dependency pins, allocation limits and icon/logo are preserved.
 
 ## Visualization roadmap: 14 November 2026 planning snapshot

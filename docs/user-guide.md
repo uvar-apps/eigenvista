@@ -19,8 +19,9 @@ in [Biological structure views](#biological-structure-views), while retaining
 molecular ambient occlusion (#59) and sidebar reordering (#52). See the
 [0.7.0 release notes](releases/0.7.0.md) and
 [status](status.md#source-version-070) for verified source and artifact identity;
-the [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-records download availability. The published [0.6.0 package](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+the [0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+provides the rebuilt Apple Silicon ZIP, checksum and build metadata. The earlier
+[0.6.0 package](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
 includes AO but predates biological views; older 0.5.15 packages predate AO.
 Updating source does not update an existing installed app or archive.
 
