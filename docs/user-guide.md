@@ -10,13 +10,17 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.5.15, a development preview. Scientific calculations and
+This guide describes version 0.6.0, an experimental development preview. Scientific calculations and
 rendering have targeted tests, but the application is not yet a qualified
 scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
-Version 0.5.15 includes the sidebar reordering described below (#52). Molecular
-ambient occlusion (#59) is a subsequent source feature; use a source build until
-a later release packages it.
+Version 0.6.0 includes molecular ambient occlusion (#59) and retains sidebar
+reordering (#52). See the [0.6.0 release notes](releases/0.6.0.md). Its
+[release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+will provide the rebuilt Apple Silicon ZIP after release checks and publication;
+check [status](status.md#source-version-060) for availability. Until then, the
+published 0.5.15 package predates AO. Updating source does not update an existing
+installed app or archive.
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files

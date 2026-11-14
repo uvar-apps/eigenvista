@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version 0.5.15 development preview, not v1 and not completion of the M0-M7 plan. See [implementation status](docs/status.md) for evidence, release artifacts, and remaining gates.
+**Status:** source version 0.6.0 release candidate, pending fresh release checks, rebuilt packages and publication. This is a development preview, not v1 or completion of the M0-M7 plan. See [implementation status](docs/status.md#source-version-060) for evidence, release artifacts, and remaining gates.
 
 Current source adds native close/quit protection, correct Molden limits, hosted
 verification, and reduced Molden-import/surface-publication work (#30–#34).
@@ -27,10 +27,12 @@ Version 0.5.15 adds [#52 sidebar reordering](docs/design/2026-11-13-sidebar-reor
 with native drag, keyboard and tap controls, remembered profile order and
 preserved control/calculation state. See the [0.5.15 release notes](docs/releases/0.5.15.md).
 
-Current source adds optional molecular ambient occlusion for dense
+Version 0.6.0 adds optional molecular ambient occlusion for dense
 structures ([#59](https://github.com/uvar-apps/eigenvista/issues/59)): matte Lambert
 shading, broad fold/cavity depth cues and an automatic radius based on molecular
-size. This subsequent source feature is not in the published 0.5.15 ZIP. See the [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md).
+size. Read the [0.6.0 release notes](docs/releases/0.6.0.md) and
+[AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md). The latest
+published package remains 0.5.15 and predates AO.
 
 ## Start here
 
@@ -84,11 +86,13 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.5.15 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.5.15)
-is the download location for its ZIP, checksum and build metadata; check
-[status](docs/status.md#version-0515) for publication and verification state.
-The ZIP is a development build for Apple Silicon Macs, not an Apple-notarized
-release. It includes source and notices under the [application license](LICENSE).
+The [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+will carry the rebuilt ZIP, checksum and build metadata after qualification and
+publication; check [status](docs/status.md#source-version-060) for the current
+state. Until then, 0.5.15 remains the latest published package and predates AO.
+Tester ZIPs are experimental builds for Apple Silicon Macs, with ad-hoc signing
+and no Apple notarization. They include source and notices under the
+[application license](LICENSE).
 
 ## Available
 

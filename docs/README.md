@@ -5,7 +5,7 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
-Current source version: **0.5.15**, including live orbital/density calculation
+Current source version: **0.6.0**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections
@@ -16,10 +16,13 @@ the native runtime badge is platform-neutral.
 Sidebar headings collapse their controls independently, retain their settings,
 and remember expansion and within-pane order in the current application profile.
 Dedicated handles support dragging, keyboard moves and tap-accessible controls.
-Version 0.5.15 includes this #52 feature; check status for release verification.
-Current source after 0.5.15 also adds optional molecular ambient occlusion;
-see the [decision](design/2026-11-14-molecular-ambient-occlusion.md). The published
-0.5.15 package predates this feature.
+Sidebar reordering originated in 0.5.15 (#52). Version 0.6.0 adds optional
+molecular ambient occlusion; see the
+[decision](design/2026-11-14-molecular-ambient-occlusion.md) and
+[release notes](releases/0.6.0.md). The 0.6.0 release candidate awaits fresh
+release checks, rebuilt artifacts and publication to its
+[release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
+The latest published 0.5.15 package predates AO.
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.
@@ -35,7 +38,7 @@ limits of opening new saves in older builds.
 | Need | Read |
 | --- | --- |
 | Restart from a fresh coding-agent session without the old chat | [Session handoff](session-handoff-2026-10-21_173143-AWST.md) and [ready-to-use prompt](restart-prompt-2026-10-21_173143-AWST.md) |
-| Changes in the current release and known limitations | [0.5.15 release notes](releases/0.5.15.md) |
+| Current source changes and known limitations | [0.6.0 release notes](releases/0.6.0.md) |
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |

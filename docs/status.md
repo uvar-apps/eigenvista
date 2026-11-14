@@ -8,6 +8,49 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Source version 0.6.0
+
+Requested 14 November 2026 to mark molecular ambient occlusion (#59) as a
+significant feature. The base is merged main `bf98802` / [PR #60](https://github.com/uvar-apps/eigenvista/pull/60).
+All eleven own version fields now read 0.6.0: workspace manifest, six Cargo
+lock packages, npm manifest, two npm lock entries and Tauri config. The six
+Rust members inherit the workspace version. [Release notes](releases/0.6.0.md)
+describe the new Lambert-plus-SSAO view and automatic/manual radius controls.
+
+Only version metadata and current documentation change. Dependency/toolchain
+pins, scientific/file profiles, frozen fixtures, rendering behavior and icon/logo
+are preserved. The Surface shading discussion was closed without changing the
+controls. The latest published package remains 0.5.15; existing apps/archives
+are historical and do not acquire AO through a source-version edit.
+
+The user has authorized commit, annotated tag, push and publication with rebuilt
+redistributables. **0.6.0 remains a release candidate**: fresh release-head CI,
+new app/ZIP construction, independent artifact audit and publication are pending.
+The planned [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+will carry its notes, ZIP, checksum and build metadata after these gates pass.
+No tag, upload or rebuilt package is claimed by this source snapshot.
+
+Fresh checks for the version bump pass: locked Cargo metadata reports all six
+workspace packages at 0.6.0; all eleven metadata values are consistent; the real
+converter reports `eigenvista-convert 0.6.0` and its targeted help/version/invalid-
+options test passes; all 13 packaging support tests pass. Parsed comparisons
+confirm unchanged external dependencies/other manifest fields, historical
+release records and protected user files. No full scientific/browser rerun or
+new app/archive build is claimed for this metadata-only change.
+
+The merged AO source had four green jobs in
+[run 43489071820](https://github.com/uvar-apps/eigenvista/actions/runs/43489071820)
+at `65f765f`: Linux 232/fmt/strict Clippy, Mac seven, Chromium/WebKit 233 each,
+package 13 and production builds. The earlier 100-case local matrix and full
+1AON visual evidence below remain feature evidence. They are not newly rerun
+0.6.0 release checks. Bump-specific local evidence is retained under
+`tmp/2026-11-14-version-0.6.0/`.
+
+Release preparation evidence is retained separately under
+`tmp/2026-11-14-release-0.6.0/`. Actual release commit/tag, artifact hashes and
+publication checks will be added to this living section after completion.
+Historical 0.5.* sections and dated restart snapshots retain their original facts.
+
 ## Molecular ambient occlusion: 14 November 2026
 
 [#59](https://github.com/uvar-apps/eigenvista/issues/59), developed on

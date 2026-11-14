@@ -39,12 +39,19 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
-- Current source after 0.5.15 adds #59 molecular screen-space ambient occlusion.
-  The published 0.5.15 app predates it. Read the
+- Current source version **0.6.0** includes #59 molecular screen-space ambient
+  occlusion. The version bump synchronizes all eleven own metadata values;
+  dependency/toolchain pins and scientific profiles remain unchanged. Read the
+  [0.6.0 release notes](docs/releases/0.6.0.md), planned
+  [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+  and current handoff/status for verification and publication state. This is a
+  release candidate pending fresh release-head checks, rebuilt packages and
+  publication. The latest published 0.5.15 app predates AO; existing bundles are
+  historical until explicitly rebuilt. Read the
   [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md): only
   actual atom/bond instances participate, with owned MeshLambertMaterial
   replacements, no specular highlights and illustrative AO on both diffuse
-  terms. The broad-fold candidate uses visibility exponent 6, GTAO sample
+  terms. The broad-fold renderer uses visibility exponent 6, GTAO sample
   parameter 32/distance exponent 2, denoise 8/radius 4/luma rejection 0.25 and
   full physical targets proportionally capped at 1024 (ideal payload at most
   28 MiB). Automatic radius is 5% of the atom-coordinate box diagonal in
@@ -56,9 +63,9 @@ documents; older `.molekel` preview documents remain readable. Check
   old-group disposal; do not mutate borrowed Standard materials or revive the
   prototype's program-refresh workaround. The earlier indirect-only head was
   visually rejected. Qualify actual-app 1AON as the primary visual case and
-  retain 4PJ1 as secondary evidence. Read the living handoff/status and actual final-head CI results linked from
-  #59/PR #60; all four jobs must pass before merge, independently of historical
-  results.
+  retain 4PJ1 as secondary evidence. The feature was merged through #59/PR #60;
+  fresh checks at the 0.6.0 release-source head are a separate gate. All four
+  actual jobs must pass before publication, independently of historical results.
 
   AO PNG verification has two bounded cases: A retains all three full-size
   desktop parity captures; B keeps the real browser window, toolbar, zoom/orbit,
@@ -70,7 +77,8 @@ documents; older `.molekel` preview documents remain readable. Check
   466 tests, 233 per engine, including 10 AO cases per engine. Keep the existing
   60-second per-test, 35-minute suite-step and 60-minute job limits with one
   worker. The failed combined case at head `04c8c919` is historical evidence;
-  the split requires all four actual jobs at its new final head before merge.
+  the merged split passed its final-head checks. Retain the existing limits
+  when checking the release source.
 
 - Version 0.5.15 includes #52 sidebar reordering within each existing pane.
   Dedicated handles support native drag, keyboard moves and tap controls;
