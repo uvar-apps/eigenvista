@@ -5,7 +5,7 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
-Current source version: **0.7.1** (release preparation), including live orbital/density calculation
+Current source version: **0.7.1**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections
@@ -27,9 +27,9 @@ The earlier 0.5.15 package predates AO.
 Version 0.7.1 renames the **Document** sidebar section to **Molecular data**
 without changing controls, saved-file profiles or internal preference IDs.
 Fresh local macOS verification passed, including all 504 browser cases.
-Clean-source rebuilt archives, artifact/native checks and publication remain
-pending; see
-the [0.7.1 release notes](releases/0.7.1.md) and
+Rebuilt, independently audited Apple Silicon assets are available at the
+[0.7.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1),
+with all three downloads verified. See the [0.7.1 release notes](releases/0.7.1.md) and
 [current status](status.md#source-version-071). The published 0.7.0 artifacts
 below retain their original source and verification evidence.
 

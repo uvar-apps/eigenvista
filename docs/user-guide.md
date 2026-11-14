@@ -19,8 +19,10 @@ in [Biological structure views](#biological-structure-views), while retaining
 molecular ambient occlusion (#59) and sidebar reordering (#52). See the
 [0.7.1 release notes](releases/0.7.1.md) and
 [status](status.md#source-version-071) for actual verification and delivery.
-Fresh 0.7.1 checks passed locally on macOS; rebuilt archives and publication
-remain pending. Version 0.7.1
+Fresh 0.7.1 checks passed locally on macOS; the
+[0.7.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+provides the verified rebuilt Apple Silicon ZIP, checksum and build metadata.
+Version 0.7.1
 renames the **Document** section to **Molecular data**; controls, saved documents
 and existing sidebar preferences remain unchanged. The published
 [0.7.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)

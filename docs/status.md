@@ -23,14 +23,18 @@ record of the completed checks.
 
 ## Source version 0.7.1
 
-14 November 2026: release preparation authorized from main `6ace2f5` for
-[#70](https://github.com/uvar-apps/eigenvista/issues/70). Version 0.7.1 renames
+Published **2026-11-14T13:24:03Z** as a development
+[prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1).
+Annotated tag `v0.7.1`, object `d471bf83e9750c05fe35a73fa554202e9ab1a434`,
+resolves locally/remotely to source
+`a7037dc47063da59e5b22a9920dbe605bae54ded`, based on main `6ace2f5`.
+[#70](https://github.com/uvar-apps/eigenvista/issues/70) is closed; see the
+[final evidence ledger](https://github.com/uvar-apps/eigenvista/issues/70#issuecomment-6877940064).
+Version 0.7.1 renames
 the visible Document section to **Molecular data**. Its internal panel/profile
 IDs and remembered UI state remain stable. Rust `Document`, Open/Save behavior,
 file formats, scientific data, limits, dependencies/compiler and icon/logo are
-unchanged. See [release notes](releases/0.7.1.md) and the
-[planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1).
-The planned page is not a publication claim.
+unchanged. See [release notes](releases/0.7.1.md).
 
 Fresh local macOS fmt, 272 default Rust tests, strict workspace/all-targets
 Clippy, seven explicit desktop tests, WASM/TypeScript/production build and
@@ -41,13 +45,45 @@ reference generation exited zero before Playwright. All 275 source hashes and
 the existing Vite PID 48452 stayed stable. These are fresh results for the
 renamed UI and updated selectors; 0.7.0 results below remain historical.
 
-The clean-source rebuilt app/converter/ZIP and independent asset/source audit,
-actual extracted native startup, production UI verification, annotated tag/push,
-publication and verified downloads
-are also pending. No new archive/hash or release success is claimed. Actual
-results belong under `tmp/2026-11-14-release-0.7.1/` and this section. Current
-qualification remains local macOS only; the future two local Linux hosts are
-unavailable. Hosted CI is not required.
+The clean-source app/converter/ZIP, independent asset/source audit, actual
+extracted native startup, production UI, annotated tag, publication and downloads
+passed verification. All three server-reported sizes/digests and fresh downloads
+matched the local candidates:
+
+| Asset | Bytes | SHA256 |
+| --- | ---: | --- |
+| `EigenVista-0.7.1-apple-silicon-20261114T131547Z-a7037dc.zip` | 46,381,687 | `2f8a433fb3f89dd2ef1cdfaafcf6e785ab7187793eca7fd61ff5ee2f0951f1b1` |
+| `EigenVista-0.7.1-apple-silicon-20261114T131547Z-a7037dc.zip.sha256` | 126 | `d260df9ff6c6938ac5a8ec488ef8573919ec5bf00703c504700b1dee5d223f15` |
+| `EigenVista-0.7.1-apple-silicon-20261114T131547Z-a7037dc.json` | 1,463 | `4eb312297350fb7a2cc51ada9252c6f12b052dae8e716a5f781725483dbeda06` |
+
+The ZIP is retained under `artifacts/distributions/`, staging at
+`tmp/eigenvista-package-e3aNeg`. Built on macOS 27.0 for arm64, deployment minimum
+macOS 13.0, with system-only runtime links, ad-hoc signing and no notarization.
+Independent audit verified 405 eligible source Git blobs/modes, all 62 payload
+files and five production assets embedded in the actual Mach-O. The new title is
+present, with internal panel key/id `document` unchanged. Recovered WASM and the
+extracted CLI passed four examples, four BinaryCIF controls, four biological
+views, four microheterogeneity controls and four frozen native inputs. Three
+direct guide image/provenance links retain exact committed bytes; no broad
+nested offline-link qualification is claimed.
+
+Eighteen production-browser captures passed, nine per engine, plus two separately
+inspected Molecular data heading captures. Actual production assets match the
+signed app. The extracted native executable passed startup with its own on-screen
+layer-zero 1320×860 window and five seconds alive after validated activation.
+Only owned child PID 54406 received SIGTERM; the user's Vite PID 48452 was
+preserved. This does not qualify physical native file dialogs/loading/Cmd+Q,
+clean-Mac/Gatekeeper/HiDPI installation or the full deployment-OS range.
+
+Evidence under `tmp/2026-11-14-release-0.7.1/` includes
+`metadata-native-audit.json`, `full-browsers-summary.json`,
+`audit/run-20261114T131920290Z-a7037dc/REPORT.json`,
+`native-startup-result.json`, `production-views-result.json` and
+`publication-verification.json`. The tag/archive keep their pre-publication
+snapshot. This later documentation-only record does not retag, rerun unchanged
+runtime tests or rebuild those binaries; release-note bytes stay unchanged.
+Current qualification remains local macOS only; the future two local Linux hosts
+await access. No hosted CI was required or used.
 
 The published 0.7.0 release/source/assets and all older records remain unchanged.
 Updating source does not update a previously installed app or existing archive.

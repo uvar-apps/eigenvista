@@ -70,7 +70,7 @@ preserve those historical results as evidence of what ran at the time.
 
 ## Layout that is not obvious from names
 
-- Current source version **0.7.1** is in release preparation for
+- Current source version **0.7.1** is published for
   [#70](https://github.com/uvar-apps/eigenvista/issues/70): the visible
   **Document** section is renamed **Molecular data**. Only the displayed label
   and current UI documentation/selectors change; internal `document` panel IDs,
@@ -80,9 +80,14 @@ preserve those historical results as evidence of what ran at the time.
   seven desktop Rust tests, fmt/strict workspace/all-targets Clippy, WASM/
   TypeScript/production build, 13 packaging checks and all 504 browser cases
   (252 per engine; zero skipped/flaky/unexpected/retries; one worker). The 275
-  recorded source hashes and Vite PID 48452 stayed stable. Clean-source optimized
-  app/converter/ZIP, artifact audit, native/production checks and publication
-  remain pending; do not substitute the earlier 0.7.0 evidence for those gates.
+  recorded source hashes and Vite PID 48452 stayed stable. The
+  [0.7.1 prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+  uses immutable source `a7037dc47063da59e5b22a9920dbe605bae54ded`.
+  Clean-source app/converter/ZIP, independent artifact audit, extracted native
+  startup, production captures and all three published/downloaded assets passed
+  verification. Handoff/status retain exact identities and qualification limits.
+  The tag/archive keep their pre-publication snapshot; later documentation-only
+  records do not retag, rerun runtime tests or rebuild them.
   All relevant checks must pass locally before pushing under the policy above.
 
 - Version **0.7.0** introduced Plan 007's metadata

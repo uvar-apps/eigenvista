@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.7.1 development preview in release preparation, including
+This describes the published 0.7.1 development preview, including
 biological structure views, molecular ambient occlusion and sidebar reordering,
 not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
@@ -18,8 +18,8 @@ The name change preserves the existing icon/logo and scientific model.
 Version 0.7.1 only renames the visible **Document** section to **Molecular data**.
 The internal panel/profile IDs and mounted control state stay unchanged, as do
 Rust `Document`, document serialization and Open/Save behavior. See
-[current status](status.md#source-version-071) for fresh release verification
-and delivery; the prior published 0.7.0 artifacts remain unchanged.
+[current status](status.md#source-version-071) for verified release identities,
+local results and remaining gaps; the prior published 0.7.0 artifacts remain unchanged.
 
 ## Boundaries and ownership
 
