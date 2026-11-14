@@ -70,13 +70,19 @@ preserve those historical results as evidence of what ran at the time.
 
 ## Layout that is not obvious from names
 
-- Unreleased source implements Plan 007's metadata prerequisite and first four
-  biological views, tracked by #62–#66 and developed on
-  `codex/biological-structure-views`. Read the
-  [biological-view decision](docs/design/2026-11-14-biological-structure-views.md)
+- Current source version **0.7.0** includes Plan 007's metadata
+  prerequisite and first four biological views, tracked by #62–#66 and merged
+  through [PR #67](https://github.com/uvar-apps/eigenvista/pull/67) as `1e6881d`.
+  Read the [0.7.0 release notes](docs/releases/0.7.0.md), current handoff/status,
+  the [biological-view decision](docs/design/2026-11-14-biological-structure-views.md)
   and [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-  for exact source, PR and actual local full-suite results. The published 0.6.0
-  package predates this work; its version/tag/assets stay unchanged.
+  for exact source, PR and local results. Fresh local macOS checks passed:
+  272 default and seven desktop Rust tests, fmt/strict Clippy, WASM/TypeScript/
+  production build, 13 packaging checks and all 504 browser cases (252 per
+  engine, zero skipped/flaky/unexpected/retries). Rebuilt artifacts and
+  publication remain pending; do not claim a release from the version alone.
+  The published 0.6.0 package predates these views and remains unchanged; source
+  updates do not update installed apps.
   `Document.structure` is optional and indexes original selected atoms.
   Native files with metadata require `eigenvista-biological-structure-v1`;
   metadata-free documents retain the old encoding. Preserve frozen native
@@ -92,9 +98,9 @@ preserve those historical results as evidence of what ran at the time.
   depiction errors. Replace `structure` when editing its metadata; color and
   visibility changes do not replace authoritative arrays or resample fields.
 
-- Current source version **0.6.0** includes #59 molecular screen-space ambient
-  occlusion. The version bump synchronizes all eleven own metadata values;
-  dependency/toolchain pins and scientific profiles remain unchanged. Read the
+- Version **0.6.0** introduced #59 molecular screen-space ambient
+  occlusion, retained in 0.7.0. That release synchronized all eleven own metadata
+  values while preserving dependency/toolchain pins and scientific profiles. Read the
   [0.6.0 release notes](docs/releases/0.6.0.md), published
   [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
   and current handoff/status for exact source, artifact and verification evidence.

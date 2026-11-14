@@ -10,21 +10,19 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.6.0, an experimental development preview. Scientific calculations and
-rendering have targeted tests, but the application is not yet a qualified
-scientific release. It visualizes supplied data; it does not run a quantum
+This guide describes version 0.7.0, an experimental development preview.
+Scientific calculations and rendering have targeted tests, but the application
+is not yet a qualified scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
-Version 0.6.0 includes molecular ambient occlusion (#59) and retains sidebar
-reordering (#52). See the [0.6.0 release notes](releases/0.6.0.md). Its
-[release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
-provides the rebuilt Apple Silicon ZIP, checksum and build metadata; check
-[status](status.md#source-version-060) for the verified artifact identity.
-Older 0.5.15 packages predate AO. Updating source does not update an existing
-installed app or archive.
-
-Chain/component controls and protein depictions are a newer source feature in
-progress, described in [Biological structure views](#biological-structure-views).
-The published 0.6.0 package does not include them.
+Version 0.7.0 adds chain/component controls and protein depictions, described
+in [Biological structure views](#biological-structure-views), while retaining
+molecular ambient occlusion (#59) and sidebar reordering (#52). See the
+[0.7.0 release notes](releases/0.7.0.md) and
+[status](status.md#source-version-070) for verified source and artifact identity;
+the [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+records download availability. The published [0.6.0 package](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+includes AO but predates biological views; older 0.5.15 packages predate AO.
+Updating source does not update an existing installed app or archive.
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
@@ -167,10 +165,9 @@ mmCIF keeps its existing per-component grouping: different monomer names at one
 sequence position can both remain selected. Both identities and all selected
 atoms are retained. Protein depictions break at that ambiguous position instead
 of choosing a conformer; use atomic views or named residue ranges to inspect it.
-The source branch now retains selected biological identities and deposited
-secondary assignments as described below; the published 0.6.0 package predates
-that addition. Occupancies, B-factors and formal charges remain omitted as atom
-attributes, and the complete source hierarchy is not retained. mmCIF connection records
+Version 0.7.0 retains selected biological identities and deposited secondary
+assignments as described below; the older 0.6.0 package predates that addition.
+Occupancies, B-factors and formal charges remain omitted as atom attributes, and the complete source hierarchy is not retained. mmCIF connection records
 retain their deposited references, types, and orders in Provenance; cell/symmetry
 are reported without crystal-image expansion. BinaryCIF uses these same rules.
 Gzip support is limited to BinaryCIF; compressed PDB and gzip-wrapped text mmCIF
@@ -209,11 +206,12 @@ orbitals or a density matrix.
 
 ## Biological structure views
 
-Current source after the published 0.6.0 release implements these controls under
-issues #62–#66. The published 0.6.0 application and ZIP predate them; this section
-describes the source application. See [status](status.md) and the
-[verification ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-for the implementation revision, checks and delivery.
+Version 0.7.0 includes these controls from issues #62–#66 and
+[PR #67](https://github.com/uvar-apps/eigenvista/pull/67). The older 0.6.0
+application and ZIP predate them. See [status](status.md#source-version-070)
+for fresh release checks and delivery, and the
+[implementation ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
+for the original feature verification.
 
 Open a PDB, mmCIF or BinaryCIF file containing chain, residue and atom identities.
 In **Document → Biological structure**, choose **Coloring**:
@@ -240,7 +238,8 @@ item, with biological context beside it. Selection does not resize the scene.
 ![Complete 1AON with chain-colored protein cartoons](images/biological-structure/1aon-chain-cartoon.png)
 
 The complete 1AON complex in chain-colored cartoons. These illustrations come
-from the actual source application; the published 0.6.0 package predates them.
+from the actual application during feature verification; the older 0.6.0
+package predates these views.
 
 Expand **Components** to show or hide protein, nucleic acid, ligand, water, ion
 and unknown components present in the file. Expand **Chains** to filter the

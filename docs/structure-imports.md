@@ -22,8 +22,10 @@ unlike PDB, XYZ does not select the first of several frames.
 
 ## Biological identities
 
-Current source implements optional biological metadata and structure views for
-issues #62–#66. The published 0.6.0 ZIP predates this work. See the
+Version 0.7.0 includes optional biological metadata and structure views from
+issues #62–#66 / [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
+Release verification, rebuilt artifacts and publication are in preparation;
+the older published 0.6.0 ZIP predates this work. See the
 [user workflow](user-guide.md#biological-structure-views),
 [architecture contract](architecture.md#biological-structure-views) and
 [verification ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097).
@@ -81,7 +83,7 @@ Bounds are explicit: 100,000 atoms, 600,000 output connections, 2,000,000 candid
 - Support the repository's old identifier/line-number suffixes only when matched to a legacy HEADER. A narrowly scoped repair recognizes full-occupancy, element-unspecified five-column nucleotide hydrogen names such as ` H2'1`; it records the repair and leaves partial-occupancy numeric alternates alone.
 - Blank occupancy and B-factor fields default to 1 and 0. Invalid numbers do not become fabricated coordinates. Non-ASCII records and hybrid-36 serials are rejected in this profile.
 
-Current source retains selected residue/chain/atom identities, TER segments, supported modified-residue classification and deposited secondary annotations in the optional biological metadata above. It does not retain the complete PDB hierarchy. Formal charges, occupancies/B-factors, isotope identity, unit cells and symmetry remain omitted, with losses recorded in provenance. The published 0.6.0 importer predates biological metadata. Crystal/periodic images are not generated. No quantum data is inferred from a structure file. Gzipped PDB is not currently accepted; see the [mmCIF profile](#mmcif-profile) for the `.cif` reader.
+Version 0.7.0 retains selected residue/chain/atom identities, TER segments, supported modified-residue classification and deposited secondary annotations in the optional biological metadata above. It does not retain the complete PDB hierarchy. Formal charges, occupancies/B-factors, isotope identity, unit cells and symmetry remain omitted, with losses recorded in provenance. The published 0.6.0 importer predates biological metadata. Crystal/periodic images are not generated. No quantum data is inferred from a structure file. Gzipped PDB is not currently accepted; see the [mmCIF profile](#mmcif-profile) for the `.cif` reader.
 
 ## mmCIF profile
 

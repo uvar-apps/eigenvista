@@ -11,11 +11,18 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version 0.6.0 is published as an experimental Apple Silicon development preview, not v1 or completion of the M0-M7 plan. See [implementation status](docs/status.md#source-version-060) for verified source, release artifacts and remaining gates.
+**Status:** source version **0.7.0** is an experimental
+Apple Silicon development preview, not v1 or completion of the M0-M7 plan.
+Fresh local macOS release checks passed, including all 504 browser cases.
+Rebuilt archives and publication remain pending. See
+[implementation status](docs/status.md#source-version-070) and the
+[0.7.0 release notes](docs/releases/0.7.0.md).
 
-Current source adds native close/quit protection, correct Molden limits, hosted
-verification, and reduced Molden-import/surface-publication work (#30–#34).
-It also includes the bounded Vite maintenance update, authentic native-file
+Earlier releases added native close/quit protection, correct Molden limits,
+then-hosted verification, and reduced Molden-import/surface-publication work
+(#30–#34). All relevant checks now run locally before pushing; hosted jobs are
+optional by explicit request.
+They also added the bounded Vite maintenance update, authentic native-file
 regressions, typed numerical encoding and collapsible sidebar sections.
 Indexed meshes remain a qualification experiment; production generation is
 unchanged. Version 0.5.14 includes the volume opacity/quality fix
@@ -34,16 +41,16 @@ size. Read the [0.6.0 release notes](docs/releases/0.6.0.md) and
 [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md).
 The published 0.6.0 package includes AO; older 0.5.15 packages predate it.
 
-Source after that release adds biological identity, chain/entity colors,
-component views and protein traces/tubes/ribbons/cartoons, tracked by
-[#62–#66](https://github.com/uvar-apps/eigenvista/issues/62) and
-[Plan 007](plans/007-molecular-visualization-roadmap.md). Read
-[current status](docs/status.md) and the linked verification ledger for the
-implementation revision, checks and delivery.
-The published 0.6.0 app/ZIP does not contain these additions. See the
-[user guide](docs/user-guide.md#biological-structure-views) for controls and the
-[native profile](docs/preview-format.md#biological-structure-capability) for the
-optional metadata feature required by new biological documents.
+Version 0.7.0 adds selected biological identity, chain/entity colors, component
+selection and mixed views, and protein traces, tubes, ribbons and cartoons.
+The work for [#62–#66](https://github.com/uvar-apps/eigenvista/issues/62) merged
+through [PR #67](https://github.com/uvar-apps/eigenvista/pull/67). Secondary
+assignments are deposited only; missing identity or assignments are not invented.
+See the [user guide](docs/user-guide.md#biological-structure-views) for controls
+and the [native profile](docs/preview-format.md#biological-structure-capability)
+for the optional capability required by new biological documents. The published
+0.6.0 app/ZIP does not include these views. Updating source versions does not
+update an installed app or an existing archive.
 
 ## Start here
 
@@ -97,10 +104,12 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
-provides the rebuilt ZIP, checksum and build metadata; check
-[status](docs/status.md#source-version-060) for verified source and artifact
-identities. Older packages remain historical and are not updated in place.
+The [planned 0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+will carry its rebuilt ZIP, checksum and build metadata after publication; check
+[status](docs/status.md#source-version-070) for actual verification and delivery.
+The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
+remains the earlier published package. Older packages remain historical and
+are not updated in place.
 Tester ZIPs are experimental builds for Apple Silicon Macs, with ad-hoc signing
 and no Apple notarization. They include source and notices under the
 [application license](LICENSE).
@@ -113,6 +122,10 @@ and no Apple notarization. They include source and notices under the
 - Ball-and-stick, liquorice, and space-filling representations; camera controls,
   atom picking, and PNG export of a freshly rendered current view, including
   after the scene has become idle.
+- Biological chain/entity/secondary colors, component and chain selection, mixed
+  views, and protein backbone traces, smooth tubes, ribbons and strand-arrow
+  cartoons from retained PDB/mmCIF/BinaryCIF identities. Secondary assignments
+  are deposited only; unknowns and sequence breaks remain explicit.
 - Rust marching-cubes mesh extraction, signed colors, opacity, visibility, deletion, sampling/meshing/validation progress, worker cancellation, and sampled-field reuse.
 - Live calculation progress shows the current field and orbital batch position,
   completed sampling slices, per-phase percentage, signed mesh-pass checkpoints,

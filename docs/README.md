@@ -5,7 +5,7 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
-Current source version: **0.6.0**, including live orbital/density calculation
+Current source version: **0.7.0**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections
@@ -24,9 +24,13 @@ independently audited Apple Silicon artifacts at its
 [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
 The earlier 0.5.15 package predates AO.
 
-Current source implements biological metadata, chain/entity coloring, component
-selection and protein trace/tube/ribbon/cartoon views under issues #62–#66.
-They are not in the published 0.6.0 package; see the
+Version 0.7.0 includes biological metadata, chain/entity coloring, component
+selection and protein trace/tube/ribbon/cartoon views under issues #62–#66,
+merged through [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
+Fresh local macOS release verification passed, including all 504 browser cases.
+Rebuilt artifacts and publication remain pending; see
+the [0.7.0 release notes](releases/0.7.0.md) and current status. The published
+0.6.0 package predates these views. Read the
 [user workflow](user-guide.md#biological-structure-views),
 [import contract](structure-imports.md#biological-identities)
 and [ranked roadmap](../plans/007-molecular-visualization-roadmap.md).
@@ -45,7 +49,7 @@ limits of opening new saves in older builds.
 | Need | Read |
 | --- | --- |
 | Restart from a fresh coding-agent session without the old chat | [Session handoff](session-handoff-2026-10-21_173143-AWST.md) and [ready-to-use prompt](restart-prompt-2026-10-21_173143-AWST.md) |
-| Current source changes and known limitations | [0.6.0 release notes](releases/0.6.0.md) |
+| Current source changes and known limitations | [0.7.0 release notes](releases/0.7.0.md) |
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |

@@ -1,7 +1,7 @@
 # As-built architecture
 
-This describes the 0.6.0 development preview, including molecular ambient
-occlusion and sidebar reordering,
+This describes the 0.7.0 development preview in release preparation, including
+biological structure views, molecular ambient occlusion and sidebar reordering,
 not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
@@ -209,8 +209,10 @@ not part of this increment. Qualified ORCA Molden exports use the shared library
 
 Issues #62–#66 implement the selected first four items in the
 [visualization roadmap](../plans/007-molecular-visualization-roadmap.md).
-The published 0.6.0 binary predates this work. This section records the source
-contract; current verification and remaining gates belong in status/handoff.
+Version 0.7.0 includes this work, merged through
+[PR #67](https://github.com/uvar-apps/eigenvista/pull/67). The older published
+0.6.0 binary predates it. This section records the source contract; fresh release
+verification, rebuilt artifacts and publication state belong in status/handoff.
 
 [Structure metadata](../crates/eigenvista-core/src/structure.rs) is optional
 authoritative document data. It retains selected chain label/author/entity

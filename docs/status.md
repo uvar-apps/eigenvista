@@ -21,6 +21,40 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Source version 0.7.0
+
+14 November 2026: release preparation authorized. Version 0.7.0 brings the
+biological views and optional metadata merged through
+[PR #67](https://github.com/uvar-apps/eigenvista/pull/67), main `1e6881d`, into a
+new tester release. See the [release notes](releases/0.7.0.md) and
+[planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0).
+The planned page is not a publication claim.
+
+Fresh automated local macOS verification passed: 272 default Rust tests, seven
+desktop tests, fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production
+build and 13 packaging checks. The full browser run passed 504 cases, 252 per
+engine, in 15.7 minutes with zero skipped, flaky or unexpected results. All runtime,
+test, fixture and generated-WASM hashes remained stable; Vite PID 48452 was
+preserved. These are fresh versioned-source results, separate from the earlier
+biological implementation checks below. Remaining artifact/native checks must
+also pass before pushing.
+
+Rebuilt app/converter/ZIP/checksum/build metadata, clean-source and embedded
+asset audit, actual native executable startup, annotated tag and remote
+publication/download verification are also pending. No new archive identity or
+release success is claimed here; completed results belong in
+`tmp/2026-11-14-release-0.7.0/` and this living section. Hosted CI is not required.
+
+[#69](https://github.com/uvar-apps/eigenvista/issues/69) adds the existing guide
+illustrations/provenance to the tester payload. Their three direct offline guide
+references and source hashes remain part of the pending full ZIP audit.
+
+The previous 0.6.0 release remains available with its original source/assets,
+and predates biological views. Changing source versions does not update an
+installed app or an existing ZIP. Scientific precision, limits, dependencies,
+compiler and logo remain unchanged; biological metadata uses its explicit native
+capability while metadata-free files keep their old profile.
+
 ## Biological structure views: first four roadmap additions
 
 14 November 2026. The user authorized the metadata prerequisite and first four
@@ -33,16 +67,17 @@ traces/tubes, and ribbons/secondary-structure cartoons. Issues
 [decision record](design/2026-11-14-biological-structure-views.md) and
 [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
 for the exact source, actual PR/merge identity, complete local results and
-historical hosted observations for [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
+historical hosted observations for [PR #67](https://github.com/uvar-apps/eigenvista/pull/67),
+merged as main `1e6881d`.
 
 The optional biological native feature is explicit; metadata-free encoding,
 scientific hashes, numerical precision, dependencies and compiler stay
 unchanged. Protein secondary assignments come from deposited records, with
-missing/conflicting assignments left unknown. The source version remains
-0.6.0, while its published binary/ZIP below predates these additions. This is
-not a new release.
+missing/conflicting assignments left unknown. This implementation phase kept
+version 0.6.0; the separate 0.7.0 release preparation is recorded above. The
+previously published 0.6.0 binary/ZIP predates these additions.
 
-Local macOS implementation checks passed: 272 default Rust tests, seven explicit
+Pre-bump local macOS implementation checks passed: 272 default Rust tests, seven explicit
 desktop tests, fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production
 build and 13 packaging checks. Forty focused browser cases pass across Chromium/WebKit,
 including independent geometry and source-identity controls, clean native Save,

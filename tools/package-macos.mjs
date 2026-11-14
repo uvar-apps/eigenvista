@@ -348,6 +348,7 @@ function main() {
     path.join(root, "docs/user-guide.md"),
     path.join(payload, "User-guide.md"),
   );
+  copy(path.join(root, "docs/images"), path.join(payload, "images"));
   copy(
     path.join(root, "docs/structure-imports.md"),
     path.join(payload, "Structure-imports.md"),

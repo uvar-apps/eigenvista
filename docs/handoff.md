@@ -1,13 +1,15 @@
 # Development handoff
 
-Updated 14 November 2026 for published **0.6.0**, including molecular ambient
-occlusion (#59), and the post-release biological structure views (#62–#66). The release
-tag/package retain source `6cb678c`; earlier
-packages and dated entries retain their then-current source, version and artifact facts.
+Updated 14 November 2026 for **0.7.0 release preparation**, including biological
+structure views (#62–#66), molecular ambient occlusion (#59) and sidebar controls.
+Fresh automated local checks passed; rebuilt artifacts, native startup and
+publication remain pending. The older
+published 0.6.0 tag/package retain source `6cb678c`; earlier packages and dated
+entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application source is **EigenVista**, version **0.6.0**, in the standalone
+The current application source is **EigenVista**, version **0.7.0**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
@@ -24,6 +26,53 @@ Dated hosted-CI requirements and results below preserve the earlier policy and
 its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
+
+## Source version 0.7.0
+
+Release preparation, 14 November 2026. The user authorized version 0.7.0,
+commit/tag/push/publication and rebuilt redistributables. The baseline is merged
+main `1e6881d` / [PR #67](https://github.com/uvar-apps/eigenvista/pull/67),
+covering #62–#66: optional selected biological metadata, chain/entity coloring,
+component selection and mixed views, protein traces/tubes and ribbons/cartoons.
+Read the [release notes](releases/0.7.0.md). The
+[planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+is a publication target, not evidence that a tag or asset exists.
+
+Fresh 0.7.0 automated local macOS checks passed: 272 default Rust tests, seven
+explicit desktop tests, formatting, strict workspace/all-targets Clippy,
+WASM/TypeScript/production build and 13 packaging checks. The complete browser
+suite passed 504 cases (252 Chromium and 252 WebKit) in 15.7 minutes, with zero
+skipped, flaky or unexpected results. Runtime/test/fixture/generated-WASM hashes
+and the owned Vite process remained unchanged during the run. All applicable
+checks, including the remaining artifact/native checks, must pass before pushing.
+The package must be rebuilt from its identified clean release commit and
+independently checked for source/payload identity, embedded JS/WASM, native
+version/signature, examples, privacy exclusions and actual executable startup.
+No 0.7.0 tag, rebuilt archive, checksum or publication is verified in this entry.
+Record those actual results after completion under
+`tmp/2026-11-14-release-0.7.0/` and in this living record. Hosted CI is not required.
+
+Packaging repair [#69](https://github.com/uvar-apps/eigenvista/issues/69) copies the
+existing biological-view illustrations/provenance beside the standalone guide.
+The rebuilt ZIP must verify those three direct references and exact source bytes.
+
+The feature's pre-bump local results are recorded below: 272 default plus seven
+desktop Rust tests, 504 browser cases, 40 focused checks and 18 actual-app visual
+captures, with build/packaging/static checks. They are implementation evidence,
+not fresh verification of this version bump or its redistributables.
+
+Native documents with selected biological metadata declare
+`eigenvista-biological-structure-v1`. Older metadata-free documents remain
+readable with the previous encoding; old files cannot reconstruct discarded
+chain/residue identities, so reimport their original structural source.
+Secondary assignments are deposited only, and ambiguous/missing identities do
+not become invented backbone connections. The bump preserves scientific data,
+numerical precision, allocation limits, dependency/compiler pins and icon/logo.
+
+The earlier published 0.6.0 tag/package below remains unchanged and predates
+biological views. Updating source does not update an installed app or an old
+archive. Its recorded hosted results remain historical evidence; the current
+local-before-push policy above governs this release.
 
 ## Source version 0.6.0
 
@@ -70,7 +119,8 @@ The user authorized Plan 007's metadata prerequisite and first four additions:
 chain/entity colors, component selection/mixed views, backbone trace/tube and
 protein ribbons/cartoons. Implementation was developed on `codex/biological-structure-views` from
 `d098380`; [#62](https://github.com/uvar-apps/eigenvista/issues/62) through
-[#66](https://github.com/uvar-apps/eigenvista/issues/66) track the work. The
+[#66](https://github.com/uvar-apps/eigenvista/issues/66) track the work, merged
+through [PR #67](https://github.com/uvar-apps/eigenvista/pull/67) as `1e6881d`. The
 [decision](design/2026-11-14-biological-structure-views.md) records optional
 metadata, native capability gating, session display ownership and deposited-only
 secondary assignments. The
@@ -79,7 +129,7 @@ records the exact source revision, PR, completed local results, historical
 hosted observations and actual merge state. Consult it and Git before continuing
 from a different checkout. The earlier planning snapshot below remains historical.
 
-Local macOS implementation checks passed: 272 default Rust tests, seven explicit
+Pre-bump local macOS implementation checks passed: 272 default Rust tests, seven explicit
 desktop tests, fmt, strict workspace/all-targets Clippy, 13 packaging tests and
 WASM/TypeScript/production build. Authentic frozen native files remain exact; biological files round-trip
 with unchanged original numeric entries and an explicit additional capability.
@@ -123,7 +173,8 @@ before pushing, including the real large-structure visual/compatibility checks
 applicable to this implementation. Hosted checks are optional under the current
 policy above; earlier hosted runs are historical evidence, not a merge gate.
 Consult the linked ledger for PR #67’s actual merge revision and delivery state.
-Source version stays 0.6.0; existing tags, releases, scientific inputs/precision,
+The implementation batch kept version 0.6.0; the separate 0.7.0 release
+preparation is recorded above. Existing tags/releases, scientific inputs/precision,
 compiler/dependency pins, allocation limits and icon/logo are preserved.
 
 ## Visualization roadmap: 14 November 2026 planning snapshot
