@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Focus, Camera, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
@@ -23,7 +23,23 @@ import {
   BOHR_ANGSTROM as BOHR,
 } from "./molecularAmbientOcclusion";
 import { elementDisplay } from "./elements";
-import { resolveAtomColor, type AtomPalette } from "./atomColors";
+import { type AtomPalette } from "./atomColors";
+import {
+  atomDisplayColor,
+  atomRepresentation,
+  defaultStructureDisplay,
+  isAtomVisible,
+  residueLabel,
+  type StructureDisplayState,
+} from "./molecularDisplay";
+import {
+  createProteinGeometry,
+  isProteinRepresentation,
+  proteinHitLabel,
+  retintProteinGeometry,
+} from "./proteinGeometry";
+import { useProteinBackbone } from "./useProteinBackbone";
+const DEFAULT_STRUCTURE_DISPLAY = defaultStructureDisplay();
 
 export function symbol(z: number) {
   return elementDisplay(z).symbol;
@@ -56,7 +72,7 @@ function labelForHit(hit: THREE.Intersection): string | undefined {
 function dispose(group: THREE.Object3D) {
   group.traverse((o) => {
     if (o instanceof THREE.InstancedMesh) o.dispose();
-    if (o instanceof THREE.Mesh) {
+    if (o instanceof THREE.Mesh || o instanceof THREE.LineSegments) {
       o.geometry.dispose();
       for (const m of Array.isArray(o.material) ? o.material : [o.material])
         m.dispose();
@@ -129,6 +145,7 @@ export function Viewport({
   shading,
   shader,
   atomPalette,
+  structureDisplay = DEFAULT_STRUCTURE_DISPLAY,
   reset,
   onSelect,
   onShaderLog,
@@ -141,11 +158,72 @@ export function Viewport({
   shading: SurfaceShading;
   shader: (ShaderPair & { target: string }) | null;
   atomPalette?: AtomPalette;
+  structureDisplay?: StructureDisplayState;
   reset: number;
   onSelect: (text: string) => void;
   onShaderLog?: (log: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
+  // Parent display reset is passive; never apply the previous source's indices
+  // during the first render of a replacement document.
+  const displayOwner = useRef({
+    atoms: doc.atoms,
+    structure: doc.structure,
+    stale: null as StructureDisplayState | null,
+  });
+  if (
+    displayOwner.current.atoms !== doc.atoms ||
+    displayOwner.current.structure !== doc.structure
+  )
+    displayOwner.current = {
+      atoms: doc.atoms,
+      structure: doc.structure,
+      stale: structureDisplay,
+    };
+  const display =
+    displayOwner.current.stale === structureDisplay
+      ? DEFAULT_STRUCTURE_DISPLAY
+      : structureDisplay;
+  const displayRef = useRef(display);
+  displayRef.current = display;
+  const layoutKey = JSON.stringify([
+    display.colorMode,
+    display.hiddenChains,
+    display.hiddenKinds,
+    display.chainStyles,
+    display.kindStyles,
+    display.isolatedChain,
+    display.residueSelection,
+  ]);
+  const proteinNeeded = useMemo(() => {
+    if (!doc.structure) return false;
+    const selected = [
+      doc.view.representation,
+      ...Object.values(display.chainStyles),
+      ...Object.values(display.kindStyles),
+    ];
+    if (
+      !selected.some(
+        (value) =>
+          value &&
+          isProteinRepresentation(
+            value as Parameters<typeof isProteinRepresentation>[0],
+          ),
+      )
+    )
+      return false;
+    return doc.atoms.positions.some(
+      (_, atom) =>
+        isAtomVisible(doc, display, atom) &&
+        isProteinRepresentation(atomRepresentation(doc, display, atom)),
+    );
+  }, [doc.atoms, doc.structure, doc.view.representation, layoutKey]);
+  const protein = useProteinBackbone(doc, proteinNeeded);
+  const [proteinMessages, setProteinMessages] = useState<string[]>([]);
+  const committedDoc = useRef(doc);
+  const committedDisplay = useRef(display);
+  const focusSeen = useRef<StructureDisplayState["focus"]>(null);
+  const focusSource = useRef({ atoms: doc.atoms, structure: doc.structure });
   const engine = useRef<{
     renderer: THREE.WebGLRenderer;
     scene: THREE.Scene;
@@ -155,6 +233,7 @@ export function Viewport({
     ambientOcclusion: MolecularAmbientOcclusion;
     draw: () => void;
     fit: () => void;
+    focus: (atoms: readonly number[]) => void;
     needsRender: boolean;
   } | null>(null);
   const selection = useRef(onSelect);
@@ -220,8 +299,7 @@ export function Viewport({
       }
       renderer.render(scene, camera);
     };
-    const fit = () => {
-      const box = new THREE.Box3().setFromObject(group);
+    const fitBox = (box: THREE.Box3) => {
       if (box.isEmpty()) return;
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
@@ -244,6 +322,22 @@ export function Viewport({
       controls.update();
       if (engine.current) engine.current.needsRender = true;
     };
+    const fit = () => fitBox(new THREE.Box3().setFromObject(group));
+    const focus = (indices: readonly number[]) => {
+      const box = new THREE.Box3();
+      const points = committedDoc.current.atoms.positions;
+      for (const index of indices) {
+        if (!Number.isSafeInteger(index) || index < 0 || index >= points.length)
+          continue;
+        const point = points[index];
+        if (
+          point.length === 3 &&
+          point.every((value) => Number.isFinite(Math.fround(value)))
+        )
+          box.expandByPoint(new THREE.Vector3(...point));
+      }
+      if (!box.isEmpty()) fitBox(box.expandByScalar(2 / BOHR));
+    };
     engine.current = {
       renderer,
       scene,
@@ -253,6 +347,7 @@ export function Viewport({
       ambientOcclusion: occlusion,
       draw,
       fit,
+      focus,
       needsRender: true,
     };
     // Wheel and middle-drag handlers update the camera before the animation tick.
@@ -285,7 +380,8 @@ export function Viewport({
       );
       const hits = ray.intersectObjects(group.children, true);
       for (const hit of hits) {
-        const label = labelForHit(hit);
+        const label =
+          proteinHitLabel(hit, committedDoc.current) ?? labelForHit(hit);
         if (label) {
           selection.current(label);
           return;
@@ -329,14 +425,52 @@ export function Viewport({
     if (!e) return;
     const shader = shaderRef.current;
     const group = new THREE.Group();
+    let stagedAtomIndices: number[] = [];
+    let stagedMessages: string[] = [];
+    const stagedDisplay = displayRef.current;
     try {
       const columns = doc.atoms;
       const atomCount = columns.positions.length;
-      // Atoms are one InstancedMesh: a single unit sphere and a single material
-      // shared by every atom, with per-instance scale and colour. The previous
-      // per-atom geometry + material cost 121k draw calls and 3.2 GB of heap on a
-      // 66k-atom structure; this renders the same scene in one draw call.
-      if (atomCount > 0) {
+      const display = displayRef.current;
+      const notices: string[] = [];
+      let preparedProtein = false;
+      if (proteinNeeded && protein.backbone) {
+        try {
+          const depiction = createProteinGeometry(
+            doc,
+            display,
+            protein.backbone,
+            paletteRef.current,
+          );
+          if (depiction.group.children.length) {
+            group.add(depiction.group);
+            preparedProtein = true;
+            notices.push(...protein.backbone.warnings, ...depiction.warnings);
+          } else
+            notices.push(
+              "No alpha-carbon depiction is available for the visible selection; atomic detail is retained.",
+            );
+        } catch (cause) {
+          notices.push(
+            `Protein depiction unavailable: ${String(cause)}. Atomic detail and quantum fields are retained.`,
+          );
+        }
+      }
+      const representations = Array.from({ length: atomCount }, (_, index) =>
+        atomRepresentation(doc, display, index),
+      );
+      const visible: number[] = [];
+      const atomic = new Uint8Array(atomCount);
+      for (let index = 0; index < atomCount; index++) {
+        if (!isAtomVisible(doc, display, index)) continue;
+        if (isProteinRepresentation(representations[index])) {
+          if (preparedProtein) continue;
+          representations[index] = "ball-stick";
+        }
+        atomic[index] = 1;
+        visible.push(index);
+      }
+      if (visible.length > 0) {
         const atomGeometry = new THREE.SphereGeometry(1, 24, 16);
         const atomMaterial = new THREE.MeshStandardMaterial({
           roughness: 0.34,
@@ -344,7 +478,7 @@ export function Viewport({
         const atoms = new THREE.InstancedMesh(
           atomGeometry,
           atomMaterial,
-          atomCount,
+          visible.length,
         );
         atoms.name = "atoms";
         const matrix = new THREE.Matrix4();
@@ -352,14 +486,15 @@ export function Viewport({
         const scale = new THREE.Vector3();
         const tint = new THREE.Color();
         const labels: string[] = [];
-        for (let i = 0; i < atomCount; i++) {
-          const point = columns.positions[i];
-          const z = columns.elements[i];
+        for (const [instance, index] of visible.entries()) {
+          const point = columns.positions[index];
+          const z = columns.elements[index];
           const element = elementDisplay(z);
+          const representation = representations[index];
           const radius =
-            doc.view.representation === "space-fill"
+            representation === "space-fill"
               ? element.radius / BOHR
-              : doc.view.representation === "liquorice"
+              : representation === "liquorice"
                 ? 0.28
                 : z === 1
                   ? 0.32
@@ -367,63 +502,116 @@ export function Viewport({
           position.set(point[0], point[1], point[2]);
           scale.setScalar(radius);
           matrix.compose(position, IDENTITY_QUATERNION, scale);
-          atoms.setMatrixAt(i, matrix);
-          tint.set(resolveAtomColor(z, paletteRef.current));
-          atoms.setColorAt(i, tint);
+          atoms.setMatrixAt(instance, matrix);
+          tint.set(atomDisplayColor(doc, display, index, paletteRef.current));
+          atoms.setColorAt(instance, tint);
           const angstrom = point.map((v) => (v * BOHR).toFixed(3)).join(", ");
-          labels.push(`${element.symbol} ${i + 1} | ${angstrom} angstrom`);
+          const hierarchy = doc.structure
+            ? `\n${residueLabel(doc.structure, doc.structure.atom_residues[index])}`
+            : "";
+          labels.push(
+            `${element.symbol} ${index + 1} | ${angstrom} angstrom${hierarchy}`,
+          );
         }
         atoms.instanceMatrix.needsUpdate = true;
         if (atoms.instanceColor) atoms.instanceColor.needsUpdate = true;
         atoms.userData.instanceLabels = labels;
-        atomsRef.current = Array.from(columns.elements);
+        atoms.userData.originalAtomIndices = visible;
         group.add(atoms);
       }
-      if (doc.view.representation !== "space-fill") {
-        const bondRadius =
-          doc.view.representation === "liquorice" ? 0.28 : 0.105;
-        const from = new THREE.Vector3();
-        const to = new THREE.Vector3();
-        const delta = new THREE.Vector3();
-        const direction = new THREE.Vector3();
-        const midpoint = new THREE.Vector3();
-        const orientation = new THREE.Quaternion();
-        const cylinderAxis = new THREE.Vector3(0, 1, 0);
-        const placed: [number, number][] = [];
-        for (const [i, j] of doc.bonds) {
+      stagedAtomIndices = visible;
+      const from = new THREE.Vector3();
+      const to = new THREE.Vector3();
+      const delta = new THREE.Vector3();
+      const direction = new THREE.Vector3();
+      const midpoint = new THREE.Vector3();
+      const orientation = new THREE.Quaternion();
+      const cylinderAxis = new THREE.Vector3(0, 1, 0);
+      const coloredBonds = !!doc.structure && display.colorMode !== "element";
+      const placed: {
+        i: number;
+        j: number;
+        half: 0 | 1 | 2;
+        colorAtom: number;
+      }[] = [];
+      for (const [i, j] of doc.bonds) {
+        if (
+          !atomic[i] ||
+          !atomic[j] ||
+          representations[i] === "space-fill" ||
+          representations[j] === "space-fill"
+        )
+          continue;
+        from.set(...columns.positions[i]);
+        to.set(...columns.positions[j]);
+        if (delta.subVectors(to, from).length() < 1e-10) continue;
+        if (
+          coloredBonds &&
+          atomDisplayColor(doc, display, i, paletteRef.current) !==
+            atomDisplayColor(doc, display, j, paletteRef.current)
+        ) {
+          placed.push(
+            { i, j, half: 1, colorAtom: i },
+            { i, j, half: 2, colorAtom: j },
+          );
+        } else placed.push({ i, j, half: 0, colorAtom: i });
+      }
+      if (placed.length > 0) {
+        const bondGeometry = new THREE.CylinderGeometry(1, 1, 1, 12);
+        const bondMaterial = new THREE.MeshStandardMaterial({
+          color: coloredBonds ? "#ffffff" : "#9ba3a8",
+          roughness: 0.5,
+        });
+        const bonds = new THREE.InstancedMesh(
+          bondGeometry,
+          bondMaterial,
+          placed.length,
+        );
+        bonds.name = "bonds";
+        const matrix = new THREE.Matrix4(),
+          scale = new THREE.Vector3(),
+          tint = new THREE.Color();
+        const labels: string[] = [];
+        for (const [instance, entry] of placed.entries()) {
+          const { i, j, half } = entry;
           from.set(...columns.positions[i]);
           to.set(...columns.positions[j]);
-          if (delta.subVectors(to, from).length() >= 1e-10) placed.push([i, j]);
-        }
-        if (placed.length > 0) {
-          const bondGeometry = new THREE.CylinderGeometry(1, 1, 1, 12);
-          const bondMaterial = new THREE.MeshStandardMaterial({
-            color: "#9ba3a8",
-            roughness: 0.5,
-          });
-          const bonds = new THREE.InstancedMesh(
-            bondGeometry,
-            bondMaterial,
-            placed.length,
-          );
-          bonds.name = "bonds";
-          const matrix = new THREE.Matrix4();
-          const scale = new THREE.Vector3();
-          for (const [k, [i, j]] of placed.entries()) {
-            from.set(...columns.positions[i]);
-            to.set(...columns.positions[j]);
-            const length = delta.subVectors(to, from).length();
-            direction.copy(delta).multiplyScalar(1 / length);
-            orientation.setFromUnitVectors(cylinderAxis, direction);
-            midpoint.addVectors(from, to).multiplyScalar(0.5);
-            scale.set(bondRadius, length, bondRadius);
-            matrix.compose(midpoint, orientation, scale);
-            bonds.setMatrixAt(k, matrix);
+          if (half === 1) to.lerpVectors(from, to, 0.5);
+          else if (half === 2) from.lerpVectors(from, to, 0.5);
+          const length = delta.subVectors(to, from).length();
+          direction.copy(delta).multiplyScalar(1 / length);
+          orientation.setFromUnitVectors(cylinderAxis, direction);
+          midpoint.addVectors(from, to).multiplyScalar(0.5);
+          const radius =
+            representations[i] === "liquorice" ||
+            representations[j] === "liquorice"
+              ? 0.28
+              : 0.105;
+          scale.set(radius, length, radius);
+          matrix.compose(midpoint, orientation, scale);
+          bonds.setMatrixAt(instance, matrix);
+          if (coloredBonds) {
+            tint.set(
+              atomDisplayColor(
+                doc,
+                display,
+                entry.colorAtom,
+                paletteRef.current,
+              ),
+            );
+            bonds.setColorAt(instance, tint);
           }
-          bonds.instanceMatrix.needsUpdate = true;
-          group.add(bonds);
+          if (doc.structure)
+            labels.push(
+              `Bond atoms ${i + 1}–${j + 1} | ${residueLabel(doc.structure, doc.structure.atom_residues[entry.colorAtom])}`,
+            );
         }
+        bonds.instanceMatrix.needsUpdate = true;
+        if (bonds.instanceColor) bonds.instanceColor.needsUpdate = true;
+        if (doc.structure) bonds.userData.instanceLabels = labels;
+        group.add(bonds);
       }
+      stagedMessages = notices;
       for (const s of doc.surfaces) {
         if (
           !s.visible ||
@@ -497,6 +685,10 @@ export function Viewport({
     dispose(e.group);
     e.group.clear();
     e.group.add(group);
+    committedDoc.current = doc;
+    committedDisplay.current = stagedDisplay;
+    atomsRef.current = stagedAtomIndices;
+    setProteinMessages(stagedMessages);
     if (!e.renderer.getContext().isContextLost()) setError("");
     e.needsRender = true;
   }, [
@@ -508,6 +700,9 @@ export function Viewport({
     shader?.vertexSource,
     shader?.fragmentSource,
     shader?.target,
+    layoutKey,
+    protein.backbone,
+    proteinNeeded,
   ]);
   useEffect(() => {
     const e = engine.current;
@@ -534,19 +729,52 @@ export function Viewport({
     const e = engine.current;
     if (!e) return;
     const atoms = e.group.getObjectByName("atoms");
-    if (!(atoms instanceof THREE.InstancedMesh)) return;
-    const elements = atomsRef.current;
     const tint = new THREE.Color();
-    for (let i = 0; i < elements.length; i++) {
-      tint.set(resolveAtomColor(elements[i], atomPalette));
-      atoms.setColorAt(i, tint);
+    if (atoms instanceof THREE.InstancedMesh) {
+      for (let instance = 0; instance < atomsRef.current.length; instance++) {
+        tint.set(
+          atomDisplayColor(
+            committedDoc.current,
+            committedDisplay.current,
+            atomsRef.current[instance],
+            atomPalette,
+          ),
+        );
+        atoms.setColorAt(instance, tint);
+      }
+      if (atoms.instanceColor) atoms.instanceColor.needsUpdate = true;
     }
-    if (atoms.instanceColor) atoms.instanceColor.needsUpdate = true;
+    retintProteinGeometry(
+      e.group,
+      committedDoc.current,
+      committedDisplay.current,
+      atomPalette,
+    );
     e.needsRender = true;
   }, [atomPalette]);
   useEffect(() => {
     engine.current?.fit();
   }, [reset, doc.id]);
+  useEffect(() => {
+    if (
+      focusSource.current.atoms !== doc.atoms ||
+      focusSource.current.structure !== doc.structure
+    ) {
+      focusSource.current = { atoms: doc.atoms, structure: doc.structure };
+      focusSeen.current = null;
+      return;
+    }
+    const focus = display.focus;
+    if (
+      !focus ||
+      focus === focusSeen.current ||
+      committedDoc.current.atoms !== doc.atoms ||
+      committedDoc.current.structure !== doc.structure
+    )
+      return;
+    focusSeen.current = focus;
+    engine.current?.focus(focus.atoms);
+  }, [display.focus, doc.atoms, doc.structure]);
   useEffect(() => {
     const current = engine.current;
     if (!current) return;
@@ -595,6 +823,44 @@ export function Viewport({
       {occlusionError && (
         <div className="viewport-error" role="alert">
           {occlusionError}
+        </div>
+      )}
+      {proteinNeeded && (
+        <div
+          role="status"
+          aria-label="Protein depiction status"
+          style={{
+            position: "absolute",
+            bottom: 8,
+            left: 12,
+            right: 12,
+            maxHeight: 120,
+            overflow: "auto",
+            padding: "5px 8px",
+            fontSize: 11,
+            background: "#fffffff0",
+            color: "#43585b",
+            zIndex: 3,
+          }}
+        >
+          {!protein.backbone && !protein.error && (
+            <div>Preparing protein backbone; atomic detail is retained.</div>
+          )}
+          {protein.error && (
+            <div>
+              Protein depiction unavailable: {protein.error}. Atomic detail is
+              retained.
+            </div>
+          )}
+          {proteinMessages.map((message, index) => (
+            <div key={index}>{message}</div>
+          ))}
+          {ambientOcclusion.enabled && ambientOcclusion.strength > 0 && (
+            <div>
+              Protein depictions use diffuse shading; ambient occlusion applies
+              to atom and bond detail.
+            </div>
+          )}
         </div>
       )}
       <div className="viewport-tools">

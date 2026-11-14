@@ -36,6 +36,7 @@ pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocume
         id,
         title,
         atoms,
+        structure,
         bonds,
         basis,
         orbitals,
@@ -58,11 +59,21 @@ pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocume
     let grids = packer.grids(grids)?;
     let orbitals = packer.orbitals(orbitals)?;
     let surfaces = packer.surfaces(surfaces)?;
-    let document = json!({
+    let mut document = json!({
         "atoms": atoms, "basis": basis, "bonds": bonds, "densities": densities,
         "grids": grids, "id": id, "orbitals": orbitals, "provenance": provenance,
         "surfaces": surfaces, "title": title, "view": view,
     });
+    if let Some(structure) = structure {
+        let mut metadata = serde_json::to_value(structure).map_err(|e| e.to_string())?;
+        metadata["atom_residues"] = packer.usize_row(
+            None,
+            0,
+            vec![structure.atom_residues.len()],
+            structure.atom_residues.iter().copied(),
+        )?;
+        document["structure"] = metadata;
+    }
     Ok(PackedDocument {
         document,
         arrays: packer.arrays,

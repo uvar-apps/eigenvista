@@ -16,6 +16,7 @@
 //! symmetry-mate generation or periodic boundary expansion.
 
 mod connections;
+mod metadata;
 
 use crate::{Atom, BOHR_TO_ANGSTROM, Document, Result, bonds};
 use connections::{ConnectionRow, SiteIdentity};
@@ -294,6 +295,7 @@ struct Site {
     alt: Option<String>,
     key: ResidueKey,
     identity: SiteIdentity,
+    hetero: bool,
 }
 
 /// Read the first model's geometry, select one occupancy-ranked alternate
@@ -647,6 +649,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             alt,
             key,
             identity,
+            hetero: field("_atom_site.group_pdb").eq_ignore_ascii_case("HETATM"),
         });
     }
 
@@ -742,6 +745,20 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         .enumerate()
         .map(|(atom, (site, _))| (&site.identity, atom))
         .collect();
+    let (structure, unresolved_annotations) = if atom_blocks.len() == 1 {
+        let metadata = metadata::CifMetadata::parse(text, *atom_blocks.iter().next().unwrap())?;
+        metadata.build(
+            &sites
+                .iter()
+                .zip(&keep)
+                .filter(|(_, keep)| **keep)
+                .map(|(site, _)| site)
+                .collect::<Vec<_>>(),
+        )?
+    } else {
+        (None, 0)
+    };
+    doc.structure = structure;
     let declared = connections::resolve(&declarations, &selected)?;
     let connectivity = bonds::perceive(&doc.atoms, &declared.explicit)?;
     let connectivity_description = connectivity.description();
@@ -765,6 +782,12 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         connectivity_description,
     ];
     provenance.extend(declared.provenance);
+    if doc.structure.is_none() {
+        provenance.push("mmCIF parser: biological hierarchy unavailable because selected identities are incomplete or span multiple data blocks; geometry remains available.".into());
+    }
+    if unresolved_annotations > 0 {
+        provenance.push(format!("mmCIF parser: {unresolved_annotations} ambiguous, absent, unsupported or conflicting secondary annotation matches left unknown."));
+    }
     if unknown_elements > 0 {
         provenance.push(format!(
             "Skipped {unknown_elements} atoms with an unrecognised element symbol; unknown elements are not guessed."
@@ -782,7 +805,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         ));
     }
     provenance.push(
-        "Structure-only import: residue/chain labels, occupancy, B-factors and formal charges are not retained as atom attributes; declared connection metadata is retained in provenance, without bond orders or quantum data being fabricated."
+        "Structure-only import: selected chain/residue/atom identity and deposited secondary annotations are retained when supplied. Occupancy, B-factors and formal charges are not retained as atom attributes; declared connection metadata is retained in provenance, without bond orders or quantum data being fabricated."
             .into(),
     );
     doc.provenance = provenance;

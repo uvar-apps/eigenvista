@@ -455,6 +455,20 @@ section {
 .selection-status > span {
   flex-shrink: 0;
 }
+.selection-description {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+.selection-description > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.selection-description > span:first-child {
+  flex-shrink: 0;
+}
 .units {
   color: #929c9f;
   font-size: 10px;

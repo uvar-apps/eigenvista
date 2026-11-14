@@ -13,6 +13,7 @@ use eigenvista_core::import::pdb;
 use eigenvista_format::{decode, encode};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
+use std::collections::BTreeMap;
 use std::io::Read;
 use zip::ZipArchive;
 
@@ -71,7 +72,14 @@ fn large_structure_imports_the_expected_counts() {
 #[test]
 fn large_structure_encodes_the_atom_collection_as_two_columns() {
     let text = String::from_utf8(fixture_bytes()).unwrap();
-    let doc = pdb(&text, "4PJ1.pdb").unwrap();
+    let mut doc = pdb(&text, "4PJ1.pdb").unwrap();
+    assert!(
+        doc.structure.is_some(),
+        "the new importer must retain identity"
+    );
+    // Preserve the original metadata-free profile regression unchanged. The
+    // independent BIO test below qualifies the additional bounded metadata.
+    doc.structure = None;
     let bytes = encode(&doc).unwrap();
 
     let atoms = manifest_json(&bytes)["document"]["atoms"].clone();
@@ -107,7 +115,14 @@ fn manifest_does_not_grow_with_atom_count() {
     // The row-wise form needed roughly 56 bytes per atom record, which put a
     // 66k-atom manifest near 3.7 MiB. The columnar form must stay small.
     let text = String::from_utf8(fixture_bytes()).unwrap();
-    let doc = pdb(&text, "4PJ1.pdb").unwrap();
+    let mut doc = pdb(&text, "4PJ1.pdb").unwrap();
+    assert!(
+        doc.structure.is_some(),
+        "the new importer must retain identity"
+    );
+    // Preserve the original metadata-free profile regression unchanged. The
+    // independent BIO test below qualifies the additional bounded metadata.
+    doc.structure = None;
     let bytes = encode(&doc).unwrap();
     let len = manifest_entry(&bytes).len();
     assert!(
@@ -129,4 +144,89 @@ fn large_structure_round_trips_exactly() {
         assert_eq!(a.element, b.element);
         assert_eq!(a.position, b.position);
     }
+}
+
+fn archive_entries(bytes: &[u8]) -> BTreeMap<String, Vec<u8>> {
+    let mut zip = ZipArchive::new(std::io::Cursor::new(bytes)).unwrap();
+    (0..zip.len())
+        .map(|index| {
+            let mut file = zip.by_index(index).unwrap();
+            let mut bytes = vec![];
+            file.read_to_end(&mut bytes).unwrap();
+            (file.name().to_string(), bytes)
+        })
+        .collect()
+}
+
+#[test]
+fn biological_profile_adds_only_bounded_metadata_and_one_mapping_column() {
+    let source = String::from_utf8(fixture_bytes()).unwrap();
+    let full = pdb(&source, "4PJ1.pdb").unwrap();
+    let metadata = full
+        .structure
+        .as_ref()
+        .expect("deposited biological identity");
+    assert_eq!(metadata.atom_names.len(), 65_963);
+    assert_eq!(metadata.atom_residues.len(), 65_963);
+    metadata.validate(full.atoms.len()).unwrap();
+    let mut geometry = full.clone();
+    geometry.structure = None;
+    let old_bytes = encode(&geometry).unwrap();
+    let new_bytes = encode(&full).unwrap();
+    let old = manifest_json(&old_bytes);
+    let new = manifest_json(&new_bytes);
+    assert_eq!(new["document"]["atoms"], old["document"]["atoms"]);
+    assert_eq!(new["document"]["bonds"], old["document"]["bonds"]);
+    let mut fields = new["document"].clone();
+    fields.as_object_mut().unwrap().remove("structure");
+    assert_eq!(fields, old["document"], "only biological metadata is added");
+    let old_arrays = old["arrays"].as_object().unwrap();
+    let new_arrays = new["arrays"].as_object().unwrap();
+    assert_eq!(old_arrays.len(), 3);
+    assert_eq!(new_arrays.len(), 4);
+    for (id, descriptor) in old_arrays {
+        assert_eq!(
+            new_arrays.get(id),
+            Some(descriptor),
+            "original array descriptor changed"
+        );
+    }
+    let old_entries = archive_entries(&old_bytes);
+    let new_entries = archive_entries(&new_bytes);
+    for (name, bytes) in old_entries
+        .iter()
+        .filter(|(name, _)| name.as_str() != "manifest.json")
+    {
+        assert_eq!(
+            new_entries.get(name),
+            Some(bytes),
+            "original numeric bytes changed: {name}"
+        );
+    }
+    assert_eq!(new_entries.len(), old_entries.len() + 1);
+    let mapping = new["document"]["structure"]["atom_residues"]["$array"]
+        .as_str()
+        .unwrap();
+    assert!(!old_arrays.contains_key(mapping));
+    let descriptor = &new_arrays[mapping];
+    assert_eq!(descriptor["shape"], serde_json::json!([65_963]));
+    assert_eq!(descriptor["dtype"], "u32");
+    assert_eq!(descriptor["bytes"], 65_963 * 4);
+    let expected: Vec<u8> = metadata
+        .atom_residues
+        .iter()
+        .flat_map(|&index| u32::try_from(index).unwrap().to_le_bytes())
+        .collect();
+    assert_eq!(new_entries[descriptor["entry"].as_str().unwrap()], expected);
+    assert_eq!(
+        new["required_features"],
+        serde_json::json!([
+            "eigenvista-preview-polynomial-v1",
+            "eigenvista-biological-structure-v1"
+        ])
+    );
+    assert!(
+        manifest_entry(&new_bytes).len() < 8 * 1024 * 1024,
+        "BIO metadata must fit the unchanged manifest budget"
+    );
 }

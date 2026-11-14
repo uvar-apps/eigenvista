@@ -1,4 +1,5 @@
 use crate::*;
+mod biological;
 mod cif;
 mod pdb;
 pub use cif::cif;

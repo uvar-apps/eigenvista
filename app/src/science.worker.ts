@@ -50,6 +50,10 @@ self.onmessage = async (event: MessageEvent) => {
           core.import_document(new Uint8Array(args.bytes), args.name),
         );
         break;
+      case "backbone":
+        progress("preparing protein backbone");
+        result = JSON.parse(core.protein_backbone(JSON.stringify(args.doc)));
+        break;
       case "sample":
       case "generate": {
         if (args.doc) {
@@ -100,7 +104,7 @@ self.onmessage = async (event: MessageEvent) => {
       !initialized ||
       e instanceof WebAssembly.RuntimeError ||
       e instanceof RangeError;
-    if (!fatal) clearCache();
+    if (!fatal && action !== "backbone") clearCache();
     self.postMessage({
       id,
       fatal,

@@ -2,7 +2,8 @@
 
 This implementation is an experimental subset of the research proposal, not
 its frozen version-1 schema. New files use `format: eigenvista`,
-`version: [0, 1]`, `required_features: [eigenvista-preview-polynomial-v1]`, and
+`version: [0, 1]`, a required polynomial feature (plus the biological feature
+described below when present), and
 `coordinate_unit: bohr`. The exact model is defined in the
 [Rust core](../crates/eigenvista-core/src/model.rs).
 
@@ -71,9 +72,49 @@ The atom collection itself is columnar in both the document JSON and the manifes
 
 Two references, so the manifest is **constant-size with respect to atom count** — 1,455 bytes for a 100,000-atom structure, where the row-wise form needed roughly 5.6 MiB and could not be written at all past 8,191 atoms. `Document::atoms` in Rust is still a row-wise `Vec<Atom>`; the conversion happens in the `atoms_columnar` serde module, and the app reads `atoms.elements[i]` / `atoms.positions[i]`.
 
+That constant-size claim describes the geometry-only profile and atom
+collection. The optional biological tables below add bounded identity metadata
+whose size grows with the retained atoms/residues; they do not change these two
+atom columns or their original numeric entries.
+
 Deserialization accepts the columnar object **and** the older row-wise array of `{ element, position }` records. The custom `Visitor` dispatches on the JSON token via `visit_map` / `visit_seq`, so supporting both forms costs no buffering — an untagged enum would have copied the whole collection into an intermediate value, which is exactly the cost this removes. Column lengths must agree; a mismatch is rejected.
 
 Measured per-atom decode peak RSS: 3,198 B (row-wise) → 2,185 B (coalesced rows) → **929 B** (atom columns).
+
+### Biological structure capability
+
+Documents with retained biological identity additionally declare
+`eigenvista-biological-structure-v1`, after `eigenvista-preview-polynomial-v1`
+in `required_features`. The optional `document.structure` contains:
+
+| Table | Retained fields |
+| --- | --- |
+| `chains` | Optional label, author and entity identifiers |
+| `residues` | Chain index, name, optional label/author sequence and insertion code, observed segment, component kind and secondary assignment |
+| `atom_names` / `atom_residues` | One name and residue index per selected original atom |
+| `secondary_source` | `none` or `deposited`; absent assignments remain `unknown` |
+
+The atom collection stays unchanged. Atom-to-residue indices use one packed
+unsigned numeric row; other bounded metadata remains JSON. Validation requires
+matching atom counts, valid references, used chains/residues, unique identities,
+bounded strings and supported enums. Tables cannot exceed 100,000 atoms/records;
+combined metadata strings have a 4 MiB budget. The existing 8 MiB manifest,
+entry and uncompressed-byte limits still apply.
+
+The decoder requires the feature marker and non-null payload to agree, and
+rejects unknown required features. An older reader rejects a newly saved
+biological document explicitly instead of dropping its hierarchy. A document
+without metadata omits `structure` and keeps the previous feature list and
+logical encoding; all authentic frozen native files remain supported. Old
+documents cannot recover discarded labels without reimporting their source.
+The legacy `molekel` profile does not accept this new capability.
+
+Global molecular representation includes `trace`, `tube`, `ribbon` and
+`cartoon` when metadata is present. Chain/entity/secondary coloring, subset
+visibility, per-chain/component style overrides and camera focus are session
+settings and are not serialized. Protein depiction geometry is derived display
+data, not a saved quantum-field surface. Metadata does not enter scientific
+field hashes. See the [biological-view decision](design/2026-11-14-biological-structure-views.md).
 
 ### Why the entry cap mattered
 
@@ -108,8 +149,9 @@ flat vector shapes. Metadata retains sorted keys and explicit nulls. Scientific
 f64 values retain their bits; unsigned arrays retain the existing whole-array
 f64 fallback if a value exceeds u32. In particular, this preserves the current
 writer behavior for oversized surface resolutions without expanding the
-decoder's numeric capabilities. No identifier/profile or hash migration is
-introduced. See the [decision](design/2026-11-12-typed-native-encoding.md).
+decoder's numeric capabilities. That typed-writer change introduced no
+identifier/profile or hash migration; the later optional biological capability
+is described above. See the [decision](design/2026-11-12-typed-native-encoding.md).
 
 Before emitting an entry, checked shape/byte arithmetic and fallible reservation
 bound its binary buffer against the existing preflight budget. Exact manifest

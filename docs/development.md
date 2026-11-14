@@ -270,10 +270,11 @@ node node_modules/@playwright/test/cli.js test --config ../ci/playwright.config.
   tests/adaptive-volume.spec.ts tests/cube.spec.ts tests/progress.spec.ts tests/viewer.spec.ts
 ```
 
-Hosted CI selects `--project=chromium` and `--project=webkit` in two independent
-matrix jobs, with the same one-worker configuration and existing deadlines.
-Their complete union is 350 cases (175 each); the default local command still
-runs both. Require both engine results and the Rust/macOS results. See the
+The optional manually dispatched hosted workflow selects `--project=chromium`
+and `--project=webkit` in two independent jobs, with the same one-worker
+configuration and existing deadlines. Their union is the same full suite as
+the default local command, which runs both engines. Both engines must pass
+locally before pushing, alongside the other applicable local checks. See the
 [project-isolation decision](design/2026-11-12-browser-project-isolation.md).
 
 For an additional controlled software-rendering check, derive a temporary config
@@ -285,7 +286,8 @@ are not proof of the backend. The measured repair used Chromium 153.0.8010.12
 and reported ANGLE/SwiftShader. See
 [Chromium's instructions](https://github.com/chromium/chromium/blob/main/docs/gpu/swiftshader.md)
 and [Playwright launch arguments](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-option-args).
-This controlled local check does not replace actual hosted results.
+This controlled diagnostic does not replace the full applicable local suite or
+qualify another operating system.
 
 The [scheduling decision](design/2026-11-12-browser-verification-scheduling.md)
 explains why progress waits for actual results/checkpoints, captures happen
@@ -294,9 +296,18 @@ Keep all numerical/pixel/sign/interaction and warmed timing coverage; do not
 make a failed gate green by lowering resolution, disabling damping or retries.
 Adaptive evidence is now six `measurements-MODE-QUALITY` files per engine,
 covering the same 24 comparisons and 14 timing configurations. The normal full
-suite has **320 cases**; consult current status/PR checks for actual outcomes.
+suite covers both engines; consult [current status](status.md) for its inventory
+and actual local outcomes.
 
 ## Verification commands
+
+User policy, 14 November 2026 (#68): **all relevant checks must pass locally
+before every push**. Current required platform validation is local macOS only.
+The user will provide two local Linux machines; add appropriate local Linux
+validation once access is available and record its actual results. Until then,
+Linux qualification remains pending. GitHub CI is not a push, merge or release
+requirement. The [agent rules](../AGENTS.md#required-local-validation-before-pushing)
+define source/result validity and documentation-only checks.
 
 Use the root-shell temporary-directory setup above, then:
 
@@ -348,7 +359,7 @@ explains ownership, validation, and cache boundaries.
 | Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, controlled out-of-order reads and clearing, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations/budgets. Native dialog interaction remains a separate acceptance check. |
 | Custom shader transparency | [Alpha/depth and UI regressions](../app/tests/shader-transparency.spec.ts): fragment alpha independent of document opacity, view-dependent alpha, opaque depth writes, unchanged built-in materials, live checkbox changes, and Clear reset |
 | Sidebar layout | [Panel workflows](../app/tests/panels.spec.ts) and [ordering regressions](../app/tests/panel-order.spec.ts): all eight disclosures, actual drag/keyboard/tap ordering, DOM/focus, mounted field/shader state, decoded-document/worker isolation, bounded preferences and storage failures, busy cancellation and mobile layout |
-| Molecular ambient occlusion | [AO browser checks](../app/tests/molecular-ao.spec.ts), 10 cases per engine within 233/engine (466 total): independent contact/isolated and gloss/Lambert controls, Auto/manual radius, instancing, exact Off/zero/material restoration, field/document/worker isolation, resource bounds and fault recovery. PNG case A retains three full-size desktop samples; case B bounds only the real `.scene` host at DPR 2 (240×128 → 160×160 CSS; 480×256 → 320×320 physical), keeping real toolbar/actions, all five original samples and unchanged oracles. Separate 1024-cap checks and tracked actual-app 1AON qualification remain; 4PJ1 is secondary. Keep 60-second tests, 35-minute suite steps, 60-minute jobs and one worker. The failed combined-case run is historical; require all four actual new-head CI jobs. Results belong in [status](status.md). |
+| Molecular ambient occlusion | [AO browser checks](../app/tests/molecular-ao.spec.ts), 10 cases per engine within the complete local suite: independent contact/isolated and gloss/Lambert controls, Auto/manual radius, instancing, exact Off/zero/material restoration, field/document/worker isolation, resource bounds and fault recovery. PNG case A retains three full-size desktop samples; case B bounds only the real `.scene` host at DPR 2 (240×128 → 160×160 CSS; 480×256 → 320×320 physical), keeping real toolbar/actions, all five original samples and unchanged oracles. Separate 1024-cap checks and tracked actual-app 1AON qualification remain; 4PJ1 is secondary. Keep 60-second tests, 35-minute suite steps, 60-minute jobs and one worker. The failed combined-case run is historical; complete all relevant local checks before pushing. Results belong in [status](status.md). |
 | Native save contract research | [Actual-writer regressions](../crates/eigenvista-format/tests/save_contract_research.rs) and [opt-in filesystem probe](../crates/eigenvista-format/examples/save_contract_probe.rs): modes, bytes, bounded complete-file visibility and unique no-clobber races; no crash-durability claim |
 | Anisotropic rendering and volume visibility | [Affine analytic checks](../app/tests/anisotropy-research.spec.ts) with [independent physical oracle](../app/tests/anisotropyReference.ts); normal [visibility](../app/tests/volume-visibility.spec.ts), [depth/opaque objects](../app/tests/volume-visibility-depth.spec.ts) and [prefix](../app/tests/volume-visibility-prefix.spec.ts) regressions preserve fixed expectations |
 | Indexed-mesh qualification only | [Frozen layout corpus](../fixtures/indexed-mesh-qualification/README.md), native research example and [real shader/Save checks](../app/tests/indexed-mesh-qualification.spec.ts): exact raw VBO/IBO restoration, both handednesses/signs and negative controls; no production compaction |
@@ -405,12 +416,13 @@ includes them; these are different scopes, not direct speedup ratios. Synthetic
 lattices test spatial work limits rather than physical bonding. Use
 [status](status.md) for dated measurements and exact verification counts.
 
-The [Verify workflow](../.github/workflows/verify.yml) runs the pinned checks on
-pull requests and main. [CI details](../ci/README.md) describe Linux Rust/WASM/
-Chromium/WebKit/package checks, explicit macOS desktop tests, local equivalents,
-temporary storage and seven-day failure artifacts. Consult dated [status](status.md)
-for actual passing run evidence; CI does not qualify a packaged Linux/Windows
-release or physical macOS controls/dialogs.
+The [Verify workflow](../.github/workflows/verify.yml) is manual-only for hosted
+diagnostics explicitly requested by the user. It does not run on PRs or pushes
+and is not a merge gate. [CI details](../ci/README.md) describe the retained
+Linux Rust/WASM/Chromium/WebKit/package and macOS desktop jobs, temporary storage
+and seven-day failure artifacts. Dated [status](status.md) preserves historical
+hosted evidence; it does not replace current local-before-push verification or
+qualify a packaged Linux/Windows release or physical macOS controls/dialogs.
 
 Node declarations are an explicit locked development dependency because tests
 and Vite/Playwright configuration use Node APIs. Run `npm --prefix app ci` to

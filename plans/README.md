@@ -1,5 +1,36 @@
 # Research and follow-up plans
 
+Index updated 14 November 2026 (Australia/Perth), EigenVista 0.6.0 main
+`d0983802c6e866c971b9a1200073dd399030bd6c`. Current release and implementation
+evidence remain in [handoff](../docs/handoff.md) and [status](../docs/status.md).
+
+## Molecular visualization roadmap
+
+[Plan 007: molecular visualization priorities](007-molecular-visualization-roadmap.md)
+records the full catalog, product rationale, dependencies and future acceptance
+boundaries. The metadata prerequisite and first four additions were authorized
+14 November 2026 and implemented on `codex/biological-structure-views`,
+tracked in #62–#66. The [decision record](../docs/design/2026-11-14-biological-structure-views.md)
+separates implementation choices from the initial proposed roadmap. Current
+source and verification/delivery evidence are recorded in
+[the ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097).
+
+Recommended first four additions, after the shared biological-metadata and
+native-compatibility foundation:
+
+1. Chain/entity coloring.
+2. Basic chain/component selection, visibility and mixed representations.
+3. Protein backbone traces and smooth tubes.
+4. Protein ribbons/secondary-structure cartoons and secondary colors.
+
+Molecular-shape surfaces follow, starting with a Gaussian envelope and separately
+qualified SAS/SES work. The roadmap ranks all remaining options and distinguishes
+coordinate-derived views from those needing external data. It does not change
+existing unrelated GitHub priorities. Later ranks and release work remain outside
+the currently authorized implementation batch.
+
+## Earlier research and implementation history
+
 Updated 13 November 2026 (Australia/Perth), latest research from main
 `a3d71d077da28e38d3e031d531888fd08d98c279`, EigenVista 0.5.12.
 The initial research changed no application code or dependencies. The user then

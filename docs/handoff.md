@@ -1,7 +1,8 @@
 # Development handoff
 
 Updated 14 November 2026 for published **0.6.0**, including molecular ambient
-occlusion (#59). The release tag/package retain source `6cb678c`; earlier
+occlusion (#59), and the post-release biological structure views (#62–#66). The release
+tag/package retain source `6cb678c`; earlier
 packages and dated entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
@@ -10,6 +11,19 @@ The current application source is **EigenVista**, version **0.6.0**, in the stan
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
+
+## Verification policy: 14 November 2026
+
+The user requires **all relevant tests and checks to pass locally before any
+push**. Current verification is local macOS only. Two local Linux machines will
+join verification when the user provides access; no current Linux qualification
+is claimed. GitHub-hosted checks are not required for push, merge or release.
+The retained workflow is manual-only and runs only when explicitly requested.
+
+Dated hosted-CI requirements and results below preserve the earlier policy and
+its evidence; they do not override this rule. This policy/documentation update
+did not rerun application tests. The implementation results below remain the
+record of the completed checks.
 
 ## Source version 0.6.0
 
@@ -49,6 +63,92 @@ untracked `AO_AND_NOAO.png` and `docs/reviews/2026-11-11-code-review.md` without
 reading, staging or moving them; private chat exports and old releases remain
 untouched. Later post-publication documentation commits may follow the tag;
 always distinguish current main from the immutable tagged/package source.
+
+## Biological structure views: first four roadmap additions
+
+The user authorized Plan 007's metadata prerequisite and first four additions:
+chain/entity colors, component selection/mixed views, backbone trace/tube and
+protein ribbons/cartoons. Implementation was developed on `codex/biological-structure-views` from
+`d098380`; [#62](https://github.com/uvar-apps/eigenvista/issues/62) through
+[#66](https://github.com/uvar-apps/eigenvista/issues/66) track the work. The
+[decision](design/2026-11-14-biological-structure-views.md) records optional
+metadata, native capability gating, session display ownership and deposited-only
+secondary assignments. The
+[verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
+records the exact source revision, PR, completed local results, historical
+hosted observations and actual merge state. Consult it and Git before continuing
+from a different checkout. The earlier planning snapshot below remains historical.
+
+Local macOS implementation checks passed: 272 default Rust tests, seven explicit
+desktop tests, fmt, strict workspace/all-targets Clippy, 13 packaging tests and
+WASM/TypeScript/production build. Authentic frozen native files remain exact; biological files round-trip
+with unchanged original numeric entries and an explicit additional capability.
+
+Forty focused Chromium/WebKit cases pass at the corrected production source
+(38 biological checks plus two unchanged atom-picking regressions):
+structure controls, namespace collisions, original-index picking, clean native
+Save/session state, independent geometry/normal/arrow controls, real worker
+caching/cancellation and exact field/custom-shader/AO-OFF/PNG invariants, with
+explicit GL/FBO/resource checks, real-file application workflows and legal
+microheterogeneity. The complete local browser suite passed 504/504 cases
+(252 per engine), with zero skipped, flaky or unexpected results. The linked
+ledger records the run; the original 233 cases per engine and all existing
+deadlines remain intact.
+
+Both engines completed nine actual-application visual captures each, using full
+tracked 1AON, 4PJ1 and 1CRN inputs. Real helices, strand arrows, ribbons, tubes,
+isolated chains and restoration were inspected. The palette now avoids the
+neighboring single-letter hue clustering found during review; an independent
+old-palette negative control verifies the fix. Contextual label/author names
+remain distinct even when valid source identifiers have the same visible text.
+See [user-guide illustrations](user-guide.md#biological-structure-views) and the
+decision's retained/peak-memory observations.
+
+The initial `10e7fe0` candidate is superseded. Its full run passed 500/502 and
+exposed the primary atom-label compatibility failure; that code now preserves
+the old format and 35-pixel status/canvas bounds without changing the old test.
+Final review also found legal shared-position monomer variants rejected by new
+validation. Both identities now remain selected, and every ambiguous backbone
+anchor is omitted with an explicit break. A subsequent partial-identifier
+counterexample at `80a6eb1` required checking identity ambiguity independently
+of traversal order. Known label conflicts and uncertain author aliases now
+remain barriers even with an unclassified variant. Independent review and
+972 identifier-presence scenarios cover this guard, including positive
+retention controls and native browser diagnostics. Both earlier candidates
+and their interrupted/cancelled runs are historical; only the final corrected
+head's completed local results in the ledger qualify delivery.
+The task-local contract, ownership, ledger and checkpoint live under
+`tmp/2026-11-14-structure-views/`. All relevant local tests and checks must pass
+before pushing, including the real large-structure visual/compatibility checks
+applicable to this implementation. Hosted checks are optional under the current
+policy above; earlier hosted runs are historical evidence, not a merge gate.
+Consult the linked ledger for PR #67’s actual merge revision and delivery state.
+Source version stays 0.6.0; existing tags, releases, scientific inputs/precision,
+compiler/dependency pins, allocation limits and icon/logo are preserved.
+
+## Visualization roadmap: 14 November 2026 planning snapshot
+
+The user requested practical priorities for additional PDB/mmCIF visualization
+options and a file for future planning. [Plan 007](../plans/007-molecular-visualization-roadmap.md)
+records the complete ordered catalog, rationale, source evidence and future
+acceptance boundaries against main `d098380`. It proposes four bounded additions:
+chain/entity coloring; basic chain/component selection and mixed views; protein
+backbone trace/tube; then ribbons/secondary-structure cartoons. Shape surfaces
+follow, with Gaussian and SAS/SES semantics kept distinct.
+
+Shared prerequisite: retain bounded biological identity across PDB/mmCIF/
+BinaryCIF and native saves. The current model retains only element/position;
+profile compatibility, stable source atom indices and true polymer continuity
+need explicit design before these features. Existing missing hierarchy is a
+documented limitation, not a newly established bug. Preserve quantum fields,
+hashes, frozen compatibility inputs, instancing, current AO and export behavior.
+
+This pass changes planning documentation only. No feature code, tests, builds,
+GitHub priorities, branches, commits or releases were changed. Future major
+implementation needs issue tracking and the user's branch/PR authorization.
+The [plans index](../plans/README.md) links the roadmap without rewriting earlier
+research or release records. Only document/source inspection and link checks
+qualify this planning pass; the release tests above remain historical evidence.
 
 ## Molecular ambient occlusion: #59
 

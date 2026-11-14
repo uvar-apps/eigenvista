@@ -56,6 +56,38 @@ export interface Surface {
   opacity: number;
   visible: boolean;
 }
+/** Selected biological identities; atom arrays retain original document indices. */
+export type ComponentKind =
+  | "protein"
+  | "nucleic"
+  | "ligand"
+  | "water"
+  | "ion"
+  | "unknown";
+export type SecondaryStructure = "helix" | "sheet" | "coil" | "unknown";
+export interface StructureChain {
+  label_id: string | null;
+  author_id: string | null;
+  entity_id: string | null;
+}
+export interface StructureResidue {
+  chain: number;
+  name: string;
+  label_seq_id: number | null;
+  author_seq_id: string | null;
+  insertion_code: string | null;
+  segment: number;
+  kind: ComponentKind;
+  secondary: SecondaryStructure;
+}
+export interface StructureMetadata {
+  chains: StructureChain[];
+  residues: StructureResidue[];
+  atom_names: string[];
+  atom_residues: number[];
+  secondary_source: "deposited" | "none";
+}
+
 export interface EigenVistaDocument {
   id: string;
   title: string;
@@ -80,6 +112,7 @@ export interface EigenVistaDocument {
     field: string | null;
   };
   provenance: string[];
+  structure?: StructureMetadata | null;
 }
 export interface Generation {
   surfaces: Surface[];

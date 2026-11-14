@@ -23,6 +23,13 @@ molecular ambient occlusion; see the
 independently audited Apple Silicon artifacts at its
 [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
 The earlier 0.5.15 package predates AO.
+
+Current source implements biological metadata, chain/entity coloring, component
+selection and protein trace/tube/ribbon/cartoon views under issues #62–#66.
+They are not in the published 0.6.0 package; see the
+[user workflow](user-guide.md#biological-structure-views),
+[import contract](structure-imports.md#biological-identities)
+and [ranked roadmap](../plans/007-molecular-visualization-roadmap.md).
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.
@@ -52,7 +59,7 @@ limits of opening new saves in older builds.
 | Implemented features, test evidence, M0-M7 progress | [Implementation status](status.md) |
 | Repeatable Apple Silicon tester ZIP, contents, signing boundaries | [Tester packaging](tester-packaging.md) |
 | Implemented `.eigenvista` container, validation, persistence | [Native preview format](preview-format.md) |
-| XYZ/PDB import policy, automatic bonds across formats, algorithm rationale | [Structure imports](structure-imports.md) |
+| Structure import policy, selected biological identities, automatic bonds and algorithm rationale | [Structure imports](structure-imports.md) |
 | Molden profile, shared Rust importer, CLI, conversion workflow | [Molden import](molden-import.md) and [independent fixtures](../fixtures/molden/README.md) |
 | Gaussian cube profile, volume/raycast previews, signed meshes, preserved grids | [Cube import](cube-import.md) and [analytic fixture](../fixtures/cube/README.md) |
 | Libraries, provenance, licensing | [Dependency record](dependencies.md) and [license](../LICENSE) |

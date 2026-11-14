@@ -87,8 +87,10 @@ function start() {
       }
       return;
     }
-    if (data.error) registration.clear();
-    else registration.commit(job.registration);
+    // A rejected depiction request never invalidates the resident quantum input.
+    if (data.error) {
+      if (job.action !== "backbone") registration.clear();
+    } else registration.commit(job.registration);
     settle(job, data.error ? new Error(data.error) : undefined, data.result);
   };
   instance.onerror = (event) => {

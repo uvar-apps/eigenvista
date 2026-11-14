@@ -45,6 +45,8 @@ import { ConvertFiles } from "./ConvertFiles";
 import { OrbitalBrowser, maxOrbitalBatch } from "./OrbitalBrowser";
 import { gridResolutions, isGridResolution } from "./resolution";
 import { Viewport, type AmbientOcclusionSettings } from "./Viewport";
+import { StructureControls } from "./StructureControls";
+import { defaultStructureDisplay } from "./molecularDisplay";
 import { automaticMolecularAoRadiusAngstrom } from "./molecularAmbientOcclusion";
 import { ShaderPanel, type ShaderEditorState } from "./ShaderPanel";
 import { PanelSection, usePanelExpansion } from "./PanelSection";
@@ -116,8 +118,23 @@ export default function App() {
   >(null);
   const [shaderStatus, setShaderStatus] = useState("");
   const [shaderError, setShaderError] = useState("");
-  // Session-scoped atom colour override. Undefined means the bundled default
-  // palette is in use. Nothing here is saved into the document.
+  const hasProtein = useMemo(
+    () =>
+      doc?.structure?.residues.some((residue) => residue.kind === "protein") ??
+      false,
+    [doc?.structure],
+  );
+  const [structureDisplay, setStructureDisplay] = useState(
+    defaultStructureDisplay,
+  );
+  // Subset indices belong to one imported geometry; coloring is a session choice.
+  useEffect(() => {
+    setStructureDisplay((previous) => ({
+      ...defaultStructureDisplay(),
+      colorMode: doc?.structure ? previous.colorMode : "element",
+    }));
+  }, [doc?.atoms, doc?.structure]);
+  // Session-scoped atom colour override; undefined uses the bundled palette.
   const [atomPalette, setAtomPalette] = useState<AtomPalette | undefined>();
   const [atomPaletteName, setAtomPaletteName] = useState("");
   const [atomPaletteError, setAtomPaletteError] = useState("");
@@ -125,6 +142,11 @@ export default function App() {
   const [grid, setGrid] = useState<SampledGrid | null>(null);
   const [reset, setReset] = useState(0);
   const [inspected, setInspected] = useState("");
+  const inspectionBreak = inspected.indexOf("\n");
+  const inspectionPrimary =
+    inspectionBreak < 0 ? inspected : inspected.slice(0, inspectionBreak);
+  const inspectionDetail =
+    inspectionBreak < 0 ? "" : inspected.slice(inspectionBreak + 1);
   const [dirty, setDirtyState] = useState(false);
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const [converterOpen, setConverterOpen] = useState(false);
@@ -765,8 +787,25 @@ export default function App() {
                   <option value="ball-stick">Ball and stick</option>
                   <option value="liquorice">Liquorice</option>
                   <option value="space-fill">Van der Waals</option>
+                  <option value="trace" disabled={!hasProtein}>
+                    Protein backbone trace
+                  </option>
+                  <option value="tube" disabled={!hasProtein}>
+                    Protein smooth tube
+                  </option>
+                  <option value="ribbon" disabled={!hasProtein}>
+                    Protein ribbon
+                  </option>
+                  <option value="cartoon" disabled={!hasProtein}>
+                    Protein cartoon
+                  </option>
                 </select>
               </label>
+              <StructureControls
+                doc={doc}
+                value={structureDisplay}
+                onChange={setStructureDisplay}
+              />
             </PanelSection>
             <PanelSection
               key="quantum-fields"
@@ -854,6 +893,7 @@ export default function App() {
               shading={surfaceShading}
               shader={appliedShader}
               atomPalette={atomPalette}
+              structureDisplay={structureDisplay}
               reset={reset}
               onSelect={setInspected}
               onShaderLog={(log) => {
@@ -869,7 +909,12 @@ export default function App() {
               }}
             />
             <div className="selection-status">
-              {inspected || fieldLabel || doc.title}
+              <div className="selection-description">
+                <span>{inspectionPrimary || fieldLabel || doc.title}</span>
+                {inspectionDetail && (
+                  <span title={inspectionDetail}>{inspectionDetail}</span>
+                )}
+              </div>
               <span>{doc.surfaces.length} saved surfaces</span>
             </div>
           </div>

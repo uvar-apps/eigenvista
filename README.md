@@ -34,6 +34,17 @@ size. Read the [0.6.0 release notes](docs/releases/0.6.0.md) and
 [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md).
 The published 0.6.0 package includes AO; older 0.5.15 packages predate it.
 
+Source after that release adds biological identity, chain/entity colors,
+component views and protein traces/tubes/ribbons/cartoons, tracked by
+[#62–#66](https://github.com/uvar-apps/eigenvista/issues/62) and
+[Plan 007](plans/007-molecular-visualization-roadmap.md). Read
+[current status](docs/status.md) and the linked verification ledger for the
+implementation revision, checks and delivery.
+The published 0.6.0 app/ZIP does not contain these additions. See the
+[user guide](docs/user-guide.md#biological-structure-views) for controls and the
+[native profile](docs/preview-format.md#biological-structure-capability) for the
+optional metadata feature required by new biological documents.
+
 ## Start here
 
 - **Using the application:** [User guide](docs/user-guide.md), including Mac

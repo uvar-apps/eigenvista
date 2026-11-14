@@ -8,6 +8,74 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Verification policy: 14 November 2026
+
+The user requires **all relevant tests and checks to pass locally before any
+push**. Current verification is local macOS only. Two local Linux machines will
+join verification when the user provides access; no current Linux qualification
+is claimed. GitHub-hosted checks are not required for push, merge or release.
+The retained workflow is manual-only and runs only when explicitly requested.
+
+Dated hosted-CI requirements and results below preserve the earlier policy and
+its evidence; they do not override this rule. This policy/documentation update
+did not rerun application tests. The implementation results below remain the
+record of the completed checks.
+
+## Biological structure views: first four roadmap additions
+
+14 November 2026. The user authorized the metadata prerequisite and first four
+additions in [Plan 007](../plans/007-molecular-visualization-roadmap.md):
+chain/entity coloring, chain/component selection and mixed views, protein
+traces/tubes, and ribbons/secondary-structure cartoons. Issues
+[#62](https://github.com/uvar-apps/eigenvista/issues/62)–
+[#66](https://github.com/uvar-apps/eigenvista/issues/66) track work on
+`codex/biological-structure-views` from main `d098380`. See the
+[decision record](design/2026-11-14-biological-structure-views.md) and
+[verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
+for the exact source, actual PR/merge identity, complete local results and
+historical hosted observations for [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
+
+The optional biological native feature is explicit; metadata-free encoding,
+scientific hashes, numerical precision, dependencies and compiler stay
+unchanged. Protein secondary assignments come from deposited records, with
+missing/conflicting assignments left unknown. The source version remains
+0.6.0, while its published binary/ZIP below predates these additions. This is
+not a new release.
+
+Local macOS implementation checks passed: 272 default Rust tests, seven explicit
+desktop tests, fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production
+build and 13 packaging checks. Forty focused browser cases pass across Chromium/WebKit,
+including independent geometry and source-identity controls, clean native Save,
+actual worker ownership/cache validation and exact field/custom/AO-OFF/PNG
+invariants. Both engines completed nine real-application captures of full
+1AON/4PJ1/1CRN inputs; actual shapes and the revised chain palette were inspected.
+The complete local browser suite passed 504/504 (252 per engine, including the
+unchanged original 233 each), with zero skipped, flaky or unexpected results.
+The linked ledger retains complete outcomes. Every future push requires all
+relevant local tests and checks to pass under the policy above; hosted results
+are not a push, merge or release requirement.
+
+The initial `10e7fe0` run passed 500/502 and caught the old primary atom-label
+format regression. That format and the fixed status/canvas bounds are restored
+with the old test unchanged. Final review also found valid mmCIF monomer
+alternatives rejected by new metadata validation. Both identities now remain
+selected, with explicit ambiguous-position backbone breaks and new native,
+import/topology and real-browser regressions. A related partial-identifier
+counterexample at `80a6eb1` required independent label/author ambiguity guards;
+972 presence scenarios and native browser diagnostics cover the correction,
+with positive controls retaining distinct canonical positions. Both earlier
+heads are superseded; the ledger records fresh final outcomes.
+
+The metadata-free large-structure tests keep their original three-array and
+8 KiB manifest assertions. A separate BIO test proves unchanged original
+numeric descriptors/entries plus one bounded atom-to-residue column. Valid
+mixed namespace aliases are distinguished for display without rewriting source
+identity. Source-index selection, long valid residue identifiers and original
+color overrides are covered. No old scientific/native fixtures were regenerated.
+Two early PDB regressions were corrected with existing assertions preserved.
+Native GUI/clean-Mac installation and coordinate-derived secondary prediction
+remain separate, unclaimed qualification work.
+
 ## Source version 0.6.0
 
 Published 2026-11-14T04:30:30Z at the [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).

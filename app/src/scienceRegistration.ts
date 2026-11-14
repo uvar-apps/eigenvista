@@ -25,6 +25,7 @@ export class ScienceRegistration {
       doc.id,
       doc.title,
       doc.atoms,
+      doc.structure,
       doc.bonds,
       doc.basis,
       doc.orbitals,
