@@ -4,7 +4,7 @@ import path from "node:path";
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 
 const titles = [
-  "Document",
+  "Molecular data",
   "Quantum fields",
   "Provenance",
   "Field rendering",
@@ -88,15 +88,15 @@ test("all eight sections disclose with the keyboard while content stays mounted"
     await expect(body).toBeVisible();
     await expect(body).toHaveAttribute("data-mounted-probe", "retained");
   }
-  await disclosure(page, "Document").click();
+  await disclosure(page, "Molecular data").click();
   await expect(page.getByLabel("Representation", { exact: true })).toBeHidden();
-  // The example menu is independent of the Document disclosure, even collapsed.
+  // The example menu is independent of the Molecular data disclosure, even collapsed.
   await page.getByTitle("Open example", { exact: true }).click();
   await page
     .getByRole("button", { name: "Fractional open shell", exact: true })
     .click();
   await expect(disclosure(page, "Field rendering")).toBeEnabled();
-  await expect(disclosure(page, "Document")).toHaveAttribute(
+  await expect(disclosure(page, "Molecular data")).toHaveAttribute(
     "aria-expanded",
     "false",
   );
@@ -347,7 +347,11 @@ test("profile preferences survive opening another document, clearing selection a
   page,
 }) => {
   await ready(page);
-  for (const title of ["Document", "Provenance", "Saved surfaces"] as const)
+  for (const title of [
+    "Molecular data",
+    "Provenance",
+    "Saved surfaces",
+  ] as const)
     await disclosure(page, title).click();
   await page
     .getByLabel("Open molecular file")
@@ -368,7 +372,11 @@ test("profile preferences survive opening another document, clearing selection a
   await dialog
     .getByRole("button", { name: "Close orbitals", exact: true })
     .click();
-  for (const title of ["Document", "Provenance", "Saved surfaces"] as const)
+  for (const title of [
+    "Molecular data",
+    "Provenance",
+    "Saved surfaces",
+  ] as const)
     await expect(disclosure(page, title)).toHaveAttribute(
       "aria-expanded",
       "false",
@@ -381,7 +389,7 @@ test("profile preferences survive opening another document, clearing selection a
   for (const title of titles)
     await expect(disclosure(page, title)).toHaveAttribute(
       "aria-expanded",
-      ["Document", "Provenance", "Saved surfaces"].includes(title)
+      ["Molecular data", "Provenance", "Saved surfaces"].includes(title)
         ? "false"
         : "true",
     );
@@ -411,7 +419,7 @@ test("corrupt, oversized and partially invalid profile values cannot break the c
     for (const title of titles)
       await expect(disclosure(page, title)).toHaveAttribute(
         "aria-expanded",
-        title === "Document" && stored.startsWith('{"document"')
+        title === "Molecular data" && stored.startsWith('{"document"')
           ? "false"
           : "true",
       );
@@ -619,11 +627,11 @@ test("mobile headings, counts and hidden focus targets fit the available width",
     path: info.outputPath("collapsed-panels-mobile.png"),
     fullPage: true,
   });
-  await disclosure(page, "Document").focus();
-  await disclosure(page, "Document").press("Tab");
+  await disclosure(page, "Molecular data").focus();
+  await disclosure(page, "Molecular data").press("Tab");
   await expect(page.getByTitle("Open example", { exact: true })).toBeFocused();
-  await disclosure(page, "Document").focus();
-  await disclosure(page, "Document").press("Space");
+  await disclosure(page, "Molecular data").focus();
+  await disclosure(page, "Molecular data").press("Space");
   await expect(
     page.getByLabel("Representation", { exact: true }),
   ).toBeVisible();

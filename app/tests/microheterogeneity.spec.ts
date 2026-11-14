@@ -127,7 +127,10 @@ async function ready(page: Page) {
     content:
       '.scene[data-testid="viewport"] { width:320px !important; height:240px !important; }',
   });
-  const heading = page.getByRole("button", { name: "Document", exact: true });
+  const heading = page.getByRole("button", {
+    name: "Molecular data",
+    exact: true,
+  });
   if ((await heading.getAttribute("aria-expanded")) !== "true")
     await heading.click();
   // Exclude the legitimate cold mathematical example's generated surface.

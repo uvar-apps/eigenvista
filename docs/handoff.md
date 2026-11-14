@@ -1,16 +1,16 @@
 # Development handoff
 
-Updated 14 November 2026 for published **0.7.0**, including biological
-structure views (#62–#66), molecular ambient occlusion (#59) and sidebar controls.
-Fresh local checks, rebuilt artifacts, extracted native startup and published
-asset downloads passed verification. Release source is `d414bc7`; this later
-living-document record does not retag or rebuild it. The older
+Updated 14 November 2026 for **0.7.1 release preparation**, renaming the visible
+Document section to Molecular data (#70). Fresh local automated checks passed;
+clean-source rebuilt artifacts, native/production checks and publication remain
+pending. The prior published 0.7.0 release retains source
+`d414bc7` and its verified artifacts. The older
 published 0.6.0 tag/package retain source `6cb678c`; earlier packages and dated
 entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application source is **EigenVista**, version **0.7.0**, in the standalone
+The current application source is **EigenVista**, version **0.7.1**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
@@ -27,6 +27,43 @@ Dated hosted-CI requirements and results below preserve the earlier policy and
 its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
+
+## Source version 0.7.1
+
+Release preparation, 14 November 2026, from main `6ace2f5`. The user authorized
+[#70](https://github.com/uvar-apps/eigenvista/issues/70): rename the visible
+**Document** sidebar section to **Molecular data**, then version, commit/tag/push
+and publish rebuilt redistributables. Read the [0.7.1 notes](releases/0.7.1.md).
+The [planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+is not evidence of publication.
+
+This is a display-label change. Internal `document` panel/profile IDs, ordering
+and expansion preferences, mounted UI state, Rust `Document`, scientific data,
+native formats and Open/Save terminology remain unchanged. Current guide
+instructions use Molecular data; historical release notes and snapshots retain
+their original labels. Dependency/compiler pins, limits and icon/logo are unchanged.
+
+Fresh local macOS checks passed: fmt, 272 default Rust tests, strict workspace/
+all-targets Clippy, seven explicit desktop tests, WASM/TypeScript/production
+build and 13 packaging checks. The complete browser suite passed 504/504 cases
+(252 Chromium and 252 WebKit), with zero skipped, flaky or unexpected results
+and zero retries, using one worker. Its summary completed at
+2026-11-14T13:12:41Z; the measured browser duration was about 14.7 minutes.
+Reference generation exited successfully before Playwright. All 275 recorded
+source hashes and the existing Vite PID 48452 remained stable. These are fresh
+0.7.1 results, separate from the older release evidence below. All remaining
+artifact/native/production checks must also pass before pushing.
+
+Clean-source app/converter/ZIP/checksum/build metadata, independent artifact
+audit, actual extracted native startup, production UI verification, annotated
+tag/push, publication and all three
+downloaded asset checks are pending. No 0.7.1 artifact identity or release success
+is claimed. Record actual completion under `tmp/2026-11-14-release-0.7.1/` and
+this living section. No hosted CI is required; current platform verification is
+local macOS only, with future Linux checks awaiting access to the two local hosts.
+
+The previous 0.7.0 tag/package and all older records below remain unchanged.
+Changing source versions does not update an installed app or an existing ZIP.
 
 ## Source version 0.7.0
 

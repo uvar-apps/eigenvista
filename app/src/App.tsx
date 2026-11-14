@@ -746,7 +746,7 @@ export default function App() {
             <PanelSection
               key="document"
               id="document"
-              title="Document"
+              title="Molecular data"
               expanded={panels.expanded.document}
               onToggle={() => panels.toggle("document")}
               headerAction={

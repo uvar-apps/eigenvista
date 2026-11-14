@@ -10,17 +10,21 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.7.0, an experimental development preview.
+This guide describes version 0.7.1, an experimental development preview.
 Scientific calculations and rendering have targeted tests, but the application
 is not yet a qualified scientific release. It visualizes supplied data; it does not run a quantum
 chemistry calculation to obtain a wavefunction from atom positions.
 Version 0.7.0 adds chain/component controls and protein depictions, described
 in [Biological structure views](#biological-structure-views), while retaining
 molecular ambient occlusion (#59) and sidebar reordering (#52). See the
-[0.7.0 release notes](releases/0.7.0.md) and
-[status](status.md#source-version-070) for verified source and artifact identity;
-the [0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-provides the rebuilt Apple Silicon ZIP, checksum and build metadata. The earlier
+[0.7.1 release notes](releases/0.7.1.md) and
+[status](status.md#source-version-071) for actual verification and delivery.
+Fresh 0.7.1 checks passed locally on macOS; rebuilt archives and publication
+remain pending. Version 0.7.1
+renames the **Document** section to **Molecular data**; controls, saved documents
+and existing sidebar preferences remain unchanged. The published
+[0.7.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+retains its original package. The earlier
 [0.6.0 package](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
 includes AO but predates biological views; older 0.5.15 packages predate AO.
 Updating source does not update an existing installed app or archive.
@@ -55,7 +59,7 @@ See [Apple's security instructions](https://support.apple.com/en-us/102445).
 ## A first session
 
 1. Click **Open** and select `Examples/water.pdb` from the extracted ZIP.
-2. The Document panel should show **3 atoms** and **2 bonds**. Bonds are computed
+2. The Molecular data panel should show **3 atoms** and **2 bonds**. Bonds are computed
    automatically, including when the file has no explicit connections.
 3. Try the **Representation** choices: Ball and stick, Liquorice, and Van der
    Waals. The last uses space-filling spheres and does not draw bond cylinders.
@@ -74,7 +78,7 @@ are not implemented.
 | Area | Purpose |
 | --- | --- |
 | Top bar | Document title, unsaved-change indicator, Open, Convert files, and Save |
-| Document panel | Atom/bond/basis counts, representation, example menu |
+| Molecular data panel | Atom/bond/basis counts, representation, example menu |
 | Quantum fields | Select an active field; the Orbitals (count) button lists all orbitals for multi-selection |
 | Provenance | Source descriptions, import decisions, and loss notices |
 | Central scene | Molecule and surfaces; selected atom/surface information below |
@@ -215,7 +219,7 @@ for fresh release checks and delivery, and the
 for the original feature verification.
 
 Open a PDB, mmCIF or BinaryCIF file containing chain, residue and atom identities.
-In **Document → Biological structure**, choose **Coloring**:
+In **Molecular data → Biological structure**, choose **Coloring**:
 
 - **Element** uses the CPK palette, including any atom-color overrides.
 - **Chain** distinguishes deposited chain instances. mmCIF label identifiers are
@@ -374,7 +378,7 @@ The detailed profile is in `docs/cube-import.md` (`Cube-import.md` in the ZIP).
 ## Orbitals, densities, and isosurfaces
 
 To try the workflow without a quantum-data file, open the flask-shaped example
-menu beside Document and choose **Hydrogen pair** or **Fractional open shell**.
+menu beside Molecular data and choose **Hydrogen pair** or **Fractional open shell**.
 These are mathematical demonstrations, not calculated molecular reference
 results. Opening an example replaces the current document after an unsaved-change
 confirmation. Independently calculated water/OH `.eigenvista` reference documents

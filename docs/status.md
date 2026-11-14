@@ -21,6 +21,37 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Source version 0.7.1
+
+14 November 2026: release preparation authorized from main `6ace2f5` for
+[#70](https://github.com/uvar-apps/eigenvista/issues/70). Version 0.7.1 renames
+the visible Document section to **Molecular data**. Its internal panel/profile
+IDs and remembered UI state remain stable. Rust `Document`, Open/Save behavior,
+file formats, scientific data, limits, dependencies/compiler and icon/logo are
+unchanged. See [release notes](releases/0.7.1.md) and the
+[planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1).
+The planned page is not a publication claim.
+
+Fresh local macOS fmt, 272 default Rust tests, strict workspace/all-targets
+Clippy, seven explicit desktop tests, WASM/TypeScript/production build and
+13 packaging checks passed. The full browser suite passed 504/504, 252 per
+engine, with zero skipped/flaky/unexpected/retries and one worker. The summary
+completed 2026-11-14T13:12:41Z after about 14.7 minutes of browser execution;
+reference generation exited zero before Playwright. All 275 source hashes and
+the existing Vite PID 48452 stayed stable. These are fresh results for the
+renamed UI and updated selectors; 0.7.0 results below remain historical.
+
+The clean-source rebuilt app/converter/ZIP and independent asset/source audit,
+actual extracted native startup, production UI verification, annotated tag/push,
+publication and verified downloads
+are also pending. No new archive/hash or release success is claimed. Actual
+results belong under `tmp/2026-11-14-release-0.7.1/` and this section. Current
+qualification remains local macOS only; the future two local Linux hosts are
+unavailable. Hosted CI is not required.
+
+The published 0.7.0 release/source/assets and all older records remain unchanged.
+Updating source does not update a previously installed app or existing archive.
+
 ## Source version 0.7.0
 
 Published **2026-11-14T11:43:29Z** as a development

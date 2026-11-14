@@ -130,7 +130,7 @@ async function setup(page: Page) {
       '.scene[data-testid="viewport"] { width:320px !important; height:240px !important; }',
   });
   const documentButton = page.getByRole("button", {
-    name: "Document",
+    name: "Molecular data",
     exact: true,
   });
   if ((await documentButton.getAttribute("aria-expanded")) !== "true")
@@ -167,7 +167,7 @@ async function open(page: Page, file: string) {
     "Opened " + path.basename(file),
   );
   const documentButton = page.getByRole("button", {
-    name: "Document",
+    name: "Molecular data",
     exact: true,
   });
   if ((await documentButton.getAttribute("aria-expanded")) !== "true")

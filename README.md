@@ -11,12 +11,14 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version **0.7.0** is published as an experimental
+**Status:** source version **0.7.1** is in release preparation as an experimental
 Apple Silicon development preview, not v1 or completion of the M0-M7 plan.
-Fresh local macOS release checks passed, including all 504 browser cases.
-Rebuilt Apple Silicon assets and downloaded hashes are verified. See
-[implementation status](docs/status.md#source-version-070) and the
-[0.7.0 release notes](docs/releases/0.7.0.md).
+Fresh local macOS checks passed, including all 504 browser cases.
+Clean-source rebuilt Apple Silicon assets, artifact/native checks and publication
+remain pending.
+See [implementation status](docs/status.md#source-version-071) and the
+[0.7.1 release notes](docs/releases/0.7.1.md). The earlier published 0.7.0
+release and its artifacts remain unchanged.
 
 Earlier releases added native close/quit protection, correct Molden limits,
 then-hosted verification, and reduced Molden-import/surface-publication work
@@ -53,6 +55,11 @@ for the optional capability required by new biological documents. The published
 update an installed app or an existing archive.
 
 ## Start here
+
+Version 0.7.1 renames the **Document** sidebar section to **Molecular data**
+([#70](https://github.com/uvar-apps/eigenvista/issues/70)). Its controls and saved
+documents are unchanged; the same internal panel IDs preserve existing ordering,
+expansion preferences and control state.
 
 - **Using the application:** [User guide](docs/user-guide.md), including Mac
   installation, supported files, controls, surfaces, saving, and troubleshooting.
@@ -104,10 +111,11 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.7.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-provides the rebuilt ZIP, checksum and build metadata. Check
-[status](docs/status.md#source-version-070) for the verified source, SHA256 and
-local test/artifact evidence.
+The [planned 0.7.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+is the target for its rebuilt ZIP, checksum and build metadata after publication.
+Check [status](docs/status.md#source-version-071) for actual local verification
+and delivery. The [0.7.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
+remains the earlier published package.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
 remains the earlier published package. Older packages remain historical and
 are not updated in place.

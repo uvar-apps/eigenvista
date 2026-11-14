@@ -11,7 +11,7 @@ const right = [
   "saved-surfaces",
 ];
 const labels: Record<string, string> = {
-  document: "Document",
+  document: "Molecular data",
   "quantum-fields": "Quantum fields",
   provenance: "Provenance",
   "field-rendering": "Field rendering",
@@ -152,7 +152,7 @@ test("keyboard moves actual sections, retains focus, announces position and resp
   await handle(page, "document").press("ArrowDown");
   await expectOrder(page, "left", ["quantum-fields", "document", "provenance"]);
   await expect(handle(page, "document")).toBeFocused();
-  await announcement(page, "Document", 2, 3, "left");
+  await announcement(page, "Molecular data", 2, 3, "left");
   await handle(page, "document").press("End");
   const movedLeft = ["quantum-fields", "provenance", "document"];
   await expectOrder(page, "left", movedLeft);
@@ -161,13 +161,13 @@ test("keyboard moves actual sections, retains focus, announces position and resp
   await expect(handle(page, "document")).toBeFocused();
   await handle(page, "document").click();
   await expect(
-    page.getByRole("button", { name: "Move Document down", exact: true }),
+    page.getByRole("button", { name: "Move Molecular data down", exact: true }),
   ).toBeDisabled();
   await expect(
-    page.getByRole("button", { name: "Move Document up", exact: true }),
+    page.getByRole("button", { name: "Move Molecular data up", exact: true }),
   ).toBeEnabled();
   const moveUp = page.getByRole("button", {
-    name: "Move Document up",
+    name: "Move Molecular data up",
     exact: true,
   });
   await moveUp.focus();
@@ -229,7 +229,7 @@ test("native pointer drag moves only handles within their own pane", async ({
   await collapse(page);
   await page
     .getByRole("button", { name: "Provenance", exact: true })
-    .dragTo(page.getByRole("button", { name: "Document", exact: true }));
+    .dragTo(page.getByRole("button", { name: "Molecular data", exact: true }));
   await expectOrder(page, "left", left);
   expect(
     await page.evaluate(
@@ -345,7 +345,9 @@ test("pane order and independent expansion preferences survive Open and reload",
     left: ["provenance", "document", "quantum-fields"],
     right: ["saved-surfaces", ...right.slice(0, -1)],
   };
-  await page.getByRole("button", { name: "Document", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Molecular data", exact: true })
+    .click();
   await expect
     .poll(() =>
       page.evaluate(
@@ -363,7 +365,7 @@ test("pane order and independent expansion preferences survive Open and reload",
   await expectOrder(page, "left", stored.left);
   await expectOrder(page, "right", stored.right);
   await expect(
-    page.getByRole("button", { name: "Document", exact: true }),
+    page.getByRole("button", { name: "Molecular data", exact: true }),
   ).toHaveAttribute("aria-expanded", "false");
   await page.reload();
   await expect(page.locator("footer [role=status]")).toContainText(
@@ -373,7 +375,7 @@ test("pane order and independent expansion preferences survive Open and reload",
   await expectOrder(page, "left", stored.left);
   await expectOrder(page, "right", stored.right);
   await expect(
-    page.getByRole("button", { name: "Document", exact: true }),
+    page.getByRole("button", { name: "Molecular data", exact: true }),
   ).toHaveAttribute("aria-expanded", "false");
 });
 
