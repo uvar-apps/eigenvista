@@ -507,7 +507,7 @@ export function Viewport({
           atoms.setColorAt(instance, tint);
           const angstrom = point.map((v) => (v * BOHR).toFixed(3)).join(", ");
           const hierarchy = doc.structure
-            ? ` | ${residueLabel(doc.structure, doc.structure.atom_residues[index])}`
+            ? `\n${residueLabel(doc.structure, doc.structure.atom_residues[index])}`
             : "";
           labels.push(
             `${element.symbol} ${index + 1} | ${angstrom} angstrom${hierarchy}`,

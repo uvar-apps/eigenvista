@@ -91,3 +91,41 @@ fn real_1aon_preserves_full_geometry_and_distinct_polymer_and_ligand_chains() {
         imported.document.structure
     );
 }
+
+#[test]
+fn public_import_preserves_existing_component_specific_microheterogeneity_selection() {
+    let source = include_bytes!("../../../app/tests/fixtures/structure-controls/microhet.cif");
+    let imported = import_bytes(source, "microhet.cif").unwrap();
+    assert_eq!(imported.report.format, "cif");
+    assert!(imported.report.requires_save);
+    assert_eq!(imported.document.atoms.len(), 20);
+    let metadata = imported.document.structure.as_ref().unwrap();
+    assert_eq!(
+        metadata
+            .residues
+            .iter()
+            .map(|r| r.name.as_str())
+            .collect::<Vec<_>>(),
+        ["ALA", "SER", "CYS", "GLY", "THR"]
+    );
+    assert_eq!(
+        metadata
+            .atom_names
+            .iter()
+            .enumerate()
+            .filter_map(|(index, name)| (name == "CA").then_some(index))
+            .collect::<Vec<_>>(),
+        [1, 5, 9, 13, 17]
+    );
+    assert!(
+        imported
+            .document
+            .provenance
+            .iter()
+            .any(|line| line.contains("omitted 0 alternate/zero-occupancy atoms"))
+    );
+    let native = eigenvista_format::encode(&imported.document).unwrap();
+    let reopened = import_bytes(&native, "microhet.eigenvista").unwrap();
+    assert!(!reopened.report.requires_save);
+    assert_eq!(reopened.document, imported.document);
+}

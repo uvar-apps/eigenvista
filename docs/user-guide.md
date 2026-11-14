@@ -163,6 +163,10 @@ PDB selection keeps common atoms and chooses the alternate with the highest
 mean occupancy per residue; zero-occupancy atoms are omitted. mmCIF follows the
 same alternate-location policy. Non-polymer mmCIF rows with no label sequence
 use author residue/insertion identity to keep separate waters/ligands distinct.
+mmCIF keeps its existing per-component grouping: different monomer names at one
+sequence position can both remain selected. Both identities and all selected
+atoms are retained. Protein depictions break at that ambiguous position instead
+of choosing a conformer; use atomic views or named residue ranges to inspect it.
 The source branch now retains selected biological identities and deposited
 secondary assignments as described below; the published 0.6.0 package predates
 that addition. Occupancies, B-factors and formal charges remain omitted as atom
@@ -230,6 +234,8 @@ When distinct label/author identifiers would otherwise have the same displayed
 name, extra source identifiers distinguish them in the legend, controls and
 picking. Colors and names are computed against the complete imported source,
 so filtering does not rename or recolor the remaining chains.
+Atom inspection keeps its element/index/coordinates in the primary status
+item, with biological context beside it. Selection does not resize the scene.
 
 ![Complete 1AON with chain-colored protein cartoons](images/biological-structure/1aon-chain-cartoon.png)
 

@@ -359,7 +359,8 @@ fn primary_chain_and_residue_aliases_and_total_metadata_bytes_are_bounded() {
     structure.atom_names.push("CB".into());
     structure.atom_residues.push(1);
     let mut second = structure.residues[0].clone();
-    second.name = "GLY".into();
+    // The same monomer with a conflicting author alias remains invalid.
+    second.author_seq_id = Some("2".into());
     structure.residues.push(second);
     assert!(doc.validate().unwrap_err().contains("residue aliases"));
     let structure = doc.structure.as_mut().unwrap();
@@ -399,4 +400,67 @@ fn relevant_cif_metadata_is_bounded_without_retaining_large_sequence_text() {
             .kind,
         ComponentKind::Protein
     );
+}
+
+#[test]
+fn distinct_microheterogeneous_monomers_share_sequence_positions_without_changing_flat_atoms() {
+    let source = include_str!("../../../app/tests/fixtures/structure-controls/microhet.cif");
+    let doc = import::cif(source, "microhet.cif").unwrap();
+    assert_eq!(doc.atoms.len(), 20);
+    let metadata = doc.structure.as_ref().unwrap();
+    assert_eq!(metadata.residues.len(), 5);
+    assert_eq!(
+        metadata
+            .residues
+            .iter()
+            .map(|r| r.name.as_str())
+            .collect::<Vec<_>>(),
+        ["ALA", "SER", "CYS", "GLY", "THR"]
+    );
+    assert_eq!(
+        metadata
+            .residues
+            .iter()
+            .map(|r| r.label_seq_id)
+            .collect::<Vec<_>>(),
+        [Some(1), Some(2), Some(2), Some(3), Some(4)]
+    );
+    assert_eq!(
+        metadata.atom_residues,
+        (0..5).flat_map(|r| [r; 4]).collect::<Vec<_>>()
+    );
+    assert_eq!(
+        metadata.atom_names,
+        (0..5)
+            .flat_map(|_| ["N", "CA", "C", "O"])
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        metadata
+            .residues
+            .iter()
+            .all(|r| r.kind == ComponentKind::Protein)
+    );
+    for (index, expected) in [
+        (1, [0.0, 0.0, 0.0]),
+        (5, [3.8, 0.0, 0.0]),
+        (9, [3.8, 0.2, 0.0]),
+        (13, [7.6, 0.0, 0.0]),
+        (17, [11.4, 0.0, 0.0]),
+    ] {
+        for (value, expected) in doc.atoms[index].position.into_iter().zip(expected) {
+            assert!((value * eigenvista_core::BOHR_TO_ANGSTROM - expected).abs() < 1e-12);
+        }
+    }
+    doc.validate().unwrap();
+    let mut author_only = doc.clone();
+    for residue in &mut author_only.structure.as_mut().unwrap().residues {
+        residue.label_seq_id = None;
+    }
+    author_only.validate().unwrap();
+    // Distinct names are valid variants, but repeating the very same identity
+    // remains invalid; neither validation route silently aliases atom records.
+    let mut duplicate = doc;
+    duplicate.structure.as_mut().unwrap().residues[2].name = "SER".into();
+    assert!(duplicate.validate().is_err());
 }

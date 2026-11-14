@@ -474,3 +474,112 @@ fn insertion_progression_accepts_y_to_z_but_never_z_to_punctuation() {
             .any(|w| w.contains("sequence discontinuities"))
     );
 }
+
+/// Independent deposited-position fixture: N, CA, C, O for each source residue.
+/// Both chemical variants are retained in the native document; neither may be
+/// chosen as a backbone continuation at their shared sequence position.
+fn microheterogeneous_document(label: bool, inserted: bool) -> Document {
+    let mut doc = base();
+    for (index, (name, number, x, y)) in [
+        ("ALA", 1, 0.0, 0.0),
+        ("SER", 2, 3.8, 0.0),
+        ("CYS", 2, 3.8, 0.2),
+        ("GLY", 3, 7.6, 0.0),
+        ("THR", 4, 11.4, 0.0),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let author = if inserted {
+            [10, 10, 10, 11, 12][index]
+        } else {
+            number + 8
+        };
+        doc.structure
+            .as_mut()
+            .unwrap()
+            .residues
+            .push(StructureResidue {
+                chain: 0,
+                name: name.into(),
+                label_seq_id: label.then_some(number),
+                author_seq_id: Some(author.to_string()),
+                insertion_code: (inserted && (index == 1 || index == 2)).then(|| "A".into()),
+                segment: 0,
+                kind: ComponentKind::Protein,
+                secondary: SecondaryStructure::Unknown,
+            });
+        atom(&mut doc, index, "N", 7, [x - 0.6, y, 0.]);
+        atom(&mut doc, index, "CA", 6, [x, y, 0.]);
+        atom(&mut doc, index, "C", 6, [x + 0.6, y, 0.]);
+        atom(&mut doc, index, "O", 8, [x + 0.6, y + 1., 0.]);
+    }
+    // Deliberately offer both branches and a direct bridge in the source bond
+    // graph. Protein topology must derive from deposited sequence identity.
+    doc.bonds = vec![[1, 5], [5, 13], [1, 9], [9, 13], [1, 13], [13, 17]];
+    doc
+}
+
+fn assert_microheterogeneous_positions_are_barriers(doc: &Document) {
+    let unchanged = doc.clone();
+    assert_eq!(doc.atoms.len(), 20);
+    assert_eq!(doc.structure.as_ref().unwrap().residues.len(), 5);
+    let data = protein_backbone(doc).unwrap();
+    let atom_ids: Vec<Vec<_>> = data
+        .segments
+        .iter()
+        .map(|segment| segment.points.iter().map(|point| point.atom).collect())
+        .collect();
+    let residue_ids: Vec<Vec<_>> = data
+        .segments
+        .iter()
+        .map(|segment| segment.points.iter().map(|point| point.residue).collect())
+        .collect();
+    assert_eq!(atom_ids, [vec![1], vec![13, 17]]);
+    assert_eq!(residue_ids, [vec![0], vec![3, 4]]);
+    assert!(
+        data.segments
+            .iter()
+            .flat_map(|segment| &segment.points)
+            .all(|point| point.position == doc.atoms[point.atom].position)
+    );
+    assert!(
+        data.warnings
+            .iter()
+            .any(|warning| warning.contains("ambiguous positions")
+                && warning.contains("anchors")
+                && warning.contains("omitted"))
+    );
+    assert_eq!(*doc, unchanged);
+}
+
+#[test]
+fn label_microheterogeneity_omits_all_variant_anchors_without_branching() {
+    let mut doc = microheterogeneous_document(true, false);
+    assert_microheterogeneous_positions_are_barriers(&doc);
+    // An unclassified alternate identity still makes this deposited position
+    // ambiguous; it must not silently select the recognized protein variant.
+    doc.structure.as_mut().unwrap().residues[2].kind = ComponentKind::Unknown;
+    assert_microheterogeneous_positions_are_barriers(&doc);
+}
+
+#[test]
+fn author_microheterogeneity_omits_all_variant_anchors_with_stable_source_ids() {
+    let mut doc = microheterogeneous_document(false, false);
+    assert_microheterogeneous_positions_are_barriers(&doc);
+    // Mixed deposited label availability still uses author order. The omitted
+    // variants' repeated labels cannot invalidate the unambiguous remainder.
+    for (index, label) in [Some(1), Some(2), Some(2), None, Some(4)]
+        .into_iter()
+        .enumerate()
+    {
+        doc.structure.as_mut().unwrap().residues[index].label_seq_id = label;
+    }
+    assert_microheterogeneous_positions_are_barriers(&doc);
+}
+
+#[test]
+fn ambiguous_author_insertion_is_a_barrier_even_when_neighbors_are_numerically_consecutive() {
+    // Excluding ambiguous10A before traversal would wrongly reconnect10->11.
+    assert_microheterogeneous_positions_are_barriers(&microheterogeneous_document(false, true));
+}

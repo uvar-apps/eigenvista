@@ -108,6 +108,16 @@ What is read, from the `_atom_site` category:
 - `pdbx_PDB_model_num` selects the first model only; later models are skipped and counted in provenance. Models are never merged.
 - A row whose field count differs from its declared column count fails rather than being partially read.
 
+The existing component-specific alternate groups are preserved for
+[microheterogeneity](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/entity_poly_seq.html):
+different monomer names can occupy one sequence position. The metadata retains
+both selected identities/coordinates; primary identity therefore includes the
+component name. Same-name contradictory aliases and exact duplicates remain
+invalid. Protein topology treats repeated sequence/insertion positions as
+barriers and omits all ambiguous anchors, including unknown-kind variants,
+without removing source atoms or guessing a branch through the alternatives.
+This applies to text and BinaryCIF through their shared core reader.
+
 Unit cell (`_cell`) and space group (`_symmetry.space_group_name_H-M`) are read
 and reported in provenance but **not applied**: no symmetry-mate generation, no
 periodic boundary handling, no wrapped distances.

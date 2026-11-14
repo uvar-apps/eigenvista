@@ -98,19 +98,46 @@ fn consecutive(a: &StructureResidue, b: &StructureResidue, order: Order) -> bool
         || (left.checked_add(1) == Some(right) && insertion(b).is_empty())
 }
 
-fn order_residues(indices: &mut [usize], residues: &[StructureResidue]) -> Order {
+fn position_order(indices: &[usize], residues: &[StructureResidue]) -> Order {
     if indices.iter().all(|&i| residues[i].label_seq_id.is_some()) {
-        indices.sort_by_key(|&i| (residues[i].label_seq_id, insertion(&residues[i]), i));
-        return Order::Label;
-    }
-    if indices
+        Order::Label
+    } else if indices
         .iter()
         .all(|&i| author_number(&residues[i]).is_some())
     {
+        Order::Author
+    } else {
+        Order::Unavailable
+    }
+}
+
+fn sequence_position(residue: &StructureResidue, order: Order) -> Option<(i32, &str)> {
+    match order {
+        Order::Label => residue.label_seq_id,
+        Order::Author => author_number(residue),
+        Order::Unavailable => None,
+    }
+    .map(|number| (number, insertion(residue)))
+}
+
+fn order_residues(
+    indices: &mut [usize],
+    residues: &[StructureResidue],
+    ambiguous_positions: &[bool],
+) -> Order {
+    let chosen = position_order(indices, residues);
+    if matches!(chosen, Order::Label) {
+        indices.sort_by_key(|&i| (residues[i].label_seq_id, insertion(&residues[i]), i));
+        return Order::Label;
+    }
+    if matches!(chosen, Order::Author) {
         indices.sort_by_key(|&i| (author_number(&residues[i]), insertion(&residues[i]), i));
         // Partial label numbering cannot contradict the chosen author order.
         let mut previous = None;
         for &i in indices.iter() {
+            if ambiguous_positions[i] {
+                continue;
+            }
             if let Some(label) = residues[i].label_seq_id {
                 if previous.is_some_and(|value| value >= label) {
                     return Order::Unavailable;
@@ -128,6 +155,7 @@ fn order_residues(indices: &mut [usize], residues: &[StructureResidue]) -> Order
 struct Counts {
     missing: usize,
     ambiguous: usize,
+    ambiguous_positions: usize,
     sequence: usize,
     distance: usize,
     unordered: usize,
@@ -185,20 +213,54 @@ pub fn protein_backbone(document: &Document) -> Result<ProteinBackbone> {
     }
     let mut groups: BTreeMap<(usize, usize), Vec<usize>> = BTreeMap::new();
     for (index, residue) in metadata.residues.iter().enumerate() {
-        if residue.kind == ComponentKind::Protein {
-            groups
-                .entry((residue.chain, residue.segment))
-                .or_default()
-                .push(index);
-        }
+        groups
+            .entry((residue.chain, residue.segment))
+            .or_default()
+            .push(index);
     }
     let mut counts = Counts::default();
     let mut segments = Vec::new();
-    for ((chain, segment), mut indices) in groups {
-        let order = order_residues(&mut indices, &metadata.residues);
+    let mut ambiguous_positions = vec![false; metadata.residues.len()];
+    for ((chain, segment), observed) in groups {
+        let mut indices: Vec<_> = observed
+            .iter()
+            .copied()
+            .filter(|&index| metadata.residues[index].kind == ComponentKind::Protein)
+            .collect();
+        if indices.is_empty() {
+            continue;
+        }
+        let chosen = position_order(&indices, &metadata.residues);
+        let mut positions = BTreeMap::new();
+        // Include nonprotein/unknown variants in identity ambiguity, while only
+        // protein residues can contribute backbone anchors or select an order.
+        for &index in &observed {
+            let residue = &metadata.residues[index];
+            if let Some(key) = sequence_position(residue, chosen) {
+                let entry = positions.entry(key).or_insert((0usize, false));
+                entry.0 += 1;
+                entry.1 |= residue.kind == ComponentKind::Protein;
+            }
+        }
+        counts.ambiguous_positions += positions
+            .values()
+            .filter(|&&(count, protein)| count > 1 && protein)
+            .count();
+        for &index in &indices {
+            ambiguous_positions[index] = sequence_position(&metadata.residues[index], chosen)
+                .is_some_and(|key| positions[&key].0 > 1);
+        }
+        let order = order_residues(&mut indices, &metadata.residues, &ambiguous_positions);
         let mut points: Vec<BackbonePoint> = Vec::new();
         for index in indices {
             let residue = &metadata.residues[index];
+            if ambiguous_positions[index] {
+                // Retain the ambiguous position as a barrier in ordered traversal:
+                // removing it first could invent author10 -> author11 continuity
+                // across an omitted insertion10A. All source atoms remain in Document.
+                finish(&mut points, chain, segment, &mut segments);
+                continue;
+            }
             let candidates = atoms[index];
             let Some(atom) = candidates.ca.filter(|_| !candidates.duplicate_ca) else {
                 if candidates.duplicate_ca {
@@ -281,6 +343,10 @@ pub fn protein_backbone(document: &Document) -> Result<ProteinBackbone> {
         (
             counts.ambiguous,
             "protein residues have ambiguous alpha carbons; no candidate was guessed",
+        ),
+        (
+            counts.ambiguous_positions,
+            "sequence positions have multiple deposited residue identities; all alpha-carbon anchors at those ambiguous positions were omitted",
         ),
         (
             counts.sequence,

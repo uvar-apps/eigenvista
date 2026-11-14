@@ -68,9 +68,9 @@ PNG invariants remain independently checked.
 
 ## Acceptance state
 
-Fresh native checks pass 259 default and seven desktop tests, formatting and
+Fresh native checks pass 265 default and seven desktop tests, formatting and
 strict workspace/all-targets Clippy. WASM/TypeScript/production builds and
-13 packaging checks pass. Thirty focused cases pass across both browser engines,
+13 packaging checks pass. Forty focused cases pass across both browser engines,
 including independent normals/arrows/rigid transforms, metadata/name aliases,
 source-index picking, actual worker lifetime/cache behavior and exact field,
 custom-shader, AO-OFF and PNG pixels. GL reports no errors, all observed FBO
@@ -79,8 +79,8 @@ Both engines completed nine actual-app captures using full tracked 1AON, 4PJ1
 and 1CRN inputs; actual shape and color appearance were inspected.
 
 The [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-records exact source/PR/merge identities, remaining real-file regression checks,
-the complete 502-case inventory outcomes and all four actual final-head hosted
+records exact source/PR/merge identities, real-file regression checks,
+the complete 504-case inventory outcomes and all four actual final-head hosted
 results. Require all four jobs before merge; do not infer them from configuration
 or earlier feature heads. [Handoff](../handoff.md) and [status](../status.md) link
 that current record. These checks do not qualify native GUI/clean-Mac installs,
@@ -93,7 +93,25 @@ and author aliases also receive contextual namespace/entity/record names and
 stable colors against the complete immutable source; filtering does not change
 them. Legend/controls/picking share those names without changing scientific data.
 
-## Initial memory measurements
+Final review found one additional valid-input regression: mmCIF
+[permits multiple monomer IDs at one sequence number](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Categories/entity_poly_seq.html).
+The new validator initially rejected the existing reader's selected SER/CYS
+alternatives. Include the component name in primary residue identity while
+preserving the existing import grouping, all coordinates and strict same-name
+conflict/duplicate checks. Protein topology retains ambiguous positions as
+traversal barriers and omits every variant anchor; it must not join either
+branch or skip an insertion barrier. The shared 20-atom fixture and native,
+import, label/author/partial-order and browser controls cover this correction.
+
+The initial complete browser run also caught an existing atom-label contract:
+its primary element/index/coordinates item must retain its exact format. The
+biological context now occupies a separate status item, with the original
+35-pixel bar and canvas bounds preserved. The old picking test is unchanged;
+the namespace-picking case additionally checks that selection never resizes the
+canvas. The initial candidate's full results remain historical in the ledger;
+only the corrected head's completed gates qualify delivery.
+
+## Memory measurements
 
 A repository-local diagnostic imported each full tracked file, prepared its
 backbone, encoded and decoded a native archive, and checked complete document
@@ -105,13 +123,13 @@ backbone, encoding and decoding together.
 
 | Input | Atoms / residues / chains | Retained metadata estimate | Backbone point storage | Process peak RSS |
 | --- | --- | --- | --- | --- |
-| tracked `1AON.cif` | 58,870 / 8,029 / 35 | 3,104,198 bytes | 1,219,840 bytes; 8,015 points in 21 segments | 142,491,648 bytes |
-| tracked `4PJ1.pdb` | 65,963 / 8,811 / 28 | 6,133,045 bytes | 1,291,520 bytes; 8,783 points in 28 segments | 112,443,392 bytes |
+| tracked `1AON.cif` | 58,870 / 8,029 / 35 | 3,104,198 bytes | 1,219,840 bytes; 8,015 points in 21 segments | 144,015,360 bytes |
+| tracked `4PJ1.pdb` | 65,963 / 8,811 / 28 | 6,133,045 bytes | 1,291,520 bytes; 8,783 points in 28 segments | 113,262,592 bytes |
 
 Compact metadata JSON was 1,673,334 / 1,864,357 bytes; compressed native archives
 were 1,466,659 / 1,603,667 bytes. The existing archive/string limits were not
 raised. Raw diagnostic source, JSON and `/usr/bin/time -l` records are retained
 under ignored `tmp/2026-11-14-structure-views/` (`memory-probe/`,
-`memory-1AON.*`, `memory-4PJ1.*`); run with the repository toolchain and local
+`memory-corrected-1AON.*`, `memory-corrected-4PJ1.*`); run with the repository toolchain and local
 temporary directory. These measurements complement validation/allocation tests,
 and do not imply every maximum-size structure will render interactively.

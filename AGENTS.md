@@ -97,7 +97,7 @@ documents; older `.molekel` preview documents remain readable. Check
   Separate resource checks still exercise the 1024 cap, and actual-app tracked
   1AON remains the primary visual qualification. The published 0.6.0 inventory was
   466 tests, 233 per engine, including 10 AO cases per engine. Current source
-  discovers 502 cases (251 per engine), adding 18 biological cases per engine.
+  discovers 504 cases (252 per engine), adding 19 biological cases per engine.
   Preserve all original cases and independent oracles. Keep the existing
   60-second per-test, 35-minute suite-step and 60-minute job limits with one
   worker. The failed combined case at head `04c8c919` is historical evidence;

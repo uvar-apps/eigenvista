@@ -86,13 +86,11 @@ async function ready(page: Page) {
 }
 
 async function open(page: Page, name: string, bytes: number[]) {
-  await page
-    .getByLabel("Open molecular file")
-    .setInputFiles({
-      name,
-      mimeType: "application/octet-stream",
-      buffer: Buffer.from(bytes),
-    });
+  await page.getByLabel("Open molecular file").setInputFiles({
+    name,
+    mimeType: "application/octet-stream",
+    buffer: Buffer.from(bytes),
+  });
   await expect(page.locator("footer [role=status]")).toContainText(
     `Opened ${name}`,
   );
@@ -286,7 +284,12 @@ test("ambiguous chain controls and picking stay distinct through filtering, acti
     .getByRole("checkbox", { name: `Show chain ${firstLabel}`, exact: true })
     .uncheck();
   await settleScene(page);
+  const sceneBeforePicking = await page.locator("canvas").boundingBox();
   await pickSource(page, doc.atoms.positions[1]);
+  await settleScene(page);
+  expect(await page.locator("canvas").boundingBox()).toEqual(
+    sceneBeforePicking,
+  );
   await expect(page.locator(".selection-status")).toContainText(`C 2`);
   await expect(page.locator(".selection-status")).toContainText(secondLabel);
   await page

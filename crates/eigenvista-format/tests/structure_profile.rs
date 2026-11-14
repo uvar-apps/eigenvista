@@ -158,3 +158,32 @@ fn metadata_budget_is_checked_before_native_publication() {
     assert!(eigenvista_format::validate_document(&doc).is_err());
     assert!(encode(&doc).is_err());
 }
+
+#[test]
+fn biological_native_profile_retains_both_microheterogeneous_monomers() {
+    let source = include_str!("../../../app/tests/fixtures/structure-controls/microhet.cif");
+    let doc = eigenvista_core::import::cif(source, "microhet.cif").unwrap();
+    assert_eq!(doc.atoms.len(), 20);
+    assert_eq!(doc.structure.as_ref().unwrap().residues.len(), 5);
+    let bytes = encode(&doc).unwrap();
+    let restored = decode(&bytes).unwrap();
+    assert_eq!(restored, doc);
+    let metadata = restored.structure.unwrap();
+    assert_eq!(
+        (
+            metadata.residues[1].name.as_str(),
+            metadata.residues[2].name.as_str()
+        ),
+        ("SER", "CYS")
+    );
+    assert_eq!(metadata.residues[1].label_seq_id, Some(2));
+    assert_eq!(metadata.residues[2].label_seq_id, Some(2));
+    assert_eq!(&metadata.atom_residues[4..12], &[1, 1, 1, 1, 2, 2, 2, 2]);
+    assert_eq!(
+        manifest(&bytes)["required_features"],
+        json!([
+            "eigenvista-preview-polynomial-v1",
+            "eigenvista-biological-structure-v1"
+        ])
+    );
+}

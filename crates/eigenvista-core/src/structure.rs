@@ -136,12 +136,14 @@ impl StructureMetadata {
                     sequence,
                     &residue.insertion_code,
                     residue.segment,
+                    &residue.name,
                 )),
                 None => author_residues.insert((
                     residue.chain,
                     &residue.author_seq_id,
                     &residue.insertion_code,
                     residue.segment,
+                    &residue.name,
                 )),
             };
             if !unique {

@@ -142,6 +142,11 @@ export default function App() {
   const [grid, setGrid] = useState<SampledGrid | null>(null);
   const [reset, setReset] = useState(0);
   const [inspected, setInspected] = useState("");
+  const inspectionBreak = inspected.indexOf("\n");
+  const inspectionPrimary =
+    inspectionBreak < 0 ? inspected : inspected.slice(0, inspectionBreak);
+  const inspectionDetail =
+    inspectionBreak < 0 ? "" : inspected.slice(inspectionBreak + 1);
   const [dirty, setDirtyState] = useState(false);
   const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const [converterOpen, setConverterOpen] = useState(false);
@@ -904,7 +909,12 @@ export default function App() {
               }}
             />
             <div className="selection-status">
-              {inspected || fieldLabel || doc.title}
+              <div className="selection-description">
+                <span>{inspectionPrimary || fieldLabel || doc.title}</span>
+                {inspectionDetail && (
+                  <span title={inspectionDetail}>{inspectionDetail}</span>
+                )}
+              </div>
               <span>{doc.surfaces.length} saved surfaces</span>
             </div>
           </div>

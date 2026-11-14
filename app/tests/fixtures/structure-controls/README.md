@@ -32,3 +32,27 @@ preserve their embedded deposition metadata and citations and see
 were copied into these new synthetic files.
 
 small.xyz is a declared three-atom O/H/H replacement geometry in angstroms. Its tiny source index range 0–2 detects stale focus from chain B (indices 12–19). water-only.pdb contains only the synthetic HOH oxygen already declared in components.pdb; it tests retained nonprotein metadata without pretending that a protein backbone is present. Their SHA-256 values are f397a8253001af5fb2f9df9c2307a1a3962b6a477312b946402a7a93cae7b4db and 2d5896d6fd257123b986faf92bf178ad0e3334bad7eaa776292ffde0ead5022b, respectively. Both use the same first-party GPL-2.0-or-later license.
+
+## Microheterogeneity regression
+
+[microhet.cif](microhet.cif) is original EigenVista synthetic test data under
+GPL-2.0-or-later, created on 14 November 2026; its header records that provenance.
+SHA-256: afe68adde9b14dc956886bdd6316983e5dc0dbf9d5b88aec3d74efc0846a3b6e. No deposited coordinates, legacy code or existing
+frozen input was copied or modified to construct it.
+
+It declares 20 N/CA/C/O atoms across five selected monomer records and four
+distinct sequence positions: ALA
+(label 1/author 9), SER (label 2/author 10, alternate A, occupancy 0.60),
+CYS (label 2/author 10, alternate B, occupancy 0.40), GLY (label 3/author 11)
+and THR (label 4/author 12). Both variants at label position 2 intentionally survive
+the existing component-specific alternate-selection policy. The label chain is A,
+author chain X and entity 1. No secondary assignments or quantum data are supplied.
+
+The zero-based CA atom indices are 1, 5, 9, 13, 17, at x=0, 3.8, 3.8, 7.6, 11.4 angstrom;
+CYS is displaced 0.2 angstrom in y. Native metadata must retain all 20 atoms and
+five residue identities. Display backbone preparation must omit the ambiguous
+SER/CYS anchors without choosing a monomer, producing separate original-index
+segments [[1], [13, 17]] and an explicit ambiguity notice. The singleton ALA
+remains a visible marker; only GLY→THR supplies a trace edge. Tests consume this
+input unchanged and check the declared semantics rather than generating an
+expectation with the production encoder.

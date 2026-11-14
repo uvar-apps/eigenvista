@@ -266,6 +266,14 @@ entity and chain-record descriptions and stable distinct colors. Legend,
 controls and picking share those names; filtering does not change them. React
 keys remain independent of visible labels. This never modifies source metadata.
 
+Microheterogeneous monomer names can share a sequence position under the
+existing CIF selection policy. All selected atoms and both residue identities
+remain in the document. Rust treats that position as an explicit backbone
+barrier and omits every ambiguous anchor, including unknown-kind variants;
+partial labels and insertion codes must not permit a connection across it.
+Atomic picking keeps its original element/index/coordinate item; biological
+context is rendered separately within the unchanged status bar/canvas bounds.
+
 ## Generation, cache, and rendering
 
 1. The UI requests `sample` or `generate` for the selected field and resolution,

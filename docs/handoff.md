@@ -66,17 +66,19 @@ records the exact source revision, PR, completed full-suite/hosted results and
 merge state. Consult it and Git before continuing from a different checkout.
 The earlier planning snapshot below remains historical.
 
-Fresh local checks pass: 259 default Rust tests, seven explicit desktop tests, fmt, strict
+Fresh local checks pass: 265 default Rust tests, seven explicit desktop tests, fmt, strict
 workspace/all-targets Clippy, 13 packaging tests and WASM/TypeScript/production
 build. Authentic frozen native files remain exact; biological files round-trip
 with unchanged original numeric entries and an explicit additional capability.
 
-Thirty focused Chromium/WebKit cases pass at the final production source:
+Forty focused Chromium/WebKit cases pass at the corrected production source
+(38 biological checks plus two unchanged atom-picking regressions):
 structure controls, namespace collisions, original-index picking, clean native
 Save/session state, independent geometry/normal/arrow controls, real worker
 caching/cancellation and exact field/custom-shader/AO-OFF/PNG invariants, with
-explicit GL/FBO/resource checks. Additional real-file application cases and the
-complete 502-case inventory (251 per engine) are recorded in the linked ledger;
+explicit GL/FBO/resource checks, real-file application workflows and legal
+microheterogeneity. The complete 504-case inventory (252 per engine) is recorded
+in the linked ledger;
 the original 233 cases per engine and all existing deadlines remain intact.
 
 Both engines completed nine actual-application visual captures each, using full
@@ -87,6 +89,14 @@ old-palette negative control verifies the fix. Contextual label/author names
 remain distinct even when valid source identifiers have the same visible text.
 See [user-guide illustrations](user-guide.md#biological-structure-views) and the
 decision's retained/peak-memory observations.
+
+The initial `10e7fe0` candidate is superseded. Its full run passed 500/502 and
+exposed the primary atom-label compatibility failure; that code now preserves
+the old format and 35-pixel status/canvas bounds without changing the old test.
+Final review also found legal shared-position monomer variants rejected by new
+validation. Both identities now remain selected, and every ambiguous backbone
+anchor is omitted with an explicit break. Fresh native and targeted browser
+tests pass; final corrected-head full-suite/CI results belong in the ledger.
 The task-local contract, ownership, ledger and checkpoint live under
 `tmp/2026-11-14-structure-views/`. All four actual final PR-head hosted jobs and
 real large-structure visual/compatibility checks are mandatory acceptance gates;
