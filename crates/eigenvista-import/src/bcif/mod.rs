@@ -80,7 +80,17 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
         // their columns or pretending to preserve metadata the model cannot hold.
         if !matches!(
             category_name.as_str(),
-            "atom_site" | "struct_conn" | "cell" | "symmetry" | "space_group"
+            "atom_site"
+                | "struct_conn"
+                | "cell"
+                | "symmetry"
+                | "space_group"
+                | "entity"
+                | "entity_poly"
+                | "struct_asym"
+                | "chem_comp"
+                | "struct_conf"
+                | "struct_sheet_range"
         ) {
             continue;
         }
@@ -89,7 +99,8 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
         }
         let maximum_rows = match category_name.as_str() {
             "atom_site" => 250_000,
-            "struct_conn" => 100_000,
+            "struct_conn" | "entity" | "entity_poly" | "struct_asym" | "chem_comp"
+            | "struct_conf" | "struct_sheet_range" => 100_000,
             _ => 1,
         };
         if rows > maximum_rows {
@@ -108,7 +119,7 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
                 return Err("BinaryCIF duplicate column name".into());
             }
         }
-        if matches!(category_name.as_str(), "atom_site" | "struct_conn") {
+        if !matches!(category_name.as_str(), "cell" | "symmetry" | "space_group") {
             atoms |= category_name == "atom_site";
             write_loop(&mut output, &category_name, &columns, rows)?;
         } else {
@@ -125,7 +136,7 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
         return Err("BinaryCIF has no atom_site rows".into());
     }
     let mut document = import::cif(&output.0, name)?;
-    document.provenance.push(format!("BinaryCIF {version}; data block {header}; decoded through the shared mmCIF structure profile. Only atom sites, declared connections, cell and symmetry metadata were interpreted; no quantum data fabricated."));
+    document.provenance.push(format!("BinaryCIF {version}; data block {header}; decoded through the shared mmCIF structure profile. Only atom sites, declared connections, bounded biological identity/secondary categories, cell and symmetry metadata were interpreted; no quantum data fabricated."));
     Ok(document)
 }
 

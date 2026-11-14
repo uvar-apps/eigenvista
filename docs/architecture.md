@@ -182,7 +182,7 @@ limits, common-image reasoning, and declared/perceived precedence.
 
 BinaryCIF transport lives in the import library, separately from scientific
 selection. Its borrowing MessagePack tree and checked inverse column pipelines
-expand only `atom_site`, `struct_conn`, and supported cell/symmetry categories
+expand only `atom_site`, `struct_conn`, bounded biological metadata and supported cell/symmetry categories
 into bounded canonical CIF text. That text enters the same core tokenizer and
 connection resolver described above. Unused category columns are not expanded,
 and no Molstar or external MessagePack/CIF runtime is required. `flate2` uses
@@ -204,6 +204,67 @@ Values that overflow f32 fail preview preparation, not import or persistence.
 See [cube import](cube-import.md) for the exact limits. Unsupported profiles
 fail explicitly. Other new formats are deferred; a direct ORCA/GBW reader is
 not part of this increment. Qualified ORCA Molden exports use the shared library.
+
+## Biological structure views
+
+Issues #62–#66 implement the selected first four items in the
+[visualization roadmap](../plans/007-molecular-visualization-roadmap.md).
+The published 0.6.0 binary predates this work. This section records the source
+contract; current verification and remaining gates belong in status/handoff.
+
+[Structure metadata](../crates/eigenvista-core/src/structure.rs) is optional
+authoritative document data. It retains selected chain label/author/entity
+identity, residue names/numbers/insertion/segment/kind/secondary assignment and
+atom-name/residue-index arrays aligned with unchanged atom indices. Atom columns
+remain element/position only. Rust validates counts, indices, strings and source
+classification; TypeScript does not infer biological chemistry. PDB TER segments
+and label/author namespaces remain distinct. Unavailable identity is not invented.
+Deposited secondary ranges are retained with provenance; there is no DSSP fallback.
+
+PDB, text mmCIF and BinaryCIF feed this same metadata contract. BinaryCIF now also
+expands bounded entity/polymer/asym/chemical-component/secondary categories before
+the shared CIF reader. The optional metadata is included in worker registration
+identity and native validation, but excluded from existing quantum-field hashes.
+Native documents containing it declare `eigenvista-biological-structure-v1` in
+addition to the existing scientific profile. Older documents without it remain
+valid and retain their previous encoding profile.
+
+[Structure controls](../app/src/StructureControls.tsx) and
+[display settings](../app/src/molecularDisplay.ts) own only session presentation:
+deterministic colors, visibility, isolation, named residue ranges, focus and style
+overrides. Chain style precedes component style, then global representation;
+nonprotein components retain atomic detail. These changes never mutate scientific
+arrays, mark the document dirty or request field calculations. Replacement resets
+index-bound settings; coloring survives only when the new document has metadata.
+
+[Protein topology](../crates/eigenvista-core/src/protein.rs) owns biological
+ordering, continuity breaks and deposited secondary assignments in Rust, separate
+from heuristic display bonds. The [backbone hook](../app/src/useProteinBackbone.ts)
+requests derived backbone data lazily for visible protein depictions, with request
+ownership and cancellation on replacement/unmount. The viewport builds bounded
+display meshes and preserves source atom/residue picking. These meshes do not
+replace imported coordinates, change a field's source hash or become quantum
+surfaces. Colors, subset masks and atomic style changes need no backbone job.
+Missing carbonyl orientation uses an explicitly reported thin-tube fallback;
+single-point segments use original-CA markers. New depiction meshes/lines keep
+their own diffuse materials and are excluded from the existing atomic SSAO
+receiver set.
+
+Backbone preparation sends only atoms/identity in a minimal validated document;
+it does not replace the worker's resident quantum registration. Nonfatal
+depiction errors preserve that registration. Geometry interpolation/extrusion
+runs in the viewport on the main thread, with at most two million display
+vertices including lines/markers/caps. Curve subdivisions decrease within that
+budget while retaining source C-alpha points; allocation/precision failures
+report atomic-detail fallback without replacing field data. Mesh/line buffers
+and materials are batch owned and disposed on replacement/unmount.
+
+Chain presentation is cached against the complete immutable metadata source.
+Ordinary PDB/CIF identifiers keep their canonical labels/colors. Distinct label
+and author identities whose displayed names collide receive explicit namespace,
+entity and chain-record descriptions and stable distinct colors. Legend,
+controls and picking share those names; filtering does not change them. React
+keys remain independent of visible labels. This never modifies source metadata.
 
 ## Generation, cache, and rendering
 
@@ -493,6 +554,10 @@ enable either. Unconditional postprocessing increases no-sharing peak memory;
 future compaction requires an explicit benefit/budget raw-fallback policy.
 Existing arbitrary indexed saved surfaces continue to draw their original
 arrays. Qualification markers in test fixtures are not a new supported profile.
+
+Optional biological metadata is persisted with the explicit required feature;
+biological colors, chain/component styles, visibility/isolation, residue ranges
+and focus remain session-only. Global representation remains persistent.
 
 Persistent view settings include representation, active field selection, colors,
 opacity, and isovalue. Camera, active render mode, surface shading, custom

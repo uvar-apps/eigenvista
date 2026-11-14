@@ -1,0 +1,116 @@
+.structure-controls {
+  border-top: 1px solid #e1e7e5;
+  margin-top: 16px;
+  padding-top: 2px;
+}
+.structure-controls h3 {
+  margin-top: 15px;
+}
+.structure-controls .structure-note {
+  color: #707d82;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.structure-controls .structure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+.structure-controls button {
+  font-size: 10px;
+  padding: 5px 7px;
+  min-height: 29px;
+}
+.structure-controls input[type="search"],
+.structure-controls input:not([type]) {
+  width: 100%;
+  min-width: 0;
+  background: white;
+  border: 1px solid #d8dfe1;
+  border-radius: 4px;
+  color: #26373b;
+  min-height: 32px;
+  padding: 5px 7px;
+  margin-top: 6px;
+}
+.structure-controls select {
+  font-size: 10px;
+}
+.structure-controls .structure-check {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+  color: #42565a;
+  font-size: 11px;
+}
+.structure-controls .structure-check input {
+  margin: 0;
+  accent-color: #258873;
+}
+.structure-controls .structure-check span {
+  font-size: 10px;
+  color: #77858a;
+}
+.structure-component,
+.structure-chain {
+  padding: 9px 0;
+  border-bottom: 1px solid #e8edeb;
+}
+.structure-chain-list {
+  max-height: 310px;
+  overflow: auto;
+  padding: 0 3px;
+}
+.structure-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 9px;
+  padding: 0;
+  margin: 8px 0 0;
+  list-style: none;
+  max-height: 112px;
+  overflow: auto;
+}
+.structure-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #56666b;
+  overflow-wrap: anywhere;
+}
+.structure-swatch {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border: 1px solid #0002;
+  border-radius: 2px;
+}
+.structure-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+.structure-controls .structure-error {
+  color: #a74141;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 6px;
+}
+
+.structure-controls .structure-group {
+  margin-top: 12px;
+  border-top: 1px solid #e8edeb;
+  padding-top: 8px;
+}
+.structure-controls .structure-group > summary {
+  cursor: pointer;
+  color: #42565a;
+  font-size: 11px;
+  font-weight: 600;
+}

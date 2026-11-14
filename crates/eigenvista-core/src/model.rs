@@ -208,6 +208,8 @@ pub struct Document {
     pub title: String,
     #[serde(with = "atoms_columnar")]
     pub atoms: Vec<Atom>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub structure: Option<crate::structure::StructureMetadata>,
     pub bonds: Vec<[usize; 2]>,
     pub basis: Vec<BasisFunction>,
     pub orbitals: Vec<Orbital>,
@@ -266,6 +268,7 @@ impl Document {
             id: title.into(),
             title: title.into(),
             atoms: vec![],
+            structure: None,
             bonds: vec![],
             basis: vec![],
             orbitals: vec![],
@@ -277,6 +280,9 @@ impl Document {
         }
     }
     pub fn validate(&self) -> Result<()> {
+        if let Some(structure) = &self.structure {
+            structure.validate(self.atoms.len())?;
+        }
         if self.atoms.len() > 100_000
             || self.bonds.len() > MAX_BONDS
             || self.basis.len() > 1024
@@ -393,7 +399,16 @@ impl Document {
                 }
             }
         }
-        if !["ball-stick", "liquorice", "space-fill"].contains(&self.view.representation.as_str())
+        if ![
+            "ball-stick",
+            "liquorice",
+            "space-fill",
+            "trace",
+            "tube",
+            "ribbon",
+            "cartoon",
+        ]
+        .contains(&self.view.representation.as_str())
             || !valid_color(&self.view.positive_color)
             || !valid_color(&self.view.negative_color)
             || !self.view.opacity.is_finite()
@@ -402,6 +417,11 @@ impl Document {
             || self.view.isovalue <= 0.
         {
             return Err("Invalid view settings".into());
+        }
+        if ["trace", "tube", "ribbon", "cartoon"].contains(&self.view.representation.as_str())
+            && self.structure.is_none()
+        {
+            return Err("Biological representations require structure metadata".into());
         }
         if let Some(f) = &self.view.field {
             self.check_field(f)?;

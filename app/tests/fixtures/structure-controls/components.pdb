@@ -1,0 +1,30 @@
+HEADER    INDEPENDENT STRUCTURE DISPLAY TEST
+ATOM      1    N ALA A  10      -1.100   0.000   0.000  1.00 20.00           N
+ATOM      2   CA ALA A  10       0.000   0.000   0.000  1.00 20.00           C
+ATOM      3    C ALA A  10       1.100   0.000   0.000  1.00 20.00           C
+ATOM      4    O ALA A  10       1.700   0.600   0.000  1.00 20.00           O
+ATOM      5    N GLY A  10A      2.700   0.000   0.000  1.00 20.00           N
+ATOM      6   CA GLY A  10A      3.800   0.000   0.000  1.00 20.00           C
+ATOM      7    C GLY A  10A      4.900   0.000   0.000  1.00 20.00           C
+ATOM      8    O GLY A  10A      5.500   0.600   0.000  1.00 20.00           O
+ATOM      9    N THR A  11       6.500   0.000   0.000  1.00 20.00           N
+ATOM     10   CA THR A  11       7.600   0.000   0.000  1.00 20.00           C
+ATOM     11    C THR A  11       8.700   0.000   0.000  1.00 20.00           C
+ATOM     12    O THR A  11       9.300   0.600   0.000  1.00 20.00           O
+TER
+ATOM     13    N SER B  20      -1.100   8.000   0.000  1.00 20.00           N
+ATOM     14   CA SER B  20       0.000   8.000   0.000  1.00 20.00           C
+ATOM     15    C SER B  20       1.100   8.000   0.000  1.00 20.00           C
+ATOM     16    O SER B  20       1.700   8.600   0.000  1.00 20.00           O
+ATOM     17    N VAL B  21       2.700   8.000   0.000  1.00 20.00           N
+ATOM     18   CA VAL B  21       3.800   8.000   0.000  1.00 20.00           C
+ATOM     19    C VAL B  21       4.900   8.000   0.000  1.00 20.00           C
+ATOM     20    O VAL B  21       5.500   8.600   0.000  1.00 20.00           O
+TER
+HETATM   21   C1 LIG L 501      -5.000   3.000   0.000  1.00 20.00           C
+HETATM   22   O1 LIG L 501      -3.800   3.000   0.000  1.00 20.00           O
+TER
+HETATM   23    O HOH W   1      12.000   8.000   0.000  1.00 20.00           O
+TER
+HETATM   24   ZN  ZN I   1      -7.000   8.000   0.000  1.00 20.00          ZN
+END

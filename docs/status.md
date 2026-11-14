@@ -8,6 +8,48 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Biological structure views: first four roadmap additions
+
+14 November 2026. The user authorized the metadata prerequisite and first four
+additions in [Plan 007](../plans/007-molecular-visualization-roadmap.md):
+chain/entity coloring, chain/component selection and mixed views, protein
+traces/tubes, and ribbons/secondary-structure cartoons. Issues
+[#62](https://github.com/uvar-apps/eigenvista/issues/62)–
+[#66](https://github.com/uvar-apps/eigenvista/issues/66) track work on
+`codex/biological-structure-views` from main `d098380`. See the
+[decision record](design/2026-11-14-biological-structure-views.md) and
+[verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
+for the exact source, PR/merge identity and complete local/hosted results.
+
+The optional biological native feature is explicit; metadata-free encoding,
+scientific hashes, numerical precision, dependencies and compiler stay
+unchanged. Protein secondary assignments come from deposited records, with
+missing/conflicting assignments left unknown. The source version remains
+0.6.0, while its published binary/ZIP below predates these additions. This is
+not a new release.
+
+Fresh local checks pass: 259 default Rust tests, seven explicit desktop tests,
+fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production build and
+13 packaging checks. Thirty focused browser cases pass across Chromium/WebKit,
+including independent geometry and source-identity controls, clean native Save,
+actual worker ownership/cache validation and exact field/custom/AO-OFF/PNG
+invariants. Both engines completed nine real-application captures of full
+1AON/4PJ1/1CRN inputs; actual shapes and the revised chain palette were inspected.
+The full browser inventory is 502 (251 per engine, including the unchanged
+original 233 each); complete results and all four actual final PR-head job
+outcomes are maintained in the linked ledger. Every future source head still
+requires its own applicable verification.
+
+The metadata-free large-structure tests keep their original three-array and
+8 KiB manifest assertions. A separate BIO test proves unchanged original
+numeric descriptors/entries plus one bounded atom-to-residue column. Valid
+mixed namespace aliases are distinguished for display without rewriting source
+identity. Source-index selection, long valid residue identifiers and original
+color overrides are covered. No old scientific/native fixtures were regenerated.
+Two early PDB regressions were corrected with existing assertions preserved.
+Native GUI/clean-Mac installation and coordinate-derived secondary prediction
+remain separate, unclaimed qualification work.
+
 ## Source version 0.6.0
 
 Published 2026-11-14T04:30:30Z at the [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).

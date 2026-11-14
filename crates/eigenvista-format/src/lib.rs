@@ -18,6 +18,7 @@ const BUDGET: usize = 128 * 1024 * 1024;
 const MANIFEST_BUDGET: usize = 8 * 1024 * 1024;
 const PROFILE: &str = "eigenvista-preview-polynomial-v1";
 const LEGACY_PROFILE: &str = "molekel-preview-polynomial-v1";
+const BIO_PROFILE: &str = "eigenvista-biological-structure-v1";
 
 #[derive(Serialize, Deserialize)]
 struct Array {
@@ -72,7 +73,11 @@ fn preflight(doc: &Document, budget: PreviewBudget) -> Result<PreparedDocument> 
     let manifest = Manifest {
         format: "eigenvista".into(),
         version: [0, 1],
-        required_features: vec![PROFILE.into()],
+        required_features: if doc.structure.is_some() {
+            vec![PROFILE.into(), BIO_PROFILE.into()]
+        } else {
+            vec![PROFILE.into()]
+        },
         coordinate_unit: "bohr".into(),
         arrays,
         document,
@@ -228,9 +233,14 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
     }
     let mut manifest: Manifest =
         serde_json::from_slice(&manifest_bytes).map_err(|e| e.to_string())?;
+    let biological = manifest
+        .document
+        .get("structure")
+        .is_some_and(|value| !value.is_null());
     let supported_profile = match manifest.format.as_str() {
+        "eigenvista" if biological => manifest.required_features == [PROFILE, BIO_PROFILE],
         "eigenvista" => manifest.required_features == [PROFILE],
-        "molekel" => manifest.required_features == [LEGACY_PROFILE],
+        "molekel" => !biological && manifest.required_features == [LEGACY_PROFILE],
         _ => false,
     };
     if !supported_profile || manifest.version != [0, 1] || manifest.coordinate_unit != "bohr" {

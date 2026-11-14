@@ -22,6 +22,10 @@ provides the rebuilt Apple Silicon ZIP, checksum and build metadata; check
 Older 0.5.15 packages predate AO. Updating source does not update an existing
 installed app or archive.
 
+Chain/component controls and protein depictions are a newer source feature in
+progress, described in [Biological structure views](#biological-structure-views).
+The published 0.6.0 package does not include them.
+
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
 remain supported, including their scientific data and saved surfaces.
@@ -159,8 +163,10 @@ PDB selection keeps common atoms and chooses the alternate with the highest
 mean occupancy per residue; zero-occupancy atoms are omitted. mmCIF follows the
 same alternate-location policy. Non-polymer mmCIF rows with no label sequence
 use author residue/insertion identity to keep separate waters/ligands distinct.
-The atom model does not retain the full hierarchy, occupancies, B-factors,
-formal charges, or secondary-structure information. mmCIF connection records
+The source branch now retains selected biological identities and deposited
+secondary assignments as described below; the published 0.6.0 package predates
+that addition. Occupancies, B-factors and formal charges remain omitted as atom
+attributes, and the complete source hierarchy is not retained. mmCIF connection records
 retain their deposited references, types, and orders in Provenance; cell/symmetry
 are reported without crystal-image expansion. BinaryCIF uses these same rules.
 Gzip support is limited to BinaryCIF; compressed PDB and gzip-wrapped text mmCIF
@@ -196,6 +202,97 @@ OBJ, atom-color text files, direct ORCA output/GBW, and Gaussian logs are **not
 implemented**. PDB, XYZ, and mmCIF/BinaryCIF files correctly show
 **No quantum fields**; coordinates alone cannot supply
 orbitals or a density matrix.
+
+## Biological structure views
+
+Current source after the published 0.6.0 release implements these controls under
+issues #62–#66. The published 0.6.0 application and ZIP predate them; this section
+describes the source application. See [status](status.md) and the
+[verification ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
+for the implementation revision, checks and delivery.
+
+Open a PDB, mmCIF or BinaryCIF file containing chain, residue and atom identities.
+In **Document → Biological structure**, choose **Coloring**:
+
+- **Element** uses the CPK palette, including any atom-color overrides.
+- **Chain** distinguishes deposited chain instances. mmCIF label identifiers are
+  shown, with author identifiers alongside when they differ. PDB uses its author
+  chain identifiers.
+- **Entity** gives chains belonging to the same supplied entity the same color.
+  PDB does not supply this mapping in the supported profile; its entity is unknown.
+- **Secondary structure** distinguishes deposited helices, sheets and coils/turns.
+  Unknown or unassigned residues stay explicitly gray. The program does not run
+  DSSP or predict assignments when annotations are missing.
+
+The legend identifies the colors; chain and entity colors are deterministic.
+Unknown identities are labeled explicitly rather than inferred from positions.
+When distinct label/author identifiers would otherwise have the same displayed
+name, extra source identifiers distinguish them in the legend, controls and
+picking. Colors and names are computed against the complete imported source,
+so filtering does not rename or recolor the remaining chains.
+
+![Complete 1AON with chain-colored protein cartoons](images/biological-structure/1aon-chain-cartoon.png)
+
+The complete 1AON complex in chain-colored cartoons. These illustrations come
+from the actual source application; the published 0.6.0 package predates them.
+
+Expand **Components** to show or hide protein, nucleic acid, ligand, water, ion
+and unknown components present in the file. Expand **Chains** to filter the
+chain/entity list, show or hide chains, **Isolate** a chain or **Focus** its visible
+atoms. Chain and component visibility filters combine. Isolation restores the
+target chain's component visibility and clears a conflicting residue range.
+**Show all components** clears visibility, isolation and residue-range filters.
+**Focus visible structure** frames the current visible atoms; focus controls are
+disabled when their target contains no visible atoms. Long chain lists are capped
+at 50 displayed entries; filter to reach another chain.
+
+Each component or chain can have a representation override. A chain override
+takes precedence over a component override; otherwise the global
+**Representation** applies. This supports a protein overview with detailed
+ligands or a selected chain in an atomic style. Protein depictions are unavailable
+for nonprotein components; these retain atomic detail.
+
+The new global protein choices are **Backbone trace**, **Smooth tube**, **Ribbon**
+and **Secondary-structure cartoon**. Trace and tube follow the protein backbone;
+cartoons distinguish helical ribbons, strand arrows and connecting loops.
+Missing backbone atoms, chain/segment ends and unsupported gaps break the path
+rather than inventing connections. Missing secondary assignments remain
+thin gray unassigned loops in ribbon/cartoon modes, including when chain or
+entity coloring is selected. These are display geometry, not additional imported atoms or
+quantum-chemistry surfaces. Nucleic-acid cartoons and glycan depictions are not
+part of this increment. Missing carbonyl orientation uses a thin-tube fallback
+with an informational notice; isolated backbone points remain visible as markers.
+Ambient occlusion continues to shade atomic spheres/bonds, while the new protein
+depiction geometry keeps its own diffuse shading.
+
+![Isolated chain A with deposited secondary colors](images/biological-structure/1aon-isolated-a-secondary.png)
+
+Isolated chain A: pink helices, gold strand arrows and gray unassigned loops.
+See [image provenance](images/biological-structure/README.md).
+
+Expand **Residue range**, select a chain and enter its first and last deposited
+residue identifiers. For example, `ALA 10` through `GLY 10A` includes an insertion
+residue `10A`; the names are optional. Author numbering is used when supplied.
+**Show residue range** displays that range and restores the necessary component
+visibility. Invalid, reversed or ambiguous ranges report an error and keep the
+previous selection. **Clear residue range** removes this filter.
+
+Coloring, component/chain styles, visibility, isolation, residue ranges and focus
+are session display settings: they do not change molecular data, create quantum
+calculations or make the document unsaved. Opening a file resets index-based
+settings; the color mode is retained when the new file has biological metadata.
+Reload resets these settings. The global **Representation** remains a document
+setting and is saved.
+
+Save preserves the selected biological identities when available. Such native
+documents require the biological-structure format feature and are not readable
+by older applications that lack it. Older native documents remain readable but
+cannot recover identities discarded by their original import; reopen the
+original PDB/mmCIF/BinaryCIF to obtain them. XYZ, cube and Molden inputs are not
+assigned invented chains or residues. Files without sufficient identities show
+a message explaining that chain and protein views are unavailable. Keep the
+original source: this is still a selected-structure importer, not an archive of
+every deposited annotation, model or conformer.
 
 ## Importing and converting Molden
 

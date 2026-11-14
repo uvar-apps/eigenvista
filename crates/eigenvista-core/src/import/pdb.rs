@@ -1,7 +1,8 @@
 use crate::{Atom, BOHR_TO_ANGSTROM, Document, MAX_BONDS, Result, bonds};
 use pdbtbx::{Element, Format, ReadOptions, StrictnessLevel};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::io::BufReader;
+mod metadata;
 
 fn column(line: &str, start: usize, end: usize) -> &str {
     line.get(start..end).unwrap_or("")
@@ -216,43 +217,13 @@ pub fn pdb(text: &str, name: &str) -> Result<Document> {
                     .join("; ")
             )
         })?;
-    let mut selected_atoms = Vec::new();
-    let mut discarded = 0;
-    for residue in structure.residues() {
-        let preferred = residue
-            .conformers()
-            .filter(|c| c.alternative_location().is_some())
-            .map(|c| {
-                let occupancy =
-                    c.atoms().map(|a| a.occupancy()).sum::<f64>() / c.atom_count().max(1) as f64;
-                (occupancy, c.alternative_location().unwrap(), c.name())
-            })
-            .max_by(|a, b| a.0.total_cmp(&b.0).then(b.1.cmp(a.1)).then(b.2.cmp(a.2)));
-        let mut names = HashSet::new();
-        for conformer in residue.conformers() {
-            let keep = conformer.alternative_location().is_none()
-                || preferred.is_some_and(|(_, alt, name)| {
-                    conformer.alternative_location() == Some(alt) && conformer.name() == name
-                });
-            for atom in conformer.atoms() {
-                if !keep || atom.occupancy() == 0. {
-                    discarded += 1;
-                    continue;
-                }
-                if !names.insert(atom.name()) {
-                    return Err(format!(
-                        "Duplicate PDB atom name {} in selected residue {}",
-                        atom.name(),
-                        residue.serial_number()
-                    ));
-                }
-                selected_atoms.push(atom);
-            }
-        }
-    }
+    let biological = metadata::PdbMetadata::parse(text, &normalized)?;
+    let (mut selected_atoms, discarded) = biological.select(structure.atoms())?;
     selected_atoms.sort_unstable_by_key(|a| atom_order[&a.serial_number()]);
+    let (metadata, unresolved_annotations) = biological.build(&selected_atoms)?;
     let title = title.join(" ");
     let mut doc = Document::empty(if title.is_empty() { name } else { &title });
+    doc.structure = Some(metadata);
     let mut serial_to_index = HashMap::new();
     for atom in selected_atoms {
         serial_to_index.insert(atom.serial_number(), doc.atoms.len());
@@ -292,8 +263,11 @@ pub fn pdb(text: &str, name: &str) -> Result<Document> {
         connectivity.description(),
         format!("Element inferred from aligned atom names for {inferred_elements} atoms. Recognized {legacy_count} legacy PDB identifier/line-number suffixes. Converted {isotope_count} D/T isotope labels to hydrogen (isotope identity not retained)."),
         format!("Normalized {legacy_names} legacy five-column nucleotide hydrogen names; numeric alternate labels with partial occupancy are not repaired."),
-        "Structure-only import: residue/chain labels, occupancy, B-factors, formal charges, crystal cells and symmetry are not retained in the preview model; no quantum data fabricated.".into(),
+        "Structure-only import: selected chain/residue/atom identity, TER segments and deposited secondary annotations are retained. Occupancy, B-factors, formal charges, crystal cells and symmetry are not retained in the preview model; no quantum data fabricated.".into(),
     ];
+    if unresolved_annotations > 0 {
+        doc.provenance.push(format!("PDB parser: {unresolved_annotations} ambiguous, absent or conflicting secondary annotation matches left unknown."));
+    }
     for warning in warnings.iter().take(5) {
         doc.provenance
             .push(format!("PDB parser: {}", warning.short_description()));

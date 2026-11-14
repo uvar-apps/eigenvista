@@ -20,6 +20,36 @@ Each atom row contains an element symbol and three coordinates. Extra nonempty
 records, including additional frames and extended XYZ columns, are rejected;
 unlike PDB, XYZ does not select the first of several frames.
 
+## Biological identities
+
+Current source implements optional biological metadata and structure views for
+issues #62–#66. The published 0.6.0 ZIP predates this work. See the
+[user workflow](user-guide.md#biological-structure-views),
+[architecture contract](architecture.md#biological-structure-views) and
+[verification ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097).
+
+Selected atoms retain parallel atom-name/residue-index arrays; residues retain
+name, chain, label/author numbering, insertion, observed segment, component kind
+and deposited secondary assignment. Chain label, author and entity identifiers
+remain separate. PDB preserves TER boundaries and does not fabricate entity IDs.
+Classification uses supplied polymer/chemical-component information, supported
+modified-residue records and recognized component names; unsupported identity
+remains unknown. It is not a complete Chemical Component Dictionary analysis.
+
+PDB HELIX/SHEET and mmCIF/BinaryCIF struct_conf/struct_sheet_range annotations
+are read with endpoint/namespace checks. Missing, ambiguous, unsupported or
+conflicting assignments stay unknown with notices. No DSSP assignment or
+secondary prediction is performed. Occupancy and alternate selection still occur
+before metadata is attached, so every retained metadata index refers to the
+selected document atoms. Incomplete mmCIF identity can leave metadata unavailable
+rather than inventing a partial hierarchy.
+
+Metadata has a 100,000-selected-atom/record bound and 4 MiB cumulative string
+budget in addition to existing import/native limits. Native Save preserves it
+under the explicit biological-structure feature; old documents without it remain
+valid. These annotations do not add quantum data or change scientific field
+hashes. The source is not preserved wholesale; keep original inputs.
+
 ## Algorithm decision
 
 The legacy implementation was inspected, not copied. `src/utility/MolekelChemPDBImporter.cpp` uses `UniformGrid`, 27 neighboring buckets, a 1.2-times-covalent-radii cutoff, and angle/valence pruning. Other legacy paths delegate to Open Babel. The located PDB implementation is a uniform grid, not a k-d tree.
@@ -51,7 +81,7 @@ Bounds are explicit: 100,000 atoms, 600,000 output connections, 2,000,000 candid
 - Support the repository's old identifier/line-number suffixes only when matched to a legacy HEADER. A narrowly scoped repair recognizes full-occupancy, element-unspecified five-column nucleotide hydrogen names such as ` H2'1`; it records the repair and leaves partial-occupancy numeric alternates alone.
 - Blank occupancy and B-factor fields default to 1 and 0. Invalid numbers do not become fabricated coordinates. Non-ASCII records and hybrid-36 serials are rejected in this profile.
 
-The preview stores coordinates, elements, and connectivity, not the full PDB hierarchy. Residue/chain labels, formal charges, occupancies/B-factors, isotope identity, unit cells, symmetry and secondary-structure annotations are not retained after selection; provenance records this loss. Crystal/periodic images are not generated. No quantum data is inferred from a structure file. Gzipped PDB is not currently accepted; see the [mmCIF profile](#mmcif-profile) for the `.cif` reader.
+Current source retains selected residue/chain/atom identities, TER segments, supported modified-residue classification and deposited secondary annotations in the optional biological metadata above. It does not retain the complete PDB hierarchy. Formal charges, occupancies/B-factors, isotope identity, unit cells and symmetry remain omitted, with losses recorded in provenance. The published 0.6.0 importer predates biological metadata. Crystal/periodic images are not generated. No quantum data is inferred from a structure file. Gzipped PDB is not currently accepted; see the [mmCIF profile](#mmcif-profile) for the `.cif` reader.
 
 ## mmCIF profile
 
@@ -149,8 +179,9 @@ offsets; consistent UTF-16 and code-point offset profiles are handled without
 splitting surrogate pairs. Producer quantization cannot restore digits absent
 from the stored data.
 
-Only `atom_site`, `struct_conn`, `cell`, `symmetry`, and `space_group` columns
-are expanded. Other categories are not column-decoded or retained as full source
+Only `atom_site`, `struct_conn`, `cell`, `symmetry`, `space_group`, `entity`,
+`entity_poly`, `struct_asym`, `chem_comp`, `struct_conf` and
+`struct_sheet_range` columns are expanded. Other categories are not column-decoded or retained as full source
 metadata; their strings and byte payloads remain borrowed within the bounded
 MessagePack tree. Interpreted values are written to
 bounded canonical CIF text and passed to the existing core reader, preserving
@@ -168,7 +199,8 @@ decoded-value** budget, including intermediate transforms, masks, dictionary
 indices, and offset boundaries; pipelines allow at most **16 transforms** and
 **8 nested string-encoding levels**. Each interpreted category has 1–256 columns;
 `atom_site` allows **250,000 total rows before model/alternate selection**,
-`struct_conn` allows 100,000 rows, and interpreted cell/symmetry categories allow
+`struct_conn` and each interpreted biological category allow 100,000 rows,
+and interpreted cell/symmetry categories allow
 one row. The shared 100,000 selected-atom and connection-provenance limits still
 apply. Malformed lengths, invalid masks/indices, arithmetic overflow, unsupported
 versions/encodings, and excessive expansion report errors rather than truncate.

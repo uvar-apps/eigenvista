@@ -39,6 +39,28 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Layout that is not obvious from names
 
+- Unreleased source implements Plan 007's metadata prerequisite and first four
+  biological views, tracked by #62–#66 and developed on
+  `codex/biological-structure-views`. Read the
+  [biological-view decision](docs/design/2026-11-14-biological-structure-views.md)
+  and [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
+  for exact source, PR and actual full-suite/final-head results. The published 0.6.0
+  package predates this work; its version/tag/assets stay unchanged.
+  `Document.structure` is optional and indexes original selected atoms.
+  Native files with metadata require `eigenvista-biological-structure-v1`;
+  metadata-free documents retain the old encoding. Preserve frozen native
+  inputs, hashes and scientific precision. Rust import/core owns biological
+  interpretation and C-alpha continuity; Three.js owns bounded depiction
+  extrusion. Respect source TER/chain/sequence breaks. Secondary assignments
+  are deposited only; missing/ambiguous assignments remain explicit unknowns.
+  Colors, subsets, focus and per-chain/component styles are session settings;
+  global representation keeps its persisted view/dirty contract. Protein
+  geometry stays outside the existing atom/bond AO target ownership and uses
+  matte Lambert materials. Preparation uses a separate owned worker client,
+  sends no quantum payload and preserves resident QC registration on nonfatal
+  depiction errors. Replace `structure` when editing its metadata; color and
+  visibility changes do not replace authoritative arrays or resample fields.
+
 - Current source version **0.6.0** includes #59 molecular screen-space ambient
   occlusion. The version bump synchronizes all eleven own metadata values;
   dependency/toolchain pins and scientific profiles remain unchanged. Read the
@@ -73,8 +95,10 @@ documents; older `.molekel` preview documents remain readable. Check
   render host to 240×128 → 160×160 CSS at DPR 2 (480×256 → 320×320 physical).
   Preserve all five original PNG samples and every pixel/identity oracle.
   Separate resource checks still exercise the 1024 cap, and actual-app tracked
-  1AON remains the primary visual qualification. The normal inventory is
-  466 tests, 233 per engine, including 10 AO cases per engine. Keep the existing
+  1AON remains the primary visual qualification. The published 0.6.0 inventory was
+  466 tests, 233 per engine, including 10 AO cases per engine. Current source
+  discovers 502 cases (251 per engine), adding 18 biological cases per engine.
+  Preserve all original cases and independent oracles. Keep the existing
   60-second per-test, 35-minute suite-step and 60-minute job limits with one
   worker. The failed combined case at head `04c8c919` is historical evidence;
   the merged split passed its final-head checks. Retain the existing limits
@@ -245,7 +269,7 @@ Standard verification order for runtime changes (details and coverage map in
   [ownership/registration design](docs/design/2026-11-06-worker-ownership-and-registration.md).
 - Registered scientific inputs are immutable snapshots. Replace the affected
   top-level `basis`, `orbitals`, `densities`, `grids`, `bonds`, or `provenance`
-  array (or `atoms` object) when editing; mutating nested values in place will
+  array (or `atoms` / optional `structure` object) when editing; mutating nested values in place will
   not invalidate reference identity. Appearance/saved-mesh changes preserve
   these references. One worker-local Rust `RegisteredDocument` owns validated
   source data and one sampled field; registration IDs never replace persisted

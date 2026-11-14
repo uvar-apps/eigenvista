@@ -45,6 +45,13 @@ pub fn import_text(text: &str, name: &str) -> Result<String, JsValue> {
 pub fn import_document(bytes: &[u8], name: &str) -> Result<String, JsValue> {
     serde_json::to_string(&eigenvista_import::import_bytes(bytes, name).map_err(err)?).map_err(err)
 }
+/// Prepare display-only biological topology without touching registered QC inputs.
+#[wasm_bindgen]
+pub fn protein_backbone(json: &str) -> Result<String, JsValue> {
+    let document: Document = serde_json::from_str(json).map_err(err)?;
+    serde_json::to_string(&eigenvista_core::protein::protein_backbone(&document).map_err(err)?)
+        .map_err(err)
+}
 #[wasm_bindgen]
 pub fn sample(json: &str, field: &str, resolution: usize) -> Result<String, JsValue> {
     serde_json::to_string(&compute::sample(&parse(json)?, field, resolution).map_err(err)?)
