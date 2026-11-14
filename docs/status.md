@@ -28,7 +28,7 @@ missing/conflicting assignments left unknown. The source version remains
 0.6.0, while its published binary/ZIP below predates these additions. This is
 not a new release.
 
-Fresh local checks pass: 265 default Rust tests, seven explicit desktop tests,
+Fresh local checks pass: 272 default Rust tests, seven explicit desktop tests,
 fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production build and
 13 packaging checks. Forty focused browser cases pass across Chromium/WebKit,
 including independent geometry and source-identity controls, clean native Save,
@@ -45,8 +45,11 @@ format regression. That format and the fixed status/canvas bounds are restored
 with the old test unchanged. Final review also found valid mmCIF monomer
 alternatives rejected by new metadata validation. Both identities now remain
 selected, with explicit ambiguous-position backbone breaks and new native,
-import/topology and real-browser regressions. Initial-head checks do not qualify
-the corrected head; the ledger records fresh final outcomes.
+import/topology and real-browser regressions. A related partial-identifier
+counterexample at `80a6eb1` required independent label/author ambiguity guards;
+972 presence scenarios and native browser diagnostics cover the correction,
+with positive controls retaining distinct canonical positions. Both earlier
+heads are superseded; the ledger records fresh final outcomes.
 
 The metadata-free large-structure tests keep their original three-array and
 8 KiB manifest assertions. A separate BIO test proves unchanged original

@@ -583,3 +583,227 @@ fn ambiguous_author_insertion_is_a_barrier_even_when_neighbors_are_numerically_c
     // Excluding ambiguous10A before traversal would wrongly reconnect10->11.
     assert_microheterogeneous_positions_are_barriers(&microheterogeneous_document(false, true));
 }
+
+#[test]
+fn mixed_identity_coverage_cannot_hide_known_label_microheterogeneity() {
+    let mut doc = microheterogeneous_document(true, false);
+    let metadata = doc.structure.as_mut().unwrap();
+    metadata.residues[2].kind = ComponentKind::Unknown;
+    metadata.residues[2].author_seq_id = None;
+    metadata.residues[3].label_seq_id = None;
+    assert_microheterogeneous_positions_are_barriers(&doc);
+}
+
+#[test]
+fn missing_label_on_unknown_variant_cannot_hide_shared_author_identity() {
+    let mut doc = microheterogeneous_document(true, false);
+    let metadata = doc.structure.as_mut().unwrap();
+    metadata.residues[2].kind = ComponentKind::Unknown;
+    metadata.residues[2].label_seq_id = None;
+    assert_microheterogeneous_positions_are_barriers(&doc);
+}
+
+#[test]
+fn opaque_author_microheterogeneity_is_detected_without_inventing_numeric_order() {
+    for unknown in [false, true] {
+        let mut doc = microheterogeneous_document(false, false);
+        for (residue, author) in doc
+            .structure
+            .as_mut()
+            .unwrap()
+            .residues
+            .iter_mut()
+            .zip(["left", "variant", "variant", "right", "last"])
+        {
+            residue.author_seq_id = Some(author.into());
+        }
+        if unknown {
+            doc.structure.as_mut().unwrap().residues[2].kind = ComponentKind::Unknown;
+        }
+        let before = doc.clone();
+        let result = protein_backbone(&doc).unwrap();
+        let ids: Vec<Vec<_>> = result
+            .segments
+            .iter()
+            .map(|segment| segment.points.iter().map(|point| point.atom).collect())
+            .collect();
+        assert_eq!(ids, [vec![1], vec![13], vec![17]]);
+        assert!(
+            result
+                .warnings
+                .iter()
+                .any(|message| message.contains("ambiguous positions"))
+        );
+        assert!(
+            result
+                .warnings
+                .iter()
+                .any(|message| message.contains("no consistent sequence order"))
+        );
+        assert_eq!(doc, before);
+    }
+}
+
+#[test]
+fn numeric_author_aliases_match_the_trimmed_integer_ordering_identity() {
+    let mut doc = microheterogeneous_document(false, false);
+    doc.structure.as_mut().unwrap().residues[2].author_seq_id = Some(" +010 ".into());
+    assert_microheterogeneous_positions_are_barriers(&doc);
+}
+
+#[test]
+fn complete_distinct_canonical_labels_disambiguate_reused_or_absent_author_aliases() {
+    for author in [Some("10"), Some("opaque-author"), None] {
+        let mut doc = microheterogeneous_document(true, false);
+        for (index, residue) in doc
+            .structure
+            .as_mut()
+            .unwrap()
+            .residues
+            .iter_mut()
+            .enumerate()
+        {
+            residue.label_seq_id = Some(index as i32 + 1);
+            residue.author_seq_id = author.map(str::to_owned);
+        }
+        // Distinct canonical positions have ordinary3.8Å CA steps. This control
+        // deliberately removes the coincident alternate-location geometry.
+        for atom in &mut doc.atoms[8..] {
+            atom.position[0] += 3.8 / BOHR_TO_ANGSTROM;
+        }
+        let before = doc.clone();
+        let result = protein_backbone(&doc).unwrap();
+        let ids: Vec<Vec<_>> = result
+            .segments
+            .iter()
+            .map(|segment| segment.points.iter().map(|point| point.atom).collect())
+            .collect();
+        assert_eq!(ids, [vec![1, 5, 9, 13, 17]]);
+        assert!(
+            !result
+                .warnings
+                .iter()
+                .any(|message| message.contains("ambiguous positions"))
+        );
+        assert_eq!(doc, before);
+    }
+}
+
+#[test]
+fn distinct_author_insertions_are_not_treated_as_one_ambiguous_position() {
+    let mut doc = microheterogeneous_document(false, true);
+    doc.structure.as_mut().unwrap().residues[2].insertion_code = Some("B".into());
+    for atom in &mut doc.atoms[8..] {
+        atom.position[0] += 3.8 / BOHR_TO_ANGSTROM;
+    }
+    let before = doc.clone();
+    let result = protein_backbone(&doc).unwrap();
+    let ids: Vec<Vec<_>> = result
+        .segments
+        .iter()
+        .map(|segment| segment.points.iter().map(|point| point.atom).collect())
+        .collect();
+    assert_eq!(ids, [vec![1, 5, 9, 13, 17]]);
+    assert!(
+        !result
+            .warnings
+            .iter()
+            .any(|message| message.contains("ambiguous positions"))
+    );
+    assert_eq!(doc, before);
+}
+
+#[test]
+fn independent_identity_presence_masks_preserve_ambiguous_barriers_and_unambiguous_anchors() {
+    let mut scenarios = 0;
+    for inserted in [false, true] {
+        for unknown in [false, true] {
+            for mask in 0..243usize {
+                let mut doc = microheterogeneous_document(true, inserted);
+                let metadata = doc.structure.as_mut().unwrap();
+                if unknown {
+                    metadata.residues[2].kind = ComponentKind::Unknown;
+                }
+                let mut digits = mask;
+                for residue in &mut metadata.residues {
+                    match digits % 3 {
+                        0 => {} // Both deposited identities are available.
+                        1 => residue.author_seq_id = None,
+                        2 => residue.label_seq_id = None,
+                        _ => unreachable!(),
+                    }
+                    digits /= 3;
+                }
+                // Independent pairwise oracle: these manufactured monomers
+                // collide iff their available labels OR available author IDs
+                // explicitly agree in the same insertion namespace. No missing
+                // identifier is projected, and no production order/key helper
+                // computes the expected set.
+                let left = &metadata.residues[1];
+                let right = &metadata.residues[2];
+                let same_insertion = left.insertion_code == right.insertion_code;
+                let shared_label = left
+                    .label_seq_id
+                    .zip(right.label_seq_id)
+                    .is_some_and(|(a, b)| a == b)
+                    && same_insertion;
+                let shared_author = left
+                    .author_seq_id
+                    .as_ref()
+                    .zip(right.author_seq_id.as_ref())
+                    .is_some_and(|(a, b)| a == b)
+                    && same_insertion;
+                let ambiguous = shared_label || shared_author;
+                let before = doc.clone();
+                let result = protein_backbone(&doc).unwrap_or_else(|error| {
+                    panic!("mask={mask},unknown={unknown},inserted={inserted}: {error}")
+                });
+                let ids: Vec<_> = result
+                    .segments
+                    .iter()
+                    .flat_map(|segment| segment.points.iter().map(|point| point.atom))
+                    .collect();
+                let context =
+                    format!("mask={mask},unknown={unknown},inserted={inserted},ids={ids:?}");
+                // Positive retention guards against a trivial empty depiction.
+                for expected in [1, 13, 17] {
+                    assert!(ids.contains(&expected), "{context}");
+                }
+                let warning = result
+                    .warnings
+                    .iter()
+                    .find(|message| message.contains("multiple deposited residue identities"));
+                if ambiguous {
+                    assert!(!ids.contains(&5) && !ids.contains(&9), "{context}");
+                    for segment in &result.segments {
+                        let before = segment.points.iter().any(|point| point.atom == 1);
+                        let after = segment
+                            .points
+                            .iter()
+                            .any(|point| point.atom == 13 || point.atom == 17);
+                        assert!(!(before && after), "{context}");
+                    }
+                    let warning =
+                        warning.unwrap_or_else(|| panic!("Missing ambiguity warning: {context}"));
+                    // Count omitted protein residues once, even when BOTH known
+                    // namespaces identify the same ambiguous source identities.
+                    assert_eq!(
+                        warning.split_whitespace().next().unwrap(),
+                        if unknown { "1" } else { "2" },
+                        "{context}"
+                    );
+                } else {
+                    assert!(ids.contains(&5), "No known identity collision: {context}");
+                    assert_eq!(ids.contains(&9), !unknown, "{context}");
+                    assert!(
+                        warning.is_none(),
+                        "No namespace projection allowed: {context}"
+                    );
+                }
+                assert_eq!(doc, before, "{context}");
+                scenarios += 1;
+            }
+        }
+    }
+    assert_eq!(scenarios, 972);
+}

@@ -293,6 +293,107 @@ test("mmCIF microheterogeneity preserves both selected monomers and native data 
   ).toEqual([]);
   expect(errors).toEqual([]);
   await expect(page.getByRole("alert")).toHaveCount(0);
+  // Manufactured, valid Native metadata-uncertainty diagnostics. The deposited
+  // synthetic coordinate arrays and quantum data are never changed. These are
+  // not claims about the original CIF's supplied component classification.
+  const manufactured: {
+    name: string;
+    changes: string[];
+    document: EigenVistaDocument;
+  }[] = [];
+  for (const [index, namespace] of ["author", "label"].entries()) {
+    const diagnostic = structuredClone(saved);
+    const residues = diagnostic.structure!.residues;
+    residues[2].kind = "unknown";
+    const changes = ["CYS residue2 kind=unknown"];
+    if (namespace === "author") {
+      residues[2].author_seq_id = null;
+      residues[3].label_seq_id = null;
+      changes.push(
+        "CYS residue2 author_seq_id=null",
+        "GLY residue3 label_seq_id=null",
+      );
+    } else {
+      residues[2].label_seq_id = null;
+      changes.push("CYS residue2 label_seq_id=null (author10 retained)");
+    }
+    diagnostic.provenance = [
+      ...saved.provenance,
+      "Manufactured metadata-uncertainty test diagnostic: " +
+        changes.join("; ") +
+        ". Coordinates/elements/connectivity/quantum data are unchanged.",
+    ];
+    expect({
+      ...diagnostic,
+      structure: saved.structure,
+      provenance: saved.provenance,
+    }).toEqual(saved);
+    expect(diagnostic.structure!.residues).toHaveLength(5);
+    const encoded = await page.evaluate(async (document) => {
+      const url = "/src/wasm/eigenvista_wasm.js";
+      const core = await import(/* @vite-ignore */ url);
+      await core.default();
+      core.validate_document(JSON.stringify(document));
+      const bytes = core.encode(JSON.stringify(document)) as Uint8Array;
+      return {
+        bytes: Array.from(bytes),
+        decoded: JSON.parse(core.decode(bytes)) as EigenVistaDocument,
+      };
+    }, diagnostic);
+    expect(encoded.decoded).toEqual(diagnostic);
+    const name = "manufactured-unknown-" + namespace + "-namespace.eigenvista";
+    const filename = info.outputPath(name);
+    fs.writeFileSync(filename, Buffer.from(encoded.bytes));
+    await open(page, filename);
+    await prepared(page, index + 3);
+    await expect(page.locator(".document-summary strong")).toHaveText(
+      "20 atoms",
+    );
+    expect((await probe(page)).imports[index + 2].document).toEqual(diagnostic);
+    await page.evaluate(() => {
+      (window as unknown as ProbedWindow).microhetProbe.draws = [];
+    });
+    const exported = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Export image", exact: true })
+      .click();
+    const image = info.outputPath("manufactured-" + namespace + "-trace.png");
+    await (await exported).saveAs(image);
+    expect(
+      (await pngPixels(page, fs.readFileSync(image))).foreground12,
+    ).toBeGreaterThan(10);
+    const rendered = await probe(page);
+    const trace = rendered.draws.filter(
+      (draw) => draw.method === "drawArrays" && draw.mode === 1,
+    );
+    expect(trace.length).toBeGreaterThan(0);
+    for (const draw of trace) expect(draw.count).toBe(2);
+    expect(
+      rendered.draws.some(
+        (draw) => draw.method === "drawElements" && draw.count > 0,
+      ),
+    ).toBe(true);
+    // Unknown CYS is not silently treated as protein: its atomic detail is
+    // legitimate and must not be rejected by the baseline all-protein oracle.
+    expect(rendered.draws.some((draw) => draw.instances > 0)).toBe(true);
+    manufactured.push({ name, changes, document: diagnostic });
+  }
+  const final = await probe(page);
+  expect(final.backbones).toHaveLength(4);
+  expect(
+    final.actions.filter(
+      (action) => action === "sample" || action === "generate",
+    ),
+  ).toEqual([]);
+  expect(final.errors).toEqual([]);
+  expect(errors).toEqual([]);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await info.attach("manufactured-metadata-uncertainty", {
+    contentType: "application/json",
+    body: Buffer.from(
+      JSON.stringify({ diagnostics: manufactured, observed: final }),
+    ),
+  });
   await info.attach("microheterogeneity-source-and-backbones", {
     contentType: "application/json",
     body: Buffer.from(JSON.stringify(seen)),

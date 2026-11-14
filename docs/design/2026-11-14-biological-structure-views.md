@@ -68,7 +68,7 @@ PNG invariants remain independently checked.
 
 ## Acceptance state
 
-Fresh native checks pass 265 default and seven desktop tests, formatting and
+Fresh native checks pass 272 default and seven desktop tests, formatting and
 strict workspace/all-targets Clippy. WASM/TypeScript/production builds and
 13 packaging checks pass. Forty focused cases pass across both browser engines,
 including independent normals/arrows/rigid transforms, metadata/name aliases,
@@ -102,6 +102,14 @@ conflict/duplicate checks. Protein topology retains ambiguous positions as
 traversal barriers and omits every variant anchor; it must not join either
 branch or skip an insertion barrier. The shared 20-atom fixture and native,
 import, label/author/partial-order and browser controls cover this correction.
+
+Ambiguity checks use all known deposited identities independently of the
+namespace available for ordering. A missing author identifier cannot hide a
+known label conflict, and a missing label cannot hide a shared author identity.
+Complete distinct canonical labels can disambiguate reused author aliases;
+opaque author identifiers contribute equality evidence without inventing an
+order. A 972-scenario presence matrix, explicit insertion/alias controls and
+native browser diagnostics check both omission barriers and retained anchors.
 
 The initial complete browser run also caught an existing atom-label contract:
 its primary element/index/coordinates item must retain its exact format. The

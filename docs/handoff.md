@@ -66,7 +66,7 @@ records the exact source revision, PR, completed full-suite/hosted results and
 merge state. Consult it and Git before continuing from a different checkout.
 The earlier planning snapshot below remains historical.
 
-Fresh local checks pass: 265 default Rust tests, seven explicit desktop tests, fmt, strict
+Fresh local checks pass: 272 default Rust tests, seven explicit desktop tests, fmt, strict
 workspace/all-targets Clippy, 13 packaging tests and WASM/TypeScript/production
 build. Authentic frozen native files remain exact; biological files round-trip
 with unchanged original numeric entries and an explicit additional capability.
@@ -95,8 +95,14 @@ exposed the primary atom-label compatibility failure; that code now preserves
 the old format and 35-pixel status/canvas bounds without changing the old test.
 Final review also found legal shared-position monomer variants rejected by new
 validation. Both identities now remain selected, and every ambiguous backbone
-anchor is omitted with an explicit break. Fresh native and targeted browser
-tests pass; final corrected-head full-suite/CI results belong in the ledger.
+anchor is omitted with an explicit break. A subsequent partial-identifier
+counterexample at `80a6eb1` required checking identity ambiguity independently
+of traversal order. Known label conflicts and uncertain author aliases now
+remain barriers even with an unclassified variant. Independent review and
+972 identifier-presence scenarios cover this guard, including positive
+retention controls and native browser diagnostics. Both earlier candidates
+and their interrupted/cancelled runs are historical; only the final corrected
+head's completed full-suite/CI results in the ledger qualify delivery.
 The task-local contract, ownership, ledger and checkpoint live under
 `tmp/2026-11-14-structure-views/`. All four actual final PR-head hosted jobs and
 real large-structure visual/compatibility checks are mandatory acceptance gates;

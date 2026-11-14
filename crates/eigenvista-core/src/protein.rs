@@ -111,13 +111,58 @@ fn position_order(indices: &[usize], residues: &[StructureResidue]) -> Order {
     }
 }
 
-fn sequence_position(residue: &StructureResidue, order: Order) -> Option<(i32, &str)> {
-    match order {
-        Order::Label => residue.label_seq_id,
-        Order::Author => author_number(residue),
-        Order::Unavailable => None,
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum AuthorIdentity<'a> {
+    Number(i32),
+    Opaque(&'a str),
+}
+
+fn author_identity(residue: &StructureResidue) -> Option<AuthorIdentity<'_>> {
+    let value = residue.author_seq_id.as_deref()?.trim();
+    Some(match value.parse() {
+        Ok(number) => AuthorIdentity::Number(number),
+        Err(_) => AuthorIdentity::Opaque(value),
+    })
+}
+
+/// Identity evidence is independent of the order available for drawing. Known
+/// duplicate canonical labels always conflict. Reused author identities conflict
+/// when author traversal is chosen or any member lacks a canonical label; complete
+/// distinct labels can otherwise disambiguate a reused author alias.
+fn mark_ambiguous_residues(
+    observed: &[usize],
+    residues: &[StructureResidue],
+    chosen: Order,
+    ambiguous: &mut [bool],
+) {
+    let mut labels = BTreeMap::new();
+    let mut authors = BTreeMap::new();
+    for &index in observed {
+        let residue = &residues[index];
+        let insertion = insertion(residue);
+        if let Some(label) = residue.label_seq_id {
+            *labels.entry((label, insertion)).or_insert(0usize) += 1;
+        }
+        if let Some(author) = author_identity(residue) {
+            let members = authors
+                .entry((author, insertion))
+                .or_insert((0usize, false));
+            members.0 += 1;
+            members.1 |= residue.label_seq_id.is_none();
+        }
     }
-    .map(|number| (number, insertion(residue)))
+    for &index in observed {
+        let residue = &residues[index];
+        let insertion = insertion(residue);
+        let label_conflict = residue
+            .label_seq_id
+            .is_some_and(|label| labels[&(label, insertion)] > 1);
+        let author_conflict = author_identity(residue).is_some_and(|author| {
+            let (count, incomplete_labels) = authors[&(author, insertion)];
+            count > 1 && (matches!(chosen, Order::Author) || incomplete_labels)
+        });
+        ambiguous[index] = label_conflict || author_conflict;
+    }
 }
 
 fn order_residues(
@@ -155,7 +200,7 @@ fn order_residues(
 struct Counts {
     missing: usize,
     ambiguous: usize,
-    ambiguous_positions: usize,
+    ambiguous_residues: usize,
     sequence: usize,
     distance: usize,
     unordered: usize,
@@ -231,25 +276,19 @@ pub fn protein_backbone(document: &Document) -> Result<ProteinBackbone> {
             continue;
         }
         let chosen = position_order(&indices, &metadata.residues);
-        let mut positions = BTreeMap::new();
-        // Include nonprotein/unknown variants in identity ambiguity, while only
-        // protein residues can contribute backbone anchors or select an order.
-        for &index in &observed {
-            let residue = &metadata.residues[index];
-            if let Some(key) = sequence_position(residue, chosen) {
-                let entry = positions.entry(key).or_insert((0usize, false));
-                entry.0 += 1;
-                entry.1 |= residue.kind == ComponentKind::Protein;
-            }
-        }
-        counts.ambiguous_positions += positions
-            .values()
-            .filter(|&&(count, protein)| count > 1 && protein)
+        // Count all source identities, including unknown/nonprotein variants,
+        // without projecting missing labels or guessing author sequence order.
+        mark_ambiguous_residues(
+            &observed,
+            &metadata.residues,
+            chosen,
+            &mut ambiguous_positions,
+        );
+        // Count omitted protein residues once, even if both namespaces conflict.
+        counts.ambiguous_residues += indices
+            .iter()
+            .filter(|&&index| ambiguous_positions[index])
             .count();
-        for &index in &indices {
-            ambiguous_positions[index] = sequence_position(&metadata.residues[index], chosen)
-                .is_some_and(|key| positions[&key].0 > 1);
-        }
         let order = order_residues(&mut indices, &metadata.residues, &ambiguous_positions);
         let mut points: Vec<BackbonePoint> = Vec::new();
         for index in indices {
@@ -345,8 +384,8 @@ pub fn protein_backbone(document: &Document) -> Result<ProteinBackbone> {
             "protein residues have ambiguous alpha carbons; no candidate was guessed",
         ),
         (
-            counts.ambiguous_positions,
-            "sequence positions have multiple deposited residue identities; all alpha-carbon anchors at those ambiguous positions were omitted",
+            counts.ambiguous_residues,
+            "protein residues share multiple deposited residue identities; all alpha-carbon anchors at those ambiguous positions were omitted",
         ),
         (
             counts.sequence,
