@@ -12,6 +12,19 @@ The current application source is **EigenVista**, version **0.6.0**, in the stan
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
+## Verification policy: 14 November 2026
+
+The user requires **all relevant tests and checks to pass locally before any
+push**. Current verification is local macOS only. Two local Linux machines will
+join verification when the user provides access; no current Linux qualification
+is claimed. GitHub-hosted checks are not required for push, merge or release.
+The retained workflow is manual-only and runs only when explicitly requested.
+
+Dated hosted-CI requirements and results below preserve the earlier policy and
+its evidence; they do not override this rule. This policy/documentation update
+did not rerun application tests. The implementation results below remain the
+record of the completed checks.
+
 ## Source version 0.6.0
 
 Published 2026-11-14T04:30:30Z at the [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
@@ -62,13 +75,13 @@ protein ribbons/cartoons. Implementation was developed on `codex/biological-stru
 metadata, native capability gating, session display ownership and deposited-only
 secondary assignments. The
 [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-records the exact source revision, PR, completed full-suite/hosted results and
-merge state. Consult it and Git before continuing from a different checkout.
-The earlier planning snapshot below remains historical.
+records the exact source revision, PR, completed local results, historical
+hosted observations and actual merge state. Consult it and Git before continuing
+from a different checkout. The earlier planning snapshot below remains historical.
 
-Fresh local checks pass: 272 default Rust tests, seven explicit desktop tests, fmt, strict
-workspace/all-targets Clippy, 13 packaging tests and WASM/TypeScript/production
-build. Authentic frozen native files remain exact; biological files round-trip
+Local macOS implementation checks passed: 272 default Rust tests, seven explicit
+desktop tests, fmt, strict workspace/all-targets Clippy, 13 packaging tests and
+WASM/TypeScript/production build. Authentic frozen native files remain exact; biological files round-trip
 with unchanged original numeric entries and an explicit additional capability.
 
 Forty focused Chromium/WebKit cases pass at the corrected production source
@@ -77,9 +90,10 @@ structure controls, namespace collisions, original-index picking, clean native
 Save/session state, independent geometry/normal/arrow controls, real worker
 caching/cancellation and exact field/custom-shader/AO-OFF/PNG invariants, with
 explicit GL/FBO/resource checks, real-file application workflows and legal
-microheterogeneity. The complete 504-case inventory (252 per engine) is recorded
-in the linked ledger;
-the original 233 cases per engine and all existing deadlines remain intact.
+microheterogeneity. The complete local browser suite passed 504/504 cases
+(252 per engine), with zero skipped, flaky or unexpected results. The linked
+ledger records the run; the original 233 cases per engine and all existing
+deadlines remain intact.
 
 Both engines completed nine actual-application visual captures each, using full
 tracked 1AON, 4PJ1 and 1CRN inputs. Real helices, strand arrows, ribbons, tubes,
@@ -102,12 +116,13 @@ remain barriers even with an unclassified variant. Independent review and
 972 identifier-presence scenarios cover this guard, including positive
 retention controls and native browser diagnostics. Both earlier candidates
 and their interrupted/cancelled runs are historical; only the final corrected
-head's completed full-suite/CI results in the ledger qualify delivery.
+head's completed local results in the ledger qualify delivery.
 The task-local contract, ownership, ledger and checkpoint live under
-`tmp/2026-11-14-structure-views/`. All four actual final PR-head hosted jobs and
-real large-structure visual/compatibility checks are mandatory acceptance gates;
-actual final-head outcomes are recorded in the linked ledger, not inferred from
-workflow configuration or an earlier successful head.
+`tmp/2026-11-14-structure-views/`. All relevant local tests and checks must pass
+before pushing, including the real large-structure visual/compatibility checks
+applicable to this implementation. Hosted checks are optional under the current
+policy above; earlier hosted runs are historical evidence, not a merge gate.
+Consult the linked ledger for PR #67’s actual merge revision and delivery state.
 Source version stays 0.6.0; existing tags, releases, scientific inputs/precision,
 compiler/dependency pins, allocation limits and icon/logo are preserved.
 

@@ -14,6 +14,19 @@ in [Plan 007](../../plans/007-molecular-visualization-roadmap.md). Tracking:
 [#66 ribbons/cartoons](https://github.com/uvar-apps/eigenvista/issues/66).
 Molecular-shape surfaces and the remaining roadmap ranks are outside this batch.
 
+## Verification policy: 14 November 2026
+
+The user requires **all relevant tests and checks to pass locally before any
+push**. Current verification is local macOS only. Two local Linux machines will
+join verification when the user provides access; no current Linux qualification
+is claimed. GitHub-hosted checks are not required for push, merge or release.
+The retained workflow is manual-only and runs only when explicitly requested.
+
+Dated hosted-CI requirements and results below preserve the earlier policy and
+its evidence; they do not override this rule. This policy/documentation update
+did not rerun application tests. The implementation results below remain the
+record of the completed checks.
+
 ## Metadata and compatibility decision
 
 Keep the authoritative atom collection and its two existing element/position
@@ -68,8 +81,8 @@ PNG invariants remain independently checked.
 
 ## Acceptance state
 
-Fresh native checks pass 272 default and seven desktop tests, formatting and
-strict workspace/all-targets Clippy. WASM/TypeScript/production builds and
+Local macOS implementation checks passed 272 default and seven desktop tests,
+formatting and strict workspace/all-targets Clippy. WASM/TypeScript/production builds and
 13 packaging checks pass. Forty focused cases pass across both browser engines,
 including independent normals/arrows/rigid transforms, metadata/name aliases,
 source-index picking, actual worker lifetime/cache behavior and exact field,
@@ -79,12 +92,15 @@ Both engines completed nine actual-app captures using full tracked 1AON, 4PJ1
 and 1CRN inputs; actual shape and color appearance were inspected.
 
 The [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-records exact source/PR/merge identities, real-file regression checks,
-the complete 504-case inventory outcomes and all four actual final-head hosted
-results. Require all four jobs before merge; do not infer them from configuration
-or earlier feature heads. [Handoff](../handoff.md) and [status](../status.md) link
-that current record. These checks do not qualify native GUI/clean-Mac installs,
-all operating systems, general secondary prediction or completion of v1.
+records exact source/PR identities, actual merge state, real-file regression
+checks and the complete local browser result: 504/504 passed, 252 per engine,
+with zero skipped, flaky or unexpected results. All relevant local tests and
+checks must pass before pushing under the policy above; hosted checks are not
+required for push, merge or release. PR #67’s merge state and revision are recorded
+in the linked ledger.
+[Handoff](../handoff.md) and [status](../status.md) link that current record.
+These local macOS checks do not qualify native GUI/clean-Mac installs, Linux or
+other operating systems, general secondary prediction or completion of v1.
 
 Visual review exposed weak neighboring single-letter hue separation despite
 distinct RGB values. A deterministic hash finalizer fixes that clustering; the

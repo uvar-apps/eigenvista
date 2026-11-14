@@ -1,10 +1,18 @@
-# Hosted verification and local portability checks
+# Local verification and optional hosted diagnostics
 
 See the [development guide](../docs/development.md) for prerequisites, exact
 root-relative commands, outputs, troubleshooting, and manual native acceptance.
-The [Verify workflow](../.github/workflows/verify.yml) runs on pull requests,
-pushes to `main`, and manual dispatch. Its four job runs have independent time
-limits and run without secrets or repository write permissions:
+As instructed by the user on 14 November 2026 (#68), all relevant checks must
+pass locally **before pushing**. Current required platform validation is local
+macOS only. Two local Linux machines will be used once the user provides access;
+Linux qualification remains pending until those checks actually run. See
+[AGENTS.md](../AGENTS.md#required-local-validation-before-pushing).
+
+GitHub CI is not required for pushing, merging or releasing. The
+[Verify workflow](../.github/workflows/verify.yml) is manual-only, for hosted
+diagnostics explicitly requested by the user. It does not run automatically on
+PRs or pushes. Its four optional jobs have independent time limits and run
+without secrets or repository write permissions:
 
 | Job                    | Runner           | Checks                                                                                                                                             | Limit      |
 | ---------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
@@ -16,7 +24,7 @@ limits and run without secrets or repository write permissions:
 The browser rows use the same job definition with a two-engine matrix. Each
 gets its own clean runner, Node 26, locked npm install and matching wasm-bindgen
 CLI 0.2.108. `fail-fast: false` preserves the other engine's result if one fails.
-Both rows, Rust and macOS must pass at the reviewed head before merge. See the
+These jobs do not replace the required local checks or block merging. See the
 [#54 decision](../docs/design/2026-11-12-browser-project-isolation.md).
 
 Every project command runs after creating repository-local `tmp/` and exporting
@@ -47,7 +55,8 @@ validate signed indexes successfully before installing packages.
 Kernel.org appears in Ubuntu's [registered archive list](https://launchpad.net/ubuntu/+archivemirrors),
 and its [operator documents the HTTPS service](https://mirrors.edge.kernel.org/).
 Local normal-TLS checks fetched Noble and Noble-security InRelease successfully;
-hosted selection/installation remains a separate gate in the status record.
+actual hosted selection/installation remains separate diagnostic evidence in the
+status record when a hosted run is requested.
 APT's [mirror format](https://manpages.ubuntu.com/manpages/noble/man1/apt-transport-mirror.1.html)
 tries lower priorities first; its [implementation](https://github.com/Debian/apt/blob/main/methods/mirror.cc)
 parses explicit zero, while omitted priorities use the maximum unsigned value.
@@ -90,7 +99,7 @@ for **seven days**. Upload paths are limited to those outputs; reference
 documents, private exports, source archives and packaged applications are not
 uploaded. The workflow builds no tester ZIP and publishes no release. It uses no
 dependency/build/browser caches, so a cache hit is never required for correctness.
-Superseded runs for the same pull request or branch are cancelled.
+Superseded manual runs on the same branch are cancelled.
 Each engine's browser-test step has a 35-minute deadline inside its 60-minute job, leaving
 time for failure artifact upload if the suite stalls. This bounds the process
 without changing individual test timeouts, assertions or the full test selection.

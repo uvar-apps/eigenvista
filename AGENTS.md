@@ -37,6 +37,37 @@ documents; older `.molekel` preview documents remain readable. Check
 - [Development](docs/development.md) — full setup, build, test, acceptance steps.
 - [Docs index](docs/README.md) · [User guide](docs/user-guide.md) · [Status](docs/status.md)
 
+## Required local validation before pushing
+
+User policy, 14 November 2026 (tracked by #68): **all relevant checks must pass
+locally before every push**, including feature branches, PR updates and releases.
+Do not push unvalidated changes or defer verification to GitHub. Resolve failures
+and complete the applicable checks before pushing.
+
+- For runtime changes, run the full applicable verification sequence below:
+  formatting, locked Rust tests, strict workspace/all-targets Clippy, explicit
+  desktop tests, WASM/TypeScript/production build, the complete Chromium and
+  WebKit suites, packaging checks, and relevant scientific, visual and native
+  acceptance checks. Focused tests supplement the full affected suites.
+- Validate the source being pushed. A later runtime or test change invalidates
+  affected earlier results. Record exact commands, platform, results and remaining
+  limitations; partial or interrupted suites are not passes.
+- Current required platform validation is **local macOS only**. The user will
+  provide two local Linux machines. Once access is available, add appropriate
+  local Linux validation before pushing affected changes and document the
+  machines/results. Until then, leave Linux qualification explicitly pending;
+  do not infer it from macOS or historical hosted runs.
+- GitHub CI is **not required** for pushing, merging or releasing. Do not start,
+  retry, poll or wait for hosted jobs unless the user explicitly requests them.
+  The saved workflow is manual-only; normal pushes and PRs do not start it.
+- For documentation/configuration-only changes, run their relevant local checks
+  (including links, syntax and consistency) before pushing. Existing full runtime
+  results remain applicable only when the tested application and test sources are
+  unchanged. Do not claim runtime checks were rerun when they were not.
+
+This policy supersedes older hosted-CI merge requirements in dated documentation;
+preserve those historical results as evidence of what ran at the time.
+
 ## Layout that is not obvious from names
 
 - Unreleased source implements Plan 007's metadata prerequisite and first four
@@ -44,7 +75,7 @@ documents; older `.molekel` preview documents remain readable. Check
   `codex/biological-structure-views`. Read the
   [biological-view decision](docs/design/2026-11-14-biological-structure-views.md)
   and [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-  for exact source, PR and actual full-suite/final-head results. The published 0.6.0
+  for exact source, PR and actual local full-suite results. The published 0.6.0
   package predates this work; its version/tag/assets stay unchanged.
   `Document.structure` is optional and indexes original selected atoms.
   Native files with metadata require `eigenvista-biological-structure-v1`;
@@ -219,7 +250,7 @@ cargo check --locked -p eigenvista-desktop             # lighter shell check
 cd app && npx playwright test tests/camera.spec.ts     # one e2e spec (needs wasm + refs)
 ```
 
-Standard verification order for runtime changes (details and coverage map in
+Required local verification order before pushing runtime changes (details and coverage map in
 [development](docs/development.md#verification-commands)):
 
 1. `cargo fmt --manifest-path Cargo.toml --all --check`
@@ -342,19 +373,18 @@ Standard verification order for runtime changes (details and coverage map in
   Cancellation evidence must identify the current worker/request before its
   result. Complete camera/draw work and expensive compositor captures before
   pixel assertions; keep GPU matrices independently bounded without dropping
-  scenarios, timing samples, signs or thresholds. Use the traced CI config and
-  actual hosted results; see the
+  scenarios, timing samples, signs or thresholds. Use actual local results and
+  preserve the traced configuration when requesting an optional hosted run; see the
   [browser-scheduling design](docs/design/2026-11-12-browser-verification-scheduling.md).
-- The [Verify workflow](.github/workflows/verify.yml) checks Linux Rust/WASM/
-  browser/package gates and explicit macOS desktop tests. Preserve pinned tools,
-  local temporary storage, read-only permissions and bounded failure artifacts.
-  Inspect actual runs at the PR head before merging; configuration alone is not
-  a passed gate. Hosted tests do not qualify packaged Linux/Windows releases or
-  physical macOS lifecycle/file-dialog interactions. See [CI](ci/README.md).
-  Require all four job results: Linux Rust, macOS desktop, Chromium and WebKit.
-  Browser projects run on independent runners with one worker each, unchanged
-  35-minute test-step/60-minute job bounds and distinct failure artifacts. Do
-  not treat one successful engine or a partially timed-out suite as a full pass.
+- The [Verify workflow](.github/workflows/verify.yml) is retained for explicitly
+  requested manual hosted diagnostics. It is not a push, merge or release gate.
+  Preserve pinned tools, local temporary storage, read-only permissions and bounded
+  failure artifacts. Its browser projects retain one worker and the existing
+  35-minute test-step/60-minute job bounds. See [CI](ci/README.md) and the required
+  local-validation policy above. Local browser verification must pass both engines;
+  one successful engine or a partially timed-out suite is not a full pass. Neither
+  browser tests nor optional hosted runs establish physical macOS lifecycle/dialog
+  acceptance or qualification of packaged Linux/Windows releases.
 - Publication uses `eigenvista_format::validate_document` through the distinct
   WASM export, sharing exact semantic/entry/manifest/uncompressed-byte preflight
   with Save without ZIP compression. The older WASM `validate` remains model-only.

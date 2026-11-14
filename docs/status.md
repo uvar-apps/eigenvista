@@ -8,6 +8,19 @@ storage remains repository-local ignored `tmp/`.
 Start with the [documentation map](README.md), [user guide](user-guide.md),
 [as-built architecture](architecture.md), or [agent handoff](handoff.md).
 
+## Verification policy: 14 November 2026
+
+The user requires **all relevant tests and checks to pass locally before any
+push**. Current verification is local macOS only. Two local Linux machines will
+join verification when the user provides access; no current Linux qualification
+is claimed. GitHub-hosted checks are not required for push, merge or release.
+The retained workflow is manual-only and runs only when explicitly requested.
+
+Dated hosted-CI requirements and results below preserve the earlier policy and
+its evidence; they do not override this rule. This policy/documentation update
+did not rerun application tests. The implementation results below remain the
+record of the completed checks.
+
 ## Biological structure views: first four roadmap additions
 
 14 November 2026. The user authorized the metadata prerequisite and first four
@@ -19,7 +32,8 @@ traces/tubes, and ribbons/secondary-structure cartoons. Issues
 `codex/biological-structure-views` from main `d098380`. See the
 [decision record](design/2026-11-14-biological-structure-views.md) and
 [verification/delivery ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097)
-for the exact source, PR/merge identity and complete local/hosted results.
+for the exact source, actual PR/merge identity, complete local results and
+historical hosted observations for [PR #67](https://github.com/uvar-apps/eigenvista/pull/67).
 
 The optional biological native feature is explicit; metadata-free encoding,
 scientific hashes, numerical precision, dependencies and compiler stay
@@ -28,17 +42,18 @@ missing/conflicting assignments left unknown. The source version remains
 0.6.0, while its published binary/ZIP below predates these additions. This is
 not a new release.
 
-Fresh local checks pass: 272 default Rust tests, seven explicit desktop tests,
-fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production build and
-13 packaging checks. Forty focused browser cases pass across Chromium/WebKit,
+Local macOS implementation checks passed: 272 default Rust tests, seven explicit
+desktop tests, fmt, strict workspace/all-targets Clippy, WASM/TypeScript/production
+build and 13 packaging checks. Forty focused browser cases pass across Chromium/WebKit,
 including independent geometry and source-identity controls, clean native Save,
 actual worker ownership/cache validation and exact field/custom/AO-OFF/PNG
 invariants. Both engines completed nine real-application captures of full
 1AON/4PJ1/1CRN inputs; actual shapes and the revised chain palette were inspected.
-The full browser inventory is 504 (252 per engine, including the unchanged
-original 233 each); complete results and all four actual final PR-head job
-outcomes are maintained in the linked ledger. Every future source head still
-requires its own applicable verification.
+The complete local browser suite passed 504/504 (252 per engine, including the
+unchanged original 233 each), with zero skipped, flaky or unexpected results.
+The linked ledger retains complete outcomes. Every future push requires all
+relevant local tests and checks to pass under the policy above; hosted results
+are not a push, merge or release requirement.
 
 The initial `10e7fe0` run passed 500/502 and caught the old primary atom-label
 format regression. That format and the fixed status/canvas bounds are restored
