@@ -42,12 +42,11 @@ documents; older `.molekel` preview documents remain readable. Check
 - Current source version **0.6.0** includes #59 molecular screen-space ambient
   occlusion. The version bump synchronizes all eleven own metadata values;
   dependency/toolchain pins and scientific profiles remain unchanged. Read the
-  [0.6.0 release notes](docs/releases/0.6.0.md), planned
+  [0.6.0 release notes](docs/releases/0.6.0.md), published
   [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
-  and current handoff/status for verification and publication state. This is a
-  release candidate pending fresh release-head checks, rebuilt packages and
-  publication. The latest published 0.5.15 app predates AO; existing bundles are
-  historical until explicitly rebuilt. Read the
+  and current handoff/status for exact source, artifact and verification evidence.
+  Release source `6cb678c` was rebuilt, independently audited and published with
+  all four release-head jobs passing. The older 0.5.15 package predates AO. Read the
   [AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md): only
   actual atom/bond instances participate, with owned MeshLambertMaterial
   replacements, no specular highlights and illustrative AO on both diffuse
@@ -64,8 +63,9 @@ documents; older `.molekel` preview documents remain readable. Check
   prototype's program-refresh workaround. The earlier indirect-only head was
   visually rejected. Qualify actual-app 1AON as the primary visual case and
   retain 4PJ1 as secondary evidence. The feature was merged through #59/PR #60;
-  fresh checks at the 0.6.0 release-source head are a separate gate. All four
-  actual jobs must pass before publication, independently of historical results.
+  release-head verification is independently recorded in living handoff/status.
+  All four actual jobs passed before publication; do not substitute historical
+  feature results for a future release's fresh checks.
 
   AO PNG verification has two bounded cases: A retains all three full-size
   desktop parity captures; B keeps the real browser window, toolbar, zoom/orbit,

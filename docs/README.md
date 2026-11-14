@@ -19,10 +19,10 @@ Dedicated handles support dragging, keyboard moves and tap-accessible controls.
 Sidebar reordering originated in 0.5.15 (#52). Version 0.6.0 adds optional
 molecular ambient occlusion; see the
 [decision](design/2026-11-14-molecular-ambient-occlusion.md) and
-[release notes](releases/0.6.0.md). The 0.6.0 release candidate awaits fresh
-release checks, rebuilt artifacts and publication to its
+[release notes](releases/0.6.0.md). Version 0.6.0 is published with rebuilt,
+independently audited Apple Silicon artifacts at its
 [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
-The latest published 0.5.15 package predates AO.
+The earlier 0.5.15 package predates AO.
 Check the [living handoff](handoff.md) and [status](status.md) for
 publication, artifact, and verification state; timestamped restart documents
 are historical snapshots, not the current release record.

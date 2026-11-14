@@ -17,9 +17,9 @@ chemistry calculation to obtain a wavefunction from atom positions.
 Version 0.6.0 includes molecular ambient occlusion (#59) and retains sidebar
 reordering (#52). See the [0.6.0 release notes](releases/0.6.0.md). Its
 [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
-will provide the rebuilt Apple Silicon ZIP after release checks and publication;
-check [status](status.md#source-version-060) for availability. Until then, the
-published 0.5.15 package predates AO. Updating source does not update an existing
+provides the rebuilt Apple Silicon ZIP, checksum and build metadata; check
+[status](status.md#source-version-060) for the verified artifact identity.
+Older 0.5.15 packages predate AO. Updating source does not update an existing
 installed app or archive.
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are

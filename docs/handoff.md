@@ -1,9 +1,8 @@
 # Development handoff
 
-Updated 14 November 2026 for the **0.6.0 release candidate**, including molecular
-ambient occlusion (#59). The latest published 0.5.15 tag/package retain source
-`cf39343` and predate AO. Older dated entries
-retain their then-current source, version and artifact facts.
+Updated 14 November 2026 for published **0.6.0**, including molecular ambient
+occlusion (#59). The release tag/package retain source `6cb678c`; earlier
+packages and dated entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
@@ -14,42 +13,42 @@ code. The icon and logo are unchanged.
 
 ## Source version 0.6.0
 
-The user selected 0.6.0 because molecular ambient occlusion is a significant
-feature. The bump starts from merged AO main `bf98802e91496fc883e43491415424225af3b42b`
-([PR #60](https://github.com/uvar-apps/eigenvista/pull/60), closing #59). Eleven
-own version values are synchronized across the workspace manifest, six Cargo
-lock entries, npm manifest/root lock entries and Tauri config. Member crates
-inherit the workspace version. See [release notes](releases/0.6.0.md) and the
-planned [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
+Published 2026-11-14T04:30:30Z at the [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
+Annotated tag `v0.6.0` (tag object `2dad43d2bb680e5f24e953e638848ea589583eda`) resolves to
+immutable release source `6cb678ca5d386cddec974365b50671798b5361d4`. The release-source tag and package retain
+that commit; this later living-document update does not retag or rebuild them.
 
-The user authorized committing, tagging, pushing and publishing 0.6.0 with rebuilt
-redistributables. This release-source snapshot is still a candidate: fresh
-release-head CI, package construction, independent artifact verification and
-publication are pending. The existing 0.5.15 release, tag, app and ZIP remain the
-latest published artifacts. Do not claim a new archive or reuse an old bundle
-based only on the version edit. Dependencies, compiler, scientific/file profiles,
-fixtures, rendering behavior and icon/logo are preserved. The shading-selector
-discussion was closed with no UI change.
+All four actual release-head jobs passed in [run 43554003208](https://github.com/uvar-apps/eigenvista/actions/runs/43554003208): Linux
+232 Rust tests plus fmt/strict Clippy, Mac seven desktop tests, and Chromium /
+WebKit 233 cases each (reported suite durations 29.4 / 13.8 minutes; zero skipped/flaky/unexpected).
+Local release checks passed 241 Rust tests, fmt/strict Clippy, 13 packaging tests
+and production builds. Pre-bump AO results remain separate historical evidence.
 
-Keep the committed release source frozen during packaging. Preserve the untracked
-`AO_AND_NOAO.png` and `docs/reviews/2026-11-11-code-review.md` without reading,
-staging or moving them; exclude their exact names from the package's source
-enumeration. Release evidence belongs under `tmp/2026-11-14-release-0.6.0/`.
-Finalize this living handoff and status with actual commit/tag/artifact hashes
-after publication; do not rewrite historical release records or retag the source.
+Rebuilt Apple Silicon tester ZIP: `artifacts/distributions/EigenVista-0.6.0-apple-silicon-20261114T035445Z-6cb678c.zip`, **45,664,199 bytes**, SHA256
+`39814fa1ccc756d2812cd46c4a4a1390b72fbb9607756547c9ba44f481fa18b2`. The release also carries its `.zip.sha256` companion and
+`EigenVista-0.6.0-apple-silicon-20261114T035445Z-6cb678c.json` build metadata. Fresh downloads of all three published assets were
+verified. The retained build staging is `tmp/eigenvista-package-zqccTd`.
 
-The AO implementation passed all four actual checks at reviewed head
-`65f765f04dc054190962b9516c3e8ef7a50c8ae9` in
-[run 43489071820](https://github.com/uvar-apps/eigenvista/actions/runs/43489071820):
-Linux 232 Rust/fmt/strict Clippy, Mac seven desktop tests, Chromium/WebKit 233
-each plus package 13/builds. Those are pre-bump feature results, not fresh
-0.6.0 release qualification. Fresh bump-specific checks pass: all eleven
-metadata values, all six inherited Cargo package versions, the real converter
-version/help test and 13 packaging support tests. The converter reports
-`eigenvista-convert 0.6.0`; dependencies and historical/protected records are
-unchanged. Bump-specific evidence is recorded in
-[status](status.md#source-version-060) and repository-local
-`tmp/2026-11-14-version-0.6.0/`. Historical restart snapshots are preserved.
+Independent extraction/audit verified 371 eligible Git/source blobs, 59 payload
+files with matching bytes/modes, seven conversion probes and exact embedded
+production JS, worker, CSS and WASM. AO v5 / visibility exponent 6 positive
+controls and the old 0.5.15 negative control passed. Signing is ad-hoc, not
+notarized; binaries are arm64 with system-only dynamic links and declared macOS13
+minimum. These checks do not establish native GUI/clean-Mac/full-OS-range or
+general scientific qualification.
+
+Evidence is retained under `tmp/2026-11-14-release-0.6.0/`. The archived source
+records its truthful pre-publication preparation state; living docs now record
+verified publication. Dependencies, compiler, scientific/file profiles, fixtures,
+renderer behavior and icon/logo were preserved by the version bump. Existing
+documents need no migration.
+
+The user authorized the version/tag/push/publication workflow. Eleven own version
+values and all six inherited Cargo package versions are 0.6.0. Preserve the
+untracked `AO_AND_NOAO.png` and `docs/reviews/2026-11-11-code-review.md` without
+reading, staging or moving them; private chat exports and old releases remain
+untouched. Later post-publication documentation commits may follow the tag;
+always distinguish current main from the immutable tagged/package source.
 
 ## Molecular ambient occlusion: #59
 

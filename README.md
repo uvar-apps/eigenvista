@@ -11,7 +11,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** source version 0.6.0 release candidate, pending fresh release checks, rebuilt packages and publication. This is a development preview, not v1 or completion of the M0-M7 plan. See [implementation status](docs/status.md#source-version-060) for evidence, release artifacts, and remaining gates.
+**Status:** version 0.6.0 is published as an experimental Apple Silicon development preview, not v1 or completion of the M0-M7 plan. See [implementation status](docs/status.md#source-version-060) for verified source, release artifacts and remaining gates.
 
 Current source adds native close/quit protection, correct Molden limits, hosted
 verification, and reduced Molden-import/surface-publication work (#30–#34).
@@ -31,8 +31,8 @@ Version 0.6.0 adds optional molecular ambient occlusion for dense
 structures ([#59](https://github.com/uvar-apps/eigenvista/issues/59)): matte Lambert
 shading, broad fold/cavity depth cues and an automatic radius based on molecular
 size. Read the [0.6.0 release notes](docs/releases/0.6.0.md) and
-[AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md). The latest
-published package remains 0.5.15 and predates AO.
+[AO decision](docs/design/2026-11-14-molecular-ambient-occlusion.md).
+The published 0.6.0 package includes AO; older 0.5.15 packages predate it.
 
 ## Start here
 
@@ -87,9 +87,9 @@ Stop an independently started Vite server before `npm run desktop`. Install Play
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
 The [0.6.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
-will carry the rebuilt ZIP, checksum and build metadata after qualification and
-publication; check [status](docs/status.md#source-version-060) for the current
-state. Until then, 0.5.15 remains the latest published package and predates AO.
+provides the rebuilt ZIP, checksum and build metadata; check
+[status](docs/status.md#source-version-060) for verified source and artifact
+identities. Older packages remain historical and are not updated in place.
 Tester ZIPs are experimental builds for Apple Silicon Macs, with ad-hoc signing
 and no Apple notarization. They include source and notices under the
 [application license](LICENSE).
