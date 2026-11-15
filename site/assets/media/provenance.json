@@ -14,7 +14,7 @@
     "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
     "encoding": "cwebp lossless -m 6; every WebP decoded and exactly compared with original PNG by ImageMagick",
     "background": "Per-image: AO/biological #ecebe4; quantum/shaders #17232d",
-    "cameraBoundary": "Fit, zoom and orbit pointer controls only; OrbitControls damping settles before export; paired cameras unchanged and exact Off restoration verified",
+    "cameraBoundary": "Fit, zoom and orbit pointer controls only; OrbitControls damping settles before export. AO pairs retain identical cameras and exact Off restoration is verified. The clipped density surface uses an oblique orbit to reveal the cut.",
     "ambientOcclusionBoundary": "Off uses original Standard shading. On switches atoms/bonds to Lambert shading plus illustrative SSAO, not a physically calibrated shadow calculation. AO render targets proportionally capped at 1024.",
     "geometryBoundary": "geometry counts describe the complete imported source document. backbone counts describe the complete prepared backbone, before visibleSubset filtering. generation describes saved mesh geometry retained in the document; volume and raycast display sampled fields instead.",
     "viewports": [
@@ -827,9 +827,9 @@
     },
     {
       "file": "quantum-clipped.webp",
-      "bytes": 275326,
-      "sha256": "e5a81a283282d8c4005e0a6277e06ca192682e984f5594b1c89f827a6f97e15b",
-      "sourcePngSha256": "5ccaf7f44c9170a4cf27639c01ffa84fe711d7cefeaefc560f919d5d3c8d750a",
+      "bytes": 264872,
+      "sha256": "0c60cc56c34bdf91342f5f552ef8b64f340187c3418d29d0df6bef44b27eb2b9",
+      "sourcePngSha256": "82494a5b72de3188cd926d3d4fa8cbbd0c55770dc789befec6b10cd1b9a609a3",
       "width": 2050,
       "height": 1671,
       "input": "tools/site/examples/bicyclic-c7h10.molden",
@@ -841,7 +841,7 @@
       "shader": "surface-clip",
       "camera": {
         "fit": true,
-        "dx": 100,
+        "dx": 250,
         "dy": 80,
         "zoom": 1
       },
@@ -930,7 +930,7 @@
         "orbitalCount": 118
       },
       "captureType": "Actual application PNG export",
-      "notes": "surface-clip with factor0.24,zmax0.25; other bounds ±10"
+      "notes": "surface-clip with factor 0.24, zmax 0.25; other bounds ±10. User-approved oblique camera on 15 November 2026; density mesh, clipping and colors unchanged."
     },
     {
       "file": "app-overview.webp",
@@ -1148,7 +1148,7 @@
     "Illustrative views do not add quantum data to structure-only inputs.",
     "Secondary structure is deposited only; unassigned regions are not inferred."
   ],
-  "updated": "2026-11-15T09:43:16.121Z",
+  "updated": "2026-11-15T13:47:04.087Z",
   "qualityUpdate": {
     "issue": 76,
     "captureScript": "tools/site/capture-quantum.mjs",

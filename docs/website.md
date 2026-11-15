@@ -117,6 +117,15 @@ cutaway uses `zmax = 0.25`, factor `0.24` and other bounds ±10; the orbital mes
 views use opaque Blinn-Phong shading to give clear phase boundaries. The dedicated
 shader-panel image is a real element screenshot at device pixel ratio 2.
 
+The approved cutaway replacement keeps that density mesh, clipping and colors,
+but uses Fit, one Zoom in step and a 250px horizontal / 80px vertical orbit at
+the 2560×1800 capture viewport. This oblique view makes the clipped opening
+clearer. It replaces the former 100px horizontal orbit; complete-surface and
+X-ray views retain their original cameras. The capture script records the
+approved view as `quantum-clipped.png`. The original approved PNG, nearby angle
+studies, lossless replacement and desktop/phone layout evidence are retained
+under `tmp/2026-11-15-clipping-angle/`.
+
 Encode selected PNGs losslessly with `cwebp`, retaining natural dimensions, then
 update the media provenance and page captions. Preserve the source, field,
 isovalue, resolution, camera and shader settings. The original

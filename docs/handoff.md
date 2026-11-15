@@ -38,6 +38,28 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Approved cutaway image: 15 November 2026
+
+The user approved the oblique cutaway candidate before replacement.
+`site/assets/media/quantum-clipped.webp` now uses the same cached 256³ total
+density mesh at 0.04 electrons/bohr³, colors and object-coordinate clipping,
+viewed with Fit, one Zoom in and a 250px/80px orbit instead of 100px/80px.
+The 2050×1671 lossless WebP exactly matches the approved PNG's decoded pixels;
+its SHA-256 is `0c60cc56c34bdf91342f5f552ef8b64f340187c3418d29d0df6bef44b27eb2b9`.
+Provenance, capture procedure and the gallery's previous same-camera claim are
+updated; generated pages carry the new image cache hash.
+
+Fresh local macOS checks passed: static/deterministic generation, capture-script
+syntax, all 96 Chromium/WebKit site route/viewport cases and interactions, and
+12 targeted cutaway layout cases across Home, Gallery and Shaders at 1440/320px.
+The approved render and page layouts were visually reviewed. Evidence is in
+`tmp/2026-11-15-clipping-angle/` and
+`tmp/2026-11-15-website/browser-I0srqK/RESULT.json`.
+The prepared site is ready for the authorized push; verify the Pages deployment
+and public image bytes after publication.
+Application source, version 0.7.2 and released packages remain unchanged;
+application/native tests were not rerun for this media/caption update.
+
 ## Project history correction: #77, 15 November 2026
 
 The author clarified EigenVista's origins in the original Molekel application

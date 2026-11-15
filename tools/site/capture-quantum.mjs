@@ -430,6 +430,31 @@ try {
         uniforms: { factor: 0.24, zmax },
       });
     }
+    // Approved cutaway: preserve the density mesh and clip, orbit to reveal the rim.
+    await set("Negative color", "#cb4e72");
+    await label("Surface shading").evaluate((node) => {
+      node.value = "diffuse";
+      node.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await set("factor", 0.24);
+    await set("zmax", 0.25);
+    await camera(250, 80, 1);
+    await capture("quantum-clipped", {
+      field: "Total density",
+      shader: "surface-clip",
+      isovalue: 0.04,
+      resolution: 256,
+      camera: { fit: true, dx: 250, dy: 80, zoom: 1 },
+      uniforms: {
+        factor: 0.24,
+        xmin: -10,
+        xmax: 10,
+        ymin: -10,
+        ymax: 10,
+        zmin: -10,
+        zmax: 0.25,
+      },
+    });
     if (process.argv.includes("--cube")) {
       await page
         .getByRole("button", { name: "Clear shader", exact: true })
