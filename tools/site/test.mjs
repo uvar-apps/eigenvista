@@ -175,16 +175,39 @@ for (const [engine, launcher] of [
         let difference=0;for(let p=0;p<frame.length;p+=4)for(let c=0;c<3;c++)difference+=Math.abs(frame[p+c]-frames[i][p+c]);
         return difference/(192*108*3);
       });
-      const start=movie.currentTime;await movie.play();
-      await new Promise(resolve=>setTimeout(resolve,300));
-      movie.pause();
       const box=movie.getBoundingClientRect();
-      return {...dimensions,changes,advanced:movie.currentTime>start,ratio:box.width/box.height};
+      return {...dimensions,changes,ratio:box.width/box.height};
     });
+    // Narration needs an actual user gesture, as it does in the native player.
+    const start=await video.evaluate(movie=>movie.currentTime);
+    await video.evaluate(movie=>{
+      window.demoPlayback=null;
+      movie.addEventListener("click",event=>{
+        event.preventDefault();
+        movie.play().then(()=>{window.demoPlayback={played:true};},error=>{window.demoPlayback={error:error.message};});
+      },{once:true});
+    });
+    await video.click({position:{x:20,y:20}});
+    await page.waitForFunction(()=>window.demoPlayback!==null);
+    assert.deepEqual(await page.evaluate(()=>window.demoPlayback),{played:true});
+    await page.waitForFunction(start=>document.querySelector("#shader-demo video").currentTime>start+0.2,start);
+    Object.assign(demo,await video.evaluate(movie=>{
+      movie.pause();
+      return {advanced:true,hasAudio:(movie.audioTracks?.length??0)>0||(movie.webkitAudioDecodedByteCount??0)>0};
+    }));
+    const captions=video.locator("track");
+    await captions.evaluate(track=>{track.track.mode="hidden";});
+    await page.waitForFunction(()=>document.querySelector("#shader-demo track").readyState===2);
+    demo.captions=await captions.evaluate(track=>Array.from(track.track.cues,cue=>({start:cue.startTime,end:cue.endTime,text:cue.text})));
     assert.equal(demo.width,1920);assert.equal(demo.height,1080);
     assert(Math.abs(demo.duration-30)<0.1);
     assert(demo.changes.every(value=>value>1),"Actual solid, X-ray and clipping frames differ");
     assert(demo.advanced,"Video plays and advances");
+    assert(demo.hasAudio,"Narrated video includes a decoded audio track");
+    assert.equal(demo.captions.length,6,"Captions follow the six spoken sentences");
+    assert.match(demo.captions[0].text,/EigenVista shows the electron density/);
+    assert.match(demo.captions.at(-1).text,/Explore more with EigenVista/);
+    assert(demo.captions.every(cue=>cue.start>=0&&cue.end>cue.start&&cue.end<30));
     assert(Math.abs(demo.ratio-16/9)<0.01,"Video keeps its natural aspect ratio");
     const range=await context.request.get(base+"assets/social/eigenvista-shaders.mp4",{headers:{Range:"bytes=0-1"}});
     assert.equal(range.status(),206);
@@ -194,6 +217,8 @@ for (const [engine, launcher] of [
     const unsatisfied=await context.request.get(base+"assets/social/eigenvista-shaders.mp4",{headers:{Range:"bytes=999999999-"}});
     assert.equal(unsatisfied.status(),416);
     assert.equal((await unsatisfied.body()).length,0);
+    // Start keyboard navigation on a fresh page, outside the native player's focus.
+    await page.goto(base);
     await page.keyboard.press(tabKey);
     assert.equal(await page.locator(":focus").textContent(), "Skip to content");
     await page.keyboard.press("Enter");

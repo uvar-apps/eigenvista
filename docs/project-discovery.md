@@ -37,10 +37,13 @@ Upload completion is recorded in the living handoff.
 
 The homepage's [demo](https://uvar-apps.github.io/eigenvista/#shader-demo) shows
 the same total-density mesh in three views: solid, X-ray with live opacity, and
-clipped with a moving boundary. It is a silent 30-second, 1920×1080 H.264 MP4 at
-25 fps. Playback starts on request; `preload="none"` keeps it out of the initial
-page load. A poster, descriptive text track, plain-text description and download
-link accompany the native player. No autoplay or looping is used.
+clipped with a moving boundary. The approved narrated replacement is a
+30-second, 1920×1080 H.264 MP4 at 25 fps, with English narration in a synthetic
+female voice and synchronized English captions. Its original video packets are
+unchanged; the audio is mono AAC at 48 kHz. Playback starts on request;
+`preload="none"` keeps it out of the initial page load. A poster, caption track,
+plain-text description and download link accompany the native player. No
+autoplay or looping is used.
 
 The footage is the actual 0.7.2 production web UI with the 17-atom C₇H₁₀ Molden
 example, total density 0.04 electrons/bohr³ and a cached 256³ field/mesh. The
@@ -50,6 +53,15 @@ scientific image synthesis or claim about calculation/import speed. The
 scientific input, shader and original image provenance remain in the existing
 media/download ledgers. Additional asset hashes and editing details are in
 [`site/assets/social/provenance.json`](../site/assets/social/provenance.json).
+
+The narration uses HeyGen's catalog-verified English female voice
+**Deirdre - Gentle & Instructive**, generated through HyperFrames' shared audio
+engine at speed 1, with no music. The approved audio is mastered to about
+−16 LUFS and retained in
+[`tools/site/media/eigenvista-narration.m4a`](../tools/site/media/eigenvista-narration.m4a).
+[`tools/site/narration.json`](../tools/site/narration.json) records the script,
+voice, caption cues and visual beats: X-ray at 7.5s, clipping at 15.8s and the
+closing at 27s. The selected audio can be reused without another synthesis call.
 
 Recreating the recording is an opt-in maintainer activity, separate from normal
 website builds. Check port ownership and start an owned production preview on
@@ -78,13 +90,26 @@ stay under `tmp/2026-11-15-visibility/`.
    `HYPERFRAMES_FFPROBE_PATH` for local binaries. Output
    `tmp/2026-11-15-visibility/eigenvista-shaders-master.mp4`.
 5. From the repository root, run `node tools/site/prepare-demo.mjs --publish`.
-   It checks codec/duration/dimensions, creates the poster/descriptions and
-   records asset hashes. Inspect frames decoded from the final MP4, then build
-   and run the static and both-browser site checks before pushing.
+   It checks codec/duration/dimensions and requires the recorded beats to match
+   `tools/site/narration.json`, then remuxes the retained approved AAC with the
+   original H.264 video packets. No new TTS call or video re-encoding is needed.
+   It creates the poster, synchronized English captions and descriptions, and
+   records asset hashes. Inspect the final video and listen through it, then
+   build and run the static and both-browser site checks before pushing.
+   If a new recording changes the beats, deliberately retime the narration and
+   captions before publishing rather than attaching the existing audio blindly.
+   Newly reviewed footage also needs its expected video packet hash updated in
+   `tools/site/narration.json`.
+
+To refresh the narrated assets without recapturing, run the same `--publish`
+command. It uses the checked-in MP4 and media ledger when the ignored visual
+master is absent; recording metadata and a fresh TTS call are not required.
+It verifies the source packets and stages the new file before replacing it.
 
 The extra tooling is used locally; the website has no HyperFrames, Playwright,
 GSAP or FFmpeg runtime dependency. The public static payload is bounded at
-24 MiB, with the on-demand video separately bounded below 4 MiB.
+25 MiB, with the on-demand video separately bounded below 5 MiB to retain the
+approved narration quality.
 
 ## Google Search Console
 

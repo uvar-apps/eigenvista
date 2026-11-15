@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "approved": "2026-11-15",
+  "durationSeconds": 30,
+  "beats": {
+    "xray": 7.5,
+    "clipping": 15.8,
+    "closing": 27
+  },
+  "audio": {
+    "file": "tools/site/media/eigenvista-narration.m4a",
+    "bytes": 359882,
+    "sha256": "5b054869cfeb2db0b42ada277abbefcf4328f4952232c60744c28227b13a4fb1",
+    "codec": "aac",
+    "channels": 1,
+    "sampleRate": 48000
+  },
+  "voice": {
+    "provider": "HeyGen",
+    "id": "84bc506c91674034aa1d32e22903f627",
+    "name": "Deirdre - Gentle & Instructive",
+    "gender": "female",
+    "language": "English",
+    "synthetic": true,
+    "speed": 1
+  },
+  "generation": "HyperFrames shared audio engine; four separately synthesized segments, aligned to the existing footage and mastered near -16 LUFS. Retained approved AAC is copied without re-encoding.",
+  "sourceVideoPacketHash": "SHA256=672c0bca5d5a7d5226f6bf32a1eee8effbb4eb004e7dcef21d0398046da5ef78",
+  "approvedPreviewSha256": "a677c7653327dd7653d21f76506254417890231324c8eeda6388d330015e10f6",
+  "cues": [
+    {
+      "start": 0.606,
+      "end": 5.239,
+      "text": "EigenVista shows the electron density surrounding a molecule as a solid surface."
+    },
+    {
+      "start": 8.099,
+      "end": 11.128,
+      "text": "The X-ray shader reveals the atomic framework inside."
+    },
+    {
+      "start": 11.469,
+      "end": 14.28,
+      "text": "Adjust its opacity to see more of the molecule."
+    },
+    {
+      "start": 16.449,
+      "end": 18.987,
+      "text": "The clipping shader cuts away part of the surface."
+    },
+    {
+      "start": 19.478,
+      "end": 22.431,
+      "text": "Move the boundary to inspect the atomic framework beneath."
+    },
+    {
+      "start": 27.449,
+      "end": 29.447,
+      "text": "Explore more with EigenVista."
+    }
+  ]
+}

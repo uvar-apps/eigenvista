@@ -29,10 +29,10 @@ export default [
   <figure class="plate demo-figure">
     <video controls playsinline preload="none" width="1920" height="1080" poster="assets/social/eigenvista-demo-poster.webp" aria-label="EigenVista density and live surface shader demonstration" aria-describedby="shader-demo-caption">
       <source src="assets/social/eigenvista-shaders.mp4" type="video/mp4">
-      <track kind="captions" src="assets/social/eigenvista-shaders.vtt" srclang="en" label="English descriptions">
+      <track kind="captions" src="assets/social/eigenvista-shaders.vtt" srclang="en" label="English captions">
       <p><a href="assets/social/eigenvista-shaders.mp4">Download the shader demonstration (MP4)</a>.</p>
     </video>
-    <figcaption id="shader-demo-caption">Actual EigenVista 0.7.2 recording. The C₇H₁₀ electron density is sampled on a 256³ grid at 0.04 electrons/bohr³. Changing opacity and clipping parameters reuses that mesh. Silent video; descriptions are available in the player and below.</figcaption>
+    <figcaption id="shader-demo-caption">Actual EigenVista 0.7.2 recording. The C₇H₁₀ electron density is sampled on a 256³ grid at 0.04 electrons/bohr³. Changing opacity and clipping parameters reuses that mesh. English narration with captions; a text description is available below.</figcaption>
   </figure>
   <details class="demo-transcript"><summary>Read the demonstration description</summary><p>The solid density envelope surrounds the bicyclic hydrocarbon. Applying the X-ray shader reveals the atoms beneath; adjusting <strong>maxOpacity</strong> changes the transparency immediately. The clipping shader then removes the part of the envelope beyond a boundary. Changing <strong>zmax</strong> moves that boundary through the surface and exposes the molecular framework. The underlying density and isovalue remain the same throughout.</p></details>
   <div class="actions"><a class="button primary" href="surface-shaders.html">Recreate these views →</a><a class="button" href="assets/social/eigenvista-shaders.mp4" download="EigenVista-shaders.mp4">Download video ↓</a></div>

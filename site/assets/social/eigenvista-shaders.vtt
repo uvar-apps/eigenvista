@@ -1,17 +1,19 @@
 WEBVTT
 
-00:00.000 --> 00:07.500
-A solid electron-density envelope surrounds a 17-atom C7H10 molecule.
-Density is 0.04 electrons/bohr³ on a 256³ grid.
+00:00.606 --> 00:05.239
+EigenVista shows the electron density surrounding a molecule as a solid surface.
 
-00:07.500 --> 00:15.800
-The X-ray shader reveals the atoms inside.
-Changing maxOpacity redraws the same mesh immediately.
+00:08.099 --> 00:11.128
+The X-ray shader reveals the atomic framework inside.
 
-00:15.800 --> 00:27.000
-The clipping shader opens the envelope.
-Changing zmax moves the boundary through the surface.
+00:11.469 --> 00:14.280
+Adjust its opacity to see more of the molecule.
 
-00:27.000 --> 00:30.000
-Install EigenVista and try the downloadable examples:
-uvar-apps.github.io/eigenvista
+00:16.449 --> 00:18.987
+The clipping shader cuts away part of the surface.
+
+00:19.478 --> 00:22.431
+Move the boundary to inspect the atomic framework beneath.
+
+00:27.449 --> 00:29.447
+Explore more with EigenVista.

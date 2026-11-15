@@ -19,7 +19,8 @@ sampled on a 256³ grid. An X-ray surface shader reveals the framework beneath.
 [Make this view](https://uvar-apps.github.io/eigenvista/surface-shaders.html).*
 
 **[Watch the 30-second shader demo](https://uvar-apps.github.io/eigenvista/#shader-demo)** —
-the same density surface, from solid to X-ray transparency and live clipping.
+the same density surface, from solid to X-ray transparency and live clipping,
+with English narration and synchronized captions.
 
 ## What you can explore
 

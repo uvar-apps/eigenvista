@@ -135,6 +135,18 @@ Read port ownership checks before starting a preview, and do not rebuild, replac
 or stop the user's app. Original PNGs and lossless pixel comparisons stay in
 ignored evidence. The website itself needs none of these image tools to serve.
 
+The 30-second shader demonstration retains its original 1920×1080, 25 fps
+H.264 footage and adds the user-approved English narration in a synthetic female
+voice, with synchronized English captions. The audio is mono AAC at 48 kHz,
+mastered to about −16 LUFS, with no music. Playback remains on request with
+`preload="none"`, no autoplay and no looping. The on-demand video is bounded
+below 5 MiB and the complete static payload below 25 MiB. See
+[project discovery](project-discovery.md#the-shader-demonstration) for the retained
+audio, script/voice/caption metadata and reproduction procedure: the publish
+helper remuxes the approved AAC without another TTS call or changes to the
+original video packets. New recordings must retain the matching visual beats
+or have their narration and captions deliberately retimed.
+
 Example downloads are copied from an explicit public-file allowlist, never from
 untracked inputs. `site/downloads/provenance.json` records original paths and
 SHA-256 values; its README identifies synthetic versus calculated examples and

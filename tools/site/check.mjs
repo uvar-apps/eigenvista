@@ -153,9 +153,17 @@ for (const row of discovery.files) {
   assert.equal(hash(content), row.sha256);
 }
 assert.equal(discovery.files.length, 4);
+const narration = JSON.parse(fs.readFileSync(path.join(root, "tools/site/narration.json")));
+assert.equal(discovery.narration.script, "tools/site/narration.json");
+assert.equal(discovery.narration.scriptSha256, hash(fs.readFileSync(path.join(root, discovery.narration.script))));
+assert.equal(narration.audio.file, "tools/site/media/eigenvista-narration.m4a");
+assert.equal(narration.audio.sha256, hash(fs.readFileSync(path.join(root, narration.audio.file))));
+assert.deepEqual(discovery.narration.audio, narration.audio);
+assert.equal(narration.voice.synthetic, true);
+assert.equal(narration.voice.gender, "female");
 const movie = fs.readFileSync(path.join(site, "assets/social/eigenvista-shaders.mp4"));
 assert.equal(movie.toString("ascii",4,8), "ftyp");
-assert(movie.length < 4 * 1024 * 1024, "On-demand demo stays below 4 MiB");
+assert(movie.length < 5 * 1024 * 1024, "Narrated on-demand demo stays below 5 MiB");
 assert(fs.readFileSync(path.join(site,"assets/social/eigenvista-shaders.vtt"),"utf8").startsWith("WEBVTT\n"));
 // Sensitivity controls ensure bad local paths and bad fragments are rejected.
 assert.throws(() => resolve("index.html", "absent-website-page.html"));
@@ -277,7 +285,7 @@ for (const name of expectedMedia)
     name,
   );
 const bytes = files.reduce((sum, row) => sum + row.bytes, 0);
-assert(bytes < 24 * 1024 * 1024, `Static payload, including on-demand video, remains bounded: ${bytes}`);
+assert(bytes < 25 * 1024 * 1024, `Static payload, including narrated on-demand video, remains bounded: ${bytes}`);
 for (const name of [
   "site/assets/site.js",
   "tools/site/build.mjs",

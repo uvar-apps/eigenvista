@@ -38,6 +38,39 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Approved narrated shader demo: 15 November 2026
+
+The user approved the female-voice preview. The local website now uses that
+English narration with six synchronized caption cues. The original 30-second,
+1920×1080/25fps H.264 packets and approved mono 48 kHz AAC packets are unchanged;
+only the container metadata differs from the preview. The final MP4 is
+4,533,853 bytes, SHA-256
+`e7d1f42cd018e3eadce1fcbadc8b33b0fd83e1a45443fb9051b757fba90068d3`.
+The synthetic voice is HeyGen's Deirdre - Gentle & Instructive, generated through
+the HyperFrames shared audio engine. Retained
+[AAC](../tools/site/media/eigenvista-narration.m4a) and
+[script/voice/caption metadata](../tools/site/narration.json) avoid future TTS calls.
+The prepare helper checks packet identity and matching beats, stages its output,
+and can recover from the tracked MP4/ledger without ignored recording metadata
+or a silent master. README, website maintenance/discovery, captions, media ledger
+and generated homepage/search are synchronized. Playback remains on request.
+The bounded media budgets are now 5 MiB per demo and 25 MiB for the static site,
+retaining the approved audio quality; actual payload is 25,239,490 bytes.
+
+Fresh local macOS checks passed: static/deterministic generation, helper syntax,
+exact recovery without the ignored recording/master, unchanged encoded streams,
+all 96 Chromium/WebKit route/viewport cases and interactions (including decoded
+audio and six loaded caption cues), and four desktop/320px caption layout cases.
+Desktop/phone player captures were visually reviewed. The first site run exposed
+native-player focus carrying into the keyboard test; starting that unchanged
+skip-link check on a fresh page resolved it. Evidence is retained under
+`tmp/2026-11-15-shader-voiceover/` and
+`tmp/2026-11-15-website/browser-buzkKB/RESULT.json`.
+The narrated site is prepared for the authorized push; verify its Pages
+deployment and public media bytes after publication. Application
+source/version 0.7.2 and released packages are unchanged; application/native
+tests were not rerun for this website-only update.
+
 ## Approved cutaway image: 15 November 2026
 
 The user approved the oblique cutaway candidate before replacement.

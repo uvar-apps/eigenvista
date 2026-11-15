@@ -35,7 +35,30 @@
     "composition": "Two labeled actual app views, with blank scene margins cropped and natural proportions preserved. 1AON uses Lambert + SSAO and MatterViz Pastel; the panels show different molecules at independent display scales."
   },
   "capture": "Actual production web UI. Native density cache opened before recording; same 72,848-triangle mesh and camera throughout. maxOpacity and zmax changed through real React controls.",
-  "editing": "Initial setup trimmed; final frame held for reading. Actual 1920×960 app view remains at native size below a 120px branded header. No scientific image alteration, time scaling, audio or calculation-speed claim.",
+  "editing": "Initial setup trimmed; final frame held for reading. Actual 1920×960 app view remains at native size below a 120px branded header. Approved synthetic English narration added by copying the original H.264 and retained AAC packets. No scientific image alteration, time scaling or calculation-speed claim.",
+  "narration": {
+    "script": "tools/site/narration.json",
+    "scriptSha256": "7d2ecff79d5245bf8ca3bdcf8fd002910c94c24398f39c3b35cf6347a70a7ca9",
+    "audio": {
+      "file": "tools/site/media/eigenvista-narration.m4a",
+      "bytes": 359882,
+      "sha256": "5b054869cfeb2db0b42ada277abbefcf4328f4952232c60744c28227b13a4fb1",
+      "codec": "aac",
+      "channels": 1,
+      "sampleRate": 48000
+    },
+    "voice": {
+      "provider": "HeyGen",
+      "id": "84bc506c91674034aa1d32e22903f627",
+      "name": "Deirdre - Gentle & Instructive",
+      "gender": "female",
+      "language": "English",
+      "synthetic": true,
+      "speed": 1
+    },
+    "videoPacketHash": "SHA256=672c0bca5d5a7d5226f6bf32a1eee8effbb4eb004e7dcef21d0398046da5ef78",
+    "audioPacketHash": "SHA256=752b7edd2a1cfdd8ea5a7f4379c63d1eea829cd828acb5062ec67be4d6695894"
+  },
   "beats": {
     "xray": 7.5,
     "clipping": 15.8
@@ -53,8 +76,8 @@
     },
     {
       "file": "eigenvista-shaders.mp4",
-      "bytes": 4166288,
-      "sha256": "48b7169156dc9c259f0b0da4c74794ffa335e4d302199e2566db358b826073fd"
+      "bytes": 4533853,
+      "sha256": "e7d1f42cd018e3eadce1fcbadc8b33b0fd83e1a45443fb9051b757fba90068d3"
     },
     {
       "file": "eigenvista-demo-poster.webp",
@@ -63,8 +86,8 @@
     },
     {
       "file": "eigenvista-shaders.vtt",
-      "bytes": 504,
-      "sha256": "08ccf451b8bede773cbe10826d37deab606e3175d5a909d9fc1663e240fbf88d"
+      "bytes": 480,
+      "sha256": "65866e8e9cdd74b134ee04f1243c60c1d74233d00a2633e86e485726abf5a516"
     }
   ]
 }
