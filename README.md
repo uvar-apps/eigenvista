@@ -2,6 +2,7 @@
 
 **User website:** [Install](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Reference manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
+[Surface shaders](https://uvar-apps.github.io/eigenvista/surface-shaders.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
 [Gallery](https://uvar-apps.github.io/eigenvista/gallery.html)
 

@@ -1,3 +1,5 @@
+// Historical initial-site capture, including superseded small demo subjects.
+// See docs/website.md and capture-quantum.mjs for the curated media workflow.
 // Run from the repository root with an owned production preview on port 5189.
 // Requires the existing app Playwright install plus cwebp and ImageMagick; no build.
 import assert from "node:assert/strict";

@@ -10,7 +10,7 @@
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
-<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="surface-shaders.html">Shaders</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
 <div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
 <div class="element-strip" aria-hidden="true"></div>
 <main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03.2 / EIGENVISTA FIELD MANUAL</p><h1>Scene, appearance, and images<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#navigation">Navigate and inspect</a><a href="#representations">Molecular representations</a><a href="#field-appearance">Field colors, opacity, and surface shading</a><a href="#ao">Molecular ambient occlusion</a><a href="#palettes">Atom colours</a><a href="#background-images">Background and PNG exports</a><a href="#shaders">Custom surface shaders</a></aside><article class="prose">
@@ -92,6 +92,7 @@
   <p>If an export fails, its error appears without changing the molecular document; try the export again. PNG files use the app or browser’s download mechanism. Check that the file has finished downloading before closing the window.</p>
 
   <h2 id="shaders">Custom surface shaders</h2>
+  <p>See the <a href="surface-shaders.html">illustrated shader guide</a> for X-ray and cutaway views, downloadable presets and a complete worked example.</p>
   <p>The <strong>Surface shader</strong> panel optionally replaces built-in surface materials with a vertex/fragment GLSL pair. It affects surfaces, not atom/bond AO. Shader sources and uniform values last for the session and are not stored in <code>.eigenvista</code>.</p>
   <ol>
     <li>Choose a <strong>Vertex shader</strong> and a <strong>Fragment shader</strong> file. The picker accepts <code>.vert</code>, <code>.frag</code>, <code>.glsl</code>, or text files.</li>

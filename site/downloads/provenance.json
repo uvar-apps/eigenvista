@@ -48,6 +48,72 @@
       "source": "palettes/LICENSE-MatterViz.txt",
       "bytes": 1073,
       "sha256": "f519d155d7ed90bd0e8e3ee2a669b70d9ad9f03fa532e008b1b397769f1f175b"
+    },
+    {
+      "file": "bicyclic-c7h10.molden",
+      "source": "tools/site/examples/bicyclic-c7h10.molden",
+      "bytes": 494537,
+      "sha256": "9309464ace24326f70c344852d4bbc49bc1bca418876a1a0d6b42863202b4645"
+    },
+    {
+      "file": "complex-field.cube",
+      "source": "tools/site/examples/complex-field.cube",
+      "bytes": 7805680,
+      "sha256": "c8cbdb64f4386e6c2da9ab875537b22cabdf828a272457ff98a5e21e550fafa6"
+    },
+    {
+      "file": "README-quantum-example.txt",
+      "source": "tools/site/examples/README.md",
+      "bytes": 1514,
+      "sha256": "e011b5e40bc0dceeaa5b37b18164bba2325c6660481e4a081a24c3e606224a5b"
+    },
+    {
+      "file": "shaders/x-ray.vert",
+      "source": "shaders/x-ray.vert",
+      "bytes": 510,
+      "sha256": "a9d2c39740947cb99bfafa547a324f663d5b0049c907f3b99fc4946f4ceab1e4"
+    },
+    {
+      "file": "shaders/x-ray.frag",
+      "source": "shaders/x-ray.frag",
+      "bytes": 585,
+      "sha256": "8e762a86a079030f45c8f08ccb08062c42ba6c1a334df9ed75a8b6e937572042"
+    },
+    {
+      "file": "shaders/x-ray.params",
+      "source": "shaders/x-ray.params",
+      "bytes": 115,
+      "sha256": "516caea61fe73dd0c336279345a2863e3b093ec846089496dff6cda20606c7a7"
+    },
+    {
+      "file": "shaders/surface-clip.vert",
+      "source": "app/shaders/surface-clip.vert",
+      "bytes": 442,
+      "sha256": "c93871cb2e48fec98791bd243b5f90a243cf19ec3e566d1ab8872673bd1793ac"
+    },
+    {
+      "file": "shaders/surface-clip.frag",
+      "source": "app/shaders/surface-clip.frag",
+      "bytes": 441,
+      "sha256": "f6ea6597ad7aa2359ca811c93bcacfda6245f078c22ff88826631112c1fb2616"
+    },
+    {
+      "file": "shaders/surface-clip.params",
+      "source": "app/shaders/surface-clip.params",
+      "bytes": 99,
+      "sha256": "e7dea8fc3d92d4b93886ebfad0eb2d6279fc47f4ecda19a67ec28202ce471892"
+    },
+    {
+      "file": "shaders/README.txt",
+      "source": "shaders/README.md",
+      "bytes": 1399,
+      "sha256": "47675bfe1de5f675653aaf0536d9f79319efdbfc630458b86271ee93400d448b"
+    },
+    {
+      "file": "shaders/LICENSE.txt",
+      "source": "LICENSE",
+      "bytes": 18673,
+      "sha256": "3f8fb5ac2049fd01f21a24dbe3ffb6a6482390901c56d004cc38237e7e6072c9"
     }
   ]
 }

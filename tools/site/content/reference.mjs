@@ -14,6 +14,7 @@ export default [
   <ul class="toc">
     <li><a href="reference-files.html">Files, imports, conversion, and saving</a> — choose a format, review import decisions, use the batch converter, and share a self-contained document.</li>
     <li><a href="reference-scene.html">Scene, appearance, and images</a> — navigate, pick atoms, choose a representation, use ambient occlusion and palettes, export PNGs, or apply a surface shader.</li>
+    <li><a href="surface-shaders.html">Custom surface shaders</a> — see through a density envelope, expose its interior with clipping, and tune lighting and transparency live.</li>
     <li><a href="reference-fields.html">Orbitals, densities, and sampled fields</a> — generate signed surfaces, browse several orbitals, compare render modes, and understand resolution and caching.</li>
     <li><a href="reference-structures.html">Biological structures</a> — color chains and secondary structure, show components, isolate a chain, select residue ranges, and use protein depictions.</li>
   </ul>
@@ -36,7 +37,7 @@ export default [
   </table></div>
   <p>The runtime badge says <strong>Native (Tauri)</strong> in the Mac app and <strong>WebAssembly</strong> in the browser viewer. On narrow windows, the panels rearrange and you may need to scroll.</p>
 
-  <figure><img src="assets/media/app-overview.webp" width="1600" height="1050" alt="EigenVista workspace with molecular and quantum controls beside a water orbital volume preview" loading="lazy"><figcaption>The shared application interface. The desktop app uses native file dialogs for Open and Save.</figcaption></figure>
+  <figure><a href="assets/media/app-overview.webp" aria-label="Open the full-size EigenVista workspace image"><img src="assets/media/app-overview.webp" alt="EigenVista workspace showing the C7H10 molecular density with a custom X-ray shader and editable parameters" loading="lazy"></a><figcaption>The C₇H₁₀ density envelope with an X-ray shader. Field controls are on the right; shader parameters update the surface live. <a href="assets/media/app-overview.webp">Open the full-size image</a> or <a href="surface-shaders.html">try the shader workflow</a>.</figcaption></figure>
 
   <h2 id="keyboard">Keyboard and sidebar controls</h2>
   <p>Use Tab to move between controls and Enter or Space to activate buttons. A sidebar heading is a button: activate it to collapse or expand that section. Collapsing a section retains its controls' settings and selections. In Safari on macOS, use Option-Tab if ordinary Tab skips buttons, or enable macOS Keyboard Navigation.</p>
@@ -263,6 +264,7 @@ eigenvista-convert --help</code></pre>
   <p>If an export fails, its error appears without changing the molecular document; try the export again. PNG files use the app or browser’s download mechanism. Check that the file has finished downloading before closing the window.</p>
 
   <h2 id="shaders">Custom surface shaders</h2>
+  <p>See the <a href="surface-shaders.html">illustrated shader guide</a> for X-ray and cutaway views, downloadable presets and a complete worked example.</p>
   <p>The <strong>Surface shader</strong> panel optionally replaces built-in surface materials with a vertex/fragment GLSL pair. It affects surfaces, not atom/bond AO. Shader sources and uniform values last for the session and are not stored in <code>.eigenvista</code>.</p>
   <ol>
     <li>Choose a <strong>Vertex shader</strong> and a <strong>Fragment shader</strong> file. The picker accepts <code>.vert</code>, <code>.frag</code>, <code>.glsl</code>, or text files.</li>
@@ -293,7 +295,7 @@ eigenvista-convert --help</code></pre>
 
   <h2 id="choose">Choose a field</h2>
   <p>In <strong>Quantum fields</strong>, select under <strong>Orbitals</strong>, <strong>Density matrices</strong>, or <strong>Sampled fields</strong>. Only one field is active for volume/raycast preview. Orbitals come from supplied coefficients; density matrices come from the document or the <a href="reference-files.html#molden">reported occupation-derived Molden interpretation</a>. A cube supplies scalar samples without orbital coefficients.</p>
-  <p>Try <a href="downloads/water.molden" download>water.molden</a> for calculated RHF orbitals and a total density, or <a href="downloads/signed-affine.cube" download>signed-affine.cube</a> for a mathematical signed grid. The flask-shaped example menu beside <strong>Molecular data</strong> offers <strong>Hydrogen pair</strong> and <strong>Fractional open shell</strong>: mathematical demonstrations, not calculated molecular reference results. Opening an example replaces the current document after an unsaved-change confirmation.</p>
+  <p>Try <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> for the molecular orbitals and density shown in the gallery, or <a href="downloads/complex-field.cube" download>complex-field.cube</a> for a 29-atom structure with a sampled scalar grid. The flask-shaped example menu beside <strong>Molecular data</strong> offers <strong>Hydrogen pair</strong> and <strong>Fractional open shell</strong>: mathematical demonstrations, not calculated molecular reference results. Opening an example replaces the current document after an unsaved-change confirmation.</p>
   <p>Orbital values use <code>bohr^-3/2</code>; density controls use electrons per <code>bohr^3</code>. Imported grid scalar units remain unspecified: consult the producer rather than guessing from a label. A positive/negative orbital surface represents field sign, not positive/negative electrical charge.</p>
 
   <h2 id="one-field">Generate a saved surface for one field</h2>
@@ -337,7 +339,7 @@ eigenvista-convert --help</code></pre>
 
   <h2 id="cube">Cube fields: already sampled data</h2>
   <p>Open <code>.cube</code>/<code>.cub</code> to obtain atoms, automatic display bonds, and one scalar grid. A new cube starts in <strong>Volume preview</strong>; raycast is available immediately. Generate surfaces when you want portable saved geometry. No Gaussian basis, coefficients, or density matrix is required.</p>
-  <p>The <a href="downloads/signed-affine.cube" download>signed-affine example</a> has <strong>2 atoms, 1 bond, and a skewed 7 × 7 × 7 grid</strong>. It is a mathematical rendering fixture, not a quantum-chemistry calculation. Follow the <a href="tutorials-cube.html">cube tutorial</a> to compare the three modes.</p>
+  <p>The <a href="downloads/complex-field.cube" download>complex-field example</a> contains <strong>29 atoms and an 84 × 84 × 84 grid</strong>, with values between 0 and 1. Start at an isovalue of <strong>0.65</strong> and adjust it to explore the field. Follow the <a href="tutorials-cube.html">cube tutorial</a> to compare the three modes.</p>
   <h3>Accepted cube profile</h3>
   <p>The file must contain one finite scalar per grid point, positive axis counts of at least two, finite bohr coordinates, and a nonsingular affine grid. Skewed and reflected grids are supported; axes need not align with Cartesian directions. Atom numbers 1–118 and zero-atom grids are accepted. The atom-row charge value is validated but not retained as a separate property. Ordinary and Fortran D/d numeric exponents are supported.</p>
   <p>A negative atom count denotes a standard orbital/dataset header with <strong>exactly one</strong> dataset ID, not a unit change. That ID labels the sampled field; it does not supply orbital coefficients. Optional NVAL must be one. Multiple datasets, negative axis counts/alternative coordinate units, ghost atoms, singular grids, and missing/extra samples are rejected. Export one field per cube with supported units; do not remove markers to bypass the profile.</p>

@@ -82,6 +82,11 @@ preserve those historical results as evidence of what ran at the time.
   local Chromium/WebKit `node tools/site/test.mjs` before pushing changes.
   Generated HTML is committed; GitHub only publishes `site/`. Preserve the real
   media/input/palette provenance, user-facing scope and current release facts.
+  Content quality is the primary acceptance criterion: read every page and inspect
+  featured images at full size and in desktop/phone layouts. Use meaningful
+  molecular examples, preserve aspect ratios, keep pictured controls readable,
+  and show the application's distinctive features prominently. Automated checks
+  supplement this review.
   Keep the site synchronized with the user guide and actual UI; do not advertise
   future features or broaden platform/scientific qualification. See
   [website maintenance](docs/website.md) and current handoff for evidence.

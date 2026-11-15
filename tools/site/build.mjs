@@ -31,6 +31,7 @@ const groups = [
   "reference",
   "tutorials",
   "gallery",
+  "shaders",
   "about",
 ];
 const pages = (
@@ -44,6 +45,7 @@ const navigation = [
   ["home", "./", "Home"],
   ["install", "install.html", "Install"],
   ["reference", "reference.html", "Manual"],
+  ["shaders", "surface-shaders.html", "Shaders"],
   ["tutorials", "tutorials.html", "Tutorials"],
   ["gallery", "gallery.html", "Gallery"],
   ["about", "about.html", "About"],
@@ -191,10 +193,24 @@ const examples = [
   ["palettes/matterviz-pastel.json", "matterviz-pastel.json"],
   ["palettes/matterviz-muted.json", "matterviz-muted.json"],
   ["palettes/LICENSE-MatterViz.txt", "LICENSE-MatterViz.txt"],
+  ["tools/site/examples/bicyclic-c7h10.molden", "bicyclic-c7h10.molden"],
+  ["tools/site/examples/complex-field.cube", "complex-field.cube"],
+  ["tools/site/examples/README.md", "README-quantum-example.txt"],
+  ["shaders/x-ray.vert", "shaders/x-ray.vert"],
+  ["shaders/x-ray.frag", "shaders/x-ray.frag"],
+  ["shaders/x-ray.params", "shaders/x-ray.params"],
+  ["app/shaders/surface-clip.vert", "shaders/surface-clip.vert"],
+  ["app/shaders/surface-clip.frag", "shaders/surface-clip.frag"],
+  ["app/shaders/surface-clip.params", "shaders/surface-clip.params"],
+  ["shaders/README.md", "shaders/README.txt"],
+  ["LICENSE", "shaders/LICENSE.txt"],
 ];
 fs.mkdirSync(path.join(out, "downloads"), { recursive: true });
 const sourceRows = examples.map(([from, name]) => {
   const bytes = fs.readFileSync(path.join(root, from));
+  fs.mkdirSync(path.dirname(path.join(out, "downloads", name)), {
+    recursive: true,
+  });
   fs.copyFileSync(path.join(root, from), path.join(out, "downloads", name));
   return {
     file: name,
@@ -216,7 +232,7 @@ fs.writeFileSync(
 );
 fs.writeFileSync(
   path.join(out, "downloads/README.txt"),
-  `EigenVista public tutorial examples\n\nwater.pdb / water.xyz: synthetic three-atom water geometry (two inferred display bonds).\nwater.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and 24 spatial orbitals. See fixtures/molden/README.md in the public repository for scientific provenance.\nsigned-affine.cube: synthetic signed affine field, two atoms/one bond, skewed 7x7x7 grid. It is a mathematical rendering fixture, not a quantum-chemistry calculation.\n1AON.cif: public deposited GroEL-GroES structure; see https://www.rcsb.org/structure/1AON for the original structure and citation. Repository import selects 58,870 source atoms.\nmatterviz-pastel.json / matterviz-muted.json: original MatterViz RGB values for elements1-109 in EigenVista's palette envelope. Author Janosh Riebesell; revision fae7a3e7fddf26f9625391ea76f28c7ebd261de9. MIT notice retained in LICENSE-MatterViz.txt; elements110-118 use built-in defaults.\n\nSource file paths and exact SHA-256 values: provenance.json.\nSource repository: https://github.com/uvar-apps/eigenvista\nApplication/website license: GPL-2.0-or-later (../LICENSE.txt). Preserve original data and palette notices.\n`,
+  `EigenVista public tutorial examples\n\nbicyclic-c7h10.molden: 17-atom C7H10 molecular calculation, 125 basis functions and 118 listed orbitals. Source and orbital notes: README-quantum-example.txt.\ncomplex-field.cube: original 29-atom, 84x84x84 scalar grid from Molekel data/elf_pic.cube. Source header does not identify scalar meaning/units.\nshaders/: ready-to-load X-ray and clipping shader pairs and parameters; original attribution and GPL notice are included.\n\nwater.pdb / water.xyz: synthetic three-atom water geometry (two inferred display bonds).\nwater.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and 24 spatial orbitals. See fixtures/molden/README.md in the public repository for scientific provenance.\nsigned-affine.cube: synthetic signed affine field, two atoms/one bond, skewed 7x7x7 grid. It is a mathematical rendering fixture, not a quantum-chemistry calculation.\n1AON.cif: public deposited GroEL-GroES structure; see https://www.rcsb.org/structure/1AON for the original structure and citation. Repository import selects 58,870 source atoms.\nmatterviz-pastel.json / matterviz-muted.json: original MatterViz RGB values for elements1-109 in EigenVista's palette envelope. Author Janosh Riebesell; revision fae7a3e7fddf26f9625391ea76f28c7ebd261de9. MIT notice retained in LICENSE-MatterViz.txt; elements110-118 use built-in defaults.\n\nSource file paths and exact SHA-256 values: provenance.json.\nSource repository: https://github.com/uvar-apps/eigenvista\nApplication/website license: GPL-2.0-or-later (../LICENSE.txt). Preserve original data and palette notices.\n`,
 );
 console.log(
   `SITE_BUILD_PASS ${pages.length} pages; ${sourceRows.length} explicit public downloads`,

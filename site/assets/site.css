@@ -85,6 +85,7 @@ button:disabled {
 }
 img {
   max-width: 100%;
+  height: auto;
   display: block;
 }
 button,
@@ -327,6 +328,16 @@ p {
   justify-content: center;
   background: #ecebe4;
   color: #151613;
+}
+.hero-image > a {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: #17232d;
 }
 .hero-image img {
   width: 100%;
@@ -771,6 +782,31 @@ details[open] summary {
 .comparison figcaption a:hover {
   color: #247762;
 }
+.shader-gallery {
+  margin: 0 auto;
+  padding: 20px var(--gutter) 30px;
+}
+.shader-gallery figure {
+  margin: 0;
+}
+.shader-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: center;
+  gap: 24px;
+}
+.shader-details figure {
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .shader-details {
+    grid-template-columns: 1fr;
+  }
+  .shader-details .shader-controls-figure {
+    width: min(100%, 280px);
+    justify-self: center;
+  }
+}
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1052,6 +1088,15 @@ details[open] summary {
   }
   .prose > h2 {
     scroll-margin-top: 20px;
+  }
+}
+@media (max-width: 480px) {
+  .top nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .top nav a {
+    border-bottom: 1px solid var(--line);
   }
 }
 @media (max-width: 400px) {

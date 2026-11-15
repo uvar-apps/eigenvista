@@ -3,7 +3,9 @@
 The public website lives in `site/` on `main` and is intended for application
 users: installation, a detailed reference, worked tutorials and a gallery.
 It is published at <https://uvar-apps.github.io/eigenvista/>. Completed issue
-[#75](https://github.com/uvar-apps/eigenvista/issues/75) tracks its creation.
+[#75](https://github.com/uvar-apps/eigenvista/issues/75) tracks its creation;
+[#76](https://github.com/uvar-apps/eigenvista/issues/76) tracks the content,
+scientific imagery, aspect-ratio and shader-showcase revision.
 
 ## A static directory, with a small publisher
 
@@ -36,7 +38,11 @@ change. Keep installation claims tied to an actually published release.
 Write for people using a molecular viewer: lead with tasks and controls. Keep
 format restrictions, units and display limitations next to the relevant feature.
 Avoid repeated elementary science warnings and internal verification terminology
-in user-facing pages.
+in user-facing pages. Read the copy and inspect every promoted image at full
+resolution and in its actual desktop/phone layout. Choose useful molecules,
+fields, camera framing, colors and opacity before publishing. Preserve natural
+aspect ratios and make screenshots of controls readable; an automated pass does
+not establish content or image quality.
 `tools/site/release.mjs` holds the verified release URL, asset stem, source and
 checksum used by the download page. It is not an automatic “latest” selector:
 development prereleases must not send users to an unrelated stable release.
@@ -69,21 +75,42 @@ application suites or create new platform qualification.
 
 ## Capture authentic media
 
-The gallery contains real EigenVista 0.7.2 captures, not generated scientific
-illustrations. `site/assets/media/provenance.json` records input/palette hashes,
+The curated website media contain 15 real EigenVista 0.7.2 captures. Nine new images
+show a 17-atom C₇H₁₀ molecular calculation, high-resolution frontier orbitals and
+volume rendering, X-ray and cutaway density surfaces, the actual workspace and
+readable shader controls, plus an imported 29-atom cube field. Six retained
+images show large structures and their biological representations. `site/assets/media/provenance.json` records input/palette hashes,
 application source, representation, camera operations, AO/field settings,
 dimensions and output hashes. The two AO pairs use complete 1AON and 4PJ1
 structures with MatterViz Pastel, element coloring and Van der Waals spheres.
 Off uses the normal molecular material; On uses Lambert + SSAO. Do not describe
 that comparison as two identical lighting models or as electron density.
 
-`tools/site/capture.mjs` documents the real-UI capture procedure. It uses the
-already built, audited application assets, an owned temporary preview, the
-installed Playwright browser and local image tools. Read its prerequisites and
-port ownership checks before running it. It must not rebuild, replace or stop
-the user's application. Original PNGs and independent lossless-WebP/pixel checks
-are retained in the ignored capture evidence, not shipped as another copy.
-The website itself does not need these tools to build or serve.
+`tools/site/capture-quantum.mjs` records the new real-UI photography procedure.
+It uses the existing production app on owned port 5189, the installed Playwright
+browser and ImageMagick. With the repository-local temporary environment above:
+
+```sh
+node tools/site/capture-quantum.mjs --final
+node tools/site/capture-quantum.mjs --final --density-only --cube
+node tools/site/capture-quantum.mjs --final --panel-only
+```
+
+It writes candidate PNGs and capture settings to
+`tmp/2026-11-15-website-quality/`; generated native meshes there can be reopened
+while refining the view. Review the frames before selecting them. The published
+cutaway uses `zmax = 0.25`, factor `0.24` and other bounds ±10; the orbital mesh
+views use opaque Blinn-Phong shading to give clear phase boundaries. The dedicated
+shader-panel image is a real element screenshot at device pixel ratio 2.
+
+Encode selected PNGs losslessly with `cwebp`, retaining natural dimensions, then
+update the media provenance and page captions. Preserve the source, field,
+isovalue, resolution, camera and shader settings. The original
+`tools/site/capture.mjs` is the initial website capture record, including the
+superseded small demonstration imagery; do not run it over the curated site.
+Read port ownership checks before starting a preview, and do not rebuild, replace
+or stop the user's app. Original PNGs and lossless pixel comparisons stay in
+ignored evidence. The website itself needs none of these image tools to serve.
 
 Example downloads are copied from an explicit public-file allowlist, never from
 untracked inputs. `site/downloads/provenance.json` records original paths and

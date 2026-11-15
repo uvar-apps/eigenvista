@@ -12,16 +12,34 @@
     "method": "Actual production application UI and its PNG export; only app-overview uses a full-window screenshot",
     "browser": "Chromium 153.0.8010.12",
     "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
-    "viewport": {
-      "width": 1900,
-      "height": 1240,
-      "deviceScaleFactor": 1
-    },
     "encoding": "cwebp lossless -m 6; every WebP decoded and exactly compared with original PNG by ImageMagick",
-    "background": "#ecebe4",
+    "background": "Per-image: AO/biological #ecebe4; quantum/shaders #17232d",
     "cameraBoundary": "Fit, zoom and orbit pointer controls only; OrbitControls damping settles before export; paired cameras unchanged and exact Off restoration verified",
     "ambientOcclusionBoundary": "Off uses original Standard shading. On switches atoms/bonds to Lambert shading plus illustrative SSAO, not a physically calibrated shadow calculation. AO render targets proportionally capped at 1024.",
-    "geometryBoundary": "geometry counts describe the complete imported source document. backbone counts describe the complete prepared backbone, before visibleSubset filtering. generation describes saved mesh geometry retained in the document; volume and raycast display sampled fields instead."
+    "geometryBoundary": "geometry counts describe the complete imported source document. backbone counts describe the complete prepared backbone, before visibleSubset filtering. generation describes saved mesh geometry retained in the document; volume and raycast display sampled fields instead.",
+    "viewports": [
+      {
+        "width": 1900,
+        "height": 1240,
+        "subject": "Original AO/biological studies"
+      },
+      {
+        "width": 2560,
+        "height": 1800,
+        "subject": "Quantum and shader studies"
+      },
+      {
+        "width": 1920,
+        "height": 1280,
+        "subject": "Shader workspace"
+      },
+      {
+        "width": 1280,
+        "height": 1100,
+        "deviceScaleFactor": 2,
+        "subject": "Readable shader panel close-up"
+      }
+    ]
   },
   "inputs": [
     {
@@ -35,21 +53,6 @@
       "sha256": "5c51e991f01bf5c9c6e676400006de17d225b93a027c31dc375dd4106e8b30a5"
     },
     {
-      "file": "fixtures/molden/water-rhf-ccpvdz.molden",
-      "bytes": 19345,
-      "sha256": "9c0393a493956d22af9dcf76398f368fa211d3fe83488669b69d102baf9f6042"
-    },
-    {
-      "file": "fixtures/molden/water-rhf-ccpvdz.json",
-      "bytes": 54787,
-      "sha256": "71181575898558db02230254017c2e23f0c424eb5d89cd7b1523bcd93fbabfd1"
-    },
-    {
-      "file": "fixtures/cube/signed-affine.cube",
-      "bytes": 6732,
-      "sha256": "a94fc0bd553bebb80c55a6b8dfce00cdf4241994c3d611c120cd8aec9735c251"
-    },
-    {
       "file": "palettes/matterviz-pastel.json",
       "bytes": 8237,
       "sha256": "6d3624bc9019e0540352865d45fa1ae4d6e5ed9083cba558bde0820556b1f802"
@@ -58,6 +61,46 @@
       "file": "palettes/LICENSE-MatterViz.txt",
       "bytes": 1073,
       "sha256": "f519d155d7ed90bd0e8e3ee2a669b70d9ad9f03fa532e008b1b397769f1f175b"
+    },
+    {
+      "file": "tools/site/examples/bicyclic-c7h10.molden",
+      "bytes": 494537,
+      "sha256": "9309464ace24326f70c344852d4bbc49bc1bca418876a1a0d6b42863202b4645"
+    },
+    {
+      "file": "tools/site/examples/complex-field.cube",
+      "bytes": 7805680,
+      "sha256": "c8cbdb64f4386e6c2da9ab875537b22cabdf828a272457ff98a5e21e550fafa6"
+    },
+    {
+      "file": "shaders/x-ray.vert",
+      "bytes": 510,
+      "sha256": "a9d2c39740947cb99bfafa547a324f663d5b0049c907f3b99fc4946f4ceab1e4"
+    },
+    {
+      "file": "shaders/x-ray.frag",
+      "bytes": 585,
+      "sha256": "8e762a86a079030f45c8f08ccb08062c42ba6c1a334df9ed75a8b6e937572042"
+    },
+    {
+      "file": "shaders/x-ray.params",
+      "bytes": 115,
+      "sha256": "516caea61fe73dd0c336279345a2863e3b093ec846089496dff6cda20606c7a7"
+    },
+    {
+      "file": "app/shaders/surface-clip.vert",
+      "bytes": 442,
+      "sha256": "c93871cb2e48fec98791bd243b5f90a243cf19ec3e566d1ab8872673bd1793ac"
+    },
+    {
+      "file": "app/shaders/surface-clip.frag",
+      "bytes": 441,
+      "sha256": "f6ea6597ad7aa2359ca811c93bcacfda6245f078c22ff88826631112c1fb2616"
+    },
+    {
+      "file": "app/shaders/surface-clip.params",
+      "bytes": 99,
+      "sha256": "e7dea8fc3d92d4b93886ebfad0eb2d6279fc47f4ecda19a67ec28202ce471892"
     }
   ],
   "sources": [
@@ -74,19 +117,21 @@
       "note": "Full unmodified tracked PDB fixture; citation and data notices retained in fixture header."
     },
     {
-      "input": "water-rhf-ccpvdz.molden",
-      "note": "First-party PySCF 2.14.0 RHF/cc-pVDZ converged calculation fixture; test geometry, not optimized. Source and independent numerical reference documented in fixtures/molden/README.md."
-    },
-    {
-      "input": "signed-affine.cube",
-      "note": "First-party synthetic analytical regression field; definition documented in fixtures/cube/README.md; not a quantum calculation."
-    },
-    {
       "input": "matterviz-pastel.json",
       "url": "https://github.com/janosh/matterviz/blob/fae7a3e7fddf26f9625391ea76f28c7ebd261de9/src/lib/colors/pastel-colors.json",
       "license": "MIT",
       "notice": "palettes/LICENSE-MatterViz.txt",
       "note": "Unchanged upstream RGB values for elements 1–109 adapted into EigenVista envelope; 110–118 retain built-in defaults."
+    },
+    {
+      "input": "bicyclic-c7h10.molden",
+      "url": "https://github.com/ugovaretto/molekel/blob/76f3e3f4d458cece9b398df90e5cc2d11cb18804/data/molden.input",
+      "note": "Original unmodified file; title/method/basis-family not assigned."
+    },
+    {
+      "input": "complex-field.cube",
+      "original": "Molekel data/elf_pic.cube",
+      "note": "Original84^3 field,29atoms. Source does not specify scalar meaning/units."
     }
   ],
   "comparisons": [
@@ -335,731 +380,766 @@
       "summary": "58870 atoms\n59317 bonds\n0 basis functions"
     },
     {
-      "file": "water-orbital-mesh.webp",
-      "bytes": 102010,
-      "sha256": "614ba47e13b2613c78d8abfa56274651d8dfd3418bf8ddb37d91206a26831b93",
-      "sourcePngSha256": "0195a06d7169906fbfe8cf8524f9f2fdf70c079044c2c0e4dfb49418f430ee47",
-      "width": 1390,
-      "height": 1072,
-      "background": "#ecebe4",
-      "input": "fixtures/molden/water-rhf-ccpvdz.molden",
-      "representation": "Ball and stick",
-      "palette": "MatterViz Pastel",
-      "field": {
-        "orbitalNumber": 5,
-        "name": "HOMO",
-        "occupation": 2,
-        "energyHartree": -0.49306280759577614,
-        "method": "RHF",
-        "basis": "cc-pVDZ",
-        "isovalueBohrPowerMinusThreeHalves": 0.05,
-        "gridResolution": 96
-      },
-      "camera": {
-        "fit": true,
-        "zoomInClicks": 2
-      },
+      "file": "quantum-orbital.webp",
+      "bytes": 286210,
+      "sha256": "7776c8cfd84c5d087d295ddafe91548714ab98bc138821e905e6a6720dd5ac2a",
+      "sourcePngSha256": "acce40e33a37df79084ebc28607594a85a454875ee1d9bb933bc10fb9b209f38",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "MO 26",
+      "isovalue": 0.03,
       "mode": "Isosurface mesh",
+      "resolution": 256,
+      "camera": {
+        "dx": 210,
+        "dy": 80,
+        "zoom": 2
+      },
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "mesh"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.03"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#75e1df"
+        },
+        {
+          "label": "Negative color",
+          "value": "#ffa1bc"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "blinn-phong"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": true
+        }
+      ],
       "geometry": {
-        "atoms": 3,
-        "bonds": 2,
-        "basisFunctions": 24,
-        "orbitals": [
-          {
-            "id": "molden-mo-1",
-            "label": "MO 1 (A)",
-            "occupation": 2,
-            "energy": -20.55051395,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-2",
-            "label": "MO 2 (A)",
-            "occupation": 2,
-            "energy": -1.336243649,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-3",
-            "label": "MO 3 (A)",
-            "occupation": 2,
-            "energy": -0.6990493969,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-4",
-            "label": "MO 4 (A)",
-            "occupation": 2,
-            "energy": -0.5662677554,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-5",
-            "label": "MO 5 (A)",
-            "occupation": 2,
-            "energy": -0.4930628076,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-6",
-            "label": "MO 6 (A)",
-            "occupation": 0,
-            "energy": 0.1854597739,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-7",
-            "label": "MO 7 (A)",
-            "occupation": 0,
-            "energy": 0.2561332086,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-8",
-            "label": "MO 8 (A)",
-            "occupation": 0,
-            "energy": 0.7890597438,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-9",
-            "label": "MO 9 (A)",
-            "occupation": 0,
-            "energy": 0.8532546893,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-10",
-            "label": "MO 10 (A)",
-            "occupation": 0,
-            "energy": 1.163498233,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-11",
-            "label": "MO 11 (A)",
-            "occupation": 0,
-            "energy": 1.200400028,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-12",
-            "label": "MO 12 (A)",
-            "occupation": 0,
-            "energy": 1.253260961,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-13",
-            "label": "MO 13 (A)",
-            "occupation": 0,
-            "energy": 1.445456325,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-14",
-            "label": "MO 14 (A)",
-            "occupation": 0,
-            "energy": 1.475800453,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-15",
-            "label": "MO 15 (A)",
-            "occupation": 0,
-            "energy": 1.674988686,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-16",
-            "label": "MO 16 (A)",
-            "occupation": 0,
-            "energy": 1.867640314,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-17",
-            "label": "MO 17 (A)",
-            "occupation": 0,
-            "energy": 1.933610981,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-18",
-            "label": "MO 18 (A)",
-            "occupation": 0,
-            "energy": 2.451373757,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-19",
-            "label": "MO 19 (A)",
-            "occupation": 0,
-            "energy": 2.488373521,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-20",
-            "label": "MO 20 (A)",
-            "occupation": 0,
-            "energy": 3.284579498,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-21",
-            "label": "MO 21 (A)",
-            "occupation": 0,
-            "energy": 3.338501378,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-22",
-            "label": "MO 22 (A)",
-            "occupation": 0,
-            "energy": 3.509186837,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-23",
-            "label": "MO 23 (A)",
-            "occupation": 0,
-            "energy": 3.865757574,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-24",
-            "label": "MO 24 (A)",
-            "occupation": 0,
-            "energy": 4.146191051,
-            "spin": "spatial"
-          }
-        ],
-        "grids": []
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
       },
-      "generation": {
-        "dimensions": [
-          96,
-          96,
-          96
-        ],
-        "surfaces": [
-          {
-            "field": "molden-mo-5",
-            "isovalue": 0.05,
-            "vertices": 6864,
-            "triangles": 2288
-          },
-          {
-            "field": "molden-mo-5",
-            "isovalue": -0.05,
-            "vertices": 6864,
-            "triangles": 2288
-          }
-        ]
-      },
-      "status": "4,576 triangles / 0.46 s",
-      "summary": "3 atoms\n2 bonds\n24 basis functions"
+      "captureType": "Actual application PNG export"
     },
     {
-      "file": "water-orbital-volume.webp",
-      "bytes": 107478,
-      "sha256": "a8bc4a2fd5a87b4656e453cfda3927dc4cf316621ae03d834fcb45fc4dc7a09f",
-      "sourcePngSha256": "e3c33897111257ee1bf977acc2ed4cb8f52bbeb9088c49637a698310d2ec89e3",
-      "width": 1390,
-      "height": 1072,
-      "background": "#ecebe4",
-      "input": "fixtures/molden/water-rhf-ccpvdz.molden",
-      "representation": "Ball and stick",
-      "palette": "MatterViz Pastel",
-      "field": {
-        "orbitalNumber": 5,
-        "name": "HOMO",
-        "occupation": 2,
-        "energyHartree": -0.49306280759577614,
-        "method": "RHF",
-        "basis": "cc-pVDZ",
-        "isovalueBohrPowerMinusThreeHalves": 0.05,
-        "gridResolution": 96
+      "file": "quantum-lumo.webp",
+      "bytes": 336862,
+      "sha256": "f3974215423ed836c47a93784573de7ca23fc4b75e15658138cad1dc8411f029",
+      "sourcePngSha256": "6b38eee1c2876ab18ecd71eec13b2a19a624c447db5969872457bb40a82f1cdb",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "MO 27",
+      "isovalue": 0.03,
+      "mode": "Isosurface mesh",
+      "resolution": 256,
+      "camera": {
+        "dx": 100,
+        "dy": 80,
+        "zoom": 2
       },
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "mesh"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.03"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#75e1df"
+        },
+        {
+          "label": "Negative color",
+          "value": "#ffa1bc"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "blinn-phong"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": true
+        }
+      ],
+      "geometry": {
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
+      },
+      "captureType": "Actual application PNG export"
+    },
+    {
+      "file": "quantum-volume.webp",
+      "bytes": 246758,
+      "sha256": "2d3421609768c9210102ba54efe1ef214027e5b9ab2d1982cbdc795f9d855c75",
+      "sourcePngSha256": "83e6a0665c8531f12ec5688673141ddf9981f9fd91f50c572e3e761da0a99f7f",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "MO 26",
+      "isovalue": 0.03,
+      "mode": "Volume preview",
+      "resolution": 256,
+      "samplingQuality": "Fine",
       "camera": {
         "fit": true,
-        "zoomInClicks": 7
+        "dx": 100,
+        "dy": 80,
+        "zoom": 1
       },
-      "mode": "Volume preview",
-      "samplingQuality": "Fine",
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "volume"
+        },
+        {
+          "label": "Preview sampling quality",
+          "value": "4"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.03"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#75e1df"
+        },
+        {
+          "label": "Negative color",
+          "value": "#ffa1bc"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "blinn-phong"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": true
+        }
+      ],
       "geometry": {
-        "atoms": 3,
-        "bonds": 2,
-        "basisFunctions": 24,
-        "orbitals": [
-          {
-            "id": "molden-mo-1",
-            "label": "MO 1 (A)",
-            "occupation": 2,
-            "energy": -20.55051395,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-2",
-            "label": "MO 2 (A)",
-            "occupation": 2,
-            "energy": -1.336243649,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-3",
-            "label": "MO 3 (A)",
-            "occupation": 2,
-            "energy": -0.6990493969,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-4",
-            "label": "MO 4 (A)",
-            "occupation": 2,
-            "energy": -0.5662677554,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-5",
-            "label": "MO 5 (A)",
-            "occupation": 2,
-            "energy": -0.4930628076,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-6",
-            "label": "MO 6 (A)",
-            "occupation": 0,
-            "energy": 0.1854597739,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-7",
-            "label": "MO 7 (A)",
-            "occupation": 0,
-            "energy": 0.2561332086,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-8",
-            "label": "MO 8 (A)",
-            "occupation": 0,
-            "energy": 0.7890597438,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-9",
-            "label": "MO 9 (A)",
-            "occupation": 0,
-            "energy": 0.8532546893,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-10",
-            "label": "MO 10 (A)",
-            "occupation": 0,
-            "energy": 1.163498233,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-11",
-            "label": "MO 11 (A)",
-            "occupation": 0,
-            "energy": 1.200400028,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-12",
-            "label": "MO 12 (A)",
-            "occupation": 0,
-            "energy": 1.253260961,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-13",
-            "label": "MO 13 (A)",
-            "occupation": 0,
-            "energy": 1.445456325,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-14",
-            "label": "MO 14 (A)",
-            "occupation": 0,
-            "energy": 1.475800453,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-15",
-            "label": "MO 15 (A)",
-            "occupation": 0,
-            "energy": 1.674988686,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-16",
-            "label": "MO 16 (A)",
-            "occupation": 0,
-            "energy": 1.867640314,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-17",
-            "label": "MO 17 (A)",
-            "occupation": 0,
-            "energy": 1.933610981,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-18",
-            "label": "MO 18 (A)",
-            "occupation": 0,
-            "energy": 2.451373757,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-19",
-            "label": "MO 19 (A)",
-            "occupation": 0,
-            "energy": 2.488373521,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-20",
-            "label": "MO 20 (A)",
-            "occupation": 0,
-            "energy": 3.284579498,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-21",
-            "label": "MO 21 (A)",
-            "occupation": 0,
-            "energy": 3.338501378,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-22",
-            "label": "MO 22 (A)",
-            "occupation": 0,
-            "energy": 3.509186837,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-23",
-            "label": "MO 23 (A)",
-            "occupation": 0,
-            "energy": 3.865757574,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-24",
-            "label": "MO 24 (A)",
-            "occupation": 0,
-            "energy": 4.146191051,
-            "spin": "spatial"
-          }
-        ],
-        "grids": []
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
       },
-      "generation": {
-        "dimensions": [
-          96,
-          96,
-          96
-        ],
-        "surfaces": [
-          {
-            "field": "molden-mo-5",
-            "isovalue": 0.05,
-            "vertices": 6864,
-            "triangles": 2288
-          },
-          {
-            "field": "molden-mo-5",
-            "isovalue": -0.05,
-            "vertices": 6864,
-            "triangles": 2288
-          }
-        ]
+      "captureType": "Actual application PNG export"
+    },
+    {
+      "file": "quantum-xray.webp",
+      "bytes": 401186,
+      "sha256": "bb992e35fa35a84fd3569e44e781e9f0b05b9954a72260d68cc8e6ef2b36edcc",
+      "sourcePngSha256": "36cfa36fd9dd1977c341e288080dcf02254582a8ac241929d8f2d41a3cd14414",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "Total density",
+      "isovalue": 0.04,
+      "mode": "Isosurface mesh",
+      "resolution": 256,
+      "shader": "x-ray",
+      "camera": {
+        "fit": true,
+        "dx": 100,
+        "dy": 80,
+        "zoom": 1
       },
-      "status": "4,576 triangles / 0.46 s",
-      "summary": "3 atoms\n2 bonds\n24 basis functions"
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "mesh"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.04"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#93e8d9"
+        },
+        {
+          "label": "Negative color",
+          "value": "#cb4e72"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "diffuse"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": true
+        },
+        {
+          "label": "eyePosition[0]",
+          "value": "0"
+        },
+        {
+          "label": "eyePosition[1]",
+          "value": "0"
+        },
+        {
+          "label": "eyePosition[2]",
+          "value": "0"
+        },
+        {
+          "label": "minOpacity",
+          "value": "0"
+        },
+        {
+          "label": "maxOpacity",
+          "value": "0.85"
+        },
+        {
+          "label": "color",
+          "value": "#7bf4ea"
+        },
+        {
+          "label": "da",
+          "value": "0.03"
+        }
+      ],
+      "geometry": {
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
+      },
+      "captureType": "Actual application PNG export"
+    },
+    {
+      "file": "quantum-unclipped.webp",
+      "bytes": 229306,
+      "sha256": "bc06fd52f8087f4be6c26b044edfdf70c76970581274dbff64d851a584650061",
+      "sourcePngSha256": "36742fe9aabe750791a484d3efd77c2d934699d604662e5f3cf310fa88299d36",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "Total density",
+      "isovalue": 0.04,
+      "mode": "Isosurface mesh",
+      "resolution": 256,
+      "shader": "surface-clip",
+      "camera": {
+        "fit": true,
+        "dx": 100,
+        "dy": 80,
+        "zoom": 1
+      },
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "mesh"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.04"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#93e8d9"
+        },
+        {
+          "label": "Negative color",
+          "value": "#cb4e72"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "diffuse"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": false
+        },
+        {
+          "label": "factor",
+          "value": "0.24"
+        },
+        {
+          "label": "xmax",
+          "value": "10"
+        },
+        {
+          "label": "xmin",
+          "value": "-10"
+        },
+        {
+          "label": "ymax",
+          "value": "10"
+        },
+        {
+          "label": "ymin",
+          "value": "-10"
+        },
+        {
+          "label": "zmax",
+          "value": "10"
+        },
+        {
+          "label": "zmin",
+          "value": "-10"
+        }
+      ],
+      "geometry": {
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
+      },
+      "captureType": "Actual application PNG export"
+    },
+    {
+      "file": "quantum-clipped.webp",
+      "bytes": 275326,
+      "sha256": "e5a81a283282d8c4005e0a6277e06ca192682e984f5594b1c89f827a6f97e15b",
+      "sourcePngSha256": "5ccaf7f44c9170a4cf27639c01ffa84fe711d7cefeaefc560f919d5d3c8d750a",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "Total density",
+      "isovalue": 0.04,
+      "mode": "Isosurface mesh",
+      "resolution": 256,
+      "shader": "surface-clip",
+      "camera": {
+        "fit": true,
+        "dx": 100,
+        "dy": 80,
+        "zoom": 1
+      },
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "mesh"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.04"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#93e8d9"
+        },
+        {
+          "label": "Negative color",
+          "value": "#cb4e72"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "diffuse"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": false
+        },
+        {
+          "label": "factor",
+          "value": "0.24"
+        },
+        {
+          "label": "xmax",
+          "value": "10"
+        },
+        {
+          "label": "xmin",
+          "value": "-10"
+        },
+        {
+          "label": "ymax",
+          "value": "10"
+        },
+        {
+          "label": "ymin",
+          "value": "-10"
+        },
+        {
+          "label": "zmax",
+          "value": "0.25"
+        },
+        {
+          "label": "zmin",
+          "value": "-10"
+        }
+      ],
+      "geometry": {
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
+      },
+      "captureType": "Actual application PNG export",
+      "notes": "surface-clip with factor0.24,zmax0.25; other bounds ±10"
     },
     {
       "file": "app-overview.webp",
-      "bytes": 132596,
-      "sha256": "9c4abb73fcb6b6d0eff03b5aad274bc4e4e3a8a29e1f55b4fcbdb6abdc7b4adf",
-      "sourcePngSha256": "dbc251d99875465fa372147e967132400486fb044447c896ecda8e8b83954068",
-      "width": 1600,
-      "height": 1050,
-      "background": "#ecebe4",
-      "input": "fixtures/molden/water-rhf-ccpvdz.molden",
-      "representation": "Ball and stick",
-      "palette": "MatterViz Pastel",
-      "field": {
-        "orbitalNumber": 5,
-        "name": "HOMO",
-        "occupation": 2,
-        "energyHartree": -0.49306280759577614,
-        "method": "RHF",
-        "basis": "cc-pVDZ",
-        "isovalueBohrPowerMinusThreeHalves": 0.05,
-        "gridResolution": 96
-      },
+      "bytes": 248324,
+      "sha256": "1d0e4a9646543d252373844519851a51091f1d2e0f3f52df2984c70ca5fb2932",
+      "sourcePngSha256": "fd668fc07ee341f666e4f6cd000327d8f468427e310de01e3146bb716a32fd08",
+      "width": 1920,
+      "height": 1280,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#17232d",
+      "field": "Total density",
+      "isovalue": 0.04,
+      "mode": "Isosurface mesh",
+      "resolution": 256,
+      "shader": "x-ray",
       "camera": {
         "fit": true,
-        "zoomInClicks": 7
+        "dx": 100,
+        "dy": 80,
+        "zoom": 0
       },
-      "mode": "Volume preview",
-      "samplingQuality": "Fine",
-      "captureType": "full unmodified application UI",
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "mesh"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.04"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "40"
+        },
+        {
+          "label": "Positive color",
+          "value": "#93e8d9"
+        },
+        {
+          "label": "Negative color",
+          "value": "#cb4e72"
+        },
+        {
+          "label": "Opacity",
+          "value": "1"
+        },
+        {
+          "label": "Surface shading",
+          "value": "diffuse"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": true
+        },
+        {
+          "label": "eyePosition[0]",
+          "value": "0"
+        },
+        {
+          "label": "eyePosition[1]",
+          "value": "0"
+        },
+        {
+          "label": "eyePosition[2]",
+          "value": "0"
+        },
+        {
+          "label": "minOpacity",
+          "value": "0"
+        },
+        {
+          "label": "maxOpacity",
+          "value": "0.85"
+        },
+        {
+          "label": "color",
+          "value": "#7bf4ea"
+        },
+        {
+          "label": "da",
+          "value": "0.03"
+        }
+      ],
       "geometry": {
-        "atoms": 3,
-        "bonds": 2,
-        "basisFunctions": 24,
-        "orbitals": [
-          {
-            "id": "molden-mo-1",
-            "label": "MO 1 (A)",
-            "occupation": 2,
-            "energy": -20.55051395,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-2",
-            "label": "MO 2 (A)",
-            "occupation": 2,
-            "energy": -1.336243649,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-3",
-            "label": "MO 3 (A)",
-            "occupation": 2,
-            "energy": -0.6990493969,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-4",
-            "label": "MO 4 (A)",
-            "occupation": 2,
-            "energy": -0.5662677554,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-5",
-            "label": "MO 5 (A)",
-            "occupation": 2,
-            "energy": -0.4930628076,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-6",
-            "label": "MO 6 (A)",
-            "occupation": 0,
-            "energy": 0.1854597739,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-7",
-            "label": "MO 7 (A)",
-            "occupation": 0,
-            "energy": 0.2561332086,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-8",
-            "label": "MO 8 (A)",
-            "occupation": 0,
-            "energy": 0.7890597438,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-9",
-            "label": "MO 9 (A)",
-            "occupation": 0,
-            "energy": 0.8532546893,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-10",
-            "label": "MO 10 (A)",
-            "occupation": 0,
-            "energy": 1.163498233,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-11",
-            "label": "MO 11 (A)",
-            "occupation": 0,
-            "energy": 1.200400028,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-12",
-            "label": "MO 12 (A)",
-            "occupation": 0,
-            "energy": 1.253260961,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-13",
-            "label": "MO 13 (A)",
-            "occupation": 0,
-            "energy": 1.445456325,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-14",
-            "label": "MO 14 (A)",
-            "occupation": 0,
-            "energy": 1.475800453,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-15",
-            "label": "MO 15 (A)",
-            "occupation": 0,
-            "energy": 1.674988686,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-16",
-            "label": "MO 16 (A)",
-            "occupation": 0,
-            "energy": 1.867640314,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-17",
-            "label": "MO 17 (A)",
-            "occupation": 0,
-            "energy": 1.933610981,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-18",
-            "label": "MO 18 (A)",
-            "occupation": 0,
-            "energy": 2.451373757,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-19",
-            "label": "MO 19 (A)",
-            "occupation": 0,
-            "energy": 2.488373521,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-20",
-            "label": "MO 20 (A)",
-            "occupation": 0,
-            "energy": 3.284579498,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-21",
-            "label": "MO 21 (A)",
-            "occupation": 0,
-            "energy": 3.338501378,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-22",
-            "label": "MO 22 (A)",
-            "occupation": 0,
-            "energy": 3.509186837,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-23",
-            "label": "MO 23 (A)",
-            "occupation": 0,
-            "energy": 3.865757574,
-            "spin": "spatial"
-          },
-          {
-            "id": "molden-mo-24",
-            "label": "MO 24 (A)",
-            "occupation": 0,
-            "energy": 4.146191051,
-            "spin": "spatial"
-          }
-        ],
-        "grids": []
+        "atoms": 17,
+        "bonds": 18,
+        "basis": 125,
+        "orbitalCount": 118
       },
-      "generation": {
-        "dimensions": [
-          96,
-          96,
-          96
-        ],
-        "surfaces": [
-          {
-            "field": "molden-mo-5",
-            "isovalue": 0.05,
-            "vertices": 6864,
-            "triangles": 2288
-          },
-          {
-            "field": "molden-mo-5",
-            "isovalue": -0.05,
-            "vertices": 6864,
-            "triangles": 2288
-          }
-        ]
-      },
-      "status": "4,576 triangles / 0.46 s",
-      "summary": "3 atoms\n2 bonds\n24 basis functions"
+      "captureType": "Unmodified application screenshot with live shader controls"
     },
     {
       "file": "cube-raycast.webp",
-      "bytes": 55722,
-      "sha256": "28e51e1b2164d44a9fb664d93697ca153193422641ed2e21d5bc4ef1dfc6617a",
-      "sourcePngSha256": "e69f822f6eefc6b04282e91c93e0b31275c4d561aae8826ae77cfbce30b721c3",
-      "width": 1390,
-      "height": 1072,
-      "background": "#ecebe4",
-      "input": "fixtures/cube/signed-affine.cube",
+      "bytes": 261770,
+      "sha256": "1b2d4716efdfa998b8723c5dc11dad2b913fc97db0f9be2e6aaec2355e80e4ee",
+      "sourcePngSha256": "fb0a5abfd1eee59f7def06654a7f819a4da0f0978badce691ac5bf4b5012f503",
+      "width": 2050,
+      "height": 1671,
+      "input": "tools/site/examples/complex-field.cube",
+      "background": "#17232d",
+      "field": "Imported scalar field",
+      "isovalue": 0.65,
       "mode": "Sampled raycast preview",
-      "synthetic": true,
-      "field": {
-        "description": "Analytical signed affine regression scalar; not quantum chemistry",
-        "dimensions": [
-          7,
-          7,
-          7
-        ],
-        "isovalue": 0.05
-      },
+      "resolution": 84,
       "samplingQuality": "Fine",
       "camera": {
         "fit": true,
-        "zoomInClicks": 2
+        "dx": 100,
+        "dy": 80,
+        "zoom": 1
       },
+      "renderControls": [
+        {
+          "label": "Representation",
+          "value": "ball-stick"
+        },
+        {
+          "label": "Background color",
+          "value": "#17232d"
+        },
+        {
+          "label": "Rendering mode",
+          "value": "raycast"
+        },
+        {
+          "label": "Preview sampling quality",
+          "value": "4"
+        },
+        {
+          "label": "Isovalue",
+          "value": "0.65"
+        },
+        {
+          "label": "Grid resolution",
+          "value": "96"
+        },
+        {
+          "label": "Positive color",
+          "value": "#eab46c"
+        },
+        {
+          "label": "Negative color",
+          "value": "#cb4e72"
+        },
+        {
+          "label": "Opacity",
+          "value": "0.8"
+        },
+        {
+          "label": "Surface shading",
+          "value": "diffuse"
+        },
+        {
+          "label": "Ambient occlusion",
+          "value": false
+        },
+        {
+          "label": "Shader target surfaces",
+          "value": "all"
+        },
+        {
+          "label": "Shader transparency",
+          "value": true
+        }
+      ],
       "geometry": {
-        "atoms": 2,
-        "bonds": 1,
-        "basisFunctions": 0,
-        "orbitals": [],
-        "grids": [
-          {
-            "id": "cube",
-            "label": "signed-affine.cube",
-            "dims": [
-              7,
-              7,
-              7
-            ]
-          }
-        ]
+        "atoms": 29,
+        "bonds": 35,
+        "basis": 0,
+        "orbitalCount": 0
       },
-      "generation": null,
-      "status": "Opened signed-affine.cube",
-      "summary": "2 atoms\n1 bond\n0 basis functions"
+      "captureType": "Actual application PNG export"
+    },
+    {
+      "file": "shader-controls.webp",
+      "width": 490,
+      "height": 1654,
+      "bytes": 29614,
+      "sha256": "e1070e8fb0226f5e6f52597e472e6438a0a4563278732a8a49d25d73a2e56011",
+      "sourcePngSha256": "eda2f596720e73dc25a06fa6e7a93287ab8103d9755a8226f2d5be1df4c960d0",
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "shader": "x-ray",
+      "captureType": "Actual shader panel element screenshot, unmodified, device pixel ratio2",
+      "uniforms": {
+        "minOpacity": 0,
+        "maxOpacity": 0.85,
+        "da": 0.03,
+        "eyePosition": [
+          0,
+          0,
+          0
+        ]
+      }
     }
   ],
   "errors": [],
@@ -1067,5 +1147,17 @@
     "These are browser captures of the audited release assets, not clean-machine/native installation qualification.",
     "Illustrative views do not add quantum data to structure-only inputs.",
     "Secondary structure is deposited only; unassigned regions are not inferred."
-  ]
+  ],
+  "updated": "2026-11-15T09:43:16.121Z",
+  "qualityUpdate": {
+    "issue": 76,
+    "captureScript": "tools/site/capture-quantum.mjs",
+    "method": "Actual EigenVista 0.7.2 UI and PNG export; selected full-resolution views after visual art direction. No image rescaling, scientific alterations or generated imagery.",
+    "sourceDatasets": [
+      "Molekel data/molden.input, 17atom C7H10, 125basis/118listedMO",
+      "Molekel data/elf_pic.cube,29atoms,84^3 scalar grid"
+    ],
+    "meshCaching": "Reopened generated native meshes to refine material/camera choices without changing geometry; sampled previews use the application evaluator.",
+    "selectedImageCount": 9
+  }
 }

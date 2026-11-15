@@ -45,6 +45,16 @@ const allImages = (page) =>
           throw Error("Image dimensions disagree with capture provenance");
         if (image.width < 1 || image.height < 1)
           throw Error("Invisible image box");
+        if (
+          image.closest(".prose") &&
+          Math.abs(
+            image.width / image.height -
+              image.naturalWidth / image.naturalHeight,
+          ) > 0.01
+        )
+          throw Error(
+            "Distorted manual/tutorial image aspect ratio: " + image.src,
+          );
       }),
     ),
   );
@@ -213,7 +223,7 @@ for (const [engine, launcher] of [
 
     await page.goto(base + "gallery.html");
     await allImages(page);
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 5);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 8);
     await page.getByRole("button", { name: "Molecules", exact: true }).click();
     assert.equal(await page.locator("[data-gallery-item]:visible").count(), 2);
     await page
@@ -221,8 +231,10 @@ for (const [engine, launcher] of [
       .focus();
     await page.keyboard.press("Enter");
     assert.equal(await page.locator("[data-gallery-item]:visible").count(), 3);
+    await page.getByRole("button", { name: "Shaders", exact: true }).click();
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 3);
     await page.getByRole("button", { name: "All views", exact: true }).click();
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 5);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 8);
     const comparisons = [];
     for (const [i, figure] of (
       await page.locator("[data-comparison]").all()
@@ -322,7 +334,7 @@ for (const [engine, launcher] of [
     await plain.goto(base + "gallery.html");
     assert.equal(await plain.locator("[data-comparison].is-ready").count(), 0);
     assert.equal(await plain.locator(".comparison-control:visible").count(), 0);
-    assert.equal(await plain.locator("[data-gallery-item]:visible").count(), 5);
+    assert.equal(await plain.locator("[data-gallery-item]:visible").count(), 8);
     await plain
       .getByRole("navigation")
       .getByRole("link", { name: "Manual", exact: true })

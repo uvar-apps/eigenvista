@@ -14,8 +14,8 @@ export default [
       <h2 id="learning-path">Your learning path</h2>
       <ol>
         <li><p><a href="tutorials-first-molecule.html"><strong>Open, inspect, and save your first molecule</strong></a>. Use three-atom water to learn rotation, zoom, picking, representations, and native Save.</p></li>
-        <li><p><a href="tutorials-orbitals.html"><strong>Explore orbitals from a real calculation</strong></a>. Browse the calculated water wavefunction, preview one field without a mesh, then generate and save signed surfaces.</p></li>
-        <li><p><a href="tutorials-cube.html"><strong>Inspect a sampled cube field</strong></a>. Compare a raycast with stored triangles and learn what survives saving a skewed scalar grid.</p></li>
+        <li><p><a href="tutorials-orbitals.html"><strong>Explore orbitals from a real calculation</strong></a>. Explore the HOMO and LUMO of a bicyclic hydrocarbon, compare volume and surface views, and save a smooth orbital mesh.</p></li>
+        <li><p><a href="tutorials-cube.html"><strong>Inspect a sampled cube field</strong></a>. Explore a scalar field around a 29-atom complex, compare volume and surface views, and save the grid with its mesh.</p></li>
         <li><p><a href="tutorials-ao.html"><strong>Read a large biological structure</strong></a>. Use MatterViz Pastel and ambient occlusion on 1AON, then switch to chain cartoons and isolate a chain.</p></li>
       </ol>
 
@@ -24,8 +24,8 @@ export default [
         <thead><tr><th scope="col">File</th><th scope="col">What it contains</th><th scope="col">Lesson</th></tr></thead>
         <tbody>
           <tr><td><a href="downloads/water.pdb" download>water.pdb</a> or <a href="downloads/water.xyz" download>water.xyz</a></td><td>Water geometry: 3 atoms and 2 display bonds after import; no quantum fields</td><td><a href="tutorials-first-molecule.html">First molecule</a></td></tr>
-          <tr><td><a href="downloads/water.molden" download>water.molden</a></td><td>Calculated RHF/cc-pVDZ water: 24 basis functions, 24 spatial orbitals, occupation-derived total density</td><td><a href="tutorials-orbitals.html">Orbitals</a></td></tr>
-          <tr><td><a href="downloads/signed-affine.cube" download>signed-affine.cube</a></td><td>A synthetic signed scalar field on a skewed 7 × 7 × 7 grid, with 2 hydrogen atoms</td><td><a href="tutorials-cube.html">Cube field</a></td></tr>
+          <tr><td><a href="downloads/bicyclic-c7h10.molden" download="bicyclic-c7h10.molden">bicyclic-c7h10.molden</a></td><td>C<sub>7</sub>H<sub>10</sub> hydrocarbon: 17 atoms, 125 basis functions, 118 orbitals and occupation-derived total density</td><td><a href="tutorials-orbitals.html">Orbitals</a></td></tr>
+          <tr><td><a href="downloads/complex-field.cube" download="complex-field.cube">complex-field.cube</a></td><td>An imported scalar field around a 29-atom complex: 84³ grid, 592,704 samples, values from 0 to 1</td><td><a href="tutorials-cube.html">Cube field</a></td></tr>
           <tr><td><a href="downloads/1AON.cif" download>1AON.cif</a> and <a href="downloads/matterviz-pastel.json" download>matterviz-pastel.json</a></td><td>A large deposited biological structure and an optional element-color palette</td><td><a href="tutorials-ao.html">Large structures and AO</a></td></tr>
         </tbody>
       </table></div>
@@ -86,103 +86,100 @@ export default [
   },
   {
     file: "tutorials-orbitals.html",
-    title: "Explore calculated orbitals",
+    title: "Explore frontier orbitals",
     description:
-      "Browse a real water wavefunction, preview one orbital without meshing, then generate and save signed isosurfaces.",
+      "Explore the HOMO and LUMO of a C7H10 hydrocarbon, compare volume and surface views, and save high-resolution orbital meshes.",
     section: "tutorials",
     number: "04.2",
     body: `
-      <h2 id="get-ready">Get ready</h2>
-      <p>Complete <a href="tutorials-first-molecule.html">Your first molecule</a> and download <a href="downloads/water.molden" download>water.molden</a>. This is a calculated RHF water wavefunction in the cc-pVDZ basis, exported by PySCF. It contains <strong>24 basis functions</strong>, <strong>24 spatial orbitals</strong>, and a total density derived from the listed occupations. Its test geometry is not an optimized structure.</p>
-      <p>Outcome: a sampled orbital preview, followed by saved signed mesh geometry that reopens without recalculation.</p>
+      <h2 id="get-ready">A closer look at a hydrocarbon</h2>
+      <p>Download <a href="downloads/bicyclic-c7h10.molden" download="bicyclic-c7h10.molden">bicyclic-c7h10.molden</a> and open it in EigenVista. This bicyclic C<sub>7</sub>H<sub>10</sub> molecule has <strong>17 atoms</strong>, <strong>125 basis functions</strong> and <strong>118 orbitals</strong>. The first 26 orbitals are doubly occupied. You will explore its frontier orbitals, switch between volume and surface rendering, and keep a high-resolution mesh.</p>
+      <figure><img src="assets/media/quantum-orbital.webp" alt="Signed HOMO isosurfaces around the carbon and hydrogen framework of a bicyclic C7H10 molecule" loading="eager" decoding="async"><figcaption>The hydrocarbon’s HOMO, MO 26 (26a), rendered at ±0.03 bohr<sup>−3/2</sup> on a 256³ grid. The two surface colors identify opposite signs of orbital amplitude.</figcaption></figure>
 
-      <h2 id="browse-orbitals">1. Open and browse the wavefunction</h2>
+      <h2 id="browse-orbitals">1. Find the frontier orbitals</h2>
       <ol>
-        <li><p>Use <strong>Open</strong> to choose <code>water.molden</code>. Check <strong>Molecular data</strong> for <strong>3 atoms</strong>, <strong>2 bonds</strong>, and <strong>24 basis functions</strong>. Review the import report and <strong>Provenance</strong>.</p></li>
-        <li><p>Under <strong>Quantum fields</strong>, click <strong>Orbitals (24)</strong>. The browser lists one-based row numbers, labels, spin, occupation, energy in hartree, and saved-mesh counts.</p></li>
-        <li><p>Use <strong>Search orbitals</strong> to locate <code>molden-mo-5</code>, or find row 5 in the unfiltered table. This orbital has occupation <strong>2.000</strong> and energy about <strong>−0.493063 hartree</strong>. The initial active field is this last occupied source-order orbital.</p></li>
-        <li><p>Inspect its checkbox, then close the browser with <strong>Close orbitals</strong>. Checking a row selects it for <strong>Generate selected</strong>; closing alone does not change the active field. For the preview below, click the corresponding <strong>MO 5 (A)</strong> field row under <strong>Quantum fields → Orbitals</strong> if another field is active.</p></li>
+        <li><p>Check <strong>Molecular data</strong> for <strong>17 atoms</strong> and <strong>125 basis functions</strong>. Choose <strong>Ball and stick</strong> under <strong>Representation</strong> to keep the molecular framework visible.</p></li>
+        <li><p>In <strong>Quantum fields</strong>, click <strong>Orbitals (118)</strong>. The orbital browser lists row number, label, spin, occupation and energy.</p></li>
+        <li><p>Find row <strong>26</strong>, labelled <strong>MO 26 (26a)</strong>: the HOMO has occupation <strong>2.000</strong> and energy approximately <strong>−0.209458 hartree</strong>. Row <strong>27</strong> is the zero-occupation LUMO. Use <strong>Search orbitals</strong> if needed.</p></li>
+        <li><p>Close the browser with <strong>Close orbitals</strong> and click <strong>MO 26 (26a)</strong> in the orbital field list to make it the active field. The browser’s checkboxes select orbitals for mesh generation; clicking a field row selects the field for a preview.</p></li>
       </ol>
-      <div class="notice"><p><strong>Checkpoint:</strong> the file offers 24 orbitals, including zero-occupation virtual orbitals. The <strong>Saved</strong> column counts meshes in the current document’s memory, not files written to disk. There is one active field for sampled previews.</p></div>
 
-      <h2 id="preview-without-meshes">2. Preview before making a mesh</h2>
+      <h2 id="preview-without-meshes">2. Explore the sampled field</h2>
       <ol>
-        <li><p>In <strong>Field rendering</strong>, set <strong>Grid resolution</strong> to <strong>96³</strong> and use a positive <strong>Isovalue</strong> of <strong>0.05</strong> to match the illustrated orbital. Orbital isovalues use bohr<sup>−3/2</sup>.</p></li>
-        <li><p>Choose <strong>Mode → Sampled raycast preview</strong>. Wait for sampling to finish. This creates a transient display grid and draws an isosurface from it; it does not create saved mesh triangles.</p></li>
-        <li><p>Choose <strong>Volume preview</strong>. It reuses the current sampled grid. Set <strong>Sampling quality → Fine</strong> to match the illustrated view, or use <strong>Standard</strong> if navigation is slow. This changes display sampling along the ray without recalculating the scientific grid.</p></li>
-        <li><p>Rotate the scene and use <strong>Fit scene</strong>. Under <strong>Appearance</strong>, adjust positive/negative colors or opacity if you wish. The colors identify the signs of the orbital value, not positive and negative charge.</p></li>
+        <li><p>In <strong>Field rendering</strong>, set <strong>Isovalue</strong> to <strong>0.03</strong> and <strong>Grid resolution</strong> to <strong>256³</strong> to match the illustrations. A 128³ grid is useful for a quicker first exploration.</p></li>
+        <li><p>Choose <strong>Mode → Sampled raycast preview</strong>. Wait for the field to finish sampling, then rotate and zoom to inspect its lobes.</p></li>
+        <li><p>Switch to <strong>Volume preview</strong> and choose <strong>Sampling quality → Fine</strong>. The volume reuses the same grid; Fine increases the display samples taken along each viewing ray.</p></li>
+        <li><p>Use <strong>Appearance</strong> to choose positive and negative colors and adjust opacity. Keep enough contrast between the field, the atoms and the background to read the molecular framework clearly.</p></li>
       </ol>
-      <figure><img src="assets/media/water-orbital-volume.webp" alt="Calculated water orbital displayed in the EigenVista volume preview, with differently colored signed regions." loading="lazy" decoding="async"><figcaption>MO 5 (A) at isovalue 0.05 bohr<sup>−3/2</sup>, with a 96³ grid and Fine preview sampling. This capture was made after meshing; the sampled preview itself does not require saved meshes.</figcaption></figure>
-      <p><strong>Checkpoint:</strong> the sampled field is visible while the saved-surface count is still zero. Increasing Sampling quality cannot recover detail absent from the calculation grid.</p>
+      <figure><img src="assets/media/quantum-volume.webp" alt="The C7H10 HOMO displayed with translucent volume rendering around its molecular framework" loading="lazy" decoding="async"><figcaption>The same MO 26 field in Volume preview, with isovalue 0.03 bohr<sup>−3/2</sup>, a 256³ grid and Fine sampling.</figcaption></figure>
+      <p>Raycast and volume previews use the sampled grid directly. Generate a mesh when you want to keep an isosurface as geometry, or apply a custom surface shader.</p>
 
-      <h2 id="generate-surfaces">3. Generate signed surfaces</h2>
+      <h2 id="generate-surfaces">3. Keep a smooth signed surface</h2>
       <ol>
-        <li><p>Open <strong>Orbitals (24)</strong> again. Use <strong>Clear orbital selection</strong>, find row 5, and check only that orbital. Confirm a positive <strong>Isovalue</strong> of <strong>0.05</strong> and <strong>Grid resolution</strong> of <strong>96³</strong>.</p></li>
-        <li><p>Click <strong>Generate selected</strong>. The browser closes. Wait for the footer’s completed result after sampling, meshing, and validation. The app attempts both positive and negative isovalues; only nonempty surfaces are added. The completed preview grid can be reused when field and resolution are unchanged.</p></li>
-        <li><p>On success, the view switches to <strong>Isosurface mesh</strong>. Inspect the entries and triangle counts under <strong>Saved surfaces</strong>. Use an eye control to hide and show one signed mesh. Click a mesh to inspect its label and triangle count.</p></li>
+        <li><p>Open <strong>Orbitals (118)</strong>, click <strong>Clear orbital selection</strong> and check row <strong>26</strong>. Keep <strong>Isovalue</strong> at <strong>0.03</strong> and <strong>Grid resolution</strong> at <strong>256³</strong>.</p></li>
+        <li><p>Click <strong>Generate selected</strong>. Follow the sampling and meshing progress until the completed result appears. A matching sampled grid can be reused.</p></li>
+        <li><p>The view switches to <strong>Isosurface mesh</strong>. Under <strong>Saved surfaces</strong>, use the eye controls to view each signed part separately, or show both to see the complete orbital.</p></li>
       </ol>
-      <figure><img src="assets/media/water-orbital-mesh.webp" alt="Positive and negative signed meshes of a calculated water orbital in EigenVista." loading="lazy" decoding="async"><figcaption>MO 5 (A) meshes generated at ±0.05 bohr<sup>−3/2</sup> on a 96³ grid. Meshes and their generation metadata are retained when you Save the document.</figcaption></figure>
-      <p>For another isovalue, change the magnitude and generate again. This replaces that orbital’s meshes; changing the control alone leaves existing meshes unchanged. Save separate documents to retain different isovalues of the same orbital. To generate several orbitals later, check at most 32 per batch; this makes separate orbital meshes.</p>
+      <p>For the illustrated finish, choose <strong>Surface shading → Blinn-Phong</strong>, set <strong>Opacity</strong> to <strong>100%</strong>, <strong>Positive color</strong> to <code>#75e1df</code> and <strong>Negative color</strong> to <code>#ffa1bc</code>. Use <code>#17232d</code> for the background. Rotate and zoom until the cage and lobes fill the view.</p>
+      <p>Try another isovalue to see how the orbital’s extent changes. Generating again replaces that orbital’s saved meshes; changing the control alone leaves the existing geometry intact. Save separate documents to retain several isovalues of one orbital.</p>
 
-      <h2 id="save-and-reopen">4. Save and reopen</h2>
+      <h2 id="compare-lumo">4. Compare the HOMO and LUMO</h2>
+      <p>Hide the HOMO meshes under <strong>Saved surfaces</strong>, select row 27’s field in <strong>Quantum fields</strong>, and choose a sampled preview. Keep the camera, grid resolution and isovalue unchanged for a useful comparison. Look at how the lobes and their signs change around the same carbon framework.</p>
+      <p>To keep both orbitals, check rows 26 and 27 in the orbital browser and choose <strong>Generate selected</strong>. EigenVista creates separate meshes for each orbital. Use the saved-surface eye controls to switch between their views.</p>
+
+      <figure><a href="assets/media/quantum-lumo.webp"><img src="assets/media/quantum-lumo.webp" alt="The C7H10 LUMO with contrasting teal and pink lobes and the carbon framework between them" loading="lazy"></a><figcaption>MO 27 (27a), the LUMO, at the same ±0.03 isovalues and 256³ resolution. Opaque surfaces give the two phases clear boundaries.</figcaption></figure>
+
+      <h2 id="save-and-reopen">5. Save and take the view further</h2>
       <ol>
-        <li><p>Click <strong>Save</strong> and choose a new filename such as <code>water-orbital.eigenvista</code>. Finish the save, then reopen that file with <strong>Open</strong>.</p></li>
-        <li><p>Check the basis/orbital counts and <strong>Saved surfaces</strong>. The document opens in mesh mode with its saved triangles available immediately, without the original Molden file or a new orbital calculation.</p></li>
-        <li><p>Select the desired orbital and choose a sampled mode to prepare its preview again. The transient sampled grid, camera, active render mode, Sampling quality, and orbital checkboxes are not stored in the file.</p></li>
+        <li><p>Click <strong>Save</strong> and choose a filename such as <code>c7h10-frontier-orbitals.eigenvista</code>. Reopen it to display the saved meshes immediately, with the molecular and orbital data alongside them.</p></li>
+        <li><p>Choose a sampled mode to prepare a volume or raycast again. Preview grids and camera framing are session choices; the saved mesh retains its generation isovalue and resolution.</p></li>
+        <li><p>Use <strong>Export image</strong> or <strong>Export image with transparent background</strong> to keep the current view.</p></li>
       </ol>
+      <p>For an envelope around the molecular framework, select <strong>Occupation-derived total density (listed orbitals)</strong> under <strong>Density matrices</strong>. Then try an X-ray finish or reveal the interior with a clipping shader.</p>
+      <div class="next-step"><span>Next</span><a href="surface-shaders.html">Shape the light with surface shaders →</a><a href="reference-fields.html">Field rendering reference →</a></div>
 
       <h2 id="if-something-differs">If something differs</h2>
-      <p>If <strong>Generate selected</strong> is disabled, check one orbital and a finite positive isovalue. Clear a search filter if you cannot find a row; filtering does not clear checks outside the visible list. If a surface is empty, reduce the isovalue magnitude or try another field. If sampling is slow, use a lower resolution; <strong>Cancel</strong> keeps prior completed surfaces and the last completed preview.</p>
-      <p>Next, try the <strong>Occupation-derived total density (listed orbitals)</strong> field under <strong>Density matrices</strong>. Its nonnegative values may produce only a positive surface. Read the <a href="reference-fields.html">field reference</a>, or continue with a <a href="tutorials-cube.html">field already sampled in a cube file</a>.</p>
+      <p>If an orbital is hard to find, clear the search filter and use its row number. If <strong>Generate selected</strong> is disabled, check an orbital and enter a positive isovalue. For an empty surface, lower the isovalue magnitude or choose another orbital. Use a smaller grid for faster exploration; <strong>Cancel</strong> retains completed surfaces and the last completed preview.</p>
     `,
   },
   {
     file: "tutorials-cube.html",
-    title: "Inspect a sampled cube field",
+    title: "Explore a cube field",
     description:
-      "Open a signed affine cube, compare sampled raycasting with meshes, and preserve its original scalar values when saving.",
+      "Explore an imported scalar field around a 29-atom complex, compare raycast and volume views, and save the original grid with an isosurface mesh.",
     section: "tutorials",
     number: "04.3",
     body: `
-      <h2 id="get-ready">Get ready</h2>
-      <p>Download <a href="downloads/signed-affine.cube" download>signed-affine.cube</a>. You need only EigenVista and this file. A cube already contains sampled scalar values, so no basis functions or orbital coefficients are needed.</p>
-      <div class="notice"><p>This example is a mathematical rendering test, not a quantum-chemistry result. Its <strong>2 hydrogen atoms</strong> are 1.4 bohr apart, producing <strong>1 display bond</strong>. Its field has positive and negative lobes, but it is not a calculated hydrogen orbital or electron density.</p></div>
+      <h2 id="get-ready">A field around a molecular complex</h2>
+      <p>Download <a href="downloads/complex-field.cube" download="complex-field.cube">complex-field.cube</a>. It contains <strong>29 atoms</strong> and an <strong>84 × 84 × 84</strong> grid: <strong>592,704 scalar samples</strong> ranging from <strong>0 to 1</strong>. The source comments do not specify the scalar quantity or its units.</p>
+      <p>You will explore this field with raycast and volume rendering, then generate a mesh and save it with the original grid.</p>
+      <figure><img src="assets/media/cube-raycast.webp" alt="An imported scalar field drawn around the framework of a 29-atom molecular complex using sampled raycasting" loading="eager" decoding="async"><figcaption>The imported field at isovalue 0.65, using its 84³ source grid and Fine raycast sampling.</figcaption></figure>
 
-      <h2 id="understand-the-data">What the example contains</h2>
-      <p>The <strong>7 × 7 × 7</strong> grid has origin <code>(−3.6, −3.3, −3)</code> and step vectors <code>(1, 0, 0)</code>, <code>(0.2, 1, 0)</code>, and <code>(0, 0.1, 1)</code>, in bohr. Those off-axis components make it skewed. At each grid position it stores:</p>
-      <p><code>f(x, y, z) = 0.8 (x + 0.25 y) exp[−0.7 (x² + 0.8 y² + 1.2 z²)]</code></p>
-      <p>The scalar is defined by that formula; it has no inferred physical units. The example’s <a href="downloads/README.txt">source notes</a> distinguish it from the calculated Molden sample.</p>
-
-      <h2 id="open-and-preview">1. Open and preview the grid</h2>
+      <h2 id="open-and-preview">1. Open and explore the grid</h2>
       <ol>
-        <li><p>Click <strong>Open</strong> and choose <code>signed-affine.cube</code>. Check <strong>2 atoms</strong> and <strong>1 bond</strong> in <strong>Molecular data</strong>. The field appears under <strong>Quantum fields → Sampled fields</strong>.</p></li>
-        <li><p>Wait for the initial <strong>Volume preview</strong>. It uses the imported field without generating meshes. Choose <strong>Sampled raycast preview</strong> under <strong>Field rendering → Mode</strong> to see an isovalue boundary instead.</p></li>
-        <li><p>Use the initial positive <strong>Isovalue</strong> of <strong>0.08</strong> to start. Rotate and use <strong>Fit scene</strong> to inspect the two signs. Then change the isovalue magnitude: a lower level usually encloses more of a localized lobe; a level outside the sampled range produces no surface.</p></li>
-        <li><p>Try <strong>Sampling quality → Fine</strong>, then return to <strong>Standard</strong>. This adjusts ray sampling, not the original 343 scalar samples.</p></li>
+        <li><p>Use <strong>Open</strong> to load <code>complex-field.cube</code>. Check <strong>29 atoms</strong> under <strong>Molecular data</strong>; bonds are generated automatically. The field appears under <strong>Quantum fields → Sampled fields</strong>.</p></li>
+        <li><p>After the initial preview is ready, set <strong>Grid resolution</strong> to <strong>96³</strong>. The app retains this smaller 84³ source grid at its original sampling.</p></li>
+        <li><p>Under <strong>Field rendering → Mode</strong>, choose <strong>Sampled raycast preview</strong>. Set <strong>Isovalue</strong> to <strong>0.65</strong> and <strong>Sampling quality</strong> to <strong>Fine</strong> to match the illustration.</p></li>
+        <li><p>Rotate and zoom to inspect the field around the atomic framework. Try isovalues between <strong>0.65</strong> and <strong>0.75</strong> to see how the boundary changes.</p></li>
+        <li><p>Switch to <strong>Volume preview</strong> for a translucent view through the field. Both preview modes use the imported grid directly.</p></li>
       </ol>
-      <figure><img src="assets/media/cube-raycast.webp" alt="The mathematical signed affine cube displayed as positive and negative sampled raycast regions around two hydrogen atoms." loading="lazy" decoding="async"><figcaption>Sampled raycasting of the synthetic signed-affine cube in the actual application. Different field colors distinguish positive and negative scalar values.</figcaption></figure>
-      <p><strong>Checkpoint:</strong> you can see the field before any entry exists under <strong>Saved surfaces</strong>. The atom positions and display bond come from geometry, independently of the scalar values.</p>
 
-      <h2 id="make-meshes">2. Make and compare meshes</h2>
+      <h2 id="make-meshes">2. Keep an isosurface mesh</h2>
       <ol>
-        <li><p>Return to an <strong>Isovalue</strong> of <strong>0.08</strong>, or use a positive magnitude that shows both signed lobes. Set <strong>Grid resolution</strong> to <strong>40³</strong>. The control bounds sampling; this small 7³ source is not upsampled to 40³.</p></li>
-        <li><p>Click <strong>Generate surfaces</strong> and wait for successful completion. Inspect the positive and negative entries under <strong>Saved surfaces</strong>, then choose <strong>Isosurface mesh</strong> if needed.</p></li>
-        <li><p>Switch between <strong>Isosurface mesh</strong> and <strong>Sampled raycast preview</strong>. In mesh mode, use the eye controls to show or hide individual saved meshes. In sampled mode, the selected field’s sampled display replaces its meshes visually.</p></li>
-        <li><p>Change the isovalue in raycast mode and observe the preview. Switch back to mesh mode: the saved geometry still reflects its generation isovalue. Generate again only when you want to replace it.</p></li>
+        <li><p>Choose the isovalue you want to retain, or return to <strong>0.65</strong>. Keep <strong>Grid resolution</strong> at <strong>96³</strong>.</p></li>
+        <li><p>Click <strong>Generate surfaces</strong> and wait for completion. Choose <strong>Isosurface mesh</strong> to inspect the stored geometry under <strong>Saved surfaces</strong>.</p></li>
+        <li><p>Compare the mesh with <strong>Sampled raycast preview</strong>. Changing the raycast isovalue redraws the preview immediately; the stored mesh keeps the isovalue used to generate it.</p></li>
       </ol>
-      <p><strong>Checkpoint:</strong> raycast changes are immediate display changes, while saved meshes change only after explicit generation. A finer display setting cannot recover detail that the original coarse cube never sampled.</p>
+      <p>Generate again to replace the saved mesh with a different boundary. For a new finish, apply an <a href="surface-shaders.html">X-ray or clipping surface shader</a> to the mesh.</p>
 
-      <h2 id="save-the-original-field">3. Save the original field with the meshes</h2>
+      <h2 id="save-the-original-field">3. Save the field and the result</h2>
       <ol>
-        <li><p>Save a new file such as <code>signed-field.eigenvista</code>, then reopen it using <strong>Open</strong>.</p></li>
-        <li><p>Confirm that the atoms, bond, sampled field, and saved meshes remain available. Cached meshes open in mesh mode without regeneration.</p></li>
-        <li><p>Choose <strong>Volume preview</strong> or <strong>Sampled raycast preview</strong> again. The app prepares a display grid from the stored original scalar field.</p></li>
+        <li><p>Use <strong>Save</strong> to create <code>complex-field.eigenvista</code>.</p></li>
+        <li><p>Reopen it with <strong>Open</strong>. The atoms, bonds, original scalar field and generated mesh remain together; the saved geometry is available immediately.</p></li>
+        <li><p>Choose <strong>Volume preview</strong> or <strong>Sampled raycast preview</strong> to explore the stored field again, then export an image of your chosen view.</p></li>
       </ol>
-      <p>Save retains the original f64 scalar values and affine grid geometry alongside generated meshes. Display sampling and current meshing use f32; they do not replace the original field in the document. Camera, active render mode, display resolution, and transient display samples are session state.</p>
-
-      <h2 id="if-something-differs">If something differs</h2>
-      <p>If no field is visible, try <strong>Fit scene</strong>, check the isovalue, and read any preview error. An all-zero grid cannot produce a nonzero isosurface. An unsupported multi-field or alternative-unit cube must be exported as one field in the supported bohr profile; renaming the file does not convert it.</p>
-      <p>Sampled raycasting can miss tangencies or crossings, volume intersections are approximate, and marching cubes is not topology-certified. See the <a href="reference-fields.html">field reference</a> and <a href="reference-files.html">file reference</a> before using your own cube data. For a large atomic model, continue with <a href="tutorials-ao.html">1AON and ambient occlusion</a>.</p>
+      <p>The native document keeps the original samples and grid alongside the generated geometry. Camera framing and preview settings are session choices, so restore them when composing another view.</p>
+      <div class="next-step"><span>Explore further</span><a href="reference-fields.html#cube">Cube field reference →</a><a href="tutorials-ao.html">Large structures and ambient occlusion →</a></div>
     `,
   },
   {
@@ -205,7 +202,7 @@ export default [
         <li><p>Expand <strong>Atom colours</strong>, click <strong>Colours file…</strong>, and choose <code>matterviz-pastel.json</code>. Confirm that its filename replaces the built-in palette label. The lighter colors make shaded contacts easier to read.</p></li>
         <li><p>Click <strong>Fit scene</strong>. Rotate to a useful view of the complex, then leave the camera unchanged for the comparison.</p></li>
       </ol>
-      <div class="notice"><p><strong>Checkpoint:</strong> you see atomic spheres colored by element with the Pastel palette. 1AON contains structure data, so <strong>No quantum fields</strong> is expected. No orbital or density is being calculated.</p></div>
+      <div class="notice"><p><strong>Checkpoint:</strong> you see atomic spheres colored by element with the Pastel palette.</p></div>
 
       <h2 id="compare-ao">2. Compare normal lighting and ambient occlusion</h2>
       <ol>

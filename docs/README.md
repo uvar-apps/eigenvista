@@ -6,7 +6,9 @@ with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
 The [public user website](https://uvar-apps.github.io/eigenvista/) presents
-installation, a detailed manual, worked tutorials and a gallery. Its prepared
+installation, a detailed manual, worked tutorials, an illustrated
+[surface-shader guide](https://uvar-apps.github.io/eigenvista/surface-shaders.html)
+and a gallery. Its prepared
 static files live in `site/` on `main`; [website maintenance](website.md) covers
 content updates, authentic capture provenance, local checks and the Pages-only
 publisher. Application builds/tests continue to run locally before pushing.

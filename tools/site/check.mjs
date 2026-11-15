@@ -51,7 +51,7 @@ const html = new Map(
       fs.readFileSync(path.join(site, row.path), "utf8"),
     ]),
 );
-assert.equal(html.size, 15, "Complete website route inventory");
+assert.equal(html.size, 16, "Complete website route inventory");
 const ids = new Map(
   [...html].map(([name, text]) => {
     const all = [...text.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
@@ -131,7 +131,7 @@ assert.throws(() =>
 const downloaded = JSON.parse(
   fs.readFileSync(path.join(site, "downloads/provenance.json")),
 );
-assert.equal(downloaded.files.length, 8);
+assert.equal(downloaded.files.length, 19);
 for (const row of downloaded.files) {
   const bytes = fs.readFileSync(path.join(site, "downloads", row.file));
   assert.equal(bytes.length, row.bytes);
@@ -173,7 +173,7 @@ assert(media && typeof media === "object", "Actual image provenance exists");
 assert.equal(media.application.version, release.version);
 assert.equal(media.application.sourceRevision, release.source);
 assert.deepEqual(media.errors, []);
-assert.equal(media.images.length, 10);
+assert.equal(media.images.length, 15);
 for (const row of media.images) {
   assert(/^[a-z0-9-]+\.webp$/.test(row.file), row.file);
   const bytes = fs.readFileSync(path.join(site, "assets/media", row.file));
@@ -191,9 +191,14 @@ for (const row of media.images) {
 const allowedInputs = new Set([
   "fixtures/cif/1AON.cif",
   "fixtures/large-structure/4PJ1.pdb",
-  "fixtures/molden/water-rhf-ccpvdz.molden",
-  "fixtures/molden/water-rhf-ccpvdz.json",
-  "fixtures/cube/signed-affine.cube",
+  "tools/site/examples/bicyclic-c7h10.molden",
+  "tools/site/examples/complex-field.cube",
+  "shaders/x-ray.vert",
+  "shaders/x-ray.frag",
+  "shaders/x-ray.params",
+  "app/shaders/surface-clip.vert",
+  "app/shaders/surface-clip.frag",
+  "app/shaders/surface-clip.params",
   "palettes/matterviz-pastel.json",
   "palettes/LICENSE-MatterViz.txt",
 ]);
@@ -214,7 +219,7 @@ for (const pair of media.comparisons) {
 const mediaFiles = files.filter(
   (row) => row.path.startsWith("assets/media/") && row.path.endsWith(".webp"),
 );
-assert.equal(mediaFiles.length, 10, "All planned genuine captures");
+assert.equal(mediaFiles.length, 15, "All curated genuine captures");
 const expectedMedia = [
   "1aon-ao-off",
   "1aon-ao-on",
@@ -222,8 +227,13 @@ const expectedMedia = [
   "4pj1-ao-on",
   "1aon-cartoon-chain",
   "1aon-chain-secondary",
-  "water-orbital-mesh",
-  "water-orbital-volume",
+  "quantum-orbital",
+  "quantum-lumo",
+  "quantum-volume",
+  "quantum-xray",
+  "quantum-unclipped",
+  "quantum-clipped",
+  "shader-controls",
   "cube-raycast",
   "app-overview",
 ];

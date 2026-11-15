@@ -1,5 +1,9 @@
 EigenVista public tutorial examples
 
+bicyclic-c7h10.molden: 17-atom C7H10 molecular calculation, 125 basis functions and 118 listed orbitals. Source and orbital notes: README-quantum-example.txt.
+complex-field.cube: original 29-atom, 84x84x84 scalar grid from Molekel data/elf_pic.cube. Source header does not identify scalar meaning/units.
+shaders/: ready-to-load X-ray and clipping shader pairs and parameters; original attribution and GPL notice are included.
+
 water.pdb / water.xyz: synthetic three-atom water geometry (two inferred display bonds).
 water.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and 24 spatial orbitals. See fixtures/molden/README.md in the public repository for scientific provenance.
 signed-affine.cube: synthetic signed affine field, two atoms/one bond, skewed 7x7x7 grid. It is a mathematical rendering fixture, not a quantum-chemistry calculation.

@@ -31,6 +31,43 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Website content and imagery: #76, 15 November 2026
+
+The user rejected the initial website's content/visual quality: the reference
+screenshot was stretched, quantum imagery used weak demonstration systems, and
+custom surface shaders were buried. #76 tracks the revision. The CSS now preserves
+natural image height as figures resize; the 1920×1280 workspace image renders at
+994×663 on desktop and 348×232 on phone, with full-size access.
+
+The site now has 16 pages, with Shaders in the main navigation and a practical
+illustrated shader guide. The homepage and gallery lead with a real C₇H₁₀ density
+surface, X-ray transparency and a clipped view of the same geometry. The guide
+provides the molecular file, shader pairs, parameter files and exact settings;
+a dedicated close-up keeps the live controls readable. HOMO/LUMO meshes and a
+volume view use a 17-atom, 125-basis, 118-orbital Molden input at 256³. The cube
+lesson now uses the original 29-atom, 84³ grid instead of the two-atom test field.
+Neither source is assigned a method or scalar meaning absent from its metadata.
+
+Fifteen curated images include nine new high-resolution captures and the six
+retained AO/biological images. Actual application PNG exports were composed and
+reviewed at full size and in page layouts; opaque phase surfaces replaced
+transparency artifacts. Shader controls use a real panel screenshot at DPR 2.
+The original AO/Pastel views remain unchanged. All new inputs are original-byte
+public examples with source/license notes. `tools/site/capture-quantum.mjs`
+records the real-UI capture workflow. Evidence is under
+`tmp/2026-11-15-website-quality/`.
+
+Application sources, version 0.7.2, icon, scientific fixtures, palette values,
+release/tag identities and redistributables remain unchanged. Fresh local site
+checks passed: all 16 routes at desktop/390/320 px in Chromium and WebKit (96
+route/viewport cases), natural rendered figure aspect ratios, shader filtering,
+existing interactions, deterministic output, exact original downloads/media and
+public-document links. Evidence includes `browser-UIEeBH/RESULT.json`,
+`static-push.log`, the reviewed page screenshots and source/capture records.
+Source push and public deployment of #76 are pending at this snapshot; record
+their outcome before completing the work. Original website publication and first
+editorial correction below remain historical evidence.
+
 ## User website: #75, 15 November 2026
 
 The user authorized a public supporting website and confirmed the repository is
