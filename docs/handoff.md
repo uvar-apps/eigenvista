@@ -49,7 +49,13 @@ was clear. Evidence: `tmp/2026-11-15-attribution/`,
 `tmp/2026-11-15-website/docs-check-source-V2jAdl/RESULT.json`.
 This is a documentation/presentation follow-up under #77; the app, version 0.7.2,
 release artifacts, scientific data, palettes and media are unchanged. App/native
-tests were not rerun for this change. Publication/readback follows these checks.
+tests were not rerun for this change. Source
+`f94459986f07ecb32398a18d27b4ef496054aa22` is published by
+[Pages deployment 43714570437](https://github.com/uvar-apps/eigenvista/actions/runs/43714570437).
+Public readback verified the exact wording in all 16 footers, About's author
+section, the bare homepage and the GitHub README, plus matching generated pages,
+stylesheet and search index. See `tmp/2026-11-15-attribution/public.json`.
+The owned site preview was stopped after verification; user servers were untouched.
 
 ## Project discovery: #77, 15 November 2026
 
