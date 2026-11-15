@@ -570,6 +570,11 @@ While active, atoms and bonds use **Lambert shading plus SSAO**, without specula
 highlights. **AO strength** controls the effect (0–100%); zero restores the normal
 view.
 
+For best results with ambient occlusion, use the **MatterViz Pastel** atom-color
+scheme, `matterviz-pastel.json`. Load it through **Atom colours → Colours file…**
+from `palettes/` in the source checkout or `Palettes/` in the tester ZIP. For
+biological structures, choose **Coloring → Element** to use the palette.
+
 **Automatic AO radius** starts checked. It chooses a neighborhood from the atom
 coordinates (1.5–30 Å), so a large protein gets broader shading than a small
 molecule. Camera zoom, field grids and representation changes do not change

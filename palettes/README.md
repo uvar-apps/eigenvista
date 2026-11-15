@@ -7,6 +7,10 @@ Two ready-to-load adaptations of the [MatterViz element colour schemes](https://
 - [MatterViz Pastel](matterviz-pastel.json): lighter colours, with pale pink
   oxygen (`#ffb3b3`).
 
+For best results with molecular ambient occlusion, use
+[MatterViz Pastel](matterviz-pastel.json). Load it using the steps below, then
+enable **Appearance → Ambient occlusion**.
+
 ## Load a palette
 
 1. Open **Atom colours → Colours file…** in EigenVista.

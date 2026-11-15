@@ -31,6 +31,14 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Documentation follow-up: 15 November 2026
+
+The user guide's ambient-occlusion section and `palettes/README.md` now recommend
+**MatterViz Pastel** (`matterviz-pastel.json`) for best results with molecular AO,
+including how to load it. This is a documentation-only clarification; application
+code and version remain unchanged, and runtime tests are not rerun. No tag,
+release or redistributable is changed by this follow-up.
+
 ## Source version 0.7.2
 
 Published **2026-11-15T07:05:08Z** as a development
