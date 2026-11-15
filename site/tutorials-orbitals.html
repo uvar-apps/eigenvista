@@ -6,7 +6,7 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
 <meta property="og:title" content="Explore frontier orbitals — EigenVista"><meta property="og:description" content="Explore the HOMO and LUMO of a C7H10 hydrocarbon, compare volume and surface views, and save high-resolution orbital meshes."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/tutorials-orbitals.html">
 <meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=5fb1fdfc2330">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
@@ -16,7 +16,7 @@
 <main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04.2 / EIGENVISTA FIELD MANUAL</p><h1>Explore frontier orbitals<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#get-ready">A closer look at a hydrocarbon</a><a href="#browse-orbitals">1. Find the frontier orbitals</a><a href="#preview-without-meshes">2. Explore the sampled field</a><a href="#generate-surfaces">3. Keep a smooth signed surface</a><a href="#compare-lumo">4. Compare the HOMO and LUMO</a><a href="#save-and-reopen">5. Save and take the view further</a><a href="#if-something-differs">If something differs</a></aside><article class="prose">
       <h2 id="get-ready">A closer look at a hydrocarbon</h2>
       <p>Download <a href="downloads/bicyclic-c7h10.molden" download="bicyclic-c7h10.molden">bicyclic-c7h10.molden</a> and open it in EigenVista. This bicyclic C<sub>7</sub>H<sub>10</sub> molecule has <strong>17 atoms</strong>, <strong>125 basis functions</strong> and <strong>118 orbitals</strong>. The first 26 orbitals are doubly occupied. You will explore its frontier orbitals, switch between volume and surface rendering, and keep a high-resolution mesh.</p>
-      <figure><img src="assets/media/quantum-orbital.webp" alt="Signed HOMO isosurfaces around the carbon and hydrogen framework of a bicyclic C7H10 molecule" loading="eager" decoding="async" width="2050" height="1671"><figcaption>The hydrocarbon’s HOMO, MO 26 (26a), rendered at ±0.03 bohr<sup>−3/2</sup> on a 256³ grid. The two surface colors identify opposite signs of orbital amplitude.</figcaption></figure>
+      <figure><img src="assets/media/quantum-orbital.webp?v=7776c8cfd84c" alt="Signed HOMO isosurfaces around the carbon and hydrogen framework of a bicyclic C7H10 molecule" loading="eager" decoding="async" width="2050" height="1671"><figcaption>The hydrocarbon’s HOMO, MO 26 (26a), rendered at ±0.03 bohr<sup>−3/2</sup> on a 256³ grid. The two surface colors identify opposite signs of orbital amplitude.</figcaption></figure>
 
       <h2 id="browse-orbitals">1. Find the frontier orbitals</h2>
       <ol>
@@ -33,7 +33,7 @@
         <li><p>Switch to <strong>Volume preview</strong> and choose <strong>Sampling quality → Fine</strong>. The volume reuses the same grid; Fine increases the display samples taken along each viewing ray.</p></li>
         <li><p>Use <strong>Appearance</strong> to choose positive and negative colors and adjust opacity. Keep enough contrast between the field, the atoms and the background to read the molecular framework clearly.</p></li>
       </ol>
-      <figure><img src="assets/media/quantum-volume.webp" alt="The C7H10 HOMO displayed with translucent volume rendering around its molecular framework" loading="lazy" decoding="async" width="2050" height="1671"><figcaption>The same MO 26 field in Volume preview, with isovalue 0.03 bohr<sup>−3/2</sup>, a 256³ grid and Fine sampling.</figcaption></figure>
+      <figure><img src="assets/media/quantum-volume.webp?v=2d3421609768" alt="The C7H10 HOMO displayed with translucent volume rendering around its molecular framework" loading="lazy" decoding="async" width="2050" height="1671"><figcaption>The same MO 26 field in Volume preview, with isovalue 0.03 bohr<sup>−3/2</sup>, a 256³ grid and Fine sampling.</figcaption></figure>
       <p>Raycast and volume previews use the sampled grid directly. Generate a mesh when you want to keep an isosurface as geometry, or apply a custom surface shader.</p>
 
       <h2 id="generate-surfaces">3. Keep a smooth signed surface</h2>
@@ -49,7 +49,7 @@
       <p>Hide the HOMO meshes under <strong>Saved surfaces</strong>, select row 27’s field in <strong>Quantum fields</strong>, and choose a sampled preview. Keep the camera, grid resolution and isovalue unchanged for a useful comparison. Look at how the lobes and their signs change around the same carbon framework.</p>
       <p>To keep both orbitals, check rows 26 and 27 in the orbital browser and choose <strong>Generate selected</strong>. EigenVista creates separate meshes for each orbital. Use the saved-surface eye controls to switch between their views.</p>
 
-      <figure><a href="assets/media/quantum-lumo.webp"><img src="assets/media/quantum-lumo.webp" alt="The C7H10 LUMO with contrasting teal and pink lobes and the carbon framework between them" loading="lazy" width="2050" height="1671"></a><figcaption>MO 27 (27a), the LUMO, at the same ±0.03 isovalues and 256³ resolution. Opaque surfaces give the two phases clear boundaries.</figcaption></figure>
+      <figure><a href="assets/media/quantum-lumo.webp?v=f3974215423e"><img src="assets/media/quantum-lumo.webp?v=f3974215423e" alt="The C7H10 LUMO with contrasting teal and pink lobes and the carbon framework between them" loading="lazy" width="2050" height="1671"></a><figcaption>MO 27 (27a), the LUMO, at the same ±0.03 isovalues and 256³ resolution. Opaque surfaces give the two phases clear boundaries.</figcaption></figure>
 
       <h2 id="save-and-reopen">5. Save and take the view further</h2>
       <ol>

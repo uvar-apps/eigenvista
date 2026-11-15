@@ -62,10 +62,14 @@ release/tag identities and redistributables remain unchanged. Fresh local site
 checks passed: all 16 routes at desktop/390/320 px in Chromium and WebKit (96
 route/viewport cases), natural rendered figure aspect ratios, shader filtering,
 existing interactions, deterministic output, exact original downloads/media and
-public-document links. Evidence includes `browser-UIEeBH/RESULT.json`,
-`static-push.log`, the reviewed page screenshots and source/capture records.
-Source push and public deployment of #76 are pending at this snapshot; record
-their outcome before completing the work. Original website publication and first
+public-document links. Evidence includes `tmp/2026-11-15-website/browser-tv6B1g/RESULT.json`,
+`static-cache.log`, the reviewed page screenshots and source/capture records.
+Content revision `21bcf54` was pushed and published by [Pages deployment
+43701982761](https://github.com/uvar-apps/eigenvista/actions/runs/43701982761).
+All 61 served files matched the locally reviewed bytes. The follow-up adds
+content hashes to image/stylesheet URLs so returning visitors receive the new
+pictures and proportion fixes despite Pages' ten-minute asset cache. The final
+publication outcome is tracked in #76. Original website publication and first
 editorial correction below remain historical evidence.
 
 ## User website: #75, 15 November 2026

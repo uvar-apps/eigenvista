@@ -56,12 +56,24 @@ const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );
 const dimensions = new Map(media.images.map((row) => [row.file, row]));
+const cssVersion = createHash("sha256")
+  .update(fs.readFileSync(path.join(site, "assets/site.css")))
+  .digest("hex")
+  .slice(0, 12);
 const renderBody = (page) => {
   let body = page.body.replace(/<img\b[^>]*>/g, (tag) => {
     const filename = tag.match(/src="assets\/media\/([^"]+)"/)?.[1];
     const size = dimensions.get(filename);
     if (!size) return tag;
     return tag
+      .replace(
+        'src="assets/media/' + filename + '"',
+        'src="assets/media/' +
+          filename +
+          "?v=" +
+          size.sha256.slice(0, 12) +
+          '"',
+      )
       .replace(/\s(?:width|height)="[^"]*"/g, "")
       .replace(
         />$/,
@@ -69,6 +81,17 @@ const renderBody = (page) => {
       );
   });
   body = body.replace(/<a\b[^>]*>/g, (tag) => {
+    const mediaFile = tag.match(/href="assets\/media\/([^"]+)"/)?.[1];
+    const image = dimensions.get(mediaFile);
+    if (image)
+      return tag.replace(
+        'href="assets/media/' + mediaFile + '"',
+        'href="assets/media/' +
+          mediaFile +
+          "?v=" +
+          image.sha256.slice(0, 12) +
+          '"',
+      );
     const filename = tag.match(/href="downloads\/([^"]+)"/)?.[1];
     if (!filename || !/\sdownload(?=[\s>])/.test(tag)) return tag;
     return tag.replace(
@@ -113,7 +136,7 @@ const document = (page) => {
 <meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
 <meta property="og:title" content="${escape(title)}"><meta property="og:description" content="${escape(page.description)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=${cssVersion}">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>${release.version}</small></a>

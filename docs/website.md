@@ -30,7 +30,9 @@ The small, dependency-free Node script `tools/site/build.mjs` composes shared
 headers/navigation/footer and page metadata around authored HTML in
 `tools/site/content/`. Its generated output is committed under `site/`; GitHub
 does not run this script. CSS and progressively enhanced JavaScript are authored
-directly under `site/assets/`.
+directly under `site/assets/`. Image and stylesheet URLs include content hashes,
+so returning readers receive revised pictures and styles despite Pages caching.
+Regenerate HTML after changing either; the local checker catches stale output.
 
 Treat [the user guide](user-guide.md), the import guides and actual UI labels as
 the source of truth. Keep the reference and tutorials synchronized when controls

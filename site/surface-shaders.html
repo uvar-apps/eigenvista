@@ -6,7 +6,7 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
 <meta property="og:title" content="Shape the light — EigenVista"><meta property="og:description" content="Give molecular surfaces an X-ray finish, reveal their interior with clipping, and adjust custom shader parameters live in EigenVista."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/surface-shaders.html">
 <meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=5fb1fdfc2330">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
@@ -17,8 +17,8 @@
 <p class="lede page-lede">Reveal the molecular framework through an X-ray shell. Cut into a density surface. Change the lighting, color and transparency while you explore.</p>
 
 <div class="gallery-grid shader-gallery">
-  <figure class="plate"><div class="plate-label"><span>X-RAY / VIEW-ANGLE OPACITY</span><span>GLSL SURFACE SHADER</span></div><img src="assets/media/quantum-xray.webp" alt="A molecular density surface drawn with a translucent X-ray shader around its atomic framework" loading="eager" width="2050" height="1671"><figcaption>The X-ray shader emphasizes the surface silhouette while letting the molecular framework show through.</figcaption></figure>
-  <figure class="plate"><div class="plate-label"><span>CLIPPING / LOOK INSIDE</span><span>LIVE PARAMETERS</span></div><img src="assets/media/quantum-clipped.webp" alt="A molecular surface clipped to expose the atomic framework inside" loading="eager" width="2050" height="1671"><figcaption>Move a clipping boundary to reveal the structure beneath the surface. The molecular model stays in place.</figcaption></figure>
+  <figure class="plate"><div class="plate-label"><span>X-RAY / VIEW-ANGLE OPACITY</span><span>GLSL SURFACE SHADER</span></div><img src="assets/media/quantum-xray.webp?v=bb992e35fa35" alt="A molecular density surface drawn with a translucent X-ray shader around its atomic framework" loading="eager" width="2050" height="1671"><figcaption>The X-ray shader emphasizes the surface silhouette while letting the molecular framework show through.</figcaption></figure>
+  <figure class="plate"><div class="plate-label"><span>CLIPPING / LOOK INSIDE</span><span>LIVE PARAMETERS</span></div><img src="assets/media/quantum-clipped.webp?v=e5a81a283282" alt="A molecular surface clipped to expose the atomic framework inside" loading="eager" width="2050" height="1671"><figcaption>Move a clipping boundary to reveal the structure beneath the surface. The molecular model stays in place.</figcaption></figure>
 </div>
 
 <div class="article-layout">
@@ -65,7 +65,7 @@
 
 <h2 id="live">Tune the view live</h2>
 <p>The parameter names come directly from the shader. Numbers, checkboxes, vector components and color pickers appear as appropriate. Once a shader is applied, editing these controls updates the scene immediately: there is no need to generate the surface again.</p>
-<div class="shader-details"><figure><a href="assets/media/quantum-xray.webp"><img src="assets/media/quantum-xray.webp" alt="The molecular framework visible through the density envelope with the X-ray shader" loading="lazy" width="2050" height="1671"></a><figcaption>Adjust the finish while keeping the same molecular surface. <a href="assets/media/app-overview.webp">See the complete workspace</a>.</figcaption></figure><figure class="shader-controls-figure"><a href="assets/media/shader-controls.webp"><img src="assets/media/shader-controls.webp" alt="Close-up of the actual shader panel with color, minimum and maximum opacity, threshold and Save parameters controls" loading="lazy" width="490" height="1654"></a><figcaption><a href="assets/media/shader-controls.webp">Open the controls at full size</a>.</figcaption></figure></div>
+<div class="shader-details"><figure><a href="assets/media/quantum-xray.webp?v=bb992e35fa35"><img src="assets/media/quantum-xray.webp?v=bb992e35fa35" alt="The molecular framework visible through the density envelope with the X-ray shader" loading="lazy" width="2050" height="1671"></a><figcaption>Adjust the finish while keeping the same molecular surface. <a href="assets/media/app-overview.webp?v=1d0e4a964654">See the complete workspace</a>.</figcaption></figure><figure class="shader-controls-figure"><a href="assets/media/shader-controls.webp?v=e1070e8fb022"><img src="assets/media/shader-controls.webp?v=e1070e8fb022" alt="Close-up of the actual shader panel with color, minimum and maximum opacity, threshold and Save parameters controls" loading="lazy" width="490" height="1654"></a><figcaption><a href="assets/media/shader-controls.webp?v=e1070e8fb022">Open the controls at full size</a>.</figcaption></figure></div>
 <p>To switch the underlying shape, choose another field or isovalue and generate its surface. To change only the appearance, keep the geometry and adjust the shader. <strong>Clear shader</strong> returns to the built-in <strong>Diffuse</strong> or <strong>Blinn-Phong</strong> surface shading.</p>
 
 <h2 id="save">Keep the result</h2>
