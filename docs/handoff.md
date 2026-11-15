@@ -56,14 +56,21 @@ show different molecules at independent display scales. Source/output hashes are
 in `site/assets/social/provenance.json`; the generator refreshes this ledger and
 demo publication preserves its social-image metadata. The replacement PNG needs
 uploading through GitHub's existing Social preview UI.
-The combined-card revision passed fresh local static/deterministic checks
-(24,876,289-byte payload), all 96 route/viewport cases and interactions in both
+The combined-card revision passed fresh local static/deterministic checks,
+all 96 route/viewport cases and interactions in both
 browsers, syntax/whitespace and public-document/history checks. Evidence:
 `tmp/2026-11-15-social-combined/`,
 `tmp/2026-11-15-website/browser-KA1Qwu/RESULT.json` and
 `tmp/2026-11-15-website/docs-check-source-QWYkAE/RESULT.json`.
 Independent full-size/reduced-card review found no cropping, distortion or
 readability issue. Original scientific images, logo and demo video are unchanged.
+The combined preview is published from `67d8c104ae2821c0cf1bdcc8de23272824c9cc57`
+by [Pages deployment 43713569961](https://github.com/uvar-apps/eigenvista/actions/runs/43713569961).
+All 66 public files (24,861,945 bytes) match the newly checked source, including the combined PNG,
+two-source provenance and cache-busted Open Graph/Twitter metadata. Evidence:
+`tmp/2026-11-15-social-combined/public-files.json`. The owned local site preview
+was stopped after readback. GitHub's repository preview still needs the user's
+manual replacement upload; this site deployment does not replace it.
 The public payload is bounded at 24 MiB (video below 4 MiB), loaded on demand.
 
 Search metadata now names supported molecular/quantum workflows while retaining
