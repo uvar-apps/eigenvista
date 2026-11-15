@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { release } from "./release.mjs";
+import { verification } from "./search-console.mjs";
 
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -104,7 +105,7 @@ for (const [name, text] of html) {
     `No placeholder copy: ${name}`,
   );
   assert(!text.split("\n").some((line) => /[ \t]+$/.test(line)), name);
-  for (const match of text.matchAll(/\b(?:href|src)="([^"]+)"/g))
+  for (const match of text.matchAll(/\b(?:href|src|poster)="([^"]+)"/g))
     if (resolve(name, match[1])) localReferences++;
   for (const match of text.matchAll(/<img\b[^>]*>/g)) {
     assert(/\balt="[^"]*"/.test(match[0]), `Image alt text: ${name}`);
@@ -123,6 +124,33 @@ for (const [name, text] of html) {
     );
   }
 }
+assert(html.get("index.html").includes(`<meta name="google-site-verification" content="${verification}">`));
+assert(html.get("404.html").includes('<meta name="robots" content="noindex">'));
+const preview = fs.readFileSync(path.join(site, "assets/social/eigenvista-social.png"));
+assert.equal(preview.readUInt32BE(16), 1280);
+assert.equal(preview.readUInt32BE(20), 640);
+assert(preview.length < 1_000_000, "GitHub social image under 1 MB");
+for (const [name, text] of html) {
+  assert(text.includes('property="og:image:width" content="1280"'), name);
+  assert(text.includes('property="og:image:height" content="640"'), name);
+  assert(text.includes('name="twitter:image:alt"'), name);
+  assert(text.includes(`eigenvista-social.png?v=${hash(preview).slice(0,12)}`), name);
+}
+const discovery = JSON.parse(fs.readFileSync(path.join(site, "assets/social/provenance.json")));
+assert.equal(discovery.applicationVersion, release.version);
+assert.equal(discovery.applicationSource, release.source);
+assert.equal(discovery.durationSeconds, 30);
+for (const row of discovery.files) {
+  assert(/^[a-z0-9-]+\.(?:png|webp|mp4|vtt)$/.test(row.file));
+  const content = fs.readFileSync(path.join(site, "assets/social", row.file));
+  assert.equal(content.length, row.bytes);
+  assert.equal(hash(content), row.sha256);
+}
+assert.equal(discovery.files.length, 4);
+const movie = fs.readFileSync(path.join(site, "assets/social/eigenvista-shaders.mp4"));
+assert.equal(movie.toString("ascii",4,8), "ftyp");
+assert(movie.length < 4 * 1024 * 1024, "On-demand demo stays below 4 MiB");
+assert(fs.readFileSync(path.join(site,"assets/social/eigenvista-shaders.vtt"),"utf8").startsWith("WEBVTT\n"));
 // Sensitivity controls ensure bad local paths and bad fragments are rejected.
 assert.throws(() => resolve("index.html", "absent-website-page.html"));
 assert.throws(() =>
@@ -243,7 +271,7 @@ for (const name of expectedMedia)
     name,
   );
 const bytes = files.reduce((sum, row) => sum + row.bytes, 0);
-assert(bytes < 20 * 1024 * 1024, `Static payload remains bounded: ${bytes}`);
+assert(bytes < 24 * 1024 * 1024, `Static payload, including on-demand video, remains bounded: ${bytes}`);
 for (const name of [
   "site/assets/site.js",
   "tools/site/build.mjs",

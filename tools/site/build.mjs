@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { release } from "./release.mjs";
+import { verification } from "./search-console.mjs";
 
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -60,6 +61,15 @@ const cssVersion = createHash("sha256")
   .update(fs.readFileSync(path.join(site, "assets/site.css")))
   .digest("hex")
   .slice(0, 12);
+const socialVersion = createHash("sha256")
+  .update(fs.readFileSync(path.join(site, "assets/social/eigenvista-social.png")))
+  .digest("hex").slice(0, 12);
+const socialImage = `https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=${socialVersion}`;
+const socialVersions = new Map(
+  fs.readdirSync(path.join(site, "assets/social"))
+    .filter((name) => /\.(?:png|webp|mp4|vtt)$/.test(name))
+    .map((name) => [name, createHash("sha256").update(fs.readFileSync(path.join(site, "assets/social", name))).digest("hex").slice(0, 12)]),
+);
 const renderBody = (page) => {
   let body = page.body.replace(/<img\b[^>]*>/g, (tag) => {
     const filename = tag.match(/src="assets\/media\/([^"]+)"/)?.[1];
@@ -99,6 +109,11 @@ const renderBody = (page) => {
       ' download="' + escape(filename) + '"',
     );
   });
+  body = body.replace(/\b(src|href|poster)="assets\/social\/([^"?]+)"/g, (match, attr, name) => {
+    const version = socialVersions.get(name);
+    if (!version) throw Error(`Missing social/demo asset: ${name}`);
+    return `${attr}="assets/social/${name}?v=${version}"`;
+  });
   if (!["reference", "tutorials"].includes(page.section)) return body;
   const headings = [
     ...body.matchAll(/<h2 id="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g),
@@ -127,15 +142,18 @@ const document = (page) => {
   const url = `https://uvar-apps.github.io/eigenvista/${home ? "" : page.file}`;
   const title = home
     ? "EigenVista — Molecular structures & quantum chemistry"
-    : `${page.title} — EigenVista`;
+    : `${page.searchTitle ?? page.title} — EigenVista`;
   const html = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="${escape(page.description)}"><meta name="theme-color" content="#ecebe4">
+${home ? `<meta name="google-site-verification" content="${escape(verification)}">` : ""}
+${page.file === "404.html" ? '<meta name="robots" content="noindex">' : ""}
 <title>${escape(title)}</title><link rel="canonical" href="${url}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
 <meta property="og:title" content="${escape(title)}"><meta property="og:description" content="${escape(page.description)}"><meta property="og:url" content="${url}">
-<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="${socialImage}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1280"><meta property="og:image:height" content="640"><meta property="og:image:alt" content="EigenVista molecular and quantum chemistry visualization, with a real electron-density X-ray surface">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escape(title)}"><meta name="twitter:description" content="${escape(page.description)}"><meta name="twitter:image" content="${socialImage}"><meta name="twitter:image:alt" content="EigenVista and its electron-density X-ray surface shader">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=${cssVersion}">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>

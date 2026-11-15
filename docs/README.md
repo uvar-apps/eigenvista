@@ -12,6 +12,8 @@ and a gallery. Its prepared
 static files live in `site/` on `main`; [website maintenance](website.md) covers
 content updates, authentic capture provenance, local checks and the Pages-only
 publisher. Application builds/tests continue to run locally before pushing.
+The [project discovery guide](project-discovery.md) covers GitHub presentation,
+the real-app shader demo/social image, and Search Console maintenance (#77).
 
 Current source version: **0.7.2**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader

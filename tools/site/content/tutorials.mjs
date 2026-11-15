@@ -2,8 +2,9 @@ export default [
   {
     file: "tutorials.html",
     title: "Learn EigenVista by doing",
+    searchTitle: "Molecular visualization tutorials",
     description:
-      "Four practical lessons: your first molecule, calculated orbitals, a sampled cube field, and a large biological structure.",
+      "Learn molecular visualization with downloadable examples: PDB and XYZ structures, Molden orbitals, Gaussian Cube fields, and ambient occlusion on 1AON.",
     section: "tutorials",
     number: "04",
     body: `
@@ -39,8 +40,9 @@ export default [
   {
     file: "tutorials-first-molecule.html",
     title: "Your first molecule",
+    searchTitle: "Open PDB and XYZ molecules",
     description:
-      "Open water, inspect its atoms and bonds, move around the scene, and save a portable EigenVista document.",
+      "Open a PDB or XYZ file, inspect automatically generated bonds, rotate and zoom the molecule, and save a portable EigenVista document.",
     section: "tutorials",
     number: "04.1",
     body: `
@@ -81,14 +83,15 @@ export default [
 
       <h2 id="if-something-differs">If something differs</h2>
       <p>If the initial example is still visible, use the app’s <strong>Open</strong> button and select the downloaded file again. Finder file associations and drag-and-drop loading are not implemented. If counts differ, verify the filename and read <strong>Provenance</strong> and the error message. For an apparently empty view, try <strong>Fit scene</strong> and <strong>Ball and stick</strong>.</p>
-      <p>Next, <a href="tutorials-orbitals.html">open the calculated water wavefunction</a> to add orbital fields. For all navigation and appearance controls, see the <a href="reference-scene.html">scene reference</a>.</p>
+      <p>Next, <a href="tutorials-orbitals.html">explore the hydrocarbon’s calculated orbitals</a> to add quantum fields. For all navigation and appearance controls, see the <a href="reference-scene.html">scene reference</a>.</p>
     `,
   },
   {
     file: "tutorials-orbitals.html",
     title: "Explore frontier orbitals",
+    searchTitle: "Visualize HOMO and LUMO orbitals from Molden files",
     description:
-      "Explore the HOMO and LUMO of a C7H10 hydrocarbon, compare volume and surface views, and save high-resolution orbital meshes.",
+      "Open a Molden calculation, select HOMO and LUMO orbitals, compare volume rendering with isosurfaces, and save high-resolution meshes in EigenVista.",
     section: "tutorials",
     number: "04.2",
     body: `
@@ -145,8 +148,9 @@ export default [
   {
     file: "tutorials-cube.html",
     title: "Explore a cube field",
+    searchTitle: "Render Gaussian Cube fields as volumes and isosurfaces",
     description:
-      "Explore an imported scalar field around a 29-atom complex, compare raycast and volume views, and save the original grid with an isosurface mesh.",
+      "Load a Gaussian Cube scalar grid, compare raycast and volume rendering, choose an isovalue, and save its original samples with an isosurface mesh.",
     section: "tutorials",
     number: "04.3",
     body: `
@@ -185,8 +189,9 @@ export default [
   {
     file: "tutorials-ao.html",
     title: "Read a large biological structure",
+    searchTitle: "Visualize PDB and mmCIF structures with ambient occlusion",
     description:
-      "Use MatterViz Pastel and molecular ambient occlusion on 1AON, then inspect chains, cartoons, and an isolated subunit.",
+      "Explore the 1AON mmCIF structure with MatterViz Pastel, molecular ambient occlusion, chain colors and protein cartoons, then isolate a subunit.",
     section: "tutorials",
     number: "04.4",
     body: `

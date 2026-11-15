@@ -1,0 +1,61 @@
+{
+  "applicationVersion": "0.7.2",
+  "applicationSource": "5f336b6a2d53dcb0db67dd5ed95956134a5a1e18",
+  "durationSeconds": 30,
+  "width": 1920,
+  "height": 1080,
+  "fps": 25,
+  "field": "Total electron density",
+  "isovalue": 0.04,
+  "units": "electrons/bohr^3",
+  "grid": [
+    256,
+    256,
+    256
+  ],
+  "input": {
+    "file": "tools/site/examples/bicyclic-c7h10.molden",
+    "sha256": "9309464ace24326f70c344852d4bbc49bc1bca418876a1a0d6b42863202b4645"
+  },
+  "socialImage": {
+    "width": 1280,
+    "height": 640,
+    "sourceImage": "assets/media/quantum-xray.webp",
+    "sourceSha256": "bb992e35fa35a84fd3569e44e781e9f0b05b9954a72260d68cc8e6ef2b36edcc",
+    "logo": "assets/favicon.svg",
+    "logoSha256": "bf23563d11bcf9bad7e8de754b3522fa00a548fc7c89bd4ee0265f8428ef6e0e"
+  },
+  "capture": "Actual production web UI. Native density cache opened before recording; same 72,848-triangle mesh and camera throughout. maxOpacity and zmax changed through real React controls.",
+  "editing": "Initial setup trimmed; final frame held for reading. Actual 1920×960 app view remains at native size below a 120px branded header. No scientific image alteration, time scaling, audio or calculation-speed claim.",
+  "beats": {
+    "xray": 7.5,
+    "clipping": 15.8
+  },
+  "tools": {
+    "recorder": "Playwright",
+    "composition": "HyperFrames 0.9.52",
+    "encoding": "FFmpeg 6.0, H.264 yuv420p, 25 fps"
+  },
+  "files": [
+    {
+      "file": "eigenvista-social.png",
+      "bytes": 228139,
+      "sha256": "432900ccae0a7835d96207ff9a6fd04525f9fd808be2bed40d11aaf5aa0186ec"
+    },
+    {
+      "file": "eigenvista-shaders.mp4",
+      "bytes": 4166288,
+      "sha256": "48b7169156dc9c259f0b0da4c74794ffa335e4d302199e2566db358b826073fd"
+    },
+    {
+      "file": "eigenvista-demo-poster.webp",
+      "bytes": 98484,
+      "sha256": "f2bda7411ddfed6ecd776d2e3578c6a3014e61f72ea22d88913557c539675dc4"
+    },
+    {
+      "file": "eigenvista-shaders.vtt",
+      "bytes": 504,
+      "sha256": "08ccf451b8bede773cbe10826d37deab606e3175d5a909d9fc1663e240fbf88d"
+    }
+  ]
+}

@@ -1,12 +1,15 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Give molecular surfaces an X-ray finish, reveal their interior with clipping, and adjust custom shader parameters live in EigenVista."><meta name="theme-color" content="#ecebe4">
-<title>Shape the light — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/surface-shaders.html">
+<meta name="description" content="Apply custom GLSL shaders to molecular isosurfaces: create an X-ray finish, clip an electron-density surface, and adjust parameters live in EigenVista."><meta name="theme-color" content="#ecebe4">
+
+
+<title>Custom molecular surface shaders: X-ray and clipping — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/surface-shaders.html">
 <meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
-<meta property="og:title" content="Shape the light — EigenVista"><meta property="og:description" content="Give molecular surfaces an X-ray finish, reveal their interior with clipping, and adjust custom shader parameters live in EigenVista."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/surface-shaders.html">
-<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=5fb1fdfc2330">
+<meta property="og:title" content="Custom molecular surface shaders: X-ray and clipping — EigenVista"><meta property="og:description" content="Apply custom GLSL shaders to molecular isosurfaces: create an X-ray finish, clip an electron-density surface, and adjust parameters live in EigenVista."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/surface-shaders.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=432900ccae0a"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1280"><meta property="og:image:height" content="640"><meta property="og:image:alt" content="EigenVista molecular and quantum chemistry visualization, with a real electron-density X-ray surface">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Custom molecular surface shaders: X-ray and clipping — EigenVista"><meta name="twitter:description" content="Apply custom GLSL shaders to molecular isosurfaces: create an X-ray finish, clip an electron-density surface, and adjust parameters live in EigenVista."><meta name="twitter:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=432900ccae0a"><meta name="twitter:image:alt" content="EigenVista and its electron-density X-ray surface shader">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=bad9fa4c82a8">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
@@ -15,6 +18,7 @@
 <div class="element-strip" aria-hidden="true"></div>
 <main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">05 / EIGENVISTA FIELD MANUAL</p><h1>Shape the light<span class="accent">.</span></h1></div>
 <p class="lede page-lede">Reveal the molecular framework through an X-ray shell. Cut into a density surface. Change the lighting, color and transparency while you explore.</p>
+<p><a href="./#shader-demo">Watch the 30-second demonstration of these live controls →</a></p>
 
 <div class="gallery-grid shader-gallery">
   <figure class="plate"><div class="plate-label"><span>X-RAY / VIEW-ANGLE OPACITY</span><span>GLSL SURFACE SHADER</span></div><img src="assets/media/quantum-xray.webp?v=bb992e35fa35" alt="A molecular density surface drawn with a translucent X-ray shader around its atomic framework" loading="eager" width="2050" height="1671"><figcaption>The X-ray shader emphasizes the surface silhouette while letting the molecular framework show through.</figcaption></figure>

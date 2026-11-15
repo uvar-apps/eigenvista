@@ -2,12 +2,14 @@ export default [
   {
     file: "surface-shaders.html",
     title: "Shape the light",
+    searchTitle: "Custom molecular surface shaders: X-ray and clipping",
     description:
-      "Give molecular surfaces an X-ray finish, reveal their interior with clipping, and adjust custom shader parameters live in EigenVista.",
+      "Apply custom GLSL shaders to molecular isosurfaces: create an X-ray finish, clip an electron-density surface, and adjust parameters live in EigenVista.",
     section: "shaders",
     number: "05",
     body: `
 <p class="lede page-lede">Reveal the molecular framework through an X-ray shell. Cut into a density surface. Change the lighting, color and transparency while you explore.</p>
+<p><a href="./#shader-demo">Watch the 30-second demonstration of these live controls →</a></p>
 
 <div class="gallery-grid shader-gallery">
   <figure class="plate"><div class="plate-label"><span>X-RAY / VIEW-ANGLE OPACITY</span><span>GLSL SURFACE SHADER</span></div><img src="assets/media/quantum-xray.webp" alt="A molecular density surface drawn with a translucent X-ray shader around its atomic framework" loading="eager"><figcaption>The X-ray shader emphasizes the surface silhouette while letting the molecular framework show through.</figcaption></figure>

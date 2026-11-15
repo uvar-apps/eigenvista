@@ -24,6 +24,19 @@ export default [
   </figure>
 </section>
 <div class="format-strip" aria-label="Supported file families"><span>MOLDEN</span><span>PDB</span><span>mmCIF / BCIF</span><span>XYZ</span><span>CUBE</span><span>.EIGENVISTA</span></div>
+<section class="section-block" id="shader-demo" aria-labelledby="shader-demo-title">
+  <div class="section-heading"><p class="eyebrow">Watch / 30 seconds</p><h2 id="shader-demo-title">One density.<br>Three ways to see it.</h2><p class="lede">From a solid molecular envelope to X-ray transparency and a moving clipping boundary. Watch the controls redraw the same density mesh.</p></div>
+  <figure class="plate demo-figure">
+    <video controls playsinline preload="none" width="1920" height="1080" poster="assets/social/eigenvista-demo-poster.webp" aria-label="EigenVista density and live surface shader demonstration" aria-describedby="shader-demo-caption">
+      <source src="assets/social/eigenvista-shaders.mp4" type="video/mp4">
+      <track kind="captions" src="assets/social/eigenvista-shaders.vtt" srclang="en" label="English descriptions">
+      <p><a href="assets/social/eigenvista-shaders.mp4">Download the shader demonstration (MP4)</a>.</p>
+    </video>
+    <figcaption id="shader-demo-caption">Actual EigenVista 0.7.2 recording. The C₇H₁₀ electron density is sampled on a 256³ grid at 0.04 electrons/bohr³. Changing opacity and clipping parameters reuses that mesh. Silent video; descriptions are available in the player and below.</figcaption>
+  </figure>
+  <details class="demo-transcript"><summary>Read the demonstration description</summary><p>The solid density envelope surrounds the bicyclic hydrocarbon. Applying the X-ray shader reveals the atoms beneath; adjusting <strong>maxOpacity</strong> changes the transparency immediately. The clipping shader then removes the part of the envelope beyond a boundary. Changing <strong>zmax</strong> moves that boundary through the surface and exposes the molecular framework. The underlying density and isovalue remain the same throughout.</p></details>
+  <div class="actions"><a class="button primary" href="surface-shaders.html">Recreate these views →</a><a class="button" href="assets/social/eigenvista-shaders.mp4" download="EigenVista-shaders.mp4">Download video ↓</a></div>
+</section>
 <section class="section-block">
   <div class="section-heading"><p class="eyebrow">01 / Explore</p><h2>From the calculation.<br>Into the scene.</h2></div>
   <div class="feature-grid">

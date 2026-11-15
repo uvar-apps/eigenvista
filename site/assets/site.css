@@ -1211,3 +1211,7 @@ details[open] summary {
     position: relative;
   }
 }
+/* Keep the actual app recording at its native 16:9 aspect ratio. */
+.demo-figure video { display: block; width: 100%; height: auto; background: #17232d; }
+.demo-transcript { margin-block: 1rem; max-width: 80ch; }
+.demo-transcript summary { cursor: pointer; font-weight: 700; }

@@ -154,6 +154,46 @@ for (const [engine, launcher] of [
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(base);
+    const video = page.locator("#shader-demo video");
+    assert.equal(await video.getAttribute("preload"), "none");
+    assert.equal(await video.getAttribute("autoplay"), null);
+    const demo = await video.evaluate(async (movie) => {
+      const event = name => new Promise((resolve, reject) => {
+        const timer=setTimeout(()=>reject(Error(`Video ${name} timed out`)),15000);
+        movie.addEventListener(name,()=>{clearTimeout(timer);resolve();},{once:true});
+      });
+      const metadata=event("loadedmetadata");movie.load();await metadata;
+      const dimensions={width:movie.videoWidth,height:movie.videoHeight,duration:movie.duration};
+      const frames=[];
+      for(const time of [4,11,21]){
+        const seek=event("seeked");movie.currentTime=time;await seek;
+        const canvas=document.createElement("canvas");canvas.width=192;canvas.height=108;
+        const ctx=canvas.getContext("2d");ctx.drawImage(movie,0,0,192,108);
+        frames.push(ctx.getImageData(0,0,192,108).data);
+      }
+      const changes=frames.slice(1).map((frame,i)=>{
+        let difference=0;for(let p=0;p<frame.length;p+=4)for(let c=0;c<3;c++)difference+=Math.abs(frame[p+c]-frames[i][p+c]);
+        return difference/(192*108*3);
+      });
+      const start=movie.currentTime;await movie.play();
+      await new Promise(resolve=>setTimeout(resolve,300));
+      movie.pause();
+      const box=movie.getBoundingClientRect();
+      return {...dimensions,changes,advanced:movie.currentTime>start,ratio:box.width/box.height};
+    });
+    assert.equal(demo.width,1920);assert.equal(demo.height,1080);
+    assert(Math.abs(demo.duration-30)<0.1);
+    assert(demo.changes.every(value=>value>1),"Actual solid, X-ray and clipping frames differ");
+    assert(demo.advanced,"Video plays and advances");
+    assert(Math.abs(demo.ratio-16/9)<0.01,"Video keeps its natural aspect ratio");
+    const range=await context.request.get(base+"assets/social/eigenvista-shaders.mp4",{headers:{Range:"bytes=0-1"}});
+    assert.equal(range.status(),206);
+    assert.equal((await range.body()).length,2);
+    assert.equal(range.headers()["content-type"],"video/mp4");
+    assert.match(range.headers()["content-range"],/^bytes 0-1\/\d+$/);
+    const unsatisfied=await context.request.get(base+"assets/social/eigenvista-shaders.mp4",{headers:{Range:"bytes=999999999-"}});
+    assert.equal(unsatisfied.status(),416);
+    assert.equal((await unsatisfied.body()).length,0);
     await page.keyboard.press(tabKey);
     assert.equal(await page.locator(":focus").textContent(), "Skip to content");
     await page.keyboard.press("Enter");
@@ -421,6 +461,8 @@ for (const [engine, launcher] of [
       unavailableSearchRecovery: true,
       realDownloadEquality: true,
       nested404Navigation: true,
+      shaderDemo: demo,
+      mediaByteRanges: true,
     });
     console.log(
       `SITE_ENGINE_PASS ${engine}: ${visited.length} route/viewport checks and all interactions`,

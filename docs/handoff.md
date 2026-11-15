@@ -31,6 +31,57 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Project discovery: #77, 15 November 2026
+
+The user approved GitHub presentation, a short real-app demonstration/social
+preview, and search discovery. Outreach and other-project promotion remain with
+the user. [#77](https://github.com/uvar-apps/eigenvista/issues/77) tracks this work;
+[project discovery](project-discovery.md) documents maintenance and reproduction.
+The README now leads with user workflows and a genuine X-ray density rendering.
+The repository website, feature-oriented description and six focused topics
+are configured and read back through GitHub.
+
+The homepage adds a 30-second 1920×1080, 25 fps H.264 recording: the same cached
+256³ C₇H₁₀ density mesh, solid → X-ray with live opacity → live clipping. Actual
+UI footage keeps its native aspect, with a separate branded header, no scientific
+alteration or calculation-speed claim. It is silent and plays on request, with
+a poster, descriptive track/text and download. The public video is 4,166,288 bytes,
+SHA256 `48b7169156dc9c259f0b0da4c74794ffa335e4d302199e2566db358b826073fd`.
+The social PNG is 1280×640 / 228,139 bytes. Its source is the actual density image
+and unchanged logo; all new asset hashes are in `site/assets/social/provenance.json`.
+The public payload is bounded at 24 MiB (video below 4 MiB), loaded on demand.
+
+Search metadata now names supported molecular/quantum workflows while retaining
+visible editorial headings. Social cards use the new PNG, dimensions and alt
+text. 404 is `noindex`. The actual Google verification tag is kept in
+`tools/site/search-console.mjs` and emitted in the homepage head. A URL-prefix
+property for `https://uvar-apps.github.io/eigenvista/` has been added in the user's
+signed-in Search Console; verification awaits public deployment. The 15-page
+sitemap is ready for direct submission. The nested project `robots.txt` is not
+the host's robots policy; do not claim it establishes discovery or modify
+another repository to address that.
+
+Fresh local macOS checks passed: static/deterministic generation (16 pages,
+19 exact downloads; 24,649,602-byte payload), all 96 route/viewport checks in
+Chromium and WebKit, actual video decoding/playback/seeking and 16:9 proportions,
+byte-range/416 responses, existing search/keyboard/theme/AO/download/404 cases,
+and public-document links/history checks. Browser evidence:
+`tmp/2026-11-15-website/browser-PQCf8q/RESULT.json`; documentation evidence:
+`tmp/2026-11-15-website/docs-check-source-x6QF44/RESULT.json`. HyperFrames 0.9.52
+check passed runtime/layout/contrast with no errors, and the encoded final frames
+were visually reviewed. Single-frame modularity and intentional-silence hints
+were reviewed. An independent content/metadata/media review found no material
+issues. Additional footage/check/probe evidence is under
+`tmp/2026-11-15-visibility/`.
+
+Publication is the next gate: push the prepared site, follow only its Pages
+publisher, verify the public tag/media, then verify the property and submit the
+sitemap. GitHub's separate social-preview upload awaits the browser extension's
+user-controlled file-URL access setting; the prepared image is ready. Do not
+claim either external operation completed until read back. Application sources,
+0.7.2 release/tag/ZIP, icon, palettes, scientific fixtures and historical
+snapshots are unchanged; native/app suites were not rerun for this website work.
+
 ## Website content and imagery: #76, 15 November 2026
 
 The user rejected the initial website's content/visual quality: the reference

@@ -6,6 +6,10 @@ It is published at <https://uvar-apps.github.io/eigenvista/>. Completed issue
 [#75](https://github.com/uvar-apps/eigenvista/issues/75) tracks its creation;
 [#76](https://github.com/uvar-apps/eigenvista/issues/76) tracks the content,
 scientific imagery, aspect-ratio and shader-showcase revision.
+[#77](https://github.com/uvar-apps/eigenvista/issues/77) tracks the user-first
+GitHub presentation, real-app video/social preview and search discovery. See
+[project discovery](project-discovery.md) for recording/reproduction, asset
+provenance, Search Console ownership-tag maintenance and publication state.
 
 ## A static directory, with a small publisher
 

@@ -2,6 +2,7 @@ export default [
   {
     file: "reference.html",
     title: "User reference",
+    searchTitle: "Molecular and quantum chemistry viewer reference manual",
     description:
       "The EigenVista 0.7.2 manual: files, scene controls, quantum fields, biological structures, and saving.",
     section: "reference",
@@ -86,8 +87,9 @@ export default [
   {
     file: "reference-files.html",
     title: "Files, conversion, and saving",
+    searchTitle: "Supported molecular files, conversion and saving",
     description:
-      "Supported import profiles, warnings and provenance, batch conversion, native documents, and safe sharing.",
+      "Open Molden, Gaussian Cube, PDB, mmCIF, BinaryCIF and XYZ files; inspect import provenance, batch-convert inputs, and save native EigenVista documents.",
     section: "reference",
     number: "03.1",
     body: `
@@ -181,6 +183,7 @@ eigenvista-convert --help</code></pre>
   {
     file: "reference-scene.html",
     title: "Scene, appearance, and images",
+    searchTitle: "Molecular appearance, ambient occlusion and PNG export",
     description:
       "Camera and picking controls, molecular representations, Pastel palettes, ambient occlusion, PNG exports, and surface shaders.",
     section: "reference",
@@ -285,8 +288,9 @@ eigenvista-convert --help</code></pre>
   {
     file: "reference-fields.html",
     title: "Orbitals, densities, and fields",
+    searchTitle: "Molden orbitals, electron density and Cube field rendering",
     description:
-      "Select supplied quantum fields, generate signed meshes, use raycast and volume previews, and understand resolution, progress, caching, and bounds.",
+      "Select Molden molecular orbitals and electron density, render Cube scalar grids, and control isosurfaces, raycasting, volumes, resolution and mesh caching.",
     section: "reference",
     number: "03.3",
     body: `
@@ -381,8 +385,9 @@ eigenvista-convert --help</code></pre>
   {
     file: "reference-structures.html",
     title: "Biological structures",
+    searchTitle: "PDB and mmCIF molecular representations",
     description:
-      "Understand imported biological identities, chain/entity/secondary colors, components, filters, residue ranges, and protein views.",
+      "Inspect PDB, mmCIF and BinaryCIF structures with chain colors, component filters, residue ranges, traces, tubes, ribbons and protein cartoons.",
     section: "reference",
     number: "03.4",
     body: `

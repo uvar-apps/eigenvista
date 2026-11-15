@@ -19,6 +19,8 @@ const types = {
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
   ".png": "image/png",
+  ".mp4": "video/mp4",
+  ".vtt": "text/vtt; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
   ".xml": "application/xml",
   ".xyz": "text/plain",
@@ -68,13 +70,32 @@ const server = http.createServer((request, response) => {
     response.writeHead(404).end();
     return;
   }
-  response.writeHead(status, {
+  const size = fs.statSync(file).size;
+  const headers = {
     "Content-Type": types[path.extname(file)] || "application/octet-stream",
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
-  });
+    "Accept-Ranges": "bytes",
+    "Content-Length": size,
+  };
+  // Safari probes and seeks MP4s with byte ranges, as it does on Pages.
+  const range = request.method === "GET" && status === 200 &&
+    request.headers.range?.match(/^bytes=(\d*)-(\d*)$/);
+  let start = 0, end = size - 1;
+  if (range && (range[1] || range[2])) {
+    start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+    end = range[1] && range[2] ? Math.min(size - 1, Number(range[2])) : size - 1;
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= size) {
+      response.writeHead(416, { "Content-Range": `bytes */${size}`, "Content-Length": 0 }).end();
+      return;
+    }
+    status = 206;
+    headers["Content-Range"] = `bytes ${start}-${end}/${size}`;
+    headers["Content-Length"] = end - start + 1;
+  }
+  response.writeHead(status, headers);
   if (request.method === "HEAD") response.end();
-  else fs.createReadStream(file).pipe(response);
+  else fs.createReadStream(file, size ? { start, end } : {}).pipe(response);
 });
 server.once("error", (error) => {
   console.error(error.message);

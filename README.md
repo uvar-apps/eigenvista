@@ -1,10 +1,70 @@
 # EigenVista
 
-**User website:** [Install](https://uvar-apps.github.io/eigenvista/install.html) ·
-[Reference manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
-[Surface shaders](https://uvar-apps.github.io/eigenvista/surface-shaders.html) ·
+**Explore molecular orbitals, electron density and large molecular structures.**
+
+EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
+orbital, look inside a density surface with a custom shader, or reveal the folds
+of a large protein complex with ambient occlusion.
+
+**[Download for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)** ·
+[Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
+[Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
 [Gallery](https://uvar-apps.github.io/eigenvista/gallery.html)
+
+[![A luminous X-ray density surface reveals the atomic framework of a bicyclic C7H10 molecule](site/assets/media/quantum-xray.webp)](https://uvar-apps.github.io/eigenvista/surface-shaders.html)
+
+*A 17-atom molecule inside its electron-density surface: 0.04 electrons/bohr³,
+sampled on a 256³ grid. An X-ray surface shader reveals the framework beneath.
+[Make this view](https://uvar-apps.github.io/eigenvista/surface-shaders.html).*
+
+**[Watch the 30-second shader demo](https://uvar-apps.github.io/eigenvista/#shader-demo)** —
+the same density surface, from solid to X-ray transparency and live clipping.
+
+## What you can explore
+
+- **Orbitals and electron density.** Browse orbital energies, occupations and
+  spin, select the orbitals you want, then generate signed isosurfaces or try
+  ray-cast and volume previews. Calculations run in the background with progress
+  and cancellation.
+- **Your own surface appearance.** Load custom GLSL shaders and adjust their
+  parameters live. Start with the supplied X-ray and clipping presets to look
+  inside a molecular envelope without regenerating its mesh.
+- **Depth in dense molecules.** Use matte Lambert shading with screen-space
+  ambient occlusion to reveal contacts and cavities. The optional
+  [MatterViz Pastel palette](palettes/matterviz-pastel.json) is recommended for
+  the best ambient-occlusion results.
+- **Biological structure.** Color by chain, entity or deposited secondary
+  structure; isolate components; combine atomic views with backbone traces,
+  tubes, ribbons and strand-arrow cartoons.
+- **Views worth keeping.** Save molecular data and generated meshes together in
+  an `.eigenvista` file. Export the current view as a PNG, including a transparent
+  background for figures and slides.
+
+Open **Molden**, **Gaussian cube**, **PDB**, **mmCIF / BinaryCIF**, **XYZ**, and
+native **`.eigenvista`** files. Display bonds are computed automatically.
+The [file reference](https://uvar-apps.github.io/eigenvista/reference-files.html)
+describes the supported profiles; the standalone converter supports the same
+imports.
+
+## Start here
+
+The current release is **0.7.2**, an experimental **Apple Silicon Mac** preview.
+The download includes the application, examples, shader presets, palettes and
+converter. It is ad-hoc signed and not Apple-notarized; follow the
+[installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
+first launch. Linux and Windows packages are not available yet.
+
+- [Explore orbitals and density](https://uvar-apps.github.io/eigenvista/tutorials-orbitals.html)
+  with a supplied Molden calculation.
+- [Try X-ray and clipping shaders](https://uvar-apps.github.io/eigenvista/surface-shaders.html)
+  on the density surface pictured above.
+- [Reveal a large molecular complex](https://uvar-apps.github.io/eigenvista/tutorials-ao.html)
+  with ambient occlusion and the Pastel palette.
+- [Read the full manual](https://uvar-apps.github.io/eigenvista/reference.html)
+  or [report a problem](https://github.com/uvar-apps/eigenvista/issues).
+
+## Development status and history
 
 A clean Rust scientific core with a React/Three.js interface, shared by a Tauri macOS application and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
 
@@ -62,7 +122,7 @@ for the optional capability required by new biological documents. The published
 0.6.0 app/ZIP does not include these views. Updating source versions does not
 update an installed app or an existing archive.
 
-## Start here
+## Documentation for contributors
 
 Version 0.7.2 adds a scene **Background color** picker/reset and a separate
 **Export image with transparent background** action (#73/#74). Normal image
