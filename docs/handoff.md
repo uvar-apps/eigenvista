@@ -55,8 +55,12 @@ syntax, all 96 Chromium/WebKit site route/viewport cases and interactions, and
 The approved render and page layouts were visually reviewed. Evidence is in
 `tmp/2026-11-15-clipping-angle/` and
 `tmp/2026-11-15-website/browser-I0srqK/RESULT.json`.
-The prepared site is ready for the authorized push; verify the Pages deployment
-and public image bytes after publication.
+The approved image is published from
+`319d3290fedf89c3c0434794bd6d90eeb42b8161` by
+[Pages deployment 43721708221](https://github.com/uvar-apps/eigenvista/actions/runs/43721708221).
+Public HTTPS readback matched all 66 served files byte for byte, including the
+approved image and refreshed page URLs. Evidence:
+`tmp/2026-11-15-clipping-angle/public.json`.
 Application source, version 0.7.2 and released packages remain unchanged;
 application/native tests were not rerun for this media/caption update.
 
