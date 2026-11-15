@@ -41,6 +41,10 @@ Regenerate HTML after changing either; the local checker catches stale output.
 Treat [the user guide](user-guide.md), the import guides and actual UI labels as
 the source of truth. Keep the reference and tutorials synchronized when controls
 change. Keep installation claims tied to an actually published release.
+Author and copyright details appear in the README, the About page and the shared
+footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
+Keep these visible when editing the layout, alongside the existing license and
+third-party credits.
 Write for people using a molecular viewer: lead with tasks and controls. Keep
 format restrictions, units and display limitations next to the relevant feature.
 Avoid repeated elementary science warnings and internal verification terminology

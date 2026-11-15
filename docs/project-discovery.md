@@ -28,8 +28,9 @@ The panels show different molecules at independent display scales. Regenerate wi
 Graph and Twitter card metadata use this asset with a content hash.
 GitHub's repository preview is a separate upload under Settings → General →
 Social preview → Edit → Upload an image. Updating site metadata alone does not
-set that repository image. The user uploaded the original density-only card,
-then requested this combined version; upload the revised PNG to replace it.
+set that repository image. The user confirms uploading both the original
+density-only card and its combined replacement on 15 November 2026. For later
+revisions, upload the regenerated PNG to replace the repository image.
 Upload completion is recorded in the living handoff.
 
 ## The shader demonstration

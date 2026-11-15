@@ -31,6 +31,26 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Author and copyright: #77, 15 November 2026
+
+The existing LICENSE already identifies Ugo Varetto's 2026 copyright. The README
+now has an explicit Author and copyright section, About has an `#author` section
+and contents link, and the shared footer displays both user-requested lines on
+all 16 pages, including 404: `Author: Ugo Varetto` and
+`Copyright (c) 2026 - Ugo Varetto`. The footer uses readable 12px text and fits
+320px screens. The original GPL license and third-party notices are unchanged.
+
+Fresh local macOS verification passed: exact wording in README/About/all footers,
+static/deterministic generation, document/history/link checks, all 96 route/
+viewport browser cases and interactions, and dedicated Chromium/WebKit footer
+visibility/layout checks at 1440 and 320px. Independent screenshot/content review
+was clear. Evidence: `tmp/2026-11-15-attribution/`,
+`tmp/2026-11-15-website/browser-a1u38c/RESULT.json` and
+`tmp/2026-11-15-website/docs-check-source-V2jAdl/RESULT.json`.
+This is a documentation/presentation follow-up under #77; the app, version 0.7.2,
+release artifacts, scientific data, palettes and media are unchanged. App/native
+tests were not rerun for this change. Publication/readback follows these checks.
+
 ## Project discovery: #77, 15 November 2026
 
 The user approved GitHub presentation, a short real-app demonstration/social
@@ -54,8 +74,8 @@ image with the 58,870-atom 1AON Lambert + SSAO/MatterViz Pastel capture and unch
 logo. Both full molecular shapes and natural proportions are preserved; panels
 show different molecules at independent display scales. Source/output hashes are
 in `site/assets/social/provenance.json`; the generator refreshes this ledger and
-demo publication preserves its social-image metadata. The replacement PNG needs
-uploading through GitHub's existing Social preview UI.
+demo publication preserves its social-image metadata. The user confirms uploading
+the combined replacement PNG through GitHub's existing Social preview UI.
 The combined-card revision passed fresh local static/deterministic checks,
 all 96 route/viewport cases and interactions in both
 browsers, syntax/whitespace and public-document/history checks. Evidence:
@@ -69,8 +89,8 @@ by [Pages deployment 43713569961](https://github.com/uvar-apps/eigenvista/action
 All 66 public files (24,861,945 bytes) match the newly checked source, including the combined PNG,
 two-source provenance and cache-busted Open Graph/Twitter metadata. Evidence:
 `tmp/2026-11-15-social-combined/public-files.json`. The owned local site preview
-was stopped after readback. GitHub's repository preview still needs the user's
-manual replacement upload; this site deployment does not replace it.
+was stopped after readback. The repository image was subsequently uploaded
+manually by the user; this site deployment did not itself replace it.
 The public payload is bounded at 24 MiB (video below 4 MiB), loaded on demand.
 
 Search metadata now names supported molecular/quantum workflows while retaining
@@ -113,8 +133,8 @@ were stopped; user servers were untouched.
 
 The user reports completing GitHub's original social-preview upload manually;
 the browser extension's file-URL permission is no longer a required user action.
-The newly requested combined-image replacement is ready for manual re-upload.
-#77 stays open for that replacement and the external sitemap follow-up. Application sources,
+The user also confirms completing the combined-image replacement upload.
+#77 stays open for the external sitemap follow-up. Application sources,
 0.7.2 release/tag/ZIP, icon, palettes, scientific fixtures and historical
 snapshots are unchanged; native/app suites were not rerun for this website work.
 

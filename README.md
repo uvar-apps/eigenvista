@@ -64,6 +64,14 @@ first launch. Linux and Windows packages are not available yet.
 - [Read the full manual](https://uvar-apps.github.io/eigenvista/reference.html)
   or [report a problem](https://github.com/uvar-apps/eigenvista/issues).
 
+## Author and copyright
+
+Author: Ugo Varetto
+
+Copyright (c) 2026 - Ugo Varetto
+
+EigenVista is licensed under [GPL-2.0-or-later](LICENSE).
+
 ## Development status and history
 
 A clean Rust scientific core with a React/Three.js interface, shared by a Tauri macOS application and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
