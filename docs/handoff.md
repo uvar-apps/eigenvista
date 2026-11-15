@@ -40,7 +40,7 @@ record of the completed checks.
 
 ## Approved narrated shader demo: 15 November 2026
 
-The user approved the female-voice preview. The local website now uses that
+The user approved the female-voice preview. The website now uses that
 English narration with six synchronized caption cues. The original 30-second,
 1920×1080/25fps H.264 packets and approved mono 48 kHz AAC packets are unchanged;
 only the container metadata differs from the preview. The final MP4 is
@@ -66,9 +66,14 @@ native-player focus carrying into the keyboard test; starting that unchanged
 skip-link check on a fresh page resolved it. Evidence is retained under
 `tmp/2026-11-15-shader-voiceover/` and
 `tmp/2026-11-15-website/browser-buzkKB/RESULT.json`.
-The narrated site is prepared for the authorized push; verify its Pages
-deployment and public media bytes after publication. Application
-source/version 0.7.2 and released packages are unchanged; application/native
+The narrated video is published from
+`2ac0b4df7ece7e06d15fc1665524e4fd082a6d35` by
+[Pages deployment 43724445370](https://github.com/uvar-apps/eigenvista/actions/runs/43724445370).
+Public HTTPS readback matched all 66 served files byte for byte, including the
+narrated MP4 and captions. The unversioned homepage also matched the checked
+local HTML and links to the new video hash. Publication evidence is in
+`tmp/2026-11-15-shader-voiceover/public.json` and `public-homepage.json`.
+Application source/version 0.7.2 and released packages are unchanged; application/native
 tests were not rerun for this website-only update.
 
 ## Approved cutaway image: 15 November 2026
