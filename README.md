@@ -1,5 +1,10 @@
 # EigenVista
 
+**User website:** [Install](https://uvar-apps.github.io/eigenvista/install.html) ·
+[Reference manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
+[Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
+[Gallery](https://uvar-apps.github.io/eigenvista/gallery.html)
+
 A clean Rust scientific core with a React/Three.js interface, shared by a Tauri macOS application and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
 
 EigenVista is the standalone successor to the Molekel Rust rewrite, in

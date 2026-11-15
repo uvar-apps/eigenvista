@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Four practical lessons: your first molecule, calculated orbitals, a sampled cube field, and a large biological structure."><meta name="theme-color" content="#ecebe4">
+<title>Learn EigenVista by doing — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/tutorials.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Learn EigenVista by doing — EigenVista"><meta property="og:description" content="Four practical lessons: your first molecule, calculated orbitals, a sampled cube field, and a large biological structure."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/tutorials.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="tutorials.html" aria-current="page">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04 / EIGENVISTA FIELD MANUAL</p><h1>Learn EigenVista by doing<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#before-you-start">Before you start</a><a href="#learning-path">Your learning path</a><a href="#example-files">Download the examples</a><a href="#checkpoints">How to use the checkpoints</a></aside><article class="prose">
+      <h2 id="before-you-start">Before you start</h2>
+      <p>Use the <a href="install.html">EigenVista 0.7.2 Mac preview</a> for these lessons. Open the downloaded example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the installed app runs the local molecular workflows.</p>
+      <p>Start with the first lesson if you are new to the viewport. Then choose the kind of data you work with. Keep the original inputs and save your work to new <code>.eigenvista</code> files.</p>
+      <div class="notice"><p>EigenVista is a development preview. It visualizes supplied scientific data; atom coordinates alone do not produce a wavefunction. The lessons distinguish calculated data, mathematical test fields, and illustrative rendering effects.</p></div>
+
+      <h2 id="learning-path">Your learning path</h2>
+      <ol>
+        <li><p><a href="tutorials-first-molecule.html"><strong>Open, inspect, and save your first molecule</strong></a>. Use three-atom water to learn rotation, zoom, picking, representations, and native Save.</p></li>
+        <li><p><a href="tutorials-orbitals.html"><strong>Explore orbitals from a real calculation</strong></a>. Browse the calculated water wavefunction, preview one field without a mesh, then generate and save signed surfaces.</p></li>
+        <li><p><a href="tutorials-cube.html"><strong>Inspect a sampled cube field</strong></a>. Compare a raycast with stored triangles and learn what survives saving a skewed scalar grid.</p></li>
+        <li><p><a href="tutorials-ao.html"><strong>Read a large biological structure</strong></a>. Use MatterViz Pastel and ambient occlusion on 1AON, then switch to chain cartoons and isolate a chain.</p></li>
+      </ol>
+
+      <h2 id="example-files">Download the examples</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">File</th><th scope="col">What it contains</th><th scope="col">Lesson</th></tr></thead>
+        <tbody>
+          <tr><td><a href="downloads/water.pdb" download="water.pdb">water.pdb</a> or <a href="downloads/water.xyz" download="water.xyz">water.xyz</a></td><td>Water geometry: 3 atoms and 2 display bonds after import; no quantum fields</td><td><a href="tutorials-first-molecule.html">First molecule</a></td></tr>
+          <tr><td><a href="downloads/water.molden" download="water.molden">water.molden</a></td><td>Calculated RHF/cc-pVDZ water: 24 basis functions, 24 spatial orbitals, occupation-derived total density</td><td><a href="tutorials-orbitals.html">Orbitals</a></td></tr>
+          <tr><td><a href="downloads/signed-affine.cube" download="signed-affine.cube">signed-affine.cube</a></td><td>A synthetic signed scalar field on a skewed 7 × 7 × 7 grid, with 2 hydrogen atoms</td><td><a href="tutorials-cube.html">Cube field</a></td></tr>
+          <tr><td><a href="downloads/1AON.cif" download="1AON.cif">1AON.cif</a> and <a href="downloads/matterviz-pastel.json" download="matterviz-pastel.json">matterviz-pastel.json</a></td><td>A large deposited biological structure and an optional element-color palette</td><td><a href="tutorials-ao.html">Large structures and AO</a></td></tr>
+        </tbody>
+      </table></div>
+      <p>Read the <a href="downloads/README.txt">example sources and reuse notes</a> before redistributing the data. After downloading the examples, these local app workflows do not need an internet connection.</p>
+
+      <h2 id="checkpoints">How to use the checkpoints</h2>
+      <p>Each lesson gives an expected result before the next action. Wait for the footer’s completed result when a calculation is running. A calculation’s live phase percentage is not a whole-job completion indicator. <strong>Cancel</strong> retains previously completed surfaces.</p>
+      <p>If your controls differ, check the installed version and expand the relevant sidebar heading. Use <strong>Fit scene</strong> if an object appears missing. The <a href="reference.html">user reference</a> covers the complete controls and current limits; the <a href="gallery.html">gallery</a> shows real application captures.</p>
+    </article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

@@ -5,6 +5,12 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
+The [public user website](https://uvar-apps.github.io/eigenvista/) presents
+installation, a detailed manual, worked tutorials and a gallery. Its prepared
+static files live in `site/` on `main`; [website maintenance](website.md) covers
+content updates, authentic capture provenance, local checks and the Pages-only
+publisher. Application builds/tests continue to run locally before pushing.
+
 Current source version: **0.7.2**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.

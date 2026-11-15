@@ -31,6 +31,53 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## User website: #75, 15 November 2026
+
+The user authorized a public supporting website and confirmed the repository is
+public. [#75](https://github.com/uvar-apps/eigenvista/issues/75) tracks the work,
+based on main `b79a751`. The site uses Sesmesh's brutalist paper/ink style and
+keeps the application icon unchanged. `site/` contains 15 prepared static HTML
+pages: product introduction, installation, a detailed four-topic reference,
+four practical tutorials, gallery, about/credits and 404 navigation.
+
+The dependency-free local renderer `tools/site/build.mjs` composes shared layout
+and metadata around authored HTML in `tools/site/content/`. Generated HTML is
+committed; the small `.github/workflows/pages.yml` only uploads/publishes `site/`
+from `main`, with four pinned official Actions and no application build, test or
+CI matrix. The user explicitly approved this arrangement after reviewing the
+existing Sesmesh workflow; no separate `gh-pages` branch is needed. The retained
+application Verify workflow remains manual-only. See [website maintenance](website.md).
+
+Ten real, lossless WebP captures total 3,181,604 bytes. The paired 1AON/4PJ1
+images use complete selected structures (58,870/65,963 atoms), MatterViz Pastel,
+Element coloring and Van der Waals spheres with identical camera/geometry.
+Normal shading is compared with Lambert + SSAO at 100%, automatic radius
+14.25/16.25 Å, background `#ecebe4`. Foreground change is independently measured;
+background/silhouette match and exact restored-Off pixels passed. Images are
+not generated scientific illustrations. Provenance records source, input and
+palette hashes, settings, dimensions and output hashes. Eight named public
+downloads retain exact source bytes and notices. The total static payload is
+under 10 MB, including the 1AON tutorial input.
+
+Fresh local site checks passed: 15 pages, 463 local references, 36 image uses,
+exact input/media/download hashes, deterministic regenerated output and YAML/
+publisher-scope validation. Chromium and WebKit each passed all 15 routes at
+1440/390/320 px (90 route/viewport checks total), plus keyboard/skip/search,
+theme persistence, AO pixel comparisons with an identical-frame negative
+control, gallery filters, exact downloaded bytes, no-JavaScript navigation,
+reduced-motion/dark settings, unavailable-search recovery and nested 404 search/
+navigation. Mac WebKit uses Option-Tab for link navigation. Earlier incomplete
+runs caught narrow-layout and search/download/404 details; they are not passes.
+The complete passing evidence is under `tmp/2026-11-15-website/browser-WDQzCB/`
+and the final qualifying run is recorded in `browser-test-final.log`.
+
+Pages enablement, source push, deployment and public HTTPS readback are pending
+at this source snapshot. The target is <https://uvar-apps.github.io/eigenvista/>.
+The local preview uses owned port 5190. No application code, version, fixture,
+palette value, tag or released redistributable changed. Application suites were
+not rerun for this isolated website/documentation change. A stale cube-guide
+sentence was aligned with the existing direct analytic-preview behavior.
+
 ## Documentation follow-up: 15 November 2026
 
 The user guide's ambient-occlusion section and `palettes/README.md` now recommend

@@ -1,0 +1,53 @@
+{
+  "sourceRepository": "https://github.com/uvar-apps/eigenvista",
+  "files": [
+    {
+      "file": "water.xyz",
+      "source": "packaging/examples/water.xyz",
+      "bytes": 117,
+      "sha256": "abb3610c58346a9c7fc9da67518ae3ca16e5e733b444d422fe2f431da3618f6d"
+    },
+    {
+      "file": "water.pdb",
+      "source": "packaging/examples/water.pdb",
+      "bytes": 271,
+      "sha256": "53873648f13611335b9ecf5e3ddc691a945b585b5995eb7c5efae0da598e2e0a"
+    },
+    {
+      "file": "water.molden",
+      "source": "fixtures/molden/water-rhf-ccpvdz.molden",
+      "bytes": 19345,
+      "sha256": "9c0393a493956d22af9dcf76398f368fa211d3fe83488669b69d102baf9f6042"
+    },
+    {
+      "file": "signed-affine.cube",
+      "source": "fixtures/cube/signed-affine.cube",
+      "bytes": 6732,
+      "sha256": "a94fc0bd553bebb80c55a6b8dfce00cdf4241994c3d611c120cd8aec9735c251"
+    },
+    {
+      "file": "1AON.cif",
+      "source": "fixtures/cif/1AON.cif",
+      "bytes": 6293816,
+      "sha256": "6b202f340ffb9a1924d5315ce9e837e02cee1dbd745df675be76f6d4e1b8e66f"
+    },
+    {
+      "file": "matterviz-pastel.json",
+      "source": "palettes/matterviz-pastel.json",
+      "bytes": 8237,
+      "sha256": "6d3624bc9019e0540352865d45fa1ae4d6e5ed9083cba558bde0820556b1f802"
+    },
+    {
+      "file": "matterviz-muted.json",
+      "source": "palettes/matterviz-muted.json",
+      "bytes": 8237,
+      "sha256": "1d636ab195433d6fd49f27e6e628a174b10e295f41f27e00f134376dcd412c80"
+    },
+    {
+      "file": "LICENSE-MatterViz.txt",
+      "source": "palettes/LICENSE-MatterViz.txt",
+      "bytes": 1073,
+      "sha256": "f519d155d7ed90bd0e8e3ee2a669b70d9ad9f03fa532e008b1b397769f1f175b"
+    }
+  ]
+}

@@ -36,6 +36,8 @@ documents; older `.molekel` preview documents remain readable. Check
 - [Architecture](docs/architecture.md) — crate ownership and data contracts.
 - [Development](docs/development.md) — full setup, build, test, acceptance steps.
 - [Docs index](docs/README.md) · [User guide](docs/user-guide.md) · [Status](docs/status.md)
+- [User website](https://uvar-apps.github.io/eigenvista/) ·
+  [Website maintenance](docs/website.md): static `site/` output, content, media and publishing.
 
 ## Required local validation before pushing
 
@@ -59,7 +61,11 @@ and complete the applicable checks before pushing.
   do not infer it from macOS or historical hosted runs.
 - GitHub CI is **not required** for pushing, merging or releasing. Do not start,
   retry, poll or wait for hosted jobs unless the user explicitly requests them.
-  The saved workflow is manual-only; normal pushes and PRs do not start it.
+  The application Verify workflow is manual-only; normal pushes and PRs do not start it.
+- The user explicitly authorized the **Pages-only publisher** for the website
+  on 15 November 2026 (#75). It uploads the prepared `site/` directory from
+  `main`; it runs no application builds, tests or CI matrix. Website publication
+  and its deployment readback do not authorize starting the Verify workflow.
 - For documentation/configuration-only changes, run their relevant local checks
   (including links, syntax and consistency) before pushing. Existing full runtime
   results remain applicable only when the tested application and test sources are
@@ -69,6 +75,16 @@ This policy supersedes older hosted-CI merge requirements in dated documentation
 preserve those historical results as evidence of what ran at the time.
 
 ## Layout that is not obvious from names
+
+- The public user website is maintained under `site/`, separately from the
+  application. Edit authored HTML modules under `tools/site/content/`, regenerate
+  with `node tools/site/build.mjs`, then run `node tools/site/check.mjs` and the
+  local Chromium/WebKit `node tools/site/test.mjs` before pushing changes.
+  Generated HTML is committed; GitHub only publishes `site/`. Preserve the real
+  media/input/palette provenance, user-facing scope and current release facts.
+  Keep the site synchronized with the user guide and actual UI; do not advertise
+  future features or broaden platform/scientific qualification. See
+  [website maintenance](docs/website.md) and current handoff for evidence.
 
 - Current version **0.7.2** is published for background controls (#73),
   transparent PNG (#74) and optional MatterViz Muted/Pastel files. Immutable source

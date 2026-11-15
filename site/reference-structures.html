@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Understand imported biological identities, chain/entity/secondary colors, components, filters, residue ranges, and protein views."><meta name="theme-color" content="#ecebe4">
+<title>Biological structures — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/reference-structures.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Biological structures — EigenVista"><meta property="og:description" content="Understand imported biological identities, chain/entity/secondary colors, components, filters, residue ranges, and protein views."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/reference-structures.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03.4 / EIGENVISTA FIELD MANUAL</p><h1>Biological structures<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#import-selection">What the importer selects</a><a href="#coloring">Coloring and identity</a><a href="#visibility">Components, chains, isolation, and focus</a><a href="#depictions">Protein depictions and style overrides</a><a href="#residues">Show a deposited residue range</a><a href="#saved-state">Session settings and saved metadata</a></aside><article class="prose">
+<div class="prose">
+  <p>Open PDB, mmCIF, or BinaryCIF with chain, residue, and atom identities to use <strong>Molecular data → Biological structure</strong>. These controls organize a selected deposited structure; they do not predict missing biology or create quantum data. Try the public <a href="downloads/1AON.cif" download="1AON.cif">1AON complex</a> and compare the real application images in the <a href="gallery.html">gallery</a>.</p>
+
+  <h2 id="import-selection">What the importer selects</h2>
+  <p>The reader retains the first model/structure, common atoms, and one alternate conformer per residue, choosing the alternate with the highest mean occupancy. Zero-occupancy atoms are omitted. Unknown mmCIF element symbols are skipped with a notice rather than guessed. These policies can make displayed counts differ from the deposited source; read <strong>Import report</strong> and <strong>Provenance</strong>.</p>
+  <p>Selected atoms can retain atom names and residue membership; residues retain chain, name, label/author numbering, insertion identifiers, observed segment, component kind, and deposited secondary assignment. mmCIF label, author, and entity identifiers remain separate. PDB TER boundaries are respected and missing entity identifiers are not fabricated. Classification uses supported deposited component/polymer information and recognized names; unknown classifications remain explicit.</p>
+  <p>mmCIF nonpolymer rows without label sequence numbers use author residue/insertion identity to distinguish waters and ligands. Different monomer names at the same sequence position can both remain selected. Protein paths break at that ambiguous position rather than selecting an invented conformer; inspect it in an atomic view or with a named residue range.</p>
+  <h3>Connectivity and source losses</h3>
+  <p>PDB CONECT and supported mmCIF/BinaryCIF covalent, disulfide, and metal declarations are retained, including accepted links beyond automatic distance cutoffs. Coordinate-based display connections fill gaps. Source declaration details and unresolved, duplicate, or omitted links are recorded in Provenance. Different/unknown symmetry images are reported without generating mates.</p>
+  <p>Occupancies, B-factors, and formal charges are not retained as atom attributes; the complete source hierarchy and all annotations/models/conformers are not preserved. Cell/symmetry reporting is not crystal-image expansion. The importer is bounded, not a complete mmCIF dictionary validator. Gzip input is supported only for BinaryCIF, not compressed text mmCIF or PDB. Keep the original structure file.</p>
+  <h3>Secondary assignments</h3>
+  <p>Supported PDB HELIX/SHEET and mmCIF/BinaryCIF deposited annotations supply secondary structure. Missing, unsupported, ambiguous, or conflicting assignments remain unknown with notices. EigenVista does not run DSSP or infer secondary structure from coordinates. An unassigned gray loop is an explicit uncertainty, not a predicted coil.</p>
+
+  <h2 id="coloring">Coloring and identity</h2>
+  <p>Choose <strong>Coloring</strong> under Biological structure. The legend explains the visible categories.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Mode</th><th scope="col">Meaning</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Element</th><td>The CPK element palette, including any <a href="reference-scene.html#palettes">Atom colours override</a>. Use this to see MatterViz Pastel with atomic AO.</td></tr>
+      <tr><th scope="row">Chain</th><td>Distinct deposited chain instances. mmCIF label identifiers appear with author identifiers when different; PDB uses author chain identifiers.</td></tr>
+      <tr><th scope="row">Entity</th><td>Chains belonging to the same supplied entity share a color. The supported PDB profile lacks this mapping and reports entity unknown.</td></tr>
+      <tr><th scope="row">Secondary structure</th><td>Deposited helices, sheets, and supported coil/turn assignments; unknown/unassigned residues remain gray.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Chain/entity colors are deterministic. Names/colors are based on the complete imported source, so filtering does not rename or recolor the remainder. Extra source identifiers distinguish otherwise identical displayed names in legends, controls, and picking. Unknown identities are labelled instead of inferred from location. A long legend shows its first 50 entries with a count notice.</p>
+  <p>Click an atom to inspect element/index/angstrom coordinates with its biological context beside them. Selection does not resize the scene.</p>
+
+  <h2 id="visibility">Components, chains, isolation, and focus</h2>
+  <ol>
+    <li>Expand <strong>Components</strong>. Show or hide the protein, nucleic acid, ligand, water, ion, and unknown component kinds actually present.</li>
+    <li>Expand <strong>Chains (count)</strong>. Use <strong>Filter chain or entity</strong> to find an entry, then its checkbox to show/hide it. Long lists show at most 50 entries at once; filter to reach another chain.</li>
+    <li>Use a chain's <strong>Isolate</strong> button to display that chain. Isolation restores the target chain's needed component visibility and clears a conflicting residue range. The button becomes <strong>Stop isolating</strong>; activate it to remove isolation.</li>
+    <li>Use <strong>Focus</strong> for a chain's visible atoms, or <strong>Focus visible structure</strong> to frame the full visible subset. Focus is disabled when no target atoms are visible.</li>
+    <li>Choose <strong>Show all components</strong> to clear component/chain visibility, isolation, and residue-range filters and recover the full selected structure.</li>
+  </ol>
+  <p>Chain and component visibility filters combine: showing a chain alone does not override a hidden component kind except when isolation explicitly restores it. The chain text filter controls the list, not the molecular subset. If a structure seems absent, Show all components and Fit scene provide a useful reset.</p>
+
+  <h2 id="depictions">Protein depictions and style overrides</h2>
+  <p>The global <strong>Representation</strong> menu offers <strong>Protein backbone trace</strong>, <strong>Protein smooth tube</strong>, <strong>Protein ribbon</strong>, and <strong>Protein cartoon</strong>, alongside the atomic Ball and stick, Liquorice, and Van der Waals choices. Trace/tube follow supported backbone continuity; the secondary-structure cartoon distinguishes helical ribbons, strand arrows, and connecting loops.</p>
+  <p>Component/chain style selectors use the shorter labels <strong>Backbone trace</strong>, <strong>Smooth tube</strong>, <strong>Ribbon</strong>, and <strong>Secondary-structure cartoon</strong> for the same protein choices.</p>
+  <ol>
+    <li>For an overview, choose <strong>Protein cartoon</strong> globally and <strong>Coloring → Chain</strong>.</li>
+    <li>In Components or Chains, use an entry's style selector to give it a representation override. For example, keep the protein overview while inspecting a ligand or one chain in an atomic style.</li>
+    <li>A chain override takes precedence over a component override; otherwise the global representation applies. Select <strong>Use global representation</strong> to remove that entry's explicit override.</li>
+    <li>Choose <strong>Coloring → Secondary structure</strong> to inspect supplied assignments, and use chain isolation/focus for a closer look.</li>
+  </ol>
+  <p>Protein depictions are unavailable for nonprotein components, which keep atomic detail. Nucleic-acid cartoons and glycan depictions are not implemented. The geometry is a display depiction, not extra imported atoms or a quantum-chemistry surface.</p>
+  <h3>Missing data stays visible as a limitation</h3>
+  <p>Missing backbone atoms, source chain/segment ends, sequence breaks, and unsupported gaps break a path rather than bridge it. Ambiguous residue identities also interrupt the depiction. Missing secondary assignments remain thin gray unassigned loops in ribbon/cartoon modes, even with chain/entity coloring. Missing carbonyl orientation uses a thin-tube fallback and an informational notice; isolated backbone points remain visible as markers.</p>
+  <p>Protein depiction geometry uses its own diffuse shading. <a href="reference-scene.html#ao">Ambient occlusion</a> continues to shade atomic spheres/bonds, not the new protein geometry. For an AO view of a dense complex, choose Van der Waals, Element coloring, and the Pastel palette.</p>
+
+  <h2 id="residues">Show a deposited residue range</h2>
+  <ol>
+    <li>Expand <strong>Residue range</strong> and choose the target <strong>Chain</strong>.</li>
+    <li>Enter <strong>First residue</strong> and <strong>Last residue</strong> using deposited identifiers. Author numbering is used when supplied. Names are optional: <code>ALA 10</code> through <code>GLY 10A</code>, or <code>10</code> through <code>10A</code>, can include an insertion residue <code>10A</code>.</li>
+    <li>Choose <strong>Show residue range</strong>. The range is displayed and necessary component visibility restored.</li>
+    <li>Use <strong>Clear residue range</strong> to remove just the range filter, or <strong>Show all components</strong> to clear all structure filters.</li>
+  </ol>
+  <p>Invalid, reversed, or ambiguous identifiers report an error and leave the previous selection intact. Use residue names where needed to distinguish deposited alternatives. Identifiers are source identities, not an invented continuous sequence: missing residues are not reconstructed.</p>
+
+  <h2 id="saved-state">Session settings and saved metadata</h2>
+  <p>Coloring, component/chain styles, visibility, isolation, residue range, and focus are session display settings. They do not modify molecular data, resample a quantum field, or mark the document unsaved. Opening another file resets index-based choices; the color mode continues when that file has biological metadata. Restart/reload resets these settings. The global representation remains a document setting and is saved.</p>
+  <p>Native Save preserves selected biological identities when available. Such files need the biological-structure format feature and cannot be opened by older applications that lack it. Older native files remain readable, but identities discarded by their original importer cannot be recovered from them: reopen the original PDB/mmCIF/BinaryCIF to obtain current metadata.</p>
+  <p>XYZ, cube, and Molden are not assigned invented chains/residues. Files with insufficient identity information show an explanation that chain/protein views are unavailable. Atomic display and any supplied quantum fields remain separate from biological metadata. See <a href="reference-files.html#saving">saving and compatibility</a> for sharing a document.</p>
+</div></article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

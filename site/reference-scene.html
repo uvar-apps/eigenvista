@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Camera and picking controls, molecular representations, Pastel palettes, ambient occlusion, PNG exports, and surface shaders."><meta name="theme-color" content="#ecebe4">
+<title>Scene, appearance, and images — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/reference-scene.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Scene, appearance, and images — EigenVista"><meta property="og:description" content="Camera and picking controls, molecular representations, Pastel palettes, ambient occlusion, PNG exports, and surface shaders."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/reference-scene.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03.2 / EIGENVISTA FIELD MANUAL</p><h1>Scene, appearance, and images<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#navigation">Navigate and inspect</a><a href="#representations">Molecular representations</a><a href="#field-appearance">Field colors, opacity, and surface shading</a><a href="#ao">Molecular ambient occlusion</a><a href="#palettes">Atom colours</a><a href="#background-images">Background and PNG exports</a><a href="#shaders">Custom surface shaders</a></aside><article class="prose">
+<div class="prose">
+  <p>Frame a molecule, choose how atoms and fields are drawn, then export the current viewport. Global representation and field colors/opacity belong to the document. Camera, background, lighting choices, palettes, and shaders are display preferences for the session.</p>
+
+  <h2 id="navigation">Navigate and inspect</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Action</th><th scope="col">Control</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Rotate</th><td>Left-drag; one-finger drag on a touchscreen.</td></tr>
+      <tr><th scope="row">Pan</th><td>Right-drag or Ctrl-drag; two-finger pan on a touchscreen.</td></tr>
+      <tr><th scope="row">Zoom</th><td>Scroll, or middle-button drag vertically; pinch on a touchscreen. The toolbar also has <strong>Zoom in</strong> and <strong>Zoom out</strong>.</td></tr>
+      <tr><th scope="row">Restore framing</th><td><strong>Fit scene</strong> or <strong>Reset view</strong>. Both currently fit all displayed objects and restore the default viewing direction.</td></tr>
+      <tr><th scope="row">Inspect an atom</th><td>Click it to show element, index, and coordinates in angstroms. Biological context appears alongside when supplied.</td></tr>
+      <tr><th scope="row">Inspect a saved mesh</th><td>Click it to show its label and triangle count.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Tab to toolbar buttons and activate with Enter or Space. Hover an icon to read its name. There is no distance/angle measurement tool. Picking displays information; it does not modify molecular coordinates. The camera is not saved in <code>.eigenvista</code>.</p>
+
+  <h2 id="representations">Molecular representations</h2>
+  <p>Choose <strong>Representation</strong> in <strong>Molecular data</strong>. The global choice is saved with the document.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Choice</th><th scope="col">Depiction and use</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Ball and stick</th><td>Atoms and connecting rods; useful for checking a small structure and its display connectivity.</td></tr>
+      <tr><th scope="row">Liquorice</th><td>A rod-focused atomic view for inspecting connected molecular detail.</td></tr>
+      <tr><th scope="row">Van der Waals</th><td>Space-filling atom spheres; no bond cylinders. Useful with ambient occlusion for dense molecules.</td></tr>
+      <tr><th scope="row">Protein backbone trace</th><td>A path through supported protein backbone points.</td></tr>
+      <tr><th scope="row">Protein smooth tube</th><td>A smoother tube following the supported backbone.</td></tr>
+      <tr><th scope="row">Protein ribbon</th><td>Oriented protein ribbons where deposited identities and backbone geometry permit.</td></tr>
+      <tr><th scope="row">Protein cartoon</th><td>Helical ribbons, strand arrows, and connecting loops based on deposited secondary assignments.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Protein choices require suitable biological identities. Nonprotein components retain atomic detail; chain/component overrides can mix styles. Missing atoms and gaps break protein paths rather than inventing a connection. See <a href="reference-structures.html#depictions">protein depiction rules</a>.</p>
+  <p>Element colors cover atomic numbers 1–118. Display radii use published van der Waals tables where available and a covalent-radius-based continuation for Fm–Og; they are visual models. Automatic bonds use a separate covalent-radius heuristic. A drawn rod is not a bond-order or chemical-validity result.</p>
+
+  <h2 id="field-appearance">Field colors, opacity, and surface shading</h2>
+  <p>Under <strong>Appearance</strong>, <strong>Positive</strong> and <strong>Negative</strong> choose signed field colors, and <strong>Opacity</strong> controls field transparency. These apply across the document's surfaces, not just the selected field, and are retained when saved. They do not recompute the field.</p>
+  <p><strong>Surface shading</strong> offers <strong>Diffuse</strong> (the default, flat two-sided lighting) and <strong>Blinn-Phong</strong> (specular highlights on saved meshes and sampled raycast isosurfaces). It is a session preference, separate from atom/bond materials, and is not stored in the molecular document. Choose <a href="reference-fields.html#modes">the rendering mode</a> under Field rendering.</p>
+  <p>In <strong>Saved surfaces</strong>, the eye icon toggles one mesh's visibility and the trash icon removes it. There is no undo. Save to retain those changes. In sampled modes, the active field's meshes are visually replaced by the sampled display; eye/trash controls still manage saved meshes. Return to <strong>Isosurface mesh</strong> to inspect their effect independently.</p>
+
+  <h2 id="ao">Molecular ambient occlusion</h2>
+  <p>Ambient occlusion emphasizes atom contacts and broad recesses in dense molecules. It starts off. While enabled with nonzero strength, atoms and bonds use <strong>Lambert shading plus screen-space ambient occlusion (SSAO)</strong>, without specular highlights.</p>
+  <ol>
+    <li>For space-filling detail, choose <strong>Representation → Van der Waals</strong>.</li>
+    <li>For best results, download <a href="downloads/matterviz-pastel.json" download="matterviz-pastel.json">matterviz-pastel.json</a> and load it through <strong>Atom colours → Colours file…</strong>. For a biological structure, choose <strong>Coloring → Element</strong> to see that palette.</li>
+    <li>Under <strong>Appearance</strong>, enable <strong>Ambient occlusion</strong>. Adjust <strong>AO strength</strong> from 0–100%; zero restores the normal molecular view.</li>
+    <li>Leave <strong>Automatic AO radius</strong> checked initially. Read the chosen neighborhood in <strong>AO radius (angstrom)</strong>.</li>
+    <li>To tune the scale, uncheck Automatic AO radius. The manual slider starts at the current automatic radius and covers 0.25–50 Å in quarter-angstrom steps. Smaller radii emphasize nearby contacts; larger radii emphasize broader recesses.</li>
+  </ol>
+  <p>Automatic radius is derived from the atom-coordinate extent and limited to 1.5–30 Å. Zooming, changing the field grid, or changing representation does not alter it. The visible screen-space shading can still vary with camera position. Compare real application views in the <a href="gallery.html">gallery</a> or follow the <a href="tutorials-ao.html">AO tutorial</a>.</p>
+  <div class="notice"><p>AO is an approximate visual cue, not electron density or another calculated molecular property. Hidden and offscreen geometry affect what the screen-space method can show. It adds GPU work and memory; turn it off if navigation becomes slow.</p></div>
+  <p>AO controls last through Open within the session; restart/reload begins with AO off. PNG exports include the current shading. Atom colors and picking still work. Quantum fields, saved surfaces, and protein depiction geometry keep their own materials; AO shades the atomic spheres and bonds. Turning AO off releases its image buffers. If enhancement fails, a message appears and normal rendering stays available; disable/re-enable to retry. A lost graphics context requires reload/restart.</p>
+
+  <h2 id="palettes">Atom colours</h2>
+  <p>The <strong>Atom colours</strong> section identifies <strong>Built-in default (118 elements)</strong> or the palette file loaded this session. <strong>Colours file…</strong> opens a JSON palette. <strong>Reset to defaults</strong> restores the bundled colors. Biological <strong>Coloring → Element</strong> displays these element overrides; other biological color modes use their own legends.</p>
+  <p>Version 0.7.2 supplies optional MatterViz examples: <a href="downloads/matterviz-pastel.json" download="matterviz-pastel.json">Pastel</a> is lighter with pale-pink oxygen and is recommended for AO; <a href="downloads/matterviz-muted.json" download="matterviz-muted.json">Muted</a> has subdued colors with dusty-rose oxygen. They also live in the source checkout's <code>palettes/</code> and tester ZIP's <code>Palettes/</code>. Both cover elements 1–109; 110–118 keep built-in defaults. Their <a href="downloads/LICENSE-MatterViz.txt">upstream MIT notice</a> accompanies the examples.</p>
+  <h3>Write a partial palette</h3>
+  <pre><code>{
+  "format": "eigenvista-atom-colors",
+  "version": 1,
+  "colors": [
+    { "z": 6, "symbol": "C", "color": "#ff00aa" }
+  ]
+}</code></pre>
+  <p><code>z</code> (atomic number) selects the element. The optional <code>symbol</code> is checked as a typo guard; it never selects an element. Partial palettes are supported: unlisted elements keep defaults. Colors must be lowercase <code>#rrggbb</code>.</p>
+  <p>The entire file is rejected for a wrong format/version, missing or empty colors, duplicate/out-of-range atomic numbers, an invalid color, or a symbol inconsistent with its atomic number. The current palette remains intact on rejection. Palette changes are session-only and do not make the molecular document unsaved; a fresh session uses the built-in palette.</p>
+
+  <h2 id="background-images">Background and PNG exports</h2>
+  <p>In the scene toolbar, <strong>Background color</strong> opens a color picker. The initial color is <code>#e8edef</code>; <strong>Reset background color</strong> restores it. The choice is session-only and is not written into molecular files.</p>
+  <ol>
+    <li>Frame the view, adjust lighting/appearance, and wait for any requested field calculation to finish.</li>
+    <li>Choose <strong>Export image</strong> for <code>eigenvista-view.png</code> with the selected opaque background.</li>
+    <li>Or choose <strong>Export image with transparent background</strong> for <code>eigenvista-view-transparent.png</code>. Empty areas are transparent; antialiased edges and translucent surfaces retain fractional alpha.</li>
+    <li>Confirm the download completed, then open the PNG in an image viewer or place the transparent version on your intended background.</li>
+  </ol>
+  <p>Both actions capture the current rendered viewport after zooming, resizing, or an idle period. Toolbar/text overlays are excluded. Transparent export leaves the selected background visible in the app. Exports include the current field mode and AO; they are images, not saved scientific documents. Use Save separately to retain data.</p>
+  <p>A failed export reports an error without replacing the document. An encoding failure can be retried. Image actions use the browser/WebView download mechanism; host handling varies. Browser export is the reference path; native image-download handling still needs qualification.</p>
+
+  <h2 id="shaders">Custom surface shaders</h2>
+  <p>The <strong>Surface shader</strong> panel optionally replaces built-in surface materials with a vertex/fragment GLSL pair. It affects surfaces, not atom/bond AO. Shader sources and uniform values last for the session and are not stored in <code>.eigenvista</code>.</p>
+  <ol>
+    <li>Choose a <strong>Vertex shader</strong> and a <strong>Fragment shader</strong> file. The picker accepts <code>.vert</code>, <code>.frag</code>, <code>.glsl</code>, or text files.</li>
+    <li>Optionally load a <strong>Parameters file</strong> (<code>.params</code>) with default uniform values.</li>
+    <li>Choose <strong>Apply to</strong>: all surfaces or one saved surface.</li>
+    <li>Click <strong>Apply shader</strong>. Parsed uniforms appear as live controls. Their edits redraw immediately. Choosing new source files leaves the previous applied pair active until you apply the new pair.</li>
+    <li>Use <strong>Save parameters</strong> to export the current uniforms as a Molekel-style <code>.params</code> file. Desktop opens a save dialog; the browser downloads it. Cancelling is harmless; a write error appears in the panel.</li>
+    <li>Use <strong>Clear shader</strong> to restore Diffuse/Blinn-Phong, clear loaded files/parameters, and reset shader transparency.</li>
+  </ol>
+  <p>Examples are included in the tester/source packages under <code>Shaders/</code>; repository examples also live in <code>app/shaders/</code> and <code>shaders/</code>. Classic GLSL 1.x built-ins such as <code>ftransform()</code>, <code>gl_Vertex</code>, <code>gl_Normal</code>, and <code>gl_Color</code> are mapped onto the current rendering environment. Surface colors feed <code>gl_Color</code>.</p>
+  <h3>Parameters and validation</h3>
+  <p>Matching uniform types retain their values when new sources load; changed types reset to defaults. A parameter file with a nonnumeric value, unsupported/mismatched kind, or wrong component count is rejected with its parameter name and line number, preserving current values and the applied shader. Clear before loading another pair when shared uniform types conflict. Parameter export uses lines such as <code>float name&lt;TAB&gt;value</code>; native export has a 128 KiB text bound and writes a complete replacement file.</p>
+  <h3>Transparency and errors</h3>
+  <p><strong>Shader transparency</strong> starts checked and blends fragment alpha even when document opacity is 100%. Uncheck it for opaque rendering: final alpha becomes one and depth writes are enabled. It updates an applied shader live and is saved in neither the document nor parameter file. <strong>Clear shader</strong> resets it to checked.</p>
+  <p>Compile/link errors appear in red in the panel after Apply. Correct and reapply the pair, or Clear shader to restore built-in materials. Transparent objects use ordinary object sorting; intersecting layers can show ordering artifacts. A successful custom shader is not a guarantee of physically accurate rendering.</p>
+</div></article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

@@ -1,0 +1,551 @@
+{
+  "format": "eigenvista-atom-colors",
+  "version": 1,
+  "colors": [
+    {
+      "z": 1,
+      "symbol": "H",
+      "color": "#ffcccc"
+    },
+    {
+      "z": 2,
+      "symbol": "He",
+      "color": "#e0ffff"
+    },
+    {
+      "z": 3,
+      "symbol": "Li",
+      "color": "#ffb6c1"
+    },
+    {
+      "z": 4,
+      "symbol": "Be",
+      "color": "#d2f5d2"
+    },
+    {
+      "z": 5,
+      "symbol": "B",
+      "color": "#ffdfba"
+    },
+    {
+      "z": 6,
+      "symbol": "C",
+      "color": "#c8c8c8"
+    },
+    {
+      "z": 7,
+      "symbol": "N",
+      "color": "#add8e6"
+    },
+    {
+      "z": 8,
+      "symbol": "O",
+      "color": "#ffb3b3"
+    },
+    {
+      "z": 9,
+      "symbol": "F",
+      "color": "#b4eeb4"
+    },
+    {
+      "z": 10,
+      "symbol": "Ne",
+      "color": "#ffd2e6"
+    },
+    {
+      "z": 11,
+      "symbol": "Na",
+      "color": "#ffeb96"
+    },
+    {
+      "z": 12,
+      "symbol": "Mg",
+      "color": "#befabe"
+    },
+    {
+      "z": 13,
+      "symbol": "Al",
+      "color": "#d3d3d3"
+    },
+    {
+      "z": 14,
+      "symbol": "Si",
+      "color": "#f0e68c"
+    },
+    {
+      "z": 15,
+      "symbol": "P",
+      "color": "#ffbe78"
+    },
+    {
+      "z": 16,
+      "symbol": "S",
+      "color": "#ffffb4"
+    },
+    {
+      "z": 17,
+      "symbol": "Cl",
+      "color": "#96f596"
+    },
+    {
+      "z": 18,
+      "symbol": "Ar",
+      "color": "#e6e6fa"
+    },
+    {
+      "z": 19,
+      "symbol": "K",
+      "color": "#ffb4dc"
+    },
+    {
+      "z": 20,
+      "symbol": "Ca",
+      "color": "#a0f0a0"
+    },
+    {
+      "z": 21,
+      "symbol": "Sc",
+      "color": "#dcdcb4"
+    },
+    {
+      "z": 22,
+      "symbol": "Ti",
+      "color": "#bed2dc"
+    },
+    {
+      "z": 23,
+      "symbol": "V",
+      "color": "#ffc8c8"
+    },
+    {
+      "z": 24,
+      "symbol": "Cr",
+      "color": "#b4dcb4"
+    },
+    {
+      "z": 25,
+      "symbol": "Mn",
+      "color": "#e6c8e6"
+    },
+    {
+      "z": 26,
+      "symbol": "Fe",
+      "color": "#dcb48c"
+    },
+    {
+      "z": 27,
+      "symbol": "Co",
+      "color": "#c8c8ff"
+    },
+    {
+      "z": 28,
+      "symbol": "Ni",
+      "color": "#d2e1d2"
+    },
+    {
+      "z": 29,
+      "symbol": "Cu",
+      "color": "#ffc8aa"
+    },
+    {
+      "z": 30,
+      "symbol": "Zn",
+      "color": "#c8dce6"
+    },
+    {
+      "z": 31,
+      "symbol": "Ga",
+      "color": "#ffd2d2"
+    },
+    {
+      "z": 32,
+      "symbol": "Ge",
+      "color": "#d2d2be"
+    },
+    {
+      "z": 33,
+      "symbol": "As",
+      "color": "#dcbedc"
+    },
+    {
+      "z": 34,
+      "symbol": "Se",
+      "color": "#b4f0d2"
+    },
+    {
+      "z": 35,
+      "symbol": "Br",
+      "color": "#ffbebe"
+    },
+    {
+      "z": 36,
+      "symbol": "Kr",
+      "color": "#f0dcff"
+    },
+    {
+      "z": 37,
+      "symbol": "Rb",
+      "color": "#ffaad2"
+    },
+    {
+      "z": 38,
+      "symbol": "Sr",
+      "color": "#aaffaa"
+    },
+    {
+      "z": 39,
+      "symbol": "Y",
+      "color": "#d2ffe1"
+    },
+    {
+      "z": 40,
+      "symbol": "Zr",
+      "color": "#bee6e6"
+    },
+    {
+      "z": 41,
+      "symbol": "Nb",
+      "color": "#e1e1be"
+    },
+    {
+      "z": 42,
+      "symbol": "Mo",
+      "color": "#c8e6c8"
+    },
+    {
+      "z": 43,
+      "symbol": "Tc",
+      "color": "#e6d2e6"
+    },
+    {
+      "z": 44,
+      "symbol": "Ru",
+      "color": "#d7d7f0"
+    },
+    {
+      "z": 45,
+      "symbol": "Rh",
+      "color": "#f0d7d7"
+    },
+    {
+      "z": 46,
+      "symbol": "Pd",
+      "color": "#dcdcdc"
+    },
+    {
+      "z": 47,
+      "symbol": "Ag",
+      "color": "#e6e6e6"
+    },
+    {
+      "z": 48,
+      "symbol": "Cd",
+      "color": "#fff0c8"
+    },
+    {
+      "z": 49,
+      "symbol": "In",
+      "color": "#c8d2dc"
+    },
+    {
+      "z": 50,
+      "symbol": "Sn",
+      "color": "#d2d2d2"
+    },
+    {
+      "z": 51,
+      "symbol": "Sb",
+      "color": "#dcc8d2"
+    },
+    {
+      "z": 52,
+      "symbol": "Te",
+      "color": "#bef0be"
+    },
+    {
+      "z": 53,
+      "symbol": "I",
+      "color": "#f0bef0"
+    },
+    {
+      "z": 54,
+      "symbol": "Xe",
+      "color": "#d2f0ff"
+    },
+    {
+      "z": 55,
+      "symbol": "Cs",
+      "color": "#ffa0c8"
+    },
+    {
+      "z": 56,
+      "symbol": "Ba",
+      "color": "#96ff96"
+    },
+    {
+      "z": 57,
+      "symbol": "La",
+      "color": "#beffd2"
+    },
+    {
+      "z": 58,
+      "symbol": "Ce",
+      "color": "#ffffdc"
+    },
+    {
+      "z": 59,
+      "symbol": "Pr",
+      "color": "#d2ffd2"
+    },
+    {
+      "z": 60,
+      "symbol": "Nd",
+      "color": "#dcffdc"
+    },
+    {
+      "z": 61,
+      "symbol": "Pm",
+      "color": "#b9ffdc"
+    },
+    {
+      "z": 62,
+      "symbol": "Sm",
+      "color": "#afffdc"
+    },
+    {
+      "z": 63,
+      "symbol": "Eu",
+      "color": "#a5ffdc"
+    },
+    {
+      "z": 64,
+      "symbol": "Gd",
+      "color": "#9bffdc"
+    },
+    {
+      "z": 65,
+      "symbol": "Tb",
+      "color": "#91ffdc"
+    },
+    {
+      "z": 66,
+      "symbol": "Dy",
+      "color": "#87ffdc"
+    },
+    {
+      "z": 67,
+      "symbol": "Ho",
+      "color": "#7dffc8"
+    },
+    {
+      "z": 68,
+      "symbol": "Er",
+      "color": "#73f5c8"
+    },
+    {
+      "z": 69,
+      "symbol": "Tm",
+      "color": "#69ebb4"
+    },
+    {
+      "z": 70,
+      "symbol": "Yb",
+      "color": "#5fe1a0"
+    },
+    {
+      "z": 71,
+      "symbol": "Lu",
+      "color": "#55d78c"
+    },
+    {
+      "z": 72,
+      "symbol": "Hf",
+      "color": "#b4dcff"
+    },
+    {
+      "z": 73,
+      "symbol": "Ta",
+      "color": "#aad2ff"
+    },
+    {
+      "z": 74,
+      "symbol": "W",
+      "color": "#a0c8ff"
+    },
+    {
+      "z": 75,
+      "symbol": "Re",
+      "color": "#96bef5"
+    },
+    {
+      "z": 76,
+      "symbol": "Os",
+      "color": "#8cb4eb"
+    },
+    {
+      "z": 77,
+      "symbol": "Ir",
+      "color": "#82aae1"
+    },
+    {
+      "z": 78,
+      "symbol": "Pt",
+      "color": "#dcdce6"
+    },
+    {
+      "z": 79,
+      "symbol": "Au",
+      "color": "#fff0b4"
+    },
+    {
+      "z": 80,
+      "symbol": "Hg",
+      "color": "#e6e6f0"
+    },
+    {
+      "z": 81,
+      "symbol": "Tl",
+      "color": "#f0c8c8"
+    },
+    {
+      "z": 82,
+      "symbol": "Pb",
+      "color": "#c8c8c8"
+    },
+    {
+      "z": 83,
+      "symbol": "Bi",
+      "color": "#d2b4d2"
+    },
+    {
+      "z": 84,
+      "symbol": "Po",
+      "color": "#dcc8a0"
+    },
+    {
+      "z": 85,
+      "symbol": "At",
+      "color": "#c8a0a0"
+    },
+    {
+      "z": 86,
+      "symbol": "Rn",
+      "color": "#d2e6f5"
+    },
+    {
+      "z": 87,
+      "symbol": "Fr",
+      "color": "#ff96b4"
+    },
+    {
+      "z": 88,
+      "symbol": "Ra",
+      "color": "#8cff8c"
+    },
+    {
+      "z": 89,
+      "symbol": "Ac",
+      "color": "#aac8ff"
+    },
+    {
+      "z": 90,
+      "symbol": "Th",
+      "color": "#a0d2ff"
+    },
+    {
+      "z": 91,
+      "symbol": "Pa",
+      "color": "#96c8ff"
+    },
+    {
+      "z": 92,
+      "symbol": "U",
+      "color": "#8cbeff"
+    },
+    {
+      "z": 93,
+      "symbol": "Np",
+      "color": "#82b4ff"
+    },
+    {
+      "z": 94,
+      "symbol": "Pu",
+      "color": "#78aaff"
+    },
+    {
+      "z": 95,
+      "symbol": "Am",
+      "color": "#6ea0f5"
+    },
+    {
+      "z": 96,
+      "symbol": "Cm",
+      "color": "#b4a0eb"
+    },
+    {
+      "z": 97,
+      "symbol": "Bk",
+      "color": "#beaaf5"
+    },
+    {
+      "z": 98,
+      "symbol": "Cf",
+      "color": "#c8b4ff"
+    },
+    {
+      "z": 99,
+      "symbol": "Es",
+      "color": "#d2beff"
+    },
+    {
+      "z": 100,
+      "symbol": "Fm",
+      "color": "#dcc8ff"
+    },
+    {
+      "z": 101,
+      "symbol": "Md",
+      "color": "#e6d2ff"
+    },
+    {
+      "z": 102,
+      "symbol": "No",
+      "color": "#f0dcff"
+    },
+    {
+      "z": 103,
+      "symbol": "Lr",
+      "color": "#fac8c8"
+    },
+    {
+      "z": 104,
+      "symbol": "Rf",
+      "color": "#ffbebe"
+    },
+    {
+      "z": 105,
+      "symbol": "Db",
+      "color": "#ffc8b4"
+    },
+    {
+      "z": 106,
+      "symbol": "Sg",
+      "color": "#ffd2aa"
+    },
+    {
+      "z": 107,
+      "symbol": "Bh",
+      "color": "#ffdca0"
+    },
+    {
+      "z": 108,
+      "symbol": "Hs",
+      "color": "#ffe696"
+    },
+    {
+      "z": 109,
+      "symbol": "Mt",
+      "color": "#fff08c"
+    }
+  ]
+}

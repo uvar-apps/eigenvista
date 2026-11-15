@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Open a signed affine cube, compare sampled raycasting with meshes, and preserve its original scalar values when saving."><meta name="theme-color" content="#ecebe4">
+<title>Inspect a sampled cube field — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/tutorials-cube.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Inspect a sampled cube field — EigenVista"><meta property="og:description" content="Open a signed affine cube, compare sampled raycasting with meshes, and preserve its original scalar values when saving."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/tutorials-cube.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="tutorials.html" aria-current="page">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04.3 / EIGENVISTA FIELD MANUAL</p><h1>Inspect a sampled cube field<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#get-ready">Get ready</a><a href="#understand-the-data">What the example contains</a><a href="#open-and-preview">1. Open and preview the grid</a><a href="#make-meshes">2. Make and compare meshes</a><a href="#save-the-original-field">3. Save the original field with the meshes</a><a href="#if-something-differs">If something differs</a></aside><article class="prose">
+      <h2 id="get-ready">Get ready</h2>
+      <p>Download <a href="downloads/signed-affine.cube" download="signed-affine.cube">signed-affine.cube</a>. You need only EigenVista and this file. A cube already contains sampled scalar values, so no basis functions or orbital coefficients are needed.</p>
+      <div class="notice"><p>This example is a mathematical rendering test, not a quantum-chemistry result. Its <strong>2 hydrogen atoms</strong> are 1.4 bohr apart, producing <strong>1 display bond</strong>. Its field has positive and negative lobes, but it is not a calculated hydrogen orbital or electron density.</p></div>
+
+      <h2 id="understand-the-data">What the example contains</h2>
+      <p>The <strong>7 × 7 × 7</strong> grid has origin <code>(−3.6, −3.3, −3)</code> and step vectors <code>(1, 0, 0)</code>, <code>(0.2, 1, 0)</code>, and <code>(0, 0.1, 1)</code>, in bohr. Those off-axis components make it skewed. At each grid position it stores:</p>
+      <p><code>f(x, y, z) = 0.8 (x + 0.25 y) exp[−0.7 (x² + 0.8 y² + 1.2 z²)]</code></p>
+      <p>The scalar is defined by that formula; it has no inferred physical units. The example’s <a href="downloads/README.txt">source notes</a> distinguish it from the calculated Molden sample.</p>
+
+      <h2 id="open-and-preview">1. Open and preview the grid</h2>
+      <ol>
+        <li><p>Click <strong>Open</strong> and choose <code>signed-affine.cube</code>. Check <strong>2 atoms</strong> and <strong>1 bond</strong> in <strong>Molecular data</strong>. The field appears under <strong>Quantum fields → Sampled fields</strong>.</p></li>
+        <li><p>Wait for the initial <strong>Volume preview</strong>. It uses the imported field without generating meshes. Choose <strong>Sampled raycast preview</strong> under <strong>Field rendering → Mode</strong> to see an isovalue boundary instead.</p></li>
+        <li><p>Use the initial positive <strong>Isovalue</strong> of <strong>0.08</strong> to start. Rotate and use <strong>Fit scene</strong> to inspect the two signs. Then change the isovalue magnitude: a lower level usually encloses more of a localized lobe; a level outside the sampled range produces no surface.</p></li>
+        <li><p>Try <strong>Sampling quality → Fine</strong>, then return to <strong>Standard</strong>. This adjusts ray sampling, not the original 343 scalar samples.</p></li>
+      </ol>
+      <figure><img src="assets/media/cube-raycast.webp" alt="The mathematical signed affine cube displayed as positive and negative sampled raycast regions around two hydrogen atoms." loading="lazy" decoding="async" width="1390" height="1072"><figcaption>Sampled raycasting of the synthetic signed-affine cube in the actual application. Different field colors distinguish positive and negative scalar values.</figcaption></figure>
+      <p><strong>Checkpoint:</strong> you can see the field before any entry exists under <strong>Saved surfaces</strong>. The atom positions and display bond come from geometry, independently of the scalar values.</p>
+
+      <h2 id="make-meshes">2. Make and compare meshes</h2>
+      <ol>
+        <li><p>Return to an <strong>Isovalue</strong> of <strong>0.08</strong>, or use a positive magnitude that shows both signed lobes. Set <strong>Grid resolution</strong> to <strong>40³</strong>. The control bounds sampling; this small 7³ source is not upsampled to 40³.</p></li>
+        <li><p>Click <strong>Generate surfaces</strong> and wait for successful completion. Inspect the positive and negative entries under <strong>Saved surfaces</strong>, then choose <strong>Isosurface mesh</strong> if needed.</p></li>
+        <li><p>Switch between <strong>Isosurface mesh</strong> and <strong>Sampled raycast preview</strong>. In mesh mode, use the eye controls to show or hide individual saved meshes. In sampled mode, the selected field’s sampled display replaces its meshes visually.</p></li>
+        <li><p>Change the isovalue in raycast mode and observe the preview. Switch back to mesh mode: the saved geometry still reflects its generation isovalue. Generate again only when you want to replace it.</p></li>
+      </ol>
+      <p><strong>Checkpoint:</strong> raycast changes are immediate display changes, while saved meshes change only after explicit generation. A finer display setting cannot recover detail that the original coarse cube never sampled.</p>
+
+      <h2 id="save-the-original-field">3. Save the original field with the meshes</h2>
+      <ol>
+        <li><p>Save a new file such as <code>signed-field.eigenvista</code>, then reopen it using <strong>Open</strong>.</p></li>
+        <li><p>Confirm that the atoms, bond, sampled field, and saved meshes remain available. Cached meshes open in mesh mode without regeneration.</p></li>
+        <li><p>Choose <strong>Volume preview</strong> or <strong>Sampled raycast preview</strong> again. The app prepares a display grid from the stored original scalar field.</p></li>
+      </ol>
+      <p>Save retains the original f64 scalar values and affine grid geometry alongside generated meshes. Display sampling and current meshing use f32; they do not replace the original field in the document. Camera, active render mode, display resolution, and transient display samples are session state.</p>
+
+      <h2 id="if-something-differs">If something differs</h2>
+      <p>If no field is visible, try <strong>Fit scene</strong>, check the isovalue, and read any preview error. An all-zero grid cannot produce a nonzero isosurface. An unsupported multi-field or alternative-unit cube must be exported as one field in the supported bohr profile; renaming the file does not convert it.</p>
+      <p>Sampled raycasting can miss tangencies or crossings, volume intersections are approximate, and marching cubes is not topology-certified. See the <a href="reference-fields.html">field reference</a> and <a href="reference-files.html">file reference</a> before using your own cube data. For a large atomic model, continue with <a href="tutorials-ao.html">1AON and ambient occlusion</a>.</p>
+    </article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

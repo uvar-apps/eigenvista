@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Select supplied quantum fields, generate signed meshes, use raycast and volume previews, and understand resolution, progress, caching, and bounds."><meta name="theme-color" content="#ecebe4">
+<title>Orbitals, densities, and fields — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/reference-fields.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Orbitals, densities, and fields — EigenVista"><meta property="og:description" content="Select supplied quantum fields, generate signed meshes, use raycast and volume previews, and understand resolution, progress, caching, and bounds."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/reference-fields.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03.3 / EIGENVISTA FIELD MANUAL</p><h1>Orbitals, densities, and fields<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#choose">Choose a field</a><a href="#one-field">Generate a saved surface for one field</a><a href="#orbitals">Browse and generate several orbitals</a><a href="#modes">Three rendering modes</a><a href="#cube">Cube fields: already sampled data</a><a href="#progress">Progress and cancellation</a><a href="#cache">Caching, replacement, and saving</a><a href="#precision">Precision and resource bounds</a><a href="#rendering-limits">Rendering limits</a></aside><article class="prose">
+<div class="prose">
+  <p>EigenVista evaluates supplied analytic wavefunction data or displays an already sampled grid. It does not solve a quantum calculation from atomic coordinates. Mesh generation and sampled previews are separate actions; choose the one needed for your view.</p>
+
+  <h2 id="choose">Choose a field</h2>
+  <p>In <strong>Quantum fields</strong>, select under <strong>Orbitals</strong>, <strong>Density matrices</strong>, or <strong>Sampled fields</strong>. Only one field is active for volume/raycast preview. Orbitals come from supplied coefficients; density matrices come from the document or the <a href="reference-files.html#molden">reported occupation-derived Molden interpretation</a>. A cube supplies scalar samples without orbital coefficients.</p>
+  <p>Try <a href="downloads/water.molden" download="water.molden">water.molden</a> for calculated RHF orbitals and a total density, or <a href="downloads/signed-affine.cube" download="signed-affine.cube">signed-affine.cube</a> for a mathematical signed grid. The flask-shaped example menu beside <strong>Molecular data</strong> offers <strong>Hydrogen pair</strong> and <strong>Fractional open shell</strong>: mathematical demonstrations, not calculated molecular reference results. Opening an example replaces the current document after an unsaved-change confirmation.</p>
+  <p>Orbital values use <code>bohr^-3/2</code>; density controls use electrons per <code>bohr^3</code>. Imported grid scalar units remain unspecified: consult the producer rather than guessing from a label. A positive/negative orbital surface represents field sign, not positive/negative electrical charge.</p>
+
+  <h2 id="one-field">Generate a saved surface for one field</h2>
+  <ol>
+    <li>Select the field in Quantum fields.</li>
+    <li>Under <strong>Field rendering</strong>, enter a finite positive <strong>Isovalue</strong> magnitude. Generation attempts both the positive and negative level; only nonempty results are added. A nonnegative density may therefore yield one positive surface.</li>
+    <li>Choose <strong>Grid resolution</strong>. The default is <strong>40³</strong>. Available points per axis are 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, and 256. These cubic labels describe the full grid.</li>
+    <li>Click <strong>Generate surfaces</strong>. Sampling, signed meshing, and validation run in the background. The button becomes <strong>Cancel</strong> while work is active.</li>
+    <li>On success, inspect the result in <strong>Isosurface mesh</strong>. Adjust colors/opacity, manage meshes under <strong>Saved surfaces</strong>, then <strong>Save</strong> to retain them on disk.</li>
+  </ol>
+  <p>An isovalue outside the sampled range can legitimately produce no surface. Try a smaller magnitude or another field. Larger resolution costs more CPU time and memory and is not an accuracy guarantee. Changing the selected field, isovalue, or resolution does not automatically regenerate existing meshes.</p>
+  <p>For a sampled preview without mesh extraction, choose <strong>Volume preview</strong> or <strong>Sampled raycast preview</strong> under <strong>Mode</strong>. Analytic orbitals/densities are sampled directly; you do not need to generate a mesh first.</p>
+
+  <h2 id="orbitals">Browse and generate several orbitals</h2>
+  <ol>
+    <li>Click <strong>Orbitals (count)</strong>, such as <strong>Orbitals (24)</strong> for the water example. Its tooltip is <strong>Browse and select orbitals</strong>.</li>
+    <li>Inspect the table: one-based row, label, spin, occupation, energy in hartree, and saved-mesh count. Missing numbers show <code>--</code>, not zero; unspecified spin is <strong>Unknown</strong>.</li>
+    <li>Use <strong>Search orbitals</strong> to filter by row number, label, identifier, or spin. Check individual rows. The header checkbox selects/clears the currently listed rows; filtering preserves checked rows outside the current list. <strong>Clear orbital selection</strong> clears every check.</li>
+    <li>Set positive <strong>Isovalue</strong> and <strong>Grid resolution</strong>, then click <strong>Generate selected</strong>. Select <strong>1–32 orbitals</strong> per generation. The full table can contain more than 32.</li>
+    <li>The window closes and progress identifies each orbital and its batch position. On complete success, all new meshes appear together in <strong>Isosurface mesh</strong>. Save when ready.</li>
+  </ol>
+  <p>Batch results are applied only after the entire batch passes validation. Cancellation or a recoverable error retains prior surfaces. Only checked orbitals' meshes are replaced; meshes of other fields remain. Multi-selection creates separate orbital meshes, not a combined orbital or a new density matrix.</p>
+  <p>The <strong>Saved</strong> column counts meshes in the document's memory, including hidden meshes. It does not mean the document is on disk. Checkboxes are temporary and are not saved. Each opening of the orbital browser initially checks only the active orbital, when the active field is an orbital. Closing without generating leaves the document/settings unchanged.</p>
+  <p>After a successful batch, the previous active orbital remains active if it was checked; otherwise the first checked orbital in document order becomes active. Its sampled preview is ready. The checks do not select multiple simultaneous volumes.</p>
+
+  <h2 id="modes">Three rendering modes</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Mode</th><th scope="col">What is drawn</th><th scope="col">When work occurs</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Isosurface mesh</th><td>Saved positive/negative triangles.</td><td><strong>Generate surfaces</strong> or <strong>Generate selected</strong> creates/replaces meshes. Reopened saved meshes draw immediately without recalculation.</td></tr>
+      <tr><th scope="row">Sampled raycast preview</th><td>Isovalue crossings found by rays through the current display grid.</td><td>Preparing a field/resolution may sample it. Isovalue changes redraw the current sampled preview directly without regenerating saved meshes.</td></tr>
+      <tr><th scope="row">Volume preview</th><td>Accumulated color/opacity along rays through one display grid.</td><td>Preparing a field/resolution may sample it. Switching between volume and raycast reuses the current grid.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Sampled previews are based on an in-memory grid, not direct analytic wavefunction evaluation in a shader. Cube/stored-grid fields prepare it automatically on Open or selection. Analytic orbital/density fields sample when a sampled mode is requested, including after reopening a document. No marching cubes runs unless you explicitly generate surfaces.</p>
+  <p>In sampled modes, selecting another field or changing resolution prepares a new preview while preserving the chosen mode and every saved mesh. Failure/cancellation retains the previous completed preview, field, and resolution. A failed preparation can be retried by selecting the mode, field, or resolution again. In mesh mode, selecting an analytic orbital changes the active field without calculation; choose a sampled mode or Generate surfaces to display it. Stored grids also prepare a preview when selected in mesh mode.</p>
+  <p>The selected field's saved meshes are visually replaced by the sampled display. Other fields' meshes may remain visible. Eye/trash controls affect meshes, not a transient volume. Return to mesh mode when checking those controls.</p>
+  <h3>Sampling quality is different from grid resolution</h3>
+  <p>In either sampled mode, <strong>Sampling quality</strong> offers <strong>Draft</strong>, <strong>Standard</strong> (default), and <strong>Fine</strong>: 1, 2, and 4 samples per voxel-distance along a ray. Quality redraws the existing grid without a worker calculation, new meshes, or scientific-data changes. It does not mark the document unsaved.</p>
+  <p>The choice continues across mode switches, is hidden in mesh mode, and is not saved. Fine can reduce missed crossings between display steps; it cannot recover details missing from the grid or guarantee detection of tangencies. Increase grid resolution only when you actually need a different grid and can afford the calculation.</p>
+
+  <h2 id="cube">Cube fields: already sampled data</h2>
+  <p>Open <code>.cube</code>/<code>.cub</code> to obtain atoms, automatic display bonds, and one scalar grid. A new cube starts in <strong>Volume preview</strong>; raycast is available immediately. Generate surfaces when you want portable saved geometry. No Gaussian basis, coefficients, or density matrix is required.</p>
+  <p>The <a href="downloads/signed-affine.cube" download="signed-affine.cube">signed-affine example</a> has <strong>2 atoms, 1 bond, and a skewed 7 × 7 × 7 grid</strong>. It is a mathematical rendering fixture, not a quantum-chemistry calculation. Follow the <a href="tutorials-cube.html">cube tutorial</a> to compare the three modes.</p>
+  <h3>Accepted cube profile</h3>
+  <p>The file must contain one finite scalar per grid point, positive axis counts of at least two, finite bohr coordinates, and a nonsingular affine grid. Skewed and reflected grids are supported; axes need not align with Cartesian directions. Atom numbers 1–118 and zero-atom grids are accepted. The atom-row charge value is validated but not retained as a separate property. Ordinary and Fortran D/d numeric exponents are supported.</p>
+  <p>A negative atom count denotes a standard orbital/dataset header with <strong>exactly one</strong> dataset ID, not a unit change. That ID labels the sampled field; it does not supply orbital coefficients. Optional NVAL must be one. Multiple datasets, negative axis counts/alternative coordinate units, ghost atoms, singular grids, and missing/extra samples are rejected. Export one field per cube with supported units; do not remove markers to bypass the profile.</p>
+  <p>Scalar meaning/units remain unspecified even for an orbital-labelled cube. If the normal initial isovalue is at or above a nonzero field's peak magnitude, import can choose one tenth of that peak as a starting display value. This is reported and does not normalize the data. All-zero grids have no nonzero isosurface.</p>
+  <p><strong>Grid resolution</strong> bounds the display/meshing grid: a larger source can be downsampled while preserving its affine extent; a smaller source is not upsampled. Increasing the control cannot add missing source detail. The complete original f64 samples and affine grid are retained and saved alongside generated geometry.</p>
+
+  <h2 id="progress">Progress and cancellation</h2>
+  <p>While work runs, Field rendering remains expanded and <strong>Cancel</strong> stays available. Read the current field, orbital/batch position, phase, counts, and elapsed time. Sampling reports completed z slices and a per-field percentage. Meshing reports completion of the two signed passes, not progress within each cell pass. Preparation, transfer, and validation are indeterminate.</p>
+  <p>Percentages restart for each phase and field; they are not a percentage of the whole batch. There is no remaining-time estimate. A single slice or meshing pass may take longer than another, very short phases may not paint, and cached fields skip sampling. A phase label staying visible is not by itself a failure.</p>
+  <p>Cancel terminates the current calculation and retains previous completed meshes/preview. The app runs one scientific operation at a time; other clients' queued operations continue in order. Batch cancellation does not publish a partial set. If work is too expensive, retry with fewer orbitals or a lower grid resolution. Density cost also depends strongly on basis size.</p>
+
+  <h2 id="cache">Caching, replacement, and saving</h2>
+  <p>For unchanged scientific inputs, the most recently sampled field at the same resolution can be reused for another isovalue or appearance change. Sampling another field/resolution replaces that transient cache. Active calculation cancellation or a worker failure that restarts the worker clears it. Saved meshes are independent of the cache.</p>
+  <p>Generate surfaces replaces that field's saved meshes, retaining other fields. A mesh records the isovalue actually used to generate it, even if the control is edited later. Save separate documents to keep multiple isovalues of one field. Colors/opacity can be changed without resampling; changing the isovalue does not silently change stored geometry.</p>
+  <p>Native Save retains analytic inputs, original imported grids, and completed meshes with generation metadata. It does <strong>not</strong> save the transient analytic calculation/display grid, active mode, camera, sampling quality, or orbital checkbox selection. A reopened document with meshes starts in mesh mode. Stored grids rebuild previews from their saved source; analytic fields can be sampled again directly when you select a sampled mode.</p>
+
+  <h2 id="precision">Precision and resource bounds</h2>
+  <p>Original imported scalar values are f64; current display textures and meshing use f32. A finite source grid that overflows f32 produces a preview/meshing error rather than silent clamping. Its valid document, bonds, and existing meshes remain open and savable with the authoritative f64 grid. This differs from a malformed import, which leaves the previous document open.</p>
+  <p>Analytic grids can reach 256³ transient samples, displayed at the selected resolution without silently lowering it. Imported/native authoritative grids remain limited to 128³ total samples. The maximum is a rejection bound, not a recommended workload or an accuracy/performance promise.</p>
+  <div class="notice"><p>At 256³, one field has <strong>16,777,216 samples</strong>: 128 MiB of f64 calculation values plus 64 MiB of f32 display values, before meshes, copies, and graphics memory. Save before large calculations. Recoverable errors preserve prior work; browser, driver, or operating-system termination can still lose unsaved work.</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Resource</th><th scope="col">Current guard</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Input / inflated native arrays</th><td>128 MiB shared budget; stricter per-format limits also apply.</td></tr>
+      <tr><th scope="row">Selected atoms / bonds</th><td>100,000 atoms; 600,000 display bonds.</td></tr>
+      <tr><th scope="row">Gaussian basis / orbitals</th><td>1,024 basis functions; 64 primitives per basis function; 512 total orbitals across spin blocks.</td></tr>
+      <tr><th scope="row">Imported/native grids</th><td>128³ total samples.</td></tr>
+      <tr><th scope="row">Transient analytic sampling</th><td>Up to 256³ samples.</td></tr>
+      <tr><th scope="row">Mesh output / document surfaces</th><td>Two-million-vertex output bound; 128 saved surfaces; estimated 128 MiB geometry check before native validation.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The orbital and basis caps are independent. A complete spatial set with one orbital per basis function fits through 512 functions; complete alpha and beta sets fit through 256 functions each. A partial export can use the separate 1,024-basis limit while listing at most 512 orbitals. Omitted orbitals are not recovered. Smaller workloads can still be slow or exceed another numerical/geometry/file limit.</p>
+
+  <h2 id="rendering-limits">Rendering limits</h2>
+  <p>Raycasting can miss tangencies and crossings unresolved by its grid or steps. Classic marching cubes is not topology-certified. Fine preview quality cannot recover missing source samples. The current renderers are experimental, not publication-quality or quantified-accuracy guarantees.</p>
+  <p>Volume depth comes from accumulated visible opacity. Opaque objects test that representative depth, but volume color integrates the whole ray; intersections may include color from behind an atom or mesh. Interpenetrating transparent objects use ordinary object sorting and can show ordering artifacts. Shrinkwrap and a transfer-function editor are not available.</p>
+</div></article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

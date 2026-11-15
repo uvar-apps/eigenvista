@@ -27,8 +27,9 @@ isosurface. Scalar units remain unspecified; consult the producer's calculation.
 Opening a native document whose selected field is a stored grid prepares the
 preview again automatically. Existing cached surfaces start in mesh mode and
 remain available without regeneration. Selecting a different stored grid also
-prepares it. Orbital/density fields without stored grids still require Generate
-surfaces to create a transient display grid.
+prepares it. For orbital/density fields without stored grids, choosing **Volume preview** or
+**Sampled raycast preview** prepares transient display samples directly.
+**Generate surfaces** is required only when you want mesh geometry.
 
 The tester ZIP includes `Examples/signed-affine.cube`, a first-party mathematical
 fixture with 2 hydrogen atoms, 1 inferred bond, and a signed skewed 7 x 7 x 7 grid.

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Supported import profiles, warnings and provenance, batch conversion, native documents, and safe sharing."><meta name="theme-color" content="#ecebe4">
+<title>Files, conversion, and saving — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/reference-files.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Files, conversion, and saving — EigenVista"><meta property="og:description" content="Supported import profiles, warnings and provenance, batch conversion, native documents, and safe sharing."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/reference-files.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/media/1aon-ao-on.webp"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03.1 / EIGENVISTA FIELD MANUAL</p><h1>Files, conversion, and saving<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#open">Open and check a file</a><a href="#formats">Supported formats</a><a href="#molden">Molden wavefunctions and density interpretation</a><a href="#provenance">Read import warnings and provenance</a><a href="#conversion">Convert files without replacing the scene</a><a href="#saving">Save, reopen, and share</a><a href="#cli">Command-line converter</a></aside><article class="prose">
+<div class="prose">
+  <p>Open an existing calculation or structure, inspect the import report, and save a self-contained <code>.eigenvista</code> document. Opening never overwrites the input. Keep original files: the preview deliberately imports a selected, supported subset rather than every source annotation.</p>
+
+  <h2 id="open">Open and check a file</h2>
+  <ol>
+    <li>Choose <strong>Open</strong> in the app's top bar, then select a supported local file. Use this button: Finder file associations and drag-and-drop loading are not implemented.</li>
+    <li>If prompted about unsaved work, save or deliberately discard it before replacing the scene.</li>
+    <li>Check atom, bond, basis, and field counts in <strong>Molecular data</strong> and <strong>Quantum fields</strong>. Read <strong>Import report</strong> and <strong>Provenance</strong>, including warnings.</li>
+    <li>Use <strong>Fit scene</strong> if necessary. Imported structures show automatic display bonds; cube fields normally start in <strong>Volume preview</strong>.</li>
+    <li>Choose <strong>Save</strong> and a new <code>.eigenvista</code> filename to retain the imported data and subsequent changes.</li>
+  </ol>
+  <p>External imports start unsaved. A malformed-file error leaves the previous document intact. A valid grid that exceeds rendering precision can still open and remain savable with a preview error; see <a href="reference-fields.html#precision">grid precision</a>. The installed app performs these local workflows without an internet connection.</p>
+  <p>For a small structure check, download <a href="downloads/water.xyz" download="water.xyz">water.xyz</a>: it should show <strong>3 atoms</strong> and <strong>2 bonds</strong>. For quantum fields, try <a href="downloads/water.molden" download="water.molden">water.molden</a>; for a sampled field, try <a href="downloads/signed-affine.cube" download="signed-affine.cube">signed-affine.cube</a>.</p>
+
+  <h2 id="formats">Supported formats</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Input</th><th scope="col">What it supplies</th><th scope="col">Supported boundary</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>.eigenvista</code>, <code>.molekel</code></th><td>Rust-preview scientific document, saved appearance, and meshes.</td><td>Current and supported earlier preview formats. Not a general project reader for the old C++ Molekel application.</td></tr>
+      <tr><th scope="row">Molden: <code>.molden</code>, <code>.molf</code>, <code>.molden.input</code>, or recognized header</th><td>Geometry, Gaussian basis, real orbitals, energies, occupations, and eligible occupation-derived density matrices.</td><td>One geometry and basis; canonical S/P/D/F/G and SP. Identified ORCA exports have a narrower qualified subset.</td></tr>
+      <tr><th scope="row"><code>.xyz</code></th><td>Geometry in angstroms and inferred display bonds.</td><td>One conventional atom-count/comment/coordinate frame. Extra columns, extended XYZ, and multiple frames are rejected.</td></tr>
+      <tr><th scope="row"><code>.pdb</code></th><td>Selected ATOM/HETATM geometry, supported biological metadata, explicit and inferred bonds.</td><td>First model/structure and one alternate conformer per residue.</td></tr>
+      <tr><th scope="row"><code>.cif</code>, <code>.mcif</code>, <code>.pdbx</code></th><td>Selected mmCIF atom sites, biological metadata, declared connections, and inferred bonds.</td><td>Bounded mmCIF profile; first model/alternate policy. No crystal-image expansion or complete dictionary validation.</td></tr>
+      <tr><th scope="row"><code>.bcif</code>, <code>.bcif.gz</code></th><td>The same selected structure and connection policy as text mmCIF.</td><td>BinaryCIF 0.3.x, one data block; raw or gzip-wrapped content. Gzip support does not extend to text mmCIF or PDB.</td></tr>
+      <tr><th scope="row"><code>.cube</code>, <code>.cub</code></th><td>Atoms, automatic bonds, and one already sampled scalar field.</td><td>Supported bohr-coordinate profile, including a single-orbital dataset header. No multi-field or alternative-unit cube profile.</td></tr>
+    </tbody>
+  </table></div>
+  <p>XYZ/PDB/mmCIF/BinaryCIF contain no basis or orbital coefficients. They do not enable quantum-field generation. OBJ, legacy atom-color text formats, direct ORCA output/GBW, and Gaussian logs are not implemented. Atom palettes use the separate <a href="reference-scene.html#palettes">JSON palette picker</a>.</p>
+  <p>For biological selection, identities, and omitted annotations, see <a href="reference-structures.html#import-selection">structure import policy</a>. For exact accepted cube features and what a sampled field means, see <a href="reference-fields.html#cube">cube fields</a>.</p>
+  <p>Per-format byte limits include 32 MiB PDB text and 64 MiB text mmCIF/cube. BinaryCIF has separate 64 MiB expanded-payload and expanded-text limits. These sit inside broader numerical, atom, bond, and allocation bounds; they are rejection limits, not a promise that the largest accepted file will be interactive. See <a href="reference-fields.html#precision">resource bounds</a>.</p>
+
+  <h2 id="molden">Molden wavefunctions and density interpretation</h2>
+  <p>A supported Molden input supplies one <code>[Atoms]</code> section with explicit AU or Angs units, one <code>[GTO]</code> basis, and real orbitals in one or more <code>[MO]</code> sections. Missing geometry/basis, ambiguous repeated sections, unsupported shell conventions, or invalid coefficients are errors. The reader does not repair an unrecognized producer convention by guessing.</p>
+  <p>Imported orbital labels include supplied symmetry information. Energies use hartree. Missing energies or occupations remain missing; an explicit Alpha/Beta spin is required by the Molden profile. One Alpha-only set is interpreted and reported as spatial orbitals with occupations up to two. Mixed Alpha/Beta sets retain their spin labels with occupations up to one; fractional occupations are preserved.</p>
+  <h3>Where the density comes from</h3>
+  <p>If every listed orbital has an occupation, the importer constructs the occupation-weighted density from those listed coefficients. A spatial set provides a total-kind matrix; a mixed Alpha/Beta set additionally provides alpha, beta, total, and alpha-minus-beta spin matrices. A beta-only set remains beta-only. If any occupation is missing, no derived density is created.</p>
+  <div class="notice"><p>Fields labelled <strong>Occupation-derived … (listed orbitals)</strong> describe the listed export. They are not recovered correlated, transition, or independent difference density matrices. A truncated orbital set can produce only a partial density; omitted orbitals and ECP core electrons are not recovered.</p></div>
+  <p>Zero-occupation virtual orbitals remain fully validated, listed, renderable, and savable. They contribute zero to the derived density. A fractional nonzero occupation contributes its supplied value. The initial field is the last source-order orbital with positive occupation, or the first orbital if none qualifies; unusual ordering means this is not necessarily the highest-energy orbital.</p>
+  <h3>ORCA exports</h3>
+  <p>Export a Molden file with ORCA's <code>orca_2mkl</code> before opening it. Preserve the producer title/marker: it selects the normalization convention. The qualified subset currently accepts S, P, and spherical 5D shells; ORCA SP, Cartesian D, F, and G are rejected. This is not a claim of support for every ORCA version or option. Do not remove a producer marker to bypass rejection.</p>
+  <p>Frequency, normal-mode, optimization-trajectory, charge, and core/ECP sections are not preserved as structured data. Ignored sections are named in the report. Keep the original calculation. A supported file needs no installed Python, ORCA, or other calculation program to be read.</p>
+  <p>The downloadable <a href="downloads/water.molden" download="water.molden">water example</a> is a calculated RHF wavefunction with <strong>24 basis functions, 24 spatial orbitals, and a total density</strong>. Follow the <a href="tutorials-orbitals.html">orbital tutorial</a> to inspect it.</p>
+
+  <h2 id="provenance">Read import warnings and provenance</h2>
+  <p>The import report summarizes what was accepted and what needs attention. <strong>Provenance</strong> retains source information and decisions in the native document: original input name and byte checksum, importer/profile identification, bond method, warnings, and reported omissions. A checksum identifies source bytes; it is not a certification that the source's chemistry is correct. The source file itself is not embedded wholesale.</p>
+  <p>For structures, look for model/alternate selection, omitted zero-occupancy or unknown-element rows, missing/ambiguous identities, secondary-structure notices, and connection decisions. mmCIF/BinaryCIF declared connections retain deposited references, type/order, resolved selected endpoints, and retained/duplicate/omitted status. Cell/symmetry information is reported without creating symmetry mates. A compressed BinaryCIF checksum identifies the actual compressed input bytes.</p>
+  <p>All supported imports compute display bonds automatically. PDB <code>CONECT</code> and supported mmCIF covalent, disulfide, and metal declarations take precedence and are supplemented by coordinate-based connections. Rods represent display connectivity; they do not establish bond order, aromaticity, hydrogen bonds, oxidation state, or chemical validity.</p>
+  <p>When opening an older native document, missing display bonds may be added while preserving existing connections, scientific arrays, and meshes. The addition is reported and the document becomes unsaved. Save explicitly to retain the change; Open leaves the original untouched.</p>
+
+  <h2 id="conversion">Convert files without replacing the scene</h2>
+  <ol>
+    <li>Choose <strong>Convert files</strong>. The separate <strong>Convert Files</strong> window leaves the current scene open.</li>
+    <li>Add supported input files and click <strong>Convert</strong>. The queue accepts at most <strong>32 files</strong>.</li>
+    <li>Review each row's report. A failed row shows its own error and does not discard successful results.</li>
+    <li>Click a successful row's <strong>Save</strong>. Desktop Save opens a destination dialog; browser Save requests a download. <strong>Conversion alone writes nothing.</strong></li>
+    <li>Save or clear completed results before adding more work. Retained outputs together are bounded to <strong>128 MiB</strong>.</li>
+  </ol>
+  <p><strong>Cancel</strong> stops that queue's pending work and retains completed results. Closing the conversion window preserves them in memory; <strong>Clear</strong> discards them. Saved/downloaded result bytes are released. Unwritten results do not survive closing the application. Conversion preserves supplied fields and existing native meshes but does not generate new surfaces.</p>
+
+  <h2 id="saving">Save, reopen, and share</h2>
+  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. A matching preview installation can show saved meshes without the original inputs or recalculation.</p>
+  <ol>
+    <li>Generate any meshes you want to keep, check visibility and appearance, and choose <strong>Save</strong>.</li>
+    <li>On desktop, choose a destination. Cancelling leaves the document unsaved. In a browser, confirm the requested download completed.</li>
+    <li>Reopen the saved file with <strong>Open</strong>. Existing meshes start in <strong>Isosurface mesh</strong> mode. The camera, active render mode, and session preferences are not restored.</li>
+    <li>Share that file with another compatible preview installation. Keep the original input and a backup because the preview schema is not frozen.</li>
+  </ol>
+  <p>Save does not export back to Molden, PDB, XYZ, mmCIF, or cube. There is no separate OBJ-plus-metadata export or external mesh linking. There is no automatic background saving, undo for surface deletion, or crash recovery. Use different native filenames to preserve multiple isovalues of the same field; regenerating replaces that field's meshes.</p>
+  <h3>Compatibility and filesystem details</h3>
+  <p>Older Rust-preview <code>.molekel</code> files open without a manual migration. Native Save also accepts that suffix, but new saves contain EigenVista identifiers regardless of filename and are not guaranteed to open in earlier Molekel builds. Native files containing biological identities require an application that supports the biological-structure feature. Keep an original when older software must continue to read it.</p>
+  <p>Desktop Save publishes a complete replacement file. On the tested APFS volume, replacing an existing file sets permissions to <code>0600</code> (owner read/write). Atomic replacement does not establish recovery after a crash or power loss. A CLI-created new file can fail with “operation not supported” on ExFAT; create it on APFS and copy the completed output. Desktop replacement Save uses a different path and succeeded on the tested ExFAT image. Other filesystem/platform behavior is not broadly qualified.</p>
+  <h3>Leaving the application</h3>
+  <p>Desktop close/quit checks for unsaved changes, unfinished operations, and converted results awaiting Save. Choose <strong>Cancel</strong> to continue working, <strong>Discard and Quit</strong> to cancel work and leave without saving, or <strong>Save and Quit</strong> to save the current document before leaving. Failed or cancelled saves keep the document open. Review a refreshed prompt if the document changes while it is displayed. Finish/cancel an existing native save first; save converted results from their queue. Save and Quit is unavailable while the queue has unfinished or unsaved work.</p>
+  <p>Browsers use their own close warning. Confirm all downloads before closing. Physical Mac close/Cmd+Q, native image downloads, and clean-Mac installation remain separate qualification gates; the preview has no autosave safety net. When sharing the application, forward the complete tester ZIP with licenses, notices, and Source.</p>
+
+  <h2 id="cli">Command-line converter</h2>
+  <p>The tester ZIP contains <code>Tools/eigenvista-convert</code>. The following examples assume it is on your PATH. Create output directories first. The converter supports the same input profiles as Open, including mmCIF/BinaryCIF and cube.</p>
+  <pre><code>eigenvista-convert calculation.molden
+eigenvista-convert calculation.molden.input --output calculation.eigenvista
+eigenvista-convert --output-dir converted water.molden structure.cif
+eigenvista-convert --check --json calculation.cube
+eigenvista-convert --help</code></pre>
+  <p>A single input defaults to a sibling <code>.eigenvista</code> output; multiple inputs require <code>--output-dir</code>. <code>--output</code> (or <code>-o</code>) chooses one destination. <code>--check</code> validates and reports without writing. <code>--json</code> writes per-file results, counts, warnings, and errors as an array on standard output; otherwise summaries go to standard error. Use <code>--</code> before filenames beginning with a hyphen.</p>
+  <p>Existing outputs need explicit <code>--force</code>; an input can never be its own destination. The converter rejects colliding destinations and output symlinks. New outputs use no-clobber publication even with force, and require filesystem hard-link support; unsupported publication is an error, not a partial-write fallback. At most 256 inputs are processed sequentially. Later per-file failures retain successful outputs.</p>
+  <p>Exit status is <code>0</code> for complete success, <code>1</code> for a per-file import/write failure, and <code>2</code> for invalid options or path preflight errors. Conversion creates no new meshes. Open its output in the app, generate surfaces, and Save when you need portable geometry.</p>
+</div></article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

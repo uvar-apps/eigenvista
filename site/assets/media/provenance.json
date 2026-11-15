@@ -1,0 +1,1071 @@
+{
+  "schema": 1,
+  "created": "2026-11-15T08:17:13.898Z",
+  "application": {
+    "name": "EigenVista",
+    "version": "0.7.2",
+    "sourceRevision": "5f336b6a2d53dcb0db67dd5ed95956134a5a1e18",
+    "productionEntrySha256": "cebfbc23851cfdd79796215ed92fc6d6e83a5f4f5d523561632a0c8e69235b59",
+    "verifiedAllDistAssetsAgainstReleaseAudit": true
+  },
+  "capture": {
+    "method": "Actual production application UI and its PNG export; only app-overview uses a full-window screenshot",
+    "browser": "Chromium 153.0.8010.12",
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+    "viewport": {
+      "width": 1900,
+      "height": 1240,
+      "deviceScaleFactor": 1
+    },
+    "encoding": "cwebp lossless -m 6; every WebP decoded and exactly compared with original PNG by ImageMagick",
+    "background": "#ecebe4",
+    "cameraBoundary": "Fit, zoom and orbit pointer controls only; OrbitControls damping settles before export; paired cameras unchanged and exact Off restoration verified",
+    "ambientOcclusionBoundary": "Off uses original Standard shading. On switches atoms/bonds to Lambert shading plus illustrative SSAO, not a physically calibrated shadow calculation. AO render targets proportionally capped at 1024.",
+    "geometryBoundary": "geometry counts describe the complete imported source document. backbone counts describe the complete prepared backbone, before visibleSubset filtering. generation describes saved mesh geometry retained in the document; volume and raycast display sampled fields instead."
+  },
+  "inputs": [
+    {
+      "file": "fixtures/cif/1AON.cif",
+      "bytes": 6293816,
+      "sha256": "6b202f340ffb9a1924d5315ce9e837e02cee1dbd745df675be76f6d4e1b8e66f"
+    },
+    {
+      "file": "fixtures/large-structure/4PJ1.pdb",
+      "bytes": 5661819,
+      "sha256": "5c51e991f01bf5c9c6e676400006de17d225b93a027c31dc375dd4106e8b30a5"
+    },
+    {
+      "file": "fixtures/molden/water-rhf-ccpvdz.molden",
+      "bytes": 19345,
+      "sha256": "9c0393a493956d22af9dcf76398f368fa211d3fe83488669b69d102baf9f6042"
+    },
+    {
+      "file": "fixtures/molden/water-rhf-ccpvdz.json",
+      "bytes": 54787,
+      "sha256": "71181575898558db02230254017c2e23f0c424eb5d89cd7b1523bcd93fbabfd1"
+    },
+    {
+      "file": "fixtures/cube/signed-affine.cube",
+      "bytes": 6732,
+      "sha256": "a94fc0bd553bebb80c55a6b8dfce00cdf4241994c3d611c120cd8aec9735c251"
+    },
+    {
+      "file": "palettes/matterviz-pastel.json",
+      "bytes": 8237,
+      "sha256": "6d3624bc9019e0540352865d45fa1ae4d6e5ed9083cba558bde0820556b1f802"
+    },
+    {
+      "file": "palettes/LICENSE-MatterViz.txt",
+      "bytes": 1073,
+      "sha256": "f519d155d7ed90bd0e8e3ee2a669b70d9ad9f03fa532e008b1b397769f1f175b"
+    }
+  ],
+  "sources": [
+    {
+      "input": "1AON.cif",
+      "url": "https://www.rcsb.org/structure/1AON",
+      "doi": "10.2210/pdb1aon/pdb",
+      "note": "Full tracked mmCIF; deposited structural coordinates and secondary annotations, no generated symmetry mates."
+    },
+    {
+      "input": "4PJ1.pdb",
+      "url": "https://www.rcsb.org/structure/4PJ1",
+      "doi": "10.2210/pdb4pj1/pdb",
+      "note": "Full unmodified tracked PDB fixture; citation and data notices retained in fixture header."
+    },
+    {
+      "input": "water-rhf-ccpvdz.molden",
+      "note": "First-party PySCF 2.14.0 RHF/cc-pVDZ converged calculation fixture; test geometry, not optimized. Source and independent numerical reference documented in fixtures/molden/README.md."
+    },
+    {
+      "input": "signed-affine.cube",
+      "note": "First-party synthetic analytical regression field; definition documented in fixtures/cube/README.md; not a quantum calculation."
+    },
+    {
+      "input": "matterviz-pastel.json",
+      "url": "https://github.com/janosh/matterviz/blob/fae7a3e7fddf26f9625391ea76f28c7ebd261de9/src/lib/colors/pastel-colors.json",
+      "license": "MIT",
+      "notice": "palettes/LICENSE-MatterViz.txt",
+      "note": "Unchanged upstream RGB values for elements 1–109 adapted into EigenVista envelope; 110–118 retain built-in defaults."
+    }
+  ],
+  "comparisons": [
+    {
+      "name": "1aon",
+      "foreground": 392694,
+      "background": 1097386,
+      "foregroundChanged": 297562,
+      "changedForegroundFraction": 0.7577452163771282,
+      "meanForegroundChannelChange": 60.47098164643887,
+      "backgroundDelta": 0,
+      "silhouetteMismatch": 0,
+      "exactOffRestoration": true
+    },
+    {
+      "name": "4pj1",
+      "foreground": 292858,
+      "background": 1197222,
+      "foregroundChanged": 236073,
+      "changedForegroundFraction": 0.8061005675105342,
+      "meanForegroundChannelChange": 68.24652334350891,
+      "backgroundDelta": 0,
+      "silhouetteMismatch": 0,
+      "exactOffRestoration": true
+    }
+  ],
+  "images": [
+    {
+      "file": "1aon-ao-off.webp",
+      "bytes": 569198,
+      "sha256": "ac31f6cefbb411c49f70d855093958c9da9e9eb1195db5ceae43c4e901949a6d",
+      "sourcePngSha256": "f9358b9d0418c820f315263e316b063638e571db5200222d7bd11e205157e695",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/cif/1AON.cif",
+      "representation": "Van der Waals",
+      "coloring": "Element",
+      "palette": "MatterViz Pastel",
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 1,
+        "dragCssPixels": [
+          65,
+          -38
+        ],
+        "dragSteps": 10
+      },
+      "ambientOcclusion": {
+        "enabled": false,
+        "shading": "original MeshStandardMaterial"
+      },
+      "geometry": {
+        "atoms": 58870,
+        "bonds": 59317,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [],
+        "chains": 35,
+        "residues": 8029
+      },
+      "status": "Opened 1AON.cif",
+      "summary": "58870 atoms\n59317 bonds\n0 basis functions"
+    },
+    {
+      "file": "1aon-ao-on.webp",
+      "bytes": 593046,
+      "sha256": "8ccaac20f9a9ed47049fcbb85ff0d97d56781ae845abfae55fb96518aefb6c94",
+      "sourcePngSha256": "9af0dec6ee15b8dfb49a1efbe070fb85247e6b078c77492dcbdfa0d0b01f4d9d",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/cif/1AON.cif",
+      "representation": "Van der Waals",
+      "coloring": "Element",
+      "palette": "MatterViz Pastel",
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 1,
+        "dragCssPixels": [
+          65,
+          -38
+        ],
+        "dragSteps": 10
+      },
+      "ambientOcclusion": {
+        "enabled": true,
+        "shading": "Lambert + SSAO",
+        "strength": 1,
+        "automaticRadius": true,
+        "radiusAngstrom": 14.25
+      },
+      "geometry": {
+        "atoms": 58870,
+        "bonds": 59317,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [],
+        "chains": 35,
+        "residues": 8029
+      },
+      "status": "Opened 1AON.cif",
+      "summary": "58870 atoms\n59317 bonds\n0 basis functions"
+    },
+    {
+      "file": "4pj1-ao-off.webp",
+      "bytes": 456052,
+      "sha256": "3535376a44e520546089c349e83ce8fbb4d2277def97ea7c6412cd9da7d508c7",
+      "sourcePngSha256": "a6469a17bca759dce511746e664e0a87135be66f148cb4703b8e108f312bba2e",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/large-structure/4PJ1.pdb",
+      "representation": "Van der Waals",
+      "coloring": "Element",
+      "palette": "MatterViz Pastel",
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 1,
+        "dragCssPixels": [
+          0,
+          0
+        ],
+        "dragSteps": 10
+      },
+      "ambientOcclusion": {
+        "enabled": false,
+        "shading": "original MeshStandardMaterial"
+      },
+      "geometry": {
+        "atoms": 65963,
+        "bonds": 66610,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [],
+        "chains": 28,
+        "residues": 8811
+      },
+      "status": "Opened 4PJ1.pdb",
+      "summary": "65963 atoms\n66610 bonds\n0 basis functions"
+    },
+    {
+      "file": "4pj1-ao-on.webp",
+      "bytes": 470040,
+      "sha256": "a9f0817195bd2d14c51ad2be18915697f3706b00ba81dc24c90d1ebe3ac9ce07",
+      "sourcePngSha256": "39c8fa9f10aec976522d584a117dd9ae9551ed2316ad35a90224f13a9f194a17",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/large-structure/4PJ1.pdb",
+      "representation": "Van der Waals",
+      "coloring": "Element",
+      "palette": "MatterViz Pastel",
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 1,
+        "dragCssPixels": [
+          0,
+          0
+        ],
+        "dragSteps": 10
+      },
+      "ambientOcclusion": {
+        "enabled": true,
+        "shading": "Lambert + SSAO",
+        "strength": 1,
+        "automaticRadius": true,
+        "radiusAngstrom": 16.25
+      },
+      "geometry": {
+        "atoms": 65963,
+        "bonds": 66610,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [],
+        "chains": 28,
+        "residues": 8811
+      },
+      "status": "Opened 4PJ1.pdb",
+      "summary": "65963 atoms\n66610 bonds\n0 basis functions"
+    },
+    {
+      "file": "1aon-cartoon-chain.webp",
+      "bytes": 568768,
+      "sha256": "ebdc6bb6f2fc7bd0fa0f16fd3d7ead5fe0837efe21770cd74459430c9270f32b",
+      "sourcePngSha256": "92fdb36e44c93a1fb64de3bd6943752953d9d3b4fdcb9c2b211f14c271ba059c",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/cif/1AON.cif",
+      "representation": "Protein cartoon",
+      "coloring": "Chain",
+      "backbone": {
+        "segments": 21,
+        "points": 8015
+      },
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 1,
+        "dragCssPixels": [
+          65,
+          -38
+        ]
+      },
+      "geometry": {
+        "atoms": 58870,
+        "bonds": 59317,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [],
+        "chains": 35,
+        "residues": 8029
+      },
+      "status": "Opened 1AON.cif",
+      "summary": "58870 atoms\n59317 bonds\n0 basis functions"
+    },
+    {
+      "file": "1aon-chain-secondary.webp",
+      "bytes": 126694,
+      "sha256": "deb9d1c2c8eed5a3bf47388fff9e9a9caef1e509390a03c90c74805a5c153ec0",
+      "sourcePngSha256": "c450ae466be36b95bd39e80456a8dfe2b8afa66c8ead2dfb7adce60eae0d7780",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/cif/1AON.cif",
+      "representation": "Protein cartoon",
+      "coloring": "Deposited secondary structure; unknown remains unknown",
+      "visibleSubset": "Chain A only",
+      "backbone": {
+        "segments": 21,
+        "points": 8015
+      },
+      "camera": {
+        "focusChain": "A"
+      },
+      "geometry": {
+        "atoms": 58870,
+        "bonds": 59317,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [],
+        "chains": 35,
+        "residues": 8029
+      },
+      "status": "Opened 1AON.cif",
+      "summary": "58870 atoms\n59317 bonds\n0 basis functions"
+    },
+    {
+      "file": "water-orbital-mesh.webp",
+      "bytes": 102010,
+      "sha256": "614ba47e13b2613c78d8abfa56274651d8dfd3418bf8ddb37d91206a26831b93",
+      "sourcePngSha256": "0195a06d7169906fbfe8cf8524f9f2fdf70c079044c2c0e4dfb49418f430ee47",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/molden/water-rhf-ccpvdz.molden",
+      "representation": "Ball and stick",
+      "palette": "MatterViz Pastel",
+      "field": {
+        "orbitalNumber": 5,
+        "name": "HOMO",
+        "occupation": 2,
+        "energyHartree": -0.49306280759577614,
+        "method": "RHF",
+        "basis": "cc-pVDZ",
+        "isovalueBohrPowerMinusThreeHalves": 0.05,
+        "gridResolution": 96
+      },
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 2
+      },
+      "mode": "Isosurface mesh",
+      "geometry": {
+        "atoms": 3,
+        "bonds": 2,
+        "basisFunctions": 24,
+        "orbitals": [
+          {
+            "id": "molden-mo-1",
+            "label": "MO 1 (A)",
+            "occupation": 2,
+            "energy": -20.55051395,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-2",
+            "label": "MO 2 (A)",
+            "occupation": 2,
+            "energy": -1.336243649,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-3",
+            "label": "MO 3 (A)",
+            "occupation": 2,
+            "energy": -0.6990493969,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-4",
+            "label": "MO 4 (A)",
+            "occupation": 2,
+            "energy": -0.5662677554,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-5",
+            "label": "MO 5 (A)",
+            "occupation": 2,
+            "energy": -0.4930628076,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-6",
+            "label": "MO 6 (A)",
+            "occupation": 0,
+            "energy": 0.1854597739,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-7",
+            "label": "MO 7 (A)",
+            "occupation": 0,
+            "energy": 0.2561332086,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-8",
+            "label": "MO 8 (A)",
+            "occupation": 0,
+            "energy": 0.7890597438,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-9",
+            "label": "MO 9 (A)",
+            "occupation": 0,
+            "energy": 0.8532546893,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-10",
+            "label": "MO 10 (A)",
+            "occupation": 0,
+            "energy": 1.163498233,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-11",
+            "label": "MO 11 (A)",
+            "occupation": 0,
+            "energy": 1.200400028,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-12",
+            "label": "MO 12 (A)",
+            "occupation": 0,
+            "energy": 1.253260961,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-13",
+            "label": "MO 13 (A)",
+            "occupation": 0,
+            "energy": 1.445456325,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-14",
+            "label": "MO 14 (A)",
+            "occupation": 0,
+            "energy": 1.475800453,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-15",
+            "label": "MO 15 (A)",
+            "occupation": 0,
+            "energy": 1.674988686,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-16",
+            "label": "MO 16 (A)",
+            "occupation": 0,
+            "energy": 1.867640314,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-17",
+            "label": "MO 17 (A)",
+            "occupation": 0,
+            "energy": 1.933610981,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-18",
+            "label": "MO 18 (A)",
+            "occupation": 0,
+            "energy": 2.451373757,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-19",
+            "label": "MO 19 (A)",
+            "occupation": 0,
+            "energy": 2.488373521,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-20",
+            "label": "MO 20 (A)",
+            "occupation": 0,
+            "energy": 3.284579498,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-21",
+            "label": "MO 21 (A)",
+            "occupation": 0,
+            "energy": 3.338501378,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-22",
+            "label": "MO 22 (A)",
+            "occupation": 0,
+            "energy": 3.509186837,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-23",
+            "label": "MO 23 (A)",
+            "occupation": 0,
+            "energy": 3.865757574,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-24",
+            "label": "MO 24 (A)",
+            "occupation": 0,
+            "energy": 4.146191051,
+            "spin": "spatial"
+          }
+        ],
+        "grids": []
+      },
+      "generation": {
+        "dimensions": [
+          96,
+          96,
+          96
+        ],
+        "surfaces": [
+          {
+            "field": "molden-mo-5",
+            "isovalue": 0.05,
+            "vertices": 6864,
+            "triangles": 2288
+          },
+          {
+            "field": "molden-mo-5",
+            "isovalue": -0.05,
+            "vertices": 6864,
+            "triangles": 2288
+          }
+        ]
+      },
+      "status": "4,576 triangles / 0.46 s",
+      "summary": "3 atoms\n2 bonds\n24 basis functions"
+    },
+    {
+      "file": "water-orbital-volume.webp",
+      "bytes": 107478,
+      "sha256": "a8bc4a2fd5a87b4656e453cfda3927dc4cf316621ae03d834fcb45fc4dc7a09f",
+      "sourcePngSha256": "e3c33897111257ee1bf977acc2ed4cb8f52bbeb9088c49637a698310d2ec89e3",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/molden/water-rhf-ccpvdz.molden",
+      "representation": "Ball and stick",
+      "palette": "MatterViz Pastel",
+      "field": {
+        "orbitalNumber": 5,
+        "name": "HOMO",
+        "occupation": 2,
+        "energyHartree": -0.49306280759577614,
+        "method": "RHF",
+        "basis": "cc-pVDZ",
+        "isovalueBohrPowerMinusThreeHalves": 0.05,
+        "gridResolution": 96
+      },
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 7
+      },
+      "mode": "Volume preview",
+      "samplingQuality": "Fine",
+      "geometry": {
+        "atoms": 3,
+        "bonds": 2,
+        "basisFunctions": 24,
+        "orbitals": [
+          {
+            "id": "molden-mo-1",
+            "label": "MO 1 (A)",
+            "occupation": 2,
+            "energy": -20.55051395,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-2",
+            "label": "MO 2 (A)",
+            "occupation": 2,
+            "energy": -1.336243649,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-3",
+            "label": "MO 3 (A)",
+            "occupation": 2,
+            "energy": -0.6990493969,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-4",
+            "label": "MO 4 (A)",
+            "occupation": 2,
+            "energy": -0.5662677554,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-5",
+            "label": "MO 5 (A)",
+            "occupation": 2,
+            "energy": -0.4930628076,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-6",
+            "label": "MO 6 (A)",
+            "occupation": 0,
+            "energy": 0.1854597739,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-7",
+            "label": "MO 7 (A)",
+            "occupation": 0,
+            "energy": 0.2561332086,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-8",
+            "label": "MO 8 (A)",
+            "occupation": 0,
+            "energy": 0.7890597438,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-9",
+            "label": "MO 9 (A)",
+            "occupation": 0,
+            "energy": 0.8532546893,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-10",
+            "label": "MO 10 (A)",
+            "occupation": 0,
+            "energy": 1.163498233,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-11",
+            "label": "MO 11 (A)",
+            "occupation": 0,
+            "energy": 1.200400028,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-12",
+            "label": "MO 12 (A)",
+            "occupation": 0,
+            "energy": 1.253260961,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-13",
+            "label": "MO 13 (A)",
+            "occupation": 0,
+            "energy": 1.445456325,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-14",
+            "label": "MO 14 (A)",
+            "occupation": 0,
+            "energy": 1.475800453,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-15",
+            "label": "MO 15 (A)",
+            "occupation": 0,
+            "energy": 1.674988686,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-16",
+            "label": "MO 16 (A)",
+            "occupation": 0,
+            "energy": 1.867640314,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-17",
+            "label": "MO 17 (A)",
+            "occupation": 0,
+            "energy": 1.933610981,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-18",
+            "label": "MO 18 (A)",
+            "occupation": 0,
+            "energy": 2.451373757,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-19",
+            "label": "MO 19 (A)",
+            "occupation": 0,
+            "energy": 2.488373521,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-20",
+            "label": "MO 20 (A)",
+            "occupation": 0,
+            "energy": 3.284579498,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-21",
+            "label": "MO 21 (A)",
+            "occupation": 0,
+            "energy": 3.338501378,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-22",
+            "label": "MO 22 (A)",
+            "occupation": 0,
+            "energy": 3.509186837,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-23",
+            "label": "MO 23 (A)",
+            "occupation": 0,
+            "energy": 3.865757574,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-24",
+            "label": "MO 24 (A)",
+            "occupation": 0,
+            "energy": 4.146191051,
+            "spin": "spatial"
+          }
+        ],
+        "grids": []
+      },
+      "generation": {
+        "dimensions": [
+          96,
+          96,
+          96
+        ],
+        "surfaces": [
+          {
+            "field": "molden-mo-5",
+            "isovalue": 0.05,
+            "vertices": 6864,
+            "triangles": 2288
+          },
+          {
+            "field": "molden-mo-5",
+            "isovalue": -0.05,
+            "vertices": 6864,
+            "triangles": 2288
+          }
+        ]
+      },
+      "status": "4,576 triangles / 0.46 s",
+      "summary": "3 atoms\n2 bonds\n24 basis functions"
+    },
+    {
+      "file": "app-overview.webp",
+      "bytes": 132596,
+      "sha256": "9c4abb73fcb6b6d0eff03b5aad274bc4e4e3a8a29e1f55b4fcbdb6abdc7b4adf",
+      "sourcePngSha256": "dbc251d99875465fa372147e967132400486fb044447c896ecda8e8b83954068",
+      "width": 1600,
+      "height": 1050,
+      "background": "#ecebe4",
+      "input": "fixtures/molden/water-rhf-ccpvdz.molden",
+      "representation": "Ball and stick",
+      "palette": "MatterViz Pastel",
+      "field": {
+        "orbitalNumber": 5,
+        "name": "HOMO",
+        "occupation": 2,
+        "energyHartree": -0.49306280759577614,
+        "method": "RHF",
+        "basis": "cc-pVDZ",
+        "isovalueBohrPowerMinusThreeHalves": 0.05,
+        "gridResolution": 96
+      },
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 7
+      },
+      "mode": "Volume preview",
+      "samplingQuality": "Fine",
+      "captureType": "full unmodified application UI",
+      "geometry": {
+        "atoms": 3,
+        "bonds": 2,
+        "basisFunctions": 24,
+        "orbitals": [
+          {
+            "id": "molden-mo-1",
+            "label": "MO 1 (A)",
+            "occupation": 2,
+            "energy": -20.55051395,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-2",
+            "label": "MO 2 (A)",
+            "occupation": 2,
+            "energy": -1.336243649,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-3",
+            "label": "MO 3 (A)",
+            "occupation": 2,
+            "energy": -0.6990493969,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-4",
+            "label": "MO 4 (A)",
+            "occupation": 2,
+            "energy": -0.5662677554,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-5",
+            "label": "MO 5 (A)",
+            "occupation": 2,
+            "energy": -0.4930628076,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-6",
+            "label": "MO 6 (A)",
+            "occupation": 0,
+            "energy": 0.1854597739,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-7",
+            "label": "MO 7 (A)",
+            "occupation": 0,
+            "energy": 0.2561332086,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-8",
+            "label": "MO 8 (A)",
+            "occupation": 0,
+            "energy": 0.7890597438,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-9",
+            "label": "MO 9 (A)",
+            "occupation": 0,
+            "energy": 0.8532546893,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-10",
+            "label": "MO 10 (A)",
+            "occupation": 0,
+            "energy": 1.163498233,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-11",
+            "label": "MO 11 (A)",
+            "occupation": 0,
+            "energy": 1.200400028,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-12",
+            "label": "MO 12 (A)",
+            "occupation": 0,
+            "energy": 1.253260961,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-13",
+            "label": "MO 13 (A)",
+            "occupation": 0,
+            "energy": 1.445456325,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-14",
+            "label": "MO 14 (A)",
+            "occupation": 0,
+            "energy": 1.475800453,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-15",
+            "label": "MO 15 (A)",
+            "occupation": 0,
+            "energy": 1.674988686,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-16",
+            "label": "MO 16 (A)",
+            "occupation": 0,
+            "energy": 1.867640314,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-17",
+            "label": "MO 17 (A)",
+            "occupation": 0,
+            "energy": 1.933610981,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-18",
+            "label": "MO 18 (A)",
+            "occupation": 0,
+            "energy": 2.451373757,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-19",
+            "label": "MO 19 (A)",
+            "occupation": 0,
+            "energy": 2.488373521,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-20",
+            "label": "MO 20 (A)",
+            "occupation": 0,
+            "energy": 3.284579498,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-21",
+            "label": "MO 21 (A)",
+            "occupation": 0,
+            "energy": 3.338501378,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-22",
+            "label": "MO 22 (A)",
+            "occupation": 0,
+            "energy": 3.509186837,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-23",
+            "label": "MO 23 (A)",
+            "occupation": 0,
+            "energy": 3.865757574,
+            "spin": "spatial"
+          },
+          {
+            "id": "molden-mo-24",
+            "label": "MO 24 (A)",
+            "occupation": 0,
+            "energy": 4.146191051,
+            "spin": "spatial"
+          }
+        ],
+        "grids": []
+      },
+      "generation": {
+        "dimensions": [
+          96,
+          96,
+          96
+        ],
+        "surfaces": [
+          {
+            "field": "molden-mo-5",
+            "isovalue": 0.05,
+            "vertices": 6864,
+            "triangles": 2288
+          },
+          {
+            "field": "molden-mo-5",
+            "isovalue": -0.05,
+            "vertices": 6864,
+            "triangles": 2288
+          }
+        ]
+      },
+      "status": "4,576 triangles / 0.46 s",
+      "summary": "3 atoms\n2 bonds\n24 basis functions"
+    },
+    {
+      "file": "cube-raycast.webp",
+      "bytes": 55722,
+      "sha256": "28e51e1b2164d44a9fb664d93697ca153193422641ed2e21d5bc4ef1dfc6617a",
+      "sourcePngSha256": "e69f822f6eefc6b04282e91c93e0b31275c4d561aae8826ae77cfbce30b721c3",
+      "width": 1390,
+      "height": 1072,
+      "background": "#ecebe4",
+      "input": "fixtures/cube/signed-affine.cube",
+      "mode": "Sampled raycast preview",
+      "synthetic": true,
+      "field": {
+        "description": "Analytical signed affine regression scalar; not quantum chemistry",
+        "dimensions": [
+          7,
+          7,
+          7
+        ],
+        "isovalue": 0.05
+      },
+      "samplingQuality": "Fine",
+      "camera": {
+        "fit": true,
+        "zoomInClicks": 2
+      },
+      "geometry": {
+        "atoms": 2,
+        "bonds": 1,
+        "basisFunctions": 0,
+        "orbitals": [],
+        "grids": [
+          {
+            "id": "cube",
+            "label": "signed-affine.cube",
+            "dims": [
+              7,
+              7,
+              7
+            ]
+          }
+        ]
+      },
+      "generation": null,
+      "status": "Opened signed-affine.cube",
+      "summary": "2 atoms\n1 bond\n0 basis functions"
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "These are browser captures of the audited release assets, not clean-machine/native installation qualification.",
+    "Illustrative views do not add quantum data to structure-only inputs.",
+    "Secondary structure is deposited only; unassigned regions are not inferred."
+  ]
+}
