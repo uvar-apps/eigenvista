@@ -11,14 +11,15 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version **0.7.1** is published as an experimental
+**Status:** source version **0.7.2** is in release preparation as an experimental
 Apple Silicon development preview, not v1 or completion of the M0-M7 plan.
-Fresh local macOS checks passed, including all 504 browser cases.
-Rebuilt Apple Silicon assets, artifact/native checks and all three downloaded
-asset identities are verified.
-See [implementation status](docs/status.md#source-version-071) and the
-[0.7.1 release notes](docs/releases/0.7.1.md). The earlier published 0.7.0
-release and its artifacts remain unchanged.
+It adds scene background controls, transparent PNG export and optional MatterViz
+Muted/Pastel atom palettes. Fresh local macOS 0.7.2 checks passed, including all
+526 browser cases. Rebuilt assets, artifact/native checks and publication remain
+pending. The earlier feature verification is recorded separately.
+See [implementation status](docs/status.md#source-version-072) and the
+[0.7.2 release notes](docs/releases/0.7.2.md). The published 0.7.1 release and its
+verified artifacts remain unchanged.
 
 Earlier releases added native close/quit protection, correct Molden limits,
 then-hosted verification, and reduced Molden-import/surface-publication work
@@ -55,6 +56,13 @@ for the optional capability required by new biological documents. The published
 update an installed app or an existing archive.
 
 ## Start here
+
+Version 0.7.2 adds a scene **Background color** picker/reset and a separate
+**Export image with transparent background** action (#73/#74). Normal image
+export uses the chosen opaque background. Optional Muted/Pastel JSON palettes
+load through **Atom colours → Colours file…**; source files are in `palettes/`
+and the planned tester ZIP includes `Palettes/` with attribution and license.
+See the [user guide](docs/user-guide.md#moving-and-inspecting-the-scene) for controls.
 
 Version 0.7.1 renames the **Document** sidebar section to **Molecular data**
 ([#70](https://github.com/uvar-apps/eigenvista/issues/70)). Its controls and saved
@@ -111,11 +119,11 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.7.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
-provides the rebuilt ZIP, checksum and build metadata. Check
-[status](docs/status.md#source-version-071) for verified source, SHA256 and local
-test/artifact evidence. The [0.7.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-remains the earlier published package.
+The [planned 0.7.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
+is the target for rebuilt ZIP, checksum and build metadata after publication.
+Check [status](docs/status.md#source-version-072) for actual verification and
+delivery. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+retains its original verified package; older releases are not updated in place.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
 remains the earlier published package. Older packages remain historical and
 are not updated in place.
@@ -129,8 +137,10 @@ and no Apple notarization. They include source and notices under the
 - Frozen independent PySCF references for closed/open-shell molecules and Cartesian/spherical general contractions through G, with native/WASM value and gradient checks. [Reference suite and example documents](fixtures/pyscf/README.md).
 - Explicit Gaussian-polynomial basis evaluation and gradients through G, signed orbitals, and supplied real density matrices in Rust/f64.
 - Ball-and-stick, liquorice, and space-filling representations; camera controls,
-  atom picking, and PNG export of a freshly rendered current view, including
-  after the scene has become idle.
+  atom picking, session background colors, and opaque or transparent PNG export
+  of a freshly rendered current view, including after the scene has become idle.
+- Optional MatterViz Muted/Pastel atom-color files for the existing palette picker;
+  built-in colors remain the default.
 - Biological chain/entity/secondary colors, component and chain selection, mixed
   views, and protein backbone traces, smooth tubes, ribbons and strand-arrow
   cartoons from retained PDB/mmCIF/BinaryCIF identities. Secondary assignments

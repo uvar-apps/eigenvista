@@ -417,7 +417,18 @@ section {
   top: 18px;
   right: 16px;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100% - 32px);
   gap: 5px;
+}
+.viewport-tools input[type="color"] {
+  width: 34px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid #cfdbdf;
+  border-radius: 4px;
+  background: #ffffffc9;
 }
 .viewport-tools button {
   width: 34px;

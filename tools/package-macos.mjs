@@ -305,6 +305,16 @@ function main() {
   );
   copy(path.join(root, "packaging/examples"), path.join(payload, "Examples"));
   copy(path.join(root, "shaders"), path.join(payload, "Shaders"));
+  for (const file of [
+    "matterviz-muted.json",
+    "matterviz-pastel.json",
+    "README.md",
+    "LICENSE-MatterViz.txt",
+  ])
+    copy(
+      path.join(root, "palettes", file),
+      path.join(payload, "Palettes", file),
+    );
   copy(
     path.join(root, "fixtures/molden/water-rhf-ccpvdz.molden"),
     path.join(payload, "Examples/water.molden"),

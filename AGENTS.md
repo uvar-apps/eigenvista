@@ -70,7 +70,27 @@ preserve those historical results as evidence of what ran at the time.
 
 ## Layout that is not obvious from names
 
-- Current source version **0.7.1** is published for
+- Current source version **0.7.2** is in release preparation for scene background
+  controls (#73), transparent PNG (#74) and optional MatterViz Muted/Pastel
+  atom-color files. The earlier feature batch passed 526 browser cases (263 per
+  engine), with native/build/pixel checks recorded in handoff/status; those are
+  pre-bump feature results. Fresh local macOS 0.7.2 checks passed: fmt, 272 default
+  and seven desktop Rust tests, strict Clippy, WASM/TypeScript/production build,
+  13 packaging checks and all 526 browser cases (263 per engine; one worker;
+  zero skipped/flaky/unexpected/retries). All 276 source hashes and Vite PID 26782
+  stayed stable. Rebuilt app/converter/ZIP, artifact/native verification and
+  publication remain pending. Source palettes are in `palettes/`; the tester payload is planned
+  to include `Palettes/` with the unchanged upstream MIT notice. Palettes use the
+  existing version-1 picker, define elements 1–109 and leave elements 110–118
+  at built-in defaults.
+  Background is session-only, normal PNG uses the selected opaque color and
+  `eigenvista-view.png`, and transparent export uses
+  `eigenvista-view-transparent.png`. Preserve scientific data/profiles, default
+  palette, dependencies, compiler and icon/logo. Read the
+  [0.7.2 notes](docs/releases/0.7.2.md) and current handoff/status; the published
+  0.7.1 app/ZIP predates these additions and remains unchanged.
+
+- Version **0.7.1** is published for
   [#70](https://github.com/uvar-apps/eigenvista/issues/70): the visible
   **Document** section is renamed **Molecular data**. Only the displayed label
   and current UI documentation/selectors change; internal `document` panel IDs,
@@ -160,8 +180,9 @@ preserve those historical results as evidence of what ran at the time.
   Preserve all five original PNG samples and every pixel/identity oracle.
   Separate resource checks still exercise the 1024 cap, and actual-app tracked
   1AON remains the primary visual qualification. The published 0.6.0 inventory was
-  466 tests, 233 per engine, including 10 AO cases per engine. Current source
-  discovers 504 cases (252 per engine), adding 19 biological cases per engine.
+  466 tests, 233 per engine, including 10 AO cases per engine. The published
+  0.7.1 inventory was 504 cases (252 per engine), adding 19 biological cases
+  per engine; later inventory and verification are recorded above.
   Preserve all original cases and independent oracles. Keep the existing
   60-second per-test, 35-minute suite-step and 60-minute job limits with one
   worker. The failed combined case at head `04c8c919` is historical evidence;
@@ -312,10 +333,17 @@ Required local verification order before pushing runtime changes (details and co
   [BinaryCIF/capture decisions](docs/design/2026-11-06-binarycif-and-capture.md)
   and independently encoded [fixtures](fixtures/bcif/README.md).
 - The viewport deliberately uses `preserveDrawingBuffer: false`. PNG export
-  renders and reads synchronously in the same task. Asynchronous backbuffer
-  reads are not reliable evidence: existing browser pixel tests use the
-  compositor via `app/tests/scenePixels.ts`, with an independent PNG oracle.
-  Keep idle/camera/resize/signed-field export and visible-error recovery checks.
+  renders and reads synchronously in the same task. Transparent
+  export enables renderer `alpha: true`, temporarily clears black with alpha
+  zero, then restores the exact clear color/alpha and redraws the normal view
+  in `finally`, including after encoding failures. Keep normal view alpha one
+  and reuse the shared final-frame draw/AO path; never remove pixels by color.
+  Asynchronous backbuffer reads are not reliable evidence: existing browser
+  pixel tests use the compositor via `app/tests/scenePixels.ts`, with an
+  independent PNG oracle. Preserve those original background/signed-color
+  expectations; use a separate decoded-RGBA/compositing oracle for transparent
+  output. Keep idle/camera/resize/signed-field export and visible-error recovery
+  checks. Export adds no persistent capture target or scientific state.
 - Bond queries use exact radius-bucket trees with each bucket's observed maximum;
   preserve pair cutoffs, deterministic ordering, explicit precedence, and work/
   allocation guards. mmCIF declarations resolve only against selected source

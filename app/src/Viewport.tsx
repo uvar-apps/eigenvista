@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { Focus, Camera, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  Focus,
+  Camera,
+  ImageDown,
+  RotateCcw,
+  Undo2,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 import type {
   EigenVistaDocument,
   SampledGrid,
@@ -40,6 +48,7 @@ import {
 } from "./proteinGeometry";
 import { useProteinBackbone } from "./useProteinBackbone";
 const DEFAULT_STRUCTURE_DISPLAY = defaultStructureDisplay();
+const DEFAULT_BACKGROUND_COLOR = "#e8edef";
 
 export function symbol(z: number) {
   return elementDisplay(z).symbol;
@@ -164,6 +173,9 @@ export function Viewport({
   onShaderLog?: (log: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
+  const [backgroundColor, setBackgroundColor] = useState(
+    DEFAULT_BACKGROUND_COLOR,
+  );
   // Parent display reset is passive; never apply the previous source's indices
   // during the first render of a replacement document.
   const displayOwner = useRef({
@@ -257,6 +269,7 @@ export function Viewport({
     try {
       renderer = new THREE.WebGLRenderer({
         antialias: true,
+        alpha: true,
         preserveDrawingBuffer: false,
       });
     } catch {
@@ -266,7 +279,7 @@ export function Viewport({
       return;
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor("#e8edef");
+    renderer.setClearColor(DEFAULT_BACKGROUND_COLOR, 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.setAttribute("aria-label", "Molecular scene");
     div.appendChild(renderer.domElement);
@@ -420,6 +433,12 @@ export function Viewport({
       engine.current = null;
     };
   }, []);
+  useEffect(() => {
+    const e = engine.current;
+    if (!e) return;
+    e.renderer.setClearColor(backgroundColor, 1);
+    e.needsRender = true;
+  }, [backgroundColor]);
   useEffect(() => {
     const e = engine.current;
     if (!e) return;
@@ -789,21 +808,36 @@ export function Viewport({
     }
     current.needsRender = true;
   }, [ambientOcclusion]);
-  function screenshot() {
+  function screenshot(transparent = false) {
     const e = engine.current;
     if (!e) return;
     try {
       if (e.renderer.getContext().isContextLost())
         throw new Error("Graphics context is lost");
-      // Read the freshly rendered frame in the same task, before the browser
-      // can discard this non-preserved drawing buffer. Export needs no
-      // persistent render target and does not change the camera or document.
-      e.draw();
+      const clearColor = e.renderer.getClearColor(new THREE.Color());
+      const clearAlpha = e.renderer.getClearAlpha();
+      let image: string;
+      try {
+        // Draw and encode in one task, before this non-preserved buffer can be
+        // discarded. Zero-alpha black keeps antialiasing and translucent fields
+        // compositable without baking the selected background into their RGB.
+        if (transparent) e.renderer.setClearColor(0x000000, 0);
+        e.draw();
+        image = e.renderer.domElement.toDataURL("image/png");
+        if (!image.startsWith("data:image/png;"))
+          throw new Error("The scene image could not be encoded as PNG");
+      } finally {
+        if (transparent) {
+          e.renderer.setClearColor(clearColor, clearAlpha);
+          e.needsRender = true;
+          e.draw();
+        }
+      }
       const a = document.createElement("a");
-      a.download = "eigenvista-view.png";
-      a.href = e.renderer.domElement.toDataURL("image/png");
-      if (!a.href.startsWith("data:image/png;"))
-        throw new Error("The scene image could not be encoded as PNG");
+      a.download = transparent
+        ? "eigenvista-view-transparent.png"
+        : "eigenvista-view.png";
+      a.href = image;
       a.click();
       setError((current) =>
         current.startsWith("Unable to export the scene image:") ? "" : current,
@@ -813,7 +847,7 @@ export function Viewport({
     }
   }
   return (
-    <div className="scene-wrap">
+    <div className="scene-wrap" style={{ backgroundColor }}>
       <div className="scene" ref={host} data-testid="viewport" />
       {error && (
         <div className="viewport-error" role="alert">
@@ -864,6 +898,21 @@ export function Viewport({
         </div>
       )}
       <div className="viewport-tools">
+        <input
+          type="color"
+          aria-label="Background color"
+          title="Background color"
+          value={backgroundColor}
+          onChange={(event) => setBackgroundColor(event.target.value)}
+        />
+        <button
+          title="Reset background color"
+          aria-label="Reset background color"
+          disabled={backgroundColor === DEFAULT_BACKGROUND_COLOR}
+          onClick={() => setBackgroundColor(DEFAULT_BACKGROUND_COLOR)}
+        >
+          <Undo2 size={18} />
+        </button>
         <button
           title="Zoom in"
           aria-label="Zoom in"
@@ -895,9 +944,16 @@ export function Viewport({
         <button
           title="Export image"
           aria-label="Export image"
-          onClick={screenshot}
+          onClick={() => screenshot()}
         >
           <Camera size={18} />
+        </button>
+        <button
+          title="Export image with transparent background"
+          aria-label="Export image with transparent background"
+          onClick={() => screenshot(true)}
+        >
+          <ImageDown size={18} />
         </button>
       </div>
       <div className="scene-label">

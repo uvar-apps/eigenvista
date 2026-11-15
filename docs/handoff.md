@@ -1,9 +1,11 @@
 # Development handoff
 
-Updated 14 November 2026 for published **0.7.1**, renaming the visible Document
-section to Molecular data (#70). Fresh local checks, rebuilt artifacts,
-native/production checks and published asset downloads passed. Release source
-is `a7037dc`; this later living record does not retag or rebuild it.
+Updated 15 November 2026 for **0.7.2 release preparation**: scene background
+controls (#73), transparent PNG (#74) and optional MatterViz Muted/Pastel atom
+palettes. Fresh local macOS 0.7.2 checks passed; rebuilt distributions,
+artifact/native checks and publication remain pending. Completed feature
+verification is preserved separately below. The
+published 0.7.1 release retains source `a7037dc` and its verified artifacts.
 The prior published 0.7.0 release retains source
 `d414bc7` and its verified artifacts. The older
 published 0.6.0 tag/package retain source `6cb678c`; earlier packages and dated
@@ -11,7 +13,7 @@ entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application source is **EigenVista**, version **0.7.1**, in the standalone
+The current application source is **EigenVista**, version **0.7.2**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
@@ -28,6 +30,93 @@ Dated hosted-CI requirements and results below preserve the earlier policy and
 its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
+
+## Source version 0.7.2
+
+Release preparation, 15 November 2026, based on main `979324c`. The user
+subsequently authorized version 0.7.2, commit/tag/push, a published release with
+notes and rebuilt redistributables. Read the [0.7.2 notes](releases/0.7.2.md).
+The [planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
+is a delivery target, not evidence of publication.
+
+This release collects #73/#74 background color/reset and transparent PNG controls
+plus two optional MatterViz palette files, loaded through the existing picker.
+The default palette is unchanged; the examples cover elements 1–109, with
+elements 110–118 falling back to built-in colors. The planned tester ZIP contains `Palettes/` with both
+JSON files, their README and unchanged upstream MIT license. No new palette UI,
+scientific data/profile change, dependency/compiler update or icon/logo change
+is part of this release.
+
+Fresh local macOS 0.7.2 checks passed: fmt, 272 default Rust tests, strict
+workspace/all-targets Clippy, seven explicit desktop tests, WASM/TypeScript/
+production build and 13 packaging checks. The complete browser suite passed
+526/526, 263 per engine, with one worker and zero skipped, flaky, unexpected or
+retried cases. Its summary completed at 2026-11-15T06:45:19.078Z; the browser report
+duration was 943.97 seconds (about 15.7 minutes). Reference generation exited zero
+before Playwright; all 276 recorded source hashes and Vite PID 26782 remained
+stable. Evidence is under `tmp/2026-11-15-release-0.7.2/`, including
+`full-browsers-summary.json`, `root-browser-review.json` and
+`root-native-build-review.json`. The earlier feature pass below remains separate.
+All remaining artifact/native checks must also pass locally before pushing.
+
+Clean committed-source app/converter/ZIP, checksum/build metadata, independent
+artifact/native verification, annotated tag, publication and all three downloaded
+asset checks are pending. No 0.7.2 artifact identity or delivery success is claimed.
+Current platform acceptance remains local macOS only; native image-download
+handling, clean-Mac/HiDPI and full-OS-range/Linux/Windows qualification remain
+separate. The published 0.7.1/older tags, archives and records below are unchanged.
+
+## Background and transparent-PNG feature verification: 15 November 2026
+
+15 November 2026: the user authorized local implementation of
+[#73](https://github.com/uvar-apps/eigenvista/issues/73) and
+[#74](https://github.com/uvar-apps/eigenvista/issues/74), based on main `979324c`.
+This feature-development pass completed on source version 0.7.1 before the later
+0.7.2 release request above. At that point no branch, commit, tag, push, version
+bump or release was requested, and the changes remained uncommitted. The
+published 0.7.1 app/ZIP predates these additions.
+
+The scene toolbar gains **Background color** and **Reset background color**,
+starting at `#e8edef`. This is viewport session state; changes only invalidate
+drawing and leave geometry, scientific inputs, field sampling, document/dirty
+state and saved-file profiles unchanged. Ordinary **Export image** retains
+`eigenvista-view.png` and uses the selected opaque background. The extra
+**Export image with transparent background** action uses
+`eigenvista-view-transparent.png`, including fractional alpha on antialiased
+edges and translucent surfaces. HTML overlays remain outside scene PNGs.
+
+The renderer uses `alpha: true` with `preserveDrawingBuffer: false`. Transparent
+capture temporarily clears black at alpha zero, calls the shared final-frame
+draw/AO path and encodes synchronously. A `finally` restores the exact prior
+clear color/alpha and redraws the opaque view on success or encoding failure.
+There is no color-key removal, persistent capture target, scientific shader/AO
+algorithm change or native-format change.
+
+Fresh local macOS checks passed: fmt, 272 default Rust tests, strict workspace/
+all-targets Clippy, seven explicit desktop tests, final WASM/TypeScript/production
+build and 13 packaging checks. The new focused browser cases passed 22/22,
+followed by 30/30 combined camera/background cases after the toolbar-test update.
+The qualifying full run passed 526/526, 263 per engine, with one worker and zero
+skipped, flaky, unexpected or retried cases. It completed at
+2026-11-15T06:12:16.039Z in about 15.4 minutes (923.92 seconds). Reference
+generation exited zero before Playwright; all 276 recorded source hashes and
+existing Vite PID 26782 remained stable.
+
+The first full attempt was stopped after its obsolete five-button mobile-toolbar
+assertion failed in both engines; that partial run is not a pass. The camera test
+now checks all eight named toolbar controls, bounds and pairwise non-overlap at
+the same 390/320 px widths. Its original zoom actions and scientific/pixel oracles
+remain unchanged. The fresh, complete `attempt-2/` run qualifies this batch.
+
+Desktop/mobile controls and actual PNG foreground/transparency were reviewed.
+Decoded RGBA/compositing checks cover alpha-zero empty pixels, fractional alpha,
+opaque white atoms, selected background, mesh/raycast/volume, AO and encoder-error
+restoration/retry. Evidence under `tmp/2026-11-15-background-export/` includes
+`attempt-2/full-browsers-summary.json`, `focused-browser-review.json` and
+`visual-review.json`; earlier release results remain historical. The
+[user guide](user-guide.md#moving-and-inspecting-the-scene) describes the controls.
+Native image-download handling remains a separate qualification gate; no new
+packaged app or clean-machine/platform qualification is claimed.
 
 ## Source version 0.7.1
 

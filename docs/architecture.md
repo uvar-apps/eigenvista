@@ -1,6 +1,7 @@
 # As-built architecture
 
-This describes the published 0.7.1 development preview, including
+This describes the 0.7.2 development preview in release preparation, including
+background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
 not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
@@ -489,12 +490,27 @@ New scene geometry is staged before replacing the prior scene;
 recoverable construction errors keep that prior scene visible and report an
 error without unmounting the interface. Render and image-export exceptions are
 also reported, separate from the existing graphics-context-loss warning.
-The renderer is created with `preserveDrawingBuffer: false`. PNG export renders
-the current scene/camera and reads `toDataURL("image/png")` synchronously in the
-same task, before presentation can discard that buffer. Export adds no persistent
-offscreen target of its own and changes neither camera nor document. Lost contexts and
-invalid/failed encoding report errors; a successful retry clears only an earlier
-export error. No GPU-memory reduction has been measured or promised.
+The renderer uses `preserveDrawingBuffer: false`. PNG export renders the current
+scene/camera and reads `toDataURL("image/png")` synchronously in the same task,
+before presentation can discard that buffer. Version 0.7.2 enables
+`alpha: true` while keeping normal clear alpha one. Background color/reset is
+owned by viewport session state and only invalidates drawing; it does not rebuild
+geometry, change camera/document state or resample scientific fields.
+
+Normal export uses the selected opaque background and keeps
+`eigenvista-view.png`. The separate transparent action uses
+`eigenvista-view-transparent.png`: save the exact clear color/alpha, temporarily
+clear black at alpha zero, draw through the same final-frame/AO path, and encode
+before restoring the clear state and redrawing the normal view in `finally`.
+This retains background transparency, antialiased edges and translucent surface
+alpha without removing foreground pixels by color. HTML overlays remain outside
+the canvas export. No persistent capture target or file-format field is added.
+Lost contexts and invalid/failed encoding report errors; successful retry clears
+only an earlier export error. Local Chromium/WebKit checks cover actual PNG
+alpha, background pixels, compositing, white foreground, AO and error recovery;
+[status](status.md#source-version-072) records the
+qualifying full run and remaining native-download limits.
+No GPU-memory reduction has been measured or promised.
 Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
 instanced meshes with per-instance atom picking. Rendering at every maximum
 input size still requires separate platform acceptance.

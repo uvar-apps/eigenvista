@@ -10,26 +10,26 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.7.1, an experimental development preview.
-Scientific calculations and rendering have targeted tests, but the application
-is not yet a qualified scientific release. It visualizes supplied data; it does not run a quantum
-chemistry calculation to obtain a wavefunction from atom positions.
-Version 0.7.0 adds chain/component controls and protein depictions, described
-in [Biological structure views](#biological-structure-views), while retaining
-molecular ambient occlusion (#59) and sidebar reordering (#52). See the
-[0.7.1 release notes](releases/0.7.1.md) and
-[status](status.md#source-version-071) for actual verification and delivery.
-Fresh 0.7.1 checks passed locally on macOS; the
-[0.7.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
-provides the verified rebuilt Apple Silicon ZIP, checksum and build metadata.
-Version 0.7.1
-renames the **Document** section to **Molecular data**; controls, saved documents
-and existing sidebar preferences remain unchanged. The published
-[0.7.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.0)
-retains its original package. The earlier
-[0.6.0 package](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
-includes AO but predates biological views; older 0.5.15 packages predate AO.
-Updating source does not update an existing installed app or archive.
+This guide describes version 0.7.2 in release preparation, an experimental
+development preview. Scientific calculations and rendering have targeted tests,
+but the application is not yet a qualified scientific release. It visualizes
+supplied data; it does not calculate a wavefunction from atom positions.
+
+Version 0.7.2 adds scene background controls and transparent PNG export
+([#73](https://github.com/uvar-apps/eigenvista/issues/73),
+[#74](https://github.com/uvar-apps/eigenvista/issues/74)), plus optional MatterViz
+Muted/Pastel atom palettes. Read the [0.7.2 notes](releases/0.7.2.md) and
+[status](status.md#source-version-072) for fresh release checks and delivery.
+Fresh 0.7.2 checks passed locally on macOS, including all 526 browser cases.
+Rebuilt archives, artifact/native checks and publication remain pending; the prior
+feature verification is recorded separately. The published
+[0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+retains its original verified package, which predates these additions.
+
+Version 0.7.1 renamed **Document** to **Molecular data**. Version 0.7.0 added
+[biological structure views](#biological-structure-views), retaining molecular
+ambient occlusion and sidebar reordering. Earlier packages remain historical;
+updating source does not update an installed app or existing archive.
 
 EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
 unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
@@ -132,13 +132,22 @@ for additional operating systems.
   a mesh to see its label and triangle count. There is no measurement tool yet.
 - **Fit scene** and **Reset view** currently do the same thing: fit all displayed
   objects and restore the default viewing direction.
-- **Export image** requests a PNG download of the current viewport, named
-  `eigenvista-view.png`. It redraws the current camera view before capturing,
-  including after idle periods, zooming, or resizing. A failed export reports an
-  error without replacing the document; you can retry an encoding failure.
-  It uses the browser/WebView download mechanism, not the
-  native document Save dialog; download handling varies by host. Browser export
-  is the reference path, and native image-download handling still needs qualification.
+- **Background color** opens a color picker in the scene toolbar.
+  The initial color is `#e8edef`; **Reset background color** restores it.
+  The color is a session display setting and is not saved in molecular files.
+- The camera icon, **Export image**, requests a PNG download of the current
+  viewport named `eigenvista-view.png`, with the selected opaque background.
+- The additional image/download icon, **Export image with transparent
+  background**, downloads `eigenvista-view-transparent.png`.
+  Empty scene areas are transparent; antialiased edges and translucent surfaces
+  retain their alpha. The selected background remains visible in the application.
+
+Both export actions capture the current camera view, including after idle
+periods, zooming or resizing. They export the rendered scene without toolbar or
+text overlays. A failed export reports an error without replacing the document;
+you can retry an encoding failure. The actions use the browser/WebView download
+mechanism; download handling varies by host. Browser export is the reference
+path, and native image-download handling still needs qualification.
 
 The scene uses bohr internally. Picked atom positions are converted to angstroms.
 The display table covers all accepted elements (Z 1–118) with a **distinct
@@ -586,6 +595,14 @@ re-enable it to retry. A lost graphics context still requires reloading.
 Every element is drawn with its own CPK colour from a bundled palette. The
 **Atom colours** section shows which palette is active: **Built-in default
 (118 elements)**, or the name of the file you loaded this session.
+
+Version 0.7.2 supplies two optional examples: `matterviz-muted.json` has subdued
+colors with dusty-rose oxygen; `matterviz-pastel.json` is lighter with pale-pink
+oxygen. Load them from `palettes/` in the source checkout or the planned tester
+ZIP's `Palettes/` directory using **Colours file…**. For biological structures,
+choose **Coloring → Element** to display atom-color overrides. Each file covers
+elements 1–109; elements 110–118 retain the built-in defaults. The source values and upstream MIT
+notice are retained with the examples. The built-in palette remains the default.
 
 **Colours file…** loads a JSON palette:
 

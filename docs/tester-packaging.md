@@ -60,6 +60,10 @@ The ZIP contains:
 - `Shaders/` — classic Molekel GLSL surface-shader samples (vertex/fragment/
   `.params`) for **Appearance → Surface shader**, plus provenance notes.
   Attribution is also under `Third-party-notices/Classic-shaders/`.
+- `Palettes/` — optional MatterViz Muted and Pastel atom-color JSON files,
+  with loading instructions and the upstream MIT license. Each overrides
+  elements 1–109; elements 110–118 keep the built-in defaults. Load through
+  **Atom colours → Colours file…**.
 - The application license and collected third-party notices. Notices are also
   embedded in the app's Resources, so moving the app does not discard them.
 - The exact standalone first-party source snapshot, lockfiles, and data-only

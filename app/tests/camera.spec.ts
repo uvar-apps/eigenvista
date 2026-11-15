@@ -147,11 +147,12 @@ test("mobile zoom buttons fit the viewport and respond to activation", async ({
     await page.getByRole("button", { name: "Fit scene", exact: true }).click();
     await settled(page);
     const layout = await page.locator(".viewport-tools").evaluate((toolbar) => {
-      const buttons = Array.from(
-        toolbar.querySelectorAll("button"),
-        (button) => {
-          const box = button.getBoundingClientRect();
+      const controls = Array.from(
+        toolbar.querySelectorAll('button, input[type="color"]'),
+        (control) => {
+          const box = control.getBoundingClientRect();
           return {
+            name: control.getAttribute("aria-label"),
             left: box.left,
             right: box.right,
             top: box.top,
@@ -160,20 +161,36 @@ test("mobile zoom buttons fit the viewport and respond to activation", async ({
         },
       );
       return {
-        buttons,
+        controls,
         viewport: window.innerWidth,
         pageWidth: document.documentElement.scrollWidth,
       };
     });
     expect(layout.pageWidth).toBeLessThanOrEqual(layout.viewport);
-    expect(layout.buttons).toHaveLength(5);
-    for (const [i, button] of layout.buttons.entries()) {
-      expect(button.left).toBeGreaterThanOrEqual(0);
-      expect(button.right).toBeLessThanOrEqual(width);
-      expect(button.top).toBeGreaterThanOrEqual(0);
-      expect(button.bottom).toBeLessThanOrEqual(844);
-      if (i > 0)
-        expect(button.left).toBeGreaterThanOrEqual(layout.buttons[i - 1].right);
+    expect(layout.controls.map((control) => control.name)).toEqual([
+      "Background color",
+      "Reset background color",
+      "Zoom in",
+      "Zoom out",
+      "Fit scene",
+      "Reset view",
+      "Export image",
+      "Export image with transparent background",
+    ]);
+    for (const [i, control] of layout.controls.entries()) {
+      expect(control.left).toBeGreaterThanOrEqual(0);
+      expect(control.right).toBeLessThanOrEqual(width);
+      expect(control.top).toBeGreaterThanOrEqual(0);
+      expect(control.bottom).toBeLessThanOrEqual(844);
+      // Extra controls may wrap at 320px; every pair must remain separate.
+      for (const previous of layout.controls.slice(0, i)) {
+        expect(
+          control.left >= previous.right ||
+            control.right <= previous.left ||
+            control.top >= previous.bottom ||
+            control.bottom <= previous.top,
+        ).toBe(true);
+      }
     }
     await zoom(page, "in", () =>
       page.getByRole("button", { name: "Zoom in", exact: true }).click(),

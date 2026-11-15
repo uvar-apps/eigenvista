@@ -21,6 +21,81 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Source version 0.7.2
+
+15 November 2026: version 0.7.2 is in release preparation following the user's
+request to commit/tag/push and publish rebuilt distributions with release notes.
+The source base is main `979324c`. The release collects #73 scene background
+controls, #74 transparent PNG export and optional MatterViz Muted/Pastel files
+for the existing atom-color picker. The planned ZIP includes `Palettes/` with
+the two JSON files, README and unchanged upstream MIT notice. Each palette covers
+elements 1–109; other elements retain built-in defaults. Scientific data/file profiles,
+normal palette defaults, dependencies/compiler and icon/logo are unchanged.
+
+Fresh local macOS 0.7.2 checks passed: fmt, 272 default Rust tests, strict
+workspace/all-targets Clippy, seven desktop tests, WASM/TypeScript/production
+build and 13 packaging checks. The complete browser suite passed 526/526,
+263 per engine, with one worker and zero skipped/flaky/unexpected/retried cases.
+The summary completed at 2026-11-15T06:45:19.078Z; the browser report duration was
+943.97 seconds (about 15.7 minutes). Reference generation exited zero before
+Playwright; all 276 source hashes and Vite PID 26782 stayed stable. Evidence under
+`tmp/2026-11-15-release-0.7.2/` includes `full-browsers-summary.json`,
+`root-browser-review.json` and `root-native-build-review.json`. The completed
+feature verification below predates the bump and remains a separate record.
+All remaining artifact/native checks must also pass locally before pushing.
+
+Clean-source rebuilt app/converter/ZIP, independent source/asset and native
+verification, annotated tag, publication and verified downloads are also pending.
+No new archive/hash or delivery success is claimed. See [release notes](releases/0.7.2.md)
+and the [planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2).
+The published 0.7.1 release and its artifacts remain unchanged. Native image-download
+handling and clean-Mac/HiDPI/full-OS-range/Linux/Windows qualification are separate
+from the current local macOS acceptance.
+
+## Background and transparent-PNG feature verification: 15 November 2026
+
+15 November 2026: local implementation of
+[#73](https://github.com/uvar-apps/eigenvista/issues/73) and
+[#74](https://github.com/uvar-apps/eigenvista/issues/74) completed in the source
+0.7.1 working tree based on main `979324c`, before the later 0.7.2 release request.
+This feature pass did not create a branch, commit, tag or release. The published
+0.7.1 binaries and source tag predate these controls and remain unchanged.
+
+The viewport gains a session background color picker/reset with `#e8edef` as
+the default. Normal image export retains `eigenvista-view.png` with the selected
+opaque background. A separate image/download icon exports
+`eigenvista-view-transparent.png` with real PNG transparency, including
+antialiased and translucent foreground alpha. The shared synchronous draw/encode
+path uses renderer `alpha: true` and `preserveDrawingBuffer: false`; transparent
+capture restores the exact clear state and redraws the normal view in `finally`,
+including after encoder failure. Camera, geometry, worker inputs, scientific data,
+document/dirty state and file profiles are unchanged.
+
+Fresh local macOS checks passed: fmt, 272 default Rust tests, strict workspace/
+all-targets Clippy, seven desktop tests, final WASM/TypeScript/production build
+and 13 packaging checks. Focused background/export cases passed 22/22; the later
+combined camera/background check passed 30/30. The qualifying full browser run
+passed 526/526, 263 per engine, with one worker and zero skipped/flaky/unexpected/
+retried cases. Its summary completed at 2026-11-15T06:12:16.039Z after about
+15.4 minutes (923.92 seconds). Reference generation exited zero first; all 276
+source hashes and the existing Vite PID 26782 remained unchanged.
+
+An earlier full attempt was stopped after the obsolete five-button mobile-toolbar
+assertion failed in both engines. It remains partial evidence, not a pass. The
+camera test now verifies all eight named controls, bounds and pairwise non-overlap
+at the same 390/320 px widths; existing zoom actions and scientific/pixel oracles
+are retained. The fresh complete `attempt-2/` run is the qualifying result.
+
+Actual desktop/mobile UI and PNG foreground/transparency were reviewed. Independent
+RGBA/compositing checks cover zero/fractional/opaque alpha, white atoms, selected
+background, mesh/raycast/volume, AO and failure restoration/retry. Evidence under
+`tmp/2026-11-15-background-export/` includes
+`attempt-2/full-browsers-summary.json`, `focused-browser-review.json` and
+`visual-review.json`. The published-release evidence below remains historical.
+No new package or native image-download qualification is claimed. See the
+[user workflow](user-guide.md#moving-and-inspecting-the-scene) and
+[architecture](architecture.md) for the display/capture contract.
+
 ## Source version 0.7.1
 
 Published **2026-11-14T13:24:03Z** as a development
