@@ -13,10 +13,10 @@
 <nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="tutorials.html" aria-current="page">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
 <div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
 <div class="element-strip" aria-hidden="true"></div>
-<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04.2 / EIGENVISTA FIELD MANUAL</p><h1>Explore calculated orbitals<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#get-ready">Get ready</a><a href="#browse-orbitals">1. Open and browse the wavefunction</a><a href="#preview-without-meshes">2. Preview before making a mesh</a><a href="#generate-surfaces">3. Generate signed surfaces</a><a href="#save-and-reopen">4. Save and prove what persists</a><a href="#if-something-differs">If something differs</a></aside><article class="prose">
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04.2 / EIGENVISTA FIELD MANUAL</p><h1>Explore calculated orbitals<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#get-ready">Get ready</a><a href="#browse-orbitals">1. Open and browse the wavefunction</a><a href="#preview-without-meshes">2. Preview before making a mesh</a><a href="#generate-surfaces">3. Generate signed surfaces</a><a href="#save-and-reopen">4. Save and reopen</a><a href="#if-something-differs">If something differs</a></aside><article class="prose">
       <h2 id="get-ready">Get ready</h2>
       <p>Complete <a href="tutorials-first-molecule.html">Your first molecule</a> and download <a href="downloads/water.molden" download="water.molden">water.molden</a>. This is a calculated RHF water wavefunction in the cc-pVDZ basis, exported by PySCF. It contains <strong>24 basis functions</strong>, <strong>24 spatial orbitals</strong>, and a total density derived from the listed occupations. Its test geometry is not an optimized structure.</p>
-      <p>Outcome: a sampled orbital preview, followed by saved signed mesh geometry that reopens without recalculation. EigenVista reads the supplied wavefunction; it does not run an SCF calculation.</p>
+      <p>Outcome: a sampled orbital preview, followed by saved signed mesh geometry that reopens without recalculation.</p>
 
       <h2 id="browse-orbitals">1. Open and browse the wavefunction</h2>
       <ol>
@@ -46,7 +46,7 @@
       <figure><img src="assets/media/water-orbital-mesh.webp" alt="Positive and negative signed meshes of a calculated water orbital in EigenVista." loading="lazy" decoding="async" width="1390" height="1072"><figcaption>MO 5 (A) meshes generated at ±0.05 bohr<sup>−3/2</sup> on a 96³ grid. Meshes and their generation metadata are retained when you Save the document.</figcaption></figure>
       <p>For another isovalue, change the magnitude and generate again. This replaces that orbital’s meshes; changing the control alone leaves existing meshes unchanged. Save separate documents to retain different isovalues of the same orbital. To generate several orbitals later, check at most 32 per batch; this makes separate orbital meshes.</p>
 
-      <h2 id="save-and-reopen">4. Save and prove what persists</h2>
+      <h2 id="save-and-reopen">4. Save and reopen</h2>
       <ol>
         <li><p>Click <strong>Save</strong> and choose a new filename such as <code>water-orbital.eigenvista</code>. Finish the save, then reopen that file with <strong>Open</strong>.</p></li>
         <li><p>Check the basis/orbital counts and <strong>Saved surfaces</strong>. The document opens in mesh mode with its saved triangles available immediately, without the original Molden file or a new orbital calculation.</p></li>

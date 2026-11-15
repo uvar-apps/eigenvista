@@ -71,7 +71,7 @@ runs caught narrow-layout and search/download/404 details; they are not passes.
 The complete passing evidence is under `tmp/2026-11-15-website/browser-WDQzCB/`
 and the final qualifying run is recorded in `browser-test-final.log`.
 
-Published at <https://uvar-apps.github.io/eigenvista/> from source
+Initially published at <https://uvar-apps.github.io/eigenvista/> from source
 `fa042e6326050a8f8a2e23fdbdb67f03089e251e` on `main`. Repository visibility is
 public; Pages uses the approved workflow publisher. [Deployment 43697301648](https://github.com/uvar-apps/eigenvista/actions/runs/43697301648)
 succeeded. Fresh HTTPS readback matched all 44 served files to the local
@@ -90,6 +90,23 @@ website/documentation change. A stale cube-guide sentence was aligned with the
 existing direct analytic-preview behavior. Maintain the website with the user
 guide and update its pinned release/download facts when a later app release is
 actually published; GitHub uploads the checked static output without building it.
+
+### Website editorial correction: 15 November 2026
+
+After publication, the user identified the inappropriate opening warning about
+coordinates and wavefunctions in the reference. The earlier review overemphasized
+layout/functionality and missed the tone. Removed that callout and its repeated
+variants across the introduction, installation, tutorials and about page. Replaced
+internal QA language with practical instructions while retaining supported-format,
+units, save behavior, resource bounds and concrete rendering-artifact guidance.
+This is a website copy correction; no application, media, example, palette,
+version or release changes. Fresh local checks passed before pushing: all 15
+pages, 464 local references, exact input/media/download hashes, deterministic
+output, public-document links, and all 90 Chromium/WebKit route/viewport checks
+plus interactions. The revised reference was also visually reviewed at desktop
+and phone widths. Evidence: `tmp/2026-11-15-website-editorial/` and
+`tmp/2026-11-15-website/browser-xMhoAQ/RESULT.json`. Initial publication results
+above remain historical; the editorial delivery is recorded against #75.
 
 ## Documentation follow-up: 15 November 2026
 

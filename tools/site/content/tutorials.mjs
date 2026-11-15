@@ -10,7 +10,6 @@ export default [
       <h2 id="before-you-start">Before you start</h2>
       <p>Use the <a href="install.html">EigenVista 0.7.2 Mac preview</a> for these lessons. Open the downloaded example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the installed app runs the local molecular workflows.</p>
       <p>Start with the first lesson if you are new to the viewport. Then choose the kind of data you work with. Keep the original inputs and save your work to new <code>.eigenvista</code> files.</p>
-      <div class="notice"><p>EigenVista is a development preview. It visualizes supplied scientific data; atom coordinates alone do not produce a wavefunction. The lessons distinguish calculated data, mathematical test fields, and illustrative rendering effects.</p></div>
 
       <h2 id="learning-path">Your learning path</h2>
       <ol>
@@ -55,7 +54,7 @@ export default [
         <li><p>Expand <strong>Molecular data</strong> if necessary. Check <strong>3 atoms</strong> and <strong>2 bonds</strong>. The importer computes display connectivity even when an input does not supply explicit connections.</p></li>
         <li><p>Check <strong>Quantum fields</strong>: it should say <strong>No quantum fields</strong>. Open <strong>Provenance</strong> to see import decisions. The imported document remains unsaved until you explicitly Save.</p></li>
       </ol>
-      <div class="notice"><p><strong>Checkpoint:</strong> you can see one oxygen and two hydrogens. The two rods are display bonds inferred from geometry, not a bond-order analysis. A disabled field-generation button is expected for PDB and XYZ.</p></div>
+      <div class="notice"><p><strong>Checkpoint:</strong> you can see one oxygen and two hydrogens. The two bonds are generated automatically from the atom positions.</p></div>
 
       <h2 id="move-and-inspect">2. Move and inspect</h2>
       <ol>
@@ -95,7 +94,7 @@ export default [
     body: `
       <h2 id="get-ready">Get ready</h2>
       <p>Complete <a href="tutorials-first-molecule.html">Your first molecule</a> and download <a href="downloads/water.molden" download>water.molden</a>. This is a calculated RHF water wavefunction in the cc-pVDZ basis, exported by PySCF. It contains <strong>24 basis functions</strong>, <strong>24 spatial orbitals</strong>, and a total density derived from the listed occupations. Its test geometry is not an optimized structure.</p>
-      <p>Outcome: a sampled orbital preview, followed by saved signed mesh geometry that reopens without recalculation. EigenVista reads the supplied wavefunction; it does not run an SCF calculation.</p>
+      <p>Outcome: a sampled orbital preview, followed by saved signed mesh geometry that reopens without recalculation.</p>
 
       <h2 id="browse-orbitals">1. Open and browse the wavefunction</h2>
       <ol>
@@ -125,7 +124,7 @@ export default [
       <figure><img src="assets/media/water-orbital-mesh.webp" alt="Positive and negative signed meshes of a calculated water orbital in EigenVista." loading="lazy" decoding="async"><figcaption>MO 5 (A) meshes generated at ±0.05 bohr<sup>−3/2</sup> on a 96³ grid. Meshes and their generation metadata are retained when you Save the document.</figcaption></figure>
       <p>For another isovalue, change the magnitude and generate again. This replaces that orbital’s meshes; changing the control alone leaves existing meshes unchanged. Save separate documents to retain different isovalues of the same orbital. To generate several orbitals later, check at most 32 per batch; this makes separate orbital meshes.</p>
 
-      <h2 id="save-and-reopen">4. Save and prove what persists</h2>
+      <h2 id="save-and-reopen">4. Save and reopen</h2>
       <ol>
         <li><p>Click <strong>Save</strong> and choose a new filename such as <code>water-orbital.eigenvista</code>. Finish the save, then reopen that file with <strong>Open</strong>.</p></li>
         <li><p>Check the basis/orbital counts and <strong>Saved surfaces</strong>. The document opens in mesh mode with its saved triangles available immediately, without the original Molden file or a new orbital calculation.</p></li>
@@ -218,7 +217,7 @@ export default [
       <figure><img src="assets/media/1aon-ao-off.webp" alt="Large 1AON structure in the MatterViz Pastel element palette and Van der Waals representation with ambient occlusion off." loading="lazy" decoding="async"><figcaption>1AON with normal molecular lighting and AO off. Both captures use the same camera, geometry, MatterViz Pastel palette, Element coloring, Van der Waals representation, and background color <code>#ecebe4</code>.</figcaption></figure>
       <figure><img src="assets/media/1aon-ao-on.webp" alt="The same 1AON view with Lambert shading plus screen-space ambient occlusion, emphasizing broad recesses and atomic contacts." loading="lazy" decoding="async"><figcaption>The matching view with Lambert shading plus SSAO at 100% strength and the automatic 14.25 Å radius. The difference includes the active mode’s matte material as well as its screen-space shading.</figcaption></figure>
       <p><strong>Checkpoint:</strong> the shading changes while atom counts, connectivity, and element colors stay the same. The automatic radius comes from the atom-coordinate extent, so zooming does not change that radius. The visible effect can still change with the camera.</p>
-      <p>AO is an illustrative screen-space depth cue, not electron density, contact energy, or a computed chemical property. It shades atomic spheres and bonds; hidden and offscreen geometry affect what the screen-space method can show. Turn it off if navigation slows. The <a href="gallery.html">gallery</a> provides the paired captures for comparison.</p>
+      <p>AO emphasizes depth and contact regions by shading atomic spheres and bonds; hidden and offscreen geometry affect what the screen-space method can show. Turn it off if navigation slows. The <a href="gallery.html">gallery</a> provides the paired captures for comparison.</p>
 
       <h2 id="inspect-chains">3. Switch to chains and protein cartoons</h2>
       <ol>
@@ -230,7 +229,7 @@ export default [
       </ol>
       <figure><img src="assets/media/1aon-cartoon-chain.webp" alt="The complete 1AON complex in EigenVista, with protein cartoons colored by deposited chain." loading="lazy" decoding="async"><figcaption>Chain coloring separates the subunits in the complete complex. Protein cartoon geometry has its own diffuse shading; molecular AO applies to atomic spheres and bonds.</figcaption></figure>
       <figure><img src="assets/media/1aon-chain-secondary.webp" alt="An isolated 1AON protein chain displayed as a cartoon with deposited secondary-structure colors." loading="lazy" decoding="async"><figcaption>An isolated chain with deposited secondary-structure coloring. Unknown or unassigned regions remain explicit; EigenVista does not predict secondary structure.</figcaption></figure>
-      <p><strong>Checkpoint:</strong> isolation changes the visible subset, not the imported atom array. Missing backbone atoms, chain boundaries, and unsupported gaps break protein paths rather than inventing connections. Nonprotein components retain atomic representations.</p>
+      <p><strong>Checkpoint:</strong> isolation hides other chains without removing them from the document. Missing backbone atoms, chain boundaries, and unsupported gaps break protein paths rather than inventing connections. Nonprotein components retain atomic representations.</p>
 
       <h2 id="export-and-save">4. Export the view and save the data</h2>
       <ol>

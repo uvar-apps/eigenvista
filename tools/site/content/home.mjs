@@ -40,12 +40,12 @@ export default [
       <div class="comparison-after"><img src="assets/media/1aon-ao-on.webp" width="1200" height="900" alt="The same 1AON view with ambient occlusion on and matte Lambert shading" loading="lazy"><span class="image-label">AO ON</span></div>
     </div>
     <div class="comparison-control" hidden><label for="home-ao">Reveal ambient occlusion</label><input id="home-ao" type="range" min="0" max="100" value="50"><output for="home-ao">50%</output></div>
-    <figcaption>Same structure, camera and MatterViz Pastel palette. Off uses the normal molecular material; On uses Lambert + SSAO. AO is a depth cue, not an electron-density calculation. <a href="tutorials-ao.html">Recreate this view →</a></figcaption>
+    <figcaption>Same structure, camera and MatterViz Pastel palette. Off uses the normal molecular material; On uses Lambert + SSAO. <a href="tutorials-ao.html">Recreate this view →</a></figcaption>
   </figure>
 </section>
 <section class="section-block split-story">
   <figure class="plate"><div class="plate-label"><span>02 / FIELD STUDY</span><span>MOLDEN</span></div><img src="assets/media/water-orbital-mesh.webp" width="1200" height="900" alt="Opposite signed lobes of a molecular orbital from the supplied water Molden calculation" loading="lazy"><figcaption>Imported quantum data, rendered as a signed isosurface. Color identifies the sign of the orbital amplitude.</figcaption></figure>
-  <div><p class="eyebrow">03 / From file to figure</p><h2>Choose an orbital.<br>See its shape.</h2><p>Inspect the orbital list, select a field and choose a rendering mode. Raycast and volume previews work without first building a mesh. Surface generation runs in the background with progress and cancellation.</p><p>EigenVista visualizes supplied calculations. Atomic coordinates alone do not provide orbitals or electron density.</p><a class="button" href="tutorials-orbitals.html">Follow the orbital tutorial →</a></div>
+  <div><p class="eyebrow">03 / From file to figure</p><h2>Choose an orbital.<br>See its shape.</h2><p>Inspect the orbital list, select a field and choose a rendering mode. Raycast and volume previews work without first building a mesh. Surface generation runs in the background with progress and cancellation.</p><a class="button" href="tutorials-orbitals.html">Follow the orbital tutorial →</a></div>
 </section>
 <section class="closing-band"><p class="eyebrow">Start here</p><h2>A molecule is a good first step.</h2><div class="actions"><a class="button primary" href="install.html">Install EigenVista →</a><a class="button" href="tutorials-first-molecule.html">Your first molecule →</a><a class="button" href="gallery.html">Browse the gallery →</a></div></section>
 `,

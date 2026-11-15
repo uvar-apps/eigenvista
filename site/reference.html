@@ -16,7 +16,6 @@
 <main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03 / EIGENVISTA FIELD MANUAL</p><h1>User reference<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#manual">Find a workflow</a><a href="#workspace">The application workspace</a><a href="#keyboard">Keyboard and sidebar controls</a><a href="#persistence">What is saved?</a><a href="#troubleshooting">When something looks wrong</a></aside><article class="prose">
 <div class="prose">
   <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.7.2</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
-  <div class="notice"><p>Coordinates do not contain a wavefunction. XYZ, PDB, mmCIF, and BinaryCIF provide structures; they correctly show <strong>No quantum fields</strong>. For orbitals or densities, open a supported Molden wavefunction, a native document containing those inputs, or an already sampled cube field.</p></div>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -42,7 +41,7 @@
       <tr><th scope="row">Footer and progress panel</th><td>Read operation status, completed sampling slices, signed meshing passes, elapsed time, and errors.</td></tr>
     </tbody>
   </table></div>
-  <p>The runtime badge says <strong>Native (Tauri)</strong> in the Mac app and <strong>WebAssembly</strong> in the browser viewer. It identifies how the program is running; it does not certify another operating system. On narrow windows, the panels rearrange and you may need to scroll.</p>
+  <p>The runtime badge says <strong>Native (Tauri)</strong> in the Mac app and <strong>WebAssembly</strong> in the browser viewer. On narrow windows, the panels rearrange and you may need to scroll.</p>
 
   <figure><img src="assets/media/app-overview.webp" alt="EigenVista workspace with molecular and quantum controls beside a water orbital volume preview" loading="lazy" width="1600" height="1050"><figcaption>The shared application interface. The desktop app uses native file dialogs for Open and Save.</figcaption></figure>
 
@@ -74,7 +73,7 @@
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Symptom</th><th scope="col">Next step</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Generate surfaces is disabled</th><td>Check that a quantum or sampled field exists and is selected. Structure-only files cannot create orbitals or densities. Wait for another active operation to finish or cancel it.</td></tr>
+      <tr><th scope="row">Generate surfaces is disabled</th><td>Select an orbital, density matrix, or sampled field in <strong>Quantum fields</strong>. Wait for another active operation to finish or cancel it.</td></tr>
       <tr><th scope="row">Generate selected is disabled</th><td>Check between 1 and 32 orbitals and enter a finite positive isovalue.</td></tr>
       <tr><th scope="row">Raycast/volume choices are disabled</th><td>Select an available field and finish/cancel other active work. Analytic orbital/density previews do not require meshes.</td></tr>
       <tr><th scope="row">No field appears</th><td>Use <strong>Fit scene</strong>, check the selected mode and field, and try a smaller positive isovalue. Read any preview error. An all-zero field has no nonzero surface.</td></tr>
@@ -86,7 +85,7 @@
       <tr><th scope="row">WebGL2 is unavailable / graphics context lost</th><td>Check graphics acceleration. A lost context requires restart/reload; save if possible beforehand. Unsaved data can be lost.</td></tr>
     </tbody>
   </table></div>
-  <p>There is no measurement tool, trajectory player, quantum calculation from coordinates, direct Gaussian-log/ORCA-GBW reader, or autosave/crash recovery. Preview raycasting, meshing, volume integration, and transparency have <a href="reference-fields.html#rendering-limits">rendering limits</a>; successful drawing is not an accuracy certificate.</p>
+  <p>See <a href="reference-files.html#formats">supported file formats</a> for import options and <a href="reference-fields.html#rendering-limits">rendering limits</a> for guidance on sampled previews and transparency.</p>
   <p>For a <a href="https://github.com/uvar-apps/eigenvista/issues">problem report</a>, include the package filename or <code>BUILD-INFO.json</code>, Mac model/processor, OS version, exact error, steps, and a screenshot. Share a small input only if you have permission to publish it. Keep confidential research data out of public issues.</p>
 </div></article></div></main>
 <footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>

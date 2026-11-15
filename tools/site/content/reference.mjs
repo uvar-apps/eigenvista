@@ -9,7 +9,6 @@ export default [
     body: `
 <div class="prose">
   <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.7.2</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
-  <div class="notice"><p>Coordinates do not contain a wavefunction. XYZ, PDB, mmCIF, and BinaryCIF provide structures; they correctly show <strong>No quantum fields</strong>. For orbitals or densities, open a supported Molden wavefunction, a native document containing those inputs, or an already sampled cube field.</p></div>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -35,7 +34,7 @@ export default [
       <tr><th scope="row">Footer and progress panel</th><td>Read operation status, completed sampling slices, signed meshing passes, elapsed time, and errors.</td></tr>
     </tbody>
   </table></div>
-  <p>The runtime badge says <strong>Native (Tauri)</strong> in the Mac app and <strong>WebAssembly</strong> in the browser viewer. It identifies how the program is running; it does not certify another operating system. On narrow windows, the panels rearrange and you may need to scroll.</p>
+  <p>The runtime badge says <strong>Native (Tauri)</strong> in the Mac app and <strong>WebAssembly</strong> in the browser viewer. On narrow windows, the panels rearrange and you may need to scroll.</p>
 
   <figure><img src="assets/media/app-overview.webp" width="1600" height="1050" alt="EigenVista workspace with molecular and quantum controls beside a water orbital volume preview" loading="lazy"><figcaption>The shared application interface. The desktop app uses native file dialogs for Open and Save.</figcaption></figure>
 
@@ -67,7 +66,7 @@ export default [
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Symptom</th><th scope="col">Next step</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Generate surfaces is disabled</th><td>Check that a quantum or sampled field exists and is selected. Structure-only files cannot create orbitals or densities. Wait for another active operation to finish or cancel it.</td></tr>
+      <tr><th scope="row">Generate surfaces is disabled</th><td>Select an orbital, density matrix, or sampled field in <strong>Quantum fields</strong>. Wait for another active operation to finish or cancel it.</td></tr>
       <tr><th scope="row">Generate selected is disabled</th><td>Check between 1 and 32 orbitals and enter a finite positive isovalue.</td></tr>
       <tr><th scope="row">Raycast/volume choices are disabled</th><td>Select an available field and finish/cancel other active work. Analytic orbital/density previews do not require meshes.</td></tr>
       <tr><th scope="row">No field appears</th><td>Use <strong>Fit scene</strong>, check the selected mode and field, and try a smaller positive isovalue. Read any preview error. An all-zero field has no nonzero surface.</td></tr>
@@ -79,7 +78,7 @@ export default [
       <tr><th scope="row">WebGL2 is unavailable / graphics context lost</th><td>Check graphics acceleration. A lost context requires restart/reload; save if possible beforehand. Unsaved data can be lost.</td></tr>
     </tbody>
   </table></div>
-  <p>There is no measurement tool, trajectory player, quantum calculation from coordinates, direct Gaussian-log/ORCA-GBW reader, or autosave/crash recovery. Preview raycasting, meshing, volume integration, and transparency have <a href="reference-fields.html#rendering-limits">rendering limits</a>; successful drawing is not an accuracy certificate.</p>
+  <p>See <a href="reference-files.html#formats">supported file formats</a> for import options and <a href="reference-fields.html#rendering-limits">rendering limits</a> for guidance on sampled previews and transparency.</p>
   <p>For a <a href="https://github.com/uvar-apps/eigenvista/issues">problem report</a>, include the package filename or <code>BUILD-INFO.json</code>, Mac model/processor, OS version, exact error, steps, and a screenshot. Share a small input only if you have permission to publish it. Keep confidential research data out of public issues.</p>
 </div>`,
   },
@@ -118,7 +117,7 @@ export default [
       <tr><th scope="row"><code>.cube</code>, <code>.cub</code></th><td>Atoms, automatic bonds, and one already sampled scalar field.</td><td>Supported bohr-coordinate profile, including a single-orbital dataset header. No multi-field or alternative-unit cube profile.</td></tr>
     </tbody>
   </table></div>
-  <p>XYZ/PDB/mmCIF/BinaryCIF contain no basis or orbital coefficients. They do not enable quantum-field generation. OBJ, legacy atom-color text formats, direct ORCA output/GBW, and Gaussian logs are not implemented. Atom palettes use the separate <a href="reference-scene.html#palettes">JSON palette picker</a>.</p>
+  <p>OBJ, legacy atom-color text formats, direct ORCA output/GBW, and Gaussian logs are not implemented. Atom palettes use the separate <a href="reference-scene.html#palettes">JSON palette picker</a>.</p>
   <p>For biological selection, identities, and omitted annotations, see <a href="reference-structures.html#import-selection">structure import policy</a>. For exact accepted cube features and what a sampled field means, see <a href="reference-fields.html#cube">cube fields</a>.</p>
   <p>Per-format byte limits include 32 MiB PDB text and 64 MiB text mmCIF/cube. BinaryCIF has separate 64 MiB expanded-payload and expanded-text limits. These sit inside broader numerical, atom, bond, and allocation bounds; they are rejection limits, not a promise that the largest accepted file will be interactive. See <a href="reference-fields.html#precision">resource bounds</a>.</p>
 
@@ -164,7 +163,7 @@ export default [
   <p>Desktop Save publishes a complete replacement file. On the tested APFS volume, replacing an existing file sets permissions to <code>0600</code> (owner read/write). Atomic replacement does not establish recovery after a crash or power loss. A CLI-created new file can fail with “operation not supported” on ExFAT; create it on APFS and copy the completed output. Desktop replacement Save uses a different path and succeeded on the tested ExFAT image. Other filesystem/platform behavior is not broadly qualified.</p>
   <h3>Leaving the application</h3>
   <p>Desktop close/quit checks for unsaved changes, unfinished operations, and converted results awaiting Save. Choose <strong>Cancel</strong> to continue working, <strong>Discard and Quit</strong> to cancel work and leave without saving, or <strong>Save and Quit</strong> to save the current document before leaving. Failed or cancelled saves keep the document open. Review a refreshed prompt if the document changes while it is displayed. Finish/cancel an existing native save first; save converted results from their queue. Save and Quit is unavailable while the queue has unfinished or unsaved work.</p>
-  <p>Browsers use their own close warning. Confirm all downloads before closing. Physical Mac close/Cmd+Q, native image downloads, and clean-Mac installation remain separate qualification gates; the preview has no autosave safety net. When sharing the application, forward the complete tester ZIP with licenses, notices, and Source.</p>
+  <p>Browsers use their own close warning. Confirm all downloads before closing. When sharing the application, forward the complete tester ZIP with licenses, notices, and Source.</p>
 
   <h2 id="cli">Command-line converter</h2>
   <p>The tester ZIP contains <code>Tools/eigenvista-convert</code>. The following examples assume it is on your PATH. Create output directories first. The converter supports the same input profiles as Open, including mmCIF/BinaryCIF and cube.</p>
@@ -235,7 +234,7 @@ eigenvista-convert --help</code></pre>
     <li>To tune the scale, uncheck Automatic AO radius. The manual slider starts at the current automatic radius and covers 0.25–50 Å in quarter-angstrom steps. Smaller radii emphasize nearby contacts; larger radii emphasize broader recesses.</li>
   </ol>
   <p>Automatic radius is derived from the atom-coordinate extent and limited to 1.5–30 Å. Zooming, changing the field grid, or changing representation does not alter it. The visible screen-space shading can still vary with camera position. Compare real application views in the <a href="gallery.html">gallery</a> or follow the <a href="tutorials-ao.html">AO tutorial</a>.</p>
-  <div class="notice"><p>AO is an approximate visual cue, not electron density or another calculated molecular property. Hidden and offscreen geometry affect what the screen-space method can show. It adds GPU work and memory; turn it off if navigation becomes slow.</p></div>
+  <div class="notice"><p>AO uses the visible scene to emphasize contacts and recesses. Offscreen geometry is not included. Turn it off if navigation becomes slow.</p></div>
   <p>AO controls last through Open within the session; restart/reload begins with AO off. PNG exports include the current shading. Atom colors and picking still work. Quantum fields, saved surfaces, and protein depiction geometry keep their own materials; AO shades the atomic spheres and bonds. Turning AO off releases its image buffers. If enhancement fails, a message appears and normal rendering stays available; disable/re-enable to retry. A lost graphics context requires reload/restart.</p>
 
   <h2 id="palettes">Atom colours</h2>
@@ -261,7 +260,7 @@ eigenvista-convert --help</code></pre>
     <li>Confirm the download completed, then open the PNG in an image viewer or place the transparent version on your intended background.</li>
   </ol>
   <p>Both actions capture the current rendered viewport after zooming, resizing, or an idle period. Toolbar/text overlays are excluded. Transparent export leaves the selected background visible in the app. Exports include the current field mode and AO; they are images, not saved scientific documents. Use Save separately to retain data.</p>
-  <p>A failed export reports an error without replacing the document. An encoding failure can be retried. Image actions use the browser/WebView download mechanism; host handling varies. Browser export is the reference path; native image-download handling still needs qualification.</p>
+  <p>If an export fails, its error appears without changing the molecular document; try the export again. PNG files use the app or browser’s download mechanism. Check that the file has finished downloading before closing the window.</p>
 
   <h2 id="shaders">Custom surface shaders</h2>
   <p>The <strong>Surface shader</strong> panel optionally replaces built-in surface materials with a vertex/fragment GLSL pair. It affects surfaces, not atom/bond AO. Shader sources and uniform values last for the session and are not stored in <code>.eigenvista</code>.</p>
@@ -278,7 +277,7 @@ eigenvista-convert --help</code></pre>
   <p>Matching uniform types retain their values when new sources load; changed types reset to defaults. A parameter file with a nonnumeric value, unsupported/mismatched kind, or wrong component count is rejected with its parameter name and line number, preserving current values and the applied shader. Clear before loading another pair when shared uniform types conflict. Parameter export uses lines such as <code>float name&lt;TAB&gt;value</code>; native export has a 128 KiB text bound and writes a complete replacement file.</p>
   <h3>Transparency and errors</h3>
   <p><strong>Shader transparency</strong> starts checked and blends fragment alpha even when document opacity is 100%. Uncheck it for opaque rendering: final alpha becomes one and depth writes are enabled. It updates an applied shader live and is saved in neither the document nor parameter file. <strong>Clear shader</strong> resets it to checked.</p>
-  <p>Compile/link errors appear in red in the panel after Apply. Correct and reapply the pair, or Clear shader to restore built-in materials. Transparent objects use ordinary object sorting; intersecting layers can show ordering artifacts. A successful custom shader is not a guarantee of physically accurate rendering.</p>
+  <p>Compile/link errors appear in red in the panel after Apply. Correct and reapply the pair, or Clear shader to restore built-in materials. Transparent objects use ordinary object sorting; intersecting layers can show ordering artifacts.</p>
 </div>`,
   },
   {
@@ -290,7 +289,7 @@ eigenvista-convert --help</code></pre>
     number: "03.3",
     body: `
 <div class="prose">
-  <p>EigenVista evaluates supplied analytic wavefunction data or displays an already sampled grid. It does not solve a quantum calculation from atomic coordinates. Mesh generation and sampled previews are separate actions; choose the one needed for your view.</p>
+  <p>Render orbitals and densities from Molden or native documents, or open a cube to visualize a sampled scalar field. Use a raycast or volume preview to explore the field, and generate an isosurface mesh when you want to save its geometry.</p>
 
   <h2 id="choose">Choose a field</h2>
   <p>In <strong>Quantum fields</strong>, select under <strong>Orbitals</strong>, <strong>Density matrices</strong>, or <strong>Sampled fields</strong>. Only one field is active for volume/raycast preview. Orbitals come from supplied coefficients; density matrices come from the document or the <a href="reference-files.html#molden">reported occupation-derived Molden interpretation</a>. A cube supplies scalar samples without orbital coefficients.</p>
@@ -329,7 +328,7 @@ eigenvista-convert --help</code></pre>
       <tr><th scope="row">Volume preview</th><td>Accumulated color/opacity along rays through one display grid.</td><td>Preparing a field/resolution may sample it. Switching between volume and raycast reuses the current grid.</td></tr>
     </tbody>
   </table></div>
-  <p>Sampled previews are based on an in-memory grid, not direct analytic wavefunction evaluation in a shader. Cube/stored-grid fields prepare it automatically on Open or selection. Analytic orbital/density fields sample when a sampled mode is requested, including after reopening a document. No marching cubes runs unless you explicitly generate surfaces.</p>
+  <p>Sampled previews use an in-memory grid. Cube/stored-grid fields prepare it automatically on Open or selection. Analytic orbital/density fields sample when a sampled mode is requested, including after reopening a document. No marching cubes runs unless you explicitly generate surfaces.</p>
   <p>In sampled modes, selecting another field or changing resolution prepares a new preview while preserving the chosen mode and every saved mesh. Failure/cancellation retains the previous completed preview, field, and resolution. A failed preparation can be retried by selecting the mode, field, or resolution again. In mesh mode, selecting an analytic orbital changes the active field without calculation; choose a sampled mode or Generate surfaces to display it. Stored grids also prepare a preview when selected in mesh mode.</p>
   <p>The selected field's saved meshes are visually replaced by the sampled display. Other fields' meshes may remain visible. Eye/trash controls affect meshes, not a transient volume. Return to mesh mode when checking those controls.</p>
   <h3>Sampling quality is different from grid resolution</h3>
@@ -347,8 +346,8 @@ eigenvista-convert --help</code></pre>
 
   <h2 id="progress">Progress and cancellation</h2>
   <p>While work runs, Field rendering remains expanded and <strong>Cancel</strong> stays available. Read the current field, orbital/batch position, phase, counts, and elapsed time. Sampling reports completed z slices and a per-field percentage. Meshing reports completion of the two signed passes, not progress within each cell pass. Preparation, transfer, and validation are indeterminate.</p>
-  <p>Percentages restart for each phase and field; they are not a percentage of the whole batch. There is no remaining-time estimate. A single slice or meshing pass may take longer than another, very short phases may not paint, and cached fields skip sampling. A phase label staying visible is not by itself a failure.</p>
-  <p>Cancel terminates the current calculation and retains previous completed meshes/preview. The app runs one scientific operation at a time; other clients' queued operations continue in order. Batch cancellation does not publish a partial set. If work is too expensive, retry with fewer orbitals or a lower grid resolution. Density cost also depends strongly on basis size.</p>
+  <p>Percentages restart for each phase and field; they are not a percentage of the whole batch. There is no remaining-time estimate. A single slice or meshing pass may take longer than another, brief phases may finish before they appear, and cached fields skip sampling. A phase label staying visible is not by itself a failure.</p>
+  <p>Cancel terminates the current calculation and retains previous completed meshes/preview. The app runs one scientific operation at a time; other queued work, such as file conversion, continues in order. Batch cancellation does not publish a partial set. If work is too expensive, retry with fewer orbitals or a lower grid resolution. Density cost also depends strongly on basis size.</p>
 
   <h2 id="cache">Caching, replacement, and saving</h2>
   <p>For unchanged scientific inputs, the most recently sampled field at the same resolution can be reused for another isovalue or appearance change. Sampling another field/resolution replaces that transient cache. Active calculation cancellation or a worker failure that restarts the worker clears it. Saved meshes are independent of the cache.</p>
@@ -373,7 +372,7 @@ eigenvista-convert --help</code></pre>
   <p>The orbital and basis caps are independent. A complete spatial set with one orbital per basis function fits through 512 functions; complete alpha and beta sets fit through 256 functions each. A partial export can use the separate 1,024-basis limit while listing at most 512 orbitals. Omitted orbitals are not recovered. Smaller workloads can still be slow or exceed another numerical/geometry/file limit.</p>
 
   <h2 id="rendering-limits">Rendering limits</h2>
-  <p>Raycasting can miss tangencies and crossings unresolved by its grid or steps. Classic marching cubes is not topology-certified. Fine preview quality cannot recover missing source samples. The current renderers are experimental, not publication-quality or quantified-accuracy guarantees.</p>
+  <p>Raycasting can miss narrow features or tangencies between grid samples. Use <strong>Fine</strong> sampling quality for a smoother preview, or increase grid resolution to sample the field more densely. For imported cube data, detail is limited by the source grid.</p>
   <p>Volume depth comes from accumulated visible opacity. Opaque objects test that representative depth, but volume color integrates the whole ray; intersections may include color from behind an atom or mesh. Interpenetrating transparent objects use ordinary object sorting and can show ordering artifacts. Shrinkwrap and a transfer-function editor are not available.</p>
 </div>`,
   },
@@ -386,7 +385,7 @@ eigenvista-convert --help</code></pre>
     number: "03.4",
     body: `
 <div class="prose">
-  <p>Open PDB, mmCIF, or BinaryCIF with chain, residue, and atom identities to use <strong>Molecular data → Biological structure</strong>. These controls organize a selected deposited structure; they do not predict missing biology or create quantum data. Try the public <a href="downloads/1AON.cif" download>1AON complex</a> and compare the real application images in the <a href="gallery.html">gallery</a>.</p>
+  <p>Open PDB, mmCIF, or BinaryCIF with chain, residue, and atom identities to use <strong>Molecular data → Biological structure</strong>. Try the public <a href="downloads/1AON.cif" download>1AON complex</a> and compare the real application images in the <a href="gallery.html">gallery</a>.</p>
 
   <h2 id="import-selection">What the importer selects</h2>
   <p>The reader retains the first model/structure, common atoms, and one alternate conformer per residue, choosing the alternate with the highest mean occupancy. Zero-occupancy atoms are omitted. Unknown mmCIF element symbols are skipped with a notice rather than guessed. These policies can make displayed counts differ from the deposited source; read <strong>Import report</strong> and <strong>Provenance</strong>.</p>
@@ -431,7 +430,7 @@ eigenvista-convert --help</code></pre>
     <li>A chain override takes precedence over a component override; otherwise the global representation applies. Select <strong>Use global representation</strong> to remove that entry's explicit override.</li>
     <li>Choose <strong>Coloring → Secondary structure</strong> to inspect supplied assignments, and use chain isolation/focus for a closer look.</li>
   </ol>
-  <p>Protein depictions are unavailable for nonprotein components, which keep atomic detail. Nucleic-acid cartoons and glycan depictions are not implemented. The geometry is a display depiction, not extra imported atoms or a quantum-chemistry surface.</p>
+  <p>Protein depictions are unavailable for nonprotein components, which keep atomic detail. Nucleic-acid cartoons and glycan depictions are not implemented.</p>
   <h3>Missing data stays visible as a limitation</h3>
   <p>Missing backbone atoms, source chain/segment ends, sequence breaks, and unsupported gaps break a path rather than bridge it. Ambiguous residue identities also interrupt the depiction. Missing secondary assignments remain thin gray unassigned loops in ribbon/cartoon modes, even with chain/entity coloring. Missing carbonyl orientation uses a thin-tube fallback and an informational notice; isolated backbone points remain visible as markers.</p>
   <p>Protein depiction geometry uses its own diffuse shading. <a href="reference-scene.html#ao">Ambient occlusion</a> continues to shade atomic spheres/bonds, not the new protein geometry. For an AO view of a dense complex, choose Van der Waals, Element coloring, and the Pastel palette.</p>
@@ -446,9 +445,9 @@ eigenvista-convert --help</code></pre>
   <p>Invalid, reversed, or ambiguous identifiers report an error and leave the previous selection intact. Use residue names where needed to distinguish deposited alternatives. Identifiers are source identities, not an invented continuous sequence: missing residues are not reconstructed.</p>
 
   <h2 id="saved-state">Session settings and saved metadata</h2>
-  <p>Coloring, component/chain styles, visibility, isolation, residue range, and focus are session display settings. They do not modify molecular data, resample a quantum field, or mark the document unsaved. Opening another file resets index-based choices; the color mode continues when that file has biological metadata. Restart/reload resets these settings. The global representation remains a document setting and is saved.</p>
+  <p>Coloring, component/chain styles, visibility, isolation, residue range, and focus are session display settings. They do not modify molecular data, resample a quantum field, or mark the document unsaved. Opening another file resets structure-specific selections and styles; the color mode continues when that file has biological metadata. Restart/reload resets these settings. The global representation remains a document setting and is saved.</p>
   <p>Native Save preserves selected biological identities when available. Such files need the biological-structure format feature and cannot be opened by older applications that lack it. Older native files remain readable, but identities discarded by their original importer cannot be recovered from them: reopen the original PDB/mmCIF/BinaryCIF to obtain current metadata.</p>
-  <p>XYZ, cube, and Molden are not assigned invented chains/residues. Files with insufficient identity information show an explanation that chain/protein views are unavailable. Atomic display and any supplied quantum fields remain separate from biological metadata. See <a href="reference-files.html#saving">saving and compatibility</a> for sharing a document.</p>
+  <p>Chain and protein views use the biological metadata imported from PDB, mmCIF, or BinaryCIF. When the file lacks the required metadata, the app explains which views are unavailable. See <a href="reference-files.html#saving">saving and compatibility</a> for sharing a document.</p>
 </div>`,
   },
 ];

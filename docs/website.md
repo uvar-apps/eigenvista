@@ -33,6 +33,10 @@ directly under `site/assets/`.
 Treat [the user guide](user-guide.md), the import guides and actual UI labels as
 the source of truth. Keep the reference and tutorials synchronized when controls
 change. Keep installation claims tied to an actually published release.
+Write for people using a molecular viewer: lead with tasks and controls. Keep
+format restrictions, units and display limitations next to the relevant feature.
+Avoid repeated elementary science warnings and internal verification terminology
+in user-facing pages.
 `tools/site/release.mjs` holds the verified release URL, asset stem, source and
 checksum used by the download page. It is not an automatic “latest” selector:
 development prereleases must not send users to an unrelated stable release.

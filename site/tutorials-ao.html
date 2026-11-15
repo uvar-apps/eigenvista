@@ -38,7 +38,7 @@
       <figure><img src="assets/media/1aon-ao-off.webp" alt="Large 1AON structure in the MatterViz Pastel element palette and Van der Waals representation with ambient occlusion off." loading="lazy" decoding="async" width="1390" height="1072"><figcaption>1AON with normal molecular lighting and AO off. Both captures use the same camera, geometry, MatterViz Pastel palette, Element coloring, Van der Waals representation, and background color <code>#ecebe4</code>.</figcaption></figure>
       <figure><img src="assets/media/1aon-ao-on.webp" alt="The same 1AON view with Lambert shading plus screen-space ambient occlusion, emphasizing broad recesses and atomic contacts." loading="lazy" decoding="async" width="1390" height="1072"><figcaption>The matching view with Lambert shading plus SSAO at 100% strength and the automatic 14.25 Å radius. The difference includes the active mode’s matte material as well as its screen-space shading.</figcaption></figure>
       <p><strong>Checkpoint:</strong> the shading changes while atom counts, connectivity, and element colors stay the same. The automatic radius comes from the atom-coordinate extent, so zooming does not change that radius. The visible effect can still change with the camera.</p>
-      <p>AO is an illustrative screen-space depth cue, not electron density, contact energy, or a computed chemical property. It shades atomic spheres and bonds; hidden and offscreen geometry affect what the screen-space method can show. Turn it off if navigation slows. The <a href="gallery.html">gallery</a> provides the paired captures for comparison.</p>
+      <p>AO emphasizes depth and contact regions by shading atomic spheres and bonds; hidden and offscreen geometry affect what the screen-space method can show. Turn it off if navigation slows. The <a href="gallery.html">gallery</a> provides the paired captures for comparison.</p>
 
       <h2 id="inspect-chains">3. Switch to chains and protein cartoons</h2>
       <ol>
@@ -50,7 +50,7 @@
       </ol>
       <figure><img src="assets/media/1aon-cartoon-chain.webp" alt="The complete 1AON complex in EigenVista, with protein cartoons colored by deposited chain." loading="lazy" decoding="async" width="1390" height="1072"><figcaption>Chain coloring separates the subunits in the complete complex. Protein cartoon geometry has its own diffuse shading; molecular AO applies to atomic spheres and bonds.</figcaption></figure>
       <figure><img src="assets/media/1aon-chain-secondary.webp" alt="An isolated 1AON protein chain displayed as a cartoon with deposited secondary-structure colors." loading="lazy" decoding="async" width="1390" height="1072"><figcaption>An isolated chain with deposited secondary-structure coloring. Unknown or unassigned regions remain explicit; EigenVista does not predict secondary structure.</figcaption></figure>
-      <p><strong>Checkpoint:</strong> isolation changes the visible subset, not the imported atom array. Missing backbone atoms, chain boundaries, and unsupported gaps break protein paths rather than inventing connections. Nonprotein components retain atomic representations.</p>
+      <p><strong>Checkpoint:</strong> isolation hides other chains without removing them from the document. Missing backbone atoms, chain boundaries, and unsupported gaps break protein paths rather than inventing connections. Nonprotein components retain atomic representations.</p>
 
       <h2 id="export-and-save">4. Export the view and save the data</h2>
       <ol>
