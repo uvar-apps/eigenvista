@@ -4,7 +4,12 @@ Standalone [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) che
 Rust workspace, `app/`, `crates/`, `docs/`, `tools/`, and `fixtures/` live at the
 repository root. There is no `next/` wrapper and no legacy C++ / Molekel build here.
 
-EigenVista was extracted from the Molekel rewrite (see [migration](docs/migration.md)).
+EigenVista continues the original Molekel application developed by Ugo Varetto
+from 2006 to 2010: [original source](https://github.com/ugovaretto/molekel) and
+[original website](https://ugovaretto.github.io/molekel/). The current Rust and
+TypeScript code is a new implementation of that project. Its later extraction
+from the rewrite's `next/` subtree is repository provenance, documented in
+[migration](docs/migration.md); it is not the project's historical origin.
 Use `eigenvista-*` crates, the `eigenvista-convert` CLI, and `.eigenvista` for new
 documents; older `.molekel` preview documents remain readable. Check
 [preview-format](docs/preview-format.md) before changing format compatibility.

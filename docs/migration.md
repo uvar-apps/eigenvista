@@ -1,5 +1,11 @@
 # Standalone repository migration
 
+EigenVista is a modern rewrite of Molekel, the molecular visualization
+application developed by Ugo Varetto between 2006 and 2010. The original
+[Molekel repository](https://github.com/ugovaretto/molekel) and
+[Molekel website](https://ugovaretto.github.io/molekel/) preserve that project.
+This document records the repository migration of the new implementation.
+
 EigenVista now has a dedicated repository at
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista). Its Rust
 workspace, `app/`, `crates/`, `docs/`, `tools/`, `packaging/`, and `fixtures/`
@@ -9,8 +15,10 @@ icon, logo, scientific model, and native-file compatibility. See
 
 ## Source and history
 
-The source is the `next/` rewrite subtree from
+The current Rust/TypeScript source was extracted from the `next/` rewrite subtree of
 [`ugovaretto/molekel` at `4edabf6852db44ff849e82223bef6c0702730e3c`](https://github.com/ugovaretto/molekel/tree/4edabf6852db44ff849e82223bef6c0702730e3c/next).
+This extraction describes the current code's Git provenance; the project's
+lineage begins with the original Molekel application above.
 Subtree extraction preserves eight rewrite-only commits, with new commit
 identities because their trees and ancestry differ from the original repository:
 

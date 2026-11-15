@@ -7,6 +7,12 @@ not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
+EigenVista is a modern rewrite of Molekel, the molecular visualization
+application developed by Ugo Varetto between 2006 and 2010. The original
+[Molekel repository](https://github.com/ugovaretto/molekel) and
+[Molekel website](https://ugovaretto.github.io/molekel/) document that application;
+the architecture below describes its new Rust/TypeScript implementation.
+
 The current application is EigenVista in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository.
 Application source lives at the repository root without a `next/` wrapper or

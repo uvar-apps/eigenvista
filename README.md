@@ -64,6 +64,18 @@ first launch. Linux and Windows packages are not available yet.
 - [Read the full manual](https://uvar-apps.github.io/eigenvista/reference.html)
   or [report a problem](https://github.com/uvar-apps/eigenvista/issues).
 
+## History
+
+EigenVista is a modern rewrite of **Molekel**, the molecular visualization
+application developed by **Ugo Varetto from 2006 to 2010**. That work brought
+together molecular structures, quantum chemistry surfaces and programmable
+shaders. EigenVista carries the project forward with a new implementation and
+name.
+
+Explore the [original Molekel source](https://github.com/ugovaretto/molekel) and
+the [original Molekel website](https://ugovaretto.github.io/molekel/), with its
+documentation and gallery.
+
 ## Author and copyright
 
 Author: Ugo Varetto
@@ -76,9 +88,11 @@ EigenVista is licensed under [GPL-2.0-or-later](LICENSE).
 
 A clean Rust scientific core with a React/Three.js interface, shared by a Tauri macOS application and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
 
-EigenVista is the standalone successor to the Molekel Rust rewrite, in
-[`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista). Application code
-now lives at this repository's root; legacy application code is not included.
+The current implementation is maintained in
+[`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista). Its code was
+moved from the rewrite's `next/` directory to this repository's root; the
+[migration record](docs/migration.md) describes that repository extraction.
+Legacy application code is not included.
 The icon and logo are unchanged. New documents use
 `.eigenvista`; existing `.molekel` preview documents still open with their
 scientific data and saved meshes. New saves use EigenVista format identifiers

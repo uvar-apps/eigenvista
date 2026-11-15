@@ -1,6 +1,11 @@
 # Documentation map
 
-This is the documentation hub for the **Rust EigenVista development preview**.
+This is the documentation hub for the **EigenVista development preview**.
+EigenVista is a modern rewrite of Molekel, the molecular visualization
+application developed by Ugo Varetto between 2006 and 2010. See the original
+[Molekel repository](https://github.com/ugovaretto/molekel) and
+[Molekel website](https://ugovaretto.github.io/molekel/).
+
 It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.

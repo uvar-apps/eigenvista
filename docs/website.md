@@ -45,6 +45,10 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits.
+Project history traces EigenVista to Molekel, developed by Ugo Varetto from
+2006 to 2010. Link the original repository and website from README/About History.
+Describe the Rust/TypeScript code as the new implementation; repository subtree
+extraction details belong in developer provenance.
 Write for people using a molecular viewer: lead with tasks and controls. Keep
 format restrictions, units and display limitations next to the relevant feature.
 Avoid repeated elementary science warnings and internal verification terminology

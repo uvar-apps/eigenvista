@@ -18,6 +18,13 @@ The current application source is **EigenVista**, version **0.7.2**, in the stan
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
 
+EigenVista's project history comes from Molekel, the molecular visualization
+application developed by Ugo Varetto from 2006 to 2010. The
+[original source](https://github.com/ugovaretto/molekel) and
+[original website](https://ugovaretto.github.io/molekel/) document that project.
+The current Rust/TypeScript code is its new implementation; recent preview names
+and subtree extraction describe development/Git provenance.
+
 ## Verification policy: 14 November 2026
 
 The user requires **all relevant tests and checks to pass locally before any
@@ -30,6 +37,27 @@ Dated hosted-CI requirements and results below preserve the earlier policy and
 its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
+
+## Project history correction: #77, 15 November 2026
+
+The author clarified EigenVista's origins in the original Molekel application
+he developed during 2006–2010. README and About now have dedicated History
+sections with both original links. The previous description as a successor to
+a Rust preview has been removed from current public introductions. AGENTS,
+the documentation index, architecture and migration introductions now establish
+the same product history. The current implementation's technical extraction
+record, commit table, file compatibility and read-only reference boundary remain
+intact. Original-project links were checked; the development dates are supplied
+by the author. Dated snapshots and immutable release notes are preserved.
+This editorial follow-up is tracked under #77; application version 0.7.2,
+scientific data, runtime, media, license and releases are unchanged.
+Fresh local checks passed: the corrected author/dates/original links in six
+current entry points, static/deterministic generation, document/history links,
+all 96 Chromium/WebKit route/viewport cases and interactions, and desktop/320px
+visual review. Evidence: `tmp/2026-11-15-history/`,
+`tmp/2026-11-15-website/browser-YYfvOm/RESULT.json` and
+`tmp/2026-11-15-website/docs-check-source-zChDKr/RESULT.json`.
+App/native tests were not rerun for this documentation-only correction.
 
 ## Author and copyright: #77, 15 November 2026
 
