@@ -55,9 +55,14 @@ Search metadata now names supported molecular/quantum workflows while retaining
 visible editorial headings. Social cards use the new PNG, dimensions and alt
 text. 404 is `noindex`. The actual Google verification tag is kept in
 `tools/site/search-console.mjs` and emitted in the homepage head. A URL-prefix
-property for `https://uvar-apps.github.io/eigenvista/` has been added in the user's
-signed-in Search Console; verification awaits public deployment. The 15-page
-sitemap is ready for direct submission. The nested project `robots.txt` is not
+property for `https://uvar-apps.github.io/eigenvista/` is verified in the user's
+signed-in Search Console. The 15-page sitemap was submitted successfully. Its
+initial report says "Couldn't fetch"; Google's separate live test at 20:04:31 AWST
+confirmed crawl allowed, page fetch Successful and indexing allowed. Public XML
+returns HTTP 200 / application/xml, and the submitted URL was checked exactly.
+Homepage indexing was requested and accepted into Google's priority crawl queue.
+Processing/indexing remain external; do not describe the sitemap report as a
+successful parse yet. The nested project `robots.txt` is not
 the host's robots policy; do not claim it establishes discovery or modify
 another repository to address that.
 
@@ -74,11 +79,21 @@ were reviewed. An independent content/metadata/media review found no material
 issues. Additional footage/check/probe evidence is under
 `tmp/2026-11-15-visibility/`.
 
-Publication is the next gate: push the prepared site, follow only its Pages
-publisher, verify the public tag/media, then verify the property and submit the
-sitemap. GitHub's separate social-preview upload awaits the browser extension's
+Website source `1f44a7d6189635f1a707a24b84ef549c83f17813` is live through
+[Pages deployment 43711379274](https://github.com/uvar-apps/eigenvista/actions/runs/43711379274).
+All 66 served files match the reviewed bytes, including video, poster, social PNG
+and bare-homepage verification tag. All 96 route/viewport cases and interactions
+also passed against the public site in both engines; see
+`tmp/2026-11-15-website/browser-jmnpFf/RESULT.json` and
+`tmp/2026-11-15-visibility/public-files.json`. Only the Pages publisher was followed;
+application Verify was not run. Both owned capture/site previews (5189/5190)
+were stopped; user servers were untouched.
+
+GitHub's separate social-preview upload awaits the browser extension's
 user-controlled file-URL access setting; the prepared image is ready. Do not
-claim either external operation completed until read back. Application sources,
+claim that upload completed until read back. The user's reply indicated they
+would enable it, but the upload tool still reported access disabled. #77 stays
+open for this final action and the external sitemap follow-up. Application sources,
 0.7.2 release/tag/ZIP, icon, palettes, scientific fixtures and historical
 snapshots are unchanged; native/app suites were not rerun for this website work.
 

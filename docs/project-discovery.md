@@ -98,6 +98,16 @@ indexing through URL Inspection when available. Verification/submission are
 separate from Google's later decision to crawl, index and rank the site; record
 the actual result without promising visibility or immediate indexing.
 
+On 15 November 2026 the property was verified, the sitemap submitted, and the
+homepage indexing request accepted into Google's priority crawl queue. The
+initial sitemap report says "Couldn't fetch". A separate live inspection of
+the exact sitemap URL at 20:04:31 AWST returned crawl allowed **Yes**, page fetch
+**Successful**, indexing allowed **Yes**. Public delivery is HTTP 200 with XML;
+the host's robots URL returns 404. Keep the submission and recheck Google's
+processing report later; a successful live fetch is not proof of a successful
+sitemap parse or indexing. [Google's fetch diagnostics](https://support.google.com/webmasters/answer/7451001?hl=en)
+describe this distinction and subsequent retries. #77 records this follow-up.
+
 `/eigenvista/robots.txt` is in a project directory. Google consults
 `https://uvar-apps.github.io/robots.txt` for the host's robots rules, so the
 nested file does not establish host-level crawler policy or sitemap discovery.
