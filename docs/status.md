@@ -23,34 +23,73 @@ record of the completed checks.
 
 ## Source version 0.7.2
 
-15 November 2026: version 0.7.2 is in release preparation following the user's
-request to commit/tag/push and publish rebuilt distributions with release notes.
-The source base is main `979324c`. The release collects #73 scene background
-controls, #74 transparent PNG export and optional MatterViz Muted/Pastel files
-for the existing atom-color picker. The planned ZIP includes `Palettes/` with
-the two JSON files, README and unchanged upstream MIT notice. Each palette covers
-elements 1–109; other elements retain built-in defaults. Scientific data/file profiles,
-normal palette defaults, dependencies/compiler and icon/logo are unchanged.
+Published **2026-11-15T07:05:08Z** as a development
+[prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2). Annotated tag `v0.7.2`,
+object `911cc11b72662eca31cbf18609176de95e9d943a`, resolves locally/remotely
+to source `5f336b6a2d53dcb0db67dd5ed95956134a5a1e18`, based on main `979324c`.
+Issues [#73](https://github.com/uvar-apps/eigenvista/issues/73#issuecomment-6890841183)
+and [#74](https://github.com/uvar-apps/eigenvista/issues/74#issuecomment-6890841431)
+are closed with final release ledgers. See [release notes](releases/0.7.2.md).
 
-Fresh local macOS 0.7.2 checks passed: fmt, 272 default Rust tests, strict
-workspace/all-targets Clippy, seven desktop tests, WASM/TypeScript/production
-build and 13 packaging checks. The complete browser suite passed 526/526,
-263 per engine, with one worker and zero skipped/flaky/unexpected/retried cases.
-The summary completed at 2026-11-15T06:45:19.078Z; the browser report duration was
-943.97 seconds (about 15.7 minutes). Reference generation exited zero before
-Playwright; all 276 source hashes and Vite PID 26782 stayed stable. Evidence under
-`tmp/2026-11-15-release-0.7.2/` includes `full-browsers-summary.json`,
-`root-browser-review.json` and `root-native-build-review.json`. The completed
-feature verification below predates the bump and remains a separate record.
-All remaining artifact/native checks must also pass locally before pushing.
+The release adds scene background controls, transparent PNG export and optional
+MatterViz Muted/Pastel files through the existing atom-color picker. `Palettes/`
+contains both JSON files, README and unchanged upstream MIT notice. The 109
+original RGB entries per palette and elements 110–118 default fallback were
+verified. Scientific data/file profiles, built-in palette, dependencies/compiler
+and icon/logo are unchanged.
 
-Clean-source rebuilt app/converter/ZIP, independent source/asset and native
-verification, annotated tag, publication and verified downloads are also pending.
-No new archive/hash or delivery success is claimed. See [release notes](releases/0.7.2.md)
-and the [planned release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2).
-The published 0.7.1 release and its artifacts remain unchanged. Native image-download
-handling and clean-Mac/HiDPI/full-OS-range/Linux/Windows qualification are separate
-from the current local macOS acceptance.
+Fresh local macOS checks passed: fmt, 272 default Rust tests, strict workspace/
+all-targets Clippy, seven desktop tests, WASM/TypeScript/production build and
+13 packaging checks. The full browser run passed 526/526, 263 per engine, with
+one worker and zero skipped/flaky/unexpected/retried cases. The summary completed
+at 2026-11-15T06:45:19.078Z; report duration was 943.97 seconds (15.7 minutes).
+Reference generation exited zero first; all 276 source hashes and Vite PID 26782
+remained unchanged. All local acceptance completed before the release push.
+The completed feature verification below remains a separate earlier record.
+
+The rebuilt app/converter/ZIP, independent source/asset audit, qualified native
+retry, production UI, tag/publication and downloaded assets passed verification.
+All three server-reported sizes/digests and complete downloaded bytes matched:
+
+| Asset | Bytes | SHA256 |
+| --- | ---: | --- |
+| `EigenVista-0.7.2-apple-silicon-20261115T065014Z-5f336b6.zip` | 46,406,211 | `02541f40e5f59ff5381c07605947ef4cff590213256b2dbc67f608e21a7b0937` |
+| `EigenVista-0.7.2-apple-silicon-20261115T065014Z-5f336b6.zip.sha256` | 126 | `6f8183755b282ce78389f6571f3d174cc035f878c44ee2cd82e7e0ff0fd29ffb` |
+| `EigenVista-0.7.2-apple-silicon-20261115T065014Z-5f336b6.json` | 1,463 | `cc04eb8b791dea6017e702ec384b2dbaabbc42f4fe3ec0b067665312979c9b0b` |
+
+The ZIP is under `artifacts/distributions/`, staging at
+`tmp/eigenvista-package-h7HDta`. Built on macOS 27.0 for arm64 with minimum
+macOS 13.0, system-only runtime links, ad-hoc signing and no notarization.
+Independent audit verified 411 source Git blobs/modes, 66 payload files, five
+actual embedded production assets and all four `Palettes/` files. Extracted
+CLI/recovered WASM checks passed four examples, four BinaryCIF controls, four
+biological views, four microheterogeneity controls and four frozen native inputs.
+
+Production checks passed 18 real-file captures, nine per engine, plus each
+engine's three signed PNG modes and two actual extracted palette imports/reset.
+The transparent/opaque composites had maximum 8-bit channel difference 2 and
+mean below 0.034; wrong-background controls were rejected. Selected production
+images were visually reviewed. Actual production assets match the signed app.
+The owned diagnostic server PID 55140 was stopped; port 5189 was free and the
+user's Vite PID 26782 remained running.
+
+The first native probe `native-startup-fb0GGQ` lost on-screen visibility while
+the process stayed alive; its retained failure does not qualify as a pass and
+its cause is unproven. The exact unchanged-helper retry `native-startup-ULdTyD`
+passed with owned PID 54972, its 1320×860 on-screen layer-zero window and five
+seconds alive/on-screen, without helper activation. Only owned children were
+signaled for cleanup. This does not qualify physical native dialogs/loading/
+image downloads/Cmd+Q, clean-Mac/Gatekeeper/HiDPI or the full deployment-OS range.
+
+Evidence under `tmp/2026-11-15-release-0.7.2/` includes
+`local-acceptance-before-push.json`, `artifact-audit-result.json`,
+`root-native-review.json`, `production-views-result.json` and
+`publication-verification.json`. The tag/source ZIP keep their truthful
+pre-publication snapshot. This later documentation-only record does not retag,
+rebuild or rerun unchanged runtime tests; release-note bytes remain fixed.
+Current qualification is local macOS only; future local Linux hosts await access.
+No hosted CI was requested or used. The published 0.7.1/older releases remain
+unchanged; catalog #71 and accessibility-palette #72 remain open.
 
 ## Background and transparent-PNG feature verification: 15 November 2026
 

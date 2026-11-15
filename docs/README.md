@@ -5,7 +5,7 @@ It separates the implemented application from the larger planned v1. Start
 with the [user guide](user-guide.md) to use the program, or the
 [root AGENTS.md](../AGENTS.md) to continue development.
 
-Current source version: **0.7.2** (release preparation), including live orbital/density calculation
+Current source version: **0.7.2**, including live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections
@@ -27,8 +27,11 @@ The earlier 0.5.15 package predates AO.
 Version 0.7.2 adds scene background color/reset controls and transparent PNG
 export (#73/#74), plus optional MatterViz Muted/Pastel files for the existing
 atom-color loader. Fresh local macOS 0.7.2 checks passed, including all 526 browser
-cases; the earlier feature batch retains its separate record. Rebuilt assets,
-artifact/native checks and publication remain pending. See the
+cases; the earlier feature batch retains its separate record. Rebuilt Apple
+Silicon assets, independent artifact/native acceptance, production checks and
+all three downloads passed verification. The
+[0.7.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
+provides the ZIP, checksum and build metadata. See the
 [0.7.2 notes](releases/0.7.2.md) and [current status](status.md#source-version-072).
 The published 0.7.1 release retains its original source and verified artifacts.
 

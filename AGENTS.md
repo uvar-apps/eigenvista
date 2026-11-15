@@ -70,25 +70,25 @@ preserve those historical results as evidence of what ran at the time.
 
 ## Layout that is not obvious from names
 
-- Current source version **0.7.2** is in release preparation for scene background
-  controls (#73), transparent PNG (#74) and optional MatterViz Muted/Pastel
-  atom-color files. The earlier feature batch passed 526 browser cases (263 per
-  engine), with native/build/pixel checks recorded in handoff/status; those are
-  pre-bump feature results. Fresh local macOS 0.7.2 checks passed: fmt, 272 default
-  and seven desktop Rust tests, strict Clippy, WASM/TypeScript/production build,
-  13 packaging checks and all 526 browser cases (263 per engine; one worker;
-  zero skipped/flaky/unexpected/retries). All 276 source hashes and Vite PID 26782
-  stayed stable. Rebuilt app/converter/ZIP, artifact/native verification and
-  publication remain pending. Source palettes are in `palettes/`; the tester payload is planned
-  to include `Palettes/` with the unchanged upstream MIT notice. Palettes use the
-  existing version-1 picker, define elements 1–109 and leave elements 110–118
-  at built-in defaults.
-  Background is session-only, normal PNG uses the selected opaque color and
-  `eigenvista-view.png`, and transparent export uses
-  `eigenvista-view-transparent.png`. Preserve scientific data/profiles, default
-  palette, dependencies, compiler and icon/logo. Read the
-  [0.7.2 notes](docs/releases/0.7.2.md) and current handoff/status; the published
-  0.7.1 app/ZIP predates these additions and remains unchanged.
+- Current version **0.7.2** is published for background controls (#73),
+  transparent PNG (#74) and optional MatterViz Muted/Pastel files. Immutable source
+  `5f336b6a2d53dcb0db67dd5ed95956134a5a1e18`, annotated tag `v0.7.2`, is available at
+  the [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2). Fresh local macOS checks passed:
+  fmt, 272 default and seven desktop Rust tests, strict Clippy, WASM/TypeScript/
+  production build, 13 packaging checks and all 526 browser cases (263 per engine;
+  one worker; zero skipped/flaky/unexpected/retries). All 276 source hashes and
+  Vite PID 26782 stayed stable. The rebuilt app/converter/ZIP, independent audit,
+  qualified extracted-native retry, production checks and all three downloaded
+  assets passed verification. The earlier native visibility failure is retained,
+  with its cause unproven; see handoff/status for exact evidence and limits.
+  `Palettes/` contains both JSON files, README and upstream MIT notice. The files
+  use the existing picker, define elements 1–109 and leave elements 110–118 at
+  built-in defaults. Background/palette choices remain session-only; science,
+  profiles, defaults, dependencies, compiler and icon/logo are unchanged.
+  The tag/source ZIP retain their truthful pre-publication snapshot; this later
+  documentation-only record does not retag, rebuild or rerun unchanged runtime
+  tests. Read the [0.7.2 notes](docs/releases/0.7.2.md) and current handoff/status.
+  Earlier published releases and their artifacts remain unchanged.
 
 - Version **0.7.1** is published for
   [#70](https://github.com/uvar-apps/eigenvista/issues/70): the visible

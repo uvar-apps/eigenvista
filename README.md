@@ -11,12 +11,13 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** source version **0.7.2** is in release preparation as an experimental
+**Status:** version **0.7.2** is published as an experimental
 Apple Silicon development preview, not v1 or completion of the M0-M7 plan.
 It adds scene background controls, transparent PNG export and optional MatterViz
 Muted/Pastel atom palettes. Fresh local macOS 0.7.2 checks passed, including all
-526 browser cases. Rebuilt assets, artifact/native checks and publication remain
-pending. The earlier feature verification is recorded separately.
+526 browser cases. Rebuilt Apple Silicon assets, independent artifact/native
+acceptance, production checks and all three downloaded asset identities are
+verified. The earlier feature verification is recorded separately.
 See [implementation status](docs/status.md#source-version-072) and the
 [0.7.2 release notes](docs/releases/0.7.2.md). The published 0.7.1 release and its
 verified artifacts remain unchanged.
@@ -61,7 +62,7 @@ Version 0.7.2 adds a scene **Background color** picker/reset and a separate
 **Export image with transparent background** action (#73/#74). Normal image
 export uses the chosen opaque background. Optional Muted/Pastel JSON palettes
 load through **Atom colours → Colours file…**; source files are in `palettes/`
-and the planned tester ZIP includes `Palettes/` with attribution and license.
+and the tester ZIP includes `Palettes/` with attribution and license.
 See the [user guide](docs/user-guide.md#moving-and-inspecting-the-scene) for controls.
 
 Version 0.7.1 renames the **Document** sidebar section to **Molecular data**
@@ -119,10 +120,10 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [planned 0.7.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
-is the target for rebuilt ZIP, checksum and build metadata after publication.
-Check [status](docs/status.md#source-version-072) for actual verification and
-delivery. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
+The [0.7.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
+provides the rebuilt ZIP, checksum and build metadata. Check
+[status](docs/status.md#source-version-072) for verified source, SHA256 and local
+verification evidence. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
 retains its original verified package; older releases are not updated in place.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
 remains the earlier published package. Older packages remain historical and

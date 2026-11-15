@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the 0.7.2 development preview in release preparation, including
+This describes the published 0.7.2 development preview, including
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
 not the complete

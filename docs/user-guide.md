@@ -10,7 +10,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.7.2 in release preparation, an experimental
+This guide describes version 0.7.2, an experimental
 development preview. Scientific calculations and rendering have targeted tests,
 but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
@@ -21,8 +21,10 @@ Version 0.7.2 adds scene background controls and transparent PNG export
 Muted/Pastel atom palettes. Read the [0.7.2 notes](releases/0.7.2.md) and
 [status](status.md#source-version-072) for fresh release checks and delivery.
 Fresh 0.7.2 checks passed locally on macOS, including all 526 browser cases.
-Rebuilt archives, artifact/native checks and publication remain pending; the prior
-feature verification is recorded separately. The published
+The [0.7.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
+provides the verified rebuilt Apple Silicon ZIP, checksum and build metadata,
+including `Palettes/`. The prior feature verification is recorded separately.
+The published
 [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
 retains its original verified package, which predates these additions.
 
@@ -598,8 +600,8 @@ Every element is drawn with its own CPK colour from a bundled palette. The
 
 Version 0.7.2 supplies two optional examples: `matterviz-muted.json` has subdued
 colors with dusty-rose oxygen; `matterviz-pastel.json` is lighter with pale-pink
-oxygen. Load them from `palettes/` in the source checkout or the planned tester
-ZIP's `Palettes/` directory using **Colours file…**. For biological structures,
+oxygen. Load them from `palettes/` in the source checkout or the tester ZIP's
+`Palettes/` directory using **Colours file…**. For biological structures,
 choose **Coloring → Element** to display atom-color overrides. Each file covers
 elements 1–109; elements 110–118 retain the built-in defaults. The source values and upstream MIT
 notice are retained with the examples. The built-in palette remains the default.
