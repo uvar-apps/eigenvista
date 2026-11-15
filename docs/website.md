@@ -133,6 +133,29 @@ publication; do not start or poll the optional application Verify workflow.
 Website work does not bump the app version, retag a release or rebuild existing
 redistributables. The published 0.7.2 source and downloads retain their identities.
 
+## Content and imagery revision: 15 November 2026
+
+Completed [#76](https://github.com/uvar-apps/eigenvista/issues/76) replaces the
+small demonstration imagery, fixes figure aspect ratios and makes custom shaders
+prominent on the homepage, gallery and illustrated guide. The published site has
+16 pages, 15 curated captures and 19 original-byte example/preset/notice downloads.
+The existing AO/Pastel views remain intact.
+
+Content source `21bcf54` and the asset-refresh follow-up
+`7c296e676219a95fb3728a08c1c412fcbda692a9` are published. The
+[final Pages deployment](https://github.com/uvar-apps/eigenvista/actions/runs/43702705994)
+succeeded; all 61 served files matched the reviewed local payload. Chromium and
+WebKit also checked the live reference proportions, readable phone shader controls
+and exact preset downloads. The existing full local site suite passed before
+pushing, with 96 route/viewport cases and all interactions. Application code,
+version and released packages are unchanged.
+
+Evidence is retained under `tmp/2026-11-15-website-quality/`, including curated
+PNG captures, reviewed page layouts, source metadata, `public-files-final.json`
+and `public-browser.json`. The final local browser run is
+`tmp/2026-11-15-website/browser-tv6B1g/RESULT.json`. Both owned previews were
+stopped after verification. See the [issue outcome](https://github.com/uvar-apps/eigenvista/issues/76#issuecomment-6892818904).
+
 ## Initial publication: 15 November 2026
 
 Source `fa042e6326050a8f8a2e23fdbdb67f03089e251e` was published from `main` by

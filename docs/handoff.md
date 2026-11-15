@@ -68,9 +68,18 @@ Content revision `21bcf54` was pushed and published by [Pages deployment
 43701982761](https://github.com/uvar-apps/eigenvista/actions/runs/43701982761).
 All 61 served files matched the locally reviewed bytes. The follow-up adds
 content hashes to image/stylesheet URLs so returning visitors receive the new
-pictures and proportion fixes despite Pages' ten-minute asset cache. The final
-publication outcome is tracked in #76. Original website publication and first
-editorial correction below remain historical evidence.
+pictures and proportion fixes despite Pages' ten-minute asset cache.
+
+The final asset revision `7c296e676219a95fb3728a08c1c412fcbda692a9` is published by
+[Pages deployment 43702705994](https://github.com/uvar-apps/eigenvista/actions/runs/43702705994).
+All 61 served files again matched the reviewed source bytes. Chromium and WebKit
+verified the live reference proportions, readable phone controls and exact
+`x-ray.params` download/filename. [#76 is complete](https://github.com/uvar-apps/eigenvista/issues/76#issuecomment-6892818904).
+Final evidence is in `public-files-final.json` and `public-browser.json` under
+the quality evidence directory above. Both owned preview servers (5189/5190)
+were stopped after public verification; the public website remains available.
+Original website publication and first editorial correction below remain
+historical evidence.
 
 ## User website: #75, 15 November 2026
 
