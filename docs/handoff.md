@@ -58,6 +58,13 @@ visual review. Evidence: `tmp/2026-11-15-history/`,
 `tmp/2026-11-15-website/browser-YYfvOm/RESULT.json` and
 `tmp/2026-11-15-website/docs-check-source-zChDKr/RESULT.json`.
 App/native tests were not rerun for this documentation-only correction.
+The corrected history is published from
+`6ab7e267dc3a0510ff5b3021b6113d51d5244632` by
+[Pages deployment 43715299639](https://github.com/uvar-apps/eigenvista/actions/runs/43715299639).
+Public readback matched About/search-index bytes and checked the author, dates,
+original-project links and removal of the misleading origin wording in About
+and five repository entry points. See `tmp/2026-11-15-history/public.json`.
+The owned site preview was stopped; user servers were untouched.
 
 ## Author and copyright: #77, 15 November 2026
 
