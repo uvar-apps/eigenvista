@@ -2,7 +2,7 @@
 
 The public website lives in `site/` on `main` and is intended for application
 users: installation, a detailed reference, worked tutorials and a gallery.
-Its target address is <https://uvar-apps.github.io/eigenvista/>. Issue
+It is published at <https://uvar-apps.github.io/eigenvista/>. Completed issue
 [#75](https://github.com/uvar-apps/eigenvista/issues/75) tracks its creation.
 
 ## A static directory, with a small publisher
@@ -99,3 +99,20 @@ publication; do not start or poll the optional application Verify workflow.
 
 Website work does not bump the app version, retag a release or rebuild existing
 redistributables. The published 0.7.2 source and downloads retain their identities.
+
+## Initial publication: 15 November 2026
+
+Source `fa042e6326050a8f8a2e23fdbdb67f03089e251e` was published from `main` by
+[Pages deployment 43697301648](https://github.com/uvar-apps/eigenvista/actions/runs/43697301648).
+All relevant local checks passed before the push. After deployment, the public
+HTTPS bytes of all 44 served files matched the local SHA-256/byte manifest;
+the homepage and nested custom 404 also matched. The empty `.nojekyll` source
+marker is not exposed as a public resource by Pages.
+
+The complete local Chromium/WebKit suite then passed against the public origin:
+all 15 routes at 1440/390/320 pixels, 90 route/viewport checks and all interaction
+cases, completed at 09:04 UTC. Evidence is retained under
+`tmp/2026-11-15-website/` (`public-files.json`, `browser-00G0Uj/RESULT.json`,
+`browser-test-public.log`). The owned local preview was stopped after public
+verification. [The issue outcome](https://github.com/uvar-apps/eigenvista/issues/75#issuecomment-6892087152)
+records the delivery and unchanged application/release scope.

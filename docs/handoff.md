@@ -71,12 +71,25 @@ runs caught narrow-layout and search/download/404 details; they are not passes.
 The complete passing evidence is under `tmp/2026-11-15-website/browser-WDQzCB/`
 and the final qualifying run is recorded in `browser-test-final.log`.
 
-Pages enablement, source push, deployment and public HTTPS readback are pending
-at this source snapshot. The target is <https://uvar-apps.github.io/eigenvista/>.
-The local preview uses owned port 5190. No application code, version, fixture,
-palette value, tag or released redistributable changed. Application suites were
-not rerun for this isolated website/documentation change. A stale cube-guide
-sentence was aligned with the existing direct analytic-preview behavior.
+Published at <https://uvar-apps.github.io/eigenvista/> from source
+`fa042e6326050a8f8a2e23fdbdb67f03089e251e` on `main`. Repository visibility is
+public; Pages uses the approved workflow publisher. [Deployment 43697301648](https://github.com/uvar-apps/eigenvista/actions/runs/43697301648)
+succeeded. Fresh HTTPS readback matched all 44 served files to the local
+SHA-256/byte manifest, plus the homepage and nested custom 404. The empty
+`.nojekyll` source marker is not served by Pages. The complete Chromium/WebKit
+suite was repeated locally against the public site: all 90 route/viewport checks
+and interactions passed, completed 15 November 2026 at 09:04 UTC. Evidence is in
+`tmp/2026-11-15-website/public-files.json`, `browser-00G0Uj/RESULT.json` and
+`browser-test-public.log`. [#75 is closed](https://github.com/uvar-apps/eigenvista/issues/75#issuecomment-6892087152)
+with the publication/validation record. The owned local preview on port 5190 was
+stopped after public verification; no user application was stopped.
+
+No application code, version, fixture, palette value, tag or released
+redistributable changed. Application suites were not rerun for this isolated
+website/documentation change. A stale cube-guide sentence was aligned with the
+existing direct analytic-preview behavior. Maintain the website with the user
+guide and update its pinned release/download facts when a later app release is
+actually published; GitHub uploads the checked static output without building it.
 
 ## Documentation follow-up: 15 November 2026
 
