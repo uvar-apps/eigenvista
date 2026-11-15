@@ -20,10 +20,19 @@
   "socialImage": {
     "width": 1280,
     "height": 640,
-    "sourceImage": "assets/media/quantum-xray.webp",
-    "sourceSha256": "bb992e35fa35a84fd3569e44e781e9f0b05b9954a72260d68cc8e6ef2b36edcc",
+    "sourceImages": [
+      {
+        "file": "assets/media/quantum-xray.webp",
+        "sha256": "bb992e35fa35a84fd3569e44e781e9f0b05b9954a72260d68cc8e6ef2b36edcc"
+      },
+      {
+        "file": "assets/media/1aon-ao-on.webp",
+        "sha256": "8ccaac20f9a9ed47049fcbb85ff0d97d56781ae845abfae55fb96518aefb6c94"
+      }
+    ],
     "logo": "assets/favicon.svg",
-    "logoSha256": "bf23563d11bcf9bad7e8de754b3522fa00a548fc7c89bd4ee0265f8428ef6e0e"
+    "logoSha256": "bf23563d11bcf9bad7e8de754b3522fa00a548fc7c89bd4ee0265f8428ef6e0e",
+    "composition": "Two labeled actual app views, with blank scene margins cropped and natural proportions preserved. 1AON uses Lambert + SSAO and MatterViz Pastel; the panels show different molecules at independent display scales."
   },
   "capture": "Actual production web UI. Native density cache opened before recording; same 72,848-triangle mesh and camera throughout. maxOpacity and zmax changed through real React controls.",
   "editing": "Initial setup trimmed; final frame held for reading. Actual 1920×960 app view remains at native size below a 120px branded header. No scientific image alteration, time scaling, audio or calculation-speed claim.",
@@ -39,8 +48,8 @@
   "files": [
     {
       "file": "eigenvista-social.png",
-      "bytes": 228139,
-      "sha256": "432900ccae0a7835d96207ff9a6fd04525f9fd808be2bed40d11aaf5aa0186ec"
+      "bytes": 439371,
+      "sha256": "e85c377060bfe711875bf0aaa7e395cfbc3f199167ded3c078e49bdca8cd9bb2"
     },
     {
       "file": "eigenvista-shaders.mp4",

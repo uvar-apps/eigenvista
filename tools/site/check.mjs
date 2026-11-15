@@ -140,6 +140,12 @@ const discovery = JSON.parse(fs.readFileSync(path.join(site, "assets/social/prov
 assert.equal(discovery.applicationVersion, release.version);
 assert.equal(discovery.applicationSource, release.source);
 assert.equal(discovery.durationSeconds, 30);
+assert.deepEqual(discovery.socialImage.sourceImages.map(row => row.file), [
+  "assets/media/quantum-xray.webp", "assets/media/1aon-ao-on.webp",
+]);
+for (const row of discovery.socialImage.sourceImages)
+  assert.equal(hash(fs.readFileSync(path.join(site, row.file))), row.sha256);
+assert.equal(hash(fs.readFileSync(path.join(site, discovery.socialImage.logo))), discovery.socialImage.logoSha256);
 for (const row of discovery.files) {
   assert(/^[a-z0-9-]+\.(?:png|webp|mp4|vtt)$/.test(row.file));
   const content = fs.readFileSync(path.join(site, "assets/social", row.file));

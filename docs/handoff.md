@@ -47,8 +47,23 @@ UI footage keeps its native aspect, with a separate branded header, no scientifi
 alteration or calculation-speed claim. It is silent and plays on request, with
 a poster, descriptive track/text and download. The public video is 4,166,288 bytes,
 SHA256 `48b7169156dc9c259f0b0da4c74794ffa335e4d302199e2566db358b826073fd`.
-The social PNG is 1280×640 / 228,139 bytes. Its source is the actual density image
-and unchanged logo; all new asset hashes are in `site/assets/social/provenance.json`.
+The initial social PNG was 1280×640 / 228,139 bytes. The user reports uploading it,
+then requested both the density rendering and an ambient-occlusion molecule.
+The replacement is 1280×640 / 439,371 bytes, combining the same real X-ray density
+image with the 58,870-atom 1AON Lambert + SSAO/MatterViz Pastel capture and unchanged
+logo. Both full molecular shapes and natural proportions are preserved; panels
+show different molecules at independent display scales. Source/output hashes are
+in `site/assets/social/provenance.json`; the generator refreshes this ledger and
+demo publication preserves its social-image metadata. The replacement PNG needs
+uploading through GitHub's existing Social preview UI.
+The combined-card revision passed fresh local static/deterministic checks
+(24,876,289-byte payload), all 96 route/viewport cases and interactions in both
+browsers, syntax/whitespace and public-document/history checks. Evidence:
+`tmp/2026-11-15-social-combined/`,
+`tmp/2026-11-15-website/browser-KA1Qwu/RESULT.json` and
+`tmp/2026-11-15-website/docs-check-source-QWYkAE/RESULT.json`.
+Independent full-size/reduced-card review found no cropping, distortion or
+readability issue. Original scientific images, logo and demo video are unchanged.
 The public payload is bounded at 24 MiB (video below 4 MiB), loaded on demand.
 
 Search metadata now names supported molecular/quantum workflows while retaining
@@ -66,7 +81,7 @@ successful parse yet. The nested project `robots.txt` is not
 the host's robots policy; do not claim it establishes discovery or modify
 another repository to address that.
 
-Fresh local macOS checks passed: static/deterministic generation (16 pages,
+The initial discovery revision's local macOS checks passed: static/deterministic generation (16 pages,
 19 exact downloads; 24,649,602-byte payload), all 96 route/viewport checks in
 Chromium and WebKit, actual video decoding/playback/seeking and 16:9 proportions,
 byte-range/416 responses, existing search/keyboard/theme/AO/download/404 cases,
@@ -89,11 +104,10 @@ also passed against the public site in both engines; see
 application Verify was not run. Both owned capture/site previews (5189/5190)
 were stopped; user servers were untouched.
 
-GitHub's separate social-preview upload awaits the browser extension's
-user-controlled file-URL access setting; the prepared image is ready. Do not
-claim that upload completed until read back. The user's reply indicated they
-would enable it, but the upload tool still reported access disabled. #77 stays
-open for this final action and the external sitemap follow-up. Application sources,
+The user reports completing GitHub's original social-preview upload manually;
+the browser extension's file-URL permission is no longer a required user action.
+The newly requested combined-image replacement is ready for manual re-upload.
+#77 stays open for that replacement and the external sitemap follow-up. Application sources,
 0.7.2 release/tag/ZIP, icon, palettes, scientific fixtures and historical
 snapshots are unchanged; native/app suites were not rerun for this website work.
 

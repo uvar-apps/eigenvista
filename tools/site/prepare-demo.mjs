@@ -50,7 +50,7 @@ if(!process.argv.includes("--publish")){
   const provenance={ applicationVersion:release.version,applicationSource:release.source,durationSeconds:30,width:1920,height:1080,fps:25,
     field:recording.field,isovalue:recording.isovalue,units:recording.units,grid:recording.grid,
     input:{file:recording.source,sha256:hash(path.join(root,recording.source))},
-    socialImage:{width:1280,height:640,sourceImage:"assets/media/quantum-xray.webp",sourceSha256:hash(path.join(root,"site/assets/media/quantum-xray.webp")),logo:"assets/favicon.svg",logoSha256:hash(path.join(root,"site/assets/favicon.svg"))},
+    socialImage:JSON.parse(fs.readFileSync(path.join(output,"provenance.json"))).socialImage,
     capture:"Actual production web UI. Native density cache opened before recording; same 72,848-triangle mesh and camera throughout. maxOpacity and zmax changed through real React controls.",
     editing:"Initial setup trimmed; final frame held for reading. Actual 1920×960 app view remains at native size below a 120px branded header. No scientific image alteration, time scaling, audio or calculation-speed claim.",
     beats,tools:{recorder:"Playwright",composition:"HyperFrames 0.9.52",encoding:"FFmpeg 6.0, H.264 yuv420p, 25 fps"},files };

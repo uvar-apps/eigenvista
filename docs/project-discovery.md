@@ -19,13 +19,18 @@ below. Keep its download link aligned with the verified published release.
 
 The reusable social image is
 [`site/assets/social/eigenvista-social.png`](../site/assets/social/eigenvista-social.png):
-1280×640 PNG, below GitHub's 1 MB limit. It combines the unchanged logo with the
-real density rendering, preserving its proportions. Regenerate with
+1280×640 PNG, below GitHub's 1 MB limit. It combines the unchanged logo with two
+actual rendering panels: the electron-density X-ray surface and the 58,870-atom
+1AON complex with Lambert + SSAO and MatterViz Pastel. Blank scene margins are
+cropped while preserving the complete molecular shapes and natural proportions.
+The panels show different molecules at independent display scales. Regenerate with
 `node tools/site/social-card.mjs`, then rebuild and check the site. Site Open
 Graph and Twitter card metadata use this asset with a content hash.
 GitHub's repository preview is a separate upload under Settings → General →
 Social preview → Edit → Upload an image. Updating site metadata alone does not
-set that repository image. Upload completion is recorded in the living handoff.
+set that repository image. The user uploaded the original density-only card,
+then requested this combined version; upload the revised PNG to replace it.
+Upload completion is recorded in the living handoff.
 
 ## The shader demonstration
 
