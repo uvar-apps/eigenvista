@@ -65,7 +65,7 @@ test("molecular AO darkens geometric contacts rather than isolated patches and r
   });
 });
 
-test("Lambert AO gives substantial localized contact contrast under the real directional and hemisphere lighting", async ({
+test("Lambert AO gives substantial localized contact contrast under the balanced scene lighting", async ({
   page,
 }, info) => {
   // A deep, visible pocket is declared independently before rendering. The

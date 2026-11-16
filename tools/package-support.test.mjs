@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
 import {
   testerEnvironment,
   testerPackageName,
@@ -15,6 +16,8 @@ import {
   npmNotices,
   rustNotices,
   licenseSupplements,
+  vendoredRustSources,
+  stageVendoredRustSources,
 } from "./package-support.mjs";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -286,4 +289,151 @@ test("pinned supplementary notices are complete and checksummed", (t) => {
   fs.cpSync(original, dir, { recursive: true });
   fs.appendFileSync(path.join(dir, entries[0].file), "changed");
   assert.throws(() => licenseSupplements(dir), /checksum mismatch/);
+});
+
+function vendoredFixture(t) {
+  const root = fixture(t);
+  const directory = path.join(root, "vendor/sesmesh");
+  fs.cpSync(path.join(repo, "vendor/sesmesh"), directory, { recursive: true });
+  const names = Object.keys(treeManifest(directory)).map(
+    (name) => `vendor/sesmesh/${name}`,
+  );
+  const snapshot = path.join(root, "snapshot");
+  const sourceManifest = snapshotFiles(root, names, snapshot);
+  const pkg = {
+    name: "sesmesh",
+    version: "1.1.2",
+    source: null,
+    manifest_path: path.join(directory, "Cargo.toml"),
+  };
+  const report = {
+    crates: [{ package: pkg, license: "MIT OR Apache-2.0" }],
+    licenses: [
+      {
+        id: "MIT",
+        name: "MIT License",
+        used_by: [{ crate: pkg }],
+        text: fs.readFileSync(path.join(directory, "LICENSE-MIT"), "utf8"),
+      },
+    ],
+  };
+  return { root, directory, snapshot, sourceManifest, report, names };
+}
+
+test("vendored Sesmesh notices and complete pinned source survive actual dependency archive staging", (t) => {
+  const value = vendoredFixture(t);
+  const dependencySources = path.join(value.root, "dependencies");
+  const notices = path.join(value.root, "notices");
+  const inventory = stageVendoredRustSources({
+    ...value,
+    repository: value.root,
+    dependencySources,
+    notices,
+  });
+  assert.equal(inventory.length, 1);
+  assert.equal(inventory[0].name, "sesmesh");
+  assert.equal(inventory[0].license, "MIT");
+  assert.equal(
+    inventory[0].revision,
+    "1ab2ebdad62cfa3fc8fee304ca64041d9bf6b5d8",
+  );
+  assert.deepEqual(inventory[0].patchedFiles, [
+    "src/control.rs",
+    "src/par.rs",
+    "src/surface.rs",
+  ]);
+  assert.equal(inventory[0].fileCount, value.names.length);
+  const archive = path.join(value.root, "dependency-sources.tar.gz");
+  const tar = spawnSync(
+    "/usr/bin/tar",
+    ["-czf", archive, "-C", dependencySources, "."],
+    { env: testerEnvironment(process.env, repo) },
+  );
+  assert.equal(tar.status, 0, String(tar.stderr));
+  const extracted = path.join(value.root, "extracted");
+  fs.mkdirSync(extracted);
+  const unpack = spawnSync("/usr/bin/tar", ["-xzf", archive, "-C", extracted], {
+    env: testerEnvironment(process.env, repo),
+  });
+  assert.equal(unpack.status, 0, String(unpack.stderr));
+  const vendored = path.join(extracted, "rust-vendored/sesmesh-1.1.2");
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(vendored, "SOURCE-MANIFEST.json"), "utf8"),
+  );
+  assertEqualManifest(manifest, snapshotFiles(vendored, Object.keys(manifest)));
+  for (const name of [
+    "Cargo.toml",
+    "src/lib.rs",
+    "src/surface.rs",
+    "LICENSE-MIT",
+    "ORIGIN.md",
+  ])
+    assert.equal(
+      fs.readFileSync(path.join(vendored, name), "utf8"),
+      fs.readFileSync(path.join(value.directory, name), "utf8"),
+    );
+  const notice = fs.readFileSync(
+    path.join(notices, "Sesmesh/LICENSE-MIT"),
+    "utf8",
+  );
+  assert.equal(notice, value.report.licenses[0].text);
+  assert.match(notice, /Copyright \(c\) 2026 Ugo Varetto/);
+  assert.match(
+    fs.readFileSync(path.join(notices, "Sesmesh/ORIGIN.md"), "utf8"),
+    /1ab2ebdad62cfa3fc8fee304ca64041d9bf6b5d8/,
+  );
+});
+
+test("vendored source packaging rejects omissions, unreviewed changes and license substitutions", (t) => {
+  const value = vendoredFixture(t);
+  const validate = (manifest = value.sourceManifest, report = value.report) =>
+    vendoredRustSources(report, value.root, manifest);
+  assert.equal(validate()[0].fileCount, value.names.length);
+  const omitted = { ...value.sourceManifest };
+  delete omitted["vendor/sesmesh/src/field/mod.rs"];
+  assert.throws(() => validate(omitted), /incomplete/);
+  const invalidLicense = structuredClone(value.report);
+  invalidLicense.licenses[0].id = "Apache-2.0";
+  assert.throws(
+    () => validate(value.sourceManifest, invalidLicense),
+    /selected MIT/,
+  );
+  const lostCopyright = structuredClone(value.report);
+  lostCopyright.licenses[0].text =
+    "MIT boilerplate without the actual copyright";
+  assert.throws(
+    () => validate(value.sourceManifest, lostCopyright),
+    /selected MIT/,
+  );
+  fs.appendFileSync(
+    path.join(value.directory, "src/geom/mod.rs"),
+    "\n// unreviewed change\n",
+  );
+  const changed = snapshotFiles(value.root, value.names);
+  assert.throws(() => validate(changed), /Unreviewed vendored source change/);
+  assert.throws(() => validate(), /changed after snapshot/);
+});
+
+test("vendored source packaging refuses external local crates and altered reviewed patch provenance", (t) => {
+  const value = vendoredFixture(t);
+  const external = structuredClone(value.report);
+  external.crates.push({
+    package: {
+      name: "foreign",
+      version: "1",
+      source: null,
+      manifest_path: path.join(value.root, "../not-authorized/Cargo.toml"),
+    },
+    license: "MIT",
+  });
+  assert.throws(
+    () => vendoredRustSources(external, value.root, value.sourceManifest),
+    /missing from the source snapshot/,
+  );
+  fs.appendFileSync(path.join(value.directory, "UPSTREAM-PATCHES.json"), " ");
+  const changed = snapshotFiles(value.root, value.names);
+  assert.throws(
+    () => vendoredRustSources(value.report, value.root, changed),
+    /provenance changed/,
+  );
 });

@@ -215,16 +215,18 @@ export async function molecularProbe(
         allocations: [...allocations.values()],
       });
       const scene = new THREE.Scene();
-      if (productLighting) {
-        scene.add(new THREE.HemisphereLight(0xffffff, 0x6e7880, 2.4));
-        const key = new THREE.DirectionalLight(0xffffff, 3);
-        key.position.set(4, 6, 8);
-        scene.add(key);
-      } else scene.add(new THREE.AmbientLight(0xffffff, 2));
+      if (!productLighting) scene.add(new THREE.AmbientLight(0xffffff, 2));
       const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 40);
       camera.position.set(0, 0, 14);
       camera.lookAt(0, 0, 0);
       camera.updateMatrixWorld();
+      if (productLighting) {
+        const lightingUrl = "/src/sceneLighting.ts";
+        const { addSceneLighting } = await import(
+          /* @vite-ignore */ lightingUrl
+        );
+        addSceneLighting(scene, camera);
+      }
       const geometry = new THREE.SphereGeometry(1, 24, 16);
       const material = new THREE.MeshStandardMaterial({
         color: 0xaaaaaa,

@@ -28,7 +28,9 @@ function privateChat(name) {
 
 // These private working documents are not application source or redistribution inputs.
 function privateDocument(name) {
-  const normalized = path.posix.normalize(name.replaceAll("\\", "/")).toLowerCase();
+  const normalized = path.posix
+    .normalize(name.replaceAll("\\", "/"))
+    .toLowerCase();
   return (
     normalized === "docs/reviews/2026-11-11-code-review.md" ||
     path.posix.basename(normalized) === "zenodo-upload.md"
@@ -212,6 +214,194 @@ export function licenseSupplements(directory) {
     if (digest(bytes) !== entry.sha256)
       throw new Error(`License supplement checksum mismatch: ${entry.file}`);
     return { ...entry, text: bytes.toString("utf8") };
+  });
+}
+
+/** Verify the reviewed vendored dependency against the exact packaged snapshot. */
+export function vendoredRustSources(report, root, sourceManifest) {
+  const directory = "vendor/sesmesh";
+  const revision = "1ab2ebdad62cfa3fc8fee304ca64041d9bf6b5d8";
+  const crates = report.crates.filter(
+    ({ package: pkg }) => pkg.name === "sesmesh",
+  );
+  if (crates.length !== 1)
+    throw new Error("Expected exactly one reviewed Sesmesh dependency");
+  for (const { package: pkg } of report.crates) {
+    if (pkg.source) continue;
+    const relative = path
+      .relative(root, pkg.manifest_path)
+      .replaceAll(path.sep, "/");
+    if (
+      relative.startsWith("../") ||
+      path.isAbsolute(relative) ||
+      !sourceManifest[relative]
+    )
+      throw new Error(
+        `Local Rust dependency is missing from the source snapshot: ${pkg.name}`,
+      );
+    if (
+      !pkg.name.startsWith("eigenvista-") &&
+      relative !== `${directory}/Cargo.toml`
+    )
+      throw new Error(`Unreviewed local Rust dependency: ${pkg.name}`);
+  }
+  const { package: pkg } = crates[0];
+  if (
+    pkg.source ||
+    pkg.version !== "1.1.2" ||
+    path.resolve(pkg.manifest_path) !== path.join(root, directory, "Cargo.toml")
+  )
+    throw new Error(
+      "Sesmesh dependency does not match its reviewed vendored source",
+    );
+  const read = (relative) => {
+    const name = `${directory}/${relative}`;
+    if (!sourceManifest[name])
+      throw new Error(`Missing vendored source file: ${name}`);
+    const file = inside(root, name);
+    if (fs.realpathSync(file) !== file || !fs.lstatSync(file).isFile())
+      throw new Error(
+        `Only regular vendored source files may be packaged: ${name}`,
+      );
+    const bytes = fs.readFileSync(file);
+    if (digest(bytes) !== sourceManifest[name])
+      throw new Error(`Vendored source changed after snapshot: ${name}`);
+    return bytes;
+  };
+  const originalBytes = read("UPSTREAM-SHA256.json");
+  const patchBytes = read("UPSTREAM-PATCHES.json");
+  if (
+    digest(originalBytes) !==
+      "33101809581739e239eaaa8802a28c40683b9d386c8f32e6a7c2d683b807f03c" ||
+    digest(patchBytes) !==
+      "c207c3c63d247707ccd422080d525e95303e2de135b93844b2bfdd5924bc09a9"
+  )
+    throw new Error("Sesmesh provenance changed without packaging review");
+  const original = JSON.parse(originalBytes);
+  const patches = JSON.parse(patchBytes);
+  if (
+    patches.upstream_revision !== revision ||
+    patches.selected_license !== "MIT" ||
+    Object.keys(original).length !== 50
+  )
+    throw new Error("Invalid pinned Sesmesh provenance");
+  const expected = [
+    ...Object.keys(original),
+    "Cargo.toml",
+    "README.md",
+    "ORIGIN.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE",
+    "UPSTREAM-SHA256.json",
+    "UPSTREAM-PATCHES.json",
+  ].sort();
+  const names = Object.keys(sourceManifest)
+    .filter((name) => name.startsWith(directory + "/"))
+    .map((name) => name.slice(directory.length + 1))
+    .sort();
+  if (JSON.stringify(names) !== JSON.stringify(expected))
+    throw new Error(
+      "Vendored Sesmesh source snapshot is incomplete or contains unreviewed files",
+    );
+  for (const [name, hash] of Object.entries(original)) {
+    if (digest(read(name)) !== (patches.modified_files[name] ?? hash))
+      throw new Error(`Unreviewed vendored source change: ${name}`);
+  }
+  const license = read("LICENSE-MIT");
+  if (
+    digest(license) !==
+    "56b5fe0eca17bdf6ee891a1947e98fe43d22cfdf86742ff32bb650c2327e366a"
+  )
+    throw new Error("Pinned Sesmesh MIT notice differs");
+  const selected = report.licenses.filter((entry) =>
+    entry.used_by?.some(
+      (use) => use.crate.name === pkg.name && use.crate.version === pkg.version,
+    ),
+  );
+  if (
+    selected.length !== 1 ||
+    selected[0].id !== "MIT" ||
+    selected[0].text.trim() !== license.toString("utf8").trim()
+  )
+    throw new Error(
+      "Sesmesh license report must retain its complete selected MIT notice",
+    );
+  const manifest = Object.fromEntries(
+    names.map((name) => [name, sourceManifest[`${directory}/${name}`]]),
+  );
+  return [
+    {
+      name: pkg.name,
+      version: pkg.version,
+      directory,
+      license: "MIT",
+      revision,
+      upstream: `https://github.com/uvar-apps/sesmesh/tree/${revision}`,
+      patchedFiles: Object.keys(patches.modified_files),
+      fileCount: names.length,
+      sourceManifestSha256: digest(JSON.stringify(manifest)),
+      manifest,
+    },
+  ];
+}
+
+/** Stage verified local dependency source and the chosen notice for the actual ZIP. */
+export function stageVendoredRustSources({
+  report,
+  repository,
+  snapshot,
+  sourceManifest,
+  dependencySources,
+  notices,
+}) {
+  const vendored = vendoredRustSources(report, repository, sourceManifest);
+  return vendored.map((vendor) => {
+    const source = inside(snapshot, vendor.directory);
+    assertEqualManifest(
+      vendor.manifest,
+      snapshotFiles(source, Object.keys(vendor.manifest)),
+    );
+    const destination = path.join(
+      dependencySources,
+      "rust-vendored",
+      `${vendor.name}-${vendor.version}`,
+    );
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.cpSync(source, destination, {
+      recursive: true,
+      errorOnExist: true,
+      force: false,
+    });
+    fs.writeFileSync(
+      path.join(destination, "SOURCE-MANIFEST.json"),
+      JSON.stringify(vendor.manifest, null, 2) + "\n",
+    );
+    const noticeDirectory = path.join(notices, "Sesmesh");
+    fs.mkdirSync(noticeDirectory, { recursive: true });
+    for (const file of [
+      "LICENSE-MIT",
+      "ORIGIN.md",
+      "UPSTREAM-SHA256.json",
+      "UPSTREAM-PATCHES.json",
+    ])
+      fs.copyFileSync(
+        path.join(source, file),
+        path.join(noticeDirectory, file),
+        fs.constants.COPYFILE_EXCL,
+      );
+    return {
+      ecosystem: "rust",
+      source: "vendored",
+      name: vendor.name,
+      version: vendor.version,
+      license: vendor.license,
+      revision: vendor.revision,
+      upstream: vendor.upstream,
+      patchedFiles: vendor.patchedFiles,
+      fileCount: vendor.fileCount,
+      sourceManifestSha256: vendor.sourceManifestSha256,
+      sourceArchive: `Source/dependency-sources.tar.gz:rust-vendored/${vendor.name}-${vendor.version}`,
+    };
   });
 }
 

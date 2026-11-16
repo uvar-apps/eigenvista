@@ -10,6 +10,38 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
+### Unreleased 0.9.0 scientific-inspection branch
+
+`codex/scientific-inspection` implements [Plan 009](../plans/009-scientific-inspection-implementation.md).
+Source version 0.9.0 is prepared for testing but has not been published;
+published 0.8.0 downloads do not include these additions. The [design record](design/2026-11-16-scientific-inspection.md)
+explains source identity, optional native capabilities, Sesmesh provenance and
+the quantitative sampling/publication contracts. See [handoff](handoff.md) for
+fresh acceptance evidence and remaining work before any authorized PR.
+
+The existing commands below build the new Rust/WASM/UI together. Sesmesh is a
+pinned, minimally patched Rust path dependency under `vendor/sesmesh`; no
+separate engine installation or external running service is required. Preserve
+its original source/patch digests and selected license when packaging. No new
+model service is needed for the installed AI connector; it discovers the new
+schemas through the existing opt-in native connection.
+
+Focused coverage includes core `inspection`, `neighborhoods`, `molecular_surfaces`
+and `field_analysis` tests, format `inspection_profiles`, and browser
+`inspection.spec.ts`, `molecular-surfaces.spec.ts` and `field-analysis.spec.ts`.
+These supplement the complete verification sequence. Actual extracted native
+helper acceptance must cover every new method, updates/readback, cancellation,
+CSV/PNG, source preservation, file scopes/no-clobber and save/reopen. In-page
+controller tests alone do not establish installed connector support.
+
+Build test bundles in the optimized target directory or repository-local
+staging; do not rebuild the debug bundle over a running user app. Label/monitor
+edits preflight the actual bounded text layout before publication, independently
+of native byte preflight. Typed native caches retain authoritative f64 values;
+GPU rendering uses its separately documented precision and allocation bounds.
+
+### Exercised environment
+
 The exercised environment is an Apple Silicon Mac running macOS 27, Rust
 1.99.0, arm64 Node.js 26 with npm, and wasm-bindgen CLI **0.2.108**. These are
 recorded tested versions, not a fully qualified minimum-version matrix. Cargo
@@ -82,7 +114,7 @@ project, choose a free port and keep [Vite](../app/vite.config.ts),
 [its config](../app/playwright.config.ts) aligned. Playwright currently reuses
 an existing server: verify it belongs to this checkout before trusting results.
 
-## External application control (0.8.0)
+## External application control (introduced in 0.8.0)
 
 The optional [application-control API](application-control.md) lets an external
 harness operate the current document, scientific worker and viewport through

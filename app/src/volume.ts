@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { SampledGrid, RenderMode, SurfaceShading } from "./types";
 import { volumeBrickRanges, type VolumeBrickRanges } from "./volumeRanges";
+import { SURFACE_LIGHTING_GLSL } from "./sceneLighting";
 
 export type VolumeQuality = 1 | 2 | 4;
 const rangeCache = new WeakMap<
@@ -99,6 +100,7 @@ export function volumeObject(
       uniform sampler3D brickRanges; uniform float brickSize; uniform float samplesPerVoxel;
       uniform vec3 positiveColor; uniform vec3 negativeColor; uniform float iso; uniform float opacity;
       uniform bool volumeMode; uniform float epsilon; in vec3 worldPoint;
+      ${SURFACE_LIGHTING_GLSL}
       const float visibilityAlpha=0.005;
       float scalar(vec3 p) {
         vec3 g=clamp((worldToGrid*vec4(p,1.0)).xyz,0.0,1.0)*(gridSize-1.0);
@@ -193,14 +195,9 @@ export function volumeObject(
                 float hit=hits[crossing];p=cameraPosition+direction*hit;
                 vec3 grad=gradient(p);vec3 n=length(grad)>1e-12?normalize(grad):vec3(0,1,0);
                 #ifdef SURFACE_BLINN_PHONG
-                  vec3 L=normalize(vec3(0.4,0.7,1.0));
-                  vec3 V=normalize(cameraPosition-p);
-                  vec3 H=normalize(L+V);
-                  float ndl=abs(dot(n,L));
-                  float ndh=pow(max(abs(dot(n,H)),0.0),64.0);
-                  float light=0.22+0.48*ndl+1.1*ndh;
+                  float light=sceneSurfaceLighting(n,cameraPosition-p,true);
                 #else
-                  float light=0.4+0.6*abs(dot(n,normalize(vec3(0.4,0.7,1.0))));
+                  float light=sceneSurfaceLighting(n,cameraPosition-p,false);
                 #endif
                 if(opacity>0.001&&first<0.0)first=hit;
                 composite(accum,(levels[crossing]>0.0?positiveColor:negativeColor)*light,opacity);

@@ -9,13 +9,35 @@ import {
   type SetStateAction,
 } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { createApplicationControl, controlIdentifier, ControlError, CONTROL_LIMITS, type ApplicationControl, type ControlExecution, type ControlHost } from "./control";
+import {
+  createApplicationControl,
+  controlIdentifier,
+  ControlError,
+  CONTROL_LIMITS,
+  type ApplicationControl,
+  type ControlExecution,
+  type ControlHost,
+} from "./control";
 import { attachDesktopControl } from "./desktopControl";
+import { INSPECTION_METHODS } from "./inspectionSchemas";
+import { useScientificInspection } from "./useScientificInspection";
+import { InspectionControls } from "./InspectionControls";
+import { MolecularSurfaceControls } from "./MolecularSurfaceControls";
+import { FieldAnalysisControls } from "./FieldAnalysisControls";
 import { controlPreset, updateDeclaredUniforms } from "./control/presets";
-import { patchStructureDisplay, visibleStructureAtoms, structureDisplaySummary, type StructurePatch } from "./control/presentation";
+import {
+  patchStructureDisplay,
+  visibleStructureAtoms,
+  structureDisplaySummary,
+  type StructurePatch,
+} from "./control/presentation";
 import type { CameraState, ViewportControl } from "./viewportControl";
 import { NativeExitGuard } from "./NativeExitGuard";
-import { hasNativeSave, subscribeNativeSaves, trackNativeSave } from "./nativeSaveActivity";
+import {
+  hasNativeSave,
+  subscribeNativeSaves,
+  trackNativeSave,
+} from "./nativeSaveActivity";
 import {
   Atom,
   FolderOpen,
@@ -179,11 +201,53 @@ export default function App() {
   const activity = useRef(true);
   const saving = useRef(false);
   const documentRevision = useRef(0);
+  const inspection = useScientificInspection({
+    doc,
+    getDocument: () => current.current,
+    publish: (next) => {
+      setDoc(next);
+      setDirty(true);
+    },
+    setBusy,
+    protectedPath: protectedSourcePath,
+    display: (atoms, focus, resetFilters, focusAtoms) =>
+      setStructureDisplay((previous) => {
+        const next = resetFilters
+          ? { ...defaultStructureDisplay(), colorMode: previous.colorMode }
+          : previous;
+        return {
+          ...next,
+          atomSelection: atoms,
+          ...(focus
+            ? {
+                focus: {
+                  atoms: focusAtoms ?? atoms ?? [],
+                  revision: (previous.focus?.revision ?? 0) + 1,
+                },
+              }
+            : {}),
+        };
+      }),
+  });
   const viewportControl = useRef<ViewportControl | null>(null);
   const controlHost = useRef<ControlHost | null>(null);
   const controller = useRef<ApplicationControl | null>(null);
+  const inspectionCommandRef = useRef<
+    | ((method: string, params?: Record<string, unknown>) => Promise<unknown>)
+    | null
+  >(null);
+  const sendInspectionCommand = useCallback(
+    (method: string, params?: Record<string, unknown>) => {
+      if (!inspectionCommandRef.current)
+        return Promise.reject(new Error("Inspection control is not ready"));
+      return inspectionCommandRef.current(method, params);
+    },
+    [],
+  );
   const [controlCommit, setControlCommit] = useState(0);
-  const commitWaiters = useRef<{ resolve: () => void; reject: (error: Error) => void }[]>([]);
+  const commitWaiters = useRef<
+    { resolve: () => void; reject: (error: Error) => void }[]
+  >([]);
   function synchronizeControl() {
     return new Promise<void>((resolve, reject) => {
       commitWaiters.current.push({ resolve, reject });
@@ -197,19 +261,28 @@ export default function App() {
     // Effect reattachment (including development refresh) gets a new session;
     // never republish a disposed controller or revive its cancelled jobs.
     const control = createApplicationControl(() => {
-      if (!controlHost.current) throw new ControlError("unavailable", "The application is not ready");
+      if (!controlHost.current)
+        throw new ControlError("unavailable", "The application is not ready");
       return controlHost.current;
     });
     controller.current = control;
     const connection = new AbortController();
     let closed = false;
     let detach = () => {};
-    const browser = !native && new URLSearchParams(window.location.search).get("control") === "1";
+    const browser =
+      !native &&
+      new URLSearchParams(window.location.search).get("control") === "1";
     const api = { request: control.request };
     if (browser) window.eigenvistaControl = api;
-    if (native) void attachDesktopControl(control, connection.signal).then((stop) => {
-      if (closed) stop(); else detach = stop;
-    }).catch((error) => console.error("Application control attachment failed", error));
+    if (native)
+      void attachDesktopControl(control, connection.signal)
+        .then((stop) => {
+          if (closed) stop();
+          else detach = stop;
+        })
+        .catch((error) =>
+          console.error("Application control attachment failed", error),
+        );
     return () => {
       closed = true;
       connection.abort();
@@ -217,7 +290,8 @@ export default function App() {
       if (window.eigenvistaControl === api) delete window.eigenvistaControl;
       if (controller.current === control) controller.current = null;
       control.dispose();
-      for (const waiter of commitWaiters.current.splice(0)) waiter.reject(new Error("Application closed"));
+      for (const waiter of commitWaiters.current.splice(0))
+        waiter.reject(new Error("Application closed"));
     };
   }, []);
   // Lifecycle decisions must see accepted edits even before React renders them.
@@ -238,7 +312,11 @@ export default function App() {
   }
   function checkFlow(token: number, execution?: ControlExecution) {
     if (token !== generation.current) {
-      if (execution) throw new ControlError("cancelled", "The operation was superseded or cancelled");
+      if (execution)
+        throw new ControlError(
+          "cancelled",
+          "The operation was superseded or cancelled",
+        );
       return false;
     }
     execution?.assertCurrent();
@@ -255,7 +333,11 @@ export default function App() {
       setAtomPaletteError("");
     } catch (error) {
       setAtomPaletteError(String(error));
-      if (strict) throw new ControlError("validation_error", error instanceof Error ? error.message : String(error));
+      if (strict)
+        throw new ControlError(
+          "validation_error",
+          error instanceof Error ? error.message : String(error),
+        );
     }
   }
   function resetAtomPalette() {
@@ -286,7 +368,11 @@ export default function App() {
     if (!document.view.field) return;
     if (!isGridResolution(res)) {
       setError("Choose an available grid resolution.");
-      if (execution) throw new ControlError("invalid_arguments", "Choose an available grid resolution");
+      if (execution)
+        throw new ControlError(
+          "invalid_arguments",
+          "Choose an available grid resolution",
+        );
       return;
     }
     const fields = orbitals ?? [document.view.field];
@@ -347,10 +433,11 @@ export default function App() {
           { signal: execution?.signal },
         );
         if (!checkFlow(token, execution)) return;
-        if (execution) for (const surface of result.surfaces) {
-          controlIdentifier(surface.id, "Surface ID");
-          controlIdentifier(surface.field, "Field ID");
-        }
+        if (execution)
+          for (const surface of result.surfaces) {
+            controlIdentifier(surface.id, "Surface ID");
+            controlIdentifier(surface.field, "Field ID");
+          }
         generated.push(...result.surfaces);
         bytes += result.surfaces.reduce((total, s) => total + meshBytes(s), 0);
         if (retained.length + generated.length > 128 || bytes > fileByteLimit)
@@ -405,6 +492,7 @@ export default function App() {
           : d,
       );
       setGrid(activeGrid);
+      execution?.markPublished();
       if (orbitals) {
         setMode("mesh");
         setResolution(res);
@@ -414,10 +502,17 @@ export default function App() {
       setStatus(
         `${orbitals ? `${fields.length} orbitals / ` : ""}${generated.reduce((n, s) => n + s.indices.length / 3, 0).toLocaleString()} triangles / ${((performance.now() - started) / 1000).toFixed(2)} s`,
       );
-      return { fieldIds: fields, surfaceIds: generated.map((surface) => surface.id),
+      return {
+        fieldIds: fields,
+        surfaceIds: generated.map((surface) => surface.id),
         surfaceCount: retained.length + generated.length,
-        triangleCount: generated.reduce((count, surface) => count + surface.indices.length / 3, 0),
-        resolution: res, revision: documentRevision.current };
+        triangleCount: generated.reduce(
+          (count, surface) => count + surface.indices.length / 3,
+          0,
+        ),
+        resolution: res,
+        revision: documentRevision.current,
+      };
     } catch (e) {
       if (token === generation.current) setError(String(e));
       if (execution) throw e;
@@ -459,6 +554,7 @@ export default function App() {
     try {
       const d = await request<EigenVistaDocument>("example", { openShell });
       setDoc(d);
+      setCalculation(null);
       setOrbitalsOpen(false);
       setGrid(null);
       setMode("mesh");
@@ -558,8 +654,15 @@ export default function App() {
       setMode(nextMode);
       setReset((v) => v + 1);
       setStatus("Sampled field ready");
-      return { fieldId: document.view.field, resolution: res, mode: nextMode,
-        dims: [...sampled.dims], meshGenerated: false, revision: documentRevision.current };
+      execution?.markPublished();
+      return {
+        fieldId: document.view.field,
+        resolution: res,
+        mode: nextMode,
+        dims: [...sampled.dims],
+        meshGenerated: false,
+        revision: documentRevision.current,
+      };
     } catch (e) {
       if (token === generation.current) setError(String(e));
       if (execution) throw e;
@@ -593,9 +696,15 @@ export default function App() {
     setGrid(null);
     return { fieldId: id, revision: documentRevision.current };
   }
-  async function load(source: SourceFile, control?: { execution: ControlExecution; discardUnsaved: boolean }) {
+  async function load(
+    source: SourceFile,
+    control?: { execution: ControlExecution; discardUnsaved: boolean },
+  ) {
     if (control && unsaved.current && !control.discardUnsaved)
-      throw new ControlError("permission_required", "The current document has unsaved changes; set discardUnsaved explicitly to replace it");
+      throw new ControlError(
+        "permission_required",
+        "The current document has unsaved changes; set discardUnsaved explicitly to replace it",
+      );
     const token = ++generation.current;
     cancel();
     setBusy("Opening document");
@@ -605,21 +714,31 @@ export default function App() {
       if (!checkFlow(token, control?.execution)) return;
       if (bytes.length > fileByteLimit)
         throw new Error("File exceeds the 128 MiB preview budget");
-      const result = await request<ImportResult>("import_document", {
-        bytes,
-        name: source.name,
-      }, undefined, { signal: control?.execution.signal });
+      const result = await request<ImportResult>(
+        "import_document",
+        {
+          bytes,
+          name: source.name,
+        },
+        undefined,
+        { signal: control?.execution.signal },
+      );
       if (!checkFlow(token, control?.execution)) return;
       const d = result.document;
       let sampled: SampledGrid | null = null;
       let previewError = "";
       if (d.grids.some((g) => g.id === d.view.field)) {
         try {
-          sampled = await request<SampledGrid>("sample", {
-            doc: { ...d, surfaces: [] },
-            field: d.view.field,
-            resolution,
-          }, undefined, { signal: control?.execution.signal });
+          sampled = await request<SampledGrid>(
+            "sample",
+            {
+              doc: { ...d, surfaces: [] },
+              field: d.view.field,
+              resolution,
+            },
+            undefined,
+            { signal: control?.execution.signal },
+          );
         } catch (e) {
           previewError = `Sampled preview unavailable: ${String(e)}`;
         }
@@ -627,14 +746,17 @@ export default function App() {
       if (!checkFlow(token, control?.execution)) return;
       if (
         unsaved.current &&
-        !(control ? control.discardUnsaved : window.confirm(
-          "Replace the current document? Unsaved changes will be lost.",
-        ))
+        !(control
+          ? control.discardUnsaved
+          : window.confirm(
+              "Replace the current document? Unsaved changes will be lost.",
+            ))
       )
         return;
       setDoc(d);
       setOrbitalsOpen(false);
       setGrid(sampled);
+      setCalculation(null);
       setMode(sampled && !d.surfaces.length ? "volume" : "mesh");
       setReset((v) => v + 1);
       setDirty(result.report.requires_save);
@@ -647,11 +769,25 @@ export default function App() {
       setStatus(
         `Opened ${source.name}${d.surfaces.length ? " / saved geometry restored" : ""}`,
       );
-      return { revision: documentRevision.current, document: { id: d.id, title: d.title,
-        atomCount: d.atoms.positions.length, bondCount: d.bonds.length,
-        orbitalCount: d.orbitals.length, densityCount: d.densities.length, gridCount: d.grids.length },
-        report: { ...result.report, warnings: result.report.warnings.slice(0, 32).map((warning) => warning.slice(0, 2048)) },
-        previewError };
+      return {
+        revision: documentRevision.current,
+        document: {
+          id: d.id,
+          title: d.title,
+          atomCount: d.atoms.positions.length,
+          bondCount: d.bonds.length,
+          orbitalCount: d.orbitals.length,
+          densityCount: d.densities.length,
+          gridCount: d.grids.length,
+        },
+        report: {
+          ...result.report,
+          warnings: result.report.warnings
+            .slice(0, 32)
+            .map((warning) => warning.slice(0, 2048)),
+        },
+        previewError,
+      };
     } catch (e) {
       if (token === generation.current) setError(String(e));
       if (control) throw e;
@@ -702,57 +838,126 @@ export default function App() {
     }
   }
   function stop() {
+    inspection.cancel();
     ++generation.current;
     cancel();
     setBusy("");
     setCalculation(null);
     setStatus("Cancelled; previous surfaces retained");
   }
-  async function executeControl(method: string, params: Record<string, unknown>, execution: ControlExecution): Promise<unknown> {
+  async function executeControl(
+    method: string,
+    params: Record<string, unknown>,
+    execution: ControlExecution,
+  ): Promise<unknown> {
     const document = current.current;
     const port = () => {
-      if (!viewportControl.current) throw new ControlError("unavailable", "The molecular renderer is not ready");
+      if (!viewportControl.current)
+        throw new ControlError(
+          "unavailable",
+          "The molecular renderer is not ready",
+        );
       return viewportControl.current;
     };
     if (method === "document.open") {
       let source: SourceFile;
       if (native) {
-        if (typeof params.path !== "string" || params.bytes !== undefined || params.name !== undefined)
-          throw new ControlError("invalid_arguments", "Native imports require one scoped path");
+        if (
+          typeof params.path !== "string" ||
+          params.bytes !== undefined ||
+          params.name !== undefined
+        )
+          throw new ControlError(
+            "invalid_arguments",
+            "Native imports require one scoped path",
+          );
         const path = params.path;
-        source = { name: path.split(/[\\/]/).pop()!, path, read: async () => {
-          const value = await invoke<ArrayBuffer | Uint8Array | number[]>("control_read_file", { path });
-          return value instanceof Uint8Array ? value : value instanceof ArrayBuffer ? new Uint8Array(value) : new Uint8Array(value);
-        } };
+        source = {
+          name: path.split(/[\\/]/).pop()!,
+          path,
+          read: async () => {
+            const value = await invoke<ArrayBuffer | Uint8Array | number[]>(
+              "control_read_file",
+              { path },
+            );
+            return value instanceof Uint8Array
+              ? value
+              : value instanceof ArrayBuffer
+                ? new Uint8Array(value)
+                : new Uint8Array(value);
+          },
+        };
       } else {
-        if (params.path !== undefined || typeof params.name !== "string" || !Array.isArray(params.bytes))
-          throw new ControlError("invalid_arguments", "Browser imports require a name and byte array, not a filesystem path");
+        if (
+          params.path !== undefined ||
+          typeof params.name !== "string" ||
+          !Array.isArray(params.bytes)
+        )
+          throw new ControlError(
+            "invalid_arguments",
+            "Browser imports require a name and byte array, not a filesystem path",
+          );
         const bytes = new Uint8Array(params.bytes as number[]);
         source = { name: params.name, read: async () => bytes };
       }
-      return await load(source, { execution, discardUnsaved: params.discardUnsaved === true });
+      return await load(source, {
+        execution,
+        discardUnsaved: params.discardUnsaved === true,
+      });
     }
-    if (!document) throw new ControlError("no_document", "No molecular document is open");
+    if (!document)
+      throw new ControlError("no_document", "No molecular document is open");
+    if (Object.hasOwn(INSPECTION_METHODS, method))
+      return inspection.execute(method, params, execution);
     if (method === "palette.load" || method === "palette.reset") {
       if (method === "palette.reset") resetAtomPalette();
       else {
         let text: string, name: string;
         if (native) {
-          if (typeof params.path !== "string" || params.text !== undefined || params.name !== undefined)
-            throw new ControlError("invalid_arguments", "Native palettes require one authorized path");
+          if (
+            typeof params.path !== "string" ||
+            params.text !== undefined ||
+            params.name !== undefined
+          )
+            throw new ControlError(
+              "invalid_arguments",
+              "Native palettes require one authorized path",
+            );
           const path = params.path;
-          const bytes = await invoke<ArrayBuffer | Uint8Array | number[]>("control_read_file", { path, maxBytes: CONTROL_LIMITS.paletteBytes });
+          const bytes = await invoke<ArrayBuffer | Uint8Array | number[]>(
+            "control_read_file",
+            { path, maxBytes: CONTROL_LIMITS.paletteBytes },
+          );
           execution.assertCurrent();
-          const buffer = bytes instanceof Uint8Array ? bytes : bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : new Uint8Array(bytes);
+          const buffer =
+            bytes instanceof Uint8Array
+              ? bytes
+              : bytes instanceof ArrayBuffer
+                ? new Uint8Array(bytes)
+                : new Uint8Array(bytes);
           text = new TextDecoder("utf-8", { fatal: true }).decode(buffer);
           name = path.split(/[\\/]/).pop()!;
         } else {
-          if (params.path !== undefined || typeof params.text !== "string" || typeof params.name !== "string")
-            throw new ControlError("invalid_arguments", "Browser palettes require a name and JSON text");
-          text = params.text; name = params.name;
+          if (
+            params.path !== undefined ||
+            typeof params.text !== "string" ||
+            typeof params.name !== "string"
+          )
+            throw new ControlError(
+              "invalid_arguments",
+              "Browser palettes require a name and JSON text",
+            );
+          text = params.text;
+          name = params.name;
         }
-        if (new TextEncoder().encode(text).byteLength > CONTROL_LIMITS.paletteBytes)
-          throw new ControlError("limit_exceeded", "Atom palette exceeds the 256 KiB input budget");
+        if (
+          new TextEncoder().encode(text).byteLength >
+          CONTROL_LIMITS.paletteBytes
+        )
+          throw new ControlError(
+            "limit_exceeded",
+            "Atom palette exceeds the 256 KiB input budget",
+          );
         execution.assertCurrent();
         applyAtomPalette(text, name, true);
       }
@@ -762,169 +967,480 @@ export default function App() {
     }
     if (method === "structure.set" || method === "structure.focus") {
       if (method === "structure.set") {
-        const next = patchStructureDisplay(document, structureDisplay, params as StructurePatch);
+        const next = patchStructureDisplay(
+          document,
+          structureDisplay,
+          params as StructurePatch,
+        );
         execution.assertCurrent();
         setStructureDisplay(next);
       } else {
         if ((params.target === "chain") !== (params.chainIndex !== undefined))
-          throw new ControlError("invalid_arguments", "A chain focus requires one chainIndex; a visible focus takes none");
-        const atoms = visibleStructureAtoms(document, structureDisplay, params.chainIndex as number | undefined);
-        if (!atoms.length) throw new ControlError("not_found", "No visible atoms match this focus request");
-        setStructureDisplay({ ...structureDisplay, focus: { atoms, revision: (structureDisplay.focus?.revision ?? 0) + 1 } });
+          throw new ControlError(
+            "invalid_arguments",
+            "A chain focus requires one chainIndex; a visible focus takes none",
+          );
+        const atoms = visibleStructureAtoms(
+          document,
+          structureDisplay,
+          params.chainIndex as number | undefined,
+        );
+        if (!atoms.length)
+          throw new ControlError(
+            "not_found",
+            "No visible atoms match this focus request",
+          );
+        setStructureDisplay({
+          ...structureDisplay,
+          focus: {
+            atoms,
+            revision: (structureDisplay.focus?.revision ?? 0) + 1,
+          },
+        });
       }
       await synchronizeControl();
       await port().setBackground(port().getBackground());
-      return { ...controlHost.current!.snapshot().structureDisplay as object, camera: port().getCamera() };
+      return {
+        ...(controlHost.current!.snapshot().structureDisplay as object),
+        camera: port().getCamera(),
+      };
     }
     if (method === "document.save") {
-      if ((native && typeof params.path !== "string") || (!native && params.path !== undefined))
-        throw new ControlError("invalid_arguments", native ? "Native Save requires an authorized path" : "Browser Save returns bytes; paths are unavailable");
-      const snapshot = document, revision = documentRevision.current;
-      if (saving.current || activity.current || hasNativeSave()) throw new ControlError("busy", "A save or calculation is already active");
+      if (
+        (native && typeof params.path !== "string") ||
+        (!native && params.path !== undefined)
+      )
+        throw new ControlError(
+          "invalid_arguments",
+          native
+            ? "Native Save requires an authorized path"
+            : "Browser Save returns bytes; paths are unavailable",
+        );
+      const snapshot = document,
+        revision = documentRevision.current;
+      if (saving.current || activity.current || hasNativeSave())
+        throw new ControlError(
+          "busy",
+          "A save or calculation is already active",
+        );
       saving.current = true;
       setBusy("Saving document");
       setError("");
       try {
-        const bytes = await request<Uint8Array>("encode", { doc: snapshot }, undefined, { signal: execution.signal });
+        const bytes = await request<Uint8Array>(
+          "encode",
+          { doc: snapshot },
+          undefined,
+          { signal: execution.signal },
+        );
         execution.assertCurrent();
         if (!native) {
           if (bytes.length > CONTROL_LIMITS.browserSaveBytes)
-            throw new ControlError("limit_exceeded", "Encoded document exceeds the browser control result budget; use the normal Save action");
-          return { revision, saved: false,
+            throw new ControlError(
+              "limit_exceeded",
+              "Encoded document exceeds the browser control result budget; use the normal Save action",
+            );
+          return {
+            revision,
+            saved: false,
             name: `${snapshot.title.replace(/[^a-z0-9-]+/gi, "-").toLowerCase()}.eigenvista`,
-            bytes: Array.from(bytes), byteLength: bytes.length };
+            bytes: Array.from(bytes),
+            byteLength: bytes.length,
+          };
         }
-        const receipt = await trackNativeSave(() => invoke<{ path: string; bytes: number }>("control_save_document", {
-          path: params.path, bytes: Array.from(bytes), protectedPaths: protectedSourcePath ? [protectedSourcePath] : [], overwrite: false,
-        }));
+        const receipt = await trackNativeSave(() =>
+          invoke<{ path: string; bytes: number }>("control_save_document", {
+            path: params.path,
+            bytes: Array.from(bytes),
+            protectedPaths: protectedSourcePath ? [protectedSourcePath] : [],
+            overwrite: false,
+          }),
+        );
         const unchanged = current.current === snapshot;
         if (unchanged) setDirty(false);
         setStatus("Saved quantum data, surfaces and appearance");
-        return { ...receipt, saved: true, current: unchanged, snapshotRevision: revision, revision: documentRevision.current };
-      } finally { saving.current = false; setBusy(""); }
+        return {
+          ...receipt,
+          saved: true,
+          current: unchanged,
+          snapshotRevision: revision,
+          revision: documentRevision.current,
+        };
+      } finally {
+        saving.current = false;
+        setBusy("");
+      }
     }
     if (method === "field.preview") {
-      return await prepareGrid({ ...document, view: { ...document.view, field: params.fieldId as string } },
-        params.resolution as number, params.mode as RenderMode, execution);
+      return await prepareGrid(
+        {
+          ...document,
+          view: { ...document.view, field: params.fieldId as string },
+        },
+        params.resolution as number,
+        params.mode as RenderMode,
+        execution,
+      );
     }
     if (method === "surfaces.generate") {
       const ids = params.fieldIds as string[];
-      const field = ids.includes(document.view.field ?? "") ? document.view.field! : ids[0];
-      const next = { ...document, view: { ...document.view, field, isovalue: params.isovalue as number } };
-      const orbitalBatch = ids.every((id) => document.orbitals.some((orbital) => orbital.id === id));
-      const result = await compute(next, params.resolution as number, orbitalBatch ? ids : undefined, true, execution);
+      const field = ids.includes(document.view.field ?? "")
+        ? document.view.field!
+        : ids[0];
+      const next = {
+        ...document,
+        view: { ...document.view, field, isovalue: params.isovalue as number },
+      };
+      const orbitalBatch = ids.every((id) =>
+        document.orbitals.some((orbital) => orbital.id === id),
+      );
+      const result = await compute(
+        next,
+        params.resolution as number,
+        orbitalBatch ? ids : undefined,
+        true,
+        execution,
+      );
       setMode("mesh");
       setResolution(params.resolution as number);
       return result;
     }
     if (method === "field.select") {
-      if (document.view.field === params.fieldId) return { fieldId: params.fieldId, revision: documentRevision.current };
+      if (document.view.field === params.fieldId)
+        return { fieldId: params.fieldId, revision: documentRevision.current };
       return await selectField(params.fieldId as string, execution);
     }
     if (method === "surfaces.set_visibility" || method === "surfaces.remove") {
-      const found = document.surfaces.find((surface) => surface.id === params.surfaceId);
-      if (!found) throw new ControlError("not_found", "Unknown saved surface ID");
+      const found = document.surfaces.find(
+        (surface) => surface.id === params.surfaceId,
+      );
+      if (!found)
+        throw new ControlError("not_found", "Unknown saved surface ID");
       if (method === "surfaces.remove") {
-        setDoc({ ...document, surfaces: document.surfaces.filter((surface) => surface.id !== found.id) });
+        setDoc({
+          ...document,
+          surfaces: document.surfaces.filter(
+            (surface) => surface.id !== found.id,
+          ),
+        });
         setDirty(true);
       } else if (found.visible !== params.visible) {
-        setDoc({ ...document, surfaces: document.surfaces.map((surface) => surface.id === found.id ? { ...surface, visible: params.visible as boolean } : surface) });
+        setDoc({
+          ...document,
+          surfaces: document.surfaces.map((surface) =>
+            surface.id === found.id
+              ? { ...surface, visible: params.visible as boolean }
+              : surface,
+          ),
+        });
         setDirty(true);
       }
-      return { surfaceId: found.id, revision: documentRevision.current,
-        ...(method === "surfaces.remove" ? { removed: true } : { visible: params.visible }) };
+      return {
+        surfaceId: found.id,
+        revision: documentRevision.current,
+        ...(method === "surfaces.remove"
+          ? { removed: true }
+          : { visible: params.visible }),
+      };
     }
     if (method === "scene.set") {
       const view: Partial<EigenVistaDocument["view"]> = {};
-      for (const [key, name] of [["representation", "representation"], ["positiveColor", "positive_color"],
-        ["negativeColor", "negative_color"], ["opacity", "opacity"], ["isovalue", "isovalue"]] as const)
-        if (params[key] !== undefined) Object.assign(view, { [name]: params[key] });
-      if (params.backgroundColor !== undefined) await port().setBackground(params.backgroundColor as string);
+      for (const [key, name] of [
+        ["representation", "representation"],
+        ["positiveColor", "positive_color"],
+        ["negativeColor", "negative_color"],
+        ["opacity", "opacity"],
+        ["isovalue", "isovalue"],
+      ] as const)
+        if (params[key] !== undefined)
+          Object.assign(view, { [name]: params[key] });
+      if (params.backgroundColor !== undefined)
+        await port().setBackground(params.backgroundColor as string);
       execution.assertCurrent();
       if (Object.keys(view).length) editView(view);
-      if (params.shading !== undefined) setSurfaceShading(params.shading as SurfaceShading);
-      if (params.volumeQuality !== undefined) setVolumeQuality(params.volumeQuality as VolumeQuality);
+      if (params.shading !== undefined)
+        setSurfaceShading(params.shading as SurfaceShading);
+      if (params.mode === "mesh") setMode("mesh");
+      if (params.volumeQuality !== undefined)
+        setVolumeQuality(params.volumeQuality as VolumeQuality);
       if (params.ambientOcclusion !== undefined) {
-        const { automaticRadius, ...patch } = params.ambientOcclusion as Partial<AmbientOcclusionSettings> & { automaticRadius?: boolean };
-        if (automaticRadius === false && automaticAoRadius && patch.radiusAngstrom === undefined)
+        const { automaticRadius, ...patch } =
+          params.ambientOcclusion as Partial<AmbientOcclusionSettings> & {
+            automaticRadius?: boolean;
+          };
+        if (
+          automaticRadius === false &&
+          automaticAoRadius &&
+          patch.radiusAngstrom === undefined
+        )
           patch.radiusAngstrom = automaticAoRadiusAngstrom;
         setAmbientOcclusion((current) => ({ ...current, ...patch }));
-        if (automaticRadius !== undefined) setAutomaticAoRadius(automaticRadius);
-        else if (patch.radiusAngstrom !== undefined) setAutomaticAoRadius(false);
+        if (automaticRadius !== undefined)
+          setAutomaticAoRadius(automaticRadius);
+        else if (patch.radiusAngstrom !== undefined)
+          setAutomaticAoRadius(false);
       }
       await synchronizeControl();
       await port().setBackground(port().getBackground());
       const accepted = controlHost.current!.snapshot();
-      return { revision: documentRevision.current, view: current.current!.view,
-        shading: accepted.shading, ambientOcclusion: accepted.ambientOcclusion,
-        volumeQuality: accepted.volumeQuality, backgroundColor: port().getBackground() };
+      return {
+        revision: documentRevision.current,
+        view: current.current!.view,
+        shading: accepted.shading,
+        ambientOcclusion: accepted.ambientOcclusion,
+        volumeQuality: accepted.volumeQuality,
+        backgroundColor: port().getBackground(),
+      };
     }
-    if (method === "shader.apply" || method === "shader.set_uniforms" || method === "shader.clear") {
+    if (
+      method === "shader.apply" ||
+      method === "shader.set_uniforms" ||
+      method === "shader.clear"
+    ) {
       if (method === "shader.clear") {
         setAppliedShader(null);
-        setShaderEditor({ vertex: null, fragment: null, values: {}, target: "all" });
+        setShaderEditor({
+          vertex: null,
+          fragment: null,
+          values: {},
+          target: "all",
+        });
         setShaderStatus("Cleared custom surface shader");
         setShaderError("");
       } else {
         const patch = (params.uniforms ?? {}) as Record<string, UniformValue>;
         if (method === "shader.set_uniforms" && !appliedShader)
-          throw new ControlError("unavailable", "Apply a bundled shader before setting its uniforms");
-        const pair = method === "shader.apply"
-          ? controlPreset(params.preset as "surface-clip" | "x-ray", patch, params.transparency as boolean | undefined)
-          : { ...appliedShader!, values: updateDeclaredUniforms(appliedShader!, patch),
-            ...(params.transparency !== undefined ? { transparent: params.transparency as boolean } : {}) };
-        setShaderEditor({ vertex: { name: pair.vertexName, source: pair.vertexSource },
-          fragment: { name: pair.fragmentName, source: pair.fragmentSource }, values: pair.values,
-          target: "all", transparent: pair.transparent !== false });
-        setAppliedShader({ ...pair, target: "all" });
+          throw new ControlError(
+            "unavailable",
+            "Apply a bundled shader before setting its uniforms",
+          );
+        const target =
+          (params.target as string | undefined) ??
+          (method === "shader.set_uniforms"
+            ? appliedShader?.target
+            : undefined) ??
+          "all";
+        if (
+          target !== "all" &&
+          ![...document.surfaces, ...(document.molecular_surfaces ?? [])].some(
+            (surface) => surface.id === target,
+          )
+        )
+          throw new ControlError("not_found", "Unknown shader target surface");
+        const pair =
+          method === "shader.apply"
+            ? controlPreset(
+                params.preset as "surface-clip" | "x-ray",
+                patch,
+                params.transparency as boolean | undefined,
+              )
+            : {
+                ...appliedShader!,
+                values: updateDeclaredUniforms(appliedShader!, patch),
+                ...(params.transparency !== undefined
+                  ? { transparent: params.transparency as boolean }
+                  : {}),
+              };
+        setShaderEditor({
+          vertex: { name: pair.vertexName, source: pair.vertexSource },
+          fragment: { name: pair.fragmentName, source: pair.fragmentSource },
+          values: pair.values,
+          target,
+          transparent: pair.transparent !== false,
+        });
+        setAppliedShader({ ...pair, target });
         setShaderError("");
         setShaderStatus(`Applied ${pair.vertexName} + ${pair.fragmentName}`);
       }
       await synchronizeControl();
       await port().setBackground(port().getBackground());
       await synchronizeControl();
-      const accepted = controlHost.current!.snapshot().shader as { error?: string } | null;
-      if (accepted?.error) throw new ControlError("operation_failed", accepted.error);
+      const accepted = controlHost.current!.snapshot().shader as {
+        error?: string;
+      } | null;
+      if (accepted?.error)
+        throw new ControlError("operation_failed", accepted.error);
       return { revision: documentRevision.current, shader: accepted };
     }
     if (method.startsWith("camera.")) {
       const viewport = port();
       if (method === "camera.fit") await viewport.fit();
-      else if (method === "camera.set") await viewport.setCamera({ position: params.position,
-        target: params.target, ...(params.up !== undefined ? { up: params.up } : {}) } as CameraState);
-      else if (method === "camera.orbit") await viewport.orbit(params.horizontalDegrees as number, params.verticalDegrees as number);
-      else if (method === "camera.zoom") await viewport.zoom(params.factor as number);
+      else if (method === "camera.set")
+        await viewport.setCamera({
+          position: params.position,
+          target: params.target,
+          ...(params.up !== undefined ? { up: params.up } : {}),
+        } as CameraState);
+      else if (method === "camera.orbit")
+        await viewport.orbit(
+          params.horizontalDegrees as number,
+          params.verticalDegrees as number,
+        );
+      else if (method === "camera.zoom")
+        await viewport.zoom(params.factor as number);
       return { revision: documentRevision.current, ...viewport.getCamera() };
     }
     if (method === "image.export") {
-      if ((native && typeof params.path !== "string") || (!native && params.path !== undefined))
-        throw new ControlError("invalid_arguments", native ? "Native PNG export requires an authorized path" : "Browser PNG export returns a data URL; paths are unavailable");
+      await inspection.synchronize();
+      if (
+        (native && typeof params.path !== "string") ||
+        (!native && params.path !== undefined)
+      )
+        throw new ControlError(
+          "invalid_arguments",
+          native
+            ? "Native PNG export requires an authorized path"
+            : "Browser PNG export returns a data URL; paths are unavailable",
+        );
       const captureRevision = documentRevision.current;
       const capture = await port().capture(params.transparent === true);
       if (capture.dataUrl.length > CONTROL_LIMITS.imageDataUrlCharacters)
-        throw new ControlError("limit_exceeded", "PNG exceeds the control artifact result budget");
+        throw new ControlError(
+          "limit_exceeded",
+          "PNG exceeds the control artifact result budget",
+        );
       if (native) {
-        const receipt = await invoke<{ path: string; bytes: number }>("control_write_image", {
-          path: params.path, dataUrl: capture.dataUrl, overwrite: false,
-        });
-        return { ...receipt, width: capture.width, height: capture.height, mimeType: "image/png",
-          revision: captureRevision, currentRevision: documentRevision.current };
+        const receipt = await invoke<{ path: string; bytes: number }>(
+          "control_write_image",
+          {
+            path: params.path,
+            dataUrl: capture.dataUrl,
+            overwrite: false,
+          },
+        );
+        return {
+          ...receipt,
+          width: capture.width,
+          height: capture.height,
+          mimeType: "image/png",
+          revision: captureRevision,
+          currentRevision: documentRevision.current,
+        };
       }
-      return { ...capture, mimeType: "image/png", revision: captureRevision, currentRevision: documentRevision.current };
+      return {
+        ...capture,
+        mimeType: "image/png",
+        revision: captureRevision,
+        currentRevision: documentRevision.current,
+      };
     }
-    throw new ControlError("method_not_found", `Unknown application operation ${method}`);
+    throw new ControlError(
+      "method_not_found",
+      `Unknown application operation ${method}`,
+    );
   }
+  async function inspectionCommand(
+    method: string,
+    params: Record<string, unknown> = {},
+  ): Promise<unknown> {
+    const api = controller.current;
+    if (!api) throw new Error("Application control is not ready");
+    let result = (await api.request(method, params)) as Record<string, unknown>;
+    if (typeof result?.jobId === "string") {
+      const jobId = result.jobId;
+      while (true) {
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        const job = (await api.request("job.get", { jobId })) as {
+          status: string;
+          result?: Record<string, unknown>;
+          error?: { message: string };
+        };
+        if (job.status === "completed") {
+          result = job.result ?? {};
+          break;
+        }
+        if (job.status === "failed" || job.status === "cancelled")
+          throw new Error(job.error?.message ?? "Operation cancelled");
+      }
+    }
+    if (method === "table.export" && typeof result?.text === "string") {
+      let text = result.text;
+      while (text.length < (result.totalCharacters as number)) {
+        const chunk = (await api.request(method, {
+          ...params,
+          offset: text.length,
+        })) as { text: string };
+        if (!chunk.text) throw new Error("Incomplete CSV export");
+        text += chunk.text;
+      }
+      if (native)
+        await trackNativeSave(() =>
+          invoke<boolean>("save_csv", {
+            text,
+            name: result.name,
+            protectedPaths: protectedSourcePath ? [protectedSourcePath] : [],
+          }),
+        );
+      else {
+        const url = URL.createObjectURL(
+          new Blob([text], { type: "text/csv;charset=utf-8" }),
+        );
+        const link = window.document.createElement("a");
+        link.href = url;
+        link.download = result.name as string;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      }
+    }
+    await synchronizeControl();
+    return result;
+  }
+  inspectionCommandRef.current = inspectionCommand;
   controlHost.current = {
-    native, viewport: () => viewportControl.current, synchronize: synchronizeControl, execute: executeControl,
-    snapshot: () => ({ document: current.current, revision: documentRevision.current, dirty: unsaved.current,
-      busy: activity.current ? busy || "Operation in progress" : conversionActivity.current ? "Converting files" : saving.current || hasNativeSave() ? "Saving document" : "",
-      progress: calculation, mode, resolution, shading: surfaceShading,
-      ambientOcclusion: { ...viewportAmbientOcclusion, automaticRadius: automaticAoRadius },
-      shader: appliedShader ? { vertexName: appliedShader.vertexName.slice(0, 512), fragmentName: appliedShader.fragmentName.slice(0, 512),
-        target: appliedShader.target, transparency: appliedShader.transparent !== false,
-        uniforms: Object.fromEntries(Object.entries(appliedShader.values).slice(0, 64)), error: shaderError.slice(0, 2048) } : null,
-      palette: { custom: Boolean(atomPalette), name: atomPaletteName.slice(0, 512) }, volumeQuality,
-      structureDisplay: structureDisplaySummary(current.current, structureDisplay),
+    native,
+    viewport: () => viewportControl.current,
+    synchronize: synchronizeControl,
+    execute: executeControl,
+    snapshot: () => ({
+      document: current.current,
+      revision: documentRevision.current,
+      dirty: unsaved.current,
+      busy: activity.current
+        ? busy || "Operation in progress"
+        : conversionActivity.current
+          ? "Converting files"
+          : saving.current || hasNativeSave()
+            ? "Saving document"
+            : "",
+      progress: inspection.progress ?? calculation,
+      mode,
+      resolution,
+      shading: surfaceShading,
+      ambientOcclusion: {
+        ...viewportAmbientOcclusion,
+        automaticRadius: automaticAoRadius,
+      },
+      shader: appliedShader
+        ? {
+            vertexName: appliedShader.vertexName.slice(0, 512),
+            fragmentName: appliedShader.fragmentName.slice(0, 512),
+            target: appliedShader.target,
+            transparency: appliedShader.transparent !== false,
+            uniforms: Object.fromEntries(
+              Object.entries(appliedShader.values).slice(0, 64),
+            ),
+            error: shaderError.slice(0, 2048),
+          }
+        : null,
+      palette: {
+        custom: Boolean(atomPalette),
+        name: atomPaletteName.slice(0, 512),
+      },
+      volumeQuality,
+      structureDisplay: structureDisplaySummary(
+        current.current,
+        structureDisplay,
+      ),
+      inspection: {
+        lastPick: inspection.getPick(),
+        pickEnabled: inspection.pickEnabled,
+        selectedCount: inspection.selectedAtoms.length,
+        orderedAtoms: inspection.orderedAtoms.slice(0, 256),
+        measurementCount:
+          current.current?.annotations?.measurements.length ?? 0,
+        molecularSurfaceCount: current.current?.molecular_surfaces?.length ?? 0,
+        analysisCount: current.current?.field_analysis?.items.length ?? 0,
+      },
     }),
   };
   const fieldLabel = doc
@@ -947,6 +1463,7 @@ export default function App() {
         beforeExit={() => {
           ++generation.current;
           cancel();
+          inspection.cancel();
           cancelConversion.current?.();
           setBusy("");
           setCalculation(null);
@@ -1114,6 +1631,18 @@ export default function App() {
                 value={structureDisplay}
                 onChange={setStructureDisplay}
               />
+              <InspectionControls
+                doc={doc}
+                selectedAtoms={inspection.selectedAtoms}
+                orderedAtoms={inspection.orderedAtoms}
+                measurements={inspection.measurements}
+                busy={!!busy}
+                error={inspection.error}
+                pickEnabled={inspection.pickEnabled}
+                onPickEnabled={inspection.setPickEnabled}
+                onCancel={stop}
+                onCommand={sendInspectionCommand}
+              />
             </PanelSection>
             <PanelSection
               key="quantum-fields"
@@ -1177,6 +1706,15 @@ export default function App() {
                   ),
               )}
               {!doc.view.field && <p className="empty">No quantum fields</p>}
+              <FieldAnalysisControls
+                doc={doc}
+                selectedAtoms={inspection.selectedAtoms}
+                orderedAtoms={inspection.orderedAtoms}
+                busy={!!busy}
+                error={inspection.error}
+                onCancel={stop}
+                onCommand={sendInspectionCommand}
+              />
             </PanelSection>
             <PanelSection
               key="provenance"
@@ -1205,6 +1743,9 @@ export default function App() {
               structureDisplay={structureDisplay}
               reset={reset}
               onSelect={setInspected}
+              onInspectionPick={inspection.recordPick}
+              inspectionSelection={inspection.selectedAtoms}
+              inspectionMeasurements={inspection.measurements}
               onShaderLog={(log) => {
                 if (log) {
                   setShaderError(log);
@@ -1224,7 +1765,10 @@ export default function App() {
                   <span title={inspectionDetail}>{inspectionDetail}</span>
                 )}
               </div>
-              <span>{doc.surfaces.length} saved surfaces</span>
+              <span>
+                {doc.surfaces.length + (doc.molecular_surfaces?.length ?? 0)}{" "}
+                saved surfaces
+              </span>
             </div>
           </div>
           <PanelSidebar
@@ -1353,6 +1897,22 @@ export default function App() {
                   progress={calculation}
                 />
               )}
+              {inspection.progress && (
+                <p role="status" aria-label="Scientific inspection progress">
+                  {inspection.progress.stage}
+                  {inspection.progress.total
+                    ? ` · ${inspection.progress.completed}/${inspection.progress.total}`
+                    : ""}
+                </p>
+              )}
+              <MolecularSurfaceControls
+                doc={doc}
+                selectedAtoms={inspection.selectedAtoms}
+                busy={!!busy}
+                error={inspection.error}
+                onCancel={stop}
+                onCommand={sendInspectionCommand}
+              />
             </PanelSection>
             <PanelSection
               key="appearance"
@@ -1549,7 +2109,10 @@ export default function App() {
                   onToggle={() => panels.toggle("surface-shader")}
                   uniforms={defs}
                   state={shaderEditor}
-                  surfaceOptions={doc.surfaces.map((s) => ({
+                  surfaceOptions={[
+                    ...doc.surfaces,
+                    ...(doc.molecular_surfaces ?? []),
+                  ].map((s) => ({
                     id: s.id,
                     label: s.label,
                   }))}

@@ -13,6 +13,13 @@ and palettes. Check the included files below as well as the version; older
 packages such as 0.7.2 do not include them. If tools are missing, the agent should
 explain that and point you to the official release page.
 
+**Unreleased 0.9.0 test builds** add geometry measurements/labels and ligand
+neighborhoods, SES/SAS molecular surfaces, and quantitative field inspection.
+The published 0.8.0 download does not include those additions. Use the matching
+test application and helper when testing them; your agent should check the
+connected app's available features. The installed-app setup below applies to
+both, without a source checkout. No public 0.9.0 download is announced here.
+
 The website has the same [overview](https://uvar-apps.github.io/eigenvista/ai.html),
 [installed-app setup](https://uvar-apps.github.io/eigenvista/ai-install.html)
 and [everyday requests](https://uvar-apps.github.io/eigenvista/ai-guide.html).

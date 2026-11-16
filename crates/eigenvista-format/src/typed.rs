@@ -37,6 +37,9 @@ pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocume
         title,
         atoms,
         structure,
+        annotations,
+        molecular_surfaces,
+        field_analysis,
         bonds,
         basis,
         orbitals,
@@ -74,6 +77,65 @@ pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocume
         )?;
         document["structure"] = metadata;
     }
+    if let Some(annotations) = annotations {
+        let mut selections = Vec::with_capacity(annotations.selections.len());
+        for selection in &annotations.selections {
+            let atoms = packer.usize_row(
+                None,
+                0,
+                vec![selection.atoms.len()],
+                selection.atoms.iter().copied(),
+            )?;
+            let neighborhood = if let Some(query) = &selection.neighborhood {
+                let seeds = packer.usize_row(
+                    None,
+                    0,
+                    vec![query.seeds.len()],
+                    query.seeds.iter().copied(),
+                )?;
+                json!({"seeds": seeds, "radius_angstrom": query.radius_angstrom, "whole_residues": query.whole_residues})
+            } else {
+                Value::Null
+            };
+            let mut row = json!({"id": selection.id, "label": selection.label, "atoms": atoms});
+            if !neighborhood.is_null() {
+                row["neighborhood"] = neighborhood;
+            }
+            selections.push(row);
+        }
+        document["annotations"] = json!({"selections": selections, "measurements": annotations.measurements, "labels": annotations.labels});
+    }
+    if let Some(surfaces) = molecular_surfaces {
+        document["molecular_surfaces"] = packer.molecular_surfaces(surfaces)?;
+    }
+    if let Some(analysis) = field_analysis {
+        let mut items = Vec::with_capacity(analysis.items.len());
+        for item in &analysis.items {
+            let eigenvista_core::field_analysis::FieldAnalysisItem {
+                id,
+                label,
+                field,
+                descriptor,
+                definition,
+                source_hash,
+                sample_hash,
+                interpretation_hash,
+                algorithm,
+                method,
+                values,
+                valid,
+                range,
+                appearance,
+            } = item;
+            let values = packer.float_row(None, 0, vec![values.len()], values.iter().copied())?;
+            let valid = packer.u32_row(None, 0, vec![valid.len()], valid.iter().copied())?;
+            items.push(json!({"id":id,"label":label,"field":field,"descriptor":descriptor,
+                "definition":definition,"source_hash":source_hash,"sample_hash":sample_hash,
+                "interpretation_hash":interpretation_hash,"algorithm":algorithm,"method":method,"values":values,
+                "valid":valid,"range":range,"appearance":appearance}));
+        }
+        document["field_analysis"] = json!({"descriptors":analysis.descriptors,"items":items,"show_field_key":analysis.show_field_key});
+    }
     Ok(PackedDocument {
         document,
         arrays: packer.arrays,
@@ -99,6 +161,71 @@ fn reference(id: &str, row: Option<usize>) -> Value {
 }
 
 impl Packer {
+    fn molecular_surfaces(
+        &mut self,
+        surfaces: &[eigenvista_core::molecular_surface::MolecularSurface],
+    ) -> Result<Value> {
+        use eigenvista_core::molecular_surface::MolecularSurface;
+        let mut rows = Vec::with_capacity(surfaces.len());
+        for MolecularSurface {
+            id,
+            label,
+            kind,
+            atom_indices,
+            radii_set,
+            radii_overrides,
+            radii_angstrom,
+            probe_radius,
+            spacing,
+            cavity_policy,
+            engine,
+            source_hash,
+            local_origin_bohr,
+            precision,
+            positions,
+            normals,
+            indices,
+            vertex_atoms,
+            color,
+            opacity,
+            visible,
+            stats,
+            warnings,
+        } in surfaces
+        {
+            let atom_indices = self.usize_row(
+                None,
+                0,
+                vec![atom_indices.len()],
+                atom_indices.iter().copied(),
+            )?;
+            let radii_angstrom = self.float_row(
+                None,
+                0,
+                vec![radii_angstrom.len()],
+                radii_angstrom.iter().copied(),
+            )?;
+            let positions =
+                self.float_row(None, 0, vec![positions.len()], positions.iter().copied())?;
+            let normals = self.float_row(None, 0, vec![normals.len()], normals.iter().copied())?;
+            let indices = self.u32_row(None, 0, vec![indices.len()], indices.iter().copied())?;
+            let vertex_atoms = self.u32_row(
+                None,
+                0,
+                vec![vertex_atoms.len()],
+                vertex_atoms.iter().copied(),
+            )?;
+            rows.push(json!({"id": id,"label":label,"kind":kind,"atom_indices":atom_indices,
+                "radii_set":radii_set,"radii_overrides":radii_overrides,"radii_angstrom":radii_angstrom,
+                "probe_radius":probe_radius,"spacing":spacing,"cavity_policy":cavity_policy,
+                "engine":engine,"source_hash":source_hash,"local_origin_bohr":local_origin_bohr,
+                "precision":precision,"positions":positions,"normals":normals,"indices":indices,
+                "vertex_atoms":vertex_atoms,"color":color,"opacity":opacity,"visible":visible,
+                "stats":stats,"warnings":warnings}));
+        }
+        Ok(Value::Array(rows))
+    }
+
     /// Account before allocating, and ensure the iterator cannot grow beyond its
     /// declared shape. Native words are always serialized as little-endian bytes.
     fn emit<const WIDTH: usize>(

@@ -4,6 +4,8 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { application } from "./application.mjs";
+import { release } from "./release.mjs";
 
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -127,6 +129,8 @@ for (const [engine, launcher] of [
         const response = await page.goto(base + file, { waitUntil: "load" });
         assert.equal(response.status(), 200, `${engine}/${width}/${file}`);
         assert.equal(await page.locator("h1").count(), 1);
+        assert.equal(await page.locator("[data-application-version]").textContent(), `${application.version} test build`);
+        assert.equal(await page.locator("[data-application-status]").textContent(), `v${application.version} / UNRELEASED TEST BUILD`);
         assert.equal(
           await page
             .getByRole("navigation", { name: "Main navigation" })
@@ -193,7 +197,29 @@ for (const [engine, launcher] of [
     await page.locator('[data-search-results] a[href$="/ai-install.html"]').waitFor();
     await page.keyboard.press("Escape");
     const aiGuide = { agents: 6, responsiveInstaller: true, unchangedCopiedCommands: true, explicitInstallAuthorization: true, navigation: true, searchable: true };
+    const inspectionPages = ["reference-inspection.html", "tutorials-geometry.html", "tutorials-molecular-surfaces.html", "tutorials-quantitative-fields.html"];
+    for (const file of inspectionPages) {
+      await page.goto(base + file);
+      assert.equal(await page.locator("[data-unreleased-inspection]").count(), 1);
+      const notice = await page.locator("[data-unreleased-inspection]").textContent();
+      assert(notice.includes(`EigenVista ${application.version}`));
+      assert(notice.includes(`not included in the published ${release.version} download`));
+      await allImages(page);
+      if (file.startsWith("tutorials-")) {
+        const prompt = page.locator("pre code").filter({ hasText: "test build" });
+        assert.equal(await prompt.count(), 1, `One usable ordinary-language task: ${file}`);
+        const text = await prompt.textContent();
+        assert(!/app\.state|analysis\.create|molecularSurfaces\.|expectedRevision/.test(text));
+      }
+    }
     await page.goto(base);
+    const development = page.locator("[data-current-development]");
+    assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
+    assert((await development.textContent()).includes(`published Mac download below remains ${release.version}`));
+    assert.equal(await development.getByRole("link").getAttribute("href"), "reference-inspection.html");
+    assert.equal(await page.getByRole("link", { name: "Download for Mac" }).getAttribute("href"), `${release.base}${release.stem}.zip`);
+    assert.deepEqual(await (await context.request.get(base + "application.json")).json(), application);
+    assert.deepEqual(await (await context.request.get(base + "release.json")).json(), release);
     const video = page.locator("#shader-demo video");
     assert.equal(await video.getAttribute("preload"), "none");
     assert.equal(await video.getAttribute("autoplay"), null);
@@ -421,6 +447,11 @@ for (const [engine, launcher] of [
       ["manual-mobile", "reference-scene.html", 390],
       ["tutorial", "tutorials-orbitals.html", 1100],
       ["gallery", "gallery.html", 1440],
+      ["inspection-manual-desktop", "reference-inspection.html", 1440],
+      ["inspection-manual-mobile", "reference-inspection.html", 390],
+      ["inspection-geometry", "tutorials-geometry.html", 1100],
+      ["inspection-surfaces", "tutorials-molecular-surfaces.html", 1100],
+      ["inspection-fields", "tutorials-quantitative-fields.html", 1100],
     ]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(base + file);

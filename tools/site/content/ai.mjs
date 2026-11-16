@@ -1,4 +1,5 @@
 // Installed-app guidance; the published pages contain no executable scripts.
+import { application } from "../application.mjs";
 const code = (value) =>
   `<pre class="wrap-code"><code>${value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</code></pre>`;
 
@@ -61,6 +62,7 @@ export default [
 </div>
 
 <h2 id="connection">The app includes the connection tools</h2>
+<div class="notice"><strong>Testing the ${application.version} scientific tools?</strong> The unreleased test build also supports geometry measurements/labels, ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field probes/planes/profiles through your agent. These additions are not in the published 0.8.0 binaries. Use the ${application.version} test app and ask your agent to confirm available features. <a href="reference-inspection.html">Read the test-build manual →</a></div>
 <p>A compatible EigenVista Mac app ships its connection helper, standalone agent instructions, launcher, examples and palettes together. You do not need a separate MCP plugin. Your agent reads those instructions and handles discovery, commands and progress checks.</p>
 <p>Use <strong>Codex Desktop or CLI, Claude Code, Pi, OpenCode</strong>, or another agent with local terminal and file access. Codex Desktop already has terminal access; its CLI is optional. An image viewer lets the agent inspect and show actual PNG exports. There is no chat box or model account inside EigenVista; you keep using your chosen agent.</p>
 
@@ -191,6 +193,11 @@ ${code(setupPrompt)}
 <h2 id="privacy">Choose where your model runs</h2>
 <p>Molecular processing and the connection to EigenVista are local. Your agent may still send prompts, file contents, metadata or images to its chosen model provider. Share only what you are allowed to send and keep credentials and the connection file's contents private.</p>
 <p>For on-device-only work, choose an agent that supports a local model/runtime and check its tools, telemetry and network settings. <a href="https://opencode.ai/docs/providers/">OpenCode documents local runtimes ↗</a>. Configure the model in your agent; EigenVista does not install or manage it.</p>
+
+<h2 id="inspection">Scientific inspection in the unreleased test build</h2>
+<p>The <a href="reference-inspection.html">new inspection controls</a> are available through both the GUI and the ${application.version} unreleased test app's connector. Published 0.8.0 downloads predate them. Ask the agent to confirm that your connected application has these capabilities before starting.</p>
+<ul><li>“Choose this ligand copy, show complete residues within 4 angstroms, label the selected distance and save the figure and numbers.”</li><li>“Generate an SES with explicit radii, a 1.4 angstrom solvent probe and 0.25 angstrom spacing. Apply X-ray shading only to that surface and keep its cached geometry.”</li><li>“Make a true HOMO slice with units and a fixed numerical key, plot values along the selected bond, and export the tables and image.”</li></ul>
+<p>The agent handles selections, palettes, parameters, cancellation, file access and exports without handing those steps back as GUI chores. Follow the <a href="tutorials-geometry.html">measurement</a>, <a href="tutorials-molecular-surfaces.html">molecular-shape</a> or <a href="tutorials-quantitative-fields.html">quantitative-field</a> lesson for an exact worked example.</p>
 
 <h2 id="walkthroughs">Try a focused workflow</h2>
 <ul><li><a href="ai-tutorial-orbitals.html">Explore orbitals with an agent</a></li><li><a href="ai-tutorial-density.html">Inspect density with an agent</a></li><li><a href="ai-tutorial-ao.html">Compare ambient occlusion</a></li><li><a href="ai-tutorial-representations.html">Compare molecular representations</a></li></ul>

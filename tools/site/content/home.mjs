@@ -1,4 +1,5 @@
 import { release } from "../release.mjs";
+import { application } from "../application.mjs";
 
 export default [
   {
@@ -14,9 +15,10 @@ export default [
     <p class="eyebrow">Orbitals / electron density / custom shaders / AI-enabled</p>
     <h1>Quantum<br>chemistry.<br><span class="outline-type">In view.</span></h1>
     <p class="lede">Explore the field. Reveal the molecule. Shape the view with custom surface shaders and live controls.</p>
+    <div class="notice" data-current-development><strong>${application.version} · Unreleased test build.</strong> Measure molecular geometry, inspect ligand neighborhoods, create SES/SAS surfaces, and analyze field slices and profiles. <a href="reference-inspection.html">Explore the scientific-inspection guide →</a><br>The published Mac download below remains ${release.version}.</div>
     <p><strong><a href="ai.html"><span aria-hidden="true">✦ </span>AI-enabled viewing →</a></strong><br>Ask your coding agent to explore molecules, prepare surfaces and export figures.<br><span class="small">Included in EigenVista 0.8.0 for Mac.</span></p>
     <div class="actions"><a class="button primary" href="${release.base}${release.stem}.zip">Download for Mac <span aria-hidden="true">↗</span></a><a class="button" href="surface-shaders.html">Explore surface shaders <span aria-hidden="true">→</span></a></div>
-    <p class="small">v${release.version} · Apple Silicon · Experimental preview<br>Ad-hoc signed; not notarized. <a href="install.html">Installation notes</a></p>
+    <p class="small">Published download: v${release.version} · Apple Silicon · Experimental preview<br>Ad-hoc signed; not notarized. <a href="install.html">Installation notes</a></p>
   </div>
   <figure class="hero-image plate">
     <div class="plate-label"><span>01 / X-RAY SURFACE SHADER</span><span>C₇H₁₀</span></div>

@@ -1,0 +1,10 @@
+{
+  "upstream_revision": "1ab2ebdad62cfa3fc8fee304ca64041d9bf6b5d8",
+  "selected_license": "MIT",
+  "upstream_manifest_sha256": "33101809581739e239eaaa8802a28c40683b9d386c8f32e6a7c2d683b807f03c",
+  "modified_files": {
+    "src/control.rs": "6e5d1f5da9d6cbccd0c7906869a048c4bf6a0013fca3a6b2d8702bb591d4d24a",
+    "src/par.rs": "060075e2b082ec4e4afb4331dd245dd63e5fd6efd2c978edec9609aa7eb27250",
+    "src/surface.rs": "f19a9fa8457a32ccf3d8c7aa2ffa9e1ed170477f6d7d7f792f1308a488184032"
+  }
+}

@@ -113,7 +113,32 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current version **0.8.0** is published, with local runtime, clean-source package,
+- Current source version is **0.9.0, unreleased**, on
+  `codex/scientific-inspection`. The user authorized this version bump before
+  personal testing and any PR/merge. Read the [0.9.0 notes](docs/releases/0.9.0.md),
+  [scientific-inspection design](docs/design/2026-11-16-scientific-inspection.md)
+  and living handoff/status. Current user/agent/site labels must identify 0.9.0;
+  download metadata still identifies the actual published 0.8.0 assets until a
+  new release is authorized and built. Do not invent a 0.9.0 release URL, archive
+  digest or version DOI. Citation uses the concept DOI while 0.9.0 is unreleased;
+  the 0.8.0 DOI and original artifact/capture evidence remain historical.
+  Keep dependencies, frozen fixtures, format/profile versions, vendored Sesmesh
+  metadata, icon and logo unchanged. No commit/tag/push/PR/merge/publication is
+  authorized by the version bump alone.
+  The user subsequently authorized a local commit and annotated `v0.9.0` tag
+  on 16 November 2026. That checkpoint does not authorize pushing, opening a PR,
+  merging or publishing. Keep the source marked unreleased until publication
+  is explicitly requested.
+  Metadata/build/Rust/CLI/citation and website checks passed at version preparation.
+  Later user testing prompted live SES color/opacity controls and balanced
+  camera-relative lighting (#87). The living handoff records fresh complete
+  614-case application and 162-case website Chromium/WebKit validation, known
+  SES/van der Waals interference and the pending-inspection/Save coordination gap
+  separately.
+  Earlier complete feature qualification and the unchanged 0.8.0 test ZIP remain
+  historical evidence. No 0.9.0 package is implied by source metadata.
+
+- Published version **0.8.0** has local runtime, clean-source package,
   extracted-native connector, downloaded-asset and public website verification (#78–#81): shared controller, authenticated opt-in native connection,
   prebuilt helper, packaged launcher, self-contained instructions/examples and
   palettes, natural-language guides and four website-only tutorials. The user

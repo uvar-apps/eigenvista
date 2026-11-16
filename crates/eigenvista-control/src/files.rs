@@ -3,6 +3,8 @@ use serde::Serialize;
 
 pub const MAX_FILE_BYTES: usize = 128 * 1024 * 1024;
 pub const MAX_PNG_DATA_URL_BYTES: usize = 16 * 1024 * 1024;
+/// Upper bound for generated scientific tables, independent of RPC frame size.
+pub const MAX_CSV_BYTES: usize = 32 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct FileReceipt {
@@ -43,6 +45,15 @@ impl ScopedFiles {
         &self,
         _: &std::path::Path,
         _: &str,
+        _: bool,
+    ) -> Result<FileReceipt, RpcError> {
+        unreachable!()
+    }
+    pub fn write_csv(
+        &self,
+        _: &std::path::Path,
+        _: &str,
+        _: &[String],
         _: bool,
     ) -> Result<FileReceipt, RpcError> {
         unreachable!()
@@ -391,6 +402,32 @@ mod unix {
                 .map_err(|message| RpcError::new(-32602, "validation_error", message))?;
             self.protect_hints(protected_paths)?;
             self.write_new(path, bytes)
+        }
+        /// Publish a bounded generated CSV under the same pinned-root and
+        /// no-clobber contract as native documents, never as an arbitrary writer.
+        pub fn write_csv(
+            &self,
+            path: &Path,
+            text: &str,
+            protected_paths: &[String],
+            overwrite: bool,
+        ) -> Result<FileReceipt, RpcError> {
+            if overwrite {
+                return Err(invalid("CSV exports are no-clobber; choose a new filename"));
+            }
+            if !path
+                .extension()
+                .is_some_and(|e| e.eq_ignore_ascii_case("csv"))
+            {
+                return Err(invalid("Table export requires a .csv filename"));
+            }
+            if text.is_empty() || text.len() > MAX_CSV_BYTES || text.contains('\0') {
+                return Err(invalid(
+                    "CSV must be nonempty UTF-8 without NUL and at most 32 MiB",
+                ));
+            }
+            self.protect_hints(protected_paths)?;
+            self.write_new(path, text.as_bytes())
         }
         pub fn write_image(
             &self,

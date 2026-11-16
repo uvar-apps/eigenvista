@@ -1,8 +1,55 @@
 # Research and follow-up plans
 
-Index updated 14 November 2026 (Australia/Perth), EigenVista 0.6.0 main
-`d0983802c6e866c971b9a1200073dd399030bd6c`. Current release and implementation
+Index updated 16 November 2026 (Australia/Perth), source version **0.9.0
+(unreleased)** on `codex/scientific-inspection`. The reviewed main baseline is
+EigenVista 0.8.0, `6a728d918cfdf4291a6a04ae9327d668fd449283`. Current release and implementation
 evidence remain in [handoff](../docs/handoff.md) and [status](../docs/status.md).
+
+## Scientific workflow roadmap
+
+[Plan 008: scientific workflow priorities](008-scientific-workflow-roadmap.md)
+reviews future features from chemist, biologist, quantum-chemist and physicist
+perspectives. It separates current functionality from new capabilities, ranks
+16 feature families by practical value/readiness, and records required data,
+scientific boundaries, dependencies, existing issues and primary sources.
+
+The recommended starting slices are stable selections/measurements, qualification
+of the existing Rust Sesmesh library for molecular surfaces, quantitative field
+metadata/probes, and reproducible scene states. A linked orbital-energy diagram
+is a smaller independent QC addition. The Sesmesh opportunity merits revisiting
+the older Gaussian-first surface proposal; no integration is assumed qualified.
+
+Status: **proposed; review/documentation only**. No implementation, issue creation,
+priority-label changes, branch, commit, version bump or publication is authorized
+by this roadmap. Choose a bounded increment before starting development. This
+cross-disciplinary order complements the broader Plan 007 biological catalog.
+
+## Implementation plan for priorities 1–3
+
+[Plan 009: selections, molecular surfaces and quantitative field inspection](009-scientific-inspection-implementation.md)
+turns the first three Plan 008 families into milestone-sized implementation
+work: shared identity/persistence contracts; geometry and ligand neighborhoods;
+actual Sesmesh native/WASM qualification followed by SES/SAS integration; field
+semantics/probes followed by planes, contours and profiles; integrated local
+verification and user/connector documentation.
+
+Status: **implemented and locally validated; awaiting user testing** on `codex/scientific-inspection`, tracked
+by [#83](https://github.com/uvar-apps/eigenvista/issues/83) and #84–#86. The plan covers GUI and external-agent
+control, bounded background jobs, scientific oracles, export/save/reopen,
+compatibility and explicit stop conditions. Full local macOS checks passed:
+336 default/eight desktop Rust tests, strict Clippy/build, 604 application browser
+cases, 162 website cases, packaging audit and the extracted helper's 34-method
+acceptance. Numerical, compatibility, cancellation and artifact checks passed.
+The user requires testing the feature branch before any pull request or merge.
+The user subsequently authorized preparing source version 0.9.0, with no commit,
+tag, push, release or PR/merge. The living handoff records the
+current implementation evidence and remaining work.
+
+All new user-facing operations require shared API and packaged AI connector
+coverage in the same milestone, including configuration/updates, readback,
+visibility, progress/cancel, persistence and exports. Plan 009 includes the
+mandatory coverage matrix and real connector-transport acceptance gates;
+GUI-only or in-page-controller-only completion is insufficient.
 
 ## Molecular visualization roadmap
 
@@ -15,19 +62,20 @@ separates implementation choices from the initial proposed roadmap. Current
 source and verification/delivery evidence are recorded in
 [the ledger](https://github.com/uvar-apps/eigenvista/issues/62#issuecomment-6874030097).
 
-Recommended first four additions, after the shared biological-metadata and
-native-compatibility foundation:
+The first four additions below, with their biological-metadata and
+native-compatibility foundation, were implemented and released in 0.7.0:
 
 1. Chain/entity coloring.
 2. Basic chain/component selection, visibility and mixed representations.
 3. Protein backbone traces and smooth tubes.
 4. Protein ribbons/secondary-structure cartoons and secondary colors.
 
-Molecular-shape surfaces follow, starting with a Gaussian envelope and separately
-qualified SAS/SES work. The roadmap ranks all remaining options and distinguishes
-coordinate-derived views from those needing external data. It does not change
-existing unrelated GitHub priorities. Later ranks and release work remain outside
-the currently authorized implementation batch.
+The original roadmap placed molecular-shape surfaces next, with a Gaussian
+envelope before separately qualified SAS/SES work. Plan 008 revisits that choice
+in light of the existing Rust Sesmesh library. Plan 007 retains its full catalog
+and distinctions between coordinate-derived views and those needing external
+data. Its remaining ranks are proposals; implementation requires a new selected
+scope and does not follow automatically from the completed first batch.
 
 ## Earlier research and implementation history
 

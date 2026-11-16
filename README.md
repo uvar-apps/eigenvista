@@ -6,7 +6,9 @@ EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**[Download for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)** ·
+**Source version: 0.9.0 — unreleased, awaiting testing.**
+
+**[Download published 0.8.0 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
@@ -51,9 +53,29 @@ The [file reference](https://uvar-apps.github.io/eigenvista/reference-files.html
 describes the supported profiles; the standalone converter supports the same
 imports.
 
+## 0.9.0: scientific inspection (unreleased)
+
+The `codex/scientific-inspection` branch adds scientific inspection through both
+the GUI and the AI connector:
+
+- Ordered atom selections, distance/angle/torsion measurements, labels, named
+  sets and individual-ligand neighborhoods.
+- Solvent-excluded and solvent-accessible molecular surfaces (SES/SAS), with
+  explicit radii/probe/spacing and cached native-file geometry.
+- Quantitative field meaning/units, probes, planes/contours, line profiles,
+  numerical keys, CSV and annotated/transparent PNG output.
+
+Read the [test-build user guide](docs/user-guide.md#scientific-inspection-in-the-unreleased-test-build).
+These additions are **not included in the published 0.8.0 download**. Version
+0.9.0 is prepared on this branch; the local annotated `v0.9.0` tag marks the
+development checkpoint. Read the [unreleased release notes](docs/releases/0.9.0.md).
+Use a matching test build and have an agent discover its available operations.
+The branch is awaiting user testing and is
+not merged into `main`; [handoff](docs/handoff.md) records verification state.
+
 ## Start here
 
-The current release is **0.8.0**, an experimental **Apple Silicon Mac** preview.
+The latest published release is **0.8.0**, an experimental **Apple Silicon Mac** preview.
 The download includes the application, examples, shader presets, palettes,
 converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
 [installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
@@ -82,11 +104,15 @@ documentation and gallery.
 
 ## Cite EigenVista
 
+For the unreleased 0.9.0 source, [CITATION.cff](CITATION.cff) uses the
+[project concept DOI](https://doi.org/10.5281/zenodo.24246123). A version-specific
+0.9.0 DOI will be added when supplied. The published 0.8.0 citation remains:
+
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
 (Version 0.8.0) [Computer software]. Zenodo.
 [https://doi.org/10.5281/zenodo.24273137](https://doi.org/10.5281/zenodo.24273137)
 
-Citation metadata is available in [CITATION.cff](CITATION.cff).
+Use the citation for the released version used in your work.
 
 ## Author and copyright
 
@@ -111,7 +137,11 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version **0.8.0** adds AI-enabled viewing through an external local
+**Current source:** version **0.9.0**, unreleased, adds the scientific-inspection
+workflows described above. See [0.9.0 notes](docs/releases/0.9.0.md) and
+[current status](docs/status.md#source-version-090) for preparation and testing.
+
+Version **0.8.0** introduced AI-enabled viewing through an external local
 agent, with a prebuilt connector inside the Apple Silicon application. Ask Codex,
 Claude Code, Pi, OpenCode or another terminal-capable agent to explore orbitals,
 load palettes, prepare molecular views and export figures. The normal GUI remains

@@ -1,5 +1,288 @@
 # Development handoff
 
+## Local checkpoint — 16 November 2026
+
+The user authorized committing the validated work and creating the annotated
+local tag **`v0.9.0`** on `codex/scientific-inspection`. The tag identifies this
+checkpoint; use Git to resolve its commit. Version 0.9.0 remains **unreleased**.
+This authorization supersedes the earlier no-commit/no-tag instructions below,
+but does not authorize a push, PR, merge or publication. Main remains
+`6a728d918cfdf4291a6a04ae9327d668fd449283`, and published downloads remain 0.8.0.
+The user will continue testing before deciding the next delivery step.
+
+The checkpoint retains the qualified runtime unchanged: 614 application and
+162 website Chromium/WebKit cases passed. Commit preparation changes only
+documentation of this authorization; it does not imply a new native bundle or
+another runtime test run. Temporary evidence, generated bindings, private
+working documents and personal chat exports are excluded from the commit.
+
+## Balanced scene lighting — validated, 16 November 2026
+
+Tracking [#87](https://github.com/uvar-apps/eigenvista/issues/87), user feedback
+that SES has a bright side and a dark back. Still on
+`codex/scientific-inspection`, version 0.9.0 unreleased. The local checkpoint
+authorization above supersedes this task's original no-Git-delivery boundary.
+
+Implemented `app/src/sceneLighting.ts`: six equal directional lights at a rotated
+octahedron's vertices, neutral ambient fill, with both lights and targets parented
+to the camera and the camera in the scene. Built-in mesh Blinn and sampled-raycast
+shaders use the same view-space directions. Ordinary atom/bond/PBR and protein
+Lambert materials receive the Three scene rig; custom GLSL, unlit volume
+compositing, planes, labels, scientific data and native formats are unchanged.
+Final ambient/diffuse weights are 0.1/0.9; pure Lambert ranges from about 0.620
+to 1 before material/color processing. This preserves shape cues without a
+preferred world direction; it does not promise identical views of different
+geometry. The product-lighting AO fixture now uses the actual rig; its existing
+contact, restoration, resource and gloss-removal assertions are unchanged.
+
+Fresh checks: TypeScript, formatting, production Vite build and generated-site
+static validation pass. Six new Chromium/WebKit cases pass across ten camera
+poses each (six axes, two oblique and two rolls), in Diffuse/Blinn modes for
+SES spheres, real 1CRN and raycast-only spheres. They save 120 actual PNGs and
+12 numeric records. Maximum sphere mean-brightness ratio is 1.00023 and 1CRN
+1.00939, versus over 2× under the old Diffuse setup. Root inspected opposed
+1CRN views and an oblique Blinn image. Earlier 0.35/0.65 and 0.25/0.75 fill
+candidates failed the predeclared protein contrast floor; final values pass
+without reducing thresholds. Evidence: `tmp/scientific-inspection/scene-lighting/`
+(`final-tests/`, `final-metrics.json`, `vite-final-build.log`, `tsc.log`).
+
+The full application qualification now passes **614/614 Chromium/WebKit cases**
+(22.7 minutes, one worker, no failures, skips or retries). All 259 captured
+runtime/test/dependency hashes stayed unchanged throughout the run. The prior
+attempt in `full-browser.log` stopped after 35 passes/six failures because two
+independent CPU color references still encoded the old fixed-light equation;
+its interrupted camera case and 572 unrun cases are not passes. Updating only
+their illumination math preserved all field, intersection, compositing, depth,
+tolerance and geometry coverage; all 26 focused controls then passed before
+the complete rerun. Evidence: `full-browser-final.log`, `oracle-browser.log`,
+`source-verification.json`, `change-scope.json` and
+`independent-color-oracle-check.json`. The actual helper's 42 light directions
+and final intensities also pass a CPU transform audit across translated/rotated
+camera poses: `actual-helper-transform-review-accepted.json` (0.1/0.9 weights).
+
+The website passes static checks (27 pages, 1,033 references, 70 image uses,
+22 exact downloads) and **162/162 Chromium/WebKit route/viewport cases plus
+interactions**. Manual desktop/mobile images were inspected. Evidence:
+`site-browser-final.log` and `tmp/2026-11-15-website/browser-f15bje/`.
+Seven public documents pass local-link/fence checks (342 local file links).
+Scientific Rust/native/dependency source is unchanged; its earlier qualification
+remains historical rather than a newly rerun Rust/native acceptance. No new
+native bundle or release. Local commit/tag is authorized as recorded above;
+push, PR and merge still require the user's instruction.
+
+The old preview server was no longer listening when this task began. Port
+ownership was checked and the correct app preview restarted at 5178 (PID 7087,
+tool session 64200); keep it running for user testing. The website preview is
+also running at 5190 (PID 9377, tool session 6591). The existing in-app tab and its
+two unsaved 1CRN meshes were preserved; save, refresh and reopen the document
+to ensure that tab loads the latest renderer after the server restart. Never use
+system temporary storage or modify Molekel.
+
+## SES appearance user-test correction — 16 November 2026
+
+Current source remains **0.9.0, unreleased**, on `codex/scientific-inspection`.
+User feedback clarified that saved SES color/opacity worked after **Apply
+appearance**; the required correction is immediate application as inputs change.
+That button is removed. Saved-surface color and valid opacity changes now use
+the shared validated controller immediately, with one in-flight request and
+coalesced latest patches per surface. Inputs stay enabled. Empty/out-of-range
+opacity remains a draft; source replacement resets drafts even when persistent
+surface IDs match. **Rename surface** commits names separately. Mesh generation
+and scientific caches are unchanged. Tracking: [#85](https://github.com/uvar-apps/eigenvista/issues/85).
+
+Fresh local macOS checks: TypeScript, production Vite build using the unchanged
+qualified WASM bindings, Prettier and `git diff --check`; all **62 inspection,
+molecular-surface and field-analysis Chromium/WebKit cases pass** (2.8 minutes,
+one worker, no skips/retries). Six focused live-appearance checks also pass.
+They cover real 327-atom 1CRN rendered PNG changes, rapid edits, two-surface
+isolation, invalid numeric input, API synchronization, same-ID reopen and exact
+mesh/source preservation. Root inspected opaque blue and translucent PNGs.
+Evidence: `tmp/scientific-inspection/live-appearance-feature-suites.log`,
+`live-surface-appearance-final/`, `live-appearance-tsc.log` and
+`live-appearance-vite-build.log`. The earlier WebKit focused attempt stopped on
+a Save while a redundant accepted-value write was still active; retained as a
+failed attempt. The final tests wait for accepted-operation completion.
+
+The website/manual/tutorial content is regenerated. Static validation passes
+27 pages, 1,033 local references, 70 image uses and 22 exact downloads. All
+**162 Chromium/WebKit website cases plus interactions pass**; evidence:
+`tmp/scientific-inspection/live-appearance-site-browser.log` and
+`tmp/2026-11-15-website/browser-78wxlh/`. Published 0.8.0 download facts remain
+unchanged.
+
+The SES/Van der Waals overlay issue is **not claimed fixed**. Actual 1CRN in both
+engines confirms that independently triangulated shared atom-contact boundaries
+cross. Conventional polygon offset leaves artifacts; explicitly choosing Ball
+and stick clears the interference (0–3 strong differing pixels against the
+opaque SES-only reference). GUI, user guide and website explain the representation
+choice. No hidden radius change, depth-test override or scientific-mesh change
+was applied. Diagnostic evidence: `tmp/scientific-inspection/ses-overlap-vZh2u8/`.
+
+Independent review also found broader GUI inspection/Save coordination work:
+Save during an in-flight validated inspection edit can encode the prior accepted
+snapshot. Dirty state correctly stays set after a newer publication. This is
+recorded in #85; the live-control fix does not claim to resolve it. Save after
+accepted writes complete. Other GUI inspection upserts share this existing gap.
+
+The previous **604-case application suite and extracted-native qualification
+predate this UI correction**; they were not rerun for this focused change and
+must not be described as testing its final source. Rust/WASM scientific source,
+renderer and packaging code are unchanged by this correction. No new native
+bundle, commit, push, PR or merge; the user's preview server remains running.
+
+## Current source: 0.9.0, unreleased — 16 November 2026
+
+The user authorized bumping the feature branch to **0.9.0 everywhere** before
+merging. Stay on `codex/scientific-inspection`; main remains
+`6a728d918cfdf4291a6a04ae9327d668fd449283`. Personal testing is still required
+before any PR or merge. The version bump does not authorize committing,
+tagging, pushing, publishing or replacing release assets.
+
+Workspace/npm/Tauri metadata and current user/agent/website descriptions now
+identify 0.9.0. [Release notes](releases/0.9.0.md) are explicitly unreleased.
+The website distinguishes current 0.9.0 source from the real published 0.8.0
+download; its archive URL, digest and release source remain unchanged. Historical
+images, native fixtures, planning baselines, dependencies and vendored Sesmesh
+metadata retain their identities. Current citation metadata uses concept DOI
+`10.5281/zenodo.24246123` without a release date; no 0.9.0 DOI exists yet. The
+0.8.0 version DOI remains associated with its original published release.
+
+Fresh local version-preparation checks passed under `tmp/version-0.9.0/`:
+12 own program-version declarations plus citation metadata agree on 0.9.0;
+locked Cargo metadata, fmt, 336 default Rust tests, eight desktop tests, strict
+workspace/all-targets Clippy, production WASM/TypeScript/Vite build and 17
+packaging-support tests pass. Rebuilt debug CLIs both report 0.9.0. The citation
+file passes the official CFF 1.2 schema. A normalization check against the prior
+257-file qualified runtime/test snapshot proves only five package-version files
+changed; dependencies, scientific/renderer code and application tests are
+unchanged. The 604-case application suite was not repeated for this metadata-only
+change and retains its explicitly earlier evidence below.
+
+The website is regenerated and validated: 27 pages, 1,033 local references,
+70 image uses, 22 exact downloads and all 162 Chromium/WebKit route/viewport
+cases plus interactions pass. Desktop/mobile layouts were inspected; current
+headers/footers show 0.9.0 unreleased, while `release.json` still describes the
+real published 0.8.0 package. `application.json` derives current identity from
+the Tauri manifest. Historical media/provenance is unchanged. Browser evidence:
+`tmp/2026-11-15-website/browser-M4Reep/`. Current documentation/agent references
+and unreleased notes passed link/fence/example checks.
+
+No 0.9.0 redistributable has been built or published by this version-only task.
+The complete feature qualification below ran before the bump; its 0.8.0 test
+ZIP must not be represented as a 0.9.0 package. User testing remains the next
+step before any PR/merge. Main and published assets remain unchanged.
+
+## Active implementation: scientific inspection, 16 November 2026
+
+Implementation and local validation are complete on `codex/scientific-inspection`,
+awaiting the user's testing before any PR. The branch is based on main
+`6a728d918cfdf4291a6a04ae9327d668fd449283`. The user authorized
+[Plan 009](../plans/009-scientific-inspection-implementation.md), priorities 1–3,
+including every feature's shared API and packaged AI connector support. Track
+the batch in [#83](https://github.com/uvar-apps/eigenvista/issues/83), geometry
+[#84](https://github.com/uvar-apps/eigenvista/issues/84), molecular surfaces
+[#85](https://github.com/uvar-apps/eigenvista/issues/85), and quantitative fields
+[#86](https://github.com/uvar-apps/eigenvista/issues/86).
+
+**Do not open or merge a pull request, merge into main, push or release.**
+Finish implementation and local validation, then let the user test this branch
+and wait for their next instruction. Main and published 0.8.0 artifacts retain
+their identities. The later local `v0.9.0` checkpoint records the completed work;
+inspect the actual working tree and tag before continuing.
+
+Implemented: Rust geometry/annotation/neighborhood kernel, independent
+Sesmesh adapter with a pinned minimally patched in-repo dependency, f64 field
+inspection kernel, optional native payloads/capabilities with typed packing,
+worker bridges, scoped CSV export, shared controller and GUI integration.
+All three feature families have GUI and shared-controller coverage, typed
+native persistence, original-index picking and rendered scientific annotations.
+Read the [scientific design record](design/2026-11-16-scientific-inspection.md)
+for accepted decisions, resource limits and the inspection-client simplification.
+
+Fresh local checks passed: **336 default Rust tests**, **eight desktop tests**,
+formatting, strict workspace/all-targets Clippy and final WASM/TypeScript/
+production build. These include 13 geometry/neighborhood, 15 field-analysis plus
+the exact contour-predicate unit test, 15 SES/SAS and eight new native-profile
+cases; frozen native fixtures remain unchanged. Initial strict Clippy flagged
+test-module placement; moving the test module to EOF repaired it without a
+lint suppression. The final full checks passed after that repair.
+
+Focused browser checks passed 40 geometry/surface cases, the additional two
+saved-neighborhood rename cases, and 16 field cases across Chromium/WebKit.
+The independent review reproduced and fixed publication/cancellation/revision
+edges, per-surface shader targeting, original-index pick readback, bounded
+warnings, Unicode CSV chunks, annotation-texture publication preflight,
+neighborhood rename provenance, extreme contour saddle signs and clipping
+before interpolation in fixed-range planes/profiles. Numeric/PNG negative
+controls cover these cases. A staged installed bundle passed all 34 new methods
+through 153 real helper calls, five PNGs, CSV/scopes/cancellation and native
+save/reopen; that bundle predates the final field-rendering/rename repairs and
+is not the final extracted-package gate.
+
+Two full-run attempts were interrupted after exposing integration defects,
+not recorded as passes. The first revealed eager metadata reads from a collapsed
+panel; lazy first-open activation preserves the mounted form and the original
+worker startup contract. All 34 field/preview/registration focused cases then
+passed. The second exposed new per-render empty default arrays in standalone
+`Viewport`, causing repeated scene rebuilds; stable module defaults repair it.
+All four existing protein-renderer cases passed in both engines, including
+settling, exact PNG/AO comparisons and GL cleanup. The interrupted logs are
+`browser-full-interrupted-1.log` and `browser-full-interrupted-2.log` under the
+evidence directory. The fresh complete run passed **604/604 cases** (302 per
+engine, 20.5 minutes, one worker), without failures, skips or retries. All 257
+monitored runtime/test source hashes remained unchanged through the final build,
+captures and complete suite (`runtime-identity.json`, `browser-full.log`).
+
+The user/technical/installed-agent documents are updated. The website adds one
+manual and three website-only tutorials with authentic 17-atom C₇H₁₀ figures,
+explicitly marked unreleased. Website validation passed 27 pages and 162 route/
+viewport cases. Final figures were recaptured after the integration repairs;
+their pixels remained identical and provenance now records the final source.
+Static checks pass 27 pages, 1,030 local references, 70 image uses and 22 exact
+downloads (25,831,599 bytes). Final route/viewport evidence is under
+`tmp/2026-11-15-website/browser-csxodm/RESULT.json`.
+
+The full local tester archive and final extracted-app acceptance passed.
+Artifact: `artifacts/distributions/EigenVista-0.8.0-apple-silicon-20261116T130036Z-6a728d9-dirty.zip`;
+SHA-256 `7395583e8608cfc1f960cf62e657b7af34587563a065f2bee0a27cf942c1f98d`.
+This is a local, ad-hoc-signed Apple Silicon **unreleased test build**, not a
+replacement for the published 0.8.0 release. Its dirty source snapshot preserves
+all uncommitted plans/implementation. The independent audit verified 664 exact
+eligible sources, all 57 vendored Sesmesh files (50 originals/three patches),
+license/dependency archives, 13 connector files, arm64 signatures/system-only
+libraries and five assets recovered from the actual Mach-O matching final dist.
+Evidence: `package-audit-latest.json`, `package-final.log`.
+
+The actual ZIP-extracted app passed all **34 new methods through 160 helper
+calls**, five visually inspected PNGs, independent PySCF/linear-grid values,
+SES/SAS, cancellation/recovery, scoped CSV/no-clobber, and native save/reopen.
+The renamed neighborhood retained its radius, whole-residue expansion and seeds.
+Transparent PNG alpha was measured: 1,389,870 clear, 680,094 partial and 187,636
+opaque pixels at 1700×1328. Original inputs stayed unchanged and the owned test
+app was cleaned up. Evidence: `native-latest.json` and its workspace's operation,
+alpha/visual-review records. Packaging support and connector tests passed 17+6.
+
+Only final documentation/status/plan records were updated after the package
+audit; tested runtime hashes and binary assets remain unchanged. The archive's
+source documentation retains its truthful pre-final-report snapshot. No release,
+tag, commit, push or PR was created. Next step: the user tests the feature branch;
+wait for their instruction before preparing a PR or merging. Linux qualification
+remains pending access to the user's future test machines.
+Temporary logs, the standalone surface probe, and coordination state live under
+`tmp/scientific-inspection/` and ignored `.unlazy/scientific-inspection/`.
+Vite (77799, port 5178) and the site server (97144, port 5190) remain running.
+The old user debug app was PID 89325; it was observed absent during final native
+acceptance, with cause/time unestablished. The agents only terminated their own
+verified staged/extracted test processes. Recheck ownership before using any PID;
+never stop the user's app or an unknown server without authorization.
+
+The GitHub connector was initially missing the organization's installation.
+The user repaired it: the connector now sees `uvar-apps/eigenvista` and an issue
+label write/readback succeeded. Use the connector where its tools suffice;
+the earlier CLI-created tracking issues are already open, not duplicates to create.
+
+## Published baseline
+
 Updated 16 November 2026 after publishing 0.8.0: shared application control
 (#78), natural-language workflows, palette/biological control and standalone
 binary setup (#79–#81). Fresh local verification, optimized packaging, extracted
@@ -21,7 +304,7 @@ entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application source is **EigenVista**, version **0.8.0**, in the standalone
+The current application source is **EigenVista**, version **0.9.0 (unreleased)**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.

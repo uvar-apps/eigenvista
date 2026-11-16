@@ -26,6 +26,7 @@ export interface StructureDisplayState {
   kindStyles: Partial<Record<ComponentKind, MolecularRepresentation>>;
   isolatedChain: number | null;
   residueSelection: number[] | null;
+  atomSelection?: number[] | null;
   focus: { atoms: number[]; revision: number } | null;
 }
 
@@ -253,6 +254,7 @@ const visibilityCache = new WeakMap<
     chains: Set<number>;
     kinds: Set<ComponentKind>;
     residues: Set<number> | null;
+    atoms: Set<number> | null;
   }
 >();
 const visibility = (state: StructureDisplayState) => {
@@ -260,6 +262,7 @@ const visibility = (state: StructureDisplayState) => {
   if (!result) {
     result = {
       chains: new Set(state.hiddenChains),
+      atoms: state.atomSelection ? new Set(state.atomSelection) : null,
       kinds: new Set(state.hiddenKinds),
       residues:
         state.residueSelection === null
@@ -277,12 +280,13 @@ export const isAtomVisible = (
   state: StructureDisplayState,
   atom: number,
 ): boolean => {
+  const hidden = visibility(state);
+  if (hidden.atoms !== null && !hidden.atoms.has(atom)) return false;
   const structure = doc.structure;
   if (!structure) return true;
   const index = structure.atom_residues[atom];
   const residue = structure.residues[index];
   if (!residue) return true;
-  const hidden = visibility(state);
   return (
     !hidden.chains.has(residue.chain) &&
     !hidden.kinds.has(residue.kind) &&

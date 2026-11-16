@@ -1,5 +1,6 @@
 use eigenvista_core::{Document, Grid, View, compute, fixtures, valid_color};
 use wasm_bindgen::prelude::*;
+mod inspection;
 fn err(e: impl ToString) -> JsValue {
     JsValue::from_str(&e.to_string())
 }
@@ -257,6 +258,42 @@ impl RegisteredDocument {
 
     pub fn display_values(&self) -> Result<Vec<f32>, JsValue> {
         self.sampled()?.display_values()
+    }
+
+    /// Quantitative sampling preserves the independent resident 3D preview cache.
+    pub fn analyze(
+        &self,
+        request: &str,
+        progress: Option<js_sys::Function>,
+    ) -> Result<inspection::QuantitativeResult, JsValue> {
+        let request = serde_json::from_str(request).map_err(err)?;
+        let item = eigenvista_core::field_analysis::sample_with_progress(
+            &self.document,
+            &request,
+            |done, total| report_progress(&progress, done, total).map_err(|e| format!("{e:?}")),
+        )
+        .map_err(err)?;
+        Ok(inspection::QuantitativeResult::new(item))
+    }
+
+    /// Interpretation is validated independently of the registered numeric source.
+    pub fn describe_field(&self, field: &str) -> Result<String, JsValue> {
+        serde_json::to_string(
+            &eigenvista_core::field_analysis::describe_field(&self.document, field).map_err(err)?,
+        )
+        .map_err(err)
+    }
+
+    pub fn declare_field(&self, request: &str) -> Result<String, JsValue> {
+        let mut descriptor: eigenvista_core::field_analysis::FieldDescriptor =
+            serde_json::from_str(request).map_err(err)?;
+        descriptor.origin = "user_declared".into();
+        descriptor.validate(&self.document).map_err(err)?;
+        let interpretation_hash = descriptor.interpretation_hash().map_err(err)?;
+        serde_json::to_string(
+            &serde_json::json!({"descriptor":descriptor,"interpretation_hash":interpretation_hash}),
+        )
+        .map_err(err)
     }
 
     /// Mesh the owned samples using validated current presentation, without source JSON.

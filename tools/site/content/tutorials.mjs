@@ -1,3 +1,6 @@
+import { application } from "../application.mjs";
+import { release } from "../release.mjs";
+
 export default [
   {
     file: "tutorials.html",
@@ -28,6 +31,15 @@ export default [
         <li><a href="ai-tutorial-ao.html">Read crowded atomic structure</a>: ambient occlusion and atomic representations on a large molecular assembly.</li>
         <li><a href="ai-tutorial-representations.html">Find the assembly's shape</a>: trace, tube, ribbon and cartoon views, with atomic detail when you need it.</li>
       </ol>
+
+      <h2 id="inspection-test-build">Scientific inspection: unreleased test-build lessons</h2>
+      <div class="notice"><strong>These three lessons require the ${application.version} unreleased test build.</strong> They are not included in the published ${release.version} download. They can be followed in the GUI or by giving the ordinary-language prompts to a connected agent.</div>
+      <ol>
+        <li><a href="tutorials-geometry.html">Measure, label and keep the geometry</a>: ordered picks, a real carbon–carbon distance, torsions, annotated PNG/CSV and a ligand-neighborhood extension.</li>
+        <li><a href="tutorials-molecular-surfaces.html">Compare solvent-accessible and excluded shape</a>: explicit radii/probe/spacing, SAS versus SES, shader targets and cached reopen.</li>
+        <li><a href="tutorials-quantitative-fields.html">Inspect an orbital quantitatively</a>: probes, a true plane with contours, fixed units/range, bond profiles and exported numerical evidence.</li>
+      </ol>
+      <p>The <a href="reference-inspection.html">scientific-inspection manual</a> explains the controls, scientific meaning, save/export behavior and limits.</p>
 
       <h2 id="example-files">Download the examples</h2>
       <div class="table-wrap"><table>
@@ -245,7 +257,7 @@ export default [
       <h2 id="export-and-save">4. Export the view and save the data</h2>
       <ol>
         <li><p>Choose your final representation, colors, and framing. To capture the shaded atomic view, restore <strong>Element</strong>, <strong>Van der Waals</strong>, the Pastel palette, and your AO settings first.</p></li>
-        <li><p>Use the viewport’s camera button, <strong>Export image</strong>, for <code>eigenvista-view.png</code>. Or use <strong>Export image with transparent background</strong> for <code>eigenvista-view-transparent.png</code>. The PNG includes current scene shading and camera framing, without the toolbar or text overlays. Check that your host completed the download.</p></li>
+        <li><p>Use the viewport’s camera button, <strong>Export image</strong>, for <code>eigenvista-view.png</code>. Or use <strong>Export image with transparent background</strong> for <code>eigenvista-view-transparent.png</code>. The PNG includes current scene shading and camera framing; toolbar and status text stay out. The unreleased scientific-inspection test build also includes visible labels, measurement monitors and numeric keys. Check that your host completed the download.</p></li>
         <li><p>Click <strong>Save</strong> and choose a new filename such as <code>1aon-study.eigenvista</code>. This retains the selected molecular data, biological identities, connectivity, and global representation. Keep the original mmCIF file too.</p></li>
       </ol>
       <div class="notice"><p><strong>Session versus Save:</strong> AO, atom palette, background, biological coloring, chain/component style overrides, visibility, isolation, residue ranges, and focus are session settings. They are not written into <code>.eigenvista</code>. Camera framing is also not saved. Reload starts with AO off and the built-in atom palette; load Pastel and restore your display choices to recreate the illustration. A PNG captures the current appearance but is not a molecular document.</p></div>

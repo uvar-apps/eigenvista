@@ -17,6 +17,7 @@ import {
   npmNotices,
   rustNotices,
   licenseSupplements,
+  stageVendoredRustSources,
   treeManifest,
   assertEqualManifest,
 } from "./package-support.mjs";
@@ -202,7 +203,14 @@ function main() {
   );
   const npmPackages = npmNotices(app, path.join(notices, "Frontend.txt"));
   const dependencySources = path.join(staging, "dependency-sources");
-  const inventory = [];
+  const inventory = stageVendoredRustSources({
+    report,
+    repository: root,
+    snapshot: sources,
+    sourceManifest,
+    dependencySources,
+    notices,
+  });
   const toml = createRequire(path.join(app, "package.json"))("@iarna/toml");
   const cargoLock = toml.parse(
     fs.readFileSync(path.join(root, "Cargo.lock"), "utf8"),

@@ -1,5 +1,11 @@
 # macOS tester ZIP
 
+The current source is **0.9.0 (unreleased)**. Updating its version does not
+publish a download or rebuild an existing package. The published 0.8.0 artifacts
+remain unchanged and do not include the scientific-inspection additions.
+Use [status](status.md) to identify any separately rebuilt test artifact before
+sharing it; release publication requires its own authorization.
+
 From the repository root, run:
 
 ```sh

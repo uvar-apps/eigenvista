@@ -1,6 +1,6 @@
 ---
 name: eigenvista-control
-description: Use an installed EigenVista app to inspect molecular data, render orbitals or densities, adjust molecular and protein views, and export images through its local connector.
+description: Use an installed EigenVista app to inspect molecules, measure geometry, create SES/SAS surfaces, analyze scalar fields, render orbitals/densities and export figures or numerical tables through its local connector.
 ---
 
 # EigenVista control
@@ -21,12 +21,22 @@ apps and tester ZIPs predate this package layout. If the bundled helper is absen
 a requested capability, explain what is missing and obtain the appropriate
 prebuilt package within the user's authorization.
 
+The scientific-inspection extension is **unreleased in 0.9.0** on
+`codex/scientific-inspection`. Published 0.8.0 binaries lack its measurement,
+SES/SAS and quantitative-field operations. Discover the connected app's actual
+schemas and use a matching 0.9.0 test binary/helper; never infer these features
+from the version string alone.
+
 ## Work from the user's goal
 
 Translate ordinary requests such as “show the HOMO,” “load Pastel” and “focus
 chain A” into connector actions. Do not ask the user for method names, internal
 IDs, revisions or JSON, and do not hand palette or biological-display actions
-back to the user as GUI chores.
+back to the user as GUI chores. This also applies to selections, measurements,
+labels, neighborhoods, radii/SES/SAS settings, field meanings/units, probes,
+planes/contours, profiles, keys and CSV/native/PNG exports. Every new control has
+an application API path; missing support means a mismatched/older app, not an
+instruction to make the user perform the action manually.
 
 1. Use the app and connection identified by the user or created during the
    authorized setup. Preserve an existing app/window; starting a separate
@@ -48,6 +58,20 @@ back to the user as GUI chores.
 7. Save new molecular documents and images into the approved output folder.
    Record transient appearance settings separately: a native document does not
    preserve the camera, palette, AO, background, shader or biological filters.
+
+For inspection work, preserve original zero-based source identity and ordered
+measurement picks internally. Discover the exact ligand copy before selecting
+neighbors; proximity is not assigned chemical interaction. Unknown cube meanings
+stay unspecified unless the user supplies an interpretation. Numerical values
+come from authoritative f64 sources, not GPU colors. SES/SAS use explicit radii,
+probe and spacing; a selected subset is an isolated object. Read back changed
+settings/results, inspect exported artifacts, and wait/cancel only your owned jobs.
+Use typed pick attribution rather than parsing inspection text or compact display
+indices. Read full paginated molecular-surface warnings when shortened previews
+are insufficient. A shader can target one returned quantum/molecular surface ID
+or all meshes; preserve its current target when only updating uniforms.
+Save accepted annotations, molecular meshes and field caches in a matching native
+document; active selections and full-scene settings remain transient.
 
 Use `expectedRevision` for document-dependent changes, inspect fresh state after
 stale/busy/uncertain outcomes, and cancel only the operation owned by the current

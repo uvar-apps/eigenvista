@@ -1,3 +1,5 @@
+import type { Annotations, FieldAnalysisState, MolecularSurface } from "./inspectionTypes";
+
 export interface Atom {
   element: number;
   position: [number, number, number];
@@ -113,6 +115,9 @@ export interface EigenVistaDocument {
   };
   provenance: string[];
   structure?: StructureMetadata | null;
+  annotations?: Annotations | null;
+  molecular_surfaces?: MolecularSurface[] | null;
+  field_analysis?: FieldAnalysisState | null;
 }
 export interface Generation {
   surfaces: Surface[];

@@ -9,6 +9,12 @@ tester ZIPs predate it. Confirm the installed files and live capabilities
 rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
 qualification is pending; non-Unix attachment is unsupported.
 
+The scientific-inspection methods below are **unreleased in 0.9.0**, tracked on
+`codex/scientific-inspection`. Published 0.8.0 downloads lack them. Use a matching
+0.9.0 test application/helper/instruction
+pair and inspect its live schemas. Do not promise these additions from a version
+comparison or require a source checkout to use an installed test binary.
+
 ## Package and instruction folder
 
 The macOS package places these files inside the selected app bundle:
@@ -147,8 +153,9 @@ the job. The flag does nothing when a result has no job ID.
 
 ## Discover schemas and current state
 
-Begin with `app.capabilities`. The current API version is 1 with 28 methods;
-older connector packages may have fewer. The response provides:
+Begin with `app.capabilities`. The API version is 1; the published 0.8.0 catalog
+has 28 methods and the unreleased branch extends it additively. The connected
+catalog, not a hardcoded count, establishes support. The response provides:
 
 - `instanceId`, `apiVersion` and each method's `description` and `inputSchema`;
 - `limits`, including allowed grid resolutions and input/output budgets;
@@ -163,6 +170,10 @@ view/mode/resolution, shading, AO, palette, biological display summary, camera
 and background. Camera/background may be temporarily null during startup.
 Scientific arrays are not returned. Check live support for palette loading,
 biological display and automatic AO before attempting those lesson steps.
+The unreleased state also includes `inspection` with pick mode, selected count,
+bounded ordered picks, typed `lastPick` and counts of measurements, molecular
+surfaces and analyses. Use the dedicated paginated queries for actual source identities,
+named-set contents and numerical samples.
 
 Use fresh `revision` as `expectedRevision` for a document-dependent mutation.
 A stale result requires rereading state and reconsidering the action. Revisions
@@ -195,8 +206,8 @@ file grants.
 | `surfaces.set_visibility` | `surfaceId`, `visible` → accepted visibility/revision |
 | `surfaces.remove` | `surfaceId` → removal/revision |
 | `scene.set` | Appearance patch below → accepted settings/revision |
-| `shader.apply` | `preset` (`"x-ray"` or `"surface-clip"`), `target?: "all"`, `uniforms?`, `transparency?` → shader state |
-| `shader.set_uniforms` | `uniforms`, `target?: "all"`, `transparency?` → accepted declared values |
+| `shader.apply` | `preset` (`"x-ray"` or `"surface-clip"`), `target?` (`"all"`; unreleased: an actual QC/molecular surface ID), `uniforms?`, `transparency?` → shader state |
+| `shader.set_uniforms` | `uniforms`, `target?` as above, `transparency?` → accepted values; omitted target retains the applied target |
 | `shader.clear` | `{}` → cleared session shader |
 | `camera.get` | `{}` → position, target and up vectors plus revision |
 | `camera.fit` | `{}` → fitted camera |
@@ -206,6 +217,205 @@ file grants.
 | `image.export` | New `path`, `transparent?`, `overwrite?: false` → PNG receipt, dimensions and capture/current revisions |
 | `job.get` | `jobId` → progress and terminal outcome |
 | `job.cancel` | `jobId` → owned cancellation and cleanup outcome |
+
+## Scientific inspection method catalog (unreleased)
+
+Users ask for scientific outcomes, such as “show complete residues within 4 Å of
+this ligand and label the distance,” or “plot this orbital along the bond and
+export the values.” Translate those requests into the methods below without
+requiring users to learn IDs/JSON or use the GUI. GUI/API/connector actions share
+the accepted document, worker, validation and renderer.
+
+All atom/residue indices are original, **zero based**; GUI numbers are one based.
+Coordinate vectors are **bohr** unless a parameter explicitly names angstrom.
+Pages accept `offset?` and `limit?` (1–100, default 100). Mutation methods accept
+optional `expectedRevision`; read methods do not. Discover exact schemas first.
+
+`lastPick` is null or a typed original-source hit. Its `kind` is `atom`, `bond`,
+`residue`, `molecular_surface` or `quantum_surface`; applicable fields are `atom`,
+`atoms`, `residue`, `surface` and a world-bohr `point`. `attribution:"mesh_vertex"`
+means source identity comes through the hit vertex, while `backbone_CA` denotes
+the mapped Cα. Neither claims that an arbitrary hit point is an atomic center.
+Source replacement or changed/removed mesh geometry invalidates old picks.
+
+| Method | Parameters / purpose |
+| --- | --- |
+| `selection.pick_mode` | `enabled`: toggle interactive original-atom picking |
+| `atoms.list` | Page, `residueIndex?`: source indices, elements, bohr positions and biological identities |
+| `residues.list` | Page, `name?`, `kind?`, `chainIndex?`: resolve one particular ligand/residue copy |
+| `selection.get` | Page: selected indices, bounded `orderedAtoms`, count, pick-mode state and typed `lastPick` |
+| `selection.list` | Page: named summaries; with `id`, page set atoms; add `seeds:true` for query seeds |
+| `selection.set` | Exactly one of `atoms`, `residueIndices`, `selectionId`; `mode?: replace/add/remove`, `showOnly?`, `resetFilters?`, `focus?` |
+| `selection.clear` | Clear transient picks/selection mask |
+| `selection.save` | `id,label,atoms?`: create/update durable named set, default active atoms |
+| `selection.remove` | `id`: delete a named definition, never source atoms |
+| `selection.neighborhood` | `radiusAngstrom`, `seeds?` or `selectionId?`, `wholeResidues?`, optional saved `id,label`, `showOnly?`, `resetFilters?`, `focus?`; background job |
+| `measure.evaluate` | `kind: distance/angle/torsion`, ordered `atoms`: authoritative result/unit or undefined reason |
+| `measure.list` | Page: saved definitions with computed results |
+| `measure.upsert` | Complete `measurement`: create/update definition/monitor |
+| `measure.remove` | `id`: delete definition/monitor |
+| `labels.list` | Page: label definitions/appearance |
+| `labels.upsert` | Complete `label`: create/update atom/residue annotation |
+| `labels.remove` | `id`: delete label |
+| `molecularSurfaces.list` | Page: SES/SAS settings, provenance, diagnostics and counts, without mesh/atom arrays |
+| `molecularSurfaces.atoms` | `id`, page: original `index` and resolved `radiusAngstrom` per included atom |
+| `molecularSurfaces.warnings` | `id`, page: full warning strings; summary warnings are limited to eight shortened previews |
+| `molecularSurfaces.generate` | Complete `request`: background SES/SAS creation/replacement |
+| `molecularSurfaces.set` | `id`, optional `label,visible,color,opacity`: accepted appearance update |
+| `molecularSurfaces.remove` | `id`: remove cached shape |
+| `fields.describe` | `fieldId`: accepted/derived quantity, units and provenance |
+| `fields.set_key` | `visible`: current mesh/raycast/volume numerical key |
+| `fields.set_metadata` | `descriptor`: record meaning/units and supported display conversion |
+| `analysis.create` | Complete `request`: create/replace cached probe/plane/profile in background |
+| `analysis.plane_atoms` | Ordered `atoms` (3), `extentAngstrom:[width,height]`, `dims:[columns,rows]`: resolved plane in bohr |
+| `analysis.list` | Page: definitions/interpretation/counts/appearance/rendering warnings, no sample arrays |
+| `analysis.get` | `id`: one analysis summary |
+| `analysis.samples` | `id`, page: raw f64 value/status/bohr position; profile distance/length in Å |
+| `analysis.set` | `id`, `label?`, `appearance?`, `automaticRange?`; true removes fixed range |
+| `analysis.remove` | `id`: remove definition/cache |
+| `table.export` | `kind: measurements/analysis`, analysis `id?`, new native `path?`, `overwrite?:false`; optional bounded text `offset,length` |
+
+### Geometry and annotation payloads
+
+`measurement` is `{id,label,kind,atoms,visible,color,always_visible}`. Distance
+uses two distinct IDs and reports Å; angles use three IDs centered on the middle
+atom; signed torsions use four ordered IDs and degrees in `[-180,180)`. Do not
+sort their input sequence. Coincident distinct atoms have zero distance; zero
+angle arms or degenerate torsions return `value:null,status:"undefined",reason`.
+All geometry is nonperiodic and has no estimated uncertainty.
+
+`label` is `{id,text,visible,color,always_visible,atom? ,residue?}` with exactly
+one target. Colors are `#RRGGBB`; text is limited to 256 UTF-8 bytes. Named sets
+use sorted unique source indices. Neighborhoods search all source atoms, including
+hidden atoms; seeds are included, and `wholeResidues` expands complete biological
+residues. Their saved results are materialized sets, not queries that silently
+rebind to another file. Identify repeated ligand copies using returned residue/
+chain/insertion identity. A proximity result is not a hydrogen bond or affinity.
+
+Example after discovering the intended atom IDs:
+
+```json
+{"measurement":{"id":"distance-1","label":"Selected distance","kind":"distance","atoms":[0,1],"visible":true,"color":"#26373b","always_visible":true}}
+```
+
+Use that object with `measure.upsert`; read `measure.list` before reporting its
+value. Annotations/monitors/keys are real exported figure content in both opaque
+and transparent `image.export` paths, unlike toolbar/status text.
+
+### Molecular surface request and readback
+
+Use this complete request shape with `molecularSurfaces.generate`:
+
+```json
+{"request":{"id":"shape-1","label":"Molecular SES","kind":"ses","atom_indices":[],"radii_set":"bondi","radii_overrides":[],"probe_radius":1.4,"spacing":0.5,"color":"#88aabb","opacity":0.7}}
+```
+
+Empty `atom_indices` means all loaded source atoms, including hidden ones.
+Nonempty indices make an **isolated selected-subset surface**, not a cropped
+patch of the whole molecule. `kind` is `ses`/`sas`; radii are `bondi` (Bondi/
+Mantina) or `alvarez`. Overrides are `{element,radius_angstrom}`. Probe radius
+0.05–10 and spacing 0.05–3 are Å. Missing radii produce an explicit element
+error: obtain/select an appropriate table or explicit user-supplied override,
+never invent a fallback or omit atoms. Cavities are kept and requested spacing
+is not silently coarsened. This creates shape, not quantum density/ESP.
+
+Wait for the job, inspect `molecularSurfaces.list`, and page
+`molecularSurfaces.atoms` for source/radius details. Material/visibility edits
+do not regenerate geometry. Existing shading, clipping/X-ray shaders and PNG
+apply; atom/bond AO does not shade the new surface. Save retains cached meshes
+and provenance, which reopen without rerunning the engine or the original file.
+Summaries include at most eight warnings shortened to 256 characters each; use
+`molecularSurfaces.warnings` to page full strings when interpreting diagnostics.
+
+### Field meaning, sampling and display
+
+`descriptor` is `{field,quantity,value_unit,origin,note?,display_unit?}`.
+Origins are `unknown/imported/derived/user_declared`; edits are user declarations.
+Quantities are `unspecified`, `dimensionless`, `orbital_amplitude`,
+`electron_density`, `spin_density`, `difference_density`, `transition_density`,
+`electric_potential` or `potential_energy`. Compatible units are validated; common
+units are `unspecified`, `1`, `bohr^-3/2`, `angstrom^-3/2`, `electron/bohr^3`,
+`electron/angstrom^3`, `hartree/e`, `V`, `hartree`, `eV`. Supported bohr↔Å
+density/amplitude conversions affect display/CSV only. Do not assume every
+potential/energy unit pair has a conversion implementation.
+
+Unknown cube meaning and value units stay unspecified unless the user supplies
+an interpretation. Declaring units labels existing samples without rescaling
+them. Source-coordinate units do not establish scalar units. Ordinary MO phase
+colors are not charge, and occupation-derived density is not a correlated-density
+claim. The app does not compute an electrostatic potential from coordinates.
+
+An `analysis.create` request contains `{id,label,field,definition,descriptor?}`.
+Use a discovered field ID. Definition shapes, in bohr:
+
+```json
+{"kind":"probe","point":[0,0,0]}
+```
+
+```json
+{"kind":"plane","origin":[-2,-2,0],"u":[4,0,0],"v":[0,4,0],"dims":[64,64]}
+```
+
+```json
+{"kind":"profile","start":[-2,0,0],"end":[2,0,0],"count":257}
+```
+
+Plane origin is its first corner; u/v are full spans. For an atom plane, use
+`analysis.plane_atoms`: it centers on A, sets horizontal B−A and normal
+`(B−A)×(C−A)`, rejecting collinearity. Optional source bindings are `atom` on a
+probe, ordered three `atoms` on a plane, and ordered two `atoms` on a profile;
+the supplied world coordinates must agree with those references. Both endpoints
+are included; zero-length profiles are rejected.
+
+Analysis `appearance` accepts `visible`, `colormap: diverging/viridis/grayscale`,
+`show_key`, `show_labels`, `range:[min,max]`, and up to 32 `contour_levels` for
+planes. API ranges/levels and paged values are raw source scalar units; the GUI
+shows converted units. `automaticRange:true` removes a fixed range. Keys/scales
+and labels do not resample the numeric cache. Read `analysis.get` after edits.
+
+Analytic Gaussian evaluation or source-f64 affine-grid trilinear interpolation
+supplies numerical values, independently of preview resolution. Grid axes may
+be skewed/reflected. Outside-domain samples have `value:null,status:"outside"`,
+not zeros/extrapolation; profiles contain gaps and contours do not bridge invalid
+cells. `analysis.samples` rows include `index,value,status,position,distanceAngstrom`;
+the response has `coordinateUnit:"bohr"` and `profileLengthAngstrom` where applicable.
+Summaries expose `renderingWarning` if numeric data remains valid but a particular
+f32 depiction cannot be prepared; readouts/CSV remain useful.
+
+For a true slice without the 3D sampled field, use `scene.set {"mode":"mesh"}`;
+this does not invoke marching cubes. Use `field.preview` to restore volume/raycast
+explicitly. `fields.set_key` shows the actual ±isovalue/opacity-transfer key of
+those modes; a continuous colorbar belongs to a quantitative slice colormap.
+
+### Jobs, CSV and saved state
+
+Neighborhood, molecular generation and analysis creation return job receipts.
+Use helper `--wait` or `job.get`, follow honest progress counts, and cancel only
+the owned `jobId`. Failure/cancellation retains earlier accepted results. Returned
+summaries never contain bulk meshes/field arrays; page data instead.
+
+`table.export {kind:"analysis",id,path:"/approved/new.csv"}` returns a native
+scoped file receipt; use `kind:"measurements"` without an analysis ID for geometry.
+The destination must be new, `.csv`, inside a granted root and not a source alias.
+Without a path, output is `{text,offset,totalCharacters,mimeType,name}`. Concatenate
+chunks using offset plus actual returned `text.length`; offsets/lengths use UTF-16
+code units, with at most 1,048,576 units requested. End boundaries preserve
+surrogate pairs, so a one-unit request may return two units. An offset inside a
+surrogate pair fails with `invalid_arguments`. A text receipt does not establish disk persistence. CSV is bounded
+to 32 MiB UTF-8. It applies selected scalar display units, uses Å coordinates/
+profile distances, and includes method/source/provenance plus blank outside
+values/status. Untrusted text formulas are neutralized; negative numeric values
+remain numeric.
+
+Native Save additionally persists annotations, named sets, molecular meshes and
+field caches/interpretations/local appearance. Active selection/pick mode and
+full-scene settings remain transient. Old 0.8.0 readers reject the new required
+capabilities explicitly; use a matching test reader to reopen these documents.
+Bounds include 64 named sets/1,000,000 references, 256 measurements/labels,
+32 molecular meshes, 2,000,000 vertices/4,000,000 triangles per molecular mesh,
+256 MiB engine estimate, 128 probes, 8 planes up to 512², 16 profiles up to 4,096,
+16 MiB aggregate analysis cache and 1,000,000 contour segments. Existing native
+128 MiB limits and 4 MiB wire frames still apply; maxima need not fit together.
 
 ## Scientific fields, jobs and image evidence
 
@@ -267,8 +477,11 @@ be a unit direction and nonparallel to the view. Degenerate poses, pole-crossing
 orbits and control-limit violations fail. Zoom factors above one move closer,
 below one move away. `camera.fit` explicitly frames the current visible scene.
 
-Bundled surface presets are `x-ray` and `surface-clip`, targeting `all` saved
-surfaces. Inspect the returned declared uniforms before tuning. X-ray controls
+Bundled surface presets are `x-ray` and `surface-clip`. Published 0.8.0 targets `all` saved
+surfaces. In the unreleased extension, `target` can also be one returned quantum
+or molecular surface ID; unknown IDs fail. Omitted `shader.set_uniforms` target
+preserves the currently applied target. Inspect returned declared uniforms before
+tuning. X-ray controls
 include `minOpacity`, `maxOpacity`, `da` and `color`; clipping uses `factor` and
 `xmin/xmax/ymin/ymax/zmin/zmax`. Shader transparency is separate from transparent
 PNG background. No arbitrary script/GLSL evaluation is available. A custom
@@ -339,7 +552,8 @@ inputs read by control remain protected for the broker's lifetime, including
 hard-link aliases. Never read an unapproved file through another tool and
 resubmit its contents to bypass the connector's refusal.
 
-All writes are atomic and no-clobber. Choose new `.eigenvista` and `.png` paths;
+All writes are atomic and no-clobber. Choose new `.eigenvista`, `.png` and, for
+the unreleased CSV operation, `.csv` paths;
 `overwrite:true` is rejected. Inspect native save receipts for `saved:true` and
 `current:true`; a file's existence alone does not establish that current work was
 saved. PNG receipts include dimensions, capture `revision` and `currentRevision`.
@@ -350,7 +564,9 @@ and saved meshes, including generation settings and document appearance. Global
 representation, surface colors/opacity and mesh visibility are document choices.
 Camera, AO, palette, background, custom shader/uniforms, biological coloring,
 filters, overrides and focus are session choices. They are not restored by Save.
-Analytic preview sampling caches are transient. Opening another file resets
+Accepted quantitative caches/definitions, annotations and molecular meshes are
+durable in the unreleased extension; analytic 3D preview caches remain transient.
+Opening another file resets
 index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document
 when the user wants a reproducible presentation.

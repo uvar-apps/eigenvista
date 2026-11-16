@@ -17,8 +17,15 @@ includes the prebuilt helper, portable instructions and session launcher. Older
 belong in [handoff](handoff.md) and [status](status.md#source-version-080).
 The additive palette/biological-presentation work in
 [#80](https://github.com/uvar-apps/eigenvista/issues/80) brings the API version 1
-catalog to 28 methods. Discover the connected instance's catalog before using
+catalog to 28 methods in the published 0.8.0 release. Discover the connected instance's catalog before using
 these additions; an older source-built instance may lack them.
+
+**Unreleased 0.9.0 extension:** `codex/scientific-inspection` adds the geometry,
+SES/SAS and quantitative-field methods documented below (#83–#86). Published
+0.8.0 downloads do not have these methods. Use the matching 0.9.0 test
+binary/helper and the connected instance's
+`app.capabilities`, not the numeric version or a hardcoded method count, to
+establish availability. No PR/merge/release is implied by this reference.
 
 For manual installation, a setup prompt and interaction instructions for Codex,
 Claude Code, Pi, OpenCode and generic local agents, start with the
@@ -28,8 +35,9 @@ transport reference for agents and client authors. Users can ask for palette,
 coloring, focus and rendering changes in ordinary language; the agent translates
 the request into these methods without asking the user to learn method names.
 
-There is no embedded AI console, model client, API-key requirement, general script
-runtime or new visible GUI. An external agent supplies its own model and tools.
+The connector adds no embedded AI console, model client, API-key requirement or
+general script runtime. An external agent supplies its own model and tools;
+the unreleased scientific features also have normal GUI controls.
 The [external-agent skill](../skills/eigenvista-control/SKILL.md) describes how to
 use this interface. The existing `eigenvista-convert` CLI remains a separate
 document converter.
@@ -173,6 +181,10 @@ isolation, selected-residue count, bounded chain styles/count, component styles
 and visible-atom count. It does not return per-atom visibility, residue selections
 or the focus atom-index array. Record requested residue-range endpoints separately
 if they will be needed to recreate the presentation.
+The unreleased extension additionally reports bounded `inspection` state:
+`pickEnabled`, `selectedCount`, up to 256 `orderedAtoms`, `measurementCount`,
+`molecularSurfaceCount`, `analysisCount` and typed `lastPick`. Page source identities/selections
+through the dedicated methods instead of expecting scientific arrays in state.
 
 Use IDs returned by the API. Human labels do not establish scientific meaning:
 for example, an occupation-derived density may have `kind: "density"` and
@@ -210,8 +222,8 @@ rules below. Results may include additional bounded metadata.
 | `surfaces.set_visibility` | `surfaceId`, `visible` | Applied visibility/revision |
 | `surfaces.remove` | `surfaceId` | Removal/revision |
 | `scene.set` | Any supported appearance patch below | Applied view/session settings and revision |
-| `shader.apply` | `preset: "surface-clip" | "x-ray"`, `target?: "all"`, `uniforms?`, `transparency?` | Applied shader metadata/revision |
-| `shader.set_uniforms` | `uniforms`, `target?: "all"`, `transparency?` | Applied declared uniforms/revision |
+| `shader.apply` | `preset: "surface-clip" | "x-ray"`, `target?` (`"all"`; unreleased: one QC/molecular surface ID), `uniforms?`, `transparency?` | Applied shader metadata/revision |
+| `shader.set_uniforms` | `uniforms`, `target?` as above, `transparency?` | Applied declared uniforms/revision; omitted target retains the applied target |
 | `shader.clear` | `{}` | Cleared shader/revision |
 | `camera.get` | `{}` | `{revision,position,target,up}` |
 | `camera.fit` | `{}` | Applied camera/revision |
@@ -334,6 +346,178 @@ path as normal PNG export, including restoration after transparent capture.
 It waits for accepted React/viewport state instead of treating a queued setter
 as a completed render.
 
+## Unreleased scientific inspection API
+
+All operations below use the same visible application state as their GUI
+counterparts. Coordinates and original atom/residue indices are **bohr and
+zero based** at this boundary; the GUI presents one-based numbers and accepts
+Å/bohr inputs. Do not parse labels to obtain identity. Preserve ordered picks
+for measurements, atom planes and profiles separately from sorted selection sets.
+Pages use `offset?`, `limit?` (1–100, default 100).
+
+`lastPick` is null or a typed original-source hit: `kind` is `atom`, `bond`,
+`residue`, `molecular_surface` or `quantum_surface`, with applicable `atom`,
+`atoms`, `residue`, `surface`, and world-bohr `point` fields. `attribution` may
+be `mesh_vertex` or `backbone_CA`: surface attribution identifies a source atom
+through the hit mesh vertex, and a backbone hit identifies its mapped Cα, not an
+arbitrary exact atomic position. Source replacement and stale/removed mesh
+geometry invalidate the pick; do not retain compact GPU instance indices.
+
+Mutation schemas accept optional `expectedRevision`; read methods do not.
+`selection.neighborhood`, `molecularSurfaces.generate` and `analysis.create`
+return job receipts. Wait/poll/cancel through the existing job methods, then read
+back the accepted settings/results. No GUI operation is a required workaround.
+
+| Method | Parameters | Result / behavior |
+| --- | --- | --- |
+| `selection.pick_mode` | `enabled` | Enables/disables interactive source-atom picking; session state |
+| `atoms.list` | Page, `residueIndex?` | Source index, element, bohr position, atom name and residue index |
+| `residues.list` | Page, `name?`, `kind?`, `chainIndex?` | Particular residue identities, chain identity and original residue indices |
+| `selection.get` | Page | Selected index page, ordered picks, selected count, pick-mode state and typed `lastPick` |
+| `selection.list` | Page, `id?`, `seeds?` | Named-set summaries; with `id`, page its atoms, or original query seeds when `seeds:true` |
+| `selection.set` | Exactly one of `atoms`, `residueIndices`, `selectionId`; `mode?: replace/add/remove`, `showOnly?`, `resetFilters?`, `focus?` | Applies source selection and optional display/focus; does not edit coordinates |
+| `selection.clear` | `{}` | Clears transient selection/picks and selection display mask |
+| `selection.save` | `id`, `label`, `atoms?` | Creates/replaces a durable named set, defaulting to active atoms |
+| `selection.remove` | `id` | Removes a named definition, not source atoms |
+| `selection.neighborhood` | `radiusAngstrom`, `seeds?` or `selectionId?`; `wholeResidues?`, `id?`, `label?`, `showOnly?`, `resetFilters?`, `focus?` | Background inclusive source-neighbor query; defaults to active seeds; optional named result |
+| `measure.evaluate` | `kind: distance/angle/torsion`, ordered `atoms` | f64 value/unit or explicit undefined status/reason |
+| `measure.list` | Page | Saved definitions with authoritative computed results |
+| `measure.upsert` | Complete `measurement` object below | Creates/replaces one saved ordered definition/style |
+| `measure.remove` | `id` | Removes a measurement and monitor |
+| `labels.list` | Page | Saved atom/residue labels and appearance |
+| `labels.upsert` | Complete `label` object below | Creates/replaces a label; exactly one atom/residue target |
+| `labels.remove` | `id` | Removes a label |
+| `molecularSurfaces.list` | Page | Settings/provenance/diagnostics/counts without bulk mesh or atom arrays |
+| `molecularSurfaces.atoms` | `id`, page | Original atom indices and resolved `radiusAngstrom` values |
+| `molecularSurfaces.warnings` | `id`, page | Full original warning strings; summaries expose only the first eight, each shortened to 256 characters |
+| `molecularSurfaces.generate` | Complete `request` below | Background create/replace SES/SAS mesh; same ID replaces only on success |
+| `molecularSurfaces.set` | `id`, `label?`, `visible?`, `color?`, `opacity?` | Updates saved appearance without recalculation |
+| `molecularSurfaces.remove` | `id` | Removes cached molecular mesh |
+| `fields.describe` | `fieldId` | Accepted or derived scalar interpretation/provenance |
+| `fields.set_key` | `visible` | Persists truthful current mesh/raycast/volume-key visibility |
+| `fields.set_metadata` | `descriptor` below | Records scalar interpretation/display units; raw sources/hash stay unchanged |
+| `analysis.create` | Complete `request` below | Background create/replace probe, plane or profile with f64 cache |
+| `analysis.plane_atoms` | Ordered `atoms` (3), `extentAngstrom` (width/height), `dims` | Resolves an atom plane definition in world bohr |
+| `analysis.list` | Page | Analysis definitions, interpretation/counts and rendering warnings; no sample arrays |
+| `analysis.get` | `id` | One analysis summary/settings/provenance |
+| `analysis.samples` | `id`, page | Raw f64 values/statuses and bohr positions; profile distances/length in Å |
+| `analysis.set` | `id`, `label?`, `appearance?`, `automaticRange?` | Updates local presentation; `automaticRange:true` removes a fixed range |
+| `analysis.remove` | `id` | Removes definition/cache/depiction |
+| `table.export` | `kind: measurements/analysis`, `id?` (required for analysis); native `path?`, `overwrite?:false`; browser `offset?`, `length?` | Native scoped CSV receipt or bounded generated text chunk |
+
+### Inspection object shapes and scientific conventions
+
+`measurement` contains `id,label,kind,atoms,visible,color,always_visible`.
+Distance uses two distinct IDs and returns Å; angle uses three, centered on the
+middle atom; ordered torsion uses four and reports degrees in `[-180,180)`.
+Coincident distinct atoms have valid zero distance; zero angle arms/degenerate
+torsion planes return `value:null,status:"undefined",reason`, never a NaN or
+fabricated zero. This is nonperiodic source geometry without uncertainties.
+
+`label` contains `id,text,visible,color,always_visible`, and exactly one of
+`atom` or `residue`. Colors use `#RRGGBB`. Labels, monitors and keys are included
+in `image.export`, including transparent captures. Named sets are materialized
+source indices; neighborhoods search hidden atoms too, include seeds, and may
+expand complete biological residues. Pick a particular residue/ligand by its
+returned identity, not its name alone. Proximity is not chemical interaction typing.
+
+A molecular-surface `request` contains:
+
+```json
+{"id":"shape-1","label":"Selected SES","kind":"ses","atom_indices":[],"radii_set":"bondi","radii_overrides":[],"probe_radius":1.4,"spacing":0.5,"color":"#88aabb","opacity":0.7}
+```
+
+Empty `atom_indices` explicitly means **all source atoms**, including hidden
+atoms. A nonempty selection is treated as an isolated subset, not a patch of
+the full-molecule surface. `kind` is `ses` or `sas`; `radii_set` is `bondi` or
+`alvarez`; overrides contain `{element,radius_angstrom}`. Probe and spacing use
+Å (0.05–10 and 0.05–3 respectively). Missing element radii are errors; no generic
+radius fallback or atom omission occurs. Cavities are kept; coarsening, smoothing
+and decimation are disabled. Shaders and surface appearance reuse existing
+operations; atom/bond AO remains separate. Save caches the geometry/provenance.
+
+In this unreleased extension, `shader.apply` can target `all` or one returned
+quantum/molecular surface ID; unknown IDs fail with `not_found`.
+`shader.set_uniforms` preserves the active target when omitted. Surface-list
+warning previews are bounded; use `molecularSurfaces.warnings` for complete,
+paginated diagnostic strings rather than treating a shortened preview as all
+available provenance.
+
+A field `descriptor` contains `field,quantity,value_unit,origin,note?` and
+`display_unit?`. Origins are `unknown`, `imported`, `derived`, `user_declared`;
+user edits are recorded as declarations. Supported quantities include
+`unspecified`, `dimensionless`, `orbital_amplitude`, `electron_density`,
+`spin_density`, `difference_density`, `transition_density`, `electric_potential`
+and `potential_energy`. Discover/validate the compatible units. Cube meanings
+remain unspecified until declared. Declaration does not rescale samples;
+supported density/amplitude bohr↔Å display conversions leave caches unchanged.
+No electrostatics or wavefunction solver is introduced.
+
+An analysis request contains `id,label,field,definition,descriptor?`. Definitions:
+
+```json
+{"kind":"probe","point":[0,0,0]}
+```
+
+```json
+{"kind":"plane","origin":[-2,-2,0],"u":[4,0,0],"v":[0,4,0],"dims":[64,64]}
+```
+
+```json
+{"kind":"profile","start":[-2,0,0],"end":[2,0,0],"count":257}
+```
+
+These coordinates are bohr. Plane `origin` is the first corner and `u/v` are
+full-span vectors, not step vectors. A probe may additionally bind `atom`; a
+plane may bind three ordered `atoms`; a profile may bind two. Resolved coordinates
+must agree with those source references. Use `analysis.plane_atoms` to construct
+the exact three-atom frame: centered at A, horizontal along B−A, normal along
+`(B−A)×(C−A)`, with a nondegenerate third point. Endpoints are included.
+
+`appearance` supports `visible`, `colormap` (`diverging`, `viridis`, `grayscale`),
+`show_key`, `show_labels`, optional ordered `range:[min,max]` and up to 32
+`contour_levels`. API ranges/levels are in **raw source scalar units**; GUI
+controls display converted units. `analysis.samples` returns raw values and
+`status:"valid"/"outside"`, with `value:null` outside. CSV applies the descriptor's
+chosen display/export scalar unit, reports coordinates/profile distance in Å,
+and leaves outside values blank. Its provenance identifies source/sample/method.
+Quantitative values come from analytic f64 evaluation or source-grid affine
+trilinear interpolation, never GPU colors or a resampled preview.
+
+For a slice without the 3D sampled field, `scene.set {mode:"mesh"}` hides that
+preview without generating a mesh. Use `field.preview` to return explicitly to
+volume/raycast. Existing meshes retain their independent visibility controls.
+Numeric keys for those existing modes describe their actual ±isovalue/opacity
+transfer; only a continuous slice colormap has a conventional continuous colorbar.
+
+### Bounded output and persistence
+
+Read results through summaries/pages; the native frame limit remains 4 MiB.
+`table.export` with an authorized new native `.csv` path returns a file receipt.
+Without a path it returns `{text,offset,totalCharacters,mimeType,name}`; browser
+clients concatenate chunks using the returned offset/text length, with a maximum
+1,048,576 UTF-16 code units per requested chunk. Offsets are UTF-16 positions;
+advance by the actual returned `text.length`, not the requested length. Chunk
+boundaries preserve Unicode surrogate pairs (a one-unit request can return two
+units), and an offset inside a pair is rejected with `invalid_arguments`.
+Never mistake that text receipt for a file written
+to the user's disk. Generated CSV is UTF-8, bounded to 32 MiB, correctly escaped
+and neutralizes untrusted textual spreadsheet formulas while preserving numbers.
+
+Save persists named selections, annotations, molecular meshes and quantitative
+definitions/f64 caches/interpretations/local appearance. It does not persist
+active selection/pick mode, camera, palette, AO, background, shaders or biological
+filters. A matching new reader is required; published 0.8.0 rejects the unfamiliar
+required native capabilities rather than dropping them silently.
+
+Further bounds: 64 named sets/1,000,000 aggregate references, 256 measurements,
+256 labels, 32 molecular meshes, two-million vertices/four-million triangles per
+molecular mesh, 256 MiB engine estimate, 128 probes, 8 planes up to 512²,
+16 profiles up to 4,096 samples, 16 MiB aggregate field cache and 1,000,000 contour
+segments. Existing native 128 MiB/archive/manifest guards still win. There is no
+silent coarsening or source-data loss. Finite f64 data can remain numerically
+valid even when a specific f32 depiction is unavailable; inspect `renderingWarning`.
+
 ## Revisions and jobs
 
 `revision` identifies the accepted document state, not a separate camera frame
@@ -343,7 +527,8 @@ blindly forcing a retry. A camera/background/session change need not increment
 the document revision. Current native persistence is unchanged; a native Save
 is not a promise to persist every transient camera/AO/shader/background setting.
 
-`field.preview`, `surfaces.generate`, and sampling-dependent `field.select`
+`field.preview`, `surfaces.generate`, sampling-dependent `field.select`, and the
+unreleased `selection.neighborhood`, `molecularSurfaces.generate`, `analysis.create`
 return `{jobId,status:"accepted"}`. Acceptance is not completion. `job.get`
 returns `jobId`, `operation`, `status`, optional `progress`, and a terminal
 `result` or structured `error`. Status is `accepted`, `running`, `completed`,
@@ -370,10 +555,13 @@ Only regular input files are accepted; directories, FIFOs and other special file
 are rejected. Existing export paths are probed without blocking on a FIFO and
 must still satisfy the no-clobber policy.
 
-All control writes are **atomic no-clobber**: choose a new `.eigenvista` or `.png`
+All control writes are **atomic no-clobber**: choose a new `.eigenvista`, `.png`
+or (in the unreleased extension) `.csv`
 filename. `overwrite: true` is rejected even if a caller supplies it intentionally.
 Native document writes decode/validate the encoded archive before publication;
-PNG writes validate the PNG structure/checksums. Filesystems lacking the required
+PNG writes validate the PNG structure/checksums. CSV accepts bounded generated
+UTF-8 text and retains the same scoped/source-protected publication policy; it
+does not expose an unrestricted text writer. Filesystems lacking the required
 hard-link publication support fail rather than falling back to a weaker write.
 A file receipt is `{path,bytes}`; native Save adds `saved`, `current`,
 `snapshotRevision` and `revision`, while PNG export adds dimensions/MIME type.

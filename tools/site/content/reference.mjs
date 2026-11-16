@@ -1,15 +1,18 @@
+import { application } from "../application.mjs";
+import { release } from "../release.mjs";
+
 export default [
   {
     file: "reference.html",
     title: "User reference",
     searchTitle: "Molecular and quantum chemistry viewer reference manual",
     description:
-      "The EigenVista 0.8.0 manual: files, scene controls, quantum fields, biological structures, and saving.",
+      `The EigenVista ${application.version} test-build manual: files, scene controls, quantum fields, scientific inspection, biological structures, and saving.`,
     section: "reference",
     number: "03",
     body: `
 <div class="prose">
-  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.8.0</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
+  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference covers the <strong>${application.version} unreleased test build</strong>, including <a href="reference-inspection.html">scientific inspection</a>. The published Mac download is still <strong>${release.version}</strong>; the new inspection controls require the matching test build. Use the <a href="install.html">installation guide</a> for the published app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -19,6 +22,7 @@ export default [
     <li><a href="reference-fields.html">Orbitals, densities, and sampled fields</a> — generate signed surfaces, browse several orbitals, compare render modes, and understand resolution and caching.</li>
     <li><a href="reference-structures.html">Biological structures</a> — color chains and secondary structure, show components, isolate a chain, select residue ranges, and use protein depictions.</li>
     <li><a href="ai.html">AI-assisted viewing</a> — connect your external coding agent, describe a molecular view, and keep exported figures and native documents.</li>
+    <li><a href="reference-inspection.html">Scientific inspection — ${application.version} unreleased test build</a> — measurements and labels, ligand neighborhoods, SES/SAS shape, numerical probes, planes/contours and profiles.</li>
   </ul>
 
   <h2 id="workspace">The application workspace</h2>
@@ -205,7 +209,7 @@ eigenvista-convert --help</code></pre>
       <tr><th scope="row">Inspect a saved mesh</th><td>Click it to show its label and triangle count.</td></tr>
     </tbody>
   </table></div>
-  <p>Tab to toolbar buttons and activate with Enter or Space. Hover an icon to read its name. There is no distance/angle measurement tool. Picking displays information; it does not modify molecular coordinates. The camera is not saved in <code>.eigenvista</code>.</p>
+  <p>Tab to toolbar buttons and activate with Enter or Space. Hover an icon to read its name. The published 0.8.0 app displays picked information; the <a href="reference-inspection.html#measure">unreleased scientific-inspection test build</a> also supports distance, angle and signed-torsion measurements. Neither modifies molecular coordinates. The camera is not saved in <code>.eigenvista</code>.</p>
 
   <h2 id="representations">Molecular representations</h2>
   <p>Choose <strong>Representation</strong> in <strong>Molecular data</strong>. The global choice is saved with the document.</p>
@@ -226,7 +230,8 @@ eigenvista-convert --help</code></pre>
 
   <h2 id="field-appearance">Field colors, opacity, and surface shading</h2>
   <p>Under <strong>Appearance</strong>, <strong>Positive</strong> and <strong>Negative</strong> choose signed field colors, and <strong>Opacity</strong> controls field transparency. These apply across the document's surfaces, not just the selected field, and are retained when saved. They do not recompute the field.</p>
-  <p><strong>Surface shading</strong> offers <strong>Diffuse</strong> (the default, flat two-sided lighting) and <strong>Blinn-Phong</strong> (specular highlights on saved meshes and sampled raycast isosurfaces). It is a session preference, separate from atom/bond materials, and is not stored in the molecular document. Choose <a href="reference-fields.html#modes">the rendering mode</a> under Field rendering.</p>
+  <p><strong>Surface shading</strong> offers <strong>Diffuse</strong> (the default) and <strong>Blinn-Phong</strong> (specular highlights on saved meshes and sampled raycast isosurfaces). It is a session preference, separate from atom/bond materials, and is not stored in the molecular document. Choose <a href="reference-fields.html#modes">the rendering mode</a> under Field rendering.</p>
+  <p>Six equally strong lights surround the view symmetrically, with neutral ambient fill. They follow the camera during orbit, pan and roll, so the other side does not become a permanently dark back. Atoms, bonds, protein depictions and built-in mesh/raycast surfaces share this arrangement. Visible geometry and specular highlights still provide shape cues. Custom shaders keep their declared lighting; volume compositing stays unlit.</p>
   <p>In <strong>Saved surfaces</strong>, the eye icon toggles one mesh's visibility and the trash icon removes it. There is no undo. Save to retain those changes. In sampled modes, the active field's meshes are visually replaced by the sampled display; eye/trash controls still manage saved meshes. Return to <strong>Isosurface mesh</strong> to inspect their effect independently.</p>
 
   <h2 id="ao">Molecular ambient occlusion</h2>
@@ -264,7 +269,7 @@ eigenvista-convert --help</code></pre>
     <li>Or choose <strong>Export image with transparent background</strong> for <code>eigenvista-view-transparent.png</code>. Empty areas are transparent; antialiased edges and translucent surfaces retain fractional alpha.</li>
     <li>Confirm the download completed, then open the PNG in an image viewer or place the transparent version on your intended background.</li>
   </ol>
-  <p>Both actions capture the current rendered viewport after zooming, resizing, or an idle period. Toolbar/text overlays are excluded. Transparent export leaves the selected background visible in the app. Exports include the current field mode and AO; they are images, not saved scientific documents. Use Save separately to retain data.</p>
+  <p>Both actions capture the current rendered viewport after zooming, resizing, or an idle period. Toolbar/status overlays are excluded. The <a href="reference-inspection.html">unreleased scientific-inspection test build</a> additionally includes scientific labels, measurement monitors and visible numerical keys in normal and transparent images. Transparent export leaves the selected background visible in the app. Exports include the current field mode and AO; they are images, not saved scientific documents. Use Save separately to retain data.</p>
   <p>If an export fails, its error appears without changing the molecular document; try the export again. PNG files use the app or browser’s download mechanism. Check that the file has finished downloading before closing the window.</p>
 
   <h2 id="shaders">Custom surface shaders</h2>

@@ -1,10 +1,11 @@
 [workspace]
+exclude = ["vendor/sesmesh"]
 members = ["crates/eigenvista-core", "crates/eigenvista-format", "crates/eigenvista-import", "crates/eigenvista-convert", "crates/eigenvista-control", "crates/eigenvista-wasm", "app/src-tauri"]
 default-members = ["crates/eigenvista-core", "crates/eigenvista-format", "crates/eigenvista-import", "crates/eigenvista-convert", "crates/eigenvista-control", "crates/eigenvista-wasm"]
 resolver = "2"
 
 [workspace.package]
-version = "0.8.0"
+version = "0.9.0"
 edition = "2024"
 license = "GPL-2.0-or-later"
 

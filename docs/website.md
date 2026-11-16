@@ -15,9 +15,16 @@ connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
 Version 0.8.0 includes the packaged connector; the AI pages guide users from
 that installed binary. Older 0.7.2 packages predate control.
-The homepage hero highlights **AI-enabled viewing**, links directly to the AI
-overview, and names the compatible 0.8.0 package beside the callout.
+The published homepage hero highlights **AI-enabled viewing**, links directly to
+the AI overview, and names the compatible 0.8.0 package beside the callout.
 Keep that availability label aligned with the actual public release.
+
+The current feature-branch source is **0.9.0 (unreleased)**. Its new
+scientific-inspection manual and three tutorials describe test-build controls,
+not the published 0.8.0 download. Keep those pages and the source-version label
+explicitly unreleased; release links, DOI and historical capture versions must
+continue to identify their actual published artifacts. Do not invent a 0.9.0
+download while preparing the documentation.
 
 ## A static directory, with a small publisher
 
