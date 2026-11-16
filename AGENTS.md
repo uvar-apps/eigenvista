@@ -113,8 +113,8 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current source version **0.8.0** is preparing its first connector-enabled
-  release (#78–#81): shared controller, authenticated opt-in native connection,
+- Current source version **0.8.0** has passed local runtime, clean-source package,
+  extracted-native connector and website qualification for its first release (#78–#81): shared controller, authenticated opt-in native connection,
   prebuilt helper, packaged launcher, self-contained instructions/examples and
   palettes, natural-language guides and four website-only tutorials. The user
   authorized commit/tag/push/publication and rebuilt redistributables. Check the

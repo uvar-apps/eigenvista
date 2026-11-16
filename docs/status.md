@@ -34,8 +34,27 @@ production build and all 546 Chromium/WebKit browser cases (273 per engine,
 hashes remained stable. Twenty packaging tests passed, including private-file
 exclusion before access. The complete public documentation link scan passed
 872 links, and installed-app setup prompts match exactly. Logs and hashes are
-under `tmp/2026-11-16-release-0.8.0/`. Clean-source optimized packaging, actual
-extracted-native acceptance and final website/publication checks are next.
+under `tmp/2026-11-16-release-0.8.0/`. Clean-source optimized packaging and
+extracted-native acceptance have now passed. The independent audit matched all
+572 source files to commit `f4ff87fab6e5d19bd3f93cafe0a30161d67ee6bd`, verified the
+signed app and 13 connector files, and confirmed private-file exclusions. The
+actual extracted bundle passed 74 helper calls, eight PNG exports, density and
+128³ HOMO generation, native save/reopen, URL-fetched 1AON Pastel/AO and protein
+cartoons. Original inputs remained unchanged; only owned test processes were
+stopped and their private descriptors removed.
+
+Rebuilt artifact: `EigenVista-0.8.0-apple-silicon-20261116T065542Z-f4ff87f.zip`,
+78,396,448 bytes, SHA-256
+`b9cc83b8fcd25179513a99ace879472c819b07efe56982c60480ce6912666a31`.
+The app/converter/helper are optimized arm64 builds with verified ad-hoc
+signatures and system-only runtime libraries. macOS 27.0 was exercised; macOS13
+is the deployment target, not full OS-range qualification.
+
+Final website checks pass: 23 pages, 854 local references, 62 image uses and
+22 exact downloads. All 138 route/viewport cases and interactions passed in
+Chromium/WebKit (`tmp/2026-11-15-website/browser-nXbckB/RESULT.json`). Historical
+0.7.2 capture identities are preserved separately from current 0.8.0 downloads.
+Publication evidence will be appended after release/download/Pages readback.
 See [release notes](releases/0.8.0.md). No earlier release is modified.
 
 ## Pre-release application-control evidence: 16 November 2026
