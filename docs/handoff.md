@@ -33,6 +33,37 @@ application developed by Ugo Varetto from 2006 to 2010. The
 The current Rust/TypeScript code is its new implementation; recent preview names
 and subtree extraction describe development/Git provenance.
 
+## Citation update: 16 November 2026
+
+The user supplied the 0.8.0 Zenodo DOI `10.5281/zenodo.24273137` after publication.
+DataCite confirms a findable Software record, title **EigenVista: molecular and
+quantum chemistry visualization**, author Ugo Varetto, issued 2026-11-16, with
+`IsVersionOf` linking to the concept DOI `10.5281/zenodo.24246123`. The version
+association is supplied by the user; DataCite's separate version field is empty.
+Zenodo's own page/API returned HTTP 403 to automated requests.
+
+`CITATION.cff`, the README, About's citation section, every website footer and
+the 0.8.0 release notes now reference the version DOI. Citation metadata passed
+the official CFF 1.2.0 schema and matches the registered title/DOI. This is a
+documentation-only follow-up; the existing release tag, binary source and
+redistributables retain their identities. Fresh local website checks passed: 23 pages, 878 local references, 62 image
+uses, 22 exact downloads and all 138 Chromium/WebKit route/viewport cases plus
+interactions (`tmp/2026-11-15-website/browser-E6MR2E/RESULT.json`). Six additional
+1440/390/320 citation layouts passed and desktop/phone captures were inspected.
+An initial 320px overflow from the displayed full resolver URL was corrected by
+using the bare DOI as link text, retaining its full resolver target and every
+original width assertion. App runtime suites were not rerun for this metadata
+change; the release results remain applicable. Evidence is under
+`tmp/2026-11-16-doi-0.8.0/`.
+
+Published in commit `705cb35a2a69727ab959136b92c920ffa838b0ff` through the
+[Pages-only publisher](https://github.com/uvar-apps/eigenvista/actions/runs/43825880869).
+All 77 public HTTPS files (25,599,746 bytes) match the tracked local payload,
+and the public `CITATION.cff` matches exactly. The existing GitHub 0.8.0 release
+body now includes the DOI while preserving its previous content. Its ZIP digest
+and annotated tag identities remain unchanged; no app rebuild, retag or hosted
+application tests were performed.
+
 ## Verification policy: 14 November 2026
 
 The user requires **all relevant tests and checks to pass locally before any

@@ -21,6 +21,23 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Version citation: 16 November 2026
+
+The 0.8.0 Zenodo DOI is [10.5281/zenodo.24273137](https://doi.org/10.5281/zenodo.24273137),
+supplied by the user after release. DataCite confirms the registered software,
+author/title/date and version-of relationship. Citation metadata is maintained
+in the root `CITATION.cff`, README, website About/footer and 0.8.0 release notes.
+The CFF file passes the official 1.2.0 schema. App sources, the existing tag and
+release assets are unchanged; their full runtime results below remain applicable.
+Local website checks passed all 138 cases/interactions, six additional citation
+layouts, schema/syntax and documentation links. Published in commit `705cb35a2a69727ab959136b92c920ffa838b0ff` through the
+[Pages-only publisher](https://github.com/uvar-apps/eigenvista/actions/runs/43825880869).
+All 77 public HTTPS files (25,599,746 bytes) match the tracked local payload,
+and the public `CITATION.cff` matches exactly. The existing GitHub 0.8.0 release
+body now includes the DOI while preserving its previous content. Its ZIP digest
+and annotated tag identities remain unchanged; no app rebuild, retag or hosted
+application tests were performed.
+
 ## Source version 0.8.0
 
 Published on 16 November 2026 after the user's release authorization. This is the first packaged

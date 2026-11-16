@@ -65,7 +65,12 @@ Keep tutorial actions aligned with the actual running connector's capabilities.
 Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
-third-party credits.
+third-party credits. The shared footer links to About's **Cite EigenVista**
+section. `CITATION.cff`, the README citation and About use the archived version's
+DOI; 0.8.0 is `10.5281/zenodo.24273137`. Keep the citation title, author, version
+and DOI synchronized. A version DOI identifies that archive, so do not assign it
+to a later version. DOI metadata added after publication updates documentation
+and release notes without moving the existing tag or rebuilding immutable assets.
 Project history traces EigenVista to Molekel, developed by Ugo Varetto from
 2006 to 2010. Link the original repository and website from README/About History.
 Describe the Rust/TypeScript code as the new implementation; repository subtree
