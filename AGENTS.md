@@ -102,7 +102,7 @@ preserve those historical results as evidence of what ran at the time.
   [website maintenance](docs/website.md) and current handoff for evidence.
   AI pages are authored in `ai.mjs`, `ai-quantum.mjs` and `ai-molecules.mjs` under
   `tools/site/content/`. Keep the shared installation/attachment prompts aligned
-  with `docs/ai-connector.md`. Until a connector release is actually published,
+  with `docs/ai-connector.md`. For installed-app setup,
   distinguish the connector-enabled 0.8.0 package from older 0.7.2 downloads.
   Keep current setup instructions aligned with the packaged binary and preserve
   historical capture/version provenance.
@@ -113,8 +113,8 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current source version **0.8.0** has passed local runtime, clean-source package,
-  extracted-native connector and website qualification for its first release (#78–#81): shared controller, authenticated opt-in native connection,
+- Current version **0.8.0** is published, with local runtime, clean-source package,
+  extracted-native connector, downloaded-asset and public website verification (#78–#81): shared controller, authenticated opt-in native connection,
   prebuilt helper, packaged launcher, self-contained instructions/examples and
   palettes, natural-language guides and four website-only tutorials. The user
   authorized commit/tag/push/publication and rebuilt redistributables. Check the

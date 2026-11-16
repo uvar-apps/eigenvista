@@ -108,6 +108,9 @@ agent, with a prebuilt connector inside the Apple Silicon application. Ask Codex
 Claude Code, Pi, OpenCode or another terminal-capable agent to explore orbitals,
 load palettes, prepare molecular views and export figures. The normal GUI remains
 the same; no embedded console or model account is required.
+The 0.8.0 release is published with rebuilt Apple Silicon redistributables,
+release notes, checksum and build information. All relevant local checks,
+extracted-app workflows and downloaded release assets passed verification.
 This remains an experimental development preview, not v1 or completion of the
 M0–M7 plan. See [implementation status](docs/status.md#source-version-080) and
 [0.8.0 release notes](docs/releases/0.8.0.md) for qualification and delivery.

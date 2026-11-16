@@ -1,10 +1,12 @@
 # Development handoff
 
-Updated 16 November 2026 for release 0.8.0: shared application control (#78),
-natural-language workflows, palette/biological control and standalone binary
-setup (#79–#81). The user authorized versioning, rebuilt redistributables,
-commit/tag/push and publication. Fresh qualification is in progress; the 0.7.2
-published assets remain unchanged until the new release is published.
+Updated 16 November 2026 after publishing 0.8.0: shared application control
+(#78), natural-language workflows, palette/biological control and standalone
+binary setup (#79–#81). Fresh local verification, optimized packaging, extracted
+native acceptance, downloaded release assets and the public website all passed.
+Tag `v0.8.0` resolves to `cd0e7f3`; clean binary source is `f4ff87f`. Earlier
+published assets remain unchanged. Dated entries below preserve their then-current
+publication state; use the 0.8.0 release section for the current delivery record.
 
 Published **0.7.2** adds background controls (#73),
 transparent PNG (#74) and optional MatterViz Muted/Pastel palettes. Fresh local
@@ -73,9 +75,29 @@ Final website checks pass: 23 pages, 854 local references, 62 image uses and
 22 exact downloads. All 138 route/viewport cases and interactions passed in
 Chromium/WebKit (`tmp/2026-11-15-website/browser-nXbckB/RESULT.json`). Historical
 0.7.2 capture identities are preserved separately from current 0.8.0 downloads.
-Publication evidence will be appended after release/download/Pages readback.
+Published 16 November 2026 at **2026-11-16T07:07:15Z** as the experimental
+[0.8.0 prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0).
+Annotated tag `v0.8.0`, object `b586a1ca1b15ddd539b94154724aad5f715cba53`,
+resolves locally/remotely to `cd0e7f3f392dec9c92211b9731f4b1de9a5cc904`.
+The clean binary source remains `f4ff87fab6e5d19bd3f93cafe0a30161d67ee6bd`;
+the tag adds only verified release/website metadata. All 190 monitored runtime
+files are identical to the fully qualified source. The published ZIP, checksum
+and build JSON were downloaded and matched the local files byte for byte.
 
-The rebuilt binary source commit will be recorded in BUILD-INFO. Final website
+The Pages-only publisher completed successfully for the tagged release commit:
+[deployment 43821665849](https://github.com/uvar-apps/eigenvista/actions/runs/43821665849).
+All **77 public HTTPS files** (25,597,705 bytes), including every AI page, portable
+instruction file, image, stylesheet and example, match the tracked local payload
+exactly (`tmp/2026-11-16-release-0.8.0/public-site.json`). Twelve additional
+Chromium/WebKit desktop/phone layouts and actual native PNG alpha checks passed.
+Issues #78–#81 are closed with the
+[release outcome](https://github.com/uvar-apps/eigenvista/issues/81#issuecomment-6909970380).
+Optional in-app setup discovery remains low-priority research in #82.
+No application hosted verification was started. Existing debug app 89325,
+Vite 77799 and website server 97144 remain intact. Current platform qualification
+is local macOS; no notarization or clean-Mac/full-OS-range claim is added.
+
+The rebuilt binary source commit is recorded in BUILD-INFO. Final website
 artifact metadata and publication evidence are separate documentation changes;
 verify that application/runtime hashes remain identical before tagging/pushing.
 The user's debug app and existing preview servers remain running. No new
