@@ -1,0 +1,69 @@
+{
+  "sha256": "4798e6b8e5ff2623fd6ca86a27c4b7dc264a2733a9d0a41ba6a350334733c27b",
+  "checks": [
+    {
+      "width": 1200,
+      "scrollWidth": 1200,
+      "messages": 14,
+      "images": [
+        {
+          "loaded": true,
+          "ratioError": 0.000018743484407668376
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000018743484407668376
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000018743484407668376
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000018743484407668376
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000018743484407668376
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000018743484407668376
+        }
+      ],
+      "networkRequests": 0
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "messages": 14,
+      "images": [
+        {
+          "loaded": true,
+          "ratioError": 0.000032336374540919977
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000032336374540919977
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000032336374540919977
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000032336374540919977
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000032336374540919977
+        },
+        {
+          "loaded": true,
+          "ratioError": 0.000032336374540919977
+        }
+      ],
+      "networkRequests": 0
+    }
+  ]
+}

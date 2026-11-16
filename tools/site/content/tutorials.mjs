@@ -9,7 +9,7 @@ export default [
     number: "04",
     body: `
       <h2 id="before-you-start">Before you start</h2>
-      <p>Use the <a href="install.html">EigenVista 0.7.2 Mac preview</a> for these lessons. Open the downloaded example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the installed app runs the local molecular workflows.</p>
+      <p>Use the <a href="install.html">EigenVista 0.8.0 Mac preview</a> for these lessons. Open the downloaded example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the installed app runs the local molecular workflows.</p>
       <p>Start with the first lesson if you are new to the viewport. Then choose the kind of data you work with. Keep the original inputs and save your work to new <code>.eigenvista</code> files.</p>
 
       <h2 id="learning-path">Your learning path</h2>
@@ -18,6 +18,15 @@ export default [
         <li><p><a href="tutorials-orbitals.html"><strong>Explore orbitals from a real calculation</strong></a>. Explore the HOMO and LUMO of a bicyclic hydrocarbon, compare volume and surface views, and save a smooth orbital mesh.</p></li>
         <li><p><a href="tutorials-cube.html"><strong>Inspect a sampled cube field</strong></a>. Explore a scalar field around a 29-atom complex, compare volume and surface views, and save the grid with its mesh.</p></li>
         <li><p><a href="tutorials-ao.html"><strong>Read a large biological structure</strong></a>. Use MatterViz Pastel and ambient occlusion on 1AON, then switch to chain cartoons and isolate a chain.</p></li>
+      </ol>
+
+      <h2 id="ai-learning-path">Explore with your AI agent</h2>
+      <p>The <a href="ai.html">AI connector guide</a> explains how to use Codex, Claude Code, Pi, OpenCode or another local coding agent with the installed viewer and its bundled helper. EigenVista 0.8.0 for Mac includes everything needed to connect the viewer to your agent; complete the setup guide before starting these lessons.</p>
+      <ol>
+        <li><a href="ai-tutorial-orbitals.html">From a prompt to a HOMO figure</a>: a recorded orbital, shader and image-export session.</li>
+        <li><a href="ai-tutorial-density.html">Explore electron density</a>: direct volume sampling, an envelope mesh and a view into the molecular interior.</li>
+        <li><a href="ai-tutorial-ao.html">Read crowded atomic structure</a>: ambient occlusion and atomic representations on a large molecular assembly.</li>
+        <li><a href="ai-tutorial-representations.html">Find the assembly's shape</a>: trace, tube, ribbon and cartoon views, with atomic detail when you need it.</li>
       </ol>
 
       <h2 id="example-files">Download the examples</h2>

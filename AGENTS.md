@@ -40,6 +40,11 @@ documents; older `.molekel` preview documents remain readable. Check
 - [Handoff](docs/handoff.md) — current work, next gates, common traps.
 - [Architecture](docs/architecture.md) — crate ownership and data contracts.
 - [Development](docs/development.md) — full setup, build, test, acceptance steps.
+- [Application control](docs/application-control.md) — opt-in external harness API,
+  CLI, scoped files and jobs; preserve the normal GUI and scientific ownership.
+- [AI connector guide](docs/ai-connector.md) — manual and agent-assisted setup,
+  Codex/Claude Code/Pi/OpenCode/generic-agent use. The four prompt-driven tutorials
+  live only in the website content modules, not as separate Markdown documents.
 - [Docs index](docs/README.md) · [User guide](docs/user-guide.md) · [Status](docs/status.md)
 - [User website](https://uvar-apps.github.io/eigenvista/) ·
   [Website maintenance](docs/website.md): static `site/` output, content, media and publishing.
@@ -95,8 +100,31 @@ preserve those historical results as evidence of what ran at the time.
   Keep the site synchronized with the user guide and actual UI; do not advertise
   future features or broaden platform/scientific qualification. See
   [website maintenance](docs/website.md) and current handoff for evidence.
+  AI pages are authored in `ai.mjs`, `ai-quantum.mjs` and `ai-molecules.mjs` under
+  `tools/site/content/`. Keep the shared installation/attachment prompts aligned
+  with `docs/ai-connector.md`. Until a connector release is actually published,
+  distinguish the connector-enabled 0.8.0 package from older 0.7.2 downloads.
+  Keep current setup instructions aligned with the packaged binary and preserve
+  historical capture/version provenance.
+  User-facing AI guides and prompts describe scientific/visual outcomes in
+  ordinary language. Never require users to name internal methods, JSON keys,
+  selectors or revision counters. The agent reads the separate technical API
+  reference/skill and handles those details. Support every tutorial action through
+  the shared controller, including palette and biological presentation changes;
+  do not hand those steps back to the user as manual GUI chores.
 
-- Current version **0.7.2** is published for background controls (#73),
+- Current source version **0.8.0** is preparing its first connector-enabled
+  release (#78–#81): shared controller, authenticated opt-in native connection,
+  prebuilt helper, packaged launcher, self-contained instructions/examples and
+  palettes, natural-language guides and four website-only tutorials. The user
+  authorized commit/tag/push/publication and rebuilt redistributables. Check the
+  living handoff/status for fresh qualification and publication evidence; do not
+  substitute earlier source-preview checks for the actual extracted release.
+  Source packages exclude protected private working documents before access.
+  The normal GUI, scientific profiles, dependencies/toolchain and icon are unchanged.
+  Read [0.8.0 notes](docs/releases/0.8.0.md) and the [connector guide](docs/ai-connector.md).
+
+- Version **0.7.2** is published for background controls (#73),
   transparent PNG (#74) and optional MatterViz Muted/Pastel files. Immutable source
   `5f336b6a2d53dcb0db67dd5ed95956134a5a1e18`, annotated tag `v0.7.2`, is available at
   the [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2). Fresh local macOS checks passed:
@@ -262,7 +290,8 @@ preserve those historical results as evidence of what ran at the time.
   `app/tests/field-preview.spec.ts`; release evidence is in `docs/status.md`.
 
 - Workspace members: `eigenvista-core`, `eigenvista-format`, `eigenvista-import`,
-  `eigenvista-convert`, `eigenvista-wasm`, plus `app/src-tauri` (`eigenvista-desktop`).
+  `eigenvista-convert`, `eigenvista-wasm`, `eigenvista-control`, plus
+  `app/src-tauri` (`eigenvista-desktop`).
   **Default members exclude the desktop shell** — `cargo test` alone is not a
   Tauri/shell check; use `-p eigenvista-desktop` when native behavior changes.
 - Scientific logic (chemistry, import, format validation) belongs in Rust crates.

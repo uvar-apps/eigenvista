@@ -13,6 +13,7 @@ tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 eigenvista-core = { path = "../../crates/eigenvista-core" }
 eigenvista-format = { path = "../../crates/eigenvista-format" }
+eigenvista-control = { path = "../../crates/eigenvista-control" }
 serde_json.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]

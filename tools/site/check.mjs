@@ -14,6 +14,11 @@ const root = path.resolve(
 );
 const site = path.join(root, "site"),
   base = "https://uvar-apps.github.io/eigenvista/";
+// Captures keep the app identity they were actually made with as downloads advance.
+const capturedRelease = Object.freeze({
+  version: "0.7.2",
+  source: "5f336b6a2d53dcb0db67dd5ed95956134a5a1e18",
+});
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const files = [];
 const walk = (directory, prefix = "") => {
@@ -52,7 +57,25 @@ const html = new Map(
       fs.readFileSync(path.join(site, row.path), "utf8"),
     ]),
 );
-assert.equal(html.size, 16, "Complete website route inventory");
+assert.equal(html.size, 23, "Complete website route inventory");
+for (const page of [
+  "ai.html", "ai-install.html", "ai-guide.html",
+  "ai-tutorial-orbitals.html", "ai-tutorial-density.html",
+  "ai-tutorial-ao.html", "ai-tutorial-representations.html",
+]) assert(html.has(page), `Complete AI guide and tutorial route: ${page}`);
+// User requests name outcomes; connector operations belong in the agent's technical guide.
+const controlMethods = [...fs.readFileSync(path.join(root, "app/src/control.ts"), "utf8").matchAll(/^  "([a-z_]+\.[a-z_]+)": definition/gm)].map((match) => match[1]);
+assert.equal(controlMethods.length, 28, "Discover the complete current connector contract");
+const assertUserLanguage = (name, content) => {
+  for (const method of controlMethods) assert(!content.includes(method), `Natural-language user page must not require ${method}: ${name}`);
+  assert(!/Do this part yourself|read app\.state|INPUT_ROOT|OUTPUT_ROOT|expectedRevision|fieldIds|shader\.set_uniforms/.test(name.startsWith("ai-tutorial-") ? content : ""), `No API/connection tasks in visualization lesson: ${name}`);
+};
+assert.throws(() => assertUserLanguage("ai-tutorial-ao.html", "read app.state and structure.list"));
+assert.throws(() => assertUserLanguage("ai-tutorial-ao.html", "Do this part yourself"));
+for (const name of ["ai.html", "ai-install.html", "ai-guide.html", "ai-tutorial-orbitals.html", "ai-tutorial-density.html", "ai-tutorial-ao.html", "ai-tutorial-representations.html"]) {
+  assertUserLanguage(name, html.get(name));
+  assert(!/\b[A]GENTS\.md\b|EIGENVISTA_REPO|cargo build|git clone|rustup|wasm-bindgen|\/target\/debug|tools\/site\/examples/.test(html.get(name)), `Installed-app user setup must not depend on development files/tools: ${name}`);
+}
 const ids = new Map(
   [...html].map(([name, text]) => {
     const all = [...text.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
@@ -137,8 +160,8 @@ for (const [name, text] of html) {
   assert(text.includes(`eigenvista-social.png?v=${hash(preview).slice(0,12)}`), name);
 }
 const discovery = JSON.parse(fs.readFileSync(path.join(site, "assets/social/provenance.json")));
-assert.equal(discovery.applicationVersion, release.version);
-assert.equal(discovery.applicationSource, release.source);
+assert.equal(discovery.applicationVersion, capturedRelease.version);
+assert.equal(discovery.applicationSource, capturedRelease.source);
 assert.equal(discovery.durationSeconds, 30);
 assert.deepEqual(discovery.socialImage.sourceImages.map(row => row.file), [
   "assets/media/quantum-xray.webp", "assets/media/1aon-ao-on.webp",
@@ -173,12 +196,26 @@ assert.throws(() =>
 const downloaded = JSON.parse(
   fs.readFileSync(path.join(site, "downloads/provenance.json")),
 );
-assert.equal(downloaded.files.length, 19);
+assert.equal(downloaded.files.length, 22);
+for (const filename of ["eigenvista-control/SKILL.md", "eigenvista-control/reference.md", "eigenvista-control/README.md"])
+  assert(downloaded.files.some((row) => row.file === filename), `Portable binary connector instructions: ${filename}`);
 for (const row of downloaded.files) {
   const bytes = fs.readFileSync(path.join(site, "downloads", row.file));
   assert.equal(bytes.length, row.bytes);
   assert.equal(hash(bytes), row.sha256);
   assert.deepEqual(bytes, fs.readFileSync(path.join(root, row.source)));
+}
+const portable = path.join(site, "downloads/eigenvista-control");
+const skill = fs.readFileSync(path.join(portable, "SKILL.md"), "utf8");
+assert(skill.includes("[reference.md](reference.md)"), "Portable skill carries its local technical reference");
+for (const name of ["SKILL.md", "reference.md", "README.md"]) {
+  const text = fs.readFileSync(path.join(portable, name), "utf8");
+  assert(!/\b[A]GENTS\.md\b|EIGENVISTA_REPO|cargo build|git clone|rustup|wasm-bindgen|target\/debug/.test(text), `Portable instructions need no development checkout: ${name}`);
+  for (const match of text.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
+    if (/^[a-z]+:/i.test(match[1]) || match[1].startsWith("#")) continue;
+    const target = path.resolve(portable, match[1].split("#")[0]);
+    assert(target.startsWith(portable + path.sep) && fs.existsSync(target), `Skill folder must carry its dependencies: ${match[1]}`);
+  }
 }
 assert.deepEqual(
   fs.readFileSync(path.join(site, "assets/favicon.svg")),
@@ -212,10 +249,10 @@ const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );
 assert(media && typeof media === "object", "Actual image provenance exists");
-assert.equal(media.application.version, release.version);
-assert.equal(media.application.sourceRevision, release.source);
+assert.equal(media.application.version, capturedRelease.version);
+assert.equal(media.application.sourceRevision, capturedRelease.source);
 assert.deepEqual(media.errors, []);
-assert.equal(media.images.length, 15);
+assert.equal(media.images.length, 16);
 for (const row of media.images) {
   assert(/^[a-z0-9-]+\.webp$/.test(row.file), row.file);
   const bytes = fs.readFileSync(path.join(site, "assets/media", row.file));
@@ -261,7 +298,7 @@ for (const pair of media.comparisons) {
 const mediaFiles = files.filter(
   (row) => row.path.startsWith("assets/media/") && row.path.endsWith(".webp"),
 );
-assert.equal(mediaFiles.length, 15, "All curated genuine captures");
+assert.equal(mediaFiles.length, 16, "All curated genuine captures");
 const expectedMedia = [
   "1aon-ao-off",
   "1aon-ao-on",
@@ -278,12 +315,20 @@ const expectedMedia = [
   "shader-controls",
   "cube-raycast",
   "app-overview",
+  "ai-session-xray",
 ];
 for (const name of expectedMedia)
   assert(
     mediaFiles.some((row) => row.path === `assets/media/${name}.webp`),
     name,
   );
+const aiCapture = media.images.find((row) => row.file === "ai-session-xray.webp");
+assert.equal(aiCapture.sourcePng, "docs/sample-ai-session/images/06-homo-xray-128.png");
+assert.equal(hash(fs.readFileSync(path.join(root, aiCapture.sourcePng))), aiCapture.sourcePngSha256);
+assert.equal(aiCapture.application.publishedRelease, false);
+assert.equal(aiCapture.width, 1700);
+assert.equal(aiCapture.height, 1328);
+assert.equal(aiCapture.resolution, 128);
 const bytes = files.reduce((sum, row) => sum + row.bytes, 0);
 assert(bytes < 25 * 1024 * 1024, `Static payload, including narrated on-demand video, remains bounded: ${bytes}`);
 for (const name of [

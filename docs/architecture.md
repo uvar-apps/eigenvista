@@ -1,6 +1,7 @@
 # As-built architecture
 
-This describes the published 0.7.2 development preview, including
+This describes the 0.8.0 development preview, including the shared
+application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
 not the complete
@@ -80,9 +81,48 @@ by native saving. There is no calculation server, remote service, or database.
 | [Shader parameter export](../app/src-tauri/src/shader_parameters.rs) | Bounded `.params` text, sibling-file write/sync/replacement, separate from molecular-document validation |
 | [Runner](../tools/run.mjs) and [packager](../tools/package-macos.mjs) | Repeatable builds/tests and verified tester artifacts |
 
-The Rust workspace's five default members are core, format, import, converter,
-and WASM. The desktop shell is a workspace member but requires an explicit
+The Rust workspace's six default members are core, format, import, converter,
+control and WASM. The desktop shell is a workspace member but requires an explicit
 workspace check or Tauri build. `cargo test` alone is not a desktop check.
+
+## External application control (0.8.0)
+
+`app/src/control.ts` owns versioned method schemas, validation, bounded metadata,
+revision guards and calculation jobs. Its host in `App.tsx` invokes the existing
+import, sampling, mesh, save and presentation flows. Scientific work remains in
+the existing owned WASM worker; the API does not create a second document or
+calculation engine. `Viewport.tsx` exposes an optional typed camera/background/
+capture port. API and toolbar PNG exports share the final-frame capture path.
+
+The #80 extension exposes palette load/reset and biological presentation through
+the same controller (28 methods in API v1). Palette loading uses the GUI's
+`parseAtomColors` parser and commits only a fully valid palette; native reads
+apply a 256 KiB limit before reserving the buffer. Palette and biological colors,
+visibility, residue subsets and representation overrides stay session-only.
+`control/presentation.ts` validates a whole biological patch before state changes,
+uses the existing source-index visibility/range helpers and mirrors GUI isolate/
+range transitions. Focus uses currently visible atoms. Summary replies expose
+bounded selectors and counts instead of per-atom arrays. Global representation
+retains its existing persisted-document/dirty semantics. Automatic AO radius can
+be restored after a manual radius, with the same transitions as the checkbox.
+These presentation changes do not invoke quantum evaluation or replace source
+scientific arrays. Human instructions describe desired views; agents translate
+them using the separate technical reference and workflow skill.
+
+The native `eigenvista-control` crate supplies an opt-in authenticated loopback
+NDJSON JSON-RPC broker, scoped filesystem adapter, client library and
+`eigenvista-ctl` binary. The Tauri bridge correlates requests with the frontend
+controller; the broker does not interpret scientific commands. File grants use
+Unix directory descriptors and no-follow traversal, protect imported sources,
+validate encoded documents/PNGs and publish without overwriting destinations.
+Unsupported native platforms reject explicit control activation; their normal
+startup is independent of it. Only local macOS is currently qualified.
+
+Browser attachment is separately opt-in through `?control=1`. Normal startup has
+no browser global API or native listener. Model integration belongs to the
+external harness. There is no embedded console, scripting runtime or MCP server.
+See the [API reference](application-control.md), [decision](design/2026-11-16-application-control-api.md)
+and [current verification record](handoff.md#shared-application-control-api-16-november-2026).
 
 ## Scientific contract
 

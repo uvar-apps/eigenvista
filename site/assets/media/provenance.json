@@ -9,7 +9,7 @@
     "verifiedAllDistAssetsAgainstReleaseAudit": true
   },
   "capture": {
-    "method": "Actual production application UI and its PNG export; only app-overview uses a full-window screenshot",
+    "method": "Actual production application UI and its PNG export; only app-overview uses a full-window screenshot The ai-session-xray.webp row is separately attributed to the later user-recorded external-agent source preview, not to the published 0.7.2 production build.",
     "browser": "Chromium 153.0.8010.12",
     "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
     "encoding": "cwebp lossless -m 6; every WebP decoded and exactly compared with original PNG by ImageMagick",
@@ -1140,6 +1140,45 @@
           0
         ]
       }
+    },
+    {
+      "file": "ai-session-xray.webp",
+      "bytes": 169034,
+      "sha256": "efdb958d0f6f31ed0165d03ff1ee416b2f9344ef2cec0780afb5aab102308fc8",
+      "sourcePng": "docs/sample-ai-session/images/06-homo-xray-128.png",
+      "sourcePngSha256": "2064910c73802aeeff7dc5a271d1c3d7198af366911d5505475031a5a6224226",
+      "width": 1700,
+      "height": 1328,
+      "input": "tools/site/examples/bicyclic-c7h10.molden",
+      "background": "#10243a",
+      "field": "MO 26 (26a), HOMO",
+      "isovalue": 0.03,
+      "mode": "Isosurface mesh",
+      "resolution": 128,
+      "shader": "x-ray; exact adjusted uniforms are not recorded in the shared transcript",
+      "camera": {
+        "fitBeforeOrbit": true,
+        "horizontalDegrees": 30,
+        "verticalDegrees": 15,
+        "preservedAfterMeshRefinement": true
+      },
+      "ambientOcclusion": "Enabled for atoms/bonds in the recorded session; numeric settings not recorded",
+      "geometry": {
+        "atoms": 17,
+        "basis": 125,
+        "orbitalCount": 118,
+        "surfaceTriangles": 18736
+      },
+      "captureType": "Original application PNG from a user-recorded external coding-agent session",
+      "application": {
+        "name": "EigenVista",
+        "version": "0.7.2 source preview after the published release",
+        "baseline": "d48a8111c5908559ac7842ac95052201e95b7cf7",
+        "publishedRelease": false
+      },
+      "sourceConversation": "https://chatgpt.com/s/cx_6afa6aac0fa48191befd5ad211e86009",
+      "archive": "docs/sample-ai-session/README.md",
+      "encoding": "cwebp -lossless -m 6; ImageMagick AE exactly 0 against source PNG"
     }
   ],
   "errors": [],

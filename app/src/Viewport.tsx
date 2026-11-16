@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect, useMemo, useRef, useState, type MutableRefObject,
+} from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
@@ -47,6 +49,7 @@ import {
   retintProteinGeometry,
 } from "./proteinGeometry";
 import { useProteinBackbone } from "./useProteinBackbone";
+import type { CameraState, ViewportControl, ViewportImage } from "./viewportControl";
 const DEFAULT_STRUCTURE_DISPLAY = defaultStructureDisplay();
 const DEFAULT_BACKGROUND_COLOR = "#e8edef";
 
@@ -158,6 +161,7 @@ export function Viewport({
   reset,
   onSelect,
   onShaderLog,
+  controlRef,
 }: {
   doc: EigenVistaDocument;
   grid: SampledGrid | null;
@@ -171,6 +175,7 @@ export function Viewport({
   reset: number;
   onSelect: (text: string) => void;
   onShaderLog?: (log: string) => void;
+  controlRef?: MutableRefObject<ViewportControl | null>;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [backgroundColor, setBackgroundColor] = useState(
@@ -231,6 +236,13 @@ export function Viewport({
     );
   }, [doc.atoms, doc.structure, doc.view.representation, layoutKey]);
   const protein = useProteinBackbone(doc, proteinNeeded);
+  const sceneInput = useMemo(() => ({}), [
+    doc, grid, mode, volumeQuality, shading, shader?.vertexSource,
+    shader?.fragmentSource, shader?.target, layoutKey, protein.backbone, proteinNeeded,
+  ]);
+  const requestedScene = useRef(sceneInput);
+  requestedScene.current = sceneInput;
+  const committedScene = useRef<object | null>(null);
   const [proteinMessages, setProteinMessages] = useState<string[]>([]);
   const committedDoc = useRef(doc);
   const committedDisplay = useRef(display);
@@ -246,8 +258,26 @@ export function Viewport({
     draw: () => void;
     fit: () => void;
     focus: (atoms: readonly number[]) => void;
+    setUp: (up: THREE.Vector3) => void;
+    setSize: (width: number, height: number) => void;
     needsRender: boolean;
   } | null>(null);
+  type Engine = NonNullable<typeof engine.current>;
+  const queued = useRef<{
+    run: (current: Engine) => unknown;
+    resolve: (value: unknown) => void;
+    reject: (reason: unknown) => void;
+    draw: boolean;
+    document: EigenVistaDocument;
+    waitForProtein: boolean;
+    commit: number;
+  }[]>([]);
+  const [controlCommit, requestCommit] = useState(0);
+  const nextControlCommit = useRef(0);
+  const latestDocument = useRef(doc);
+  latestDocument.current = doc;
+  const proteinPending = useRef(false);
+  proteinPending.current = proteinNeeded && !protein.backbone && !protein.error;
   const selection = useRef(onSelect);
   selection.current = onSelect;
   const shaderRef = useRef(shader);
@@ -289,7 +319,7 @@ export function Viewport({
     key.position.set(4, 6, 8);
     scene.add(key);
     const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 1000);
-    const controls = new OrbitControls(camera, renderer.domElement);
+    let controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     const group = new THREE.Group();
     scene.add(group);
@@ -311,6 +341,12 @@ export function Viewport({
         );
       }
       renderer.render(scene, camera);
+    };
+    const setSize = (width: number, height: number) => {
+      renderer.setSize(width, height);
+      camera.aspect = width / Math.max(height, 1);
+      camera.updateProjectionMatrix();
+      if (engine.current) engine.current.needsRender = true;
     };
     const fitBox = (box: THREE.Box3) => {
       if (box.isEmpty()) return;
@@ -361,6 +397,45 @@ export function Viewport({
       draw,
       fit,
       focus,
+      setSize,
+      setUp: (up) => {
+        if (camera.up.equals(up)) return;
+        // OrbitControls fixes its up-axis quaternion at construction. Recreate
+        // through its public API when the requested camera up direction changes.
+        const previous = controls;
+        previous.removeEventListener("change", invalidate);
+        previous.dispose();
+        camera.up.copy(up);
+        controls = new OrbitControls(camera, renderer.domElement);
+        Object.assign(controls, {
+          enabled: previous.enabled,
+          enableDamping: previous.enableDamping,
+          dampingFactor: previous.dampingFactor,
+          minDistance: previous.minDistance,
+          maxDistance: previous.maxDistance,
+          minZoom: previous.minZoom,
+          maxZoom: previous.maxZoom,
+          minTargetRadius: previous.minTargetRadius,
+          maxTargetRadius: previous.maxTargetRadius,
+          minPolarAngle: previous.minPolarAngle,
+          maxPolarAngle: previous.maxPolarAngle,
+          minAzimuthAngle: previous.minAzimuthAngle,
+          maxAzimuthAngle: previous.maxAzimuthAngle,
+          enableZoom: previous.enableZoom,
+          enableRotate: previous.enableRotate,
+          enablePan: previous.enablePan,
+          zoomSpeed: previous.zoomSpeed,
+          rotateSpeed: previous.rotateSpeed,
+          panSpeed: previous.panSpeed,
+          screenSpacePanning: previous.screenSpacePanning,
+          zoomToCursor: previous.zoomToCursor,
+          autoRotate: previous.autoRotate,
+          autoRotateSpeed: previous.autoRotateSpeed,
+        });
+        controls.cursor.copy(previous.cursor);
+        controls.addEventListener("change", invalidate);
+        if (engine.current) engine.current.controls = controls;
+      },
       needsRender: true,
     };
     // Wheel and middle-drag handlers update the camera before the animation tick.
@@ -370,10 +445,7 @@ export function Viewport({
     controls.addEventListener("change", invalidate);
     const resize = new ResizeObserver(() => {
       const { width, height } = div.getBoundingClientRect();
-      renderer.setSize(width, height);
-      camera.aspect = width / Math.max(height, 1);
-      camera.updateProjectionMatrix();
-      if (engine.current) engine.current.needsRender = true;
+      setSize(width, height);
     });
     resize.observe(div);
     const ray = new THREE.Raycaster();
@@ -431,6 +503,8 @@ export function Viewport({
       renderer.dispose();
       div.removeChild(renderer.domElement);
       engine.current = null;
+      for (const operation of queued.current.splice(0))
+        operation.reject(new Error("The viewport is no longer available"));
     };
   }, []);
   useEffect(() => {
@@ -705,6 +779,7 @@ export function Viewport({
     e.group.clear();
     e.group.add(group);
     committedDoc.current = doc;
+    committedScene.current = sceneInput;
     committedDisplay.current = stagedDisplay;
     atomsRef.current = stagedAtomIndices;
     setProteinMessages(stagedMessages);
@@ -808,36 +883,44 @@ export function Viewport({
     }
     current.needsRender = true;
   }, [ambientOcclusion]);
+  function captureImage(e: Engine, transparent: boolean): ViewportImage {
+    if (e.renderer.getContext().isContextLost())
+      throw new Error("Graphics context is lost");
+    const clearColor = e.renderer.getClearColor(new THREE.Color());
+    const clearAlpha = e.renderer.getClearAlpha();
+    let image: string;
+    try {
+      // Draw and encode in one task, before this non-preserved buffer can be
+      // discarded. Zero-alpha black keeps antialiasing and translucent fields
+      // compositable without baking the selected background into their RGB.
+      if (transparent) e.renderer.setClearColor(0x000000, 0);
+      e.draw();
+      image = e.renderer.domElement.toDataURL("image/png");
+      if (!image.startsWith("data:image/png;"))
+        throw new Error("The scene image could not be encoded as PNG");
+    } finally {
+      if (transparent) {
+        e.renderer.setClearColor(clearColor, clearAlpha);
+        e.needsRender = true;
+        e.draw();
+      }
+    }
+    return {
+      dataUrl: image,
+      width: e.renderer.domElement.width,
+      height: e.renderer.domElement.height,
+    };
+  }
   function screenshot(transparent = false) {
     const e = engine.current;
     if (!e) return;
     try {
-      if (e.renderer.getContext().isContextLost())
-        throw new Error("Graphics context is lost");
-      const clearColor = e.renderer.getClearColor(new THREE.Color());
-      const clearAlpha = e.renderer.getClearAlpha();
-      let image: string;
-      try {
-        // Draw and encode in one task, before this non-preserved buffer can be
-        // discarded. Zero-alpha black keeps antialiasing and translucent fields
-        // compositable without baking the selected background into their RGB.
-        if (transparent) e.renderer.setClearColor(0x000000, 0);
-        e.draw();
-        image = e.renderer.domElement.toDataURL("image/png");
-        if (!image.startsWith("data:image/png;"))
-          throw new Error("The scene image could not be encoded as PNG");
-      } finally {
-        if (transparent) {
-          e.renderer.setClearColor(clearColor, clearAlpha);
-          e.needsRender = true;
-          e.draw();
-        }
-      }
+      const image = captureImage(e, transparent);
       const a = document.createElement("a");
       a.download = transparent
         ? "eigenvista-view-transparent.png"
         : "eigenvista-view.png";
-      a.href = image;
+      a.href = image.dataUrl;
       a.click();
       setError((current) =>
         current.startsWith("Unable to export the scene image:") ? "" : current,
@@ -846,6 +929,217 @@ export function Viewport({
       setError(`Unable to export the scene image: ${String(error)}.`);
     }
   }
+  function available(): Engine {
+    const current = engine.current;
+    if (!current) throw new Error("The viewport is not available");
+    if (current.renderer.getContext().isContextLost())
+      throw new Error("Graphics context is lost");
+    return current;
+  }
+  function afterEffects<T>(
+    run: (current: Engine) => T,
+    draw = true,
+    waitForProtein = false,
+  ): Promise<T> {
+    available();
+    return new Promise((resolve, reject) => {
+      const commit = ++nextControlCommit.current;
+      queued.current.push({
+        run,
+        resolve: (value) => resolve(value as T),
+        reject,
+        draw,
+        document: latestDocument.current,
+        waitForProtein,
+        commit,
+      });
+      // A previous commit's pending passive effect must not acknowledge this
+      // operation before its requested state update has actually committed.
+      requestCommit(commit);
+    });
+  }
+  function vector(value: unknown, name: string): THREE.Vector3 {
+    if (
+      !Array.isArray(value) || value.length !== 3 ||
+      !value.every((part) =>
+        typeof part === "number" && Number.isFinite(part) &&
+        Number.isFinite(Math.fround(part)),
+      )
+    )
+      throw new TypeError(`${name} must contain three finite display coordinates`);
+    return new THREE.Vector3(value[0], value[1], value[2]);
+  }
+  function cameraState(current: Engine): CameraState {
+    return {
+      position: current.camera.position.toArray() as [number, number, number],
+      target: current.controls.target.toArray() as [number, number, number],
+      up: current.camera.up.toArray() as [number, number, number],
+    };
+  }
+  function validatedCamera(current: Engine, state: CameraState) {
+    if (!state || typeof state !== "object" || Array.isArray(state))
+      throw new TypeError("Camera state must be an object");
+    if (Object.keys(state).some((key) => !["position", "target", "up"].includes(key)))
+      throw new TypeError("Unknown camera state parameter");
+    const position = vector(state.position, "Camera position");
+    const target = vector(state.target, "Camera target");
+    const up = state.up === undefined
+      ? current.camera.up.clone()
+      : vector(state.up, "Camera up");
+    if (Math.abs(up.length() - 1) > 1e-6)
+      throw new RangeError("Camera up must be a unit direction");
+    up.normalize();
+    const offset = position.clone().sub(target);
+    const distance = offset.length();
+    const controls = current.controls;
+    if (
+      !Number.isFinite(distance) || distance <= 1e-8 ||
+      distance < controls.minDistance || distance > controls.maxDistance
+    )
+      throw new RangeError("Camera distance is degenerate or outside the current controls limits");
+    const aligned = offset.clone().applyQuaternion(
+      new THREE.Quaternion().setFromUnitVectors(up, new THREE.Vector3(0, 1, 0)),
+    );
+    const spherical = new THREE.Spherical().setFromVector3(aligned);
+    if (
+      spherical.phi < Math.max(1e-6, controls.minPolarAngle) ||
+      spherical.phi > Math.min(Math.PI - 1e-6, controls.maxPolarAngle)
+    )
+      throw new RangeError("Camera direction is at a pole or outside the current controls limits");
+    let min = controls.minAzimuthAngle, max = controls.maxAzimuthAngle;
+    if (Number.isFinite(min) && Number.isFinite(max)) {
+      if (min < -Math.PI) min += 2 * Math.PI; else if (min > Math.PI) min -= 2 * Math.PI;
+      if (max < -Math.PI) max += 2 * Math.PI; else if (max > Math.PI) max -= 2 * Math.PI;
+      if (min <= max ? spherical.theta < min || spherical.theta > max : spherical.theta > max && spherical.theta < min)
+        throw new RangeError("Camera azimuth is outside the current controls limits");
+    }
+    const targetRadius = target.distanceTo(controls.cursor);
+    if (targetRadius < controls.minTargetRadius || targetRadius > controls.maxTargetRadius)
+      throw new RangeError("Camera target is outside the current controls limits");
+    return { position, target, up };
+  }
+  function undamped(controls: OrbitControls, apply: () => void) {
+    const damping = controls.enableDamping, rotate = controls.autoRotate;
+    controls.enableDamping = false;
+    controls.autoRotate = false;
+    try {
+      apply();
+    } finally {
+      controls.enableDamping = damping;
+      controls.autoRotate = rotate;
+    }
+  }
+  const control = useMemo<ViewportControl>(() => Object.freeze<ViewportControl>({
+    getCamera: () => cameraState(available()),
+    setCamera: async (state) => {
+      const validated = validatedCamera(available(), state);
+      await afterEffects((current) => {
+        undamped(current.controls, () => current.controls.update());
+        current.setUp(validated.up);
+        undamped(current.controls, () => {
+          current.camera.position.copy(validated.position);
+          current.controls.target.copy(validated.target);
+          current.controls.update();
+        });
+      });
+    },
+    fit: () => afterEffects((current) => {
+      undamped(current.controls, () => {
+        current.controls.update();
+        current.fit();
+      });
+    }, true, true),
+    orbit: async (horizontalDegrees, verticalDegrees) => {
+      if (!Number.isFinite(horizontalDegrees) || !Number.isFinite(verticalDegrees))
+        throw new TypeError("Camera orbit angles must be finite numbers");
+      await afterEffects((current) => {
+        const before = cameraState(current);
+        const up = current.camera.up.clone().normalize();
+        const rotation = new THREE.Quaternion().setFromUnitVectors(up, new THREE.Vector3(0, 1, 0));
+        const offset = current.camera.position.clone().sub(current.controls.target).applyQuaternion(rotation);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        const horizontal = THREE.MathUtils.degToRad(horizontalDegrees % 360);
+        const vertical = THREE.MathUtils.degToRad(verticalDegrees);
+        spherical.theta += horizontal;
+        spherical.phi -= vertical;
+        if (spherical.phi < Math.max(1e-6, current.controls.minPolarAngle) || spherical.phi > Math.min(Math.PI - 1e-6, current.controls.maxPolarAngle))
+          throw new RangeError("Camera orbit would cross a pole or the current controls limits");
+        const position = new THREE.Vector3().setFromSpherical(spherical).applyQuaternion(rotation.invert()).add(current.controls.target);
+        validatedCamera(current, { ...cameraState(current), position: position.toArray() as [number, number, number] });
+        undamped(current.controls, () => {
+          current.controls.update();
+          current.camera.position.fromArray(before.position);
+          current.controls.target.fromArray(before.target);
+          current.controls.update();
+          current.controls.rotateLeft(-horizontal);
+          current.controls.rotateUp(vertical);
+        });
+      });
+    },
+    zoom: async (factor) => {
+      if (!Number.isFinite(factor) || factor <= 0)
+        throw new RangeError("Camera zoom factor must be a finite positive number");
+      await afterEffects((current) => {
+        const before = cameraState(current);
+        const position = current.camera.position.clone().sub(current.controls.target).divideScalar(factor).add(current.controls.target);
+        validatedCamera(current, { ...cameraState(current), position: position.toArray() as [number, number, number] });
+        undamped(current.controls, () => {
+          current.controls.update();
+          current.camera.position.fromArray(before.position);
+          current.controls.target.fromArray(before.target);
+          current.controls.update();
+          if (factor > 1) current.controls.dollyIn(1 / factor);
+          else if (factor < 1) current.controls.dollyOut(factor);
+        });
+      });
+    },
+    getBackground: () => `#${available().renderer.getClearColor(new THREE.Color()).getHexString()}`,
+    setBackground: async (color) => {
+      if (typeof color !== "string" || !/^#[0-9a-f]{6}$/i.test(color))
+        throw new TypeError("Background color must be a six-digit hexadecimal color");
+      available();
+      setBackgroundColor(color.toLowerCase());
+      await afterEffects(() => undefined);
+    },
+    capture: async (transparent = false) => {
+      if (typeof transparent !== "boolean") throw new TypeError("Transparent capture must be boolean");
+      return afterEffects((current) => captureImage(current, transparent), false, true);
+    },
+  }), []);
+  useEffect(() => {
+    if (!controlRef) return;
+    controlRef.current = control;
+    return () => { if (controlRef.current === control) controlRef.current = null; };
+  }, [controlRef, control]);
+  useEffect(() => {
+    if (queued.current.length === 0) return;
+    while (queued.current.length > 0) {
+      const operation = queued.current[0];
+      if (operation.commit > controlCommit) return;
+      if (operation.document !== latestDocument.current) {
+        queued.current.shift();
+        operation.reject(new Error("The requested scene is stale"));
+        continue;
+      }
+      if (operation.waitForProtein && proteinPending.current) return;
+      queued.current.shift();
+      try {
+        const current = available();
+        if (committedDoc.current !== operation.document || committedScene.current !== requestedScene.current)
+          throw new Error("The requested scene is stale or has not been prepared");
+        const bounds = host.current!.getBoundingClientRect();
+        if (bounds.width <= 0 || bounds.height <= 0)
+          throw new Error("The viewport has no drawable size");
+        current.setSize(bounds.width, bounds.height);
+        const result = operation.run(current);
+        if (operation.draw) current.draw();
+        current.needsRender = false;
+        operation.resolve(result);
+      } catch (cause) {
+        operation.reject(cause);
+      }
+    }
+  });
   return (
     <div className="scene-wrap" style={{ backgroundColor }}>
       <div className="scene" ref={host} data-testid="viewport" />

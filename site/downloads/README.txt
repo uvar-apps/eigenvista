@@ -13,3 +13,5 @@ matterviz-pastel.json / matterviz-muted.json: original MatterViz RGB values for 
 Source file paths and exact SHA-256 values: provenance.json.
 Source repository: https://github.com/uvar-apps/eigenvista
 Application/website license: GPL-2.0-or-later (../LICENSE.txt). Preserve original data and palette notices.
+
+Portable agent instructions: eigenvista-control/SKILL.md and reference.md form a complete optional workflow folder; README.md is the installed-app user guide. These instructions do not install a binary or enable an older app. A compatible EigenVista.app supplies the prebuilt connection helper and launcher. No source checkout or compiler is required for that binary package.

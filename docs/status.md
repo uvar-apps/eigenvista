@@ -21,6 +21,85 @@ its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
 
+## Source version 0.8.0
+
+Release preparation authorized on 16 November 2026. This is the first packaged
+AI connector release (#78–#81), with the same visible document, worker and
+renderer, opt-in authenticated native control, prebuilt helper/launcher and
+standalone user/agent instructions. Metadata is 0.8.0 across Cargo, npm and Tauri.
+Fresh local macOS 0.8.0 checks passed: formatting, 283 default Rust tests,
+eight desktop tests, strict workspace/all-targets Clippy, WASM/TypeScript/
+production build and all 546 Chromium/WebKit browser cases (273 per engine,
+16.8 minutes; no failed/skipped/retried cases). All 190 monitored runtime source
+hashes remained stable. Twenty packaging tests passed, including private-file
+exclusion before access. The complete public documentation link scan passed
+872 links, and installed-app setup prompts match exactly. Logs and hashes are
+under `tmp/2026-11-16-release-0.8.0/`. Clean-source optimized packaging, actual
+extracted-native acceptance and final website/publication checks are next.
+See [release notes](releases/0.8.0.md). No earlier release is modified.
+
+## Pre-release application-control evidence: 16 November 2026
+
+The following entries preserve the checks and publication state before the
+0.8.0 release request; use the current release section above for delivery state.
+
+[Issue #81](https://github.com/uvar-apps/eigenvista/issues/81) replaces the earlier
+developer-oriented installation guide with installed-binary setup. The app package
+now stages a signed prebuilt helper, portable instructions, examples/palettes and
+a system-tool-only launcher. A standalone extracted app passed 34 actual calls,
+quantum rendering/save/reopen and URL-downloaded 1AON Pastel/AO rendering without
+source or a development server; 19 packaging checks passed. The revised website
+passed all 138 route/viewport cases and interactions, plus 18 targeted phone/
+desktop checks. Static checks verify 23 pages and 22 exact-byte downloads,
+including the three portable instruction files. See the
+[binary setup handoff](handoff.md#standalone-binary-connection-setup-16-november-2026-local).
+The currently published 0.7.2 app/ZIP still predates the connector-enabled package.
+
+[Issue #80](https://github.com/uvar-apps/eigenvista/issues/80) extends the connector
+to existing palette and biological presentation controls. The user rejected #79's
+initial method-oriented prompts and manual GUI handoffs. All four website lessons
+and the interaction guide now use ordinary requests, with internal commands
+handled by the agent's separate technical reference/skill. Palette loading/reset,
+biological colors, subsets, styles/focus and automatic AO radius are accessible
+through the shared controller. Fresh local macOS qualification passed: 283 default
+Rust tests, eight desktop tests, fmt/strict Clippy, production build, 13 packaging
+checks, all 546 browser cases and 12 selected production API/representation cases.
+Native replay passed 277 CLI calls, 19 PNGs and eight source-preserving saves;
+the revised site passed 138 browser cases plus independent desktop/phone text
+and visual review. All 212 monitored source hashes stayed unchanged. See the
+[current handoff](handoff.md#natural-language-workflows-and-presentation-control-16-november-2026-local).
+
+[Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the
+[connector installation/user guide](ai-connector.md) for Codex, Claude Code, Pi,
+OpenCode and generic local agents, plus seven AI website pages containing four
+website-only tutorials. Local site checks passed: 23 pages, 138 Chromium/WebKit
+route/viewport cases and all interactions. Live native replay verified the four
+workflows and seven representations; see the
+[documentation handoff](handoff.md#initial-connector-guide-and-ai-website-tutorials-16-november-2026-local)
+for the initial evidence and limits, superseded by #80's qualification above.
+These changes are uncommitted and unpublished; the
+released 0.7.2 package still does not include the connector.
+
+[Issue #78](https://github.com/uvar-apps/eigenvista/issues/78) adds an opt-in shared
+application-control API, authenticated native JSON-RPC connector, Rust
+`eigenvista-ctl` client, external harness and coding-agent skill. The existing
+document/worker/renderer owns operations; the normal GUI adds no console or
+controls. This is uncommitted source after `d48a811`, with version metadata still
+0.7.2. Published 0.7.2 applications and ZIPs remain unchanged and do not include it.
+
+Fresh local macOS checks passed: fmt, 282 default Rust tests, eight desktop tests,
+strict workspace/all-targets Clippy, WASM/TypeScript/production build, all 540
+Chromium/WebKit browser cases (270 each; zero skipped/flaky/unexpected/retries)
+and 13 packaging checks. Actual native CLI/harness, auth/file/FIFO negatives,
+independent saved-document validation and PNG alpha/composition checks passed.
+Ten selected production API cases also passed, five per engine; the two
+development-only direct-WASM cases were outside that production smoke.
+Normal startup exposed no automation listener/global, and its 74 controls match
+the prior inventory. Native test processes used verified-PID signal cleanup;
+physical normal GUI exit was not requalified. Linux and signed-package
+qualification remain pending. See [handoff](handoff.md#shared-application-control-api-16-november-2026)
+for evidence and [application control](application-control.md) for usage/limits.
+
 ## Source version 0.7.2
 
 Published **2026-11-15T07:05:08Z** as a development

@@ -6,7 +6,7 @@ EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**[Download for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)** ·
+**[Download for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
@@ -38,6 +38,9 @@ with English narration and synchronized captions.
 - **Biological structure.** Color by chain, entity or deposited secondary
   structure; isolate components; combine atomic views with backbone traces,
   tubes, ribbons and strand-arrow cartoons.
+- **AI-enabled viewing.** Ask Codex, Claude Code, Pi, OpenCode or another local
+  agent to explore molecules and export figures. The Mac app includes its
+  connection helper and setup instructions; no source checkout is needed.
 - **Views worth keeping.** Save molecular data and generated meshes together in
   an `.eigenvista` file. Export the current view as a PNG, including a transparent
   background for figures and slides.
@@ -50,9 +53,9 @@ imports.
 
 ## Start here
 
-The current release is **0.7.2**, an experimental **Apple Silicon Mac** preview.
-The download includes the application, examples, shader presets, palettes and
-converter. It is ad-hoc signed and not Apple-notarized; follow the
+The current release is **0.8.0**, an experimental **Apple Silicon Mac** preview.
+The download includes the application, examples, shader presets, palettes,
+converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
 [installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
 first launch. Linux and Windows packages are not available yet.
 
@@ -100,16 +103,15 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Status:** version **0.7.2** is published as an experimental
-Apple Silicon development preview, not v1 or completion of the M0-M7 plan.
-It adds scene background controls, transparent PNG export and optional MatterViz
-Muted/Pastel atom palettes. Fresh local macOS 0.7.2 checks passed, including all
-526 browser cases. Rebuilt Apple Silicon assets, independent artifact/native
-acceptance, production checks and all three downloaded asset identities are
-verified. The earlier feature verification is recorded separately.
-See [implementation status](docs/status.md#source-version-072) and the
-[0.7.2 release notes](docs/releases/0.7.2.md). The published 0.7.1 release and its
-verified artifacts remain unchanged.
+**Status:** version **0.8.0** adds AI-enabled viewing through an external local
+agent, with a prebuilt connector inside the Apple Silicon application. Ask Codex,
+Claude Code, Pi, OpenCode or another terminal-capable agent to explore orbitals,
+load palettes, prepare molecular views and export figures. The normal GUI remains
+the same; no embedded console or model account is required.
+This remains an experimental development preview, not v1 or completion of the
+M0–M7 plan. See [implementation status](docs/status.md#source-version-080) and
+[0.8.0 release notes](docs/releases/0.8.0.md) for qualification and delivery.
+Earlier releases retain their original source and artifacts.
 
 Earlier releases added native close/quit protection, correct Molden limits,
 then-hosted verification, and reduced Molden-import/surface-publication work
@@ -162,6 +164,14 @@ expansion preferences and control state.
 - **Using the application:** [User guide](docs/user-guide.md), including Mac
   installation, supported files, controls, surfaces, saving, and troubleshooting.
 - **Building or running from source:** [Development guide](docs/development.md).
+- **Using Codex, Claude Code, Pi, OpenCode or another local agent:**
+  [Connector installation and user guide](docs/ai-connector.md), including a
+  copyable setup prompt for the installed app and its bundled prebuilt helper.
+  Version 0.8.0 bundles the helper, launcher, examples and palettes.
+  No source checkout or compiler is needed to use the package.
+  The [API reference](docs/application-control.md) covers methods and file grants;
+  the [AI website section](https://uvar-apps.github.io/eigenvista/ai.html) contains
+  four prompt-driven visualization tutorials.
 - **Sharing a tester ZIP:** [Packaging guide](docs/tester-packaging.md).
 - **Continuing development:** [Root AGENTS.md](AGENTS.md),
   [handoff](docs/handoff.md), and [as-built architecture](docs/architecture.md).
@@ -209,9 +219,9 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.7.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.2)
+The [0.8.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)
 provides the rebuilt ZIP, checksum and build metadata. Check
-[status](docs/status.md#source-version-072) for verified source, SHA256 and local
+[status](docs/status.md#source-version-080) for verified source, SHA256 and local
 verification evidence. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
 retains its original verified package; older releases are not updated in place.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)

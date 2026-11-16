@@ -153,6 +153,46 @@ for (const [engine, launcher] of [
       }
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto(base + "ai-install.html");
+    const agentTable = page.locator(".agent-setup-table");
+    assert.equal(await agentTable.getByRole("rowheader").count(), 6);
+    assert.equal(await agentTable.getByRole("columnheader").count(), 3);
+    const codexRow = agentTable.getByRole("row").filter({ has: page.getByRole("rowheader", { name: "Codex CLI", exact: true }) });
+    assert.equal(await codexRow.count(), 1);
+    const desktopHeader = await codexRow.getByRole("rowheader").boundingBox();
+    const desktopCell = await codexRow.getByRole("cell").first().boundingBox();
+    assert(desktopCell.x > desktopHeader.x + desktopHeader.width - 2);
+    const installer = await codexRow.getByRole("cell").first().textContent();
+    assert(installer.includes("existing") || installer.includes("local"));
+    const launcher = page.locator("pre code").filter({ hasText: '"/Applications/EigenVista.app/Contents/Resources/AI-connector/Start AI connection.command"' }).first();
+    const launcherCommand = await launcher.textContent();
+    assert.equal(launcherCommand, '"/Applications/EigenVista.app/Contents/Resources/AI-connector/Start AI connection.command"');
+    const setupPrompt = await page.locator("pre code").filter({ hasText: "Set up EigenVista so you can operate its desktop window for me." }).textContent();
+    assert(setupPrompt.includes("I authorize this installation and setup"));
+    assert(setupPrompt.includes("binary package from https://github.com/uvar-apps/eigenvista/releases"));
+    assert(setupPrompt.includes("standalone instructions"));
+    assert(!/cargo build|git clone|wasm-bindgen|EIGENVISTA_REPO/.test(setupPrompt));
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 844 });
+      const header = await codexRow.getByRole("rowheader").boundingBox();
+      const cells = codexRow.getByRole("cell");
+      const install = await cells.nth(0).boundingBox();
+      const start = await cells.nth(1).boundingBox();
+      assert(install.y >= header.y + header.height - 2, "Phone installer is stacked below agent name");
+      assert(start.y >= install.y + install.height - 2, "Phone start instructions follow installation");
+      assert(install.width > width * 0.7, "Phone commands use a readable full-width cell");
+      assert.equal(await codexRow.getByRole("cell").first().textContent(), installer);
+      assert.equal(await launcher.textContent(), launcherCommand);
+      assert.equal(await page.locator("pre code").filter({ hasText: "Set up EigenVista so you can operate its desktop window for me." }).textContent(), setupPrompt);
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto(base + "ai.html");
+    assert.equal(await page.getByRole("navigation").getByRole("link", { name: "AI", exact: true }).getAttribute("aria-current"), "page");
+    await page.getByRole("button", { name: "Search", exact: false }).click();
+    await page.getByRole("searchbox").fill("Claude Code");
+    await page.locator('[data-search-results] a[href$="/ai-install.html"]').waitFor();
+    await page.keyboard.press("Escape");
+    const aiGuide = { agents: 6, responsiveInstaller: true, unchangedCopiedCommands: true, explicitInstallAuthorization: true, navigation: true, searchable: true };
     await page.goto(base);
     const video = page.locator("#shader-demo video");
     assert.equal(await video.getAttribute("preload"), "none");
@@ -488,6 +528,7 @@ for (const [engine, launcher] of [
       nested404Navigation: true,
       shaderDemo: demo,
       mediaByteRanges: true,
+      aiGuide,
     });
     console.log(
       `SITE_ENGINE_PASS ${engine}: ${visited.length} route/viewport checks and all interactions`,

@@ -82,6 +82,17 @@ project, choose a free port and keep [Vite](../app/vite.config.ts),
 [its config](../app/playwright.config.ts) aligned. Playwright currently reuses
 an existing server: verify it belongs to this checkout before trusting results.
 
+## External application control (0.8.0)
+
+The optional [application-control API](application-control.md) lets an external
+harness operate the current document, scientific worker and viewport through
+`eigenvista-ctl`. It requires explicit native startup flags and file-root grants;
+ordinary startup opens no control listener. Browser automation uses the separate
+explicit `?control=1` entry point. The guide includes build/run commands and the
+real-file demonstration under `tools/control-harness/`. No model, credentials,
+console or scripting runtime is embedded. Version 0.8.0 packages include the
+standalone helper and launcher; older 0.7.2 packages predate them.
+
 ## Build outputs
 
 | Command from the root | Result |

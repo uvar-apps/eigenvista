@@ -1,6 +1,12 @@
 # Development handoff
 
-Updated 15 November 2026 for published **0.7.2**: background controls (#73),
+Updated 16 November 2026 for release 0.8.0: shared application control (#78),
+natural-language workflows, palette/biological control and standalone binary
+setup (#79–#81). The user authorized versioning, rebuilt redistributables,
+commit/tag/push and publication. Fresh qualification is in progress; the 0.7.2
+published assets remain unchanged until the new release is published.
+
+Published **0.7.2** adds background controls (#73),
 transparent PNG (#74) and optional MatterViz Muted/Pastel palettes. Fresh local
 checks, rebuilt artifacts, qualified native retry, production checks and published
 asset downloads passed. Source `5f336b6` and the ZIP retain the pre-publication
@@ -13,7 +19,7 @@ entries retain their then-current source, version and artifact facts.
 Start with [root AGENTS.md](../AGENTS.md), then this document,
 [architecture](architecture.md), and [development commands](development.md).
 The [documentation map](README.md) links the original brief and full M0-M7 plan.
-The current application source is **EigenVista**, version **0.7.2**, in the standalone
+The current application source is **EigenVista**, version **0.8.0**, in the standalone
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) repository. Source
 lives at this repository's root, without a `next/` wrapper or legacy application
 code. The icon and logo are unchanged.
@@ -37,6 +43,416 @@ Dated hosted-CI requirements and results below preserve the earlier policy and
 its evidence; they do not override this rule. This policy/documentation update
 did not rerun application tests. The implementation results below remain the
 record of the completed checks.
+
+## Release 0.8.0 qualification: 16 November 2026 (local)
+
+Fresh local macOS 0.8.0 checks passed: formatting, 283 default Rust tests,
+eight desktop tests, strict workspace/all-targets Clippy, WASM/TypeScript/
+production build and all 546 Chromium/WebKit browser cases (273 per engine,
+16.8 minutes; no failed/skipped/retried cases). All 190 monitored runtime source
+hashes remained stable. Twenty packaging tests passed, including private-file
+exclusion before access. The complete public documentation link scan passed
+872 links, and installed-app setup prompts match exactly. Logs and hashes are
+under `tmp/2026-11-16-release-0.8.0/`. Clean-source optimized packaging, actual
+extracted-native acceptance and final website/publication checks are next.
+
+The rebuilt binary source commit will be recorded in BUILD-INFO. Final website
+artifact metadata and publication evidence are separate documentation changes;
+verify that application/runtime hashes remain identical before tagging/pushing.
+The user's debug app and existing preview servers remain running. No new
+platform, Developer ID, notarization or clean-machine qualification is claimed.
+
+## Homepage AI visibility: 16 November 2026 (local)
+
+The homepage hero now names AI-enabled viewing in its eyebrow and adds a direct
+AI overview link above the download actions, with an ordinary-language description
+and a compact pending-package label. The detailed AI section remains below.
+Fresh website checks pass: 23 pages, 851 local references, 62 image uses, 22 exact
+downloads, and all 138 Chromium/WebKit route/viewport cases and interactions
+(`tmp/2026-11-15-website/browser-WU3lQw/RESULT.json`). Six additional homepage checks
+at 1440/390/320 pixels verify initial-viewport visibility and navigation in both
+engines; screenshots and results are in `tmp/2026-11-16-home-ai/`. No app runtime,
+version, release, commit, push or public deployment changed.
+
+## Standalone binary connection setup: 16 November 2026 (local)
+
+[Issue #81](https://github.com/uvar-apps/eigenvista/issues/81) corrects the second
+installation error: user setup must start with an installed binary, not a local
+development checkout, source compilation or project-maintenance instructions.
+The user also explicitly permits autonomous URL downloads by the coding agent.
+The user guide and three AI setup pages have been rewritten around a compatible
+installed app, one setup prompt, and a manual packaged-launcher alternative.
+The published 0.7.2 assets still predate these components; no compatible public
+binary release is invented and there is no source-build fallback for users.
+
+New package contents are self-contained: `Contents/MacOS/eigenvista-ctl` plus
+`Contents/Resources/AI-connector/` containing the user guide, portable skill and
+local technical reference, launcher, examples and palettes/notices. The packager
+builds the control client with the converter under the same locked release/arm64
+target, signs/verifies its architecture/system-only libraries, stages resources
+before signing the outer app, and verifies the extracted connector hashes/modes.
+`tools/package-ai-connector.mjs` shares the staging/verification implementation.
+The source release's optional GPL source archive is unrelated to runtime setup.
+
+`tools/ai-connector/Start AI connection.command` uses only system tools and the
+installed binaries. With no arguments it creates persistent
+`~/Documents/EigenVista/Inputs` and unique private
+`Sessions/session.XXXXXX/{Results,Temporary}`. The connection descriptor is outside
+Results; the printed `session-note.txt` contains only paths, never credentials.
+`--workspace DIR`, repeated `--input DIR` and `--help` support noninteractive agent
+setup. Bundled examples/palettes are included in the narrow roots. The launcher
+starts one separate foreground app, preserving existing windows and files.
+The portable skill links only its sibling `reference.md`; reading it is separate
+from installing a binary, registering a host skill or starting a connection.
+The website supplies identical portable instruction files at
+`downloads/eigenvista-control/{SKILL.md,reference.md,README.md}`. All four lessons
+use bundled/downloaded data without development paths; agents can fetch 1AON
+directly into the approved input folder.
+
+Local acceptance so far: 19 packaging tests pass, including six real-binary,
+help/error/symlink/no-overwrite/extraction checks. A separate ad-hoc-signed
+qualification app was built with embedded production assets and an intentionally
+unreachable development URL, archived/extracted into a path with spaces, and
+launched from its packaged script with system-only PATH. Its bundled helper
+performed 34 calls: bundled C₇H₁₀ import/Pastel/mesh/PNG/native save and reopen,
+then autonomous HTTPS 1AON download (verified original SHA), 58,870-atom import,
+Pastel/AO PNG and native save. No development server or compiler/Node runtime was
+available to the launcher/app. This is local binary-independence evidence, not
+clean-Mac/Gatekeeper or full release qualification. Original released artifacts
+and the user's running bundle were not overwritten.
+
+Evidence is under `tmp/2026-11-16-ai-binary-install/`: `standalone.json`,
+`standalone-raUH3c/native-summary.json` and native operations, extracted app/ZIP,
+signature logs, and `cleanup.json`. Only owned PID 15095 was stopped after saving,
+with PID/instance verification before removing its stale descriptor. User app
+89325, Vite 77799 and website server 97144 remain intact. Final website static
+checks pass: 23 pages, 850 local references, 62 image uses, 22 exact downloads
+and 25,613,408 bytes. All 138 Chromium/WebKit route/viewport cases and interactions
+passed (`tmp/2026-11-15-website/browser-XQDVdX/RESULT.json`), plus 18 targeted
+320/390/1440 layout checks in both engines. The actual phone overflow came from
+a slash-joined list item; ordinary comma-separated wording and scoped list
+wrapping fixed it without relaxing any width assertions. An older broad table
+locator matched both Codex rows after copy changes; the test now selects the
+exact row header. Earlier failing logs are retained. User setup prompts and
+manual commands match the packaged README, and portable links resolve within
+the instruction folder or to absolute documentation URLs. Developer-file/build
+dependencies are explicitly rejected by static checks on the user AI pages and
+portable instruction files. App scientific/UI sources are unchanged from #80;
+their 283 Rust/eight desktop/546 browser and production results remain applicable.
+No version change, commit, push, release or public deployment was requested.
+The [issue outcome](https://github.com/uvar-apps/eigenvista/issues/81#issuecomment-6908911216)
+records the completed checks and limitations. Before the first compatible public
+release, update the pending-availability statements alongside actual release
+metadata; the present 0.7.2 release identity and downloads remain unchanged.
+
+## Natural-language workflows and presentation control: 16 November 2026 (local)
+
+The user rejected the initial tutorials' internal method names and manual GUI
+handoffs. [Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) now tracks
+the correction; [#80](https://github.com/uvar-apps/eigenvista/issues/80) tracks
+missing connector access to existing presentation features. User-facing lessons
+and interaction prompts now describe desired scientific/visual outcomes. They
+require no API names, JSON keys, internal identifiers or revision bookkeeping.
+Technical transport/method details remain in the separate API reference and agent
+skill. AGENTS explicitly preserves this distinction for future work.
+
+The additive API v1 now has 28 methods: palette load/reset and biological
+presentation/focus join the existing 24. Native palette loading uses the same
+parser as the GUI with a 256 KiB preallocation read limit and existing scoped,
+protected-source resolution. Browser palettes use bounded named JSON text.
+Invalid files preserve the active palette and return a structured failure.
+Biological color, visibility, isolation, residue-range, style inheritance and
+focus controls operate existing session state and source-index helpers.
+Validation is transactional; isolate/range operations restore relevant visibility
+like their GUI actions. Automatic AO radius can be restored, and switching from
+automatic to manual without specifying a radius retains the displayed automatic
+value. Conflicting automatic/explicit-radius input is rejected before mutation.
+Scientific payloads and persisted-document semantics are unchanged.
+
+Both installation forms now include the bundled palette directory in their
+explicit sample input grants. Setup checks for the newer presentation support
+and asks the agent to confirm the running instance supports it. Molecular lessons
+leave connection/access mechanics to setup and ask the agent to load Pastel,
+choose biological colors, reset/filter/focus and prepare all views. The guide's
+residue-range and mixed-chain-style examples are separate because a selected
+residue range hides other chains. Temporary files use ignored `tmp/`; normal
+build output paths remain the documented `target/`/`app/dist/` paths.
+
+Local macOS formatting, 283 default Rust tests, eight desktop tests, strict
+workspace/all-targets Clippy, WASM/TypeScript/production build and 13 packaging
+checks passed. All 546 browser cases passed (273 per engine; no skipped,
+unexpected or flaky cases), plus six focused presentation cases. The 212
+monitored authored runtime/configuration files stayed unchanged during that
+qualification. Twelve selected production API/representation cases passed, six
+per engine; four development-only test definitions that import `/src/wasm/` were
+outside that production selection. No skipped, unexpected or flaky results are
+reported as passes. Full-suite JSON starts `2026-11-16T04:29:04.854Z`, duration
+962,384.605 ms. Production smoke took 25.7 seconds.
+
+Actual native replay passed **277 CLI calls**, including **19 expected rejected
+requests** with unchanged accepted state, **19 real 1700×1328 PNGs** and **eight
+validated native saves**. It loaded/reset the actual Pastel file, exercised
+coloring, components/chains, inserted residue ranges, isolation/focus, style
+inheritance and automatic/manual AO transitions. The matched-camera full-1AON
+Pastel AO pair differs at 458,004 pixels; source geometry, representation,
+palette, background and dimensions remain identical. Root visual review confirmed
+readable AO, chain-colored assembly and focused deposited-secondary views.
+Independent `unzip` array hashes and the real WASM decoder agree: component
+saves retain 24 atoms; Molden retains 17 atoms, 125 basis functions, 118 orbitals,
+one density and all 381 numeric-array entries; isolated/final 1AON saves retain
+58,870 atoms and 35 chains. All four original input/palette hashes are unchanged.
+
+Final website checks passed: **23 pages, 851 local references, 62 image uses,
+19 exact downloads, 25,592,677 bytes**. Complete Chromium/WebKit site verification
+passed all **138 route/viewport cases** and interactions. Independent visual
+review covered all seven AI pages at 1440/390 px, actual ordinary-language
+prompts, installer cards, outcome tables and natural image proportions. All 27
+tutorial prompts are natural-language requests. The shared setup/attach prompts
+and all eight manual shell snippets match the repository guide; snippets parse.
+The static check rejects internal command names/manual handoffs and verifies
+negative controls for the rejected wording. Existing media/download hashes remain
+unchanged. Documentation links, anchors, syntax and whitespace passed checks.
+
+Evidence: `tmp/2026-11-16-ai-workflow/` contains runtime/build/browser logs,
+`browser-full.json`, `production-browser.json`, `scope-check.json`,
+`source-hashes.json`, `final-text-review.json` and `visual/final-visual-qa.json`.
+Native results and independent audit are in
+`native/session-XPpqQn/output/retry.Lw6BNC/`; site results are
+`tmp/2026-11-15-website/browser-6Mgos4/RESULT.json`. Earlier failed harness runs
+remain preserved: the first expected the wrong missing-file error kind (scoped
+missing paths intentionally report `scope_denied`); the next conflated palette
+reset with changed near/far depth planes after focusing on a subset. A full-scene
+Fit followed by the original camera pose restored the exact baseline pixel hash.
+An independent palette-only roundtrip was also pixel-identical. No runtime
+workaround or relaxed image oracle was introduced. The initial browser attempts
+used the wrong test cwd, then forwarded query-only `revision` to `camera.set`;
+the test harness was corrected before focused/full acceptance.
+
+Only the owned native test process (verified PID 8371 and instance identity) was
+stopped, after its final document was saved and idle. SIGTERM/process-death and
+matching-instance checks preceded removal of its stale private descriptor;
+physical normal GUI exit was not requalified. User app PID 89325, Vite PID 77799
+and website server PID 97144 remain untouched. The website preview remains
+<http://127.0.0.1:5190/eigenvista/ai.html>.
+
+Work remains on main, uncommitted and unpublished. No version bump, source push,
+website deployment or release rebuild was requested. Published 0.7.2 packages
+still predate the connector. Qualification is local macOS only; Linux,
+fresh-machine installation and live installation/sign-in of every named agent
+remain unqualified. Technical APIs retain scoped files, no-clobber writes,
+source protection and existing scientific/rendering ownership.
+The [#79 correction ledger](https://github.com/uvar-apps/eigenvista/issues/79#issuecomment-6907839156)
+and [#80 implementation ledger](https://github.com/uvar-apps/eigenvista/issues/80#issuecomment-6907839524)
+record the final outcomes. All five acceptance gates are met, with zero unmet
+or abandoned gates; `tmp/2026-11-16-ai-workflow/final-checks.json` records the
+final source and process checks. Both issues remain open for source delivery.
+
+## Initial connector guide and AI website tutorials: 16 November 2026 (local)
+
+This initial documentation snapshot preceded the user-requested correction
+above. Its claim of suitable user prompts was rejected: internal method names
+and manual palette/biological steps were unacceptable. Its earlier checks remain
+evidence of what ran, not acceptance of that user experience. The current guides
+and controller supersede those limitations.
+
+[Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) tracks the requested
+installation/user documentation and four website-only tutorials. The
+[connector guide](ai-connector.md) provides manual installation, a copyable
+agent installation prompt, attachment, jobs/cancellation, file grants, exports
+and troubleshooting. It covers **Codex Desktop/CLI, Claude Code, Pi, OpenCode
+and generic terminal-capable agents**. An existing Codex Desktop session needs
+no separate Codex CLI. The agent supplies its model/provider; EigenVista adds no
+embedded console, model credentials or MCP requirement.
+
+The website gains seven routes: `ai.html`, `ai-install.html`, `ai-guide.html`,
+`ai-tutorial-orbitals.html`, `ai-tutorial-density.html`, `ai-tutorial-ao.html`
+and `ai-tutorial-representations.html`. Author them in `ai.mjs`, `ai-quantum.mjs`
+and `ai-molecules.mjs` under `tools/site/content/`. The two quantum lessons use
+the real C₇H₁₀ Molden calculation; the orbital lesson adapts the saved user
+session. The two 1AON lessons cover atomic packing/AO and all four protein
+depictions. Tutorials remain on the website, with no separate Markdown copies.
+Homepage/tutorial navigation, search, sitemap, phone installer layout and the
+documentation map are synchronized. The new 1700×1328 X-ray hero is a lossless
+copy of the user-approved public sample-session PNG, with explicit source-preview
+provenance; the other 15 curated captures retain their original bytes.
+
+Setup uses the user's selected checkout and repository-local temporary tools,
+a freshly authorized native instance and explicit existing input/output roots.
+The roots are path grants, not separate read-only and write-only permissions.
+Tutorial `INPUT_ROOT`/`OUTPUT_ROOT` placeholders must resolve to those actual
+grants. The 1AON fixture directory needs an explicit grant or a user-placed copy
+inside an already approved input root. Never silently expand a running instance's
+access. Palette loading, biological coloring/isolation and per-chain styling
+remain clearly identified manual GUI steps; they have no new API methods.
+
+Fresh local macOS documentation/website acceptance passed:
+
+- Static build/check: **23 pages, 849 local references, 62 image uses, 19 exact
+  public downloads, 25,611,918 bytes**, retaining the existing 25 MiB budget.
+- Complete Chromium/WebKit site suite: **138 route/viewport checks**, plus all
+  interactions, image proportions, downloads, AO comparisons and video checks.
+  New checks cover accessible installer cards at 390/320 px, unchanged copied
+  command/prompt text, AI navigation and agent search.
+- Manual desktop/phone visual review and independent content/protocol review
+  found no remaining blockers. Nine shell snippets parse; shared setup and
+  attachment prompts match the repository guide. Official current agent
+  installation sources are linked in the guide and evidence ledger.
+  Final documentation checks passed for 356 relative links, 55 Markdown anchors,
+  JavaScript syntax and whitespace.
+- Actual native tutorial replay: **116 CLI calls**, all four workflows and
+  all seven representations, 18 PNGs and four native saves. Direct density
+  volume/raycast previews created no meshes. Refining the HOMO produced 18,736
+  triangles; matched-camera AO Off/On and camera restoration passed.
+- Testing established that file Open retains session shader/AO/background and
+  mesh generation can refit the camera. Instructions explicitly clear the shader
+  for ordinary surfaces and snapshot/restore camera transforms for comparisons.
+  A separate ordinary-HOMO checkpoint verified the clear-shader recipe and was
+  visually inspected. It adds one PNG and one native save to the replay outputs.
+- All **210 monitored authored application/configuration files** retain the
+  previously qualified hashes. Full runtime suites were not rerun for this
+  documentation/site change; the #78 results below remain their separate record.
+
+Evidence: `tmp/2026-11-16-ai-docs/` (static/browser logs, `leaf-checks.json`,
+`official-sources.json`, visual reviews and `native/run3/` ledgers/captures),
+plus `tmp/2026-11-15-website/browser-5ok0kA/RESULT.json`. Native replay used the
+default element palette; the curated Pastel/chain-color illustrations retain
+their earlier GUI provenance. Manual GUI palette/color steps, fresh-machine
+installation and live sign-in/use of every named agent were not repeated.
+Linux qualification remains pending.
+
+Only the owned native test process (verified PID 95781/control-file identity)
+was stopped after saving its final document. Cleanup used SIGTERM, followed by
+process-death and instance-identity checks before removing its stale private
+descriptor. This does not qualify physical normal GUI exit. The user's native
+app PID 89325 and Vite PID 77799 were preserved. The owned website preview remains
+at <http://127.0.0.1:5190/eigenvista/ai.html>. No version bump, commit, push,
+publication or rebuild of released packages was requested; #79 stays open for
+delivery. Its [verification ledger](https://github.com/uvar-apps/eigenvista/issues/79#issuecomment-6906747808)
+records the completed local work and limits. Public links to the new AI pages
+become available after an authorized push/publication. The published 0.7.2
+downloads still predate the connector.
+
+## Shared application-control API: 16 November 2026
+
+The user selected the shared application API and external connectors, explicitly
+excluding an embedded console, model client, scripting runtime and visible GUI
+changes. [Issue #78](https://github.com/uvar-apps/eigenvista/issues/78) tracks the
+work; the [accepted decision](design/2026-11-16-application-control-api.md) records
+the implementation scope. The working tree remains on main at `d48a811`; no
+branch switch, commit/push, version bump or release was requested.
+
+The implementation is complete in the working tree. Read the
+[API guide](application-control.md) for startup flags, CLI examples, all 24
+methods, jobs/revisions, errors, file grants and limits. Entry points:
+
+- `app/src/control.ts`, `App.tsx` and `desktopControl.ts`: app-owned typed
+  controller, real scientific flows and native attachment.
+- `app/src/viewportControl.ts` and `Viewport.tsx`: optional camera/background/
+  capture port; toolbar and API share final-frame/AO/alpha capture.
+- `crates/eigenvista-control/`: broker/client/scoped files and `eigenvista-ctl`;
+  `app/src-tauri/src/control.rs` attaches it to the single frontend document.
+- `tools/control-harness/demo.mjs` and
+  `skills/eigenvista-control/SKILL.md`: external deterministic demonstration and
+  instructions for a coding agent. No inference SDK or credentials are added.
+
+Native attachment requires `--control-file FILE --control-root DIR` (root
+repeatable). Its authenticated loopback TCP connection is newline-delimited
+JSON-RPC 2.0, **not HTTP or MCP**. Browser attachment requires `?control=1`.
+Ordinary startup exposes neither a native listener nor a browser global API.
+Queries omit large scientific arrays. Field previews sample without meshing;
+mesh batches publish transactionally, expose real progress and permit owned
+cancellation. Native writes are validated, source-protected, atomic and
+no-clobber. Browser encoded Save explicitly retains dirty state. Identifiers
+over the API's 512-character bound fail explicitly, rather than being truncated.
+PNG receipts retain the capture revision and separately report currentRevision.
+
+Fresh local macOS 27.0 / Apple Silicon / pinned Rust 1.99.0 verification passed:
+
+- `cargo fmt --all --check`; `cargo test --locked`: **282 tests**, including
+  ten control tests; strict workspace/all-targets Clippy; explicit desktop tests:
+  **eight passed**. No existing dependency version was changed.
+- `npm --prefix app run build`: optimized WASM, TypeScript and production output.
+  Packaging-support tests: **13 passed**. Published ZIPs were not rebuilt.
+- All **540 browser cases** passed, 270 in Chromium and 270 in WebKit, one worker,
+  zero skipped/unexpected/flaky/retries. References were generated first.
+  JSON report start `2026-11-16T01:44:26.368Z`, duration 923,085.35 ms. The seven
+  new real API tests also passed separately in both engines (14 cases).
+- The built `app/dist` passed ten additional production API cases, five per
+  engine, in 18.9 seconds with no failures/flaky/skipped/retried cases. These
+  explicitly selected startup/import/preview/mesh/camera/capture tests; two
+  development-only tests importing `/src/wasm/` were excluded by title filter,
+  not modified or reported as production passes. Eleven recorded production/
+  runtime/test hashes stayed unchanged. The owned port-5189 preview was stopped.
+- Actual native external harness: 31 CLI calls, Molden import/metadata,
+  sampling-only volume, density meshing, both shaders, camera, four PNGs and
+  native Save. Another 26 CLI guard checks plus raw auth/batch/oversized-frame
+  cases passed. Real FIFO read/save/export failed promptly without blocking the
+  app; subsequent sampling/camera/export remained usable.
+- Independent hashes matched all five native artifacts. CLI `--check --json`
+  validated the saved document: 17 atoms, 118 orbitals, one density. Native PNGs
+  are 1700×1328; the transparent image has 2,019,664 empty and 2,044 fractional
+  pixels. Compositing it over the selected background differs from opaque PNG
+  by at most one channel level, mean 0.000332.
+- All 74 normal-startup controls match the pre-change inventory. Visible
+  viewport JSX is unchanged and scene captures were visually reviewed. The
+  screenshots are not byte/pixel identical: mean channel difference 0.01363,
+  maximum 71, across 9,978 channels. Do not claim exact pixel equality.
+- A normal native instance without flags stayed alive for 34 seconds with no
+  TCP sockets or control descriptor. Both owned test apps were stopped by
+  verified-PID SIGTERM; the stale private descriptor was removed only after
+  process-death/instance-ID checks. **Physical normal GUI exit was not
+  requalified**. Broker cleanup has socket/filesystem test coverage.
+
+Evidence lives under `tmp/2026-11-16-control-api/`: `rust-checks.json`,
+`browser-full.json`, build/packaging logs, baseline/qualified UI images,
+`normal-ui-result.json`, and `native-final/` ledgers/images/cleanup records.
+Production smoke has its own `production-control/summary.json` and reports.
+The 210 monitored authored source/configuration files remained unchanged during
+final qualification; generated WASM bindings and Tauri schemas are build outputs.
+The owned Vite server PID 77799 remains at `127.0.0.1:5178`.
+
+Qualification remains local macOS only; non-Unix control activation fails
+explicitly, and Linux qualification is pending. Jobs are not durable, mutations
+are not idempotent, and a transport timeout does not cancel an accepted job.
+Native readiness is per app start; full WebView reload behavior has not been
+qualified. No signed production bundle or redistributable for this change was
+created. Source version and published release remain 0.7.2; those immutable
+assets do not contain this feature. Issue #78 remains open for source delivery.
+Its [verification ledger](https://github.com/uvar-apps/eigenvista/issues/78#issuecomment-6905399975)
+records the completed local checks; the authenticated GitHub CLI posted it after
+the connector's write request returned 403. No Git push or hosted CI was run.
+Earlier research/Zenodo edits and protected untracked files remain untouched.
+
+The user successfully tested natural-language control in a separate shared
+session. Its complete exported archive now lives in
+[`docs/sample-ai-session/`](sample-ai-session/README.md): six-page PDF, offline
+HTML, Markdown/image ZIP, six PNG assets, captured content and verification
+records. All seven exchanges and six image occurrences are preserved. The move
+from `tmp/session-export-mAgQf1/` preserved all original file hashes; relative
+links and archive integrity were checked. This documentation-only move did not
+change application behavior or rerun runtime tests.
+
+## AI console and external-agent API research: 15 November 2026 (local)
+
+The user requested investigation of both an EigenVista-hosted prompt console
+using configurable OpenAI-compatible local/remote models and an API for external
+coding agents through skills, MCP, UTCP and related protocols. The
+[research report](research/2026-11-15-ai-console-and-agent-api.md) records source
+evidence against `d48a811`, official protocol/provider references, both product
+paths, a proposed shared app-owned command/job/state/artifact controller,
+integration tradeoffs and future qualification gates. It distinguishes today's
+UI automation/internal worker transport from a public viewer-control API.
+UCP/AP2 are assessed under their commerce/payment meanings; current MCP revision
+and inference-dialect differences are documented rather than assumed.
+
+This is a research proposal, not an accepted implementation. No app code,
+dependencies, model connections, listeners, running processes or released
+artifacts changed. No issue, commit or push was requested. Provider/client
+interoperability still requires the real qualification described in the report.
+Fresh documentation checks passed for source revision, relative links/anchors,
+Markdown structure and change scope; independent source and protocol reviews
+found no blockers. Evidence: `tmp/2026-11-15-ai-research/verification.json`.
+Application/native/browser tests were not rerun for this research-only update.
 
 ## Approved narrated shader demo: 15 November 2026
 
@@ -101,6 +517,22 @@ approved image and refreshed page URLs. Evidence:
 `tmp/2026-11-15-clipping-angle/public.json`.
 Application source, version 0.7.2 and released packages remain unchanged;
 application/native tests were not rerun for this media/caption update.
+
+## Zenodo upload draft: 15 November 2026
+
+The user requested [zenodo-upload.md](../zenodo-upload.md), with suggested values
+for their saved upload form through Publisher only. It describes published
+release 0.7.2, its original release date and three existing release artifacts,
+Ugo Varetto's authorship, GPL-2.0-or-later and the original 2006–2010 Molekel history.
+The form's existing DOI reservation is identified as belonging to that draft;
+it is not described as a registered/published DOI. Unknown ORCID/affiliation
+details remain for the author. The selected journal community and CC BY default
+are called out for correction. Form fields after Publisher are excluded.
+The source HTML was read from `~/tmp/zenodo/new-upload-zenodo.html` (the supplied
+folder spelling had a typo); it was not copied into this repository. Release
+facts were checked through GitHub and field guidance against official Zenodo
+documentation. This is a local metadata draft: no Zenodo record was submitted
+or published, and no commit/push or application/site changes were requested.
 
 ## Project history correction: #77, 15 November 2026
 

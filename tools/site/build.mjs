@@ -33,6 +33,9 @@ const groups = [
   "tutorials",
   "gallery",
   "shaders",
+  "ai",
+  "ai-quantum",
+  "ai-molecules",
   "about",
 ];
 const pages = (
@@ -47,6 +50,7 @@ const navigation = [
   ["install", "install.html", "Install"],
   ["reference", "reference.html", "Manual"],
   ["shaders", "surface-shaders.html", "Shaders"],
+  ["ai", "ai.html", "AI"],
   ["tutorials", "tutorials.html", "Tutorials"],
   ["gallery", "gallery.html", "Gallery"],
   ["about", "about.html", "About"],
@@ -114,7 +118,7 @@ const renderBody = (page) => {
     if (!version) throw Error(`Missing social/demo asset: ${name}`);
     return `${attr}="assets/social/${name}?v=${version}"`;
   });
-  if (!["reference", "tutorials"].includes(page.section)) return body;
+  if (!["reference", "tutorials", "ai"].includes(page.section)) return body;
   const headings = [
     ...body.matchAll(/<h2 id="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g),
   ];
@@ -131,7 +135,7 @@ const renderBody = (page) => {
   return (
     '<div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p>' +
     toc +
-    '</aside><article class="prose">' +
+    '</aside><article class="prose' + (page.section === "ai" ? " ai-prose" : "") + '">' +
     body +
     "</article></div>"
   );
@@ -245,6 +249,9 @@ const examples = [
   ["app/shaders/surface-clip.params", "shaders/surface-clip.params"],
   ["shaders/README.md", "shaders/README.txt"],
   ["LICENSE", "shaders/LICENSE.txt"],
+  ["skills/eigenvista-control/SKILL.md", "eigenvista-control/SKILL.md"],
+  ["skills/eigenvista-control/reference.md", "eigenvista-control/reference.md"],
+  ["docs/ai-connector.md", "eigenvista-control/README.md"],
 ];
 fs.mkdirSync(path.join(out, "downloads"), { recursive: true });
 const sourceRows = examples.map(([from, name]) => {
@@ -277,4 +284,8 @@ fs.writeFileSync(
 );
 console.log(
   `SITE_BUILD_PASS ${pages.length} pages; ${sourceRows.length} explicit public downloads`,
+);
+fs.appendFileSync(
+  path.join(out, "downloads/README.txt"),
+  "\nPortable agent instructions: eigenvista-control/SKILL.md and reference.md form a complete optional workflow folder; README.md is the installed-app user guide. These instructions do not install a binary or enable an older app. A compatible EigenVista.app supplies the prebuilt connection helper and launcher. No source checkout or compiler is required for that binary package.\n",
 );

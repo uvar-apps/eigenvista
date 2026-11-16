@@ -11,9 +11,10 @@ export default [
     body: `
 <section class="hero">
   <div class="hero-copy">
-    <p class="eyebrow">Orbitals / electron density / custom shaders</p>
+    <p class="eyebrow">Orbitals / electron density / custom shaders / AI-enabled</p>
     <h1>Quantum<br>chemistry.<br><span class="outline-type">In view.</span></h1>
     <p class="lede">Explore the field. Reveal the molecule. Shape the view with custom surface shaders and live controls.</p>
+    <p><strong><a href="ai.html"><span aria-hidden="true">✦ </span>AI-enabled viewing →</a></strong><br>Ask your coding agent to explore molecules, prepare surfaces and export figures.<br><span class="small">Included in EigenVista 0.8.0 for Mac.</span></p>
     <div class="actions"><a class="button primary" href="${release.base}${release.stem}.zip">Download for Mac <span aria-hidden="true">↗</span></a><a class="button" href="surface-shaders.html">Explore surface shaders <span aria-hidden="true">→</span></a></div>
     <p class="small">v${release.version} · Apple Silicon · Experimental preview<br>Ad-hoc signed; not notarized. <a href="install.html">Installation notes</a></p>
   </div>
@@ -63,6 +64,10 @@ export default [
     <div class="comparison-control" hidden><label for="home-ao">Reveal ambient occlusion</label><input id="home-ao" type="range" min="0" max="100" value="50"><output for="home-ao">50%</output></div>
     <figcaption>1AON: 58,870 atoms, with the same camera, structure and MatterViz Pastel element palette. Off uses normal shading; On uses Lambert + SSAO. <a href="tutorials-ao.html">Recreate this view →</a></figcaption>
   </figure>
+</section>
+<section class="section-block split-story">
+  <figure class="plate"><div class="plate-label"><span>05 / A CONVERSATION WITH THE VIEWER</span><span>RECORDED SESSION</span></div><a href="ai-tutorial-orbitals.html"><img src="assets/media/ai-session-xray.webp" alt="Smooth signed HOMO surfaces rendered with the X-ray shader during a recorded prompt-driven EigenVista session" loading="lazy"></a><figcaption>An actual external-agent session: the C₇H₁₀ HOMO at ±0.03 bohr<sup>−3/2</sup>, refined from 64³ to 128³ and styled with the X-ray preset.</figcaption></figure>
+  <div><p class="eyebrow">05 / AI-assisted viewing</p><h2>Ask for the view.<br>Inspect the result.</h2><p>Use Codex, Claude Code, Pi, OpenCode or another coding agent to open molecular data, find orbitals, prepare surfaces and export figures. You describe the task in your agent's chat while EigenVista shows the result.</p><p>EigenVista 0.8.0 for Mac includes its prebuilt connection helper, launcher, examples and agent instructions. No source checkout or compiler is needed for the binary setup.</p><div class="actions"><a class="button primary" href="ai.html">Meet the AI connector →</a><a class="button" href="ai-tutorial-orbitals.html">Follow a real session →</a></div></div>
 </section>
 <section class="closing-band"><p class="eyebrow">From data to figure</p><h2>Keep the result.<br>Share the view.</h2><p>Save molecular data and generated meshes together in an .eigenvista document. Export the current view as a PNG, including a transparent-background option for figures and presentations.</p><div class="actions"><a class="button primary" href="install.html">Install EigenVista →</a><a class="button" href="tutorials.html">Choose a tutorial →</a><a class="button" href="gallery.html">Browse the gallery →</a></div></section>
 `,

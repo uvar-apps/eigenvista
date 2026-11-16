@@ -1,14 +1,21 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   useSyncExternalStore,
   type SetStateAction,
 } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { createApplicationControl, controlIdentifier, ControlError, CONTROL_LIMITS, type ApplicationControl, type ControlExecution, type ControlHost } from "./control";
+import { attachDesktopControl } from "./desktopControl";
+import { controlPreset, updateDeclaredUniforms } from "./control/presets";
+import { patchStructureDisplay, visibleStructureAtoms, structureDisplaySummary, type StructurePatch } from "./control/presentation";
+import type { CameraState, ViewportControl } from "./viewportControl";
 import { NativeExitGuard } from "./NativeExitGuard";
-import { hasNativeSave, subscribeNativeSaves } from "./nativeSaveActivity";
+import { hasNativeSave, subscribeNativeSaves, trackNativeSave } from "./nativeSaveActivity";
 import {
   Atom,
   FolderOpen,
@@ -171,10 +178,53 @@ export default function App() {
   const unsaved = useRef(dirty);
   const activity = useRef(true);
   const saving = useRef(false);
+  const documentRevision = useRef(0);
+  const viewportControl = useRef<ViewportControl | null>(null);
+  const controlHost = useRef<ControlHost | null>(null);
+  const controller = useRef<ApplicationControl | null>(null);
+  const [controlCommit, setControlCommit] = useState(0);
+  const commitWaiters = useRef<{ resolve: () => void; reject: (error: Error) => void }[]>([]);
+  function synchronizeControl() {
+    return new Promise<void>((resolve, reject) => {
+      commitWaiters.current.push({ resolve, reject });
+      setControlCommit((value) => value + 1);
+    });
+  }
+  useLayoutEffect(() => {
+    for (const waiter of commitWaiters.current.splice(0)) waiter.resolve();
+  }, [controlCommit]);
+  useEffect(() => {
+    // Effect reattachment (including development refresh) gets a new session;
+    // never republish a disposed controller or revive its cancelled jobs.
+    const control = createApplicationControl(() => {
+      if (!controlHost.current) throw new ControlError("unavailable", "The application is not ready");
+      return controlHost.current;
+    });
+    controller.current = control;
+    const connection = new AbortController();
+    let closed = false;
+    let detach = () => {};
+    const browser = !native && new URLSearchParams(window.location.search).get("control") === "1";
+    const api = { request: control.request };
+    if (browser) window.eigenvistaControl = api;
+    if (native) void attachDesktopControl(control, connection.signal).then((stop) => {
+      if (closed) stop(); else detach = stop;
+    }).catch((error) => console.error("Application control attachment failed", error));
+    return () => {
+      closed = true;
+      connection.abort();
+      detach();
+      if (window.eigenvistaControl === api) delete window.eigenvistaControl;
+      if (controller.current === control) controller.current = null;
+      control.dispose();
+      for (const waiter of commitWaiters.current.splice(0)) waiter.reject(new Error("Application closed"));
+    };
+  }, []);
   // Lifecycle decisions must see accepted edits even before React renders them.
   function setDoc(update: SetStateAction<EigenVistaDocument | null>) {
     const next =
       typeof update === "function" ? update(current.current) : update;
+    if (next !== current.current) documentRevision.current++;
     current.current = next;
     setDocument(next);
   }
@@ -186,17 +236,26 @@ export default function App() {
     activity.current = Boolean(value);
     setBusyState(value);
   }
+  function checkFlow(token: number, execution?: ControlExecution) {
+    if (token !== generation.current) {
+      if (execution) throw new ControlError("cancelled", "The operation was superseded or cancelled");
+      return false;
+    }
+    execution?.assertCurrent();
+    return true;
+  }
   /**
    * Apply a palette file. A rejected file leaves the current palette untouched
    * and only the message changes, so a bad load can never half-colour the scene.
    */
-  function applyAtomPalette(text: string, name: string) {
+  function applyAtomPalette(text: string, name: string, strict = false) {
     try {
       setAtomPalette(parseAtomColors(text, name));
       setAtomPaletteName(name);
       setAtomPaletteError("");
     } catch (error) {
       setAtomPaletteError(String(error));
+      if (strict) throw new ControlError("validation_error", error instanceof Error ? error.message : String(error));
     }
   }
   function resetAtomPalette() {
@@ -222,10 +281,12 @@ export default function App() {
     res = resolution,
     orbitals?: string[],
     markDirty = true,
+    execution?: ControlExecution,
   ) {
     if (!document.view.field) return;
     if (!isGridResolution(res)) {
       setError("Choose an available grid resolution.");
+      if (execution) throw new ControlError("invalid_arguments", "Choose an available grid resolution");
       return;
     }
     const fields = orbitals ?? [document.view.field];
@@ -281,9 +342,15 @@ export default function App() {
               setBusy(`${description} / Sampling field`);
             if (stage === "meshing")
               setBusy(`${description} / Extracting meshes`);
+            execution?.progress(stage, counts);
           },
+          { signal: execution?.signal },
         );
-        if (token !== generation.current) return;
+        if (!checkFlow(token, execution)) return;
+        if (execution) for (const surface of result.surfaces) {
+          controlIdentifier(surface.id, "Surface ID");
+          controlIdentifier(surface.field, "Field ID");
+        }
         generated.push(...result.surfaces);
         bytes += result.surfaces.reduce((total, s) => total + meshBytes(s), 0);
         if (retained.length + generated.length > 128 || bytes > fileByteLimit)
@@ -306,10 +373,12 @@ export default function App() {
               stage: "validating",
               started,
             });
+            execution?.progress("validating");
           }
         },
+        { signal: execution?.signal },
       );
-      if (token !== generation.current) return;
+      if (!checkFlow(token, execution)) return;
       setDoc((d) =>
         d
           ? {
@@ -345,8 +414,13 @@ export default function App() {
       setStatus(
         `${orbitals ? `${fields.length} orbitals / ` : ""}${generated.reduce((n, s) => n + s.indices.length / 3, 0).toLocaleString()} triangles / ${((performance.now() - started) / 1000).toFixed(2)} s`,
       );
+      return { fieldIds: fields, surfaceIds: generated.map((surface) => surface.id),
+        surfaceCount: retained.length + generated.length,
+        triangleCount: generated.reduce((count, surface) => count + surface.indices.length / 3, 0),
+        resolution: res, revision: documentRevision.current };
     } catch (e) {
       if (token === generation.current) setError(String(e));
+      if (execution) throw e;
     } finally {
       if (token === generation.current) {
         setBusy("");
@@ -444,6 +518,7 @@ export default function App() {
     document: EigenVistaDocument,
     res: number,
     nextMode: RenderMode,
+    execution?: ControlExecution,
   ) {
     if (!document.view.field) return;
     if (!isGridResolution(res)) {
@@ -470,9 +545,11 @@ export default function App() {
         (stage, counts) => {
           if (token === generation.current)
             setCalculation({ label, stage, counts, started });
+          execution?.progress(stage, counts);
         },
+        { signal: execution?.signal },
       );
-      if (token !== generation.current) return;
+      if (!checkFlow(token, execution)) return;
       // Keep the previous field and preview until sampling has succeeded.
       if (document.view.field !== current.current?.view.field)
         editView({ field: document.view.field });
@@ -481,8 +558,11 @@ export default function App() {
       setMode(nextMode);
       setReset((v) => v + 1);
       setStatus("Sampled field ready");
+      return { fieldId: document.view.field, resolution: res, mode: nextMode,
+        dims: [...sampled.dims], meshGenerated: false, revision: documentRevision.current };
     } catch (e) {
       if (token === generation.current) setError(String(e));
+      if (execution) throw e;
     } finally {
       if (token === generation.current) {
         setBusy("");
@@ -499,34 +579,37 @@ export default function App() {
     setMode(nextMode);
     setReset((v) => v + 1);
   }
-  async function selectField(id: string) {
+  async function selectField(id: string, execution?: ControlExecution) {
     if (!doc || busy || id === doc.view.field) return;
     if (mode !== "mesh" || doc.grids.some((g) => g.id === id)) {
-      await prepareGrid(
+      return await prepareGrid(
         { ...doc, view: { ...doc.view, field: id } },
         resolution,
         mode === "mesh" ? "volume" : mode,
+        execution,
       );
-      return;
     }
     editView({ field: id });
     setGrid(null);
+    return { fieldId: id, revision: documentRevision.current };
   }
-  async function load(source: SourceFile) {
+  async function load(source: SourceFile, control?: { execution: ControlExecution; discardUnsaved: boolean }) {
+    if (control && unsaved.current && !control.discardUnsaved)
+      throw new ControlError("permission_required", "The current document has unsaved changes; set discardUnsaved explicitly to replace it");
     const token = ++generation.current;
     cancel();
     setBusy("Opening document");
     setError("");
     try {
       const bytes = await source.read();
-      if (token !== generation.current) return;
+      if (!checkFlow(token, control?.execution)) return;
       if (bytes.length > fileByteLimit)
         throw new Error("File exceeds the 128 MiB preview budget");
       const result = await request<ImportResult>("import_document", {
         bytes,
         name: source.name,
-      });
-      if (token !== generation.current) return;
+      }, undefined, { signal: control?.execution.signal });
+      if (!checkFlow(token, control?.execution)) return;
       const d = result.document;
       let sampled: SampledGrid | null = null;
       let previewError = "";
@@ -536,17 +619,17 @@ export default function App() {
             doc: { ...d, surfaces: [] },
             field: d.view.field,
             resolution,
-          });
+          }, undefined, { signal: control?.execution.signal });
         } catch (e) {
           previewError = `Sampled preview unavailable: ${String(e)}`;
         }
       }
-      if (token !== generation.current) return;
+      if (!checkFlow(token, control?.execution)) return;
       if (
         unsaved.current &&
-        !window.confirm(
+        !(control ? control.discardUnsaved : window.confirm(
           "Replace the current document? Unsaved changes will be lost.",
-        )
+        ))
       )
         return;
       setDoc(d);
@@ -564,8 +647,14 @@ export default function App() {
       setStatus(
         `Opened ${source.name}${d.surfaces.length ? " / saved geometry restored" : ""}`,
       );
+      return { revision: documentRevision.current, document: { id: d.id, title: d.title,
+        atomCount: d.atoms.positions.length, bondCount: d.bonds.length,
+        orbitalCount: d.orbitals.length, densityCount: d.densities.length, gridCount: d.grids.length },
+        report: { ...result.report, warnings: result.report.warnings.slice(0, 32).map((warning) => warning.slice(0, 2048)) },
+        previewError };
     } catch (e) {
       if (token === generation.current) setError(String(e));
+      if (control) throw e;
     } finally {
       if (token === generation.current) setBusy("");
     }
@@ -619,6 +708,225 @@ export default function App() {
     setCalculation(null);
     setStatus("Cancelled; previous surfaces retained");
   }
+  async function executeControl(method: string, params: Record<string, unknown>, execution: ControlExecution): Promise<unknown> {
+    const document = current.current;
+    const port = () => {
+      if (!viewportControl.current) throw new ControlError("unavailable", "The molecular renderer is not ready");
+      return viewportControl.current;
+    };
+    if (method === "document.open") {
+      let source: SourceFile;
+      if (native) {
+        if (typeof params.path !== "string" || params.bytes !== undefined || params.name !== undefined)
+          throw new ControlError("invalid_arguments", "Native imports require one scoped path");
+        const path = params.path;
+        source = { name: path.split(/[\\/]/).pop()!, path, read: async () => {
+          const value = await invoke<ArrayBuffer | Uint8Array | number[]>("control_read_file", { path });
+          return value instanceof Uint8Array ? value : value instanceof ArrayBuffer ? new Uint8Array(value) : new Uint8Array(value);
+        } };
+      } else {
+        if (params.path !== undefined || typeof params.name !== "string" || !Array.isArray(params.bytes))
+          throw new ControlError("invalid_arguments", "Browser imports require a name and byte array, not a filesystem path");
+        const bytes = new Uint8Array(params.bytes as number[]);
+        source = { name: params.name, read: async () => bytes };
+      }
+      return await load(source, { execution, discardUnsaved: params.discardUnsaved === true });
+    }
+    if (!document) throw new ControlError("no_document", "No molecular document is open");
+    if (method === "palette.load" || method === "palette.reset") {
+      if (method === "palette.reset") resetAtomPalette();
+      else {
+        let text: string, name: string;
+        if (native) {
+          if (typeof params.path !== "string" || params.text !== undefined || params.name !== undefined)
+            throw new ControlError("invalid_arguments", "Native palettes require one authorized path");
+          const path = params.path;
+          const bytes = await invoke<ArrayBuffer | Uint8Array | number[]>("control_read_file", { path, maxBytes: CONTROL_LIMITS.paletteBytes });
+          execution.assertCurrent();
+          const buffer = bytes instanceof Uint8Array ? bytes : bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : new Uint8Array(bytes);
+          text = new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+          name = path.split(/[\\/]/).pop()!;
+        } else {
+          if (params.path !== undefined || typeof params.text !== "string" || typeof params.name !== "string")
+            throw new ControlError("invalid_arguments", "Browser palettes require a name and JSON text");
+          text = params.text; name = params.name;
+        }
+        if (new TextEncoder().encode(text).byteLength > CONTROL_LIMITS.paletteBytes)
+          throw new ControlError("limit_exceeded", "Atom palette exceeds the 256 KiB input budget");
+        execution.assertCurrent();
+        applyAtomPalette(text, name, true);
+      }
+      await synchronizeControl();
+      await port().setBackground(port().getBackground());
+      return controlHost.current!.snapshot().palette;
+    }
+    if (method === "structure.set" || method === "structure.focus") {
+      if (method === "structure.set") {
+        const next = patchStructureDisplay(document, structureDisplay, params as StructurePatch);
+        execution.assertCurrent();
+        setStructureDisplay(next);
+      } else {
+        if ((params.target === "chain") !== (params.chainIndex !== undefined))
+          throw new ControlError("invalid_arguments", "A chain focus requires one chainIndex; a visible focus takes none");
+        const atoms = visibleStructureAtoms(document, structureDisplay, params.chainIndex as number | undefined);
+        if (!atoms.length) throw new ControlError("not_found", "No visible atoms match this focus request");
+        setStructureDisplay({ ...structureDisplay, focus: { atoms, revision: (structureDisplay.focus?.revision ?? 0) + 1 } });
+      }
+      await synchronizeControl();
+      await port().setBackground(port().getBackground());
+      return { ...controlHost.current!.snapshot().structureDisplay as object, camera: port().getCamera() };
+    }
+    if (method === "document.save") {
+      if ((native && typeof params.path !== "string") || (!native && params.path !== undefined))
+        throw new ControlError("invalid_arguments", native ? "Native Save requires an authorized path" : "Browser Save returns bytes; paths are unavailable");
+      const snapshot = document, revision = documentRevision.current;
+      if (saving.current || activity.current || hasNativeSave()) throw new ControlError("busy", "A save or calculation is already active");
+      saving.current = true;
+      setBusy("Saving document");
+      setError("");
+      try {
+        const bytes = await request<Uint8Array>("encode", { doc: snapshot }, undefined, { signal: execution.signal });
+        execution.assertCurrent();
+        if (!native) {
+          if (bytes.length > CONTROL_LIMITS.browserSaveBytes)
+            throw new ControlError("limit_exceeded", "Encoded document exceeds the browser control result budget; use the normal Save action");
+          return { revision, saved: false,
+            name: `${snapshot.title.replace(/[^a-z0-9-]+/gi, "-").toLowerCase()}.eigenvista`,
+            bytes: Array.from(bytes), byteLength: bytes.length };
+        }
+        const receipt = await trackNativeSave(() => invoke<{ path: string; bytes: number }>("control_save_document", {
+          path: params.path, bytes: Array.from(bytes), protectedPaths: protectedSourcePath ? [protectedSourcePath] : [], overwrite: false,
+        }));
+        const unchanged = current.current === snapshot;
+        if (unchanged) setDirty(false);
+        setStatus("Saved quantum data, surfaces and appearance");
+        return { ...receipt, saved: true, current: unchanged, snapshotRevision: revision, revision: documentRevision.current };
+      } finally { saving.current = false; setBusy(""); }
+    }
+    if (method === "field.preview") {
+      return await prepareGrid({ ...document, view: { ...document.view, field: params.fieldId as string } },
+        params.resolution as number, params.mode as RenderMode, execution);
+    }
+    if (method === "surfaces.generate") {
+      const ids = params.fieldIds as string[];
+      const field = ids.includes(document.view.field ?? "") ? document.view.field! : ids[0];
+      const next = { ...document, view: { ...document.view, field, isovalue: params.isovalue as number } };
+      const orbitalBatch = ids.every((id) => document.orbitals.some((orbital) => orbital.id === id));
+      const result = await compute(next, params.resolution as number, orbitalBatch ? ids : undefined, true, execution);
+      setMode("mesh");
+      setResolution(params.resolution as number);
+      return result;
+    }
+    if (method === "field.select") {
+      if (document.view.field === params.fieldId) return { fieldId: params.fieldId, revision: documentRevision.current };
+      return await selectField(params.fieldId as string, execution);
+    }
+    if (method === "surfaces.set_visibility" || method === "surfaces.remove") {
+      const found = document.surfaces.find((surface) => surface.id === params.surfaceId);
+      if (!found) throw new ControlError("not_found", "Unknown saved surface ID");
+      if (method === "surfaces.remove") {
+        setDoc({ ...document, surfaces: document.surfaces.filter((surface) => surface.id !== found.id) });
+        setDirty(true);
+      } else if (found.visible !== params.visible) {
+        setDoc({ ...document, surfaces: document.surfaces.map((surface) => surface.id === found.id ? { ...surface, visible: params.visible as boolean } : surface) });
+        setDirty(true);
+      }
+      return { surfaceId: found.id, revision: documentRevision.current,
+        ...(method === "surfaces.remove" ? { removed: true } : { visible: params.visible }) };
+    }
+    if (method === "scene.set") {
+      const view: Partial<EigenVistaDocument["view"]> = {};
+      for (const [key, name] of [["representation", "representation"], ["positiveColor", "positive_color"],
+        ["negativeColor", "negative_color"], ["opacity", "opacity"], ["isovalue", "isovalue"]] as const)
+        if (params[key] !== undefined) Object.assign(view, { [name]: params[key] });
+      if (params.backgroundColor !== undefined) await port().setBackground(params.backgroundColor as string);
+      execution.assertCurrent();
+      if (Object.keys(view).length) editView(view);
+      if (params.shading !== undefined) setSurfaceShading(params.shading as SurfaceShading);
+      if (params.volumeQuality !== undefined) setVolumeQuality(params.volumeQuality as VolumeQuality);
+      if (params.ambientOcclusion !== undefined) {
+        const { automaticRadius, ...patch } = params.ambientOcclusion as Partial<AmbientOcclusionSettings> & { automaticRadius?: boolean };
+        if (automaticRadius === false && automaticAoRadius && patch.radiusAngstrom === undefined)
+          patch.radiusAngstrom = automaticAoRadiusAngstrom;
+        setAmbientOcclusion((current) => ({ ...current, ...patch }));
+        if (automaticRadius !== undefined) setAutomaticAoRadius(automaticRadius);
+        else if (patch.radiusAngstrom !== undefined) setAutomaticAoRadius(false);
+      }
+      await synchronizeControl();
+      await port().setBackground(port().getBackground());
+      const accepted = controlHost.current!.snapshot();
+      return { revision: documentRevision.current, view: current.current!.view,
+        shading: accepted.shading, ambientOcclusion: accepted.ambientOcclusion,
+        volumeQuality: accepted.volumeQuality, backgroundColor: port().getBackground() };
+    }
+    if (method === "shader.apply" || method === "shader.set_uniforms" || method === "shader.clear") {
+      if (method === "shader.clear") {
+        setAppliedShader(null);
+        setShaderEditor({ vertex: null, fragment: null, values: {}, target: "all" });
+        setShaderStatus("Cleared custom surface shader");
+        setShaderError("");
+      } else {
+        const patch = (params.uniforms ?? {}) as Record<string, UniformValue>;
+        if (method === "shader.set_uniforms" && !appliedShader)
+          throw new ControlError("unavailable", "Apply a bundled shader before setting its uniforms");
+        const pair = method === "shader.apply"
+          ? controlPreset(params.preset as "surface-clip" | "x-ray", patch, params.transparency as boolean | undefined)
+          : { ...appliedShader!, values: updateDeclaredUniforms(appliedShader!, patch),
+            ...(params.transparency !== undefined ? { transparent: params.transparency as boolean } : {}) };
+        setShaderEditor({ vertex: { name: pair.vertexName, source: pair.vertexSource },
+          fragment: { name: pair.fragmentName, source: pair.fragmentSource }, values: pair.values,
+          target: "all", transparent: pair.transparent !== false });
+        setAppliedShader({ ...pair, target: "all" });
+        setShaderError("");
+        setShaderStatus(`Applied ${pair.vertexName} + ${pair.fragmentName}`);
+      }
+      await synchronizeControl();
+      await port().setBackground(port().getBackground());
+      await synchronizeControl();
+      const accepted = controlHost.current!.snapshot().shader as { error?: string } | null;
+      if (accepted?.error) throw new ControlError("operation_failed", accepted.error);
+      return { revision: documentRevision.current, shader: accepted };
+    }
+    if (method.startsWith("camera.")) {
+      const viewport = port();
+      if (method === "camera.fit") await viewport.fit();
+      else if (method === "camera.set") await viewport.setCamera({ position: params.position,
+        target: params.target, ...(params.up !== undefined ? { up: params.up } : {}) } as CameraState);
+      else if (method === "camera.orbit") await viewport.orbit(params.horizontalDegrees as number, params.verticalDegrees as number);
+      else if (method === "camera.zoom") await viewport.zoom(params.factor as number);
+      return { revision: documentRevision.current, ...viewport.getCamera() };
+    }
+    if (method === "image.export") {
+      if ((native && typeof params.path !== "string") || (!native && params.path !== undefined))
+        throw new ControlError("invalid_arguments", native ? "Native PNG export requires an authorized path" : "Browser PNG export returns a data URL; paths are unavailable");
+      const captureRevision = documentRevision.current;
+      const capture = await port().capture(params.transparent === true);
+      if (capture.dataUrl.length > CONTROL_LIMITS.imageDataUrlCharacters)
+        throw new ControlError("limit_exceeded", "PNG exceeds the control artifact result budget");
+      if (native) {
+        const receipt = await invoke<{ path: string; bytes: number }>("control_write_image", {
+          path: params.path, dataUrl: capture.dataUrl, overwrite: false,
+        });
+        return { ...receipt, width: capture.width, height: capture.height, mimeType: "image/png",
+          revision: captureRevision, currentRevision: documentRevision.current };
+      }
+      return { ...capture, mimeType: "image/png", revision: captureRevision, currentRevision: documentRevision.current };
+    }
+    throw new ControlError("method_not_found", `Unknown application operation ${method}`);
+  }
+  controlHost.current = {
+    native, viewport: () => viewportControl.current, synchronize: synchronizeControl, execute: executeControl,
+    snapshot: () => ({ document: current.current, revision: documentRevision.current, dirty: unsaved.current,
+      busy: activity.current ? busy || "Operation in progress" : conversionActivity.current ? "Converting files" : saving.current || hasNativeSave() ? "Saving document" : "",
+      progress: calculation, mode, resolution, shading: surfaceShading,
+      ambientOcclusion: { ...viewportAmbientOcclusion, automaticRadius: automaticAoRadius },
+      shader: appliedShader ? { vertexName: appliedShader.vertexName.slice(0, 512), fragmentName: appliedShader.fragmentName.slice(0, 512),
+        target: appliedShader.target, transparency: appliedShader.transparent !== false,
+        uniforms: Object.fromEntries(Object.entries(appliedShader.values).slice(0, 64)), error: shaderError.slice(0, 2048) } : null,
+      palette: { custom: Boolean(atomPalette), name: atomPaletteName.slice(0, 512) }, volumeQuality,
+      structureDisplay: structureDisplaySummary(current.current, structureDisplay),
+    }),
+  };
   const fieldLabel = doc
     ? [...doc.orbitals, ...doc.densities, ...doc.grids].find(
         (f) => f.id === doc.view.field,
@@ -885,6 +1193,7 @@ export default function App() {
           </PanelSidebar>
           <div className="viewport-column">
             <Viewport
+              controlRef={viewportControl}
               doc={doc}
               grid={grid}
               mode={mode}

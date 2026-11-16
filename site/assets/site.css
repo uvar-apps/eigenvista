@@ -608,6 +608,14 @@ pre code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.ai-prose pre,
+.ai-prose pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ai-prose li {
+  overflow-wrap: anywhere;
+}
 details {
   border: 2px solid var(--line);
   padding: 16px 20px;
@@ -1093,6 +1101,47 @@ details[open] summary {
   }
   .prose > h2 {
     scroll-margin-top: 20px;
+  }
+}
+@media (max-width: 700px) {
+  .agent-setup-table,
+  .agent-setup-table tbody,
+  .agent-setup-table tr {
+    display: block;
+    width: 100%;
+  }
+  .agent-setup-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .agent-setup-table tr {
+    border-bottom: var(--rule) solid var(--line);
+  }
+  .agent-setup-table tr:last-child {
+    border-bottom: 0;
+  }
+  .agent-setup-table th[scope="row"],
+  .agent-setup-table td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    border: 0;
+  }
+  .agent-setup-table td + td {
+    border-top: 1px solid var(--line);
+  }
+  .agent-setup-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 8px;
+    font: 700 11px/1.5 var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 }
 @media (max-width: 480px) {

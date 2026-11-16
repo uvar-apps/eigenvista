@@ -4,6 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import {
+  stageAiConnector,
+  verifyAiConnector,
+} from "./package-ai-connector.mjs";
+import {
   ABOUT_VERSION,
   testerPackageName,
   packageSourceFiles,
@@ -269,6 +273,8 @@ function main() {
     target,
     "-p",
     "eigenvista-convert",
+    "-p",
+    "eigenvista-control",
   ]);
   run(
     path.join(app, "node_modules/.bin/tauri"),
@@ -293,11 +299,35 @@ function main() {
     "release/bundle/macos",
     `${config.productName}.app`,
   );
+  run(
+    process.execPath,
+    ["--test", "tools/package-ai-connector.test.mjs"],
+    root,
+    false,
+    {
+      EIGENVISTA_TEST_CONTROL_CLIENT: path.join(
+        root,
+        "target",
+        target,
+        "release/eigenvista-ctl",
+      ),
+      EIGENVISTA_TEST_DESKTOP_BINARY: path.join(
+        built,
+        "Contents/MacOS/eigenvista-desktop",
+      ),
+    },
+  );
   const bundle = path.join(payload, `${config.productName}.app`);
   run("/usr/bin/ditto", ["--norsrc", "--noextattr", "--noqtn", built, bundle]);
   const resources = path.join(bundle, "Contents/Resources");
   copy(notices, path.join(resources, "Third-party-notices"));
   copy(path.join(root, "LICENSE"), path.join(resources, "LICENSE"));
+  const aiConnector = stageAiConnector({
+    repositoryRoot: root,
+    bundle,
+    client: path.join(root, "target", target, "release/eigenvista-ctl"),
+    environment: env,
+  });
   copy(path.join(root, "LICENSE"), path.join(payload, "LICENSE"));
   copy(
     path.join(root, "packaging/TESTING.txt"),
@@ -357,6 +387,10 @@ function main() {
   copy(
     path.join(root, "docs/user-guide.md"),
     path.join(payload, "User-guide.md"),
+  );
+  copy(
+    path.join(root, "docs/ai-connector.md"),
+    path.join(payload, "ai-connector.md"),
   );
   copy(path.join(root, "docs/images"), path.join(payload, "images"));
   copy(
@@ -439,6 +473,7 @@ function main() {
     buildMacOS: run("/usr/bin/sw_vers", ["-productVersion"], root, true),
     signing: "ad-hoc",
     notarized: false,
+    aiConnector,
     toolchain: {
       rust,
       node: process.version,
@@ -459,6 +494,9 @@ function main() {
       "standalone converter signature, architecture, and runtime libraries",
       "standalone converter default .eigenvista naming and legacy extension reads",
       "extracted converter Molden/cube/native roundtrip and WASM agreement",
+      "bundled control client signature, arm64 architecture and system-only runtime libraries",
+      "portable AI instructions, shell launcher, attributed examples and palettes",
+      "extracted AI connector resource/client byte and mode comparison",
     ],
     limitations:
       "No clean-machine/Gatekeeper installation or full supported-OS-range qualification. Browser checks are a separate test command.",
@@ -504,6 +542,11 @@ function main() {
     "--verbose=2",
     path.join(restored, "Tools/eigenvista-convert"),
   ]);
+  const extractedAiConnector = verifyAiConnector({
+    bundle: path.join(restored, `${config.productName}.app`),
+    environment: env,
+  });
+  assertEqualManifest(aiConnector.files, extractedAiConnector.files);
   run(process.execPath, [
     "tools/verify-package-examples.mjs",
     core,

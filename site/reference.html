@@ -1,24 +1,24 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="The EigenVista 0.7.2 manual: files, scene controls, quantum fields, biological structures, and saving."><meta name="theme-color" content="#ecebe4">
+<meta name="description" content="The EigenVista 0.8.0 manual: files, scene controls, quantum fields, biological structures, and saving."><meta name="theme-color" content="#ecebe4">
 
 
 <title>Molecular and quantum chemistry viewer reference manual — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/reference.html">
 <meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
-<meta property="og:title" content="Molecular and quantum chemistry viewer reference manual — EigenVista"><meta property="og:description" content="The EigenVista 0.7.2 manual: files, scene controls, quantum fields, biological structures, and saving."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/reference.html">
+<meta property="og:title" content="Molecular and quantum chemistry viewer reference manual — EigenVista"><meta property="og:description" content="The EigenVista 0.8.0 manual: files, scene controls, quantum fields, biological structures, and saving."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/reference.html">
 <meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1280"><meta property="og:image:height" content="640"><meta property="og:image:alt" content="EigenVista: an electron-density X-ray surface beside the 1AON molecular complex with ambient occlusion and Pastel atom colors">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Molecular and quantum chemistry viewer reference manual — EigenVista"><meta name="twitter:description" content="The EigenVista 0.7.2 manual: files, scene controls, quantum fields, biological structures, and saving."><meta name="twitter:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta name="twitter:image:alt" content="EigenVista X-ray density rendering and molecular ambient occlusion on 1AON">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=902990837de3">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Molecular and quantum chemistry viewer reference manual — EigenVista"><meta name="twitter:description" content="The EigenVista 0.8.0 manual: files, scene controls, quantum fields, biological structures, and saving."><meta name="twitter:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta name="twitter:image:alt" content="EigenVista X-ray density rendering and molecular ambient occlusion on 1AON">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=00b6a4494e27">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
-<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="surface-shaders.html">Shaders</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html" aria-current="page">Manual</a><a href="surface-shaders.html">Shaders</a><a href="ai.html">AI</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
 <div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
 <div class="element-strip" aria-hidden="true"></div>
 <main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">03 / EIGENVISTA FIELD MANUAL</p><h1>User reference<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#manual">Find a workflow</a><a href="#workspace">The application workspace</a><a href="#keyboard">Keyboard and sidebar controls</a><a href="#persistence">What is saved?</a><a href="#troubleshooting">When something looks wrong</a></aside><article class="prose">
 <div class="prose">
-  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.7.2</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
+  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.8.0</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -27,6 +27,7 @@
     <li><a href="surface-shaders.html">Custom surface shaders</a> — see through a density envelope, expose its interior with clipping, and tune lighting and transparency live.</li>
     <li><a href="reference-fields.html">Orbitals, densities, and sampled fields</a> — generate signed surfaces, browse several orbitals, compare render modes, and understand resolution and caching.</li>
     <li><a href="reference-structures.html">Biological structures</a> — color chains and secondary structure, show components, isolate a chain, select residue ranges, and use protein depictions.</li>
+    <li><a href="ai.html">AI-assisted viewing</a> — connect your external coding agent, describe a molecular view, and keep exported figures and native documents.</li>
   </ul>
 
   <h2 id="workspace">The application workspace</h2>

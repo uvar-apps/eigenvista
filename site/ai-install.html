@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Set up a connector-enabled EigenVista Mac package with its bundled launcher, or give your agent one prompt to install and connect it for you."><meta name="theme-color" content="#ecebe4">
+
+
+<title>Connect the installed EigenVista app — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/ai-install.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="Connect the installed EigenVista app — EigenVista"><meta property="og:description" content="Set up a connector-enabled EigenVista Mac package with its bundled launcher, or give your agent one prompt to install and connect it for you."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/ai-install.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1280"><meta property="og:image:height" content="640"><meta property="og:image:alt" content="EigenVista: an electron-density X-ray surface beside the 1AON molecular complex with ambient occlusion and Pastel atom colors">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Connect the installed EigenVista app — EigenVista"><meta name="twitter:description" content="Set up a connector-enabled EigenVista Mac package with its bundled launcher, or give your agent one prompt to install and connect it for you."><meta name="twitter:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta name="twitter:image:alt" content="EigenVista X-ray density rendering and molecular ambient occlusion on 1AON">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=00b6a4494e27">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="surface-shaders.html">Shaders</a><a href="ai.html" aria-current="page">AI</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">07.A / EIGENVISTA FIELD MANUAL</p><h1>Connect the installed EigenVista app<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#agents">Choose the agent you already use</a><a href="#package">Check the compatible app package</a><a href="#manual">Manual setup: open the packaged launcher</a><a href="#folders">Your inputs persist; each session gets new results</a><a href="#setup-prompt">One prompt: let your agent install and connect</a><a href="#connect">Ask what is open</a></aside><article class="prose ai-prose">
+<p class="lede">Use the connection tools already inside the Mac app. Open its launcher yourself, or give your agent the setup prompt and let it handle the installation and connection.</p>
+<div class="notice"><strong>Use EigenVista 0.8.0 or later for Mac.</strong> Its connection helper, launcher, instructions, examples and palettes are inside the app. <a href="install.html">Download and install EigenVista</a>, then choose the setup method below. Check the included files when using an older or custom package.</div>
+
+<h2 id="agents">Choose the agent you already use</h2>
+<p>Your agent needs local terminal/file access and, to inspect exported pictures, an image viewer. A cloud-only chat without access to this Mac cannot control its local app. Keep an existing working agent installation; choose only one if you need to install one.</p>
+<div class="table-wrap"><table class="agent-setup-table" role="table"><thead><tr><th scope="col">Agent</th><th scope="col">How to use it</th><th scope="col">Official setup</th></tr></thead><tbody>
+<tr><th scope="row">Codex Desktop</th><td data-label="How to use it">Use its local terminal-capable chat. A separate Codex CLI installation is optional.</td><td data-label="Official setup"><a href="https://developers.openai.com/codex/quickstart/">Codex setup ↗</a> · <a href="https://learn.chatgpt.com/docs/integrated-terminal">Desktop terminal ↗</a></td></tr>
+<tr><th scope="row">Codex CLI</th><td data-label="How to use it">Use your existing local Codex terminal session and give it the setup prompt.</td><td data-label="Official setup"><a href="https://learn.chatgpt.com/docs/codex/cli">Codex CLI ↗</a></td></tr>
+<tr><th scope="row">Claude Code</th><td data-label="How to use it">Use a local Claude Code session with permission to read the app and run its helper.</td><td data-label="Official setup"><a href="https://code.claude.com/docs/en/overview">Claude Code ↗</a></td></tr>
+<tr><th scope="row">Pi</th><td data-label="How to use it">Use your local Pi session with your chosen model and terminal tools.</td><td data-label="Official setup"><a href="https://github.com/earendil-works/pi/tree/main/packages/coding-agent">Pi ↗</a></td></tr>
+<tr><th scope="row">OpenCode</th><td data-label="How to use it">Use a local OpenCode session and your existing model connection.</td><td data-label="Official setup"><a href="https://opencode.ai/docs/">OpenCode ↗</a></td></tr>
+<tr><th scope="row">Other local agent</th><td data-label="How to use it">Use the same packaged instructions and helper through its local terminal tools.</td><td data-label="Official setup">Follow that agent's official setup and model sign-in instructions.</td></tr>
+</tbody></table></div>
+<p class="small">Official agent setup links were checked on 16 November 2026. Sign-in and model choices belong to your agent; EigenVista does not manage them.</p>
+
+<h2 id="package">Check the compatible app package</h2>
+<p>Install EigenVista 0.8.0 or later from the <a href="https://github.com/uvar-apps/eigenvista/releases">official release page ↗</a>. Follow the <a href="install.html">normal Mac installation guide</a>. The connection tools below must be included:</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Inside EigenVista.app</th><th scope="col">Purpose</th></tr></thead><tbody>
+<tr><td><code>Contents/MacOS/eigenvista-ctl</code></td><td>The prebuilt connection helper used by the agent.</td></tr>
+<tr><td><code>Contents/Resources/AI-connector/Start AI connection.command</code></td><td>The packaged launcher for an enabled session.</td></tr>
+<tr><td><code>Contents/Resources/AI-connector/SKILL.md</code> and <code>reference.md</code></td><td>Standalone instructions the agent reads directly. No skill registration is required.</td></tr>
+<tr><td><code>Contents/Resources/AI-connector/README.md</code></td><td>This portable user guide.</td></tr>
+<tr><td><code>Contents/Resources/AI-connector/examples/</code> and <code>palettes/</code></td><td>Ready-to-use molecular examples and atom palettes.</td></tr>
+</tbody></table></div>
+<p>If the helper or launcher is missing, this app package is not compatible. Your agent should explain what is missing and point you to the release page. Downloading instructions alone cannot enable an older app.</p>
+
+<h2 id="manual">Manual setup: open the packaged launcher</h2>
+<ol><li>Place the compatible <strong>EigenVista.app</strong> in Applications, or keep its actual installed location.</li><li>In Finder, right-click the app and choose <strong>Show Package Contents</strong>.</li><li>Open <strong>Contents → Resources → AI-connector</strong> and double-click <strong>Start AI connection.command</strong>.</li><li>Keep the Terminal window open while this session runs. The app runs in the foreground there.</li><li>Give your agent the nonsecret session note, or the displayed app, helper, input, output and connection paths. Never paste the connection file's contents.</li></ol>
+<p>If the app is in Applications, the equivalent Terminal command is:</p>
+<pre class="wrap-code"><code>"/Applications/EigenVista.app/Contents/Resources/AI-connector/Start AI connection.command"</code></pre>
+<p>The launcher starts one new enabled EigenVista window. It does not stop or restart other windows. Ordinary app startup does not open a connection.</p>
+
+<h2 id="folders">Your inputs persist; each session gets new results</h2>
+<p>With no options, the launcher uses <code>~/Documents/EigenVista</code>:</p>
+<ul><li><code>Inputs/</code> is a persistent folder for molecular files you want the agent to use.</li><li><code>Sessions/session.XXXXXX/Results/</code> is a fresh results directory for each launch.</li><li>A private connection file lives in that session directory, outside Results. The launcher prints its filename and writes a nonsecret session note with the paths.</li><li>The bundled examples and palettes are available too. Ask the agent to use MatterViz Pastel; you do not need to load it manually.</li></ul>
+<p>Copy your chosen molecular files into Inputs, preserving originals. To allow another existing data folder, use the launcher's repeatable <code>--input</code> option or ask the agent to set up that approved folder for you. A different <code>--workspace</code> chooses the persistent base directory. Only approve the specific folders you want the agent to use.</p>
+<details><summary>Optional: choose the workspace and another input folder</summary>
+<pre class="wrap-code"><code>"/Applications/EigenVista.app/Contents/Resources/AI-connector/Start AI connection.command" \
+  --workspace "$HOME/Documents/EigenVista" \
+  --input "$HOME/Documents/My molecules"</code></pre>
+<p>The extra input directory must already exist. Repeat <code>--input</code> for additional approved directories. Run the packaged launcher with <code>--help</code> for its options. If the app is elsewhere, use its actual path.</p></details>
+<p>Keep the connection file private. A new session gets a fresh one; its contents must not be printed, uploaded or placed in chat. Use the session note to pass around the filenames. Output files use new names, so repeating a workflow keeps earlier results.</p>
+
+<h2 id="setup-prompt">One prompt: let your agent install and connect</h2>
+<p>Paste this into your chosen local agent. It authorizes installation of a compatible binary package if needed, folder setup, a new enabled instance and connection checks. The agent handles the packaged launcher's commands. Only required Mac permissions, sign-in or a private-folder choice should need you.</p>
+<pre class="wrap-code"><code>Set up EigenVista so you can operate its desktop window for me.
+Use the installed Mac application and the connection tools packaged inside it.
+
+Find EigenVista in Applications or the location I supplied. If I need a
+compatible app, I authorize downloading and installing the appropriate Mac
+binary package from https://github.com/uvar-apps/eigenvista/releases into an
+applications location I can write. Preserve existing app copies. Check that
+the package includes its connection helper, standalone instructions and
+"Start AI connection.command" launcher. Use version 0.8.0 or newer; older packages
+such as 0.7.2 do not include them. If no compatible package is available, explain that clearly,
+show me the official release page and stop the setup.
+
+Read the standalone instructions in the app's AI-connector folder. If you
+need their public copies, use
+https://uvar-apps.github.io/eigenvista/downloads/eigenvista-control/SKILL.md and
+https://uvar-apps.github.io/eigenvista/downloads/eigenvista-control/reference.md.
+Handle all connection commands and checks for me.
+
+Use the launcher's default persistent workspace unless I supplied another
+location. Make the bundled examples and palettes available, and use only the
+specific data folders I already approved. Keep a fresh private output folder
+for this session. Start one new enabled EigenVista window with the packaged
+launcher. Leave all existing windows and servers alone.
+
+Check the connection and tell me which molecule is open, whether there are
+unsaved changes or running calculations, and what I can ask you to do. Do not
+replace a molecule or discard changes just to test the connection. Return the
+app, helper, input, output, connection-file and session-note paths needed to
+continue. Keep the connection file's contents and credentials private.
+
+I authorize this installation and setup. Ask me to act only when a required
+Mac permission, sign-in or choice of a private data folder needs me. Keep my
+agent/model account settings unchanged.</code></pre>
+<p>Public copies of the packaged <a href="downloads/eigenvista-control/SKILL.md">agent instructions</a> and <a href="downloads/eigenvista-control/reference.md">connection reference</a> are available when the agent needs to read them. These are instructions for the packaged tools, not a replacement for a compatible app.</p>
+
+<h2 id="connect">Ask what is open</h2>
+<p>Once setup finishes, ask the agent to tell you what molecule is open, what supplied orbitals or densities are available, and whether there is unsaved work. Continue with ordinary requests in the <a href="ai-guide.html">interaction guide</a>.</p>
+<div class="next-step"><span>Next</span><a href="ai-guide.html">What to ask your agent →</a></div>
+</article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

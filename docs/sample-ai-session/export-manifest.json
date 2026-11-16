@@ -1,0 +1,83 @@
+{
+  "source": "https://chatgpt.com/s/cx_6afa6aac0fa48191befd5ad211e86009",
+  "title": "Start EigenVista with external control",
+  "capturedAt": "2026-11-16T02:37:09.596Z",
+  "exportedAt": "2026-11-16T02:43:13.966Z",
+  "messages": 14,
+  "userMessages": 7,
+  "assistantMessages": 7,
+  "imageOccurrences": 6,
+  "textFidelity": "All 14 messages matched after whitespace normalization; no wording changed.",
+  "images": [
+    {
+      "url": "https://chatgpt.com/backend-api/wham/shared_threads/cx_6afa6aac0fa48191befd5ad211e86009/assets/asset-1",
+      "file": "images/01-homo-isosurfaces.png",
+      "bytes": 293197,
+      "width": 1700,
+      "height": 1328,
+      "sha256": "7731b1a12ae1d4eb50fd70b887d07b4647062c797595d8a7a3135d28cc12f628"
+    },
+    {
+      "url": "https://chatgpt.com/backend-api/wham/shared_threads/cx_6afa6aac0fa48191befd5ad211e86009/assets/asset-2",
+      "file": "images/02-homo-dark-blue.png",
+      "bytes": 332692,
+      "width": 1700,
+      "height": 1328,
+      "sha256": "9f45751d9ab6d6ae90032fa592a89b2e51c5d47881b7520911f081c8ddd10898"
+    },
+    {
+      "url": "https://chatgpt.com/backend-api/wham/shared_threads/cx_6afa6aac0fa48191befd5ad211e86009/assets/asset-3",
+      "file": "images/03-homo-transparent.png",
+      "bytes": 340385,
+      "width": 1700,
+      "height": 1328,
+      "sha256": "646024f99bb80ad6c38aa861c541c4c9168a978225f2e8f69cbf70561258bb72"
+    },
+    {
+      "url": "https://chatgpt.com/backend-api/wham/shared_threads/cx_6afa6aac0fa48191befd5ad211e86009/assets/asset-4",
+      "file": "images/04-homo-saved.png",
+      "bytes": 332692,
+      "width": 1700,
+      "height": 1328,
+      "sha256": "9f45751d9ab6d6ae90032fa592a89b2e51c5d47881b7520911f081c8ddd10898"
+    },
+    {
+      "url": "https://chatgpt.com/backend-api/wham/shared_threads/cx_6afa6aac0fa48191befd5ad211e86009/assets/asset-5",
+      "file": "images/05-homo-xray.png",
+      "bytes": 404894,
+      "width": 1700,
+      "height": 1328,
+      "sha256": "e843ea1fa2817c32ccdb60fe0ac101c3921f8a84185ff973d796c9100a2235e3"
+    },
+    {
+      "url": "https://chatgpt.com/backend-api/wham/shared_threads/cx_6afa6aac0fa48191befd5ad211e86009/assets/asset-6",
+      "file": "images/06-homo-xray-128.png",
+      "bytes": 401391,
+      "width": 1700,
+      "height": 1328,
+      "sha256": "2064910c73802aeeff7dc5a271d1c3d7198af366911d5505475031a5a6224226"
+    }
+  ],
+  "outputs": [
+    {
+      "file": "EigenVista-prompt-session-2026-11-16.pdf",
+      "bytes": 1522021,
+      "sha256": "ad57104252f314585ee5eee2e55f30ff2effeb69c86fe891c48333ec03ffb2d9"
+    },
+    {
+      "file": "EigenVista-prompt-session-2026-11-16.html",
+      "bytes": 2815154,
+      "sha256": "4798e6b8e5ff2623fd6ca86a27c4b7dc264a2733a9d0a41ba6a350334733c27b"
+    },
+    {
+      "file": "EigenVista-prompt-session-2026-11-16.md",
+      "bytes": 3059,
+      "sha256": "1ca9b93e836eb573dbebbbbcfb7d1b40a54639b601a15337818fc2f0186fabe9"
+    },
+    {
+      "file": "EigenVista-prompt-session-2026-11-16-markdown.zip",
+      "bytes": 1910443,
+      "sha256": "fc6ebe8e98d351bf31d8b97d2ecb54fb47180d286fd3c82fd15a66889006e75d"
+    }
+  ]
+}

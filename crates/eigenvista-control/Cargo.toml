@@ -1,0 +1,23 @@
+[package]
+name = "eigenvista-control"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+eigenvista-format = { path = "../eigenvista-format" }
+getrandom = "=0.3.4"
+base64 = "=0.22.1"
+crc32fast = "=1.5.2"
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.190"
+
+[dev-dependencies]
+eigenvista-core = { path = "../eigenvista-core" }
+
+[[bin]]
+name = "eigenvista-ctl"
+path = "src/main.rs"

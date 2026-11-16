@@ -12,4 +12,7 @@
 # Personal chat exports are not application source or redistribution inputs.
 /chat-*.md
 /*-chat-*.md
+# Private working documents are not application source or redistribution inputs.
+/docs/reviews/2026-11-11-code-review.md
+/zenodo-upload.md
 *.log

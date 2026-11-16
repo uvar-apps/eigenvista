@@ -25,6 +25,18 @@ If macOS instead reports malware or a damaged/modified app, stop and report
 the exact message; do not bypass that warning. Apple instructions:
 https://support.apple.com/en-us/102445
 
+AI-ENABLED VIEWING
+
+This package includes the prebuilt AI connection helper and agent instructions.
+Read ai-connector.md or https://uvar-apps.github.io/eigenvista/ai-install.html.
+In Finder, right-click EigenVista.app > Show Package Contents, then open
+Contents > Resources > AI-connector > Start AI connection.command. Keep its
+Terminal window open and give Codex, Claude Code, Pi, OpenCode or another local
+agent the printed session-note filename. Ask it to connect and tell you what
+molecule is open. No source checkout or development tools are needed.
+The launcher starts a separate enabled window and leaves existing windows alone.
+Do not share the private connection file's contents.
+
 QUICK TEST
 
 - Click Open and choose Examples/water.pdb or Examples/water.xyz.
@@ -83,9 +95,9 @@ REDISTRIBUTION
 Keep LICENSE, Third-party-notices, and Source together with the application
 when forwarding this package. Source contains the exact first-party source
 snapshot and lockfiles used for this build, including uncommitted changes.
-Its root AGENTS.md is the development entry point. Current documentation and
-the required molecular test fixtures are included in the standalone source;
-no legacy application implementation or personal chat exports are included.
+Current documentation and the required molecular test fixtures are included
+in the standalone source; no legacy application implementation, personal chat
+exports or private working documents are included.
 Third-party components retain their own licenses and copyright notices.
 No credentials or development caches are included. Dependency source copies
 are provided for inspection and redistribution alongside their notices.

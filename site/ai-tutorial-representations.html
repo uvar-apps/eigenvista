@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Use natural-language prompts to compare four protein representations of 1AON, distinguish chains and entities, and focus on one protein chain."><meta name="theme-color" content="#ecebe4">
+
+
+<title>AI tutorial: protein trace, tube, ribbon and cartoon representations — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/ai-tutorial-representations.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="AI tutorial: protein trace, tube, ribbon and cartoon representations — EigenVista"><meta property="og:description" content="Use natural-language prompts to compare four protein representations of 1AON, distinguish chains and entities, and focus on one protein chain."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/ai-tutorial-representations.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1280"><meta property="og:image:height" content="640"><meta property="og:image:alt" content="EigenVista: an electron-density X-ray surface beside the 1AON molecular complex with ambient occlusion and Pastel atom colors">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AI tutorial: protein trace, tube, ribbon and cartoon representations — EigenVista"><meta name="twitter:description" content="Use natural-language prompts to compare four protein representations of 1AON, distinguish chains and entities, and focus on one protein chain."><meta name="twitter:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta name="twitter:image:alt" content="EigenVista X-ray density rendering and molecular ambient occlusion on 1AON">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=00b6a4494e27">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="surface-shaders.html">Shaders</a><a href="ai.html" aria-current="page">AI</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">07.4 / EIGENVISTA FIELD MANUAL</p><h1>Read a large protein assembly<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#get-ready">Get ready</a><a href="#inspect-the-structure">1. Inspect the structure before choosing a view</a><a href="#representation-map">Choose the level of detail</a><a href="#trace-and-tube">2. Follow the backbone with trace and tube</a><a href="#ribbon-and-cartoon">3. Compare ribbons and secondary-structure cartoons</a><a href="#compare-chain-colors">4. Distinguish chains and entities</a><a href="#focus-a-chain">5. Focus on one deposited fold</a><a href="#finish-and-save">6. Finish the overview and keep the result</a><a href="#sources-and-next">Sources and next steps</a></aside><article class="prose ai-prose">
+      <p class="lede page-lede">Step back from atomic packing to see how a large complex is organized. Ask your agent to compare backbone traces, smooth tubes, ribbons and cartoons, then study the deposited fold of one chain.</p>
+
+      <h2 id="get-ready">Get ready</h2>
+      <p>Complete <a href="ai-install.html">external-agent setup</a> and read the <a href="ai-guide.html">AI control guide</a>. The connection tools are included in the <strong>EigenVista 0.8.0 Mac app</strong>. Give the prompts to your connected Codex, Claude Code, Pi, OpenCode, or another local agent with an image viewer.</p>
+      <p>Use <a href="downloads/1AON.cif" download="1AON.cif">1AON.cif</a> again, this time to study the GroEL–GroES assembly rather than its crowded atomic envelope. Give your agent the file location and the folder where you want the pictures saved, using the connection established during setup. Keep original inputs and use new output names for repeated runs.</p>
+      <p>Outcome: four protein-view PNGs, a chain-colored assembly overview, and a focused chain illustration.</p>
+
+      <h2 id="inspect-the-structure">1. Inspect the structure before choosing a view</h2>
+      <pre class="wrap-code"><code>Use my connected EigenVista instance. If 1AON.cif is already open, continue with it. Otherwise save any unsaved work under a new name before opening 1AON.cif. If needed, download https://uvar-apps.github.io/eigenvista/downloads/1AON.cif into my input folder first. Never discard existing work silently.
+
+      Tell me the imported atom and chain counts, the kinds of biological components present, and whether the secondary-structure assignments came from the deposited file. Expect 58,870 selected atoms. Show the complete structure, removing earlier visibility filters and special chain or component representation choices. Turn ambient occlusion off, use Element coloring and set the background to #ecebe4.</code></pre>
+      <p><strong>Checkpoint:</strong> the full imported complex is available for comparison and the agent reports its biological identities. Keep one coloring choice throughout the four-view comparison.</p>
+
+      <h2 id="representation-map">Choose the level of detail</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">Global representation</th><th scope="col">Useful question</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Ball and stick</th><td>Where are the atoms and their connections?</td></tr>
+          <tr><th scope="row">Liquorice</th><td>How does the connected atomic framework run through this region?</td></tr>
+          <tr><th scope="row">Van der Waals</th><td>How tightly do atomic envelopes pack? Try the <a href="ai-tutorial-ao.html">AO lesson</a>.</td></tr>
+          <tr><th scope="row">Backbone trace</th><td>How do the protein backbone paths arrange themselves across the assembly?</td></tr>
+          <tr><th scope="row">Smooth tube</th><td>How do those paths flow through space when drawn as rounded tubes?</td></tr>
+          <tr><th scope="row">Ribbon</th><td>How do the oriented protein ribbons fold within each subunit?</td></tr>
+          <tr><th scope="row">Secondary-structure cartoon</th><td>Where do deposited helices, strand arrows and connecting loops organize the fold?</td></tr>
+        </tbody>
+      </table></div>
+      <p>The first three modes depict atoms. The four protein modes draw the backbone while nonprotein components retain atomic detail. Missing backbone atoms, chain ends and unsupported gaps break paths; the viewer does not draw invented connections. Missing secondary assignments remain thin gray unassigned loops in ribbon/cartoon views.</p>
+
+      <h2 id="trace-and-tube">2. Follow the backbone with trace and tube</h2>
+      <pre class="wrap-code"><code>Show the complete assembly as a Backbone trace. Wait for the view to finish preparing, fit the whole complex, then rotate 25 degrees horizontally and 10 degrees vertically. Keep this exact camera angle and framing for all four protein views.
+
+      Save and show me a new 1aon-trace.png. Change only the representation to Smooth tube, wait for it to finish preparing, then save and show me a new 1aon-tube.png. Compare the backbone paths and rounded tubes at matching framing.</code></pre>
+      <p><strong>Checkpoint:</strong> trace and tube follow the same protein paths, with different thickness and shape. Atom and chain counts remain unchanged. On this large input, wait for protein geometry to finish preparing before judging a blank or old view.</p>
+
+      <h2 id="ribbon-and-cartoon">3. Compare ribbons and secondary-structure cartoons</h2>
+      <pre class="wrap-code"><code>Keep the same assembly camera, background, colors and visible components. Show Ribbon, wait for it to finish preparing, then save and show me a new 1aon-ribbon.png. Repeat with Secondary-structure cartoon and save 1aon-cartoon.png.
+
+      Compare how ribbons, helical regions, strand arrows and connecting loops reveal the folds. Explain which assignments were supplied by the deposited structure. Describe missing or unassigned regions as unknown, without predicting secondary structure. Leave the cartoon view selected.</code></pre>
+      <figure><img src="assets/media/1aon-cartoon-chain.webp?v=ebdc6bb6f2fc" alt="The complete 1AON assembly in protein cartoons, with deposited chain instances distinguished by color" loading="lazy" decoding="async" width="1390" height="1072"><figcaption>Reference capture: the full 1AON complex in protein cartoons with Chain coloring. This existing image was made with the GUI; the next step asks your agent to choose the biological colors. Protein depiction geometry uses its own diffuse shading, outside molecular AO.</figcaption></figure>
+      <p><strong>Checkpoint:</strong> you have four distinct protein-view images of one assembly. Unknown secondary structure remains explicit even with chain or entity coloring. If carbonyl orientation is unavailable, the app can show a thin tube with an informational notice; isolated backbone points remain markers.</p>
+
+      <h2 id="compare-chain-colors">4. Distinguish chains and entities</h2>
+      <p>Chain coloring separates deposited chain instances. Entity coloring groups chains that belong to the same supplied molecular entity. Their legends identify the colors; color alone does not establish identity.</p>
+      <pre class="wrap-code"><code>Keep the complete assembly in the cartoon representation and keep the camera fixed. Color it by Chain, save a new 1aon-chains.png and show me the image. Then color it by Entity, save a new 1aon-entities.png and show me that image too.
+
+      Explain how chain instances differ from molecular entities in this deposited structure, using the imported identities and the images. Preserve the molecule and the four earlier comparison views.</code></pre>
+      <p><strong>Checkpoint:</strong> chain colors distinguish subunits, while chains sharing an entity receive the same entity color. The complete molecular data remain unchanged.</p>
+
+      <h2 id="focus-a-chain">5. Focus on one deposited fold</h2>
+      <pre class="wrap-code"><code>Find protein chain A using the deposited chain identities. Isolate it and frame that visible chain closely. Keep the cartoon representation, and color it by the deposited secondary structure.
+
+      Save and show me a new 1aon-chain-a.png. Point out helices, strand arrows and unassigned connecting regions in the actual image. Keep unknown assignments explicit, and confirm that the other chains are hidden rather than removed from the molecular document.</code></pre>
+      <figure><img src="assets/media/1aon-chain-secondary.webp?v=deb9d1c2c8ee" alt="An isolated 1AON chain A in a protein cartoon with deposited secondary-structure colors and gray unassigned regions" loading="lazy" decoding="async" width="1390" height="1072"><figcaption>Reference capture: chain A isolated and focused, with deposited secondary-structure coloring. This existing image was made with the GUI. Isolation hides other chains without removing their molecular data.</figcaption></figure>
+      <p><strong>Checkpoint:</strong> one protein chain fills the view. Assigned helices and strands are distinct from gray unassigned regions. EigenVista uses deposited annotations; it does not run DSSP or predict missing assignments.</p>
+
+      <h2 id="finish-and-save">6. Finish the overview and keep the result</h2>
+      <pre class="wrap-code"><code>Restore the complete structure and remove any chain or component representation choices that would override the whole-assembly view. Use Secondary-structure cartoon for the protein, color by Chain, and frame the entire complex. Choose a readable overview with rotation and zoom, and show me a candidate image before the final export.
+
+      Save new opaque and transparent overview PNGs in my approved output directory. Show me both images and report their filenames and dimensions. Save a new 1aon-assembly.eigenvista without overwriting anything. Record the camera, representation, coloring and other display choices so I can recreate this presentation.</code></pre>
+      <p><strong>Checkpoint:</strong> the overview shows the whole complex and the focused-chain PNG shows the chosen subunit. Save retains molecular data, biological identities, connectivity and the global representation. Biological coloring, visibility, isolation, residue ranges, per-chain/component styles, focus, camera, background and palette are session choices; record them with the images if you want to reproduce the presentation.</p>
+      <p>The <a href="ai-tutorial-ao.html">atomic-packing lesson</a> shows the complementary Ball and stick, Liquorice and Van der Waals views with <a href="downloads/matterviz-pastel.json" download="matterviz-pastel.json">MatterViz Pastel</a>. AO shades atomic spheres and bonds, not the protein ribbons or custom field surfaces.</p>
+
+      <h2 id="sources-and-next">Sources and next steps</h2>
+      <p>Structure and original scientific citation: <a href="https://www.rcsb.org/structure/1AON">RCSB PDB 1AON</a>. Keep the <a href="downloads/README.txt">download sources and reuse notes</a> with redistributed inputs; the <a href="assets/media/provenance.json">image provenance record</a> documents the real application captures. The <a href="reference-structures.html">biological structure reference</a> covers component filters, residue ranges and identity labels.</p>
+      <div class="next-step"><span>More external-agent lessons</span><a href="ai-tutorial-ao.html">Read atomic packing with AO →</a><a href="ai-tutorial-orbitals.html">Explore frontier orbitals →</a><a href="ai-tutorial-density.html">Shape a density surface →</a></div>
+    </article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

@@ -114,6 +114,24 @@
       "source": "LICENSE",
       "bytes": 18673,
       "sha256": "3f8fb5ac2049fd01f21a24dbe3ffb6a6482390901c56d004cc38237e7e6072c9"
+    },
+    {
+      "file": "eigenvista-control/SKILL.md",
+      "source": "skills/eigenvista-control/SKILL.md",
+      "bytes": 3568,
+      "sha256": "f6c43796fade1be2ce0af772552324fe097de3f33922ad0781437dde8c3ac6d1"
+    },
+    {
+      "file": "eigenvista-control/reference.md",
+      "source": "skills/eigenvista-control/reference.md",
+      "bytes": 21159,
+      "sha256": "6a5583d56d4865346cf462860ba1ffdf59b1d81d05bb5d4850bd886bd4bf6b16"
+    },
+    {
+      "file": "eigenvista-control/README.md",
+      "source": "docs/ai-connector.md",
+      "bytes": 16792,
+      "sha256": "fdc621de9e3e2ebedade8c29f00338fc5ccb8c0a0c92652389fde6492d9cba6a"
     }
   ]
 }

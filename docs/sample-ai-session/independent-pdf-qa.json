@@ -1,0 +1,232 @@
+{
+  "pdf_sha256": "ad57104252f314585ee5eee2e55f30ff2effeb69c86fe891c48333ec03ffb2d9",
+  "pdf_bytes": 1522021,
+  "page_count": 6,
+  "message_count": 14,
+  "message_checks": [
+    {
+      "id": "message-1",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-2",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-3",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-4",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-5",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-6",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-7",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-8",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-9",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-10",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-11",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-12",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-13",
+      "role": "user",
+      "text_matches_ignoring_whitespace": true
+    },
+    {
+      "id": "message-14",
+      "role": "assistant",
+      "text_matches_ignoring_whitespace": true
+    }
+  ],
+  "images_by_page": [
+    [],
+    [
+      {
+        "name": "X15.png",
+        "size": [
+          1700,
+          1328
+        ]
+      }
+    ],
+    [
+      {
+        "name": "X20.png",
+        "size": [
+          1700,
+          1328
+        ]
+      }
+    ],
+    [
+      {
+        "name": "X20.png",
+        "size": [
+          1700,
+          1328
+        ]
+      },
+      {
+        "name": "X25.png",
+        "size": [
+          1700,
+          1328
+        ]
+      }
+    ],
+    [
+      {
+        "name": "X29.png",
+        "size": [
+          1700,
+          1328
+        ]
+      }
+    ],
+    [
+      {
+        "name": "X32.png",
+        "size": [
+          1700,
+          1328
+        ]
+      }
+    ]
+  ],
+  "critical_text": {
+    "−0.20945781051103": true,
+    "−0.022452121682877": true,
+    "128³": true,
+    "18,736 triangles": true
+  },
+  "rendered_all_pages": true,
+  "footer_wording_fixed": true,
+  "page_geometry": [
+    {
+      "page": 1,
+      "width": 594.95996,
+      "height": 841.91998,
+      "text_bbox": [
+        47.999998,
+        46.74828904715457,
+        521.2970322991666,
+        827.0214499007715
+      ],
+      "characters_outside_page": 0
+    },
+    {
+      "page": 2,
+      "width": 594.95996,
+      "height": 841.91998,
+      "text_bbox": [
+        47.999998,
+        46.87110892099349,
+        545.2355862786745,
+        827.0214499007715
+      ],
+      "characters_outside_page": 0
+    },
+    {
+      "page": 3,
+      "width": 594.95996,
+      "height": 841.91998,
+      "text_bbox": [
+        47.999998,
+        46.871108920993265,
+        519.4931689743275,
+        827.0214499007715
+      ],
+      "characters_outside_page": 0
+    },
+    {
+      "page": 4,
+      "width": 594.95996,
+      "height": 841.91998,
+      "text_bbox": [
+        47.999998,
+        46.87110892099372,
+        537.7841223872045,
+        827.0214499007715
+      ],
+      "characters_outside_page": 0
+    },
+    {
+      "page": 5,
+      "width": 594.95996,
+      "height": 841.91998,
+      "text_bbox": [
+        47.999998,
+        46.871108920993265,
+        499.87618367500016,
+        827.0214499007715
+      ],
+      "characters_outside_page": 0
+    },
+    {
+      "page": 6,
+      "width": 594.95996,
+      "height": 841.91998,
+      "text_bbox": [
+        47.999998,
+        46.87110892099372,
+        533.6544906393952,
+        827.0214499007715
+      ],
+      "characters_outside_page": 0
+    }
+  ],
+  "visual_review": {
+    "reviewed_pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "clipping": false,
+    "overlaps": false,
+    "blank_pages": false,
+    "orphan_headings": false,
+    "layout_defects": [],
+    "checkerboard_only_behind_transparent_image": true,
+    "footer_wording_corrected": true
+  }
+}

@@ -10,12 +10,18 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.7.2, an experimental
+This guide describes version 0.8.0, an experimental
 development preview. Scientific calculations and rendering have targeted tests,
 but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
 
-Version 0.7.2 adds scene background controls and transparent PNG export
+Version 0.8.0 adds optional AI-enabled viewing through your external coding
+agent. The Mac app bundles its connection helper, launcher, examples and
+palettes; no source checkout or compiler is required. Start with the
+[connector guide](ai-connector.md) and [0.8.0 release notes](releases/0.8.0.md).
+See [current status](status.md#source-version-080) for release qualification.
+
+Version 0.7.2 added scene background controls and transparent PNG export
 ([#73](https://github.com/uvar-apps/eigenvista/issues/73),
 [#74](https://github.com/uvar-apps/eigenvista/issues/74)), plus optional MatterViz
 Muted/Pastel atom palettes. Read the [0.7.2 notes](releases/0.7.2.md) and
@@ -796,3 +802,14 @@ starts its own server on that port. The installed tester app needs neither.
 
 Other developer documentation is in `docs/README.md`; the tester ZIP's
 `Source/eigenvista-source.tar.gz` contains those files with their original paths.
+
+Connector-enabled binary packages offer optional external control for coding
+agents and other harnesses. The installed app includes a prebuilt connection
+helper and portable agent instructions; no source checkout, compiler or development
+server is needed. It operates the same document and renderer with explicitly
+chosen file access. Version 0.8.0 includes this connector; older 0.7.2 packages
+do not. The normal interface is unchanged.
+The [connector guide](ai-connector.md) covers installation, a ready-to-use agent
+setup prompt and interaction with Codex, Claude Code, Pi, OpenCode or another
+local agent. Follow the four [website tutorials](https://uvar-apps.github.io/eigenvista/ai.html)
+for orbitals, density, large-molecule ambient occlusion and protein representations.

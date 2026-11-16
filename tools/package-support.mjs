@@ -26,10 +26,19 @@ function privateChat(name) {
   return /(^|[\\/])(?:[^\\/]*-)?chat-[^\\/]*\.md$/i.test(name);
 }
 
+// These private working documents are not application source or redistribution inputs.
+function privateDocument(name) {
+  const normalized = path.posix.normalize(name.replaceAll("\\", "/")).toLowerCase();
+  return (
+    normalized === "docs/reviews/2026-11-11-code-review.md" ||
+    path.posix.basename(normalized) === "zenodo-upload.md"
+  );
+}
+
 export function packageSourceFiles(root, names) {
   const publicNames = names.filter((name) => {
     inside(root, name);
-    return !privateChat(name);
+    return !privateChat(name) && !privateDocument(name);
   });
   return [...new Set(existingSourceFiles(root, publicNames))].sort();
 }
@@ -74,9 +83,9 @@ export function digest(bytes) {
 export function snapshotFiles(root, names, destination) {
   const manifest = {};
   for (const name of [...new Set(names)].sort()) {
-    if (privateChat(name))
+    if (privateChat(name) || privateDocument(name))
       throw new Error(
-        `Private chat exports must not enter the source package: ${name}`,
+        `Private chat exports and personal documents must not enter the source package: ${name}`,
       );
     const source = inside(root, name);
     if (fs.realpathSync(source) !== source || !fs.lstatSync(source).isFile()) {

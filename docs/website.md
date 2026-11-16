@@ -10,6 +10,14 @@ scientific imagery, aspect-ratio and shader-showcase revision.
 GitHub presentation, real-app video/social preview and search discovery. See
 [project discovery](project-discovery.md) for recording/reproduction, asset
 provenance, Search Console ownership-tag maintenance and publication state.
+[Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the local AI
+connector section and four prompt-driven tutorials. See the
+[connector guide](ai-connector.md) for manual and agent-assisted installation.
+Version 0.8.0 includes the packaged connector; the AI pages guide users from
+that installed binary. Older 0.7.2 packages predate control.
+The homepage hero highlights **AI-enabled viewing**, links directly to the AI
+overview, and names the compatible 0.8.0 package beside the callout.
+Keep that availability label aligned with the actual public release.
 
 ## A static directory, with a small publisher
 
@@ -41,6 +49,19 @@ Regenerate HTML after changing either; the local checker catches stale output.
 Treat [the user guide](user-guide.md), the import guides and actual UI labels as
 the source of truth. Keep the reference and tutorials synchronized when controls
 change. Keep installation claims tied to an actually published release.
+The AI pages are authored in `tools/site/content/ai.mjs` (overview, installation,
+user guide), `ai-quantum.mjs` (two quantum lessons) and `ai-molecules.mjs` (two
+large-molecule lessons). The four tutorials live only on the website. Keep the
+installation and attachment prompts aligned with `docs/ai-connector.md`, covering
+Codex Desktop/CLI, Claude Code, Pi, OpenCode and generic local agents. Link current
+official agent setup sources and distinguish the first compatible binary package
+from the currently released download. User installation starts from an installed
+app and prebuilt helper; it must never require source compilation, a checkout or
+project-development instructions. User prompts describe desired views in ordinary language;
+the agent handles internal connection/method details from its technical guide.
+Palette loading/reset, biological coloring, subsets, per-chain/component styles,
+focus and automatic AO radius are now available through #80's controller work.
+Keep tutorial actions aligned with the actual running connector's capabilities.
 Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
@@ -89,7 +110,8 @@ application suites or create new platform qualification.
 
 ## Capture authentic media
 
-The curated website media contain 15 real EigenVista 0.7.2 captures. Nine new images
+The local website contains 16 curated captures: the original 15 real EigenVista
+0.7.2 captures and one source-preview AI-session image. The original nine quantum images
 show a 17-atom C₇H₁₀ molecular calculation, high-resolution frontier orbitals and
 volume rendering, X-ray and cutaway density surfaces, the actual workspace and
 readable shader controls, plus an imported 29-atom cube field. Six retained
@@ -99,6 +121,15 @@ dimensions and output hashes. The two AO pairs use complete 1AON and 4PJ1
 structures with MatterViz Pastel, element coloring and Van der Waals spheres.
 Off uses the normal molecular material; On uses Lambert + SSAO. Do not describe
 that comparison as two identical lighting models or as electron density.
+
+`ai-session-xray.webp` is a lossless 1700×1328 conversion of the final image in
+the user-approved [sample AI session](sample-ai-session/README.md). Its provenance
+row identifies the unreleased connector/source workflow, HOMO 26, signed 0.03
+isovalue, 128³ grid and 18,736 triangles. Numeric X-ray uniforms were not recorded
+in the original session and must not be presented as measured reproduction data.
+The lesson labels suggested settings as starting values. Do not relabel this
+image as a capture from the released 0.7.2 binary. Existing media keep their
+original hashes, including the Pastel/element AO comparisons.
 
 `tools/site/capture-quantum.mjs` records the new real-UI photography procedure.
 It uses the existing production app on owned port 5189, the installed Playwright
@@ -166,11 +197,100 @@ publication; do not start or poll the optional application Verify workflow.
 Website work does not bump the app version, retag a release or rebuild existing
 redistributables. The published 0.7.2 source and downloads retain their identities.
 
+## Installed-binary setup correction: 16 November 2026 (local)
+
+[Issue #81](https://github.com/uvar-apps/eigenvista/issues/81) replaces the earlier
+developer-oriented installation with installed-app setup: one autonomous agent
+prompt or a bundled launcher. The app carries a prebuilt helper, portable user/
+agent instructions and local reference, examples and palettes. The optional
+skill folder is metadata for an agent, not a substitute for installing the
+actual binary or starting its connection. Agents can download a compatible
+binary and data files from URLs; a missing compatible release is reported
+honestly without a source-build fallback. The published 0.7.2 assets remain
+unchanged and lack these components.
+
+The prepared site has 23 pages and **22 exact-byte downloads**: the original 19
+inputs/palettes/shaders/notices plus portable `SKILL.md`, `reference.md` and
+`README.md` under `downloads/eigenvista-control/`. Their local dependencies travel
+with them. All seven AI pages reject development-file/build-command requirements.
+Final static checks passed: 850 references, 62 image uses and 25,613,408 bytes.
+The full Chromium/WebKit suite passed 138 route/viewport cases and interactions;
+18 targeted desktop/phone checks confirmed readable tables, paths and unchanged
+copied prompts at 320/390/1440. Real staged/extracted-binary acceptance and 19
+packaging checks also passed; see the
+[current handoff](handoff.md#standalone-binary-connection-setup-16-november-2026-local).
+
+Evidence: `tmp/2026-11-16-ai-binary-install/` and
+`tmp/2026-11-15-website/browser-XQDVdX/RESULT.json`. The first phone overflow and
+an obsolete table locator are preserved in failed logs; both were corrected
+without weakening assertions. Existing imagery, examples and released artifacts
+retain their identities. The website remains a local, uncommitted update.
+
+## Natural-language correction: 16 November 2026 (local)
+
+The user rejected the first AI tutorials' method-oriented language and manual
+palette/biological steps. The four lessons and interaction guide now contain
+ordinary requests for results. Agents handle connection discovery and translate
+those requests using the technical reference/skill. Setup includes narrow access
+to bundled palettes and confirms the newer palette/biological features; the
+lessons no longer require users to configure roots or operate GUI controls.
+AGENTS preserves this user-facing content requirement. The static checker rejects
+internal method names and manual handoffs in the AI pages, including negative
+controls for the exact rejected wording. #80 adds the required shared-controller
+operations without adding a GUI console or model connection.
+
+The corrected site passed static checks: 23 pages, 851 references, 62 image uses,
+19 exact downloads and 25,592,677 bytes, within the existing payload budget.
+The full Chromium/WebKit site suite passed 138 route/viewport cases and all
+interactions. Independent review covered all seven AI pages at desktop/phone
+widths, all 27 ordinary-language lesson prompts, matched setup/attach text and
+eight parsed manual shell snippets. Existing source media/download hashes are
+unchanged. Site results: `tmp/2026-11-15-website/browser-6Mgos4/RESULT.json`;
+text/visual evidence: `tmp/2026-11-16-ai-workflow/`.
+
+Actual native verification passed 277 CLI calls, 19 PNGs and eight native saves,
+including real 1AON Pastel/AO and chain/entity/secondary views without GUI steps.
+Independent archive checks retained complete source/scientific data in isolated
+saves. These new captures are verification artifacts, not replacements for the
+curated website media. The application also passed its full affected local
+runtime/build/native checks. See the
+[current handoff](handoff.md#natural-language-workflows-and-presentation-control-16-november-2026-local)
+for exact commands, results and remaining limits. The initial evidence below
+remains historical and is not acceptance of the rejected user experience. The
+corrected site/source remains local, uncommitted and unpublished.
+
+## Initial AI documentation addition: 16 November 2026 (local)
+
+The prepared site now has **23 pages**, **16 curated images** and the original
+**19 exact-byte downloads**. The seven new AI routes provide an overview,
+installation with an agent setup prompt, connector use, frontier orbitals,
+density volume/raycast/shaders, large-molecule AO and protein representations.
+The HOMO lesson adapts the saved real session. Source availability and the
+unchanged released ZIP are distinguished throughout. These routes are not yet
+published; preview them at <http://127.0.0.1:5190/eigenvista/ai.html>.
+
+Local static checks passed: 849 references, 62 image uses and a 25,611,918-byte
+payload, within the existing 25 MiB budget. The full Chromium/WebKit suite passed
+138 route/viewport cases and all interactions, including the new accessible
+phone installer table, exact copied commands/prompts, AI navigation and search.
+Independent desktop/phone content and figure reviews passed. Live native replay
+verified all four workflows and seven representations through 116 CLI calls,
+with 18 PNGs/four native saves; a separate clear-shader checkpoint adds one PNG
+and one save. Palette/color GUI instructions retain qualified existing imagery
+and were not claimed as new API operations or repeated live checks.
+
+Evidence: `tmp/2026-11-16-ai-docs/` and
+`tmp/2026-11-15-website/browser-5ok0kA/RESULT.json`. See the
+[living handoff](handoff.md#initial-connector-guide-and-ai-website-tutorials-16-november-2026-local)
+for exact scope and testing limits. The application/runtime hashes are unchanged
+from #78's qualification. No fresh-machine installation, every-agent sign-in,
+Linux qualification, version change, release rebuild or publication is claimed.
+
 ## Content and imagery revision: 15 November 2026
 
 Completed [#76](https://github.com/uvar-apps/eigenvista/issues/76) replaces the
 small demonstration imagery, fixes figure aspect ratios and makes custom shaders
-prominent on the homepage, gallery and illustrated guide. The published site has
+prominent on the homepage, gallery and illustrated guide. That published snapshot has
 16 pages, 15 curated captures and 19 original-byte example/preset/notice downloads.
 The existing AO/Pastel views remain intact.
 

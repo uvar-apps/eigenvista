@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri_plugin_dialog::DialogExt;
+mod control;
 mod lifecycle;
 mod shader_parameters;
 
@@ -117,17 +118,31 @@ fn scientific_core_version() -> &'static str {
 fn main() {
     tauri::Builder::default()
         .manage(lifecycle::Lifecycle::default())
-        .setup(|app| lifecycle::install(app.handle()).map_err(Into::into))
+        .setup(|app| {
+            lifecycle::install(app.handle())?;
+            control::install(app.handle()).map_err(Into::into)
+        })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             scientific_core_version,
             save_native,
             save_shader_parameters,
+            control::control_connection,
+            control::control_ready,
+            control::control_respond,
+            control::control_read_file,
+            control::control_save_document,
+            control::control_write_image,
             lifecycle::pending_native_exit,
             lifecycle::resolve_native_exit
         ])
         .build(tauri::generate_context!())
         .expect("EigenVista desktop failed to start")
-        .run(lifecycle::handle_event);
+        .run(|app, event| {
+            if matches!(event, tauri::RunEvent::Exit) {
+                control::shutdown(app);
+            }
+            lifecycle::handle_event(app, event);
+        });
 }

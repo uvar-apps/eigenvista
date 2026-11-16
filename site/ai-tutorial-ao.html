@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Ask an external agent to compare atomic representations and matched-camera ambient-occlusion images of the 58,870-atom 1AON complex in EigenVista."><meta name="theme-color" content="#ecebe4">
+
+
+<title>AI tutorial: large molecules, atomic representations and ambient occlusion — EigenVista</title><link rel="canonical" href="https://uvar-apps.github.io/eigenvista/ai-tutorial-ao.html">
+<meta property="og:type" content="website"><meta property="og:site_name" content="EigenVista">
+<meta property="og:title" content="AI tutorial: large molecules, atomic representations and ambient occlusion — EigenVista"><meta property="og:description" content="Ask an external agent to compare atomic representations and matched-camera ambient-occlusion images of the 58,870-atom 1AON complex in EigenVista."><meta property="og:url" content="https://uvar-apps.github.io/eigenvista/ai-tutorial-ao.html">
+<meta property="og:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1280"><meta property="og:image:height" content="640"><meta property="og:image:alt" content="EigenVista: an electron-density X-ray surface beside the 1AON molecular complex with ambient occlusion and Pastel atom colors">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AI tutorial: large molecules, atomic representations and ambient occlusion — EigenVista"><meta name="twitter:description" content="Ask an external agent to compare atomic representations and matched-camera ambient-occlusion images of the 58,870-atom 1AON complex in EigenVista."><meta name="twitter:image" content="https://uvar-apps.github.io/eigenvista/assets/social/eigenvista-social.png?v=e85c377060bf"><meta name="twitter:image:alt" content="EigenVista X-ray density rendering and molecular ambient occlusion on 1AON">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=00b6a4494e27">
+<script src="assets/site.js" defer></script></head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.7.2</small></a>
+<nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="surface-shaders.html">Shaders</a><a href="ai.html" aria-current="page">AI</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
+<div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
+<div class="element-strip" aria-hidden="true"></div>
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">07.3 / EIGENVISTA FIELD MANUAL</p><h1>Read crowded molecules with AO<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#get-ready">Get ready</a><a href="#open-and-check">1. Open the complex</a><a href="#load-pastel">2. Give the atoms a lighter palette</a><a href="#compare-atomic-views">3. Choose the atomic representation</a><a href="#matched-ao-comparison">4. Compare AO off and on from one camera</a><a href="#tune-and-navigate">5. Tune the scale, then move closer</a><a href="#keep-the-result">6. Keep the view and the molecular data</a><a href="#sources-and-next">Sources and next steps</a></aside><article class="prose ai-prose">
+      <p class="lede page-lede">Turn a crowded atomic view into a readable study of molecular packing. Ask your agent to compare three representations, add matte ambient occlusion, and keep a pair of images from exactly the same camera.</p>
+
+      <h2 id="get-ready">Get ready</h2>
+      <p>Complete <a href="ai-install.html">external-agent setup</a> and read the <a href="ai-guide.html">AI control guide</a> first. Give the prompts to Codex, Claude Code, Pi, OpenCode, or another connected local agent that can inspect images. The connection tools are included in the <strong>EigenVista 0.8.0 Mac app</strong>.</p>
+      <p>The agent can download <a href="downloads/1AON.cif" download="1AON.cif">1AON.cif</a> into your input folder and use the included MatterViz Pastel palette. If you already have those files, give it their locations. The palette is also available as <a href="downloads/matterviz-pastel.json" download="matterviz-pastel.json">matterviz-pastel.json</a>. Keep original inputs and choose new output names for repeated runs.</p>
+      <p>The input is the deposited GroEL–GroES chaperonin complex, <a href="https://www.rcsb.org/structure/1AON">RCSB PDB 1AON</a>. EigenVista imports <strong>58,870 selected atoms</strong>. The goal is two comparison PNGs, a closer finished view, and a native molecular document.</p>
+
+      <h2 id="open-and-check">1. Open the complex</h2>
+      <p>Copy this into your external agent after supplying the approved file locations from setup:</p>
+      <pre class="wrap-code"><code>Use my connected EigenVista instance and only the input and output directories I approved. If the current molecule has unsaved work, save it under a new name before replacing it; never discard it silently.
+
+      Open 1AON.cif. If I do not already have it, download https://uvar-apps.github.io/eigenvista/downloads/1AON.cif into my input folder first. Tell me how many atoms and chains were imported, which kinds of biological components are present, and whether the secondary-structure assignments came from the deposited file. Check for 58,870 selected atoms and summarize any import warnings before changing the view.</code></pre>
+      <div class="notice"><p><strong>Checkpoint:</strong> the agent reports 58,870 atoms and the imported biological identities, preserving any earlier work. Let import and scene preparation finish before judging the picture.</p></div>
+
+      <h2 id="load-pastel">2. Give the atoms a lighter palette</h2>
+      <p>MatterViz Pastel is recommended for AO: its light element colors leave room for shaded contacts and cavities. Ask the agent to load the downloaded palette and prepare a complete atomic view.</p>
+      <pre class="wrap-code"><code>Load the included matterviz-pastel.json palette and color the structure by element. Show the complete complex, removing any earlier chain or component filters and special representation choices. Use Ball and stick for the whole structure, turn ambient occlusion off, choose automatic AO radius, and set the background to #ecebe4.
+
+      Fit the whole complex in the view. Confirm that MatterViz Pastel is active and show me a PNG so I can check the lighter element colors.</code></pre>
+      <p><strong>Checkpoint:</strong> the full complex is framed and its atom colors use Pastel. Chain, entity and secondary-structure coloring serve different tasks; Element coloring displays the palette’s element colors.</p>
+
+      <h2 id="compare-atomic-views">3. Choose the atomic representation</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">Representation</th><th scope="col">Use it to read</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Ball and stick</th><td>Atomic positions and connectivity; a dense whole-complex view can be visually busy.</td></tr>
+          <tr><th scope="row">Liquorice</th><td>The connected atomic framework with a more uniform stick-like appearance.</td></tr>
+          <tr><th scope="row">Van der Waals</th><td>Space-filling atomic envelopes, packing and broad recesses; bond cylinders are hidden.</td></tr>
+        </tbody>
+      </table></div>
+      <pre class="wrap-code"><code>Keep the camera, background and palette fixed, with ambient occlusion off. Compare Ball and stick, Liquorice and Van der Waals in that order. Save a new PNG of each in my approved output directory and show me the actual images.
+
+      Wait for each view to finish preparing before taking its picture. Explain what each representation reveals about this crowded complex, then leave Van der Waals selected. Preserve the imported atoms and connectivity.</code></pre>
+      <p><strong>Checkpoint:</strong> three images show different depictions of the same complex. Van der Waals has atomic spheres without bond cylinders; hiding those cylinders does not remove connectivity from the document.</p>
+
+      <h2 id="matched-ao-comparison">4. Compare AO off and on from one camera</h2>
+      <p>Choose a view with both outer contacts and a broad recess visible. The agent can orbit and zoom before the pair, but must keep the camera fixed between captures.</p>
+      <pre class="wrap-code"><code>With Van der Waals selected, fit the complete structure, rotate the view 25 degrees horizontally and 10 degrees vertically, and zoom in by a factor of 1.08. Keep that exact camera angle and framing for the comparison.
+
+      Save a new 1aon-ao-off.png with ambient occlusion off. Then enable ambient occlusion at 100% strength with automatic radius and save a new 1aon-ao-on.png. Wait for each image to finish, then show them side by side. Keep the representation, palette, background and image dimensions unchanged. Confirm that the camera matches and tell me the radius used.</code></pre>
+      <figure><img src="assets/media/1aon-ao-off.webp?v=ac31f6cefbb4" alt="The complete 1AON complex as Pastel element-colored Van der Waals spheres with normal molecular shading and ambient occlusion off" loading="lazy" decoding="async" width="1390" height="1072"><figcaption>Reference capture: normal molecular material, AO off, MatterViz Pastel, Element coloring, Van der Waals spheres and background <code>#ecebe4</code>. The next image uses the same camera and geometry. These existing reference captures used a palette loaded through the GUI.</figcaption></figure>
+      <figure><img src="assets/media/1aon-ao-on.webp?v=8ccaac20f9a9" alt="The matching 1AON view with matte Lambert shading plus screen-space ambient occlusion, emphasizing contacts and broad cavities" loading="lazy" decoding="async" width="1390" height="1072"><figcaption>Reference capture: AO on at 100% strength with automatic radius. Active AO uses Lambert shading plus SSAO, without specular highlights. The comparison includes the matte material change as well as the occlusion effect.</figcaption></figure>
+      <p><strong>Checkpoint:</strong> the two exported views have matching framing and element colors, while AO emphasizes contacts and recesses. Off, or zero strength, restores the normal molecular material. The reference images illustrate the result; your chosen orbit need not reproduce their exact angle.</p>
+      <p>AO shades <strong>atomic spheres and bonds only</strong>. Protein ribbons, cartoons and custom field surfaces keep their own materials. It is an approximate screen-space depth cue, so visible shading can change with the camera and cannot account for all hidden or offscreen geometry.</p>
+
+      <h2 id="tune-and-navigate">5. Tune the scale, then move closer</h2>
+      <p>Automatic radius comes from the atom-coordinate extent and stays fixed as you zoom. Compare a gentler strength and a smaller neighborhood before moving the camera.</p>
+      <pre class="wrap-code"><code>Keep the comparison camera fixed. Lower AO strength to 60%, save a new comparison PNG, and show it beside the 100% image. Then use 100% strength with a manual radius of 8 angstroms. Save another PNG and explain how the scale of the shading changes.
+
+      Return to automatic radius. Rotate a further 15 degrees horizontally and zoom in by a factor of 1.15 to explore a recess. Show me a new image and explain which broad features remain readable. If the model is clipped, zoom out without changing its molecular data.</code></pre>
+      <p><strong>Checkpoint:</strong> changing radius adjusts the scale of the shading, while camera movement changes its screen-space appearance. Manual radius supports 0.25–50 Å. The final view uses automatic radius again. If navigation is slow, ask the agent to turn AO off while you explore.</p>
+
+      <h2 id="keep-the-result">6. Keep the view and the molecular data</h2>
+      <pre class="wrap-code"><code>Keep this Van der Waals view, the Pastel palette and the current AO settings. Save two new final PNGs in my approved output directory: one with the current background and one with a transparent background. Show me both, check that the transparent one has an alpha background, and report their filenames and dimensions.
+
+      Save a new molecular document named 1aon-packing.eigenvista without overwriting anything. Record the camera, background, palette, Element coloring and AO settings in your reply so I can recreate this appearance later.</code></pre>
+      <p><strong>Checkpoint:</strong> you have the comparison images, two finished PNGs, and a new native file. The native document retains the selected molecular data, biological identities, connectivity and global representation. AO, palette, background, biological display choices and camera are session settings; Save does not preserve them. A PNG preserves the rendered appearance.</p>
+      <p>If a save or image export fails, ask the agent to check the destination before retrying and use fresh names for existing files. An AO enhancement error leaves normal molecular rendering available; ask the agent to disable and re-enable AO before trying again.</p>
+
+      <h2 id="sources-and-next">Sources and next steps</h2>
+      <p>Structure and original scientific citation: <a href="https://www.rcsb.org/structure/1AON">RCSB PDB 1AON</a>. The palette preserves Janosh Riebesell’s MatterViz colors for elements 1–109; see the <a href="downloads/LICENSE-MatterViz.txt">MIT notice</a>. <a href="downloads/README.txt">Download sources and reuse notes</a> and the <a href="assets/media/provenance.json">image provenance record</a> accompany the examples.</p>
+      <div class="next-step"><span>Continue with your agent</span><a href="ai-tutorial-representations.html">Read the assembly with protein views →</a><a href="ai-tutorial-orbitals.html">Explore frontier orbitals →</a><a href="ai-tutorial-density.html">Shape a density surface →</a></div>
+    </article></div></main>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span>v0.7.2 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
+</body></html>

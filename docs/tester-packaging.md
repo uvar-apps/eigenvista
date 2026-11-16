@@ -48,9 +48,15 @@ remains a development preview despite no longer using "Preview" in its name.
 The ZIP contains:
 
 - An optimized, complete `EigenVista.app` with an ad-hoc signature.
+- The app also carries a prebuilt, signed `Contents/MacOS/eigenvista-ctl` and
+  `Contents/Resources/AI-connector/`: portable user/agent instructions, a launcher,
+  quantum examples and palettes. Moving the app to Applications retains all
+  connector components. User setup needs no source, compiler or development
+  server; see the [binary-user guide](ai-connector.md). These components ship
+  starting with 0.8.0; older 0.7.2 assets do not include them.
 - An optimized, ad-hoc-signed `Tools/eigenvista-convert` for headless conversion;
   it uses the same Rust import library and needs no GUI, Python, or vendor tool.
-- `READ-ME-FIRST.txt`, the standalone `User-guide.md` (including known
+- `READ-ME-FIRST.txt`, `ai-connector.md`, the standalone `User-guide.md` (including known
   limitations), structure import policies, `Cube-import.md`, and `Molden-import.md`
   with the exact scientific profiles and CLI usage.
 - Synthetic water PDB/XYZ inputs and independently calculated `water.molden`;

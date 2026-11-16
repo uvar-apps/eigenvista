@@ -23,6 +23,7 @@ fact*; this directory records *decisions before the fact*.
 
 | Date | Design | Status | Issue |
 | --- | --- | --- | --- |
+| 2026-11-16 | [Shared application control for external harnesses](2026-11-16-application-control-api.md) | accepted; implementation in progress | [#78](https://github.com/uvar-apps/eigenvista/issues/78) |
 | 2026-11-14 | [Biological identity and protein depictions](2026-11-14-biological-structure-views.md) | implemented; verification/delivery ledger linked | [#62](https://github.com/uvar-apps/eigenvista/issues/62)–[#66](https://github.com/uvar-apps/eigenvista/issues/66) |
 | 2026-11-12 | [Independent hosted browser projects](2026-11-12-browser-project-isolation.md) | implemented | [#54](https://github.com/uvar-apps/eigenvista/issues/54), integration for #48/#37 |
 | 2026-11-14 | [Molecular ambient occlusion](2026-11-14-molecular-ambient-occlusion.md) | implemented | [#59](https://github.com/uvar-apps/eigenvista/issues/59) |

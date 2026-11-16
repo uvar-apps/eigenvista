@@ -100,6 +100,37 @@ test("titled chat exports are excluded before any file access", (t) => {
   for (const entry of names)
     assert.throws(() => snapshotFiles(dir, [entry]), /Private chat exports/);
 });
+test("protected working documents are excluded before access without hiding public reviews or sample sessions", (t) => {
+  const dir = fixture(t);
+  const allowed = [
+    "source.rs",
+    "docs/reviews/public-review.md",
+    "docs/sample-ai-session/README.md",
+  ];
+  for (const name of allowed) {
+    const file = path.join(dir, name);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, "public source fixture");
+  }
+  const protectedNames = [
+    "docs/reviews/2026-11-11-code-review.md",
+    "docs/./reviews/2026-11-11-code-review.md",
+    "DOCS/REVIEWS/2026-11-11-CODE-REVIEW.MD",
+    "zenodo-upload.md",
+    "docs/zenodo-upload.md",
+  ];
+  // Protected files deliberately do not exist; no filesystem access is needed.
+  assert.deepEqual(packageSourceFiles(dir, protectedNames), []);
+  const names = packageSourceFiles(dir, [...protectedNames, ...allowed]);
+  assert.deepEqual(names, [...allowed].sort());
+  assert.deepEqual(Object.keys(snapshotFiles(dir, names)), [...allowed].sort());
+  for (const name of protectedNames)
+    assert.throws(
+      () => snapshotFiles(dir, [name]),
+      /Private chat exports and personal documents/,
+    );
+});
+
 test("tester environment cannot inherit Apple signing/notarization secrets", () => {
   const env = testerEnvironment(
     {

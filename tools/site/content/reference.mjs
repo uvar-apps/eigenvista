@@ -4,12 +4,12 @@ export default [
     title: "User reference",
     searchTitle: "Molecular and quantum chemistry viewer reference manual",
     description:
-      "The EigenVista 0.7.2 manual: files, scene controls, quantum fields, biological structures, and saving.",
+      "The EigenVista 0.8.0 manual: files, scene controls, quantum fields, biological structures, and saving.",
     section: "reference",
     number: "03",
     body: `
 <div class="prose">
-  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.7.2</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
+  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference describes <strong>version 0.8.0</strong>, an experimental development preview. Use the <a href="install.html">installation guide</a> to get the Mac app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -18,6 +18,7 @@ export default [
     <li><a href="surface-shaders.html">Custom surface shaders</a> — see through a density envelope, expose its interior with clipping, and tune lighting and transparency live.</li>
     <li><a href="reference-fields.html">Orbitals, densities, and sampled fields</a> — generate signed surfaces, browse several orbitals, compare render modes, and understand resolution and caching.</li>
     <li><a href="reference-structures.html">Biological structures</a> — color chains and secondary structure, show components, isolate a chain, select residue ranges, and use protein depictions.</li>
+    <li><a href="ai.html">AI-assisted viewing</a> — connect your external coding agent, describe a molecular view, and keep exported figures and native documents.</li>
   </ul>
 
   <h2 id="workspace">The application workspace</h2>
@@ -243,7 +244,7 @@ eigenvista-convert --help</code></pre>
 
   <h2 id="palettes">Atom colours</h2>
   <p>The <strong>Atom colours</strong> section identifies <strong>Built-in default (118 elements)</strong> or the palette file loaded this session. <strong>Colours file…</strong> opens a JSON palette. <strong>Reset to defaults</strong> restores the bundled colors. Biological <strong>Coloring → Element</strong> displays these element overrides; other biological color modes use their own legends.</p>
-  <p>Version 0.7.2 supplies optional MatterViz examples: <a href="downloads/matterviz-pastel.json" download>Pastel</a> is lighter with pale-pink oxygen and is recommended for AO; <a href="downloads/matterviz-muted.json" download>Muted</a> has subdued colors with dusty-rose oxygen. They also live in the source checkout's <code>palettes/</code> and tester ZIP's <code>Palettes/</code>. Both cover elements 1–109; 110–118 keep built-in defaults. Their <a href="downloads/LICENSE-MatterViz.txt">upstream MIT notice</a> accompanies the examples.</p>
+  <p>Two optional MatterViz palettes are supplied: <a href="downloads/matterviz-pastel.json" download>Pastel</a> is lighter with pale-pink oxygen and is recommended for AO; <a href="downloads/matterviz-muted.json" download>Muted</a> has subdued colors with dusty-rose oxygen. They also live in the source checkout's <code>palettes/</code> and tester ZIP's <code>Palettes/</code>. Both cover elements 1–109; 110–118 keep built-in defaults. Their <a href="downloads/LICENSE-MatterViz.txt">upstream MIT notice</a> accompanies the examples.</p>
   <h3>Write a partial palette</h3>
   <pre><code>{
   "format": "eigenvista-atom-colors",
