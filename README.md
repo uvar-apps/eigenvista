@@ -80,6 +80,14 @@ Explore the [original Molekel source](https://github.com/ugovaretto/molekel) and
 the [original Molekel website](https://ugovaretto.github.io/molekel/), with its
 documentation and gallery.
 
+## Cite EigenVista
+
+Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
+(Version 0.8.0) [Computer software]. Zenodo.
+[https://doi.org/10.5281/zenodo.24273137](https://doi.org/10.5281/zenodo.24273137)
+
+Citation metadata is available in [CITATION.cff](CITATION.cff).
+
 ## Author and copyright
 
 Author: Ugo Varetto
