@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use EigenVista in your work, cite the project concept DOI below or the DOI of the released version you used."
+message: "If you use EigenVista 0.10.0 in your work, please cite this version using the DOI below."
 type: software
 title: "EigenVista: molecular and quantum chemistry visualization"
 authors:
@@ -7,7 +7,7 @@ authors:
     given-names: Ugo
 version: "0.10.0"
 date-released: "2026-11-17"
-doi: 10.5281/zenodo.24246123
+doi: 10.5281/zenodo.24302658
 url: "https://uvar-apps.github.io/eigenvista/"
 repository-code: "https://github.com/uvar-apps/eigenvista"
 license: GPL-2.0-or-later

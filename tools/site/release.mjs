@@ -1,6 +1,7 @@
 // User-facing download facts from the verified 0.10.0 package.
 export const release = Object.freeze({
   version: "0.10.0",
+  doi: "10.5281/zenodo.24302658",
   source: "c27a8dcbf43b5bcf4b9c69ed8426c6ade32f1167",
   url: "https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0",
   base: "https://github.com/uvar-apps/eigenvista/releases/download/v0.10.0/",

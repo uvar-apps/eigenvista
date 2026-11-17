@@ -10,6 +10,15 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Verification policy: 14 November 2026
 
+### Zenodo citation update, 17 November 2026
+
+The 0.10.0 version DOI supplied by the user is
+[10.5281/zenodo.24302658](https://doi.org/10.5281/zenodo.24302658).
+Current citation, documentation, release notes and website metadata use it.
+The all-version concept DOI and historical 0.8.0 citation remain distinct.
+Packages, tag and runtime are unchanged; current validation/publication evidence
+is recorded in the living handoff.
+
 <a id="source-version-0100"></a>
 
 ### Mac package 0.10.0 — published, 17 November 2026

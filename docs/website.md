@@ -110,9 +110,11 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. `CITATION.cff`, the README citation and About distinguish the current
-source's concept DOI (`10.5281/zenodo.24246123`) from the published 0.8.0 archive's
-DOI (`10.5281/zenodo.24273137`). Keep citation title, author, version and DOI
+section. `CITATION.cff`, the README citation and About use the current 0.10.0
+version DOI (`10.5281/zenodo.24302658`), also recorded in `tools/site/release.mjs`.
+The project concept DOI (`10.5281/zenodo.24246123`) identifies all versions;
+the historical 0.8.0 archive retains DOI `10.5281/zenodo.24273137`.
+Keep citation title, author, version and DOI
 synchronized. A version DOI identifies that archive, so do not assign it to a
 later version. DOI metadata added after publication updates documentation
 and release notes without moving the existing tag or rebuilding immutable assets.

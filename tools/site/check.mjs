@@ -285,15 +285,18 @@ if (published) {
   assert(html.get("index.html").includes(`${release.version} · Available for Mac.`));
   assert(html.get("index.html").includes("The Mac download includes this workspace, the scientific tools and the AI connector."));
   assert(html.get("install.html").replace(/<[^>]*>/g, "").includes("The ZIP includes the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual."));
-  assert(html.get("about.html").includes(`Version ${application.version} has no supplied version-specific DOI yet`));
+  assert(html.get("about.html").includes(`href="https://doi.org/${release.doi}">${release.doi}</a>`), "Current released-version citation DOI");
 } else {
   assert(html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
-  assert(html.get("about.html").includes(`${application.version} test build is unreleased and has no version-specific DOI yet`));
+  assert(html.get("about.html").includes(`(Version ${release.version}) [Computer software]`), "Development source retains the published-version citation");
 }
 assert(html.get("install.html").includes(`Published download: ${release.version}`));
 assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download identifies the verified package");
 assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive"), "Historical DOI remains attributed to its actual archive");
 assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
+const citation = fs.readFileSync(path.join(root, "CITATION.cff"), "utf8");
+assert.equal(citation.match(/^version: "([^"]+)"$/m)?.[1], application.version);
+if (published) assert.equal(citation.split("\n").find((line) => line.startsWith("doi: ")), `doi: ${release.doi}`, "CFF and released website DOI agree");
 const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );

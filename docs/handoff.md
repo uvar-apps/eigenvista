@@ -1,5 +1,28 @@
 # Development handoff
 
+## Zenodo DOI for 0.10.0 — 17 November 2026
+
+The user supplied **10.5281/zenodo.24302658** as the 0.10.0 version DOI.
+Update CITATION.cff, README, release notes, agent guidance and the website's
+About citation/download metadata together. The project concept DOI remains
+10.5281/zenodo.24246123; the historical 0.8.0 DOI remains
+10.5281/zenodo.24273137. Preserve dated pre-DOI records below and all immutable
+packages, source tag and asset digests. This is a documentation/metadata update;
+validate citation schema, links, static output and the two-engine website suite
+before pushing and publishing. The GitHub release notes also need the new DOI.
+Zenodo's public API returned HTTP 403 from this environment; the user-supplied
+identifier is authoritative and no independent record-metadata match is claimed.
+
+Local verification passes citation schema 1.2.0, Markdown links/whitespace,
+website module syntax/static checks and all **162 Chromium/WebKit website cases**
+(`tmp/2026-11-15-website/browser-foZl0v/RESULT.json`). Static output remains
+27 pages/1,076 local references/76 image uses/22 exact downloads. The new positive
+DOI check requires CFF and the published website release metadata to agree.
+All 234 frozen application/test hashes match the existing 646-case qualification;
+application tests were not rerun for this citation-only change. Evidence is under
+`tmp/doi-0.10.0/`. Commit/push, GitHub release-note update and Pages/public readback
+follow these checks; no retag or package rebuild.
+
 ## Mac package 0.10.0 — published, 17 November 2026
 
 The user explicitly requires the downloadable Mac package updated to the latest
@@ -45,8 +68,8 @@ and phone homepages were inspected. Static payload is 26,204,546 bytes. The firs
 static attempt matched visible installation text against raw HTML containing a
 link; correcting the text extraction retains the full positive wording check.
 Earlier failed diagnostic evidence is preserved. All existing imagery and
-version-specific DOI provenance remain historical; current citation uses the
-concept DOI.
+version-specific DOI provenance remain historical. At package build time the
+citation used the concept DOI; the newer 0.10.0 citation is recorded above.
 
 **Publication complete:** the [0.10.0 Mac release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)
 is public, retaining the experimental prerelease classification and unchanged

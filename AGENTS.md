@@ -141,8 +141,11 @@ preserve those historical results as evidence of what ran at the time.
   160 calls and five images; actual optimized GUI plane/pane/Zen/WebKit-fullscreen
   checks pass. All 234 frozen hashes still match the 646-case application suite;
   updated website passes all 162 browser cases. Preserve historical 0.8.0 assets
-  and capture provenance. Citation uses the concept DOI until a new version DOI
-  is supplied. Keep #83/#85 open for the documented Save/SES limits; Linux,
+  and capture provenance. The 0.10.0 version DOI is **10.5281/zenodo.24302658**;
+  keep CITATION.cff, README, release notes and website aligned. The concept DOI
+  10.5281/zenodo.24246123 identifies all versions; 0.8.0 retains its own DOI.
+  Citation-only updates do not rebuild immutable packages or move tags.
+  Keep #83/#85 open for the documented Save/SES limits; Linux,
   clean-Mac/Gatekeeper and full OS-range qualification remain pending. No
   application CI, compiler/dependency/profile/icon change or retag is implied.
 

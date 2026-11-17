@@ -113,9 +113,13 @@ documentation and gallery.
 
 ## Cite EigenVista
 
-For version 0.10.0, [CITATION.cff](CITATION.cff) uses the
-[project concept DOI](https://doi.org/10.5281/zenodo.24246123). A version-specific
-0.10.0 DOI will be added when supplied. The historical 0.8.0 citation remains:
+Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
+(Version 0.10.0) [Computer software]. Zenodo.
+[https://doi.org/10.5281/zenodo.24302658](https://doi.org/10.5281/zenodo.24302658)
+
+Machine-readable metadata is in [CITATION.cff](CITATION.cff). The
+[project concept DOI](https://doi.org/10.5281/zenodo.24246123) identifies the
+project across versions. The historical 0.8.0 citation remains:
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
 (Version 0.8.0) [Computer software]. Zenodo.
