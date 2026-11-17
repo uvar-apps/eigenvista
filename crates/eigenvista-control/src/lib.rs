@@ -5,7 +5,7 @@ mod files;
 
 pub use broker::{Broker, Connection, ControlRequest, MAX_FRAME_BYTES, REQUEST_TIMEOUT, RpcError};
 pub use client::{call, wait_for_job};
-pub use files::{FileReceipt, MAX_FILE_BYTES, MAX_PNG_DATA_URL_BYTES, ScopedFiles};
+pub use files::{FileReceipt, MAX_CSV_BYTES, MAX_FILE_BYTES, MAX_PNG_DATA_URL_BYTES, ScopedFiles};
 
 pub(crate) fn random_hex(bytes: usize) -> Result<String, RpcError> {
     let mut random = vec![0; bytes];

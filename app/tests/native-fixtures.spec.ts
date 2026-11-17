@@ -1,3 +1,4 @@
+import { hideToolsForScene } from "./workspace";
 import { expect, test, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -240,6 +241,7 @@ for (const record of records.filter((fixture) => fixture.counts.surfaces > 0)) {
       ["mobile", { width: 390, height: 844 }],
     ] as const) {
       await page.setViewportSize(viewport);
+      if (layout === "mobile") await hideToolsForScene(page);
       await settleScene(page);
       const pixels = await scenePixels(page);
       expect(pixels.error).toBe(0);

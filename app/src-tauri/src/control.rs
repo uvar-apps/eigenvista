@@ -177,6 +177,28 @@ pub async fn control_write_image(
     .map_err(|_| RpcError::new(-32006, "io_error", "Image export task failed"))?
 }
 
+/// Write only generated CSV tables through the authenticated scoped file adapter.
+#[tauri::command]
+pub async fn control_write_csv(
+    state: tauri::State<'_, ControlState>,
+    path: String,
+    text: String,
+    protected_paths: Vec<String>,
+    overwrite: bool,
+) -> Result<FileReceipt, RpcError> {
+    let files = state.files.clone().ok_or_else(disabled)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        files.write_csv(
+            std::path::Path::new(&path),
+            &text,
+            &protected_paths,
+            overwrite,
+        )
+    })
+    .await
+    .map_err(|_| RpcError::new(-32006, "io_error", "CSV export task failed"))?
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

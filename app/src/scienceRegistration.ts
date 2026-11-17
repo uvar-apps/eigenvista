@@ -1,4 +1,5 @@
 import type { EigenVistaDocument } from "./types";
+import { registeredScienceActions } from "./scienceActions";
 
 interface Registration {
   id: number;
@@ -15,7 +16,7 @@ export class ScienceRegistration {
   }
 
   prepare(action: string, args: Record<string, unknown>) {
-    if (action !== "sample" && action !== "generate") return { args };
+    if (!registeredScienceActions.has(action)) return { args };
     const { doc: source, ...parameters } = args;
     const doc = source as EigenVistaDocument;
     if (!doc) throw new Error("Sampling requires a document");
@@ -42,7 +43,17 @@ export class ScienceRegistration {
       args: {
         ...parameters,
         registration: registration.id,
-        ...(!reused ? { doc: { ...doc, surfaces: [] } } : {}),
+        ...(!reused
+          ? {
+              doc: {
+                ...doc,
+                surfaces: [],
+                annotations: undefined,
+                molecular_surfaces: undefined,
+                field_analysis: undefined,
+              },
+            }
+          : {}),
         appearance: {
           positive_color: doc.view.positive_color,
           negative_color: doc.view.negative_color,

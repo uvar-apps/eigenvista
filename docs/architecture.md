@@ -1,12 +1,21 @@
 # As-built architecture
 
-This describes the 0.8.0 development preview, including the shared
+This describes the **unreleased 0.10.0 development preview**, including the shared
 application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
 not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
+
+This source contains the **unreleased scientific-inspection implementation**
+([Plan 009](../plans/009-scientific-inspection-implementation.md), #83–#86).
+Its selections/measurements/labels, SES/SAS meshes and quantitative field
+analyses are described below. Published 0.8.0 binaries predate them; the source
+now identifies itself as 0.10.0. Qualification evidence is tracked
+separately from the existing release; no merge/release is implied here.
+The [scientific-inspection decision](design/2026-11-16-scientific-inspection.md)
+records source identity, transport, scientific conventions and qualification boundaries.
 
 EigenVista is a modern rewrite of Molekel, the molecular visualization
 application developed by Ugo Varetto between 2006 and 2010. The original
@@ -69,7 +78,8 @@ by native saving. There is no calculation server, remote service, or database.
 | [Connectivity](../crates/eigenvista-core/src/bonds.rs) | Exact k-d-tree neighbors, explicit-plus-inferred display bonds |
 | [Native format](../crates/eigenvista-format/src/lib.rs) and [filesystem adapter](../crates/eigenvista-format/src/native.rs) | Portable container, checksums/validation, atomic native writes |
 | [WASM bridge](../crates/eigenvista-wasm/src/lib.rs) | Document import/validation/encoding, immutable registered document with one sampled-field cache, typed display buffers, compatibility JSON sampling/meshing and point/gradient probes |
-| [Document UI](../app/src/App.tsx) and [types](../app/src/types.ts) | Document state, controls, dirty state, generation replacement, error recovery |
+| [Document UI](../app/src/App.tsx) and [types](../app/src/types.ts) | One document/controller owner, controls, dirty state, generation replacement, error recovery |
+| [Workspace pane](../app/src/WorkspacePane.tsx), [preferences](../app/src/useWorkspacePane.ts) and [widget stack](../app/src/PanelSidebar.tsx) | Default left/right resizable pane, four task tabs, stable mounted tools, bounded presentation preferences, reusable drag/keyboard/menu ordering |
 | [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
 | [Worker client](../app/src/science.ts), [registration identity](../app/src/scienceRegistration.ts), and [worker](../app/src/science.worker.ts) | Owned FIFO requests, per-request abort, worker lifecycle, bounded resident registration/cache |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
@@ -85,7 +95,72 @@ The Rust workspace's six default members are core, format, import, converter,
 control and WASM. The desktop shell is a workspace member but requires an explicit
 workspace check or Tauri build. `cargo test` alone is not a desktop check.
 
-## External application control (0.8.0)
+## Scientific inspection ownership (unreleased)
+
+All GUI inspection controls use the same discovered application operations as
+the external connector. [Inspection schemas](../app/src/inspectionSchemas.ts)
+declare strict bounded parameters; [the inspection hook](../app/src/useScientificInspection.ts)
+owns accepted selection/pick order, worker requests and publication. Its
+operations are dispatched through the existing controller/helper, not a second
+document, scripting runtime or GUI-driving automation layer.
+
+| Component | Ownership |
+| --- | --- |
+| [Rust geometry inspection](../crates/eigenvista-core/src/inspection.rs) | Document-local atom references, annotation validation, f64 distance/angle/torsion, exact zero-radius coincidence and nearest-seed k-d-tree neighborhoods |
+| [Rust molecular surfaces](../crates/eigenvista-core/src/molecular_surface.rs) | Selected accepted atoms, explicit radii/Å parameters, Sesmesh adapter, rebased mesh precision, independent provenance/hash and mesh validation |
+| [Rust field analysis](../crates/eigenvista-core/src/field_analysis.rs) | Quantity/unit declarations, prepared f64 evaluation, affine-grid interpolation, planes/profiles, contours, caches/fingerprints and CSV |
+| [WASM inspection bridge](../crates/eigenvista-wasm/src/inspection.rs) | Validated operations, typed mesh/quantitative buffers and bounded sample pages |
+| [Annotation rendering](../app/src/annotationRendering.ts) | Sparse scene sprites/monitors and selection markers; no scientific geometry calculation |
+| [Field depiction](../app/src/fieldAnalysisRendering.ts) | Slice/probe/profile depiction, numeric keys, GPU precision warnings and contour geometry |
+| [Geometry controls](../app/src/InspectionControls.tsx), [shape controls](../app/src/MolecularSurfaceControls.tsx), [field controls](../app/src/FieldAnalysisControls.tsx) | Forms/readouts sharing the controller; no duplicate TS scientific evaluator |
+
+Original zero-based atom indices remain stable through filtering and instancing;
+GUI numbering is one based. Active source generation/identity and request guards
+reject stale picks/jobs after atom/structure replacement. Canonical selection
+sets are distinct from ordered measurement/plane/profile atom sequences.
+Typed `lastPick` readback distinguishes atoms, bonds, residues and quantum/
+molecular surfaces, retaining original identity and explicit mesh-vertex or
+backbone-Cα attribution. A changed/removed source mesh invalidates its old pick.
+Source geometry-only requests omit basis/density/grids and do not replace QC
+registration. Quantitative requests reuse prepared immutable numeric inputs and
+transfer f64 caches separately from f32 preview values. Active cancellation
+terminates blocked synchronous WASM; unrelated queued clients retain ownership.
+
+Molecular surfaces use the vendored Sesmesh 1.1.2 source with the documented
+worker-clock and serial-callback portability changes. Default features are
+disabled. The adapter converts bohr to Å, rebases around a source atom before
+f32 local meshing, and restores world bohr in f64. It records this precision;
+widening vertices does not make the engine f64. Selected-source meshes are
+isolated-subset surfaces. Radii, probe, spacing, cavities, engine and source
+atoms determine an independent molecular hash; no fake quantum grid is created.
+No automatic coarsening, smoothing or decimation is enabled.
+
+Field descriptors live outside legacy `Grid`/orbital/density records so their
+interpretation does not change `compute::source_hash`. Sampling and interpretation
+have separate fingerprints. Analytic values use prepared Gaussian input; grid
+values use source f64 trilinear interpolation in the complete affine basis,
+including reflected/skewed axes and closed endpoints. Outside status is explicit.
+Finite numeric data may remain inspectable/exportable even when f32 world/value
+limits prevent a particular depiction; summaries expose that rendering warning.
+
+Publication validates a whole candidate with exact native preflight before
+replacing accepted state. Failed/cancelled jobs retain prior meshes/results.
+Annotation edits additionally preflight actual CPU text layout against the
+16 MiB texture budget before publication, disposing temporary resources without
+a GPU upload; a rejected layout leaves the accepted annotations intact.
+Durable optional `annotations`, `molecular_surfaces` and `field_analysis` payloads
+have explicit required capabilities; the typed writer packs bulk numeric arrays.
+Annotation, style and interpretation changes leave old quantum hashes intact.
+Cached mesh/analysis data reload directly; no silent recalculation is performed.
+
+Scene sprites/measurement lines participate in the shared final-frame PNG path;
+field keys are explicitly composited from the matching overlay. They do not
+become atom/bond AO targets. Molecular surfaces reuse existing surface materials,
+shaders and export while remaining independent of the active quantum-field mode.
+The connector's CSV writer shares scoped atomic/no-clobber publication protections;
+it is not a general arbitrary-text writer.
+
+## External application control (introduced in 0.8.0)
 
 `app/src/control.ts` owns versioned method schemas, validation, bounded metadata,
 revision guards and calculation jobs. Its host in `App.tsx` invokes the existing
@@ -95,7 +170,9 @@ calculation engine. `Viewport.tsx` exposes an optional typed camera/background/
 capture port. API and toolbar PNG exports share the final-frame capture path.
 
 The #80 extension exposes palette load/reset and biological presentation through
-the same controller (28 methods in API v1). Palette loading uses the GUI's
+the same controller (28 methods in the published 0.8.0 API v1 catalog). The
+unreleased inspection extension remains additive in API v1; discover live
+schemas rather than inferring a method count from the version. Palette loading uses the GUI's
 `parseAtomColors` parser and commits only a fully valid palette; native reads
 apply a 256 KiB limit before reserving the buffer. Palette and biological colors,
 visibility, residue subsets and representation overrides stay session-only.
@@ -561,6 +638,25 @@ Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
 instanced meshes with per-instance atom picking. Rendering at every maximum
 input size still requires separate platform acceptance.
 
+The scene uses [camera-relative lighting](../app/src/sceneLighting.ts): six equal
+directional lights at the vertices of a rotated octahedron, plus neutral ambient
+fill. Lights and targets are children of the camera, which belongs to the scene;
+orbit/pan/roll therefore preserve the view-space arrangement. Front directions
+are orthogonal and 120° apart in azimuth; their antipodes complete the rig.
+Light intensities multiply the declared weights by π to compensate Three's
+Lambert BRDF factor of 1/π, matching the shared GLSL irradiance weights.
+Built-in Blinn–Phong
+mesh and sampled-raycast shaders rotate their world normals/view vectors to
+camera space and use the same six directions. Ambient/diffuse weights are
+0.1/0.9, giving a pure-Lambert response from approximately 0.620 to 1 before
+material/color processing; the finite rig preserves shape cues rather than
+claiming isotropic illumination for every normal. Blinn specular remains an
+explicit additional term. Existing PBR, Lambert and custom materials remain
+distinct; equal illumination does not imply identical BRDFs or images of
+different sides of an asymmetric molecule. User/bundled custom GLSL keeps its
+declared lighting; pure volume compositing, numerical planes and labels remain
+unlit. No scientific geometry, palette or stored view fields change.
+
 Molecular ambient occlusion is an optional session display setting. The
 [controller](../app/src/molecularAmbientOcclusion.ts) uses the pinned GTAO addon
 as a molecule-only normal/depth and AO producer on reserved layer 1. It attaches
@@ -612,11 +708,17 @@ in-memory copies.
 The [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
 preserves the earlier writer's exact logical bytes: sorted metadata, array IDs,
 column-before-row coalescing, flat shapes, f64 bits, integer fallback and hashes.
-No schema/profile migration is introduced. Checked byte accounting and fallible
+That typed-writer change introduced no schema/profile migration. Checked byte accounting and fallible
 binary-buffer reservation preserve the existing preflight thresholds. Metadata,
 prepared arrays, ZIP output and unchanged decoder allocations remain; saved-source
 validation still uses core's separate JSON-based hashing. The native benchmark
 and its measurement limits are documented in [development](development.md#native-encoding-measurements).
+
+The later unreleased inspection extension adds optional capability-tagged
+payloads under the same `[0,1]` container. It does not alter old documents' entry
+bytes or the established quantum hash algorithm. See
+[inspection capabilities](preview-format.md#scientific-inspection-capabilities-unreleased)
+for the new durable records and compatibility boundary.
 
 Saved meshes include field ID, source hash, signed isovalue, mesher/version,
 grid geometry, precision, vertices/normals/indices, and appearance. The associated
@@ -654,7 +756,16 @@ The larger 256 cubed transient-grid limit does not extend native source-grid or
 128 MiB container limits; generated meshes can record their larger generation
 resolution without embedding the transient samples in `Document.grids`.
 
-Sidebar expansion is a separate profile preference, managed by
+The default workspace is one **480 px** tool pane, initially on the right and
+selectable on the left. **Molecule**, **Fields**, **Surfaces** and **Appearance**
+each expose a scrollable stack of the existing widgets. At narrow widths the
+pane overlays the scene; hiding it returns its allocated width to the viewport.
+`WorkspacePane` keeps one viewport parent and one mounted instance of every
+scientific widget through side changes, tab changes, closing and Zen. Tab scroll
+positions are restored. Hidden form bodies and shader file inputs are retained;
+an application reload is not a promise to recover unsaved drafts.
+
+Widget expansion is a separate profile preference, managed by
 [`PanelSection`](../app/src/PanelSection.tsx). Eight whitelisted booleans live
 under `eigenvista:panel-expansion:v1` in localStorage; reads are size-bounded and
 storage errors fall back to in-memory state. Accessible heading buttons control
@@ -663,15 +774,31 @@ edit the scientific document, mark it dirty or request worker calculations.
 During scientific activity the Field rendering body is forced open and its
 disclosure disabled, without overwriting the user's preference.
 
-[PanelSidebar](../app/src/PanelSidebar.tsx) separately manages within-pane order
-under `eigenvista:panel-order:v1`. Only complete permutations of each pane's
-known IDs are accepted from bounded storage. Stable keyed React siblings are
-sorted in actual DOM order, preserving mounted controls (including ShaderPanel's
-local state), reading order and tab order. Reordering uses a dedicated drag handle
-or keyboard/tap move controls, announces positions, and retains keyboard focus.
-Cross-pane moves are rejected. The two pane memberships stay fixed on desktop
-and mobile; no scientific data or worker registration changes. See the
+`useWorkspacePane` owns `eigenvista:workspace-pane:v1`: pane side, finite bounded
+width, visibility, active tab, complete per-tab widget permutations and the
+three additional widget disclosures. Reads are limited to 4 KiB and validate
+each preference; unavailable storage falls back to session state. Zen and actual
+fullscreen state are transient. Neither this store nor the original disclosure
+store contains scientific arrays, shader sources, file grants or job state.
+
+The shared `PanelStack` in [PanelSidebar](../app/src/PanelSidebar.tsx) sorts stable
+keyed React siblings into actual DOM order, preserving mounted controls,
+reading order and tab order. A dedicated drag handle or keyboard/tap move
+controls announce positions and retain keyboard focus. Cross-tab/scope moves
+are rejected. The legacy `PanelSidebar` wrapper retains its original two-sidebar
+membership, `{pane,id}` drag payload and `eigenvista:panel-order:v1` preference
+for compatibility; it does not supply the default pane's orders. See the
+[simple-pane decision](design/2026-11-17-simple-workspace-pane.md) and earlier
 [ordering decision](design/2026-11-13-sidebar-reordering.md).
+
+Closing tools or entering Zen never transfers document/controller ownership,
+restarts a worker or cancels a job. An activity strip outside the pane retains
+progress and cancellation for cancellable calculations. Browser fullscreen uses
+the actual Fullscreen API and reports rejection; it is not a detached native
+window implementation or native macOS fullscreen qualification. Presentation
+settings currently have no application-control API methods. Quantitative field
+metadata stays lazy until its widget is opened, so selecting the Fields tab
+alone does not parse an unused source or start an analysis.
 
 Browser saving encodes through WASM and requests a download. Desktop saving
 encodes through WASM, revalidates in native Rust, asks for a destination, writes

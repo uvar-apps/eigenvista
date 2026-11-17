@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "created": "2026-11-16T12:39:00.278Z",
+  "application": {
+    "name": "EigenVista",
+    "version": "0.8.0",
+    "publishedRelease": false,
+    "branch": "codex/scientific-inspection",
+    "baselineRevision": "6a728d918cfdf4291a6a04ae9327d668fd449283",
+    "runtime": [
+      {
+        "file": "app/src/App.tsx",
+        "sha256": "7b1837522c658fb7c8fc7cd045476fdaaa324e98773ddd24e3f8e672ebf81b62"
+      },
+      {
+        "file": "app/src/Viewport.tsx",
+        "sha256": "a8129d3c88649e68b0ecf095c5495d9a19ae748d5459a75d7b0669eb435bd477"
+      },
+      {
+        "file": "app/src/annotationRendering.ts",
+        "sha256": "f6e00c7536a978d5ec9ec38f2712dab486bb9db4bf7a310b2ed4b621ca495492"
+      },
+      {
+        "file": "app/src/fieldAnalysisRendering.ts",
+        "sha256": "734a53b221dcb982041561ec0e3e367fa50c4fa48859a6f0be09bb9c112cf089"
+      },
+      {
+        "file": "app/src/useScientificInspection.ts",
+        "sha256": "3665be76d9786df793b344a7d482ac3ec016a8bba48d40c7cd3951efc7d54039"
+      },
+      {
+        "file": "crates/eigenvista-core/src/field_analysis.rs",
+        "sha256": "ce3775dedc7797a7d11c1cdd17a1c0155612cb60b816a4534ca5d685e492887e"
+      },
+      {
+        "file": "crates/eigenvista-core/src/inspection.rs",
+        "sha256": "e36e742cc08a630327c618c708100e72a791164fbbbb3c0a6bf2775f16cbb4b1"
+      },
+      {
+        "file": "crates/eigenvista-core/src/molecular_surface.rs",
+        "sha256": "7c18617da47e1c62bf282d5076cd67b39c435f468e0ab15cee9df561b21cc89b"
+      }
+    ],
+    "evidenceBoundary": "Captured from the uncommitted scientific-inspection development working tree, not from a published 0.8.0 binary. baselineRevision identifies the starting history; runtime hashes identify source files observed at capture completion. These figures establish their observed appearance and parameters, not release or platform qualification."
+  },
+  "capture": {
+    "method": "Public application control API operating the real development browser app; actual PNG export; WebP quality90 encoding only; no scientific image synthesis",
+    "browser": "153.0.8010.12",
+    "coordinateUnit": "bohr",
+    "background": "#17232d",
+    "encoding": "cwebp -q 90 -m 6; original dimensions retained"
+  },
+  "inputs": [
+    {
+      "file": "tools/site/examples/bicyclic-c7h10.molden",
+      "bytes": 494537,
+      "sha256": "9309464ace24326f70c344852d4bbc49bc1bca418876a1a0d6b42863202b4645"
+    },
+    {
+      "file": "palettes/matterviz-pastel.json",
+      "sha256": "6d3624bc9019e0540352865d45fa1ae4d6e5ed9083cba558bde0820556b1f802"
+    }
+  ],
+  "images": [
+    {
+      "file": "geometry-annotations.webp",
+      "width": 1650,
+      "height": 1232,
+      "bytes": 24174,
+      "sha256": "5c33b8cb3502f67270065b04c03a43097f9977db8d6943506fa8d82b9224eb04",
+      "detail": {
+        "subject": "Original 17-atom geometry, measured C–C distance and source atom label",
+        "measurements": [
+          {
+            "id": "figure-distance",
+            "label": "C–C",
+            "kind": "distance",
+            "atoms": [
+              0,
+              1
+            ],
+            "visible": true,
+            "color": "#ffd49c",
+            "always_visible": true,
+            "result": {
+              "kind": "distance",
+              "atoms": [
+                0,
+                1
+              ],
+              "value": 1.5250402584124771,
+              "unit": "angstrom",
+              "status": "defined",
+              "reason": null
+            }
+          }
+        ]
+      },
+      "camera": {
+        "position": [
+          1.5132100456920914,
+          10.619162919362818,
+          19.17277767333158
+        ],
+        "target": [
+          -0.0003449916839599609,
+          0.4909260272979735,
+          0.2164219617843628
+        ],
+        "up": [
+          0,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "file": "molecular-ses.webp",
+      "width": 1650,
+      "height": 1232,
+      "bytes": 36506,
+      "sha256": "826644c97417a103ffe972c786586c0c2a997696171bea981f8847bdb36284e6",
+      "detail": {
+        "subject": "Solvent-excluded surface with X-ray shading over the original molecular framework",
+        "shape": {
+          "id": "figure-ses",
+          "label": "C7H10 solvent-excluded surface",
+          "kind": "ses",
+          "radii_set": "bondi",
+          "radii_overrides": [],
+          "probe_radius": 1.4,
+          "spacing": 0.15,
+          "cavity_policy": "keep",
+          "engine": "sesmesh-1.1.2+eigenvista-wasm-v1",
+          "source_hash": "401fc395f6dc99a0b32c2b898bf5484a6dbf28c3b9b23eaab0efa07c32232506",
+          "local_origin_bohr": [
+            -1.2795847981101,
+            -0.97661648325429,
+            -2.3657630908143
+          ],
+          "precision": "f32-local-angstrom;f64-world-bohr",
+          "color": "#6bc1b7",
+          "opacity": 0.85,
+          "visible": true,
+          "stats": {
+            "area_angstrom2": 125.81994534770084,
+            "volume_angstrom3": 109.37448406290707,
+            "components": 1,
+            "cavities": 0,
+            "estimated_engine_bytes": 19334916,
+            "elapsed_seconds": 0.0569,
+            "kernel": "scalar"
+          },
+          "atomCount": 17,
+          "vertexCount": 8352,
+          "triangleCount": 16700,
+          "warningCount": 0,
+          "warnings": []
+        }
+      },
+      "camera": {
+        "position": [
+          3.2305779546328797,
+          13.095754712806245,
+          28.290125649983487
+        ],
+        "target": [
+          -0.0004000663757324219,
+          0.4902362823486328,
+          0.2156236171722412
+        ],
+        "up": [
+          0,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "file": "orbital-slice.webp",
+      "width": 1650,
+      "height": 1232,
+      "bytes": 50686,
+      "sha256": "8037f3f0f944f63f7e9b97e49bf4369096ba64803b0bf3be706100c68d49444a",
+      "detail": {
+        "subject": "True quantitative HOMO plane with signed range, contour levels and numeric key",
+        "analysis": {
+          "id": "figure-plane",
+          "label": "HOMO section · z = 0 bohr",
+          "field": "molden-mo-26",
+          "descriptor": {
+            "field": "molden-mo-26",
+            "quantity": "orbital_amplitude",
+            "value_unit": "bohr^-3/2",
+            "origin": "derived",
+            "note": "Real canonical Gaussian orbital amplitude; normalization follows the supplied coefficients."
+          },
+          "definition": {
+            "kind": "plane",
+            "origin": [
+              -7,
+              -6,
+              0
+            ],
+            "u": [
+              14,
+              0,
+              0
+            ],
+            "v": [
+              0,
+              12,
+              0
+            ],
+            "dims": [
+              192,
+              192
+            ]
+          },
+          "source_hash": "23db270617c44c0c74c724e5d1927047f844732ef17903b0fe80b0ce58d4d79d",
+          "sample_hash": "f96f6dd64623fc0063e639d38ba1e8c9aa5b404ac20c104b75f30ea8c05a159b",
+          "interpretation_hash": "2e7e19b5720c1eb7d4c46e9ae84d592289391138a923382c6b47dab6ab8042e9",
+          "algorithm": "eigenvista-quantitative-f64-v1",
+          "method": "canonical_gaussian_analytic",
+          "range": [
+            -0.15469371136839527,
+            0.09079710960250043
+          ],
+          "appearance": {
+            "visible": true,
+            "colormap": "diverging",
+            "show_key": true,
+            "show_labels": true,
+            "contour_levels": [
+              -0.04,
+              -0.02,
+              0.02,
+              0.04
+            ],
+            "range": [
+              -0.06,
+              0.06
+            ]
+          },
+          "sampleCount": 36864,
+          "validCount": 36864,
+          "renderingWarning": null
+        }
+      },
+      "camera": {
+        "position": [
+          9.999999999999996,
+          -12.999999999999998,
+          23.000000000000004
+        ],
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "up": [
+          0,
+          1,
+          0
+        ]
+      }
+    }
+  ],
+  "errors": []
+}

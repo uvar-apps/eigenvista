@@ -1,4 +1,6 @@
 import { release } from "../release.mjs";
+import { application } from "../application.mjs";
+import { workspaceFigure } from "./workspace.mjs";
 
 export default [
   {
@@ -14,9 +16,10 @@ export default [
     <p class="eyebrow">Orbitals / electron density / custom shaders / AI-enabled</p>
     <h1>Quantum<br>chemistry.<br><span class="outline-type">In view.</span></h1>
     <p class="lede">Explore the field. Reveal the molecule. Shape the view with custom surface shaders and live controls.</p>
+    <div class="notice" data-current-development><strong>${application.version} · Unreleased test build.</strong> A simpler four-tab Tools pane puts molecular measurements, SES/SAS surfaces and quantitative field planes within reach. <a href="reference-inspection.html">Explore the workspace and scientific tools →</a><br>The published Mac download below remains ${release.version}; it has the earlier interface.</div>
     <p><strong><a href="ai.html"><span aria-hidden="true">✦ </span>AI-enabled viewing →</a></strong><br>Ask your coding agent to explore molecules, prepare surfaces and export figures.<br><span class="small">Included in EigenVista 0.8.0 for Mac.</span></p>
     <div class="actions"><a class="button primary" href="${release.base}${release.stem}.zip">Download for Mac <span aria-hidden="true">↗</span></a><a class="button" href="surface-shaders.html">Explore surface shaders <span aria-hidden="true">→</span></a></div>
-    <p class="small">v${release.version} · Apple Silicon · Experimental preview<br>Ad-hoc signed; not notarized. <a href="install.html">Installation notes</a></p>
+    <p class="small">Published download: v${release.version} · Apple Silicon · Experimental preview<br>Ad-hoc signed; not notarized. <a href="install.html">Installation notes</a></p>
   </div>
   <figure class="hero-image plate">
     <div class="plate-label"><span>01 / X-RAY SURFACE SHADER</span><span>C₇H₁₀</span></div>
@@ -25,6 +28,12 @@ export default [
   </figure>
 </section>
 <div class="format-strip" aria-label="Supported file families"><span>MOLDEN</span><span>PDB</span><span>mmCIF / BCIF</span><span>XYZ</span><span>CUBE</span><span>.EIGENVISTA</span></div>
+<section class="section-block" id="quantitative-workspace" aria-labelledby="quantitative-workspace-title">
+  <div class="section-heading"><p class="eyebrow">Current source / four tabs, one workspace</p><h2 id="quantitative-workspace-title">Read the field.<br>Keep the numbers.</h2><p class="lede">A true plane through the HOMO, with signed values, contours and a numerical colorbar. Choose Fields → Quantitative field inspection to probe a point, sample a section or plot a bond profile.</p></div>
+  ${workspaceFigure("homo-analysis-right", "Four tabs inside the right-hand Tools pane beside a signed HOMO plane with contour lines and its numerical amplitude key", "The C₇H₁₀ HOMO sampled on a real plane. Blue and red encode the sign of orbital amplitude ψ, not charge; the key spans −0.06 to +0.06 bohr⁻³ᐟ². Total electron density is a separate nonnegative field.")}
+  <p>Move the 480 px pane left or right, resize it, and collapse or reorder familiar widgets inside Molecule, Fields, Surfaces and Appearance. Hide Tools to reclaim the scene, or use Zen for a minimal view with the field's numerical key still visible.</p>
+  <div class="actions"><a class="button primary" href="tutorials-quantitative-fields.html">Make a quantitative section →</a><a class="button" href="reference.html#workspace">Tour the new workspace →</a></div>
+</section>
 <section class="section-block" id="shader-demo" aria-labelledby="shader-demo-title">
   <div class="section-heading"><p class="eyebrow">Watch / 30 seconds</p><h2 id="shader-demo-title">One density.<br>Three ways to see it.</h2><p class="lede">From a solid molecular envelope to X-ray transparency and a moving clipping boundary. Watch the controls redraw the same density mesh.</p></div>
   <figure class="plate demo-figure">

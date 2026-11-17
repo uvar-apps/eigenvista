@@ -87,15 +87,16 @@ export function usePanelOrder() {
 }
 
 interface SidebarOrder {
-  pane: Pane;
-  order: PanelId[];
-  move: (id: PanelId, destination: number, title: string) => void;
-  startDrag: (event: DragEvent<HTMLButtonElement>, id: PanelId) => void;
+  scope: string;
+  location: string;
+  order: readonly string[];
+  move: (id: string, destination: number, title: string) => void;
+  startDrag: (event: DragEvent<HTMLButtonElement>, id: string) => void;
   endDrag: () => void;
 }
 const SidebarContext = createContext<SidebarOrder | null>(null);
 
-/** Keyed siblings are sorted in the real DOM without remounting their bodies. */
+/** Preserve the original fixed membership, markup and profile-owned ordering. */
 export function PanelSidebar({
   pane,
   order,
@@ -107,24 +108,74 @@ export function PanelSidebar({
   onMove: ReturnType<typeof usePanelOrder>["move"];
   children: ReactNode;
 }) {
-  const sidebar = useRef<HTMLElement>(null);
-  const focusAfterMove = useRef<PanelId | null>(null);
-  const [dragging, setDragging] = useState<PanelId | null>(null);
-  const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
-  const sections = new Map<PanelId, ReactNode>();
+  const allowed: ReactNode[] = [];
   Children.forEach(children, (child) => {
     if (
       isValidElement(child) &&
       typeof child.key === "string" &&
       panelInPane(pane, child.key)
     )
+      allowed.push(child);
+  });
+  return (
+    <PanelStack
+      scope={pane}
+      dragScopeKey="pane"
+      order={order.filter((id) => panelInPane(pane, id))}
+      onMove={(id, destination) => {
+        if (panelInPane(pane, id)) onMove(pane, id, destination);
+      }}
+      className={`${pane}-panel`}
+      label={`${pane === "left" ? "Left" : "Right"} sidebar`}
+    >
+      {allowed}
+    </PanelStack>
+  );
+}
+
+/** Keyed widgets share one real-DOM reorder implementation within their scope. */
+export function PanelStack({
+  scope,
+  dragScopeKey = "scope",
+  order,
+  onMove,
+  className,
+  label,
+  children,
+}: {
+  scope: string;
+  /** Preserve the legacy sidebar's internal drag payload without a second algorithm. */
+  dragScopeKey?: "scope" | "pane";
+  order: readonly string[];
+  onMove: (id: string, destination: number) => void;
+  className: string;
+  label: string;
+  children: ReactNode;
+}) {
+  const sidebar = useRef<HTMLElement>(null);
+  const focusAfterMove = useRef<string | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
+  const location = label.toLowerCase();
+  const sections = new Map<string, ReactNode>();
+  Children.forEach(children, (child) => {
+    if (
+      isValidElement(child) &&
+      typeof child.key === "string" &&
+      order.includes(child.key)
+    )
       sections.set(child.key, child);
   });
 
-  function focusHandle(id: PanelId) {
-    const handle = sidebar.current?.querySelector<HTMLButtonElement>(
-      `[data-panel-reorder="${id}"]`,
-    );
+  function handleFor(id: string) {
+    return Array.from(
+      sidebar.current?.querySelectorAll<HTMLButtonElement>(
+        "[data-panel-reorder]",
+      ) ?? [],
+    ).find((handle) => handle.dataset.panelReorder === id);
+  }
+  function focusHandle(id: string) {
+    const handle = handleFor(id);
     handle?.focus({ preventScroll: true });
     handle?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
@@ -135,12 +186,12 @@ export function PanelSidebar({
     }
   }, [order]);
 
-  function move(id: PanelId, destination: number, title: string) {
+  function move(id: string, destination: number, title: string) {
     const index = order.indexOf(id);
     const target = Math.max(0, Math.min(order.length - 1, destination));
     if (index < 0) return;
     setAnnouncement((current) => ({
-      text: `${title}, position ${target + 1} of ${order.length} in ${pane} sidebar`,
+      text: `${title}, position ${target + 1} of ${order.length} in ${location}`,
       sequence: current.sequence + 1,
     }));
     if (index === target) {
@@ -148,7 +199,7 @@ export function PanelSidebar({
       return;
     }
     focusAfterMove.current = id;
-    onMove(pane, id, target);
+    onMove(id, target);
   }
 
   function dropTarget(event: DragEvent<HTMLElement>) {
@@ -162,7 +213,7 @@ export function PanelSidebar({
       !section ||
       !event.currentTarget.contains(section) ||
       !id ||
-      !panelInPane(pane, id)
+      !order.includes(id)
     )
       return null;
     return { section, id };
@@ -182,7 +233,7 @@ export function PanelSidebar({
       const data = payload as Record<string, unknown>;
       if (
         Object.keys(data).length !== 2 ||
-        data.pane !== pane ||
+        data[dragScopeKey] !== scope ||
         data.id !== dragging ||
         !dragging
       )
@@ -193,9 +244,7 @@ export function PanelSidebar({
       const rect = target.section.getBoundingClientRect();
       const after = event.clientY > rect.top + rect.height / 2;
       const destination = remaining.indexOf(target.id) + (after ? 1 : 0);
-      const title = sidebar.current?.querySelector<HTMLButtonElement>(
-        `[data-panel-reorder="${dragging}"]`,
-      )?.dataset.panelTitle;
+      const title = handleFor(dragging)?.dataset.panelTitle;
       move(dragging, destination, title ?? dragging);
     } catch {
       // Foreign or malformed drag payloads must never change the layout.
@@ -205,8 +254,8 @@ export function PanelSidebar({
   return (
     <aside
       ref={sidebar}
-      className={`${pane}-panel`}
-      aria-label={`${pane === "left" ? "Left" : "Right"} sidebar`}
+      className={className}
+      aria-label={label}
       onDragOver={(event) => {
         if (dropTarget(event)) {
           event.preventDefault();
@@ -216,7 +265,7 @@ export function PanelSidebar({
       onDrop={drop}
     >
       <span
-        id={`panel-order-${pane}-instructions`}
+        id={`panel-order-${scope}-instructions`}
         className="panel-order-accessible"
       >
         Use Arrow Up or Arrow Down to move this section. Home moves it first and
@@ -226,7 +275,7 @@ export function PanelSidebar({
       <div
         className="panel-order-accessible"
         role="status"
-        aria-label={`${pane === "left" ? "Left" : "Right"} sidebar order`}
+        aria-label={`${label} order`}
         aria-live="polite"
         aria-atomic="true"
       >
@@ -234,12 +283,16 @@ export function PanelSidebar({
       </div>
       <SidebarContext.Provider
         value={{
-          pane,
+          scope,
+          location,
           order,
           move,
           startDrag: (event, id) => {
             event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData(dragType, JSON.stringify({ pane, id }));
+            event.dataTransfer.setData(
+              dragType,
+              JSON.stringify({ [dragScopeKey]: scope, id }),
+            );
             setDragging(id);
           },
           endDrag: () => setDragging(null),
@@ -255,7 +308,7 @@ export function PanelReorderHandle({
   id,
   title,
 }: {
-  id: PanelId;
+  id: string;
   title: string;
 }) {
   const sidebar = useContext(SidebarContext);
@@ -287,7 +340,7 @@ export function PanelReorderHandle({
         title={`Reorder ${title}`}
         aria-expanded={menuOpen}
         aria-controls={menuId}
-        aria-describedby={`panel-order-${sidebar.pane}-instructions panel-${id}-position`}
+        aria-describedby={`panel-order-${sidebar.scope}-instructions panel-${id}-position`}
         onDragStart={(event) => {
           setMenuOpen(false);
           sidebar.startDrag(event, id);
@@ -312,7 +365,7 @@ export function PanelReorderHandle({
       </button>
       <span id={`panel-${id}-position`} className="panel-order-accessible">
         {title}, position {index + 1} of {sidebar.order.length} in{" "}
-        {sidebar.pane} sidebar
+        {sidebar.location}
       </span>
       <div id={menuId} className="panel-reorder-menu" hidden={!menuOpen}>
         <button

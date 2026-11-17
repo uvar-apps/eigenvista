@@ -2,8 +2,8 @@
 
 This implementation is an experimental subset of the research proposal, not
 its frozen version-1 schema. New files use `format: eigenvista`,
-`version: [0, 1]`, a required polynomial feature (plus the biological feature
-described below when present), and
+`version: [0, 1]`, a required polynomial feature (plus the biological and
+unreleased scientific-inspection features described below when present), and
 `coordinate_unit: bohr`. The exact model is defined in the
 [Rust core](../crates/eigenvista-core/src/model.rs).
 
@@ -115,6 +115,72 @@ visibility, per-chain/component style overrides and camera focus are session
 settings and are not serialized. Protein depiction geometry is derived display
 data, not a saved quantum-field surface. Metadata does not enter scientific
 field hashes. See the [biological-view decision](design/2026-11-14-biological-structure-views.md).
+
+### Scientific inspection capabilities (unreleased)
+
+The unreleased 0.10.0 `codex/scientific-inspection` test build adds three optional
+payloads. These are not understood by the published 0.8.0 reader. Matching
+capabilities, not the displayed version alone, establish support. The container
+version remains `[0,1]`; the application-version bump does not replace its
+explicit feature negotiation.
+
+| Required feature | Document payload | Durable meaning |
+| --- | --- | --- |
+| `eigenvista-annotations-v1` | `annotations` | Named source-index sets/query provenance, ordered measurement definitions, atom/residue label text/targets/style |
+| `eigenvista-molecular-surfaces-v1` | `molecular_surfaces` | Cached SES/SAS geometry, original-atom attribution, resolved radii, probe/spacing/cavity/engine/source identity and material |
+| `eigenvista-field-analysis-v1` | `field_analysis` | Structured quantity/unit/provenance descriptors, probe/plane/profile definitions and f64 caches/status masks, fingerprints, local appearance and current-field-key visibility |
+
+The canonical feature order is base polynomial, biological structure if present,
+annotations if present, molecular surfaces if present, field analysis if present.
+Every non-null optional payload must declare its feature; every optional feature
+must have its payload. Unknown, duplicate, missing and unordered features are
+rejected, as are marker/payload mismatches. The legacy `molekel` profile remains
+base-only. Documents without the additions retain their old logical manifests,
+numeric entry bytes and scientific hashes; frozen inputs are not rewritten.
+
+Persistent atom references are original zero-based document indices. Named sets
+and neighborhood seeds use typed u32 arrays; ordered 2/3/4-atom measurement
+definitions remain small metadata. Numeric values are recomputed from source
+coordinates rather than persisted as rounded label text. Labels bind exactly
+one valid atom or residue. Active selection/picking/filter state is not saved.
+
+Molecular meshes have their own collection and `eigenvista-molecular-surface-v1` source
+identity, independent of quantum `Surface` fields, grids and isovalues. Positions
+and normals are typed f64 arrays; triangle indices and original `vertex_atoms`
+are u32. The precision record is `f32-local-angstrom;f64-world-bohr`: local
+Sesmesh vertices are f32, with a source-derived origin restored in f64. This
+does not imply f64 meshing accuracy. Resolved radii, selection, engine, cavity
+policy and geometry settings are validated on load. Cached geometry displays
+without rerunning the engine or requiring an external input file.
+
+Field caches store typed f64 `values` and u32 validity masks. Outside samples
+have mask zero and canonical zero storage; that placeholder is not an observed
+field value and is exposed/exported as missing. Dimensions, masks, finite
+values/ranges, source/request/interpretation hashes, methods and references are
+validated. Valid cached values reopen exactly, not through an implicit new
+sampling pass. A 2D plane is an analysis definition with two span vectors; it
+is not an invalid 3D `Grid` with a dimension of one.
+
+New field descriptors deliberately live outside the existing serialized grid,
+orbital and density objects. Existing `compute::source_hash` bytes are unchanged.
+Sample identity covers numeric source, geometry/counts and sampler version;
+interpretation identity covers scalar meaning/units/provenance. Label, range and
+compatible display-unit changes do not replace raw numeric samples. Sources
+retain bohr coordinates; source scalar units are independent declarations.
+
+The same 8 MiB manifest, 8,192-entry and 128 MiB inflated/archive guards apply.
+Additional limits include 64 named sets/1,000,000 aggregate references,
+256 measurements/256 labels, 32 molecular meshes, and 16 MiB aggregate f64/mask
+analysis cache (128 probes, 8 planes up to 512², 16 profiles up to 4,096 points).
+All publication and Save paths share exact preflight. A scientific request may
+fail publication if retained source/cache/mesh data cannot fit; nothing is
+silently discarded or downsampled to make it saveable.
+
+Full-scene camera/AO/palette/background/custom-shader/biological-filter presets
+remain out of scope. The inspection records and their local presentation persist
+without claiming whole-scene restoration. Regression coverage includes
+[inspection-profile tests](../crates/eigenvista-format/tests/inspection_profiles.rs)
+alongside the frozen compatibility corpus.
 
 ### Why the entry cap mattered
 

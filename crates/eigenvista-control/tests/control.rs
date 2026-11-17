@@ -58,6 +58,61 @@ fn raw(connection: &Connection, bytes: &[u8]) -> Value {
 }
 
 #[test]
+fn scientific_csv_is_scoped_bounded_source_protected_and_no_clobber() {
+    let dir = Scratch::new("csv");
+    let files = scope(&dir);
+    let source = dir.0.join("source.csv");
+    fs::write(&source, "original input").unwrap();
+    files.read(&source).unwrap();
+    let text = "distance,value,unit,status\n0,-0.5,electron/bohr^3,valid\n1,,,outside\n";
+    let output = dir.0.join("profile.csv");
+    assert_eq!(
+        files.write_csv(&output, text, &[], false).unwrap().bytes,
+        text.len()
+    );
+    assert_eq!(fs::read_to_string(&output).unwrap(), text);
+    assert_eq!(
+        kind(
+            &files
+                .write_csv(&output, "replacement", &[], false)
+                .unwrap_err()
+        ),
+        "destination_exists"
+    );
+    assert_eq!(
+        kind(&files.write_csv(&source, text, &[], false).unwrap_err()),
+        "source_protected"
+    );
+    assert!(
+        files
+            .write_csv(&dir.0.join("not-native.eigenvista"), text, &[], false)
+            .is_err()
+    );
+    assert!(
+        files
+            .write_csv(&dir.0.join("empty.csv"), "", &[], false)
+            .is_err()
+    );
+    assert!(
+        files
+            .write_csv(&dir.0.join("nul.csv"), "x\0y", &[], false)
+            .is_err()
+    );
+    assert!(
+        files
+            .write_csv(&dir.0.join("overwrite.csv"), text, &[], true)
+            .is_err()
+    );
+    let outside = Scratch::new("csv-outside");
+    assert!(
+        files
+            .write_csv(&outside.0.join("escape.csv"), text, &[], false)
+            .is_err()
+    );
+    assert_eq!(fs::read_to_string(&source).unwrap(), "original input");
+}
+
+#[test]
 fn actual_socket_auth_readiness_correlation_and_private_descriptor() {
     let dir = Scratch::new("broker");
     let file = dir.0.join("connection.json");

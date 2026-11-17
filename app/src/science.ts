@@ -1,4 +1,5 @@
 import { ScienceRegistration } from "./scienceRegistration";
+import { auxiliaryScienceActions } from "./scienceActions";
 
 export type WorkProgress = { completed: number; total: number };
 type Progress = (stage: string, counts?: WorkProgress) => void;
@@ -89,7 +90,11 @@ function start() {
     }
     // A rejected depiction request never invalidates the resident quantum input.
     if (data.error) {
-      if (job.action !== "backbone") registration.clear();
+      if (
+        !auxiliaryScienceActions.has(job.action) &&
+        !data.registrationPreserved
+      )
+        registration.clear();
     } else registration.commit(job.registration);
     settle(job, data.error ? new Error(data.error) : undefined, data.result);
   };

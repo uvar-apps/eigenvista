@@ -1,5 +1,6 @@
 import init, * as core from "./wasm/eigenvista_wasm";
 import type { SampledGrid } from "./types";
+import { auxiliaryScienceActions } from "./scienceActions";
 
 const ready = init();
 let registered: { id: number; document: core.RegisteredDocument } | null = null;
@@ -21,6 +22,7 @@ self.onmessage = async (event: MessageEvent) => {
     };
   };
   let initialized = false;
+  let registrationPreserved = false;
   try {
     await ready;
     initialized = true;
@@ -54,6 +56,127 @@ self.onmessage = async (event: MessageEvent) => {
         progress("preparing protein backbone");
         result = JSON.parse(core.protein_backbone(JSON.stringify(args.doc)));
         break;
+      case "inspection_measure":
+        result = JSON.parse(
+          core.inspection_measure(
+            JSON.stringify(args.doc),
+            JSON.stringify(args.request),
+          ),
+        );
+        break;
+      case "inspection_measurements":
+        result = JSON.parse(
+          core.inspection_measurements(JSON.stringify(args.doc)),
+        );
+        break;
+      case "inspection_neighborhood": {
+        result = core.inspection_neighborhood(
+          JSON.stringify(args.doc),
+          JSON.stringify(args.request),
+          measuredProgress("finding neighboring atoms"),
+        );
+        transfer.push((result as Uint32Array).buffer);
+        break;
+      }
+      case "inspection_validate":
+        core.inspection_validate(JSON.stringify(args.doc));
+        result = null;
+        break;
+      case "analysis_plane_atoms":
+        result = JSON.parse(
+          core.analysis_plane_atoms(
+            JSON.stringify(args.doc),
+            new Uint32Array(args.atoms),
+            new Float64Array(args.extent),
+            new Uint32Array(args.dims),
+          ),
+        );
+        break;
+      case "analysis_contours": {
+        result = core.analysis_contours(JSON.stringify(args.item));
+        transfer.push((result as Float64Array).buffer);
+        break;
+      }
+      case "analysis_csv":
+        result = core.analysis_csv(JSON.stringify(args.item));
+        break;
+      case "analysis_samples":
+        result = JSON.parse(
+          core.analysis_sample_rows(
+            JSON.stringify(args.definition),
+            new Float64Array(args.values),
+            new Uint32Array(args.valid),
+            args.offset,
+          ),
+        );
+        break;
+      case "molecular_surface": {
+        const mesh = core.molecular_surface(
+          JSON.stringify(args.doc),
+          JSON.stringify(args.request),
+          (stage: string, completed: number, total: number) =>
+            self.postMessage({ id, progress: stage, completed, total }),
+        );
+        try {
+          const positions = mesh.take_positions(),
+            normals = mesh.take_normals();
+          const indices = mesh.take_indices(),
+            vertex_atoms = mesh.take_vertex_atoms();
+          result = {
+            ...JSON.parse(mesh.metadata()),
+            positions,
+            normals,
+            indices,
+            vertex_atoms,
+          };
+          transfer.push(
+            positions.buffer,
+            normals.buffer,
+            indices.buffer,
+            vertex_atoms.buffer,
+          );
+        } finally {
+          mesh.free();
+        }
+        break;
+      }
+      case "describe_field":
+      case "analysis_metadata":
+      case "analyze": {
+        if (args.doc) {
+          const source = new core.RegisteredDocument(JSON.stringify(args.doc));
+          clearCache();
+          registered = { id: args.registration, document: source };
+        }
+        if (!registered || registered.id !== args.registration)
+          throw new Error(
+            "Scientific document registration is unavailable; retry the calculation",
+          );
+        // Query errors preserve an already accepted numeric registration. When a
+        // new registration was installed, notify the bridge of that boundary.
+        registrationPreserved = !args.doc;
+        if (action === "describe_field")
+          result = JSON.parse(registered.document.describe_field(args.field));
+        else if (action === "analysis_metadata")
+          result = JSON.parse(
+            registered.document.declare_field(JSON.stringify(args.descriptor)),
+          );
+        else {
+          const query = registered.document.analyze(
+            JSON.stringify(args.request),
+            measuredProgress("sampling quantitative field"),
+          );
+          try {
+            const values = query.take_values(),
+              valid = query.take_valid();
+            result = { ...JSON.parse(query.metadata()), values, valid };
+            transfer.push(values.buffer, valid.buffer);
+          } finally {
+            query.free();
+          }
+        }
+        break;
+      }
       case "sample":
       case "generate": {
         if (args.doc) {
@@ -104,12 +227,18 @@ self.onmessage = async (event: MessageEvent) => {
       !initialized ||
       e instanceof WebAssembly.RuntimeError ||
       e instanceof RangeError;
-    if (!fatal && action !== "backbone") clearCache();
+    if (
+      !fatal &&
+      !auxiliaryScienceActions.has(action) &&
+      !registrationPreserved
+    )
+      clearCache();
     self.postMessage({
       id,
       fatal,
+      registrationPreserved,
       error: fatal
-        ? "The calculation worker exhausted memory or failed. Reduce the grid resolution and retry; previous surfaces were retained."
+        ? "The calculation worker exhausted memory or failed. Reduce grid resolution, surface detail or analysis extent and retry; previous results were retained."
         : String(e),
     });
   }

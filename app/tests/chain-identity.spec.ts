@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import type { EigenVistaDocument, StructureChain } from "../src/types";
@@ -81,7 +82,7 @@ async function encode(page: Page, doc: EigenVistaDocument) {
 async function ready(page: Page) {
   page.on("dialog", (dialog) => dialog.accept());
   await trackSceneDraws(page);
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
 }
 

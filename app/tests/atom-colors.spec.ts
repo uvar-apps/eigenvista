@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
@@ -9,7 +10,7 @@ const tmp = path.resolve("../tmp");
 fs.mkdirSync(tmp, { recursive: true });
 
 async function ready(page: Page) {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText(
     "triangles",
     { timeout: 45000 },
@@ -115,7 +116,7 @@ test("an invalid file is rejected and leaves the palette untouched", async ({
 test("parseAtomColors rejects every documented failure in the browser", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const results = await page.evaluate(async () => {
     // Runtime-only specifier: the dev server serves and transforms the module,
     // and a variable keeps tsc from trying to resolve the app path itself.

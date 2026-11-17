@@ -210,6 +210,12 @@ pub struct Document {
     pub atoms: Vec<Atom>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub structure: Option<crate::structure::StructureMetadata>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub annotations: Option<crate::inspection::Annotations>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub molecular_surfaces: Option<Vec<crate::molecular_surface::MolecularSurface>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_analysis: Option<crate::field_analysis::FieldAnalysisState>,
     pub bonds: Vec<[usize; 2]>,
     pub basis: Vec<BasisFunction>,
     pub orbitals: Vec<Orbital>,
@@ -269,6 +275,9 @@ impl Document {
             title: title.into(),
             atoms: vec![],
             structure: None,
+            annotations: None,
+            molecular_surfaces: None,
+            field_analysis: None,
             bonds: vec![],
             basis: vec![],
             orbitals: vec![],
@@ -425,6 +434,23 @@ impl Document {
         }
         if let Some(f) = &self.view.field {
             self.check_field(f)?;
+        }
+        if let Some(annotations) = &self.annotations {
+            annotations.validate(self)?;
+        }
+        if let Some(analysis) = &self.field_analysis {
+            analysis.validate(self)?;
+        }
+        if let Some(surfaces) = &self.molecular_surfaces {
+            if surfaces.len() > crate::molecular_surface::MAX_MOLECULAR_SURFACES {
+                return Err("Too many molecular surfaces".into());
+            }
+            for surface in surfaces {
+                if !ids.insert(&surface.id) {
+                    return Err("Duplicate molecular surface ID".into());
+                }
+                surface.validate(self)?;
+            }
         }
         Ok(())
     }

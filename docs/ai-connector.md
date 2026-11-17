@@ -13,6 +13,18 @@ and palettes. Check the included files below as well as the version; older
 packages such as 0.7.2 do not include them. If tools are missing, the agent should
 explain that and point you to the official release page.
 
+**Unreleased 0.10.0 test builds** add geometry measurements/labels and ligand
+neighborhoods, SES/SAS molecular surfaces, and quantitative field inspection.
+The published 0.8.0 download does not include those additions. Use the matching
+test application and helper when testing them; your agent should check the
+connected app's available features. The installed-app setup below applies to
+both, without a source checkout. No public 0.10.0 download is announced here.
+
+The current source build groups tools into **Molecule**, **Fields**, **Surfaces**
+and **Appearance**. You do not have to operate them first. Ask for the outcome;
+the agent shares their document and calculations. Pane position and Zen are
+local presentation choices, not connector actions.
+
 The website has the same [overview](https://uvar-apps.github.io/eigenvista/ai.html),
 [installed-app setup](https://uvar-apps.github.io/eigenvista/ai-install.html)
 and [everyday requests](https://uvar-apps.github.io/eigenvista/ai-guide.html).
@@ -190,6 +202,10 @@ examples are already available to the session.
 | Save the result | “Save a new molecular document, an opaque PNG and a transparent-background PNG in this session's Results folder. Use fresh filenames and show me the images.” |
 | Stop a long calculation | “Cancel only the calculation you started for my current request. Keep completed surfaces and the molecular data. Tell me when the app is ready again.” |
 
+For the newer inspection build, ask “Show the HOMO as a colored plane, with a
+numeric key and contours. Keep the signed amplitude rather than squaring it.
+Export the samples and save the result.” This requires the connected feature.
+
 You can ask for palette loading/reset, element/chain/entity/secondary-structure
 coloring, hiding and isolation, residue ranges, per-chain/component styles,
 focus and automatic AO radius directly. The agent handles these choices;
@@ -211,6 +227,11 @@ The view depends on data actually supplied in your input. Ask the agent to
 explain what supports the picture. Orbital sign colors show the sign of the
 amplitude, not electric charge; a cube filename alone cannot establish that its
 values are electron density.
+
+For a quantitative plane, specify orientation, extent and resolution. A total
+density is nonnegative; an orbital amplitude is signed. Ask for a fixed range
+when comparing planes, or for a probe/profile when numbers matter. GUI users find
+these under **Fields → Quantitative field inspection**.
 
 ## Protect your work and wait for results
 

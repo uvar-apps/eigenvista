@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { release } from "./release.mjs";
+import { application } from "./application.mjs";
 import { verification } from "./search-console.mjs";
 
 const root = path.resolve(
@@ -30,6 +31,7 @@ const groups = [
   "home",
   "install",
   "reference",
+  "inspection",
   "tutorials",
   "gallery",
   "shaders",
@@ -60,7 +62,9 @@ fs.mkdirSync(path.join(out, "assets"), { recursive: true });
 const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );
-const dimensions = new Map(media.images.map((row) => [row.file, row]));
+const dimensions = new Map(
+  [...media.images, ...media.workspacePaneCaptures.images].map((row) => [row.file, row]),
+);
 const cssVersion = createHash("sha256")
   .update(fs.readFileSync(path.join(site, "assets/site.css")))
   .digest("hex")
@@ -161,12 +165,12 @@ ${page.file === "404.html" ? '<meta name="robots" content="noindex">' : ""}
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=${cssVersion}">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>${release.version}</small></a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small data-application-version>${application.version}${application.status === "unreleased" ? " test build" : ""}</small></a>
 <nav aria-label="Main navigation">${navigation.map(([section, href, label]) => `<a href="${href}"${page.section === section && page.file !== "404.html" ? ' aria-current="page"' : ""}>${label}</a>`).join("")}</nav>
 <div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
 <div class="element-strip" aria-hidden="true"></div>
 <main id="main" tabindex="-1">${home ? "" : `<div class="page-heading"><p class="eyebrow">${escape(page.number ?? "")} / EIGENVISTA FIELD MANUAL</p><h1>${escape(page.title)}<span class="accent">.</span></h1></div>`}${renderBody(page)}</main>
-<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span>v${release.version} / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#citation">Cite EigenVista</a><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span data-application-status>v${application.version} / ${application.status === "unreleased" ? "UNRELEASED TEST BUILD" : "DEVELOPMENT PREVIEW"}</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#citation">Cite EigenVista</a><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
 <dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
 </body></html>\n`;
   if (page.file !== "404.html") return html;
@@ -206,6 +210,10 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join(out, "release.json"),
   JSON.stringify(release, null, 2) + "\n",
+);
+fs.writeFileSync(
+  path.join(out, "application.json"),
+  JSON.stringify(application, null, 2) + "\n",
 );
 fs.writeFileSync(
   path.join(out, "sitemap.xml"),

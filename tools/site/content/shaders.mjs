@@ -1,3 +1,4 @@
+import { workspaceNotice } from "./workspace.mjs";
 export default [
   {
     file: "surface-shaders.html",
@@ -8,6 +9,7 @@ export default [
     section: "shaders",
     number: "05",
     body: `
+${workspaceNotice}
 <p class="lede page-lede">Reveal the molecular framework through an X-ray shell. Cut into a density surface. Change the lighting, color and transparency while you explore.</p>
 <p><a href="./#shader-demo">Watch the 30-second demonstration of these live controls →</a></p>
 
@@ -21,11 +23,11 @@ export default [
 <article class="prose">
 
 <h2 id="prepare">Start with a molecular surface</h2>
-<p>Custom shaders give you direct control over how an isosurface is drawn. Load a ready-made preset to get started, or bring your own vertex and fragment GLSL files. EigenVista turns their parameters into editable controls in the <strong>Surface shader</strong> panel.</p>
+<p>Custom shaders give you direct control over how an isosurface is drawn. Load a ready-made preset to get started, or bring your own vertex and fragment GLSL files. Choose <strong>Appearance → Surface shader</strong> in the single Tools pane for the editable controls.</p>
 <ol>
-  <li>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> and select its total density under <strong>Quantum fields → Density matrices</strong>.</li>
-  <li>Set <strong>Isovalue</strong> to <strong>0.04</strong> electrons/bohr³ and <strong>Grid resolution</strong> to <strong>256³</strong>, then click <strong>Generate surfaces</strong>. The images here use this same density mesh.</li>
-  <li>Under <strong>Field rendering → Mode</strong>, select <strong>Isosurface mesh</strong>. Use <strong>Ball and stick</strong> to see the atomic framework alongside it.</li>
+  <li>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> and select its total density under <strong>Fields → Quantum fields → Density matrices</strong>.</li>
+  <li>In the same <strong>Fields</strong> tab, expand <strong>Field rendering</strong>. Set <strong>Isovalue</strong> to <strong>0.04</strong> electrons/bohr³ and <strong>Grid resolution</strong> to <strong>256³</strong>, then click <strong>Generate surfaces</strong>. The images here use this same density mesh.</li>
+  <li>Under <strong>Fields → Field rendering → Mode</strong>, select <strong>Isosurface mesh</strong>. Use <strong>Ball and stick</strong> to see the atomic framework alongside it.</li>
   <li>Frame the molecule with the rotate, zoom and <strong>Fit scene</strong> controls.</li>
 </ol>
 <p>For the complete field workflow, see <a href="tutorials-orbitals.html">the orbital tutorial</a>. The shaders below work on the generated surface, so you can try several finishes on the same geometry.</p>
@@ -34,7 +36,7 @@ export default [
 <p>This preset makes front-facing areas more transparent and keeps the outline stronger. It is useful when a surface would otherwise hide the atoms inside.</p>
 <ol>
   <li>Download <a href="downloads/shaders/x-ray.vert" download="x-ray.vert">x-ray.vert</a>, <a href="downloads/shaders/x-ray.frag" download="x-ray.frag">x-ray.frag</a> and <a href="downloads/shaders/x-ray.params" download="x-ray.params">x-ray.params</a>.</li>
-  <li>Expand <strong>Surface shader</strong>. Use <strong>Vertex shader…</strong> for <code>x-ray.vert</code> and <strong>Fragment shader…</strong> for <code>x-ray.frag</code>.</li>
+  <li>Choose <strong>Appearance</strong> and expand <strong>Surface shader</strong>. Use <strong>Vertex shader…</strong> for <code>x-ray.vert</code> and <strong>Fragment shader…</strong> for <code>x-ray.frag</code>.</li>
   <li>Use <strong>Parameters file…</strong> to load <code>x-ray.params</code>. Leave <strong>Shader transparency</strong> checked.</li>
   <li>Choose <strong>All surfaces</strong> under <strong>Apply to</strong>, or select an individual surface, then click <strong>Apply shader</strong>.</li>
   <li>For the illustrated finish, set <code>maxOpacity</code> to <strong>0.85</strong>, <code>minOpacity</code> to <strong>0</strong> and <code>da</code> to <strong>0.03</strong>. Use the toolbar’s background picker for <code>#17232d</code>. Rotate the molecule and adjust <strong>color</strong> to suit your view.</li>
@@ -60,7 +62,7 @@ export default [
 
 <h2 id="live">Tune the view live</h2>
 <p>The parameter names come directly from the shader. Numbers, checkboxes, vector components and color pickers appear as appropriate. Once a shader is applied, editing these controls updates the scene immediately: there is no need to generate the surface again.</p>
-<div class="shader-details"><figure><a href="assets/media/quantum-xray.webp"><img src="assets/media/quantum-xray.webp" alt="The molecular framework visible through the density envelope with the X-ray shader" loading="lazy"></a><figcaption>Adjust the finish while keeping the same molecular surface. <a href="assets/media/app-overview.webp">See the complete workspace</a>.</figcaption></figure><figure class="shader-controls-figure"><a href="assets/media/shader-controls.webp"><img src="assets/media/shader-controls.webp" alt="Close-up of the actual shader panel with color, minimum and maximum opacity, threshold and Save parameters controls" loading="lazy"></a><figcaption><a href="assets/media/shader-controls.webp">Open the controls at full size</a>.</figcaption></figure></div>
+<div class="shader-details"><figure><a href="assets/media/quantum-xray.webp"><img src="assets/media/quantum-xray.webp" alt="The molecular framework visible through the density envelope with the X-ray shader" loading="lazy"></a><figcaption>Adjust the finish while keeping the same molecular surface. <a href="reference.html#workspace">Tour the current four-tab workspace</a>.</figcaption></figure><figure class="shader-controls-figure"><a href="assets/media/shader-controls.webp"><img src="assets/media/shader-controls.webp" alt="Close-up of the actual shader panel with color, minimum and maximum opacity, threshold and Save parameters controls" loading="lazy"></a><figcaption><a href="assets/media/shader-controls.webp">Open the controls at full size</a>. This earlier 0.7.2 close-up illustrates shader parameters; find the current widget under Appearance → Surface shader.</figcaption></figure></div>
 <p>To switch the underlying shape, choose another field or isovalue and generate its surface. To change only the appearance, keep the geometry and adjust the shader. <strong>Clear shader</strong> returns to the built-in <strong>Diffuse</strong> or <strong>Blinn-Phong</strong> surface shading.</p>
 
 <h2 id="save">Keep the result</h2>

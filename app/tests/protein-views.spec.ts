@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -121,7 +122,7 @@ async function setup(page: Page) {
       };
     }
   });
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   // Bound GPU interaction cost without filtering atoms or changing the real
   // browser window, toolbar, import path, quality or per-test deadline.

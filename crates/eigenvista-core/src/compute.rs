@@ -86,7 +86,7 @@ pub fn evaluate(doc: &Document, field: &str, p: [f64; 3]) -> Result<(f64, [f64; 
     Err("Analytic evaluation requires an orbital or density matrix".into())
 }
 
-fn basis_scalar_value(b: &BasisFunction, p: [f64; 3]) -> f64 {
+pub(crate) fn basis_scalar_value(b: &BasisFunction, p: [f64; 3]) -> f64 {
     let r: [f64; 3] = std::array::from_fn(|k| p[k] - b.center[k]);
     let r2: f64 = r.iter().map(|x| x * x).sum();
     let radial: f64 = b
@@ -108,14 +108,14 @@ fn basis_scalar_value(b: &BasisFunction, p: [f64; 3]) -> f64 {
     poly * radial
 }
 
-enum ScalarField<'a> {
+pub(crate) enum ScalarField<'a> {
     Orbital(&'a [f64]),
     Density(Vec<f64>),
     FullDensity(&'a [f64]),
 }
 
 impl<'a> ScalarField<'a> {
-    fn new(doc: &'a Document, field: &str) -> Result<Self> {
+    pub(crate) fn new(doc: &'a Document, field: &str) -> Result<Self> {
         if let Some(o) = doc.orbitals.iter().find(|o| o.id == field) {
             return Ok(Self::Orbital(&o.coefficients));
         }
@@ -146,7 +146,7 @@ impl<'a> ScalarField<'a> {
         Err("Analytic evaluation requires an orbital or density matrix".into())
     }
 
-    fn value(&self, ao: &[f64]) -> f64 {
+    pub(crate) fn value(&self, ao: &[f64]) -> f64 {
         match self {
             Self::Orbital(c) => ao.iter().zip(*c).map(|(a, c)| a * c).sum(),
             Self::Density(c) => {

@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -8,7 +9,7 @@ type CaptureProbe = Window & { captureDraws: number };
 test("PNG pixel oracle distinguishes background and signed colours with WebGL row ordering", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const encoded = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 2;
@@ -80,7 +81,7 @@ async function ready(page: Page) {
       };
     }
   });
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await expect
     .poll(async () => (await scenePixels(page)).colorful)

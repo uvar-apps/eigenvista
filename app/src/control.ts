@@ -3,6 +3,7 @@ import { gridResolutions } from "./resolution";
 import { REPRESENTATION_OPTIONS, COMPONENT_KINDS } from "./molecularDisplay";
 import type { EigenVistaDocument } from "./types";
 import type { CameraState, ViewportControl } from "./viewportControl";
+import { INSPECTION_METHODS, inspectionBackgroundMethods, inspectionReadMethods } from "./inspectionSchemas";
 
 export const CONTROL_API_VERSION = 1;
 export const CONTROL_LIMITS = {
@@ -64,14 +65,15 @@ export function controlErrorResponse(error: unknown) {
   return { code: value.code, message: value.message, data: value.data };
 }
 
-type Schema = {
+export type ControlSchema = {
   type?: "object" | "array" | "string" | "number" | "integer" | "boolean";
-  items?: Schema;
-  properties?: Record<string, Schema>; required?: string[];
-  additionalProperties?: boolean | Schema; enum?: unknown[]; anyOf?: Schema[];
+  items?: ControlSchema;
+  properties?: Record<string, ControlSchema>; required?: string[];
+  additionalProperties?: boolean | ControlSchema; enum?: unknown[]; anyOf?: ControlSchema[];
   minimum?: number; maximum?: number; minItems?: number; maxItems?: number;
   minLength?: number; maxLength?: number; maxProperties?: number; pattern?: string;
 };
+type Schema = ControlSchema;
 const string: Schema = { type: "string", minLength: 1, maxLength: CONTROL_LIMITS.selectorCharacters };
 const number: Schema = { type: "number" };
 const boolean: Schema = { type: "boolean" };
@@ -92,6 +94,7 @@ const chainIndex: Schema = { type: "integer", minimum: 0, maximum: Number.MAX_SA
 const representation: Schema = { type: "string", enum: REPRESENTATION_OPTIONS.map((x) => x.value) };
 const nullable = (schema: Schema): Schema => ({ anyOf: [schema, { enum: [null] }] });
 export const CONTROL_METHODS = {
+  ...INSPECTION_METHODS,
   "app.capabilities": definition("Inspect API version, schemas, bounds and file capabilities.", object()),
   "app.state": definition("Inspect the accepted document and actual presentation without scientific arrays.", object()),
   "fields.list": definition("List bounded orbital, supplied density and grid metadata.", object(page)),
@@ -137,6 +140,7 @@ export const CONTROL_METHODS = {
   "surfaces.set_visibility": definition("Set one saved surface's visibility.", mutation({ surfaceId: string, visible: boolean }, ["surfaceId", "visible"])),
   "surfaces.remove": definition("Remove one saved surface from the accepted document.", mutation({ surfaceId: string }, ["surfaceId"])),
   "scene.set": definition("Apply a validated document/session appearance patch.", mutation({
+    mode: { type: "string", enum: ["mesh"] },
     representation: { type: "string", enum: REPRESENTATION_OPTIONS.map((x) => x.value) },
     positiveColor: color, negativeColor: color,
     opacity: { type: "number", minimum: 0, maximum: 1 },
@@ -149,10 +153,10 @@ export const CONTROL_METHODS = {
   })),
   "shader.apply": definition("Apply a bundled shader preset and declared uniform values.", mutation({
     preset: { type: "string", enum: ["surface-clip", "x-ray"] },
-    target: { type: "string", enum: ["all"] }, uniforms, transparency: boolean,
+    target: string, uniforms, transparency: boolean,
   }, ["preset"])),
   "shader.set_uniforms": definition("Update only declared values of the currently applied shader.", mutation({ uniforms,
-    target: { type: "string", enum: ["all"] }, transparency: boolean }, ["uniforms"])),
+    target: string, transparency: boolean }, ["uniforms"])),
   "shader.clear": definition("Clear the custom shader, preserving scientific data.", mutation()),
   "camera.get": definition("Read the current camera in bohr coordinates.", object()),
   "camera.fit": definition("Fit the actual visible scene.", mutation()),
@@ -210,6 +214,8 @@ function validate(value: unknown, schema: Schema, path = "params"): void {
 }
 
 export interface ControlExecution {
+  /** The app calls this synchronously at accepted publication, before unwinding. */
+  markPublished(): void;
   signal: AbortSignal;
   assertCurrent(): void;
   progress(stage: string, counts?: { completed: number; total: number }): void;
@@ -228,6 +234,7 @@ export interface ControlSnapshot {
   palette: unknown;
   volumeQuality: number;
   structureDisplay: unknown;
+  inspection?: unknown;
 }
 export interface ControlHost {
   native: boolean;
@@ -238,6 +245,7 @@ export interface ControlHost {
 }
 type Status = "accepted" | "running" | "completed" | "failed" | "cancelled";
 type Job = { jobId: string; status: Status; operation: string; progress?: unknown; result?: unknown;
+  published: boolean;
   error?: ReturnType<typeof controlErrorResponse>; abort: AbortController; done: Promise<void> };
 const terminal = (job: Job) => ["completed", "failed", "cancelled"].includes(job.status);
 const bounded = (text: string | null | undefined) => text?.slice(0, 512) ?? null;
@@ -280,15 +288,26 @@ export function createApplicationControl(getHost: () => ControlHost) {
     if (params.expectedRevision !== undefined && params.expectedRevision !== getHost().snapshot().revision)
       throw new ControlError("stale_document", "The accepted document revision has changed", { revision: getHost().snapshot().revision });
   };
-  const execution = (source: ControlSnapshot, abort: AbortController, progress: ControlExecution["progress"], strictRevision = false): ControlExecution => ({
-    signal: abort.signal, progress,
-    assertCurrent() {
-      if (abort.signal.aborted) throw new ControlError("cancelled", "Operation cancelled");
-      const current = getHost().snapshot();
-      if ((strictRevision && current.revision !== source.revision) || !sameSource(source.document, current.document))
-        throw new ControlError("stale_document", "The source document changed before publication", { revision: current.revision });
-    },
-  });
+  const execution = (source: ControlSnapshot, abort: AbortController, progress: ControlExecution["progress"], strictRevision = false, onPublication?: () => void): ControlExecution => {
+    let acceptedRevision = source.revision;
+    let published = false;
+    return {
+      signal: abort.signal, progress,
+      markPublished() {
+        // An operation may finish session selection/focus after committing its
+        // durable record. Guard that accepted revision, not its own old one.
+        acceptedRevision = getHost().snapshot().revision;
+        published = true;
+        onPublication?.();
+      },
+      assertCurrent() {
+        if (abort.signal.aborted && !published) throw new ControlError("cancelled", "Operation cancelled");
+        const current = getHost().snapshot();
+        if ((strictRevision && current.revision !== acceptedRevision) || !sameSource(source.document, current.document))
+          throw new ControlError("stale_document", "The source document changed before publication", { revision: current.revision });
+      },
+    };
+  };
   const publicJob = ({ jobId, status, operation, progress, result, error }: Job) => ({ jobId, status, operation,
     ...(progress === undefined ? {} : { progress }), ...(result === undefined ? {} : { result }), ...(error ? { error } : {}) });
   const startJob = (method: string, params: Record<string, unknown>) => {
@@ -296,7 +315,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
     const source = getHost().snapshot();
     const abort = new AbortController();
     let finish!: () => void;
-    const job: Job = { jobId: controlId(), operation: method, status: "accepted", abort,
+    const job: Job = { jobId: controlId(), operation: method, status: "accepted", abort, published: false,
       done: new Promise<void>((resolve) => { finish = resolve; }) };
     while (jobs.size >= CONTROL_LIMITS.retainedJobs) {
       const oldest = [...jobs.values()].find(terminal);
@@ -309,17 +328,18 @@ export function createApplicationControl(getHost: () => ControlHost) {
       try {
         if (abort.signal.aborted) throw new ControlError("cancelled", "Operation cancelled");
         job.status = "running";
-        const context = execution(source, abort, (stage, counts) => { job.progress = { stage, ...(counts ? { counts } : {}) }; });
+        const context = execution(source, abort, (stage, counts) => { job.progress = { stage, ...(counts ? { counts } : {}) }; }, params.expectedRevision !== undefined, () => { job.published = true; });
         job.result = await getHost().execute(method, params, context);
-        if (abort.signal.aborted) throw new ControlError("cancelled", "Operation cancelled");
+        if (abort.signal.aborted && !job.published) throw new ControlError("cancelled", "Operation cancelled");
         // Accepted publication is the cancellation boundary: a later Cancel must
         // not describe already committed geometry as retained previous results.
         job.status = "completed";
         await getHost().synchronize();
       } catch (error) {
         const failure = controlError(error);
-        job.status = abort.signal.aborted || failure.kind === "cancelled" ? "cancelled" : "failed";
-        job.error = controlErrorResponse(job.status === "cancelled" ? new ControlError("cancelled", "Operation cancelled; previous results retained") : failure);
+        job.status = !job.published && (abort.signal.aborted || failure.kind === "cancelled") ? "cancelled" : "failed";
+        job.error = controlErrorResponse(job.published ? new ControlError("operation_failed", "Operation failed after publication; committed results are retained", { cause: failure.message })
+          : job.status === "cancelled" ? new ControlError("cancelled", "Operation cancelled; previous results retained") : failure);
         delete job.result;
       } finally {
         if (active === job) active = undefined;
@@ -362,7 +382,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
         if (method === "job.get" || method === "job.cancel") {
           const job = jobs.get(params.jobId as string);
           if (!job) throw new ControlError("not_found", "Unknown or expired job ID");
-          if (method === "job.cancel" && !terminal(job)) { job.abort.abort(); await job.done; await getHost().synchronize(); }
+          if (method === "job.cancel" && !terminal(job)) { if (!job.published) job.abort.abort(); await job.done; await getHost().synchronize(); }
           return publicJob(job);
         }
         await getHost().synchronize();
@@ -382,6 +402,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
             shading: snapshot.shading, ambientOcclusion: snapshot.ambientOcclusion, shader: snapshot.shader,
             palette: snapshot.palette, volumeQuality: snapshot.volumeQuality, camera, backgroundColor,
             structureDisplay: snapshot.structureDisplay,
+            inspection: snapshot.inspection ?? null,
           };
         }
         if (method === "fields.list") {
@@ -419,6 +440,17 @@ export function createApplicationControl(getHost: () => ControlHost) {
             components, secondarySource: structure?.secondary_source ?? "none" };
         }
         if (method === "camera.get") return { revision: snapshot.revision, ...viewport().getCamera() };
+        if (Object.hasOwn(INSPECTION_METHODS, method)) {
+          getDocument();
+          if (inspectionBackgroundMethods.has(method)) return startJob(method, params);
+          const writes=!inspectionReadMethods.has(method);
+          if (writes) {idle();mutating=true;}
+          try {
+            const result = await getHost().execute(method, params, execution(snapshot, new AbortController(), () => {}, params.expectedRevision !== undefined));
+            await getHost().synchronize();
+            return result;
+          } finally {if(writes)mutating=false;}
+        }
         if (method === "field.preview" || method === "surfaces.generate") {
           const d = getDocument();
           const ids = method === "field.preview" ? [params.fieldId as string] : params.fieldIds as string[];

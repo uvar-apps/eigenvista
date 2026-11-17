@@ -10,12 +10,18 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version 0.8.0, an experimental
+This guide describes version **0.10.0 (unreleased)**, an experimental
 development preview. Scientific calculations and rendering have targeted tests,
 but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
 
-Version 0.8.0 adds optional AI-enabled viewing through your external coding
+**Unreleased test-build additions:** the scientific-inspection section below
+describes `codex/scientific-inspection`: measurements and labels, SES/SAS
+molecular surfaces, and quantitative field inspection. These additions are not
+in the published 0.8.0 download. Use the matching 0.10.0 test build. An AI assistant should
+confirm which features the connected application actually provides.
+
+Version 0.8.0 introduced optional AI-enabled viewing through your external coding
 agent. The Mac app bundles its connection helper, launcher, examples and
 palettes; no source checkout or compiler is required. Start with the
 [connector guide](ai-connector.md) and [0.8.0 release notes](releases/0.8.0.md).
@@ -39,8 +45,9 @@ Version 0.7.1 renamed **Document** to **Molecular data**. Version 0.7.0 added
 ambient occlusion and sidebar reordering. Earlier packages remain historical;
 updating source does not update an installed app or existing archive.
 
-EigenVista is the new name of the Molekel Rust preview. Its icon and logo are
-unchanged. New documents use `.eigenvista`; existing `.molekel` preview files
+EigenVista continues Ugo Varetto's 2006–2010 Molekel project with a new Rust
+implementation. The EigenVista rename keeps its icon and logo.
+New documents use `.eigenvista`; existing `.molekel` preview files
 remain supported, including their scientific data and saved surfaces.
 
 ## Install and start on a Mac
@@ -69,7 +76,7 @@ See [Apple's security instructions](https://support.apple.com/en-us/102445).
 ## A first session
 
 1. Click **Open** and select `Examples/water.pdb` from the extracted ZIP.
-2. The Molecular data panel should show **3 atoms** and **2 bonds**. Bonds are computed
+2. **Molecule → Molecular data** should show **3 atoms** and **2 bonds**. Bonds are computed
    automatically, including when the file has no explicit connections.
 3. Try the **Representation** choices: Ball and stick, Liquorice, and Van der
    Waals. The last uses space-filling spheres and does not draw bond cylinders.
@@ -83,26 +90,57 @@ original inputs: the preview does not retain every source-format annotation.
 Use the app's Open button; Finder file associations and drag-and-drop loading
 are not implemented.
 
+## The workspace
+
+The current source build opens with one wide tools pane, initially **480 px**
+wide on the **right**. This is the approved default workspace
+([#88](https://github.com/uvar-apps/eigenvista/issues/88)); no special preview URL
+is needed. Published 0.8.0 downloads retain their earlier two-sidebar layout and
+do not include the scientific-inspection controls described below.
+
+Choose **Left** or **Right** using **Position** in its header. Four tabs sit at the top of the
+pane: **Molecule**, **Fields**, **Surfaces** and **Appearance**. Drag the boundary
+to resize the pane, or focus the divider and use arrow keys.
+
+Widgets keep their collapsible headings and drag handles. Drag a handle to
+reorder widgets within the current tab, use its Up/Down or Home/End keys, or
+open its Move up/Move down buttons. Collapsing a widget or switching tabs retains
+its form entries. The original top bar, bottom status and camera/background/
+export controls stay in place.
+
+Close tools with their × or the **Hide tools** icon beside Save; **Show tools**
+or **Shift+T** reopens them. **Zen mode** / **Shift+Z** leaves a minimal scene UI;
+**Exit Zen** or **Escape** restores the workspace. Fullscreen is a separate
+button and can be combined with Zen. While fullscreen is active, Escape exits
+it first; a second Escape leaves Zen. Active calculations keep a visible
+**Cancel calculation** control even when their tools are closed. Shortcuts leave
+text/numeric editing and modal dialogs alone. The pane side, size, selected tab
+and widget order are remembered in this application profile, separately from
+saved molecular data.
+
+See the [simple-pane guide](design/2026-11-17-simple-workspace-pane.md)
+for the design, retained behavior and validation boundaries. The following
+navigation describes the current source build.
+
 ## Finding your way around
 
 | Area | Purpose |
 | --- | --- |
 | Top bar | Document title, unsaved-change indicator, Open, Convert files, and Save |
-| Molecular data panel | Atom/bond/basis counts, representation, example menu |
-| Quantum fields | Select an active field; the Orbitals (count) button lists all orbitals for multi-selection |
-| Provenance | Source descriptions, import decisions, and loss notices |
+| Molecule tab | **Molecular data**: counts, representation and examples; **Selections and measurements**: picks, labels, geometry and neighborhoods; **Provenance**: import decisions and loss notices |
+| Fields tab | **Quantum fields**: active field and orbital browser; **Field rendering**: mesh/raycast/volume mode, isovalue, resolution and generation; **Quantitative field inspection**: point probes, colored planes/contours and line profiles |
+| Surfaces tab | **Molecular surfaces**: coordinate-derived SES/SAS; **Saved surfaces**: meshes, visibility, counts and deletion |
+| Appearance tab | **Appearance**: surface colors, opacity, shading and molecular AO; **Atom colours**: element palettes; **Surface shader**: custom GLSL finishes |
 | Central scene | Molecule and surfaces; selected atom/surface information below |
-| Field rendering | Rendering mode, isovalue, grid resolution, Generate/Cancel |
-| Appearance | Positive/negative colors and opacity |
-| Saved surfaces | Current document's meshes, visibility, triangle counts, deletion |
 | Footer | Busy state, completion information, or errors |
 
-On a narrow browser window these areas rearrange; scrolling may be needed.
+On a narrow window the pane overlays the scene; close it to regain the view.
+Scrolling may be needed.
 Toolbar icons show their names on hover.
-Click a sidebar section's heading to collapse or expand its controls. Keyboard
+Click a widget's heading to collapse or expand its controls. Keyboard
 users can focus the heading with Tab and activate it with Enter or Space.
-Collapsing a section retains its current settings and selections. The eight
-sections start expanded; your choices are remembered in this browser or desktop
+Collapsing a widget retains its current settings and selections. Disclosure
+choices are remembered in this browser or desktop
 profile across Open, Clear and restart. They are interface preferences, separate
 from the saved molecular document. If profile storage is unavailable, the
 choices last for the current session.
@@ -112,10 +150,10 @@ progress report and **Cancel** button remain available. Its previous expansion
 choice returns when the calculation finishes or is cancelled.
 
 To reorder sections, drag a heading's **Reorder** handle onto the upper or lower
-half of another section to place it before or after that section in the same
-sidebar. The left and right sidebars keep their own sections.
+half of another widget to place it before or after that widget in the same
+tab. Widgets stay in their task tab; they do not move between tabs.
 You can also click or tap the handle for **Move up** and **Move down**, or focus
-it with Tab and press Up/Down; Home/End moves to the start/end of that sidebar.
+it with Tab and press Up/Down; Home/End moves to the start/end of that tab's stack.
 The handle keeps keyboard focus and announces the new position. Escape closes
 the move controls and returns focus to the handle. In Safari on macOS, use
 Option-Tab to reach buttons if ordinary Tab skips them, or enable Keyboard
@@ -137,7 +175,8 @@ for additional operating systems.
   keyboard users can Tab to either button and activate it with Enter or Space.
   On a touchscreen, one finger rotates and two fingers pinch/pan.
 - Click an atom to see its element/index and coordinates in angstroms. Click
-  a mesh to see its label and triangle count. There is no measurement tool yet.
+  a mesh to see its label and triangle count. The unreleased test build also has
+  ordered selection and measurement controls described below.
 - **Fit scene** and **Reset view** currently do the same thing: fit all displayed
   objects and restore the default viewing direction.
 - **Background color** opens a color picker in the scene toolbar.
@@ -151,8 +190,10 @@ for additional operating systems.
   retain their alpha. The selected background remains visible in the application.
 
 Both export actions capture the current camera view, including after idle
-periods, zooming or resizing. They export the rendered scene without toolbar or
-text overlays. A failed export reports an error without replacing the document;
+periods, zooming or resizing. Toolbar/status overlays are excluded. In the
+unreleased test build, scientific labels, measurement monitors and visible
+field keys are part of the exported figure, including transparent PNGs.
+A failed export reports an error without replacing the document;
 you can retry an encoding failure. The actions use the browser/WebView download
 mechanism; download handling varies by host. Browser export is the reference
 path, and native image-download handling still needs qualification.
@@ -227,6 +268,8 @@ OBJ, atom-color text files, direct ORCA output/GBW, and Gaussian logs are **not
 implemented**. PDB, XYZ, and mmCIF/BinaryCIF files correctly show
 **No quantum fields**; coordinates alone cannot supply
 orbitals or a density matrix.
+They still support structure views and, in the unreleased test build, geometry
+measurements and coordinate-derived SES/SAS molecular surfaces.
 
 ## Biological structure views
 
@@ -238,7 +281,7 @@ for fresh release checks and delivery, and the
 for the original feature verification.
 
 Open a PDB, mmCIF or BinaryCIF file containing chain, residue and atom identities.
-In **Molecular data → Biological structure**, choose **Coloring**:
+In **Molecule → Molecular data → Biological structure**, choose **Coloring**:
 
 - **Element** uses the CPK palette, including any atom-color overrides.
 - **Chain** distinguishes deposited chain instances. mmCIF label identifiers are
@@ -323,6 +366,221 @@ a message explaining that chain and protein views are unavailable. Keep the
 original source: this is still a selected-structure importer, not an archive of
 every deposited annotation, model or conformer.
 
+## Scientific inspection in the unreleased test build
+
+These controls require the matching 0.10.0 scientific-inspection test build, not the
+published 0.8.0 package. They work with the original loaded atoms: hiding a chain
+or changing a representation does not renumber the source atoms or alter the
+scientific data. Your external AI assistant can perform the same operations;
+describe the scientific result you want in ordinary language.
+
+### Select, measure and label
+
+Choose **Molecule → Selections and measurements**. Enable
+**Pick atoms for inspection** and click atoms in the scene, or enter the atom
+numbers shown by the viewer. Displayed atom/residue numbers start at 1. The
+ordered list has earlier/later and remove buttons; order matters for geometry.
+**Focus selection**, **Show only selection**, and **Show full structure** help
+inspect a local region. Clear the selection before starting a different set.
+
+In **Geometry measurements**, choose distance, angle or signed torsion, select
+exactly 2, 3 or 4 distinct atoms in order, and choose **Add measurement**.
+Distances are reported in Å. An angle is centered on the middle atom. Torsions
+use the ordered right-handed convention in the range −180° inclusive to +180°
+exclusive; reversing the relevant pick order can change the sign. These are
+nonperiodic measurements of the supplied coordinates, not uncertainty estimates.
+
+Distinct coincident atoms have zero distance. A zero-length angle arm or a
+degenerate torsion plane is **Undefined**, with a reason; it is not reported as
+zero. The table, scene monitor and **Export measurement CSV** use the same
+authoritative calculation. Edit a measurement to change its name, order, kind,
+color or label placement; hide its monitor without deleting the measurement.
+
+**Named selections** retain sets for later use, including as surface inputs.
+Use **Edit** to select and rename or replace a set, or **Delete** to remove its
+definition. This never deletes source atoms. **Atom and residue labels** lets
+you choose a target, text and color, with depth-aware or always-visible labels.
+Labels and monitors are included in ordinary and transparent PNG exports.
+
+Active picks/highlights are temporary and clear when another source is opened.
+Named sets, label definitions and measurement definitions are saved in the
+molecular document; measurement values are calculated from its source coordinates.
+
+### Inspect one ligand and its neighbors
+
+Under **Molecule → Selections and measurements**, expand **Ligands and neighborhoods** and choose the particular ligand copy from
+the list. Chain, residue number, insertion code and displayed residue number
+distinguish copies with the same ligand name. Search the list if needed.
+Set **Neighborhood radius (Å)** and optionally **Include complete residues**,
+then choose **Show neighborhood**. Supply **Save neighborhood as** to retain a
+named result.
+
+The query measures inclusive atom-center distance from the selected seed atoms
+against all loaded source atoms, including hidden atoms, and includes the seeds.
+Whole-residue expansion includes every atom belonging to a matched residue,
+even when that atom itself lies outside the radius. It requires biological
+identity metadata. Showing a neighborhood resets conflicting visibility filters
+and focuses the result. A saved neighborhood is a materialized set for that
+document, not an automatically rebinding query for unrelated files.
+
+This shows geometric proximity. It does not assign hydrogen bonds, salt bridges,
+binding affinity, functional pockets or periodic crystal contacts.
+
+### Molecular surfaces: SES and SAS
+
+Choose **Surfaces → Molecular surfaces**. These are
+shape surfaces derived from atomic coordinates and radii; PDB/XYZ/mmCIF inputs
+do not need orbitals or a cube field to use them.
+
+Choose **Solvent excluded (SES)** for the molecular boundary swept by a solvent
+probe, or **Solvent accessible (SAS)** for the boundary traced by its center.
+Choose all source atoms, the current selection or a named selection. All atoms
+includes hidden atoms. A selected subset is treated as an **isolated object**:
+omitted atoms do not occlude it. This is not a cropped patch of the full
+molecule's surface or a pocket-detection calculation.
+
+Choose **Bondi / Mantina** or **Alvarez** atomic radii, a **Probe radius (Å)**
+and **Grid spacing (Å)**. Explicit radius overrides are available. Missing
+radii produce an error naming the affected element; select a suitable table or
+provide an explicit positive radius rather than expecting an automatic fallback.
+Display sphere radii and bond-detection radii are separate from these inputs.
+
+Choose **Generate molecular surface**. Smaller spacing gives finer geometry and
+requires more memory. Progress and cancellation remain available; automatic
+coarsening is disabled and cavities are retained. Regeneration replaces a cached
+surface only on success. Saved molecular-surface controls expose visibility,
+color, opacity, regeneration/removal and scientific provenance. Expand a saved
+surface to change its color and opacity immediately, without an Apply button or
+regenerating its mesh. **Rename surface** commits a name separately. Empty or
+out-of-range opacity text leaves the accepted appearance unchanged. The
+generation form's initial color and opacity apply when generating a mesh.
+Surface shading
+and the X-ray/clipping shaders also apply; atom/bond ambient occlusion does not
+add an AO effect to these surfaces.
+
+For a clear SES overlay, use **Ball and stick** or **Liquorice**. Van der Waals
+spheres share SES atom-contact boundaries; the two independent triangulations
+can cross and show patchy interference. Changing opacity does not separate those
+coincident boundaries. Choose the representation explicitly; surface generation
+does not change display radii or the atomic representation.
+
+Save the document to retain the mesh, included atoms, resolved radii, probe,
+spacing and engine identity. Reopening displays cached geometry without requiring
+the input file or regenerating it. This is molecular shape, not electron density
+or an electrostatic-potential calculation.
+
+### Probe fields, inspect planes and plot profiles
+
+Choose **Fields → Quantitative field inspection** and select
+the **Analysis field**. This reads supplied Molden orbitals/density matrices or
+an imported cube's original scalar values, independently of preview resolution.
+Atom coordinates alone do not supply a scalar field.
+
+Expand **Field meaning and units** to inspect quantity, source-value unit and
+provenance. Cube meanings remain **unspecified** unless explicitly declared;
+a filename or known coordinate unit does not identify the scalar quantity.
+**Apply field meaning** records a user declaration. Declaring units labels the
+existing values; it does not rescale them. Supported **Display and export unit**
+conversions affect readouts, keys and CSV while preserving raw source samples.
+For an orbital, the sampled quantity is the signed amplitude **ψ**: the two
+signs represent phase, not positive/negative charge. A total electron-density
+field is nonnegative; spin density and difference fields can be signed. Choose
+the quantity you intend to inspect rather than treating these as interchangeable.
+
+To make a colored orbital plane:
+
+1. Open a Molden file containing orbitals. Choose **Fields**, expand
+   **Quantitative field inspection**, and use **Analysis field** to choose the
+   orbital, for example the HOMO. This analysis choice is independent of the
+   active field used for a 3D preview.
+2. Select **Plane / contours** as the analysis type. Choose XY, XZ or YZ, set
+   the center and coordinate unit, and give the plane a width, height, column
+   count and row count covering the molecule. Alternatively, select three atoms
+   in order and use their frame, as described below.
+3. Choose **Create plane**. Use **View meshes and analyses** if a 3D volume or
+   raycast hides the plane; no marching-cubes surface is required.
+4. Expand the saved result. Choose **Blue / white / red** for signed ψ and
+   **Show numeric key**. When comparing orbitals, clear **Automatic sampled
+   range** and use the same fixed negative-to-positive range. Add contour levels in the displayed field unit and choose
+   **Apply result settings**. A zero contour helps show a nodal boundary when
+   the sampled plane crosses it; its absence is not proof that the whole orbital
+   has no node.
+5. Export a PNG for the picture and **Export analysis CSV** for the numbers.
+   Save a new `.eigenvista` document to retain the plane and its accepted samples
+   for reopening without recalculation.
+
+The same plane workflow applies to a supplied density or cube field. For total
+electron density, choose a nonnegative color range rather than interpreting
+orbital phase colors as density signs.
+
+Choose an analysis type:
+
+- **Point probe:** enter a coordinate or select one source atom. The result
+  reports a numerical value/unit and distinguishes analytic evaluation from
+  source-grid interpolation.
+- **Plane / contours:** choose XY/XZ/YZ or three ordered selected atoms, then
+  specify the center or atom-based frame, width, height, columns and rows. The
+  first selected atom centers an atom-defined plane; the second defines its
+  horizontal direction and the third fixes its orientation. Collinear inputs
+  are rejected. This samples a true 2D plane, not a clipping shader.
+- **Line profile:** enter start/end coordinates or select two atoms in order,
+  choose the sample count, and create the profile. Both endpoints are sampled;
+  the plot's distance axis uses Å. Zero-length segments are rejected.
+
+The coordinate-unit selector accepts Å or bohr. Source-grid points outside the
+sampled domain are marked outside: planes show missing regions and profiles
+have gaps. They are not silently replaced with zero or extrapolated. Skewed and
+reflected cube axes remain supported. Denser sampling does not create new
+information in an imported field.
+Raw accepted caches retain f64 values; CSV uses the chosen display/export scalar
+unit and reports coordinates/distances in Å. Changing those display units does
+not modify the original field.
+
+Use **View meshes and analyses** when a volume obscures a slice. This hides
+the 3D sampled preview without generating marching-cubes meshes; it does not
+change the numerical analysis. Existing saved meshes keep their own visibility
+settings; hide them separately if they obscure the plane. Return to a volume/raycast mode explicitly when
+you want that preview again.
+
+Each saved result has **Edit sampling**, **Recompute**, visibility, label,
+colormap and range settings. Continuous numeric colorbars belong to quantitative
+slices; set a fixed range for comparable figures. **Automatic sampled range**
+restores the sampled range. Add comma-separated **Contour levels** for a plane,
+then choose **Apply result settings**. Out-of-domain cells do not bridge contour
+lines. The sample/provenance table and **Export analysis CSV** provide the raw
+numerical evidence, including coordinates, units, method and domain status.
+
+**Show current field rendering key** is separate: mesh/raycast keys identify
+their signed isovalues, and volume keys describe its actual color/opacity
+transfer. They do not pretend that the existing two-color volume is a linear
+continuous colormap. Visible keys and scientific annotations are included in PNGs.
+
+Save retains accepted f64 probe/plane/profile caches, interpretation/provenance,
+sampling definitions and result appearance. Reopening restores valid caches
+without silently recalculating them. Their persistence does not save the entire
+camera/AO/palette/shader scene configuration.
+
+### Inspection limits
+
+There are at most 64 named sets with 1,000,000 aggregate atom references,
+256 measurements and 256 labels. Label text is limited to 256 UTF-8 bytes per
+record and 64 KiB aggregate annotation text; visible label textures have a
+16 MiB budget. Neighborhood controls accept 0–1,000 Å; zero means exact
+coincidence, while unrepresentably tiny positive radii are rejected explicitly.
+
+Molecular surfaces have at most 32 records, 2,000,000 vertices and 4,000,000
+triangles per mesh, and a 256 MiB engine memory-estimate guard. The whole job
+also needs memory for accepted sources, conversion buffers, native preflight
+and GPU upload. Probe radius is 0.05–10 Å and spacing 0.05–3 Å; these input bounds
+do not promise every combination fits.
+
+Field analysis allows 128 probes, 8 planes up to 512×512, 16 profiles up to
+4,096 samples and a 16 MiB aggregate cache. Contours are limited to 32 levels
+and 1,000,000 segments; CSV output is at most 32 MiB. The existing 128 MiB
+native-document budget still applies. The individual maxima cannot necessarily
+fit together. Failure/cancellation retains the previous accepted result; choose
+an explicit smaller extent/count or coarser surface spacing when needed.
+
 ## Importing and converting Molden
 
 Use **Open** to select your Molden file, including `molden.input`. Import runs
@@ -397,7 +655,7 @@ The detailed profile is in `docs/cube-import.md` (`Cube-import.md` in the ZIP).
 ## Orbitals, densities, and isosurfaces
 
 To try the workflow without a quantum-data file, open the flask-shaped example
-menu beside Molecular data and choose **Hydrogen pair** or **Fractional open shell**.
+menu in **Molecule → Molecular data** and choose **Hydrogen pair** or **Fractional open shell**.
 These are mathematical demonstrations, not calculated molecular reference
 results. Opening an example replaces the current document after an unsaved-change
 confirmation. Independently calculated water/OH `.eigenvista` reference documents
@@ -405,7 +663,7 @@ can also be generated from the source tree; see `fixtures/pyscf/README.md`.
 
 ### Browse and render several orbitals
 
-1. Click **Orbitals (count)** under Quantum fields, such as **Orbitals (24)**.
+1. In **Fields → Quantum fields**, click **Orbitals (count)**, such as **Orbitals (24)**.
    Its tooltip is **Browse and select orbitals**. The table lists every orbital
    in document order, with a one-based row number, label, spin, occupation,
    energy in hartree, and the number of saved meshes. Missing energies or
@@ -438,7 +696,8 @@ new density matrix.
 
 ### Render one field
 
-1. Select a field under Orbitals, Density matrices, or Sampled fields.
+1. In **Fields → Quantum fields**, select a field under Orbitals, Density matrices,
+   or Sampled fields. Open **Field rendering** in the same tab.
 2. Set a positive **Isovalue** magnitude. The generator attempts both positive
    and negative levels; only nonempty surfaces are added. A nonnegative density
    can therefore produce only a positive surface.
@@ -461,7 +720,8 @@ new density matrix.
    their indicator is painted. During
    computation the same button becomes **Cancel**; cancelling retains the
    previous completed meshes.
-5. Adjust colors or opacity, then Save to make the result durable on disk.
+5. Adjust colors or opacity in **Appearance → Appearance**, then Save to make
+   the result durable on disk. Saved meshes are listed under **Surfaces → Saved surfaces**.
 
 Density calculation cost depends on the basis size as well as grid resolution.
 Analytic sampling has no estimated CPU-work cutoff and does not automatically
@@ -549,7 +809,7 @@ controls manage saved meshes, not the transient volume; switch to mesh mode
 to inspect their effect independently.
 
 Volume and raycast previews still have **one active field**, chosen in the
-Quantum fields panel; the browser's orbital checkboxes do not select multiple
+**Fields → Quantum fields** widget; the browser's orbital checkboxes do not select multiple
 simultaneous volumes. After a successful orbital batch, the previous active
 orbital stays active if it was checked, otherwise the first checked orbital in
 document order becomes active. Its sampled preview is ready. Selecting another
@@ -560,16 +820,24 @@ create its meshes.
 
 Positive/negative colors and opacity currently apply across the document's
 surfaces, not just the selected field. **Surface shading** chooses how those
-surfaces are lit: **Diffuse** (default, flat two-sided lighting) or
+surfaces are lit: **Diffuse** (default) or
 **Blinn-Phong** (adds specular highlights on saved meshes and sampled raycast
 isosurfaces). Shading is a session display preference and is not written into
 `.eigenvista` files; molecular atoms and bonds keep their own material. Eye
 icons toggle individual mesh visibility; trash icons remove meshes from the
 document. There is no undo.
 
+Scene illumination uses six equally strong lights spaced symmetrically around
+the view, with neutral ambient fill. The lights follow the camera as you orbit,
+pan or roll, so rotating to the other side does not reveal a permanently dark
+back. Saved molecular/quantum meshes, atoms, bonds and protein depictions share
+this arrangement; built-in raycast surfaces use the same directions. Shape and
+specular highlights still vary with the visible geometry. Custom surface shaders
+retain their own explicit lighting, and volume compositing stays unlit.
+
 ### Molecular ambient occlusion
 
-Under **Appearance**, enable **Ambient occlusion** for matte shading of atom
+Under **Appearance → Appearance**, enable **Ambient occlusion** for matte shading of atom
 contacts and the broad folds/cavities of dense molecules. Use
 **Representation → Van der Waals** for space-filling spheres. AO starts off.
 While active, atoms and bonds use **Lambert shading plus SSAO**, without specular
@@ -577,7 +845,7 @@ highlights. **AO strength** controls the effect (0–100%); zero restores the no
 view.
 
 For best results with ambient occlusion, use the **MatterViz Pastel** atom-color
-scheme, `matterviz-pastel.json`. Load it through **Atom colours → Colours file…**
+scheme, `matterviz-pastel.json`. Load it through **Appearance → Atom colours → Colours file…**
 from `palettes/` in the source checkout or `Palettes/` in the tester ZIP. For
 biological structures, choose **Coloring → Element** to use the palette.
 
@@ -606,7 +874,7 @@ re-enable it to retry. A lost graphics context still requires reloading.
 ### Atom colours
 
 Every element is drawn with its own CPK colour from a bundled palette. The
-**Atom colours** section shows which palette is active: **Built-in default
+**Appearance → Atom colours** widget shows which palette is active: **Built-in default
 (118 elements)**, or the name of the file you loaded this session.
 
 Version 0.7.2 supplies two optional examples: `matterviz-muted.json` has subdued
@@ -649,7 +917,7 @@ or a `symbol` that disagrees with the element for that number.
 
 ### Custom surface shaders
 
-**Surface shader** (Appearance) optionally replaces the built-in surface
+**Appearance → Surface shader** optionally replaces the built-in surface
 materials with a user vertex + fragment GLSL pair, similar to classic Molekel
 Display→Shaders:
 
@@ -705,6 +973,13 @@ saved mesh geometry and generation metadata, visibility, colors, opacity, and
 representation. Copy that file to another matching preview installation to
 view its saved meshes without the original input or recomputation. There is
 no separate OBJ-plus-metadata export or external mesh linking yet.
+
+In the unreleased test build, Save additionally keeps named atom sets, labels,
+ordered measurement definitions, SES/SAS meshes/provenance and quantitative
+field definitions/caches/keys. Use a matching reader: older 0.8.0 downloads reject
+these new required capabilities rather than silently dropping them. Active
+selection/pick mode, the camera, biological filters, palette, background, AO and
+custom shader settings remain session choices.
 
 On desktop, Save opens a native destination dialog; cancelling leaves the
 document unsaved. In a browser, Save requests a download to the browser's

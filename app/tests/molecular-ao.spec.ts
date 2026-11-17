@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
@@ -16,7 +17,7 @@ test("molecular AO darkens geometric contacts rather than isolated patches and r
 }, info) => {
   expect(analyticVisibility(isolated, [receiver, ...neighbors])).toBe(1);
   expect(analyticVisibility(receiver, neighbors)).toBeLessThan(0.95);
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await molecularProbe(page);
   const [off, on, restored, zero] = result.frames;
   const contact = off.patches.contact - on.patches.contact;
@@ -65,7 +66,7 @@ test("molecular AO darkens geometric contacts rather than isolated patches and r
   });
 });
 
-test("Lambert AO gives substantial localized contact contrast under the real directional and hemisphere lighting", async ({
+test("Lambert AO gives substantial localized contact contrast under the balanced scene lighting", async ({
   page,
 }, info) => {
   // A deep, visible pocket is declared independently before rendering. The
@@ -73,7 +74,7 @@ test("Lambert AO gives substantial localized contact contrast under the real dir
   expect(analyticVisibility(isolated, [receiver, ...litNeighbors])).toBe(1);
   expect(analyticVisibility(receiver, litNeighbors)).toBeLessThan(0.7);
   expect(cameraSeesReceiver(receiver, litNeighbors)).toBe(true);
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await molecularProbe(page, "lit");
   const [off, , restored, zero, weak, full] = result.frames;
   const contact = weak.patches.contact - full.patches.contact;
@@ -109,7 +110,7 @@ test("Lambert AO gives substantial localized contact contrast under the real dir
 test("active Lambert shading removes a positive legacy gloss signal independently of AO and restores both original roughness states", async ({
   page,
 }, info) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await molecularProbe(page, "matte");
   const frames = Object.fromEntries(
     result.frames.map((frame) => [frame.label, frame]),
@@ -181,7 +182,7 @@ test("active Lambert shading removes a positive legacy gloss signal independentl
 test("AO leaves field-only and opaque custom/surface pixels intact while preserving transparent molecular backdrops", async ({
   page,
 }, info) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await molecularProbe(page, "fields");
   const [off, on, restored, zero, transparentOff, transparentOn] =
     result.frames;
@@ -247,7 +248,7 @@ type AoWindow = Window & {
 
 async function ready(page: Page) {
   await trackSceneDraws(page);
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText(
     "triangles",
     { timeout: 45000 },
@@ -639,7 +640,7 @@ test("bounded AO PNGs match the actual current compositor after orbit, HiDPI res
 test("AO targets are lazy, capped in physical pixels and released through resize and toggle cycles", async ({
   page,
 }, info) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await molecularProbe(page, "resources");
   const byName = Object.fromEntries(
     result.frames.map((frame) => [frame.label, frame]),
@@ -804,7 +805,7 @@ test("injected FBO and driver-link failures retain the scene and recover on new 
 test("dense molecular AO retains instancing and bounded targets instead of per-atom draws", async ({
   page,
 }, info) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await molecularProbe(page, "dense");
   const [off, on, restored, zero] = result.frames;
   expect(result.counts).toEqual({ atoms: 512, bonds: 511 });

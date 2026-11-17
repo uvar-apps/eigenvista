@@ -115,6 +115,40 @@ fn scientific_core_version() -> &'static str {
     concat!("eigenvista-core ", env!("CARGO_PKG_VERSION"))
 }
 
+/// GUI export grants only the directory explicitly chosen in this dialog.
+#[tauri::command]
+async fn save_csv(
+    app: tauri::AppHandle,
+    text: String,
+    name: String,
+    protected_paths: Vec<String>,
+) -> Result<bool, String> {
+    if text.is_empty() || text.len() > eigenvista_control::MAX_CSV_BYTES {
+        return Err("CSV must contain at most 32 MiB of generated data".into());
+    }
+    tauri::async_runtime::spawn_blocking(move || {
+        let Some(path) = app
+            .dialog()
+            .file()
+            .add_filter("Scientific table", &["csv"])
+            .set_file_name(name)
+            .blocking_save_file()
+        else {
+            return Ok(false);
+        };
+        let path = path.into_path().map_err(|e| e.to_string())?;
+        let parent = path.parent().ok_or("Missing export directory")?;
+        let files = eigenvista_control::ScopedFiles::new(&[parent.to_path_buf()])
+            .map_err(|e| e.to_string())?;
+        files
+            .write_csv(&path, &text, &protected_paths, false)
+            .map_err(|e| e.to_string())?;
+        Ok(true)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(lifecycle::Lifecycle::default())
@@ -128,12 +162,14 @@ fn main() {
             scientific_core_version,
             save_native,
             save_shader_parameters,
+            save_csv,
             control::control_connection,
             control::control_ready,
             control::control_respond,
             control::control_read_file,
             control::control_save_document,
             control::control_write_image,
+            control::control_write_csv,
             lifecycle::pending_native_exit,
             lifecycle::resolve_native_exit
         ])

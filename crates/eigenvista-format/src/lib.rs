@@ -19,6 +19,26 @@ const MANIFEST_BUDGET: usize = 8 * 1024 * 1024;
 const PROFILE: &str = "eigenvista-preview-polynomial-v1";
 const LEGACY_PROFILE: &str = "molekel-preview-polynomial-v1";
 const BIO_PROFILE: &str = "eigenvista-biological-structure-v1";
+const ANNOTATIONS_PROFILE: &str = "eigenvista-annotations-v1";
+const MOLECULAR_SURFACES_PROFILE: &str = "eigenvista-molecular-surfaces-v1";
+const FIELD_ANALYSIS_PROFILE: &str = "eigenvista-field-analysis-v1";
+
+/// Exact ordered capabilities reject unknown/duplicate flags and require each
+/// optional scientific payload to declare its interpretation explicitly.
+fn required_features(document: &Value) -> Vec<String> {
+    let mut features = vec![PROFILE.into()];
+    for (key, feature) in [
+        ("structure", BIO_PROFILE),
+        ("annotations", ANNOTATIONS_PROFILE),
+        ("molecular_surfaces", MOLECULAR_SURFACES_PROFILE),
+        ("field_analysis", FIELD_ANALYSIS_PROFILE),
+    ] {
+        if document.get(key).is_some_and(|value| !value.is_null()) {
+            features.push(feature.into());
+        }
+    }
+    features
+}
 
 #[derive(Serialize, Deserialize)]
 struct Array {
@@ -70,14 +90,11 @@ fn preflight(doc: &Document, budget: PreviewBudget) -> Result<PreparedDocument> 
         arrays,
         entries,
     } = typed::pack(doc, budget)?;
+    let required_features = required_features(&document);
     let manifest = Manifest {
         format: "eigenvista".into(),
         version: [0, 1],
-        required_features: if doc.structure.is_some() {
-            vec![PROFILE.into(), BIO_PROFILE.into()]
-        } else {
-            vec![PROFILE.into()]
-        },
+        required_features,
         coordinate_unit: "bohr".into(),
         arrays,
         document,
@@ -233,14 +250,12 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
     }
     let mut manifest: Manifest =
         serde_json::from_slice(&manifest_bytes).map_err(|e| e.to_string())?;
-    let biological = manifest
-        .document
-        .get("structure")
-        .is_some_and(|value| !value.is_null());
+    let expected_features = required_features(&manifest.document);
     let supported_profile = match manifest.format.as_str() {
-        "eigenvista" if biological => manifest.required_features == [PROFILE, BIO_PROFILE],
-        "eigenvista" => manifest.required_features == [PROFILE],
-        "molekel" => !biological && manifest.required_features == [LEGACY_PROFILE],
+        "eigenvista" => manifest.required_features == expected_features,
+        "molekel" => {
+            expected_features == [PROFILE] && manifest.required_features == [LEGACY_PROFILE]
+        }
         _ => false,
     };
     if !supported_profile || manifest.version != [0, 1] || manifest.coordinate_unit != "bohr" {

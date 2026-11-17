@@ -527,7 +527,10 @@ test("coarse ray segments composite both signed roots in order and retain exact-
       renderer.dispose();
     }
   });
-  const light = 0.4 + 0.6 / Math.sqrt(0.4 ** 2 + 0.7 ** 2 + 1);
+  // This central ray sees a world-Z linear field along either camera-Z direction.
+  // Its view normal is ±Z: the three front axes each project to 1/sqrt(3),
+  // giving 0.1 + (0.9/sqrt(3)) * sqrt(3) = 1, independently of camera sign.
+  const light = 1;
   const srgb = (linear: number) =>
     linear <= 0.0031308 ? linear * 12.92 : 1.055 * linear ** (1 / 2.4) - 0.055;
   for (const sample of samples) {

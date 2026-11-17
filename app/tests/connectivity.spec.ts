@@ -1,3 +1,4 @@
+import { activateWidget, hideToolsForScene } from "./workspace";
 import { scenePixels } from "./scenePixels";
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
@@ -45,9 +46,11 @@ for (const input of inputs) {
     await expect(page.locator(".document-summary")).toContainText(
       `${input.bonds} bonds`,
     );
+    await activateWidget(page, "field-rendering");
     await expect(
       page.getByRole("button", { name: "Generate surfaces" }),
     ).toBeDisabled();
+    await activateWidget(page, "document");
     for (const mode of ["ball-stick", "liquorice"]) {
       await page.getByLabel("Representation").selectOption(mode);
       await scenePixels(page).then(({ colored }) => colored);
@@ -81,7 +84,11 @@ for (const input of inputs) {
     await expect(page.locator(".document-summary")).toContainText(
       `${input.bonds} bonds`,
     );
+    const originalScene = await page
+      .getByLabel("Molecular scene", { exact: true })
+      .elementHandle();
     await page.setViewportSize({ width: 390, height: 844 });
+    await hideToolsForScene(page);
     await expect
       .poll(() =>
         page.locator("canvas").evaluate((canvas) => {
@@ -111,9 +118,21 @@ for (const input of inputs) {
     expect(mobilePixels.colored).toBeGreaterThan(100);
     expect(mobilePixels.foreground).toBeGreaterThan(300);
     expect(mobilePixels.edgePixels).toBe(0);
-    const scene = await page.locator("canvas").boundingBox();
-    const panel = await page.locator(".left-panel").boundingBox();
-    expect(scene!.y + scene!.height).toBeLessThanOrEqual(panel!.y);
+    const scene = (await page
+      .getByLabel("Molecular scene", { exact: true })
+      .boundingBox())!;
+    await expect(
+      page
+        .locator(".workspace-lab .viewport-column")
+        .getByLabel("Molecular scene", { exact: true }),
+    ).toHaveCount(1);
+    expect(await originalScene!.evaluate((node) => node.isConnected)).toBe(
+      true,
+    );
+    expect(scene.x).toBeGreaterThanOrEqual(0);
+    expect(scene.y).toBeGreaterThanOrEqual(0);
+    expect(scene.x + scene.width).toBeLessThanOrEqual(390);
+    expect(scene.y + scene.height).toBeLessThanOrEqual(844);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,

@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels } from "./scenePixels";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
@@ -10,7 +11,7 @@ test("custom shader alpha blends independently of document opacity and opaque mo
 }, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   const result = await page.evaluate(
     async (sources) => {
@@ -238,7 +239,7 @@ test("custom shader alpha blends independently of document opacity and opaque mo
 test("shader transparency is a live session control and resets with Clear", async ({
   page,
 }, testInfo) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   const mode = page.getByLabel("Shader transparency", { exact: true });
   await expect(mode).toBeChecked();

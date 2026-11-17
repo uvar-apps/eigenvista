@@ -1,3 +1,4 @@
+// Isolated renderer harness: exact root interception prevents App mounting; not application-GUI qualification.
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import type { EigenVistaDocument, SampledGrid } from "../src/types";

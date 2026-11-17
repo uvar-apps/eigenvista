@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { test, expect, type Page } from "@playwright/test";
 import { installNativeIpc, type NativeIpcWindow } from "./nativeIpc";
 
@@ -27,6 +28,7 @@ async function approved(page: Page) {
 }
 
 async function dirty(page: Page) {
+  await activateWidget(page, "document");
   await page
     .getByLabel("Representation", { exact: true })
     .selectOption("space-fill");
@@ -34,6 +36,7 @@ async function dirty(page: Page) {
 }
 
 async function holdGeneration(page: Page) {
+  await activateWidget(page, "field-rendering");
   await page.evaluate(() => {
     (window as unknown as NativeIpcWindow).nativeIpc.holdGeneration = true;
   });

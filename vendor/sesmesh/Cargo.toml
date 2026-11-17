@@ -1,0 +1,38 @@
+# Vendored from uvar-apps/sesmesh 1ab2ebdad62cfa3fc8fee304ca64041d9bf6b5d8.
+# See ORIGIN.md for the narrowly scoped WASM portability modifications.
+[package]
+name = "sesmesh"
+version = "1.1.2"
+edition = "2024"
+rust-version = "1.89"
+license = "MIT OR Apache-2.0"
+authors = ["Ugo Varetto"]
+repository = "https://github.com/uvar-apps/sesmesh"
+description = "Solvent Excluded Surface meshing; EigenVista's pinned WASM-compatible source"
+readme = "README.md"
+
+# This dependency is independently vendored, not an EigenVista workspace member.
+[workspace]
+
+[features]
+default = ["parallel", "gzip", "radii-file"]
+parallel = ["dep:rayon"]
+gzip = ["dep:flate2"]
+radii-file = ["dep:serde", "dep:toml"]
+
+[dependencies]
+fast-float2 = "0.2"
+fearless_simd = { version = "1.2", features = ["force_support_fallback"] }
+flate2 = { version = "1.1", default-features = false, features = ["zlib-rs"], optional = true }
+memchr = "2.8"
+rayon = { version = "1.12", optional = true }
+rustc-hash = "2.1"
+serde = { version = "1.0", features = ["derive"], optional = true }
+thiserror = "2.0"
+toml = { version = "1.2", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-time = "=1.1.0"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(fuzzing)"] }

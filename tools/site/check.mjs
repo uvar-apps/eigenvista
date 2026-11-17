@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { release } from "./release.mjs";
+import { application } from "./application.mjs";
 import { verification } from "./search-console.mjs";
 
 const root = path.resolve(
@@ -57,15 +58,22 @@ const html = new Map(
       fs.readFileSync(path.join(site, row.path), "utf8"),
     ]),
 );
-assert.equal(html.size, 23, "Complete website route inventory");
+assert.equal(html.size, 27, "Complete website route inventory");
 for (const page of [
   "ai.html", "ai-install.html", "ai-guide.html",
   "ai-tutorial-orbitals.html", "ai-tutorial-density.html",
   "ai-tutorial-ao.html", "ai-tutorial-representations.html",
 ]) assert(html.has(page), `Complete AI guide and tutorial route: ${page}`);
 // User requests name outcomes; connector operations belong in the agent's technical guide.
-const controlMethods = [...fs.readFileSync(path.join(root, "app/src/control.ts"), "utf8").matchAll(/^  "([a-z_]+\.[a-z_]+)": definition/gm)].map((match) => match[1]);
-assert.equal(controlMethods.length, 28, "Discover the complete current connector contract");
+const controlSource = fs.readFileSync(path.join(root, "app/src/control.ts"), "utf8");
+const inspectionSource = fs.readFileSync(path.join(root, "app/src/inspectionSchemas.ts"), "utf8");
+const baseMethods = [...controlSource.matchAll(/^  "([a-z_]+\.[a-z_]+)": definition/gm)].map((match) => match[1]);
+const inspectionMethods = [...inspectionSource.matchAll(/^  "([A-Za-z_]+\.[a-z_]+)":\s*entry\(/gm)].map((match) => match[1]);
+assert(baseMethods.includes("app.state") && baseMethods.includes("job.cancel"), "Discover real base controller operations");
+assert(inspectionMethods.includes("molecularSurfaces.warnings") && inspectionMethods.includes("analysis.samples"), "Discover the additive inspection contract");
+assert(controlSource.includes("...INSPECTION_METHODS"), "Inspection schemas are actually part of the shared controller");
+const controlMethods = [...baseMethods, ...inspectionMethods];
+assert.equal(new Set(controlMethods).size, controlMethods.length, "No duplicate discovered operations");
 const assertUserLanguage = (name, content) => {
   for (const method of controlMethods) assert(!content.includes(method), `Natural-language user page must not require ${method}: ${name}`);
   assert(!/Do this part yourself|read app\.state|INPUT_ROOT|OUTPUT_ROOT|expectedRevision|fieldIds|shader\.set_uniforms/.test(name.startsWith("ai-tutorial-") ? content : ""), `No API/connection tasks in visualization lesson: ${name}`);
@@ -75,6 +83,15 @@ assert.throws(() => assertUserLanguage("ai-tutorial-ao.html", "Do this part your
 for (const name of ["ai.html", "ai-install.html", "ai-guide.html", "ai-tutorial-orbitals.html", "ai-tutorial-density.html", "ai-tutorial-ao.html", "ai-tutorial-representations.html"]) {
   assertUserLanguage(name, html.get(name));
   assert(!/\b[A]GENTS\.md\b|EIGENVISTA_REPO|cargo build|git clone|rustup|wasm-bindgen|\/target\/debug|tools\/site\/examples/.test(html.get(name)), `Installed-app user setup must not depend on development files/tools: ${name}`);
+}
+const inspectionPages = ["reference-inspection.html", "tutorials-geometry.html", "tutorials-molecular-surfaces.html", "tutorials-quantitative-fields.html"];
+for (const name of inspectionPages) {
+  assert(html.has(name), `Complete inspection manual/tutorial route: ${name}`);
+  const content = html.get(name);
+  assertUserLanguage(name, content);
+  assert(content.includes("data-unreleased-inspection") && content.includes(`EigenVista ${application.version}`) && content.includes(`not included in the published ${release.version} download`), `New features must not masquerade as published: ${name}`);
+  assert(!content.includes("test build still displays"), `Test-build identity must match source metadata: ${name}`);
+  assert(!/\b[A]GENTS\.md\b|expectedRevision|fieldIds|read app\.state/.test(content), `No internal setup/API chores: ${name}`);
 }
 const ids = new Map(
   [...html].map(([name, text]) => {
@@ -109,6 +126,11 @@ let localReferences = 0,
   images = 0;
 for (const [name, text] of html) {
   assert(text.startsWith("<!doctype html>"), name);
+  assert(!text.includes("test build still displays"), `No stale test-build identity: ${name}`);
+  assert(text.includes(`<small data-application-version>${application.version}${application.status === "unreleased" ? " test build" : ""}</small>`), `Current application identity: ${name}`);
+  assert(text.includes(`<span data-application-status>v${application.version} / ${application.status === "unreleased" ? "UNRELEASED TEST BUILD" : "DEVELOPMENT PREVIEW"}</span>`), `Current application status: ${name}`);
+  if (application.status === "unreleased")
+    assert(!new RegExp(`releases/(?:tag|download)/v${application.version.replaceAll(".", "\\.")}(?:["/])`).test(text), `No unpublished release/download URL: ${name}`);
   assert(text.includes('<html lang="en">'), name);
   assert.equal(
     [...text.matchAll(/<h1(?:\s|>)/g)].length,
@@ -236,15 +258,27 @@ assert.deepEqual(
   JSON.parse(fs.readFileSync(path.join(site, "release.json"))),
   release,
 );
+assert.deepEqual(
+  JSON.parse(fs.readFileSync(path.join(site, "application.json"))),
+  application,
+);
 assert.equal(
   JSON.parse(fs.readFileSync(path.join(root, "app/package.json"))).version,
-  release.version,
+  application.version,
 );
 assert.equal(
   JSON.parse(fs.readFileSync(path.join(root, "app/src-tauri/tauri.conf.json")))
     .version,
-  release.version,
+  application.version,
 );
+assert.equal(application.publishedVersion, release.version);
+assert.equal(application.status, "unreleased", "Source version is preparation for user testing, not a release");
+assert(html.get("index.html").includes("data-current-development") && html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
+assert(html.get("install.html").includes(`Published download: ${release.version}`));
+assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download remains the existing verified package");
+assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive, not the newer source"));
+assert(html.get("about.html").includes(`${application.version} test build is unreleased and has no version-specific DOI yet`));
+assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
 const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );
@@ -298,7 +332,49 @@ for (const pair of media.comparisons) {
 const mediaFiles = files.filter(
   (row) => row.path.startsWith("assets/media/") && row.path.endsWith(".webp"),
 );
-assert.equal(mediaFiles.length, 16, "All curated genuine captures");
+const workspaceMedia = media.workspacePaneCaptures;
+assert.equal(workspaceMedia.application.version, "0.9.0", "Preserve the actual capture version");
+assert.equal(workspaceMedia.application.publishedRelease, false);
+assert.equal(workspaceMedia.application.sourceBaseline, "9617a31e7824fbe93ccc78829afa6079ed1080f5");
+assert.equal(workspaceMedia.images.length, 3);
+for (const row of workspaceMedia.images) {
+  assert(/^simple-[a-z0-9-]+\.webp$/.test(row.file), row.file);
+  const image = fs.readFileSync(path.join(site, "assets/media", row.file));
+  assert.equal(image.length, row.bytes);
+  assert.equal(hash(image), row.sha256);
+  assert.equal(image.toString("ascii", 0, 4), "RIFF");
+  assert.equal(image.toString("ascii", 8, 12), "WEBP");
+  const original = fs.readFileSync(path.join(root, row.sourcePng));
+  assert.equal(hash(original), row.sourcePngSha256);
+  assert.equal(original.readUInt32BE(16), row.width);
+  assert.equal(original.readUInt32BE(20), row.height);
+  assert.equal(row.width, 1280);
+  assert.equal(row.height, 800);
+}
+for (const row of workspaceMedia.inputs)
+  assert.equal(hash(fs.readFileSync(path.join(root, row.file))), row.sha256);
+assert.deepEqual(mediaFiles.map((row) => path.basename(row.path)).sort(),
+  [...media.images, ...workspaceMedia.images].map((row) => row.file).sort(),
+  "Complete curated capture inventory, including three approved-workspace images");
+const inspectionMedia = JSON.parse(fs.readFileSync(path.join(site, "assets/inspection/provenance.json")));
+assert.equal(inspectionMedia.application.publishedRelease, false);
+assert.equal(inspectionMedia.application.branch, "codex/scientific-inspection");
+assert.equal(inspectionMedia.application.version, "0.8.0");
+assert.equal(inspectionMedia.images.length, 3);
+assert.deepEqual(inspectionMedia.errors, []);
+for (const row of inspectionMedia.images) {
+  assert(/^[a-z0-9-]+\.webp$/.test(row.file));
+  const image = fs.readFileSync(path.join(site, "assets/inspection", row.file));
+  assert.equal(image.length, row.bytes);
+  assert.equal(hash(image), row.sha256);
+  assert.equal(image.toString("ascii", 0, 4), "RIFF");
+  assert.equal(image.toString("ascii", 8, 12), "WEBP");
+  assert(row.width > 0 && row.height > 0);
+}
+for (const row of inspectionMedia.inputs) assert.equal(hash(fs.readFileSync(path.join(root, row.file))), row.sha256);
+for (const method of inspectionMethods) {
+  assert(fs.readFileSync(path.join(portable, "reference.md"), "utf8").includes("`" + method + "`"), `Packaged instructions cover ${method}`);
+}
 const expectedMedia = [
   "1aon-ao-off",
   "1aon-ao-on",

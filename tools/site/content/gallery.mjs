@@ -1,3 +1,5 @@
+import { workspaceFigure } from "./workspace.mjs";
+
 const labels = {
   quantum: "QUANTUM FIELD",
   shader: "SHADER STUDY",
@@ -19,6 +21,12 @@ export default [
     description:
       "EigenVista renders of molecular orbitals, electron density, custom X-ray and clipping shaders, protein cartoons and large structures with ambient occlusion.",
     body: `<p class="lede page-lede">Orbitals, electron density and the molecular framework. Explore real EigenVista views, then use the linked guides to make your own.</p>
+<section class="section-block"><div class="section-heading"><p class="eyebrow">Current workspace / actual application views</p><h2>From the field<br>to the number.</h2><p>A true HOMO plane puts signed amplitude, a continuous colorbar and contours beside readable controls. The same single pane can sit left or right; Zen gives the scene the full window.</p></div>
+${workspaceFigure("homo-analysis-right", "The Fields tab in the right-hand pane beside a signed C7H10 HOMO plane with contours and an amplitude key", "Fields → Quantitative field inspection: C₇H₁₀ HOMO amplitude ψ, with a fixed −0.06 to +0.06 bohr⁻³ᐟ² colorbar and signed contours. This is a sampled section, rather than a clipped 3D shell.")}
+<div class="gallery-grid">
+${workspaceFigure("crambin-shape-left", "An X-ray-shaded crambin solvent-excluded surface beside the Surfaces tab in a left-hand pane", "The Surfaces tab on the left, with real 327-atom crambin SES and MatterViz Pastel atoms beneath an X-ray finish. This is coordinate-derived molecular shape.")}
+${workspaceFigure("homo-analysis-zen", "The same HOMO plane in Zen with signed contours, a numerical key and minimal visible exit controls", "The matching HOMO section in Zen. Its numerical key and contours remain while the tool pane and ordinary chrome hide.")}
+</div><p><a href="tutorials-quantitative-fields.html">Make the section →</a> · <a href="tutorials-molecular-surfaces.html">Compare SES and SAS →</a> · <a href="reference.html#workspace">Find the four workspace tabs →</a></p></section>
 <section class="section-block"><div class="section-heading"><p class="eyebrow">01 / Fields and materials</p><h2>See the field.<br>Shape the view.</h2><p>The quantum and shader studies use the same 17-atom C₇H₁₀ bicyclic hydrocarbon. Compare its frontier orbitals, then see how a custom shader reveals different parts of its electron-density surface.</p></div>
 <div class="filter-bar" data-gallery-filters hidden aria-label="Filter gallery"><button type="button" data-filter="all" aria-pressed="true">All views</button><button type="button" data-filter="quantum" aria-pressed="false">Quantum fields</button><button type="button" data-filter="shader" aria-pressed="false">Shaders</button><button type="button" data-filter="structure" aria-pressed="false">Molecules</button><span role="status" data-gallery-status></span></div>
 <div class="gallery-grid">

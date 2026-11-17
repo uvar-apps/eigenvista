@@ -10,6 +10,38 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
+### 0.10.0 scientific-inspection source
+
+`codex/scientific-inspection` implements [Plan 009](../plans/009-scientific-inspection-implementation.md).
+Source version 0.10.0 is prepared for testing but has not been published;
+published 0.8.0 downloads do not include these additions. The [design record](design/2026-11-16-scientific-inspection.md)
+explains source identity, optional native capabilities, Sesmesh provenance and
+the quantitative sampling/publication contracts. See [handoff](handoff.md) for
+fresh acceptance evidence and current delivery state.
+
+The existing commands below build the new Rust/WASM/UI together. Sesmesh is a
+pinned, minimally patched Rust path dependency under `vendor/sesmesh`; no
+separate engine installation or external running service is required. Preserve
+its original source/patch digests and selected license when packaging. No new
+model service is needed for the installed AI connector; it discovers the new
+schemas through the existing opt-in native connection.
+
+Focused coverage includes core `inspection`, `neighborhoods`, `molecular_surfaces`
+and `field_analysis` tests, format `inspection_profiles`, and browser
+`inspection.spec.ts`, `molecular-surfaces.spec.ts` and `field-analysis.spec.ts`.
+These supplement the complete verification sequence. Actual extracted native
+helper acceptance must cover every new method, updates/readback, cancellation,
+CSV/PNG, source preservation, file scopes/no-clobber and save/reopen. In-page
+controller tests alone do not establish installed connector support.
+
+Build test bundles in the optimized target directory or repository-local
+staging; do not rebuild the debug bundle over a running user app. Label/monitor
+edits preflight the actual bounded text layout before publication, independently
+of native byte preflight. Typed native caches retain authoritative f64 values;
+GPU rendering uses its separately documented precision and allocation bounds.
+
+### Exercised environment
+
 The exercised environment is an Apple Silicon Mac running macOS 27, Rust
 1.99.0, arm64 Node.js 26 with npm, and wasm-bindgen CLI **0.2.108**. These are
 recorded tested versions, not a fully qualified minimum-version matrix. Cargo
@@ -67,6 +99,15 @@ npm --prefix app run dev
 This builds WASM and starts Vite at `http://127.0.0.1:5178`. Open that address in
 a WebGL2-capable browser. Stop your server with Ctrl-C when finished.
 
+Normal startup uses the approved single tools pane: initially **480 px** on the
+right, movable to the left, with **Molecule**, **Fields**, **Surfaces** and
+**Appearance** tabs. No `?workspace=lab` flag is needed. Widgets retain their
+collapse and drag/keyboard/menu order controls; Show/Hide tools, Zen and browser
+fullscreen leave the same document, viewport and calculation owners mounted.
+This describes a fresh source build, not the older layout in published 0.8.0
+packages. See the [workspace guide](user-guide.md#the-workspace) and
+[design/qualification record](design/2026-11-17-simple-workspace-pane.md).
+
 ```sh
 npm --prefix app run desktop
 ```
@@ -82,7 +123,7 @@ project, choose a free port and keep [Vite](../app/vite.config.ts),
 [its config](../app/playwright.config.ts) aligned. Playwright currently reuses
 an existing server: verify it belongs to this checkout before trusting results.
 
-## External application control (0.8.0)
+## External application control (introduced in 0.8.0)
 
 The optional [application-control API](application-control.md) lets an external
 harness operate the current document, scientific worker and viewport through
@@ -369,7 +410,7 @@ explains ownership, validation, and cache boundaries.
 | Indexed-column validation | [Native column regressions](../crates/eigenvista-format/tests/columnar_packing.rs) and [actual WASM decoding](../app/tests/format-validation.spec.ts): oversized/wrapped indices, swapped/duplicate rows, invalid reference forms, and valid roundtrips |
 | Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, controlled out-of-order reads and clearing, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations/budgets. Native dialog interaction remains a separate acceptance check. |
 | Custom shader transparency | [Alpha/depth and UI regressions](../app/tests/shader-transparency.spec.ts): fragment alpha independent of document opacity, view-dependent alpha, opaque depth writes, unchanged built-in materials, live checkbox changes, and Clear reset |
-| Sidebar layout | [Panel workflows](../app/tests/panels.spec.ts) and [ordering regressions](../app/tests/panel-order.spec.ts): all eight disclosures, actual drag/keyboard/tap ordering, DOM/focus, mounted field/shader state, decoded-document/worker isolation, bounded preferences and storage failures, busy cancellation and mobile layout |
+| Default workspace and legacy widget compatibility | [Workspace workflows](../app/tests/workspace-experiments.spec.ts): four task tabs, left/right pane, bounded resize/storage, real widget ordering, hide/Zen/fullscreen, scroll/draft/file-node/source/camera retention, calculation cancellation and scientific exports. [Panel workflows](../app/tests/panels.spec.ts) and [ordering regressions](../app/tests/panel-order.spec.ts) retain the original eight-widget disclosure/order contract on the explicit legacy route. Fresh default-startup qualification is separate from historical opt-in results; record the exact source and run in [status](status.md). |
 | Molecular ambient occlusion | [AO browser checks](../app/tests/molecular-ao.spec.ts), 10 cases per engine within the complete local suite: independent contact/isolated and gloss/Lambert controls, Auto/manual radius, instancing, exact Off/zero/material restoration, field/document/worker isolation, resource bounds and fault recovery. PNG case A retains three full-size desktop samples; case B bounds only the real `.scene` host at DPR 2 (240×128 → 160×160 CSS; 480×256 → 320×320 physical), keeping real toolbar/actions, all five original samples and unchanged oracles. Separate 1024-cap checks and tracked actual-app 1AON qualification remain; 4PJ1 is secondary. Keep 60-second tests, 35-minute suite steps, 60-minute jobs and one worker. The failed combined-case run is historical; complete all relevant local checks before pushing. Results belong in [status](status.md). |
 | Native save contract research | [Actual-writer regressions](../crates/eigenvista-format/tests/save_contract_research.rs) and [opt-in filesystem probe](../crates/eigenvista-format/examples/save_contract_probe.rs): modes, bytes, bounded complete-file visibility and unique no-clobber races; no crash-durability claim |
 | Anisotropic rendering and volume visibility | [Affine analytic checks](../app/tests/anisotropy-research.spec.ts) with [independent physical oracle](../app/tests/anisotropyReference.ts); normal [visibility](../app/tests/volume-visibility.spec.ts), [depth/opaque objects](../app/tests/volume-visibility-depth.spec.ts) and [prefix](../app/tests/volume-visibility-prefix.spec.ts) regressions preserve fixed expectations |
@@ -471,6 +512,17 @@ bundle: launch it, open the included water PDB/XYZ, check 3 atoms/2 bonds, save
 to a new path, reopen, cancel a save, and exercise replacement/close behavior
 without losing unsaved data. Test cached orbital meshes with a reference document.
 Use disposable files under repository `tmp/`, never the user's original data.
+In a newly built bundle, check the normal four-tab workspace, both pane sides,
+resizing, widget collapse and drag/keyboard/menu ordering. Hide/reopen the pane
+and enter/exit Zen during a cancellable job: progress and Cancel must remain
+available, with the same accepted result and source afterward. Test actual
+fullscreen entry/exit or a clear unsupported/rejected response; browser checks
+alone do not establish native macOS fullscreen or assistive-technology support.
+For field-plane discoverability, open a Molden file and use **Fields →
+Quantitative field inspection → Analysis field → Plane / contours**. Create a
+signed orbital plane, show its numeric key, export CSV/PNG and save/reopen the
+cache without recomputation. Use **View meshes and analyses** if a volume hides
+the slice. See the [user workflow](user-guide.md#probe-fields-inspect-planes-and-plot-profiles).
 Also open `Examples/water.molden`, generate an orbital and density, save/reopen,
 then convert a mixed valid/invalid batch without replacing the scene. Check
 per-result Save, cancellation, retry, and protected-source errors with disposable

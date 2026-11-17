@@ -15,9 +15,27 @@ connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
 Version 0.8.0 includes the packaged connector; the AI pages guide users from
 that installed binary. Older 0.7.2 packages predate control.
-The homepage hero highlights **AI-enabled viewing**, links directly to the AI
-overview, and names the compatible 0.8.0 package beside the callout.
+The published homepage hero highlights **AI-enabled viewing**, links directly to
+the AI overview, and names the compatible 0.8.0 package beside the callout.
 Keep that availability label aligned with the actual public release.
+
+The current source is **0.10.0**, preparing the approved 0.10.0 update. Its
+scientific-inspection manual, tutorials and workspace guide describe the new
+source build, beyond the published 0.8.0 download. Normal startup uses one wide,
+resizable left/right pane with Molecule, Fields, Surfaces and Appearance tabs,
+hide/reopen and Zen mode. Keep current instructions aligned with that default.
+Published download links, DOI and historical capture versions must continue to
+identify their actual artifacts. A source tag does not imply a new binary
+download. The current task authorizes PR merge and the Pages-only publisher,
+without a GitHub release or rebuilt redistributables.
+
+The three `simple-*` workspace PNGs are real 0.9.0 captures of the approved workspace, retained
+with exact hashes and dimensions in media provenance. They illustrate the
+approved layout and quantitative signed-orbital plane. Keep their capture
+identity separate from current source metadata and preserve their aspect ratios.
+Earlier experiment images remain historical design evidence. New page copy
+must make quantitative inspection discoverable through Fields and distinguish
+orbital amplitude (signed phase) from nonnegative electron density.
 
 ## A static directory, with a small publisher
 
@@ -66,11 +84,20 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. `CITATION.cff`, the README citation and About use the archived version's
-DOI; 0.8.0 is `10.5281/zenodo.24273137`. Keep the citation title, author, version
-and DOI synchronized. A version DOI identifies that archive, so do not assign it
-to a later version. DOI metadata added after publication updates documentation
+section. `CITATION.cff`, the README citation and About distinguish the current
+source's concept DOI (`10.5281/zenodo.24246123`) from the published 0.8.0 archive's
+DOI (`10.5281/zenodo.24273137`). Keep citation title, author, version and DOI
+synchronized. A version DOI identifies that archive, so do not assign it to a
+later version. DOI metadata added after publication updates documentation
 and release notes without moving the existing tag or rebuilding immutable assets.
+
+The three simple-pane illustrations retain original PNGs and complete capture
+metadata under `docs/design/assets/simple-workspace-pane-2026-11-17/`. Public
+copies are lossless WebP at the same 1280 × 800 dimensions, with zero decoded
+pixel differences. Their source version remains 0.9.0; the 0.10.0 workspace adopts
+the same design. The public provenance JSON is compactly serialized to keep
+all capture data and the new imagery within the existing 25 MiB payload bound.
+Existing image bytes, metadata values and palette provenance are preserved.
 Project history traces EigenVista to Molekel, developed by Ugo Varetto from
 2006 to 2010. Link the original repository and website from README/About History.
 Describe the Rust/TypeScript code as the new implementation; repository subtree
@@ -199,8 +226,9 @@ After deployment, verify the public HTTPS pages, CSS/JS/media and examples again
 the locally checked payload. Follow only the Pages deployment when checking this
 publication; do not start or poll the optional application Verify workflow.
 
-Website work does not bump the app version, retag a release or rebuild existing
-redistributables. The published 0.7.2 source and downloads retain their identities.
+Website-only work does not bump the app version, retag a release or rebuild
+existing redistributables. An explicitly requested source-version update is
+coordinated with application metadata. Published downloads retain their identities.
 
 ## Installed-binary setup correction: 16 November 2026 (local)
 

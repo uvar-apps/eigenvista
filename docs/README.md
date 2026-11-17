@@ -20,7 +20,28 @@ publisher. Application builds/tests continue to run locally before pushing.
 The [project discovery guide](project-discovery.md) covers GitHub presentation,
 the real-app shader demo/social image, and Search Console maintenance (#77).
 
-Current source version: **0.8.0**, including live orbital/density calculation
+**Current source update:** `codex/scientific-inspection` implements
+[Plan 009](../plans/009-scientific-inspection-implementation.md), tracked by
+[#83–#86](https://github.com/uvar-apps/eigenvista/issues/83): measurements/labels
+and ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field
+probes/planes/contours/profiles. All have shared API and external AI connector
+paths. The published 0.8.0 binaries do not include these additions.
+Use a matching source/test build and live capability discovery. The user has
+approved the layout and authorized delivery through a PR, followed by a tag on
+main; current evidence belongs in [handoff](handoff.md) and [status](status.md).
+The approved [simple workspace pane](design/2026-11-17-simple-workspace-pane.md)
+implements the user's preferred IDE-style arrangement: one wide pane on either
+side, four internal top tabs, hide/reopen, and the original collapsible/draggable
+widgets and application chrome (#88). It becomes normal startup in this update;
+`?workspace=legacy` retains the previous comparison for regression/reference use. The
+[earlier analysis and alternatives](design/2026-11-16-desktop-workspaces.md) are
+preserved as historical research, with their separate captures and qualification.
+
+The [implementation decision](design/2026-11-16-scientific-inspection.md) records
+the contracts and evidence boundaries behind those workflows.
+
+Current source version: **0.10.0 (unreleased)**, adding the scientific-inspection
+workflows above to the existing live orbital/density calculation
 progress, voxel-relative sampled preview quality, and explicit custom shader
 transparency, plus scoped worker cancellation and resident document reuse.
 Bond search uses conservative radius buckets, and mmCIF declared connections
@@ -39,7 +60,7 @@ independently audited Apple Silicon artifacts at its
 [release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0).
 The earlier 0.5.15 package predates AO.
 
-Version 0.8.0 adds a shared application controller and packaged AI connector.
+Version 0.8.0 introduced a shared application controller and packaged AI connector.
 Use the installed app from Codex, Claude Code, Pi, OpenCode or a generic local
 agent without a source checkout. The website includes four prompt-driven
 scientific/visual tutorials. See [0.8.0 notes](releases/0.8.0.md),
@@ -93,13 +114,14 @@ limits of opening new saves in older builds.
 | Need | Read |
 | --- | --- |
 | Restart from a fresh coding-agent session without the old chat | [Session handoff](session-handoff-2026-10-21_173143-AWST.md) and [ready-to-use prompt](restart-prompt-2026-10-21_173143-AWST.md) |
-| Current source changes and known limitations | [0.8.0 release notes](releases/0.8.0.md) |
+| Current source changes and known limitations | [Unreleased 0.10.0 notes](releases/0.10.0.md), [handoff](handoff.md) and [status](status.md) |
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
+| Unreleased selections, measurements, labels, neighborhoods, SES/SAS and quantitative fields | [Test-build user guide](user-guide.md#scientific-inspection-in-the-unreleased-test-build), [API additions](application-control.md#unreleased-scientific-inspection-api), [native capabilities](preview-format.md#scientific-inspection-capabilities-unreleased) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |
-| Install and use the connector with Codex, Claude Code, Pi, OpenCode or a generic local agent | [Connector installation and user guide](ai-connector.md), with a copyable agent setup prompt for the installed 0.8.0 binary |
+| Install and use the connector with Codex, Claude Code, Pi, OpenCode or a generic local agent | [Connector installation and user guide](ai-connector.md), with a copyable setup prompt for published 0.8.0 and matching 0.10.0 test binaries |
 | Prompt-driven orbital, density, large-molecule AO and protein-representation lessons | [AI website section](https://uvar-apps.github.io/eigenvista/ai.html); these four tutorials are maintained only on the website |
-| External harness control, CLI, method discovery, jobs and scoped artifacts (0.8.0) | [Application control](application-control.md) and [accepted decision](design/2026-11-16-application-control-api.md) |
+| External harness control, CLI, method discovery, jobs and scoped artifacts (introduced in 0.8.0; inspection additions in unreleased 0.10.0) | [Application control](application-control.md) and [accepted decision](design/2026-11-16-application-control-api.md) |
 | Recorded natural-language orbital visualization, with PDF/HTML/Markdown and images | [Sample AI session](sample-ai-session/README.md) |
 | AI console, model compatibility and protocol research | [Research report](research/2026-11-15-ai-console-and-agent-api.md); the selected implementation omits the embedded console and scripting runtime |
 | Agent continuation, current baseline, priorities, verification gaps | [Handoff](handoff.md) and [root AGENTS.md](../AGENTS.md) |

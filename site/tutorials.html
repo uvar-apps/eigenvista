@@ -12,13 +12,14 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=00b6a4494e27">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small>0.8.0</small></a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small data-application-version>0.10.0 test build</small></a>
 <nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="surface-shaders.html">Shaders</a><a href="ai.html">AI</a><a href="tutorials.html" aria-current="page">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
 <div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
 <div class="element-strip" aria-hidden="true"></div>
-<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04 / EIGENVISTA FIELD MANUAL</p><h1>Learn EigenVista by doing<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#before-you-start">Before you start</a><a href="#learning-path">Your learning path</a><a href="#ai-learning-path">Explore with your AI agent</a><a href="#example-files">Download the examples</a><a href="#checkpoints">How to use the checkpoints</a></aside><article class="prose">
+<main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">04 / EIGENVISTA FIELD MANUAL</p><h1>Learn EigenVista by doing<span class="accent">.</span></h1></div><div class="article-layout"><aside class="toc" aria-label="On this page"><p class="eyebrow">On this page</p><a href="#before-you-start">Before you start</a><a href="#learning-path">Your learning path</a><a href="#ai-learning-path">Explore with your AI agent</a><a href="#inspection-test-build">Measure shape and quantitative fields</a><a href="#example-files">Download the examples</a><a href="#checkpoints">How to use the checkpoints</a></aside><article class="prose">
+      <div class="notice" data-current-workspace><strong>This guide follows the 0.10.0 source interface.</strong> Use the four tabs in the single Tools pane: Molecule, Fields, Surfaces and Appearance. The published 0.8.0 Mac download has the earlier layout and lacks the new scientific-inspection tools. <a href="reference.html#workspace">Find your way around the current workspace →</a></div>
       <h2 id="before-you-start">Before you start</h2>
-      <p>Use the <a href="install.html">EigenVista 0.8.0 Mac preview</a> for these lessons. Open the downloaded example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the installed app runs the local molecular workflows.</p>
+      <p>These GUI instructions follow the current 0.10.0 source build and its four-tab Tools pane. The published <a href="install.html">0.8.0 Mac download</a> supports the first four workflows with earlier panel navigation; measurements, SES/SAS and quantitative analysis require a matching newer build. Open example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the app runs the local workflows.</p>
       <p>Start with the first lesson if you are new to the viewport. Then choose the kind of data you work with. Keep the original inputs and save your work to new <code>.eigenvista</code> files.</p>
 
       <h2 id="learning-path">Your learning path</h2>
@@ -38,6 +39,15 @@
         <li><a href="ai-tutorial-representations.html">Find the assembly's shape</a>: trace, tube, ribbon and cartoon views, with atomic detail when you need it.</li>
       </ol>
 
+      <h2 id="inspection-test-build">Measure shape and quantitative fields</h2>
+      <div class="notice"><strong>These three lessons require the 0.10.0 unreleased test build.</strong> They are not included in the published 0.8.0 download. They can be followed in the GUI or by giving the ordinary-language prompts to a connected agent.</div>
+      <ol>
+        <li><a href="tutorials-geometry.html">Measure, label and keep the geometry</a>: ordered picks, a real carbon–carbon distance, torsions, annotated PNG/CSV and a ligand-neighborhood extension.</li>
+        <li><a href="tutorials-molecular-surfaces.html">Compare solvent-accessible and excluded shape</a>: explicit radii/probe/spacing, SAS versus SES, shader targets and cached reopen.</li>
+        <li><a href="tutorials-quantitative-fields.html">Inspect an orbital quantitatively</a>: probes, a true plane with contours, fixed units/range, bond profiles and exported numerical evidence.</li>
+      </ol>
+      <p>The <a href="reference-inspection.html">scientific-inspection manual</a> explains the controls, scientific meaning, save/export behavior and limits.</p>
+
       <h2 id="example-files">Download the examples</h2>
       <div class="table-wrap"><table>
         <thead><tr><th scope="col">File</th><th scope="col">What it contains</th><th scope="col">Lesson</th></tr></thead>
@@ -52,8 +62,8 @@
 
       <h2 id="checkpoints">How to use the checkpoints</h2>
       <p>Each lesson gives an expected result before the next action. Wait for the footer’s completed result when a calculation is running. A calculation’s live phase percentage is not a whole-job completion indicator. <strong>Cancel</strong> retains previously completed surfaces.</p>
-      <p>If your controls differ, check the installed version and expand the relevant sidebar heading. Use <strong>Fit scene</strong> if an object appears missing. The <a href="reference.html">user reference</a> covers the complete controls and current limits; the <a href="gallery.html">gallery</a> shows real application captures.</p>
+      <p>If your controls differ, check the installed version, choose the pane tab and expand the relevant widget. In the current source, Molecule holds structure and measurements, Fields holds quantum rendering and quantitative inspection, Surfaces holds molecular shape and saved meshes, and Appearance holds palettes, AO and shaders. Use <strong>Fit scene</strong> if an object appears missing. <a href="reference.html#workspace">Tour the workspace</a> or browse the <a href="gallery.html">real application captures</a>.</p>
     </article></div></main>
-<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span>v0.8.0 / DEVELOPMENT PREVIEW</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#citation">Cite EigenVista</a><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span data-application-status>v0.10.0 / UNRELEASED TEST BUILD</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#citation">Cite EigenVista</a><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
 <dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
 </body></html>
