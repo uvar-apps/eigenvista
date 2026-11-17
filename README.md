@@ -6,9 +6,9 @@ EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**Source version: 0.10.0 — development preview.** Published binaries remain at 0.8.0.
+**Version 0.10.0 — experimental development preview for Apple Silicon Macs.**
 
-**[Download published 0.8.0 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)** ·
+**[Download 0.10.0 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
@@ -55,7 +55,7 @@ imports.
 
 ## A wider workspace and scientific inspection
 
-The current source uses a single resizable tools pane, with four tabs:
+EigenVista 0.10.0 uses a single resizable tools pane, with four tabs:
 **Molecule**, **Fields**, **Surfaces** and **Appearance**. Put it on either side,
 widen it to let widgets flow into two columns, or hide it to reclaim the view.
 Zen mode removes the surrounding interface; fullscreen is a separate action.
@@ -75,8 +75,8 @@ choose an orbital and **Plane / contours**, then **Create plane**. The color bar
 reports signed orbital amplitude; choose an electron-density field for density.
 Read the [user guide](docs/user-guide.md) for probes, contours and line profiles.
 
-These additions are **not included in the published 0.8.0 download**. Use a
-matching source/test build. Read the [0.10.0 source notes](docs/releases/0.10.0.md).
+These additions are included in the **0.10.0 Mac download** and its bundled AI
+connector. Read the [0.10.0 release notes](docs/releases/0.10.0.md).
 The [workspace design](docs/design/2026-11-17-simple-workspace-pane.md)
 records the approved layout; [handoff](docs/handoff.md) records current
 validation and delivery. The local `v0.9.0` tag remains the earlier scientific
@@ -84,7 +84,7 @@ inspection checkpoint.
 
 ## Start here
 
-The latest published release is **0.8.0**, an experimental **Apple Silicon Mac** preview.
+The latest release is **0.10.0**, an experimental **Apple Silicon Mac** preview.
 The download includes the application, examples, shader presets, palettes,
 converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
 [installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
@@ -113,9 +113,9 @@ documentation and gallery.
 
 ## Cite EigenVista
 
-For the 0.10.0 source, [CITATION.cff](CITATION.cff) uses the
+For version 0.10.0, [CITATION.cff](CITATION.cff) uses the
 [project concept DOI](https://doi.org/10.5281/zenodo.24246123). A version-specific
-0.10.0 DOI will be added when supplied. The published 0.8.0 citation remains:
+0.10.0 DOI will be added when supplied. The historical 0.8.0 citation remains:
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
 (Version 0.8.0) [Computer software]. Zenodo.
@@ -146,7 +146,7 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Current source:** version **0.10.0**, a development preview, combines the wider
+**Current release:** version **0.10.0**, a development preview, combines the wider
 workspace with the scientific-inspection workflows above. See
 [0.10.0 notes](docs/releases/0.10.0.md) and
 [current status](docs/status.md#source-version-0100) for qualification and delivery.
@@ -270,9 +270,9 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.8.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)
+The [0.10.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)
 provides the rebuilt ZIP, checksum and build metadata. Check
-[status](docs/status.md#source-version-080) for verified source, SHA256 and local
+[status](docs/status.md#source-version-0100) for verified source, SHA256 and local
 verification evidence. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
 retains its original verified package; older releases are not updated in place.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)

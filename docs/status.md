@@ -12,6 +12,15 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 <a id="source-version-0100"></a>
 
+### Mac package 0.10.0 — release preparation, 17 November 2026
+
+The user now explicitly requires rebuilt latest-version Mac downloads (#90).
+This supersedes the earlier source-tag-only scope. Correct bundled guides, build
+from clean source with unchanged qualified runtime, audit the actual ZIP and
+exercise its packaged launcher/helper and GUI before publication. Preserve the
+existing v0.10.0 tag. Artifact and final publication identities will be recorded
+here; the earlier diagnostic build was intentionally stopped, not passed.
+
 ### Source update 0.10.0, 17 November 2026 — delivered
 
 The user approved the simpler workspace and authorized complete documentation/

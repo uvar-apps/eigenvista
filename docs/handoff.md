@@ -1,5 +1,21 @@
 # Development handoff
 
+## Mac package 0.10.0 — authorized follow-up, 17 November 2026
+
+The user explicitly requires the downloadable Mac package updated to the latest
+version. Track [#90](https://github.com/uvar-apps/eigenvista/issues/90): rebuild
+clean optimized app/converter/ZIP, independently audit it, test the actual
+extracted packaged launcher/helper and GUI, publish a GitHub release and update
+website/download facts. Keep the existing `v0.10.0` tag unchanged. All work is in
+EigenVista with repository-local temporary storage; no application CI.
+
+Bundled guides/skill references are being corrected before the final clean
+package snapshot so the delivered app describes its own features accurately.
+The first diagnostic package run was intentionally stopped during Rust tests;
+its staging/log remain under `tmp/release-0.10.0/`. It is not a qualified build.
+The previous source-tag delivery below remains historical. Until the new
+artifacts and publication are verified, the public download is still 0.8.0.
+
 ## Approved 0.10.0 source update — delivered, 17 November 2026
 
 The user tested and approved the simpler workspace for

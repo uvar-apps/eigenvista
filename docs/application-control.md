@@ -20,12 +20,12 @@ The additive palette/biological-presentation work in
 catalog to 28 methods in the published 0.8.0 release. Discover the connected instance's catalog before using
 these additions; an older source-built instance may lack them.
 
-**Unreleased 0.10.0 extension:** `codex/scientific-inspection` adds the geometry,
-SES/SAS and quantitative-field methods documented below (#83–#86). Published
-0.8.0 downloads do not have these methods. Use the matching 0.10.0 test
-binary/helper and the connected instance's
+**Version 0.10.0 extension:** the Mac package includes the geometry,
+SES/SAS and quantitative-field methods documented below (#83–#86). Older
+0.8.0 downloads do not have these methods. Use the matching 0.10.0
+app/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
-establish availability. No PR/merge/release is implied by this reference.
+establish availability.
 
 The default pane only changes presentation: the same controls use this service.
 Fields → Quantitative field inspection maps to the probe/plane/profile commands,
@@ -42,7 +42,7 @@ the request into these methods without asking the user to learn method names.
 
 The connector adds no embedded AI console, model client, API-key requirement or
 general script runtime. An external agent supplies its own model and tools;
-the unreleased scientific features also have normal GUI controls.
+the 0.10.0 scientific features also have normal GUI controls.
 The [external-agent skill](../skills/eigenvista-control/SKILL.md) describes how to
 use this interface. The existing `eigenvista-convert` CLI remains a separate
 document converter.
@@ -186,7 +186,7 @@ isolation, selected-residue count, bounded chain styles/count, component styles
 and visible-atom count. It does not return per-atom visibility, residue selections
 or the focus atom-index array. Record requested residue-range endpoints separately
 if they will be needed to recreate the presentation.
-The unreleased extension additionally reports bounded `inspection` state:
+The 0.10.0 extension additionally reports bounded `inspection` state:
 `pickEnabled`, `selectedCount`, up to 256 `orderedAtoms`, `measurementCount`,
 `molecularSurfaceCount`, `analysisCount` and typed `lastPick`. Page source identities/selections
 through the dedicated methods instead of expecting scientific arrays in state.
@@ -227,7 +227,7 @@ rules below. Results may include additional bounded metadata.
 | `surfaces.set_visibility` | `surfaceId`, `visible` | Applied visibility/revision |
 | `surfaces.remove` | `surfaceId` | Removal/revision |
 | `scene.set` | Any supported appearance patch below | Applied view/session settings and revision |
-| `shader.apply` | `preset: "surface-clip" | "x-ray"`, `target?` (`"all"`; unreleased: one QC/molecular surface ID), `uniforms?`, `transparency?` | Applied shader metadata/revision |
+| `shader.apply` | `preset: "surface-clip" | "x-ray"`, `target?` (`"all"`; 0.10.0: one QC/molecular surface ID), `uniforms?`, `transparency?` | Applied shader metadata/revision |
 | `shader.set_uniforms` | `uniforms`, `target?` as above, `transparency?` | Applied declared uniforms/revision; omitted target retains the applied target |
 | `shader.clear` | `{}` | Cleared shader/revision |
 | `camera.get` | `{}` | `{revision,position,target,up}` |
@@ -351,7 +351,9 @@ path as normal PNG export, including restoration after transparent capture.
 It waits for accepted React/viewport state instead of treating a queued setter
 as a completed render.
 
-## Unreleased scientific inspection API
+<a id="unreleased-scientific-inspection-api"></a>
+
+## Scientific inspection API (0.10.0)
 
 All operations below use the same visible application state as their GUI
 counterparts. Coordinates and original atom/residue indices are **bohr and
@@ -441,7 +443,7 @@ radius fallback or atom omission occurs. Cavities are kept; coarsening, smoothin
 and decimation are disabled. Shaders and surface appearance reuse existing
 operations; atom/bond AO remains separate. Save caches the geometry/provenance.
 
-In this unreleased extension, `shader.apply` can target `all` or one returned
+In this 0.10.0 extension, `shader.apply` can target `all` or one returned
 quantum/molecular surface ID; unknown IDs fail with `not_found`.
 `shader.set_uniforms` preserves the active target when omitted. Surface-list
 warning previews are bounded; use `molecularSurfaces.warnings` for complete,
@@ -533,7 +535,7 @@ the document revision. Current native persistence is unchanged; a native Save
 is not a promise to persist every transient camera/AO/shader/background setting.
 
 `field.preview`, `surfaces.generate`, sampling-dependent `field.select`, and the
-unreleased `selection.neighborhood`, `molecularSurfaces.generate`, `analysis.create`
+0.10.0 `selection.neighborhood`, `molecularSurfaces.generate`, `analysis.create`
 return `{jobId,status:"accepted"}`. Acceptance is not completion. `job.get`
 returns `jobId`, `operation`, `status`, optional `progress`, and a terminal
 `result` or structured `error`. Status is `accepted`, `running`, `completed`,
@@ -561,7 +563,7 @@ are rejected. Existing export paths are probed without blocking on a FIFO and
 must still satisfy the no-clobber policy.
 
 All control writes are **atomic no-clobber**: choose a new `.eigenvista`, `.png`
-or (in the unreleased extension) `.csv`
+or (in the 0.10.0 extension) `.csv`
 filename. `overwrite: true` is rejected even if a caller supplies it intentionally.
 Native document writes decode/validate the encoded archive before publication;
 PNG writes validate the PNG structure/checksums. CSV accepts bounded generated

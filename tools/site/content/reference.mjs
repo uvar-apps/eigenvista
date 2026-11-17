@@ -12,7 +12,7 @@ export default [
     number: "03",
     body: `
 <div class="prose">
-  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference covers the <strong>${application.version} unreleased source build</strong>, including the four-tab workspace and <a href="reference-inspection.html">scientific inspection</a>. The published Mac download is still <strong>${release.version}</strong>; its earlier layout and tools differ. Use the <a href="install.html">installation guide</a> for that published app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example and a matching build.</p>
+  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference covers <strong>EigenVista ${application.version}</strong>, including the four-tab workspace and <a href="reference-inspection.html">scientific inspection</a>. The <strong>${release.version} Mac download</strong> includes these tools and its AI connector. Start with the <a href="install.html">installation guide</a> or a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -22,7 +22,7 @@ export default [
     <li><a href="reference-fields.html">Orbitals, densities, and sampled fields</a> — generate signed surfaces, browse several orbitals, compare render modes, and understand resolution and caching.</li>
     <li><a href="reference-structures.html">Biological structures</a> — color chains and secondary structure, show components, isolate a chain, select residue ranges, and use protein depictions.</li>
     <li><a href="ai.html">AI-assisted viewing</a> — connect your external coding agent, describe a molecular view, and keep exported figures and native documents.</li>
-    <li><a href="reference-inspection.html">Scientific inspection — ${application.version} unreleased test build</a> — measurements and labels, ligand neighborhoods, SES/SAS shape, numerical probes, planes/contours and profiles.</li>
+    <li><a href="reference-inspection.html">Scientific inspection — ${application.version}</a> — measurements and labels, ligand neighborhoods, SES/SAS shape, numerical probes, planes/contours and profiles.</li>
   </ul>
 
   <h2 id="workspace">The application workspace</h2>
@@ -159,7 +159,7 @@ export default [
   <p><strong>Cancel</strong> stops that queue's pending work and retains completed results. Closing the conversion window preserves them in memory; <strong>Clear</strong> discards them. Saved/downloaded result bytes are released. Unwritten results do not survive closing the application. Conversion preserves supplied fields and existing native meshes but does not generate new surfaces.</p>
 
   <h2 id="saving">Save, reopen, and share</h2>
-  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. The current source also retains named selections, labels/measurements, SES/SAS meshes and accepted quantitative field definitions/caches. A matching installation can reopen results without their original inputs or silent recalculation; the published 0.8.0 reader cannot open documents requiring these newer capabilities.</p>
+  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. Version 0.10.0 also retains named selections, labels/measurements, SES/SAS meshes and accepted quantitative field definitions/caches. A matching installation can reopen results without their original inputs or silent recalculation; older 0.8.0 readers cannot open documents requiring these newer capabilities.</p>
   <ol>
     <li>Generate any meshes you want to keep, check visibility and appearance, and choose <strong>Save</strong>.</li>
     <li>On desktop, choose a destination. Cancelling leaves the document unsaved. In a browser, confirm the requested download completed.</li>
@@ -211,7 +211,7 @@ eigenvista-convert --help</code></pre>
       <tr><th scope="row">Inspect a saved mesh</th><td>Click it to show its label and triangle count.</td></tr>
     </tbody>
   </table></div>
-  <p>Tab to toolbar buttons and activate with Enter or Space. Hover an icon to read its name. The published 0.8.0 app displays picked information; the <a href="reference-inspection.html#measure">unreleased scientific-inspection test build</a> also supports distance, angle and signed-torsion measurements. Neither modifies molecular coordinates. The camera is not saved in <code>.eigenvista</code>.</p>
+  <p>Tab to toolbar buttons and activate with Enter or Space. Hover an icon to read its name. The app displays picked information and supports <a href="reference-inspection.html#measure">distance, angle and signed-torsion measurements</a>. Neither modifies molecular coordinates. The camera is not saved in <code>.eigenvista</code>.</p>
 
   <h2 id="representations">Molecular representations</h2>
   <p>Choose <strong>Representation</strong> in <strong>Molecule → Molecular data</strong>. The global choice is saved with the document.</p>
@@ -271,7 +271,7 @@ eigenvista-convert --help</code></pre>
     <li>Or choose <strong>Export image with transparent background</strong> for <code>eigenvista-view-transparent.png</code>. Empty areas are transparent; antialiased edges and translucent surfaces retain fractional alpha.</li>
     <li>Confirm the download completed, then open the PNG in an image viewer or place the transparent version on your intended background.</li>
   </ol>
-  <p>Both actions capture the current rendered viewport after zooming, resizing, or an idle period. Toolbar/status overlays are excluded. The <a href="reference-inspection.html">unreleased scientific-inspection test build</a> additionally includes scientific labels, measurement monitors and visible numerical keys in normal and transparent images. Transparent export leaves the selected background visible in the app. Exports include the current field mode and AO; they are images, not saved scientific documents. Use Save separately to retain data.</p>
+  <p>Both actions capture the current rendered viewport after zooming, resizing, or an idle period. Toolbar/status overlays are excluded. Exports additionally include <a href="reference-inspection.html">scientific labels, measurement monitors and visible numerical keys</a> in normal and transparent images. Transparent export leaves the selected background visible in the app. Exports include the current field mode and AO; they are images, not saved scientific documents. Use Save separately to retain data.</p>
   <p>If an export fails, its error appears without changing the molecular document; try the export again. PNG files use the app or browser’s download mechanism. Check that the file has finished downloading before closing the window.</p>
 
   <h2 id="shaders">Custom surface shaders</h2>

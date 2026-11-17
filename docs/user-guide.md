@@ -10,22 +10,22 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version **0.10.0 (unreleased)**, an experimental
+This guide describes version **0.10.0**, an experimental
 development preview. Scientific calculations and rendering have targeted tests,
 but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
 
-**Unreleased test-build additions:** the scientific-inspection section below
-describes `codex/scientific-inspection`: measurements and labels, SES/SAS
-molecular surfaces, and quantitative field inspection. These additions are not
-in the published 0.8.0 download. Use the matching 0.10.0 test build. An AI assistant should
-confirm which features the connected application actually provides.
+**New in 0.10.0:** measurements and labels, ligand neighborhoods, SES/SAS
+molecular surfaces, and quantitative field inspection are included in the Mac
+package and its AI connector. Older 0.8.0 apps do not include them. An AI
+assistant should confirm which features the connected application provides.
 
 Version 0.8.0 introduced optional AI-enabled viewing through your external coding
 agent. The Mac app bundles its connection helper, launcher, examples and
 palettes; no source checkout or compiler is required. Start with the
 [connector guide](ai-connector.md) and [0.8.0 release notes](releases/0.8.0.md).
-See [current status](status.md#source-version-080) for release qualification.
+See [current status](status.md#source-version-0100) and the
+[0.10.0 notes](releases/0.10.0.md) for current release qualification.
 
 Version 0.7.2 added scene background controls and transparent PNG export
 ([#73](https://github.com/uvar-apps/eigenvista/issues/73),
@@ -92,11 +92,11 @@ are not implemented.
 
 ## The workspace
 
-The current source build opens with one wide tools pane, initially **480 px**
+EigenVista 0.10.0 opens with one wide tools pane, initially **480 px**
 wide on the **right**. This is the approved default workspace
 ([#88](https://github.com/uvar-apps/eigenvista/issues/88)); no special preview URL
-is needed. Published 0.8.0 downloads retain their earlier two-sidebar layout and
-do not include the scientific-inspection controls described below.
+is needed. Older 0.8.0 apps retain their earlier two-sidebar layout and lack
+the scientific-inspection controls described below.
 
 Choose **Left** or **Right** using **Position** in its header. Four tabs sit at the top of the
 pane: **Molecule**, **Fields**, **Surfaces** and **Appearance**. Drag the boundary
@@ -120,7 +120,7 @@ saved molecular data.
 
 See the [simple-pane guide](design/2026-11-17-simple-workspace-pane.md)
 for the design, retained behavior and validation boundaries. The following
-navigation describes the current source build.
+navigation describes the 0.10.0 Mac app.
 
 ## Finding your way around
 
@@ -175,7 +175,7 @@ for additional operating systems.
   keyboard users can Tab to either button and activate it with Enter or Space.
   On a touchscreen, one finger rotates and two fingers pinch/pan.
 - Click an atom to see its element/index and coordinates in angstroms. Click
-  a mesh to see its label and triangle count. The unreleased test build also has
+  a mesh to see its label and triangle count. Version 0.10.0 also has
   ordered selection and measurement controls described below.
 - **Fit scene** and **Reset view** currently do the same thing: fit all displayed
   objects and restore the default viewing direction.
@@ -190,8 +190,7 @@ for additional operating systems.
   retain their alpha. The selected background remains visible in the application.
 
 Both export actions capture the current camera view, including after idle
-periods, zooming or resizing. Toolbar/status overlays are excluded. In the
-unreleased test build, scientific labels, measurement monitors and visible
+periods, zooming or resizing. Toolbar/status overlays are excluded. Scientific labels, measurement monitors and visible
 field keys are part of the exported figure, including transparent PNGs.
 A failed export reports an error without replacing the document;
 you can retry an encoding failure. The actions use the browser/WebView download
@@ -268,8 +267,8 @@ OBJ, atom-color text files, direct ORCA output/GBW, and Gaussian logs are **not
 implemented**. PDB, XYZ, and mmCIF/BinaryCIF files correctly show
 **No quantum fields**; coordinates alone cannot supply
 orbitals or a density matrix.
-They still support structure views and, in the unreleased test build, geometry
-measurements and coordinate-derived SES/SAS molecular surfaces.
+They still support structure views, geometry measurements and coordinate-derived
+SES/SAS molecular surfaces.
 
 ## Biological structure views
 
@@ -366,10 +365,12 @@ a message explaining that chain and protein views are unavailable. Keep the
 original source: this is still a selected-structure importer, not an archive of
 every deposited annotation, model or conformer.
 
-## Scientific inspection in the unreleased test build
+<a id="scientific-inspection-in-the-unreleased-test-build"></a>
 
-These controls require the matching 0.10.0 scientific-inspection test build, not the
-published 0.8.0 package. They work with the original loaded atoms: hiding a chain
+## Scientific inspection
+
+These controls are included in EigenVista 0.10.0 and its bundled AI connector.
+They work with the original loaded atoms: hiding a chain
 or changing a representation does not renumber the source atoms or alter the
 scientific data. Your external AI assistant can perform the same operations;
 describe the scientific result you want in ordinary language.
@@ -974,7 +975,7 @@ representation. Copy that file to another matching preview installation to
 view its saved meshes without the original input or recomputation. There is
 no separate OBJ-plus-metadata export or external mesh linking yet.
 
-In the unreleased test build, Save additionally keeps named atom sets, labels,
+Save additionally keeps named atom sets, labels,
 ordered measurement definitions, SES/SAS meshes/provenance and quantitative
 field definitions/caches/keys. Use a matching reader: older 0.8.0 downloads reject
 these new required capabilities rather than silently dropping them. Active
@@ -1082,8 +1083,9 @@ Connector-enabled binary packages offer optional external control for coding
 agents and other harnesses. The installed app includes a prebuilt connection
 helper and portable agent instructions; no source checkout, compiler or development
 server is needed. It operates the same document and renderer with explicitly
-chosen file access. Version 0.8.0 includes this connector; older 0.7.2 packages
-do not. The normal interface is unchanged.
+chosen file access. The connector has shipped since version 0.8.0; the current 0.10.0 package also
+includes scientific inspection. Older 0.7.2 packages do not include it. The
+normal interface remains available.
 The [connector guide](ai-connector.md) covers installation, a ready-to-use agent
 setup prompt and interaction with Codex, Claude Code, Pi, OpenCode or another
 local agent. Follow the four [website tutorials](https://uvar-apps.github.io/eigenvista/ai.html)

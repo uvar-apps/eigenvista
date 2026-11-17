@@ -2,9 +2,9 @@ import { application } from "../application.mjs";
 import { release } from "../release.mjs";
 import { workspaceFigure } from "./workspace.mjs";
 
-const development = `<div class="notice" data-unreleased-inspection><strong>EigenVista ${application.version} · Unreleased source build.</strong> The four-tab workspace and scientific-inspection controls described here are not included in the published ${release.version} download. Use a matching current build and have your agent confirm its available features. This guide does not announce a new downloadable package.</div>`;
+const development = `<div class="notice" data-unreleased-inspection><strong>EigenVista ${application.version} · Scientific inspection.</strong> The ${release.version} Mac download includes the four-tab workspace and the scientific-inspection controls described here, through both the GUI and its bundled AI connector. If you are using an older app, update it before following these workflows.</div>`;
 const figure = (file, alt, caption) =>
-  `<figure class="plate"><a href="assets/inspection/${file}.webp"><img src="assets/inspection/${file}.webp" width="1650" height="1232" loading="lazy" alt="${alt}"></a><figcaption>${caption} Actual unreleased-app export; original proportions retained. <a href="assets/inspection/provenance.json">Capture provenance</a>.</figcaption></figure>`;
+  `<figure class="plate"><a href="assets/inspection/${file}.webp"><img src="assets/inspection/${file}.webp" width="1650" height="1232" loading="lazy" alt="${alt}"></a><figcaption>${caption} Actual pre-release app export; original proportions retained. <a href="assets/inspection/provenance.json">Capture provenance</a>.</figcaption></figure>`;
 const prompt = (text) => `<pre><code>${text}</code></pre>`;
 
 export default [
@@ -14,7 +14,7 @@ export default [
     searchTitle:
       "Measurements, SES SAS molecular surfaces, quantitative field probes slices profiles",
     description:
-      "Unreleased EigenVista test-build manual: select atoms, measure geometry, inspect ligand neighborhoods, create SES/SAS surfaces and analyze scalar fields quantitatively.",
+      "EigenVista scientific-inspection manual: select atoms, measure geometry, inspect ligand neighborhoods, create SES/SAS surfaces and analyze scalar fields quantitatively.",
     section: "reference",
     number: "03.F",
     body: `${development}
@@ -70,7 +70,7 @@ ${workspaceFigure("homo-analysis-zen", "The same C7H10 signed HOMO section in Ze
 <p><strong>Numerical samples and provenance</strong> and <strong>Export analysis CSV</strong> keep coordinates, values/units, domain status, method and source identity. CSV reports coordinates/profile distances in Å and values in the chosen display/export unit. Finite numerical data can remain inspectable/exportable when a particular 3D depiction reaches its graphics-precision limit; read the displayed explanation.</p>
 
 <h2 id="keep">Keep the scientific result</h2>
-<p>Save retains named selections, label and measurement definitions, SES/SAS meshes with provenance, and accepted numerical definitions, caches, interpretation and local appearance. Reopening restores cached fields and meshes without silently recomputing them. Use a matching test-build reader: older 0.8.0 packages reject the new required capabilities.</p>
+<p>Save retains named selections, label and measurement definitions, SES/SAS meshes with provenance, and accepted numerical definitions, caches, interpretation and local appearance. Reopening restores cached fields and meshes without silently recomputing them. Use a 0.10.0 reader: older 0.8.0 packages reject the new required capabilities.</p>
 <p>Camera, active pick mode, biological filters, palette, background, AO and custom shader settings remain session choices. Save the document and export the figure separately. PNGs include scientific labels/monitors/visible keys; toolbar/status overlays stay out.</p>
 
 <h2 id="limits">Work within the bounded preview</h2>
@@ -90,7 +90,7 @@ ${workspaceFigure("homo-analysis-zen", "The same C7H10 signed HOMO section in Ze
 <p class="lede">A figure should tell you which atoms were measured and keep the numbers that support it. Start with one real carbon–carbon bond, then reuse the same selection.</p>
 ${figure("geometry-annotations", "C7H10 ball-and-stick structure with a measured carbon-carbon distance and a label on the bridge carbon", "The first two carbons of the 17-atom C₇H₁₀ example are about 1.525 Å apart. The bridge-carbon label targets atom 7; annotations are exported by the app.")}
 <h2 id="prepare">1. Open the example</h2>
-<p>Use the matching test build and <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a>. This is the same calculated example used by the orbital tutorials. For this lesson you need only its geometry. Preserve the input and use new names for output files.</p>
+<p>Use EigenVista 0.10.0 and <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a>. This is the same calculated example used by the orbital tutorials. For this lesson you need only its geometry. Preserve the input and use new names for output files.</p>
 <p>Choose <strong>Ball and stick</strong>. If a volume obscures the atoms, expand <strong>Fields → Quantitative field inspection</strong> and choose <strong>View meshes and analyses</strong>; hide any saved surfaces separately.</p>
 <h2 id="distance">2. Measure the C–C bond</h2>
 <ol><li>Open <strong>Molecule → Selections and measurements</strong>.</li><li>Enter <strong>1, 2</strong> in the atom-number box and choose <strong>Select atom numbers</strong>. Alternatively enable picking and click those atoms in order.</li><li>Expand <strong>Geometry measurements</strong>, choose <strong>Distance</strong>, name it <strong>C–C bond</strong>, and choose <strong>Add measurement</strong>.</li><li>Check a value near <strong>1.525 Å</strong> in the table and scene monitor. Rotating/zooming must not change it.</li></ol>
@@ -104,8 +104,8 @@ ${figure("geometry-annotations", "C7H10 ball-and-stick structure with a measured
 <p>With the <a href="downloads/1AON.cif" download>1AON example</a>, expand <strong>Ligands and neighborhoods</strong> and choose a particular ADP copy using its chain/residue identity. Start at <strong>4 Å</strong>, include complete residues, name the neighborhood and choose <strong>Show neighborhood</strong>.</p>
 <p>Hidden source atoms are searched too. Whole residues can extend beyond the radius because one atom brought their residue into the set. This is proximity, not a hydrogen-bond or affinity assignment. Use the new named set as a later surface input.</p>
 <h2 id="agent">Ask your agent instead</h2>
-${prompt("Use the scientific-inspection test build and the C7H10 example. Measure the distance between atoms 1 and 2, label atom 7 as the bridge carbon, and save an annotated transparent image, a measurement table and a new native document. Check the actual exported files and preserve the input.")}
-<p>Your agent handles the connection and file operations; you do not need programming commands or manual GUI steps. Follow the <a href="ai-install.html">installed-app connection guide</a> first, using the matching test binary for these unreleased features.</p>
+${prompt("Use EigenVista 0.10.0 and the C7H10 example. Measure the distance between atoms 1 and 2, label atom 7 as the bridge carbon, and save an annotated transparent image, a measurement table and a new native document. Check the actual exported files and preserve the input.")}
+<p>Your agent handles the connection and file operations; you do not need programming commands or manual GUI steps. Follow the <a href="ai-install.html">installed-app connection guide</a> first, using the current 0.10.0 Mac package.</p>
 <div class="next-step"><span>Next</span><a href="tutorials-molecular-surfaces.html">Compare molecular surfaces →</a><a href="reference-inspection.html#measure">Measurement reference →</a></div>
 `,
   },
@@ -120,7 +120,7 @@ ${prompt("Use the scientific-inspection test build and the C7H10 example. Measur
 <p class="lede">A molecular surface answers a geometric question about atoms and a solvent probe. Keep those choices explicit, and compare SAS with SES without confusing either with electron density.</p>
 ${figure("molecular-ses", "Translucent teal solvent-excluded surface around the full C7H10 structure, using the X-ray surface shader to reveal its atomic framework", "C₇H₁₀ SES with Bondi/Mantina radii, a 1.4 Å probe and 0.15 Å spacing, shown with an X-ray finish. This is coordinate-derived molecular shape, not an electron-density isosurface.")}
 <h2 id="prepare">1. Start with a manageable structure</h2>
-<p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in the matching test build. Its 17 atoms make a quick first comparison; the surface needs their coordinates/radii, not the file's quantum fields. PDB/XYZ/mmCIF structures can use the same controls.</p>
+<p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in EigenVista 0.10.0. Its 17 atoms make a quick first comparison; the surface needs their coordinates/radii, not the file's quantum fields. PDB/XYZ/mmCIF structures can use the same controls.</p>
 <p>Choose <strong>View meshes and analyses</strong> to remove a sampled volume, and hide unrelated saved quantum meshes. Keep the atomic framework visible.</p>
 <h2 id="ses">2. Generate the first SES</h2>
 <ol><li>Choose the <strong>Surfaces</strong> tab and expand <strong>Molecular surfaces</strong>.</li><li>Choose <strong>Solvent excluded (SES)</strong>, all source atoms, and <strong>Bondi / Mantina</strong> radii.</li><li>Start with a <strong>1.4 Å</strong> probe and <strong>0.5 Å</strong> spacing. Name the surface and choose <strong>Generate molecular surface</strong>.</li><li>Wait for completion and inspect the saved surface's scientific provenance. It should echo your kind, radii, probe and actual spacing.</li></ol>
@@ -139,7 +139,7 @@ ${workspaceFigure("crambin-shape-left", "The left-hand Surfaces pane with molecu
 <h2 id="radius-errors">If a radius or allocation is rejected</h2>
 <p>Some elements lack a value in a selected table. The app names the missing element; choose a suitable table or provide an explicit positive radius with defensible provenance. Do not silently omit it or substitute a display radius. If the request exceeds memory/native limits, choose an explicitly coarser spacing or smaller source selection.</p>
 <h2 id="agent">Ask your agent instead</h2>
-${prompt("Using the scientific-inspection test build, compare solvent-excluded and solvent-accessible surfaces for the complete C7H10 example. Use Bondi/Mantina radii, a 1.4 angstrom probe and 0.25 angstrom spacing. Keep both cached meshes, show one at a time from the same camera, apply the X-ray finish only to the SES, and save two images plus a new native document. Report the actual settings and any radius or memory errors.")}
+${prompt("Using EigenVista 0.10.0, compare solvent-excluded and solvent-accessible surfaces for the complete C7H10 example. Use Bondi/Mantina radii, a 1.4 angstrom probe and 0.25 angstrom spacing. Keep both cached meshes, show one at a time from the same camera, apply the X-ray finish only to the SES, and save two images plus a new native document. Report the actual settings and any radius or memory errors.")}
 <div class="next-step"><span>Next</span><a href="tutorials-quantitative-fields.html">Put numbers on an orbital →</a><a href="reference-inspection.html#shape">Surface reference →</a></div>
 `,
   },
@@ -154,7 +154,7 @@ ${prompt("Using the scientific-inspection test build, compare solvent-excluded a
 <p class="lede">A colored surface suggests shape. A probe, slice and line profile tell you what values are actually there.</p>
 ${figure("orbital-slice", "An oblique view of a signed HOMO slice with the molecular framework, contour lines and a numerical amplitude key", "C₇H₁₀ HOMO (MO 26), z = 0 bohr: 14 × 12 bohr plane, 192 × 192 samples, fixed ±0.06 bohr⁻³ᐟ² range and contours at −0.04, −0.02, +0.02 and +0.04 bohr⁻³ᐟ².")}
 <h2 id="field">1. Select a field with known provenance</h2>
-<p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in the matching test build. Expand <strong>Fields → Quantitative field inspection</strong> and choose the example's <strong>HOMO, MO 26</strong>, as the analysis field.</p>
+<p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in EigenVista 0.10.0. Expand <strong>Fields → Quantitative field inspection</strong> and choose the example's <strong>HOMO, MO 26</strong>, as the analysis field.</p>
 <p>Inspect <strong>Field meaning and units</strong>: this is the real orbital amplitude <strong>ψ</strong>, with values expressed in bohr⁻³ᐟ² under the supplied basis/coefficients. The signs are orbital phase, not positive and negative charge. Total electron density is a different, nonnegative field, <strong>ρ = Σ n<sub>i</sub>|ψ<sub>i</sub>|²</strong>, in electrons/bohr³. This tutorial samples the supplied HOMO; it does not calculate a new wavefunction or a density from its color.</p>
 <h2 id="probe">2. Read one source point</h2>
 <p>Choose <strong>Point probe</strong>. Enter a coordinate with an explicit Å/bohr choice, or select exactly one atom and choose selected source atoms. Create the result and inspect its numerical value, unit and sampling method. Moving the camera or changing 3D preview resolution must not change the number.</p>
@@ -172,7 +172,7 @@ ${figure("orbital-slice", "An oblique view of a signed HOMO slice with the molec
 <h2 id="keep">6. Save a reproducible numerical result</h2>
 <p>Export a PNG with its visible numeric key and save a new native document. Reopen it to confirm definitions, accepted numerical caches and interpretation survive without silent recalculation. Use a fixed range for comparisons and record the camera/session choices separately.</p>
 <h2 id="agent">Ask your agent instead</h2>
-${prompt("In the scientific-inspection test build, inspect the HOMO of the C7H10 example. Make an XY section centered at the origin, 14 by 12 bohr with 192 by 192 samples. Use a fixed amplitude range from minus 0.06 to plus 0.06 and contours at plus and minus 0.02 and 0.04, with units visible. Also plot 257 values along the bond between atoms 1 and 2. Save an image with the key, both numerical tables and a new native document. Preserve the source and verify the saved outputs.")}
+${prompt("In EigenVista 0.10.0, inspect the HOMO of the C7H10 example. Make an XY section centered at the origin, 14 by 12 bohr with 192 by 192 samples. Use a fixed amplitude range from minus 0.06 to plus 0.06 and contours at plus and minus 0.02 and 0.04, with units visible. Also plot 257 values along the bond between atoms 1 and 2. Save an image with the key, both numerical tables and a new native document. Preserve the source and verify the saved outputs.")}
 <div class="next-step"><span>Continue</span><a href="reference-inspection.html#quantitative">Quantitative reference →</a><a href="ai-guide.html">More ordinary-language requests →</a></div>
 `,
   },

@@ -1,18 +1,16 @@
 # macOS tester ZIP
 
-The current source is **0.10.0 (unreleased)**. Updating its version does not
-publish a download or rebuild an existing package. The published 0.8.0 artifacts
-remain unchanged and do not include the scientific-inspection additions.
-Use [status](status.md) to identify any separately rebuilt test artifact before
-sharing it; release publication requires its own authorization.
+The current release is **0.10.0**. Its rebuilt Mac package includes the approved
+workspace and scientific-inspection additions. Updating a source version alone
+does not rebuild an archive; follow [status](status.md) and the package's
+`BUILD-INFO.json` for the verified artifact identity. Older 0.8.0 artifacts remain
+historical and predate these additions.
 
 A newly built source package uses the approved **480 px** left/right tools pane
 with **Molecule**, **Fields**, **Surfaces** and **Appearance** tabs. Its widgets
 remain collapsible and reorderable; the header provides hide/show, Zen and
-fullscreen actions. This guide does not claim that published 0.8.0 ZIPs have
-that workspace or the newer scientific-inspection controls. Preparing the next
-source version also does not imply that a new native archive has been built or
-qualified. Follow the recorded artifact identity, not the current source label.
+fullscreen actions. Older 0.8.0 ZIPs have the earlier workspace. Follow the
+recorded artifact identity, not the current source label, when sharing a build.
 
 From the repository root, run:
 

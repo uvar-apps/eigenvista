@@ -13,22 +13,24 @@ provenance, Search Console ownership-tag maintenance and publication state.
 [Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the local AI
 connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
-Version 0.8.0 includes the packaged connector; the AI pages guide users from
-that installed binary. Older 0.7.2 packages predate control.
+Version 0.10.0 includes the packaged connector and scientific-inspection features;
+the AI pages guide users from that installed binary. The connector was introduced
+in 0.8.0; older 0.7.2 packages predate control.
 The published homepage hero highlights **AI-enabled viewing**, links directly to
-the AI overview, and names the compatible 0.8.0 package beside the callout.
+the AI overview, and names the compatible 0.10.0 package beside the callout.
 Keep that availability label aligned with the actual public release.
 
 The current source is **0.10.0**, merged through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89)
 and tagged `v0.10.0`. Its
 scientific-inspection manual, tutorials and workspace guide describe the new
-source build, beyond the published 0.8.0 download. Normal startup uses one wide,
+0.10.0 Mac package. Older 0.8.0 downloads predate these additions. Normal startup uses one wide,
 resizable left/right pane with Molecule, Fields, Surfaces and Appearance tabs,
 hide/reopen and Zen mode. Keep current instructions aligned with that default.
 Published download links, DOI and historical capture versions must continue to
 identify their actual artifacts. A source tag does not imply a new binary
-download. The current task authorizes PR merge and the Pages-only publisher,
-without a GitHub release or rebuilt redistributables.
+download. Follow-up #90 explicitly authorizes the rebuilt 0.10.0 Mac release,
+updated download metadata and the Pages-only publisher. Record measured artifact
+facts only after package qualification; preserve the existing source tag.
 
 The three `simple-*` workspace PNGs are real 0.9.0 captures of the approved workspace, retained
 with exact hashes and dimensions in media provenance. They illustrate the

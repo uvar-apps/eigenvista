@@ -51,6 +51,16 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Required local validation before pushing
 
+Current follow-up (#90): the user explicitly requires the downloadable Mac
+package to match 0.10.0. Build and qualify clean optimized redistributables,
+including the actual extracted packaged launcher/helper, publish the GitHub
+release and synchronize website/download facts. This supersedes the earlier
+source-tag-only scope below. Preserve `v0.10.0`; never retag it. Current package
+identity and publication evidence belong at the top of the living handoff/status.
+The source-tag update's full runtime qualification remains valid only while
+the recorded runtime/test hashes match; fresh packaging and extracted acceptance
+are independently required. No application CI or invented version DOI.
+
 User policy, 14 November 2026 (tracked by #68): **all relevant checks must pass
 locally before every push**, including feature branches, PR updates and releases.
 Do not push unvalidated changes or defer verification to GitHub. Resolve failures

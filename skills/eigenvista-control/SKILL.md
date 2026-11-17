@@ -16,16 +16,16 @@ but does not install the app, start a connection or register a skill with the
 chosen agent. Skill registration is optional and follows that agent's own
 mechanism. No additional MCP service or provider SDK is required.
 
-Use EigenVista 0.8.0 or newer, the first connector-enabled package. Older 0.7.2
-apps and tester ZIPs predate this package layout. If the bundled helper is absent or the connected app lacks
+Use the current EigenVista 0.10.0 package and its bundled helper. The connector
+was introduced in 0.8.0; older 0.7.2 apps and tester ZIPs predate this package
+layout. If the bundled helper is absent or the connected app lacks
 a requested capability, explain what is missing and obtain the appropriate
 prebuilt package within the user's authorization.
 
-The scientific-inspection extension is **unreleased in 0.10.0** on
-`codex/scientific-inspection`. Published 0.8.0 binaries lack its measurement,
-SES/SAS and quantitative-field operations. Discover the connected app's actual
-schemas and use a matching 0.10.0 test binary/helper; never infer these features
-from the version string alone.
+The scientific-inspection extension ships in **0.10.0**, including measurements,
+SES/SAS and quantitative-field operations. Older 0.8.0 binaries lack these
+operations. Discover the connected app's actual schemas and use the application
+and helper supplied together; never infer features from the version string alone.
 
 ## Work from the user's goal
 

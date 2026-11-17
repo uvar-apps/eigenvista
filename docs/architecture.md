@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the **unreleased 0.10.0 development preview**, including the shared
+This describes the **0.10.0 application preview**, including the shared
 application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
@@ -8,12 +8,12 @@ not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
-This source contains the **unreleased scientific-inspection implementation**
+Version 0.10.0 includes the **scientific-inspection implementation**
 ([Plan 009](../plans/009-scientific-inspection-implementation.md), #83–#86).
 Its selections/measurements/labels, SES/SAS meshes and quantitative field
-analyses are described below. Published 0.8.0 binaries predate them; the source
-now identifies itself as 0.10.0. Qualification evidence is tracked
-separately from the existing release; no merge/release is implied here.
+analyses are described below and ship in the 0.10.0 Mac package. Older 0.8.0
+binaries predate them. Read the living handoff for source, artifact identity
+and actual qualification boundaries.
 The [scientific-inspection decision](design/2026-11-16-scientific-inspection.md)
 records source identity, transport, scientific conventions and qualification boundaries.
 
@@ -95,7 +95,9 @@ The Rust workspace's six default members are core, format, import, converter,
 control and WASM. The desktop shell is a workspace member but requires an explicit
 workspace check or Tauri build. `cargo test` alone is not a desktop check.
 
-## Scientific inspection ownership (unreleased)
+<a id="scientific-inspection-ownership-unreleased"></a>
+
+## Scientific inspection ownership
 
 All GUI inspection controls use the same discovered application operations as
 the external connector. [Inspection schemas](../app/src/inspectionSchemas.ts)
@@ -171,7 +173,7 @@ capture port. API and toolbar PNG exports share the final-frame capture path.
 
 The #80 extension exposes palette load/reset and biological presentation through
 the same controller (28 methods in the published 0.8.0 API v1 catalog). The
-unreleased inspection extension remains additive in API v1; discover live
+0.10.0 inspection extension remains additive in API v1; discover live
 schemas rather than inferring a method count from the version. Palette loading uses the GUI's
 `parseAtomColors` parser and commits only a fully valid palette; native reads
 apply a 256 KiB limit before reserving the buffer. Palette and biological colors,
@@ -714,7 +716,7 @@ prepared arrays, ZIP output and unchanged decoder allocations remain; saved-sour
 validation still uses core's separate JSON-based hashing. The native benchmark
 and its measurement limits are documented in [development](development.md#native-encoding-measurements).
 
-The later unreleased inspection extension adds optional capability-tagged
+The later 0.10.0 inspection extension adds optional capability-tagged
 payloads under the same `[0,1]` container. It does not alter old documents' entry
 bytes or the established quantum hash algorithm. See
 [inspection capabilities](preview-format.md#scientific-inspection-capabilities-unreleased)

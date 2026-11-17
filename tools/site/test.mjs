@@ -7,6 +7,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { application } from "./application.mjs";
 import { release } from "./release.mjs";
 
+const published = application.version === release.version;
+assert.equal(application.status, published ? "published" : "unreleased", "Availability follows the verified package version");
+
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
@@ -129,8 +132,8 @@ for (const [engine, launcher] of [
         const response = await page.goto(base + file, { waitUntil: "load" });
         assert.equal(response.status(), 200, `${engine}/${width}/${file}`);
         assert.equal(await page.locator("h1").count(), 1);
-        assert.equal(await page.locator("[data-application-version]").textContent(), `${application.version} test build`);
-        assert.equal(await page.locator("[data-application-status]").textContent(), `v${application.version} / UNRELEASED TEST BUILD`);
+        assert.equal(await page.locator("[data-application-version]").textContent(), `${application.version}${published ? "" : " test build"}`);
+        assert.equal(await page.locator("[data-application-status]").textContent(), `v${application.version} / ${published ? "DEVELOPMENT PREVIEW" : "UNRELEASED TEST BUILD"}`);
         assert.equal(
           await page
             .getByRole("navigation", { name: "Main navigation" })
@@ -203,10 +206,15 @@ for (const [engine, launcher] of [
       assert.equal(await page.locator("[data-unreleased-inspection]").count(), 1);
       const notice = await page.locator("[data-unreleased-inspection]").textContent();
       assert(notice.includes(`EigenVista ${application.version}`));
-      assert(notice.includes(`not included in the published ${release.version} download`));
+      if (published) {
+        assert(notice.includes(`The ${release.version} Mac download includes the four-tab workspace and the scientific-inspection controls described here, through both the GUI and its bundled AI connector.`));
+        assert(!notice.includes(`not included in the published ${release.version} download`));
+      } else {
+        assert(notice.includes(`not included in the published ${release.version} download`));
+      }
       await allImages(page);
       if (file.startsWith("tutorials-")) {
-        const prompt = page.locator("pre code").filter({ hasText: "test build" });
+        const prompt = page.locator("pre code").filter({ hasText: "C7H10 example" });
         assert.equal(await prompt.count(), 1, `One usable ordinary-language task: ${file}`);
         const text = await prompt.textContent();
         assert(!/app\.state|analysis\.create|molecularSurfaces\.|expectedRevision/.test(text));
@@ -214,8 +222,13 @@ for (const [engine, launcher] of [
     }
     await page.goto(base);
     const development = page.locator("[data-current-development]");
-    assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
-    assert((await development.textContent()).includes(`published Mac download below remains ${release.version}`));
+    if (published) {
+      assert((await development.textContent()).includes(`${release.version} · Available for Mac.`));
+      assert((await development.textContent()).includes("The Mac download includes this workspace, the scientific tools and the AI connector."));
+    } else {
+      assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
+      assert((await development.textContent()).includes(`published Mac download below remains ${release.version}`));
+    }
     assert.equal(await development.getByRole("link").getAttribute("href"), "reference-inspection.html");
     assert.equal(await page.getByRole("link", { name: "Download for Mac" }).getAttribute("href"), `${release.base}${release.stem}.zip`);
     assert.deepEqual(await (await context.request.get(base + "application.json")).json(), application);

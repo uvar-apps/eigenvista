@@ -3,7 +3,7 @@
 This implementation is an experimental subset of the research proposal, not
 its frozen version-1 schema. New files use `format: eigenvista`,
 `version: [0, 1]`, a required polynomial feature (plus the biological and
-unreleased scientific-inspection features described below when present), and
+scientific-inspection features described below when present), and
 `coordinate_unit: bohr`. The exact model is defined in the
 [Rust core](../crates/eigenvista-core/src/model.rs).
 
@@ -116,10 +116,12 @@ settings and are not serialized. Protein depiction geometry is derived display
 data, not a saved quantum-field surface. Metadata does not enter scientific
 field hashes. See the [biological-view decision](design/2026-11-14-biological-structure-views.md).
 
-### Scientific inspection capabilities (unreleased)
+<a id="scientific-inspection-capabilities-unreleased"></a>
 
-The unreleased 0.10.0 `codex/scientific-inspection` test build adds three optional
-payloads. These are not understood by the published 0.8.0 reader. Matching
+### Scientific inspection capabilities (0.10.0)
+
+Version 0.10.0 adds three optional
+payloads. These are not understood by the older 0.8.0 reader. Matching
 capabilities, not the displayed version alone, establish support. The container
 version remains `[0,1]`; the application-version bump does not replace its
 explicit feature negotiation.

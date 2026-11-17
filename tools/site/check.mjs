@@ -15,6 +15,8 @@ const root = path.resolve(
 );
 const site = path.join(root, "site"),
   base = "https://uvar-apps.github.io/eigenvista/";
+const published = application.version === release.version;
+assert.equal(application.status, published ? "published" : "unreleased", "Availability follows the verified package version");
 // Captures keep the app identity they were actually made with as downloads advance.
 const capturedRelease = Object.freeze({
   version: "0.7.2",
@@ -89,7 +91,13 @@ for (const name of inspectionPages) {
   assert(html.has(name), `Complete inspection manual/tutorial route: ${name}`);
   const content = html.get(name);
   assertUserLanguage(name, content);
-  assert(content.includes("data-unreleased-inspection") && content.includes(`EigenVista ${application.version}`) && content.includes(`not included in the published ${release.version} download`), `New features must not masquerade as published: ${name}`);
+  assert(content.includes("data-unreleased-inspection") && content.includes(`EigenVista ${application.version}`), `Inspection availability and exact version: ${name}`);
+  if (published) {
+    assert(content.includes(`The ${release.version} Mac download includes the four-tab workspace and the scientific-inspection controls described here, through both the GUI and its bundled AI connector.`), `Released inspection tools are available in the actual package: ${name}`);
+    assert(!content.includes(`not included in the published ${release.version} download`), `No obsolete feature exclusion for the current package: ${name}`);
+  } else {
+    assert(content.includes(`not included in the published ${release.version} download`), `New source features must not masquerade as published: ${name}`);
+  }
   assert(!content.includes("test build still displays"), `Test-build identity must match source metadata: ${name}`);
   assert(!/\b[A]GENTS\.md\b|expectedRevision|fieldIds|read app\.state/.test(content), `No internal setup/API chores: ${name}`);
 }
@@ -272,12 +280,19 @@ assert.equal(
   application.version,
 );
 assert.equal(application.publishedVersion, release.version);
-assert.equal(application.status, "unreleased", "Source version is preparation for user testing, not a release");
-assert(html.get("index.html").includes("data-current-development") && html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
+assert(html.get("index.html").includes("data-current-development"), "Homepage explicitly explains current availability");
+if (published) {
+  assert(html.get("index.html").includes(`${release.version} · Available for Mac.`));
+  assert(html.get("index.html").includes("The Mac download includes this workspace, the scientific tools and the AI connector."));
+  assert(html.get("install.html").includes("The ZIP includes the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual."));
+  assert(html.get("about.html").includes(`Version ${application.version} has no supplied version-specific DOI yet`));
+} else {
+  assert(html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
+  assert(html.get("about.html").includes(`${application.version} test build is unreleased and has no version-specific DOI yet`));
+}
 assert(html.get("install.html").includes(`Published download: ${release.version}`));
-assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download remains the existing verified package");
-assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive, not the newer source"));
-assert(html.get("about.html").includes(`${application.version} test build is unreleased and has no version-specific DOI yet`));
+assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download identifies the verified package");
+assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive"), "Historical DOI remains attributed to its actual archive");
 assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
 const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),

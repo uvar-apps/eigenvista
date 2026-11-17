@@ -14,8 +14,8 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 Source version 0.10.0 implements [Plan 009](../plans/009-scientific-inspection-implementation.md),
 merged from `codex/scientific-inspection` through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89).
-The annotated `v0.10.0` source tag and updated website are published;
-published 0.8.0 downloads do not include these additions. The [design record](design/2026-11-16-scientific-inspection.md)
+The annotated `v0.10.0` source tag, Mac package and updated website provide
+these additions. Older 0.8.0 downloads predate them. The [design record](design/2026-11-16-scientific-inspection.md)
 explains source identity, optional native capabilities, Sesmesh provenance and
 the quantitative sampling/publication contracts. See [handoff](handoff.md) for
 fresh acceptance evidence and current delivery state.
