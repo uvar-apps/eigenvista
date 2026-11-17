@@ -12,7 +12,7 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 <a id="source-version-0100"></a>
 
-### Mac package 0.10.0 — qualified for publication, 17 November 2026
+### Mac package 0.10.0 — published, 17 November 2026
 
 The user now explicitly requires rebuilt latest-version Mac downloads (#90).
 This supersedes the earlier source-tag-only scope. Correct bundled guides, build
@@ -33,6 +33,14 @@ The 646-case application result remains applicable with all 234 frozen hashes
 unchanged. All 162 updated website cases pass; static/visual review passes.
 See the current handoff for exact evidence, recovered diagnostic failures and
 limits. The existing v0.10.0 source tag remains unchanged.
+
+The [0.10.0 prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)
+is published with the ZIP, checksum and build JSON. All three anonymously
+downloaded assets match local bytes/hashes and GitHub digests. Website/download
+commit `3fc91fb56114c7b16219a2f86e8e817fc6332328` is pushed; its
+[Pages deployment](https://github.com/uvar-apps/eigenvista/actions/runs/44054046506)
+succeeded. All 89 public files and the custom nested 404 match. The subsequent
+documentation-only delivery record leaves package/tag/runtime unchanged.
 
 ### Source update 0.10.0, 17 November 2026 — delivered
 

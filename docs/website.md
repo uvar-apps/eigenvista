@@ -42,6 +42,18 @@ orbital amplitude (signed phase) from nonnegative electron density.
 
 ## A static directory, with a small publisher
 
+The current **0.10.0 Mac download** is published, with actual qualified artifact
+facts in `tools/site/release.mjs`. Site commit
+`3fc91fb56114c7b16219a2f86e8e817fc6332328` was published by
+[Pages deployment 44054046506](https://github.com/uvar-apps/eigenvista/actions/runs/44054046506).
+All 89 public files and the custom nested 404 match the qualified payload. The
+three release assets also match independent anonymous downloads. Before pushing,
+all 162 local site browser cases, static checks and desktop/phone visual review
+passed. Evidence is under `tmp/release-0.10.0/`, with browser report
+`tmp/2026-11-15-website/browser-FKf8Dv/RESULT.json`. Earlier source-only delivery
+and published 0.8.0 asset facts below are historical. Do not alter image capture
+versions when advancing release metadata.
+
 The 0.10.0 site is published from merge
 `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784` by the successful
 [Pages-only deployment](https://github.com/uvar-apps/eigenvista/actions/runs/44047989575).

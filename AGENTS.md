@@ -51,11 +51,12 @@ documents; older `.molekel` preview documents remain readable. Check
 
 ## Required local validation before pushing
 
-Current follow-up (#90): the user explicitly requires the downloadable Mac
-package to match 0.10.0. Build and qualify clean optimized redistributables,
-including the actual extracted packaged launcher/helper, publish the GitHub
-release and synchronize website/download facts. This supersedes the earlier
-source-tag-only scope below. Preserve `v0.10.0`; never retag it. Current package
+Current release (#90): the downloadable Mac package is **0.10.0**, with a
+published GitHub release and synchronized website/download facts. The clean
+optimized ZIP and actual extracted packaged launcher/helper are qualified;
+all three downloaded release assets and all 89 served website files match.
+This supersedes the earlier source-tag-only delivery. Preserve `v0.10.0`;
+never retag it. Current package
 identity and publication evidence belong at the top of the living handoff/status.
 The source-tag update's full runtime qualification remains valid only while
 the recorded runtime/test hashes match; fresh packaging and extracted acceptance

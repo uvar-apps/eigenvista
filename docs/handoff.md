@@ -1,6 +1,6 @@
 # Development handoff
 
-## Mac package 0.10.0 — authorized follow-up, 17 November 2026
+## Mac package 0.10.0 — published, 17 November 2026
 
 The user explicitly requires the downloadable Mac package updated to the latest
 version. Track [#90](https://github.com/uvar-apps/eigenvista/issues/90): rebuild
@@ -46,8 +46,22 @@ static attempt matched visible installation text against raw HTML containing a
 link; correcting the text extraction retains the full positive wording check.
 Earlier failed diagnostic evidence is preserved. All existing imagery and
 version-specific DOI provenance remain historical; current citation uses the
-concept DOI. The draft release carries ZIP/checksum/build JSON; publication and
-public download/site readback remain the final steps.
+concept DOI.
+
+**Publication complete:** the [0.10.0 Mac release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)
+is public, retaining the experimental prerelease classification and unchanged
+source tag. Download metadata/site commit is
+`3fc91fb56114c7b16219a2f86e8e817fc6332328`; its parent clean package source
+`c27a8dc` is also pushed. ZIP, checksum and build JSON were downloaded through
+anonymous HTTPS and independently matched to local bytes, sizes and GitHub
+digests. The [Pages-only deployment](https://github.com/uvar-apps/eigenvista/actions/runs/44054046506)
+succeeded; all **89 committed public files** and the custom nested 404 match
+the qualified local payload. Evidence: `published-release.json`,
+`published-download-check.json`, `pages-deployment.json` and `public-files.json`
+under `tmp/release-0.10.0/`. A later documentation-only delivery record updates
+these living files without rebuilding, moving the tag, changing the package or
+rerunning unchanged runtime checks. Continue from main; #83/#85 remain open
+for the documented limitations. Older 0.8.0 assets remain untouched.
 
 Evidence: `tmp/release-0.10.0/` contains `package-final.log`, `artifacts.json`,
 `package-test-summary.json`, `package-audit-latest.json`, `native/native-latest.json`,
