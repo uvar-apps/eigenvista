@@ -284,7 +284,7 @@ assert(html.get("index.html").includes("data-current-development"), "Homepage ex
 if (published) {
   assert(html.get("index.html").includes(`${release.version} · Available for Mac.`));
   assert(html.get("index.html").includes("The Mac download includes this workspace, the scientific tools and the AI connector."));
-  assert(html.get("install.html").includes("The ZIP includes the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual."));
+  assert(html.get("install.html").replace(/<[^>]*>/g, "").includes("The ZIP includes the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual."));
   assert(html.get("about.html").includes(`Version ${application.version} has no supplied version-specific DOI yet`));
 } else {
   assert(html.get("index.html").includes(`The published Mac download below remains ${release.version}`));

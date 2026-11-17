@@ -9,11 +9,10 @@ tester ZIPs predate it. Confirm the installed files and live capabilities
 rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
 qualification is pending; non-Unix attachment is unsupported.
 
-The scientific-inspection methods below are **unreleased in 0.10.0**, tracked on
-`codex/scientific-inspection`. Published 0.8.0 downloads lack them. Use a matching
-0.10.0 test application/helper/instruction
-pair and inspect its live schemas. Do not promise these additions from a version
-comparison or require a source checkout to use an installed test binary.
+The scientific-inspection methods below ship in **0.10.0**. Older 0.8.0
+downloads lack them. Use the application, helper and instructions supplied
+together, and inspect the connected app's live schemas. Do not promise features
+from a version comparison or require a source checkout to use an installed app.
 
 ## Package and instruction folder
 
@@ -153,8 +152,8 @@ the job. The flag does nothing when a result has no job ID.
 
 ## Discover schemas and current state
 
-Begin with `app.capabilities`. The API version is 1; the published 0.8.0 catalog
-has 28 methods and the unreleased branch extends it additively. The connected
+Begin with `app.capabilities`. The API version is 1; the original 0.8.0 catalog
+has 28 methods and 0.10.0 extends it additively. The connected
 catalog, not a hardcoded count, establishes support. The response provides:
 
 - `instanceId`, `apiVersion` and each method's `description` and `inputSchema`;
@@ -170,7 +169,7 @@ view/mode/resolution, shading, AO, palette, biological display summary, camera
 and background. Camera/background may be temporarily null during startup.
 Scientific arrays are not returned. Check live support for palette loading,
 biological display and automatic AO before attempting those lesson steps.
-The unreleased state also includes `inspection` with pick mode, selected count,
+Version 0.10.0 state also includes `inspection` with pick mode, selected count,
 bounded ordered picks, typed `lastPick` and counts of measurements, molecular
 surfaces and analyses. Use the dedicated paginated queries for actual source identities,
 named-set contents and numerical samples.
@@ -206,7 +205,7 @@ file grants.
 | `surfaces.set_visibility` | `surfaceId`, `visible` → accepted visibility/revision |
 | `surfaces.remove` | `surfaceId` → removal/revision |
 | `scene.set` | Appearance patch below → accepted settings/revision |
-| `shader.apply` | `preset` (`"x-ray"` or `"surface-clip"`), `target?` (`"all"`; unreleased: an actual QC/molecular surface ID), `uniforms?`, `transparency?` → shader state |
+| `shader.apply` | `preset` (`"x-ray"` or `"surface-clip"`), `target?` (`"all"` or an actual QC/molecular surface ID), `uniforms?`, `transparency?` → shader state |
 | `shader.set_uniforms` | `uniforms`, `target?` as above, `transparency?` → accepted values; omitted target retains the applied target |
 | `shader.clear` | `{}` → cleared session shader |
 | `camera.get` | `{}` → position, target and up vectors plus revision |
@@ -218,7 +217,9 @@ file grants.
 | `job.get` | `jobId` → progress and terminal outcome |
 | `job.cancel` | `jobId` → owned cancellation and cleanup outcome |
 
-## Scientific inspection method catalog (unreleased)
+<a id="scientific-inspection-method-catalog-unreleased"></a>
+
+## Scientific inspection method catalog
 
 Users ask for scientific outcomes, such as “show complete residues within 4 Å of
 this ligand and label the distance,” or “plot this orbital along the bond and
@@ -410,7 +411,7 @@ remain numeric.
 Native Save additionally persists annotations, named sets, molecular meshes and
 field caches/interpretations/local appearance. Active selection/pick mode and
 full-scene settings remain transient. Old 0.8.0 readers reject the new required
-capabilities explicitly; use a matching test reader to reopen these documents.
+capabilities explicitly; use a 0.10.0 reader to reopen these documents.
 Bounds include 64 named sets/1,000,000 references, 256 measurements/labels,
 32 molecular meshes, 2,000,000 vertices/4,000,000 triangles per molecular mesh,
 256 MiB engine estimate, 128 probes, 8 planes up to 512², 16 profiles up to 4,096,
@@ -477,8 +478,8 @@ be a unit direction and nonparallel to the view. Degenerate poses, pole-crossing
 orbits and control-limit violations fail. Zoom factors above one move closer,
 below one move away. `camera.fit` explicitly frames the current visible scene.
 
-Bundled surface presets are `x-ray` and `surface-clip`. Published 0.8.0 targets `all` saved
-surfaces. In the unreleased extension, `target` can also be one returned quantum
+Bundled surface presets are `x-ray` and `surface-clip`. The original 0.8.0 connector targets `all` saved
+surfaces. In 0.10.0, `target` can also be one returned quantum
 or molecular surface ID; unknown IDs fail. Omitted `shader.set_uniforms` target
 preserves the currently applied target. Inspect returned declared uniforms before
 tuning. X-ray controls
@@ -552,8 +553,7 @@ inputs read by control remain protected for the broker's lifetime, including
 hard-link aliases. Never read an unapproved file through another tool and
 resubmit its contents to bypass the connector's refusal.
 
-All writes are atomic and no-clobber. Choose new `.eigenvista`, `.png` and, for
-the unreleased CSV operation, `.csv` paths;
+All writes are atomic and no-clobber. Choose new `.eigenvista`, `.png` and `.csv` paths;
 `overwrite:true` is rejected. Inspect native save receipts for `saved:true` and
 `current:true`; a file's existence alone does not establish that current work was
 saved. PNG receipts include dimensions, capture `revision` and `currentRevision`.
@@ -565,7 +565,7 @@ representation, surface colors/opacity and mesh visibility are document choices.
 Camera, AO, palette, background, custom shader/uniforms, biological coloring,
 filters, overrides and focus are session choices. They are not restored by Save.
 Accepted quantitative caches/definitions, annotations and molecular meshes are
-durable in the unreleased extension; analytic 3D preview caches remain transient.
+durable in 0.10.0; analytic 3D preview caches remain transient.
 Opening another file resets
 index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document

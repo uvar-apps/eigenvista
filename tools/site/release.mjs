@@ -1,12 +1,12 @@
-// User-facing download facts from the verified 0.8.0 package.
+// User-facing download facts from the verified 0.10.0 package.
 export const release = Object.freeze({
-  version: "0.8.0",
-  source: "f4ff87fab6e5d19bd3f93cafe0a30161d67ee6bd",
-  url: "https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0",
-  base: "https://github.com/uvar-apps/eigenvista/releases/download/v0.8.0/",
-  stem: "EigenVista-0.8.0-apple-silicon-20261116T065542Z-f4ff87f",
-  zipBytes: 78396448,
-  zipSha256: "b9cc83b8fcd25179513a99ace879472c819b07efe56982c60480ce6912666a31",
+  version: "0.10.0",
+  source: "c27a8dcbf43b5bcf4b9c69ed8426c6ade32f1167",
+  url: "https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0",
+  base: "https://github.com/uvar-apps/eigenvista/releases/download/v0.10.0/",
+  stem: "EigenVista-0.10.0-apple-silicon-20261117T085533Z-c27a8dc",
+  zipBytes: 82117816,
+  zipSha256: "479339c16f18022da86f860ece49f8c3ed39d2dcf27f221ecd0c0c9011048961",
   platform: "Apple Silicon Mac",
   minimumMacOS: "13.0",
 });

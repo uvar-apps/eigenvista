@@ -12,7 +12,7 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 <a id="source-version-0100"></a>
 
-### Mac package 0.10.0 — release preparation, 17 November 2026
+### Mac package 0.10.0 — qualified for publication, 17 November 2026
 
 The user now explicitly requires rebuilt latest-version Mac downloads (#90).
 This supersedes the earlier source-tag-only scope. Correct bundled guides, build
@@ -20,6 +20,19 @@ from clean source with unchanged qualified runtime, audit the actual ZIP and
 exercise its packaged launcher/helper and GUI before publication. Preserve the
 existing v0.10.0 tag. Artifact and final publication identities will be recorded
 here; the earlier diagnostic build was intentionally stopped, not passed.
+
+Clean package source `c27a8dcbf43b5bcf4b9c69ed8426c6ade32f1167` produces
+`EigenVista-0.10.0-apple-silicon-20261117T085533Z-c27a8dc.zip` (82,117,816 bytes,
+SHA-256 `479339c16f18022da86f860ece49f8c3ed39d2dcf27f221ecd0c0c9011048961`).
+Fresh packaging passes 336 Rust, 17 support and six connector checks; independent
+audit verifies 695 source files, 300 runtime/tag identities, 88 payload files,
+embedded frontend/WASM and signatures. Actual extracted packaged launcher/helper
+passes all 34 inspection methods through 160 calls, five PNGs and native/CSV
+round trips; actual optimized GUI plane/pane/Zen/WebKit-fullscreen checks pass.
+The 646-case application result remains applicable with all 234 frozen hashes
+unchanged. All 162 updated website cases pass; static/visual review passes.
+See the current handoff for exact evidence, recovered diagnostic failures and
+limits. The existing v0.10.0 source tag remains unchanged.
 
 ### Source update 0.10.0, 17 November 2026 — delivered
 

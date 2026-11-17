@@ -123,34 +123,27 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current source version is **0.10.0**, merged to `main` through
-  [PR #89](https://github.com/uvar-apps/eigenvista/pull/89) and annotated tag
-  `v0.10.0` at `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784`.
-  The user tested and approved the simple
-  workspace, then authorized documentation/website updates, the 0.10.0 bump,
-  commit, PR merge, annotated tag and push of main. This explicitly supersedes
-  the earlier wait-before-merge constraint. Read the [0.10.0 notes](docs/releases/0.10.0.md),
-  [scientific-inspection design](docs/design/2026-11-16-scientific-inspection.md)
-  and living handoff/status. Keep current user/agent/site version labels aligned;
-  download metadata still identifies the actual published 0.8.0 assets until a
-  new release is authorized and built. Do not invent a new release URL, archive
-  digest or version DOI. Citation uses the concept DOI for the current source;
-  the 0.8.0 DOI and original artifact/capture evidence remain historical.
-  Keep dependencies, frozen fixtures, format/profile versions, vendored Sesmesh
-  metadata, icon and logo unchanged. No new GitHub release or redistributable
-  publication is requested by the current source-tag delivery. The local
-  `v0.9.0` checkpoint remains historical and must not move. Run fresh applicable
-  local checks after promoting the pane to normal startup; the earlier 638-case
-  opt-in qualification does not establish the new default. Record current
-  evidence in the living handoff. Fresh qualification now passes all 646 browser
-  cases (323 per engine, no skips/flaky cases/retries) with all 234 frozen hashes
-  unchanged, alongside the Rust/build/native/packaging and 162 website checks.
-  The Pages deployment succeeded; all 89 published files and the custom nested
-  404 match the qualified local output. Living docs record delivery after the
-  immutable source tag; do not move the tag or imply a new binary release.
-  Keep SES/van der Waals interference and the
-  pending-inspection/Save coordination gap explicit. Earlier qualification and
-  the unchanged 0.8.0 test ZIP remain historical evidence.
+- Current application version is **0.10.0**. The approved workspace and scientific
+  inspection were merged through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89).
+  Preserve the existing annotated `v0.10.0` at
+  `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784`. Follow-up #90 explicitly authorizes
+  the rebuilt Mac release, correcting the earlier source-only delivery. Its clean
+  package source is `c27a8dcbf43b5bcf4b9c69ed8426c6ade32f1167`; all 300 archived
+  application/scientific/fixture/vendor files match the tag. The archive includes
+  corrected guides and the signed bundled AI helper/launcher. Record the actual
+  release/publication state in the living handoff; download metadata must match
+  the independently qualified 82,117,816-byte ZIP with SHA-256
+  `479339c16f18022da86f860ece49f8c3ed39d2dcf27f221ecd0c0c9011048961`.
+  Fresh packaging passes 336 Rust tests, 17 packaging-support and six connector
+  checks; independent archive/signature/source/embedded-WASM audit passes.
+  The extracted packaged launcher/helper passes 34 inspection methods through
+  160 calls and five images; actual optimized GUI plane/pane/Zen/WebKit-fullscreen
+  checks pass. All 234 frozen hashes still match the 646-case application suite;
+  updated website passes all 162 browser cases. Preserve historical 0.8.0 assets
+  and capture provenance. Citation uses the concept DOI until a new version DOI
+  is supplied. Keep #83/#85 open for the documented Save/SES limits; Linux,
+  clean-Mac/Gatekeeper and full OS-range qualification remain pending. No
+  application CI, compiler/dependency/profile/icon change or retag is implied.
 
 - Published version **0.8.0** has local runtime, clean-source package,
   extracted-native connector, downloaded-asset and public website verification (#78–#81): shared controller, authenticated opt-in native connection,

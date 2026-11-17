@@ -13,8 +13,48 @@ Bundled guides/skill references are being corrected before the final clean
 package snapshot so the delivered app describes its own features accurately.
 The first diagnostic package run was intentionally stopped during Rust tests;
 its staging/log remain under `tmp/release-0.10.0/`. It is not a qualified build.
-The previous source-tag delivery below remains historical. Until the new
-artifacts and publication are verified, the public download is still 0.8.0.
+The previous source-tag delivery below remains historical.
+
+The clean optimized build now passes from `c27a8dcbf43b5bcf4b9c69ed8426c6ade32f1167`:
+`artifacts/distributions/EigenVista-0.10.0-apple-silicon-20261117T085533Z-c27a8dc.zip`,
+**82,117,816 bytes**, SHA-256
+`479339c16f18022da86f860ece49f8c3ed39d2dcf27f221ecd0c0c9011048961`.
+All 336 Rust tests, 17 packaging-support and six connector-packaging checks pass.
+The independent ZIP audit verifies 695 clean source files, 300 runtime/science/
+fixture/vendor files against the unchanged tag, all 88 payload-file bytes/modes,
+five embedded frontend/WASM assets, the three signed arm64 binaries and Sesmesh
+notices/source archives. Deployment target remains macOS 13; host is macOS 27.0.
+
+Actual extracted acceptance uses the **packaged** launcher and helper under a
+system-only PATH, with spaces in paths. All 34 inspection methods pass through
+160 calls: scoped imports, Pastel, geometry, SES/SAS, analytic/grid analyses,
+cancellation, protected/no-clobber outputs, CSV/PNG and native save/reopen. Five
+PNGs are generated; root inspected three. The owned app/descriptor are cleaned
+up. The actual optimized GUI separately opens the bundled C7H10 Molden input,
+creates a 96 × 96 HOMO plane with key, checks both pane sides, 320/840 px bounds,
+restores right/480/Molecule, and retains the plane/key across hide/show, Zen and
+explicit Tauri WebKit fullscreen entry/exit. Cmd+Q guards the generated document.
+Two automation-handle/screenshot timeouts were recovered without app/source
+changes; no native GUI screenshot or native green-button qualification is claimed.
+All owned diagnostic windows exited. Existing servers remain untouched.
+
+All 234 frozen hashes still match the full 646-case application qualification.
+No runtime/test changes were made for packaging. The website's updated published
+availability passes static checks and all **162 Chromium/WebKit cases**; desktop
+and phone homepages were inspected. Static payload is 26,204,546 bytes. The first
+static attempt matched visible installation text against raw HTML containing a
+link; correcting the text extraction retains the full positive wording check.
+Earlier failed diagnostic evidence is preserved. All existing imagery and
+version-specific DOI provenance remain historical; current citation uses the
+concept DOI. The draft release carries ZIP/checksum/build JSON; publication and
+public download/site readback remain the final steps.
+
+Evidence: `tmp/release-0.10.0/` contains `package-final.log`, `artifacts.json`,
+`package-test-summary.json`, `package-audit-latest.json`, `native/native-latest.json`,
+`native/gui-observations.json`, `site-check.log`, `site-browser.log`; website report
+`tmp/2026-11-15-website/browser-FKf8Dv/RESULT.json`. Retain the initial stopped
+`package.log` and `site-check-attempt1.log` separately. Clean-Mac/Gatekeeper,
+the full deployment-OS range and Linux/Windows remain unqualified.
 
 ## Approved 0.10.0 source update — delivered, 17 November 2026
 

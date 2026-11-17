@@ -6,21 +6,21 @@ see. Keep using Codex Desktop or CLI, Claude Code, Pi, OpenCode, or another
 agent with local terminal/file access. An image viewer lets the agent inspect
 and show actual exported pictures.
 
-**EigenVista 0.8.0 includes the AI connector.** Download the Apple Silicon Mac
-package from the [0.8.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0).
+**EigenVista 0.10.0 includes the AI connector.** Download the Apple Silicon Mac
+package from the [0.10.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0).
 The app ships its prebuilt connection helper, launcher, instructions, examples
 and palettes. Check the included files below as well as the version; older
 packages such as 0.7.2 do not include them. If tools are missing, the agent should
 explain that and point you to the official release page.
 
-**Unreleased 0.10.0 test builds** add geometry measurements/labels and ligand
-neighborhoods, SES/SAS molecular surfaces, and quantitative field inspection.
-The published 0.8.0 download does not include those additions. Use the matching
-test application and helper when testing them; your agent should check the
-connected app's available features. The installed-app setup below applies to
-both, without a source checkout. No public 0.10.0 download is announced here.
+**New in 0.10.0:** geometry measurements/labels and ligand neighborhoods,
+SES/SAS molecular surfaces, and quantitative field inspection are available
+through the connector. Older 0.8.0 downloads lack these additions. Use the
+application and helper supplied together; your agent should check the connected
+app's available features. Setup starts from the downloaded app, without a
+source checkout.
 
-The current source build groups tools into **Molecule**, **Fields**, **Surfaces**
+EigenVista 0.10.0 groups tools into **Molecule**, **Fields**, **Surfaces**
 and **Appearance**. You do not have to operate them first. Ask for the outcome;
 the agent shares their document and calculations. Pane position and Zen are
 local presentation choices, not connector actions.
@@ -143,7 +143,7 @@ compatible app, I authorize downloading and installing the appropriate Mac
 binary package from https://github.com/uvar-apps/eigenvista/releases into an
 applications location I can write. Preserve existing app copies. Check that
 the package includes its connection helper, standalone instructions and
-"Start AI connection.command" launcher. Use version 0.8.0 or newer; older packages
+"Start AI connection.command" launcher. Use the current 0.10.0 Mac package; older packages
 such as 0.7.2 do not include them. If no compatible package is available, explain that clearly,
 show me the official release page and stop the setup.
 
