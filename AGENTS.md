@@ -113,8 +113,10 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current source version is **0.10.0**, the approved source
-  update on `codex/scientific-inspection`. The user tested and approved the simple
+- Current source version is **0.10.0**, merged to `main` through
+  [PR #89](https://github.com/uvar-apps/eigenvista/pull/89) and annotated tag
+  `v0.10.0` at `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784`.
+  The user tested and approved the simple
   workspace, then authorized documentation/website updates, the 0.10.0 bump,
   commit, PR merge, annotated tag and push of main. This explicitly supersedes
   the earlier wait-before-merge constraint. Read the [0.10.0 notes](docs/releases/0.10.0.md),
@@ -133,6 +135,9 @@ preserve those historical results as evidence of what ran at the time.
   evidence in the living handoff. Fresh qualification now passes all 646 browser
   cases (323 per engine, no skips/flaky cases/retries) with all 234 frozen hashes
   unchanged, alongside the Rust/build/native/packaging and 162 website checks.
+  The Pages deployment succeeded; all 89 published files and the custom nested
+  404 match the qualified local output. Living docs record delivery after the
+  immutable source tag; do not move the tag or imply a new binary release.
   Keep SES/van der Waals interference and the
   pending-inspection/Save coordination gap explicit. Earlier qualification and
   the unchanged 0.8.0 test ZIP remain historical evidence.

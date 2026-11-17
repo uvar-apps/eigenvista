@@ -1,6 +1,6 @@
 # Development handoff
 
-## Approved 0.10.0 source update — qualified, 17 November 2026
+## Approved 0.10.0 source update — delivered, 17 November 2026
 
 The user tested and approved the simpler workspace for
 [#88](https://github.com/uvar-apps/eigenvista/issues/88), then authorized complete
@@ -31,7 +31,27 @@ scientific or persistence fix is implied by the layout update. See
 [0.10.0 notes](releases/0.10.0.md) and the
 [approved design](design/2026-11-17-simple-workspace-pane.md). Sections below are
 dated evidence, including superseded candidate and delivery restrictions. Fresh
-final verification and delivery identities will be recorded here.
+final verification and delivery identities follow.
+
+**Delivery:** feature commit `308e98b8a814d5703400700d4c6253134fb81af0`
+was merged through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89)
+as `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784`. The merged tree exactly
+matches the qualified feature tree `424f4103e9fcabea5961c3c164d089ebd9ac9cd3`.
+Annotated tag `v0.10.0` (tag object `f55a6a688868f874edbe7a55c9a0cf3b45ecf739`)
+identifies that merged main commit; remote main and tag readback passed. The
+local `v0.9.0` checkpoint was neither moved nor pushed. Issues #84, #86, #87 and
+#88 closed through the PR; #83/#85 remain open for the documented gaps.
+
+The [Pages-only publisher](https://github.com/uvar-apps/eigenvista/actions/runs/44047989575)
+succeeded for the merge. All **89 committed public files** and the custom nested
+404 body/status match the qualified output (`tmp/version-0.10.0/public-files.json`).
+The earlier readback included two ignored macOS `.DS_Store` files; their expected
+404s caused its diagnostic failure. The corrected verifier uses the committed
+deployment list. Preserve `public-files-attempt1.json`; every actual public file
+matched in that attempt too. No application CI ran. Published binaries remain
+0.8.0. A later documentation-only delivery record updates these living files;
+it does not retag, rebuild or repeat unchanged runtime tests. Continue from
+`main` and inspect actual Git state before starting new work.
 
 Version preparation is now complete: all current own metadata and citation
 identify 0.10.0. Fresh local macOS checks pass for formatting, 336 default Rust

@@ -12,7 +12,7 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 <a id="source-version-0100"></a>
 
-### Source update 0.10.0, 17 November 2026 — locally qualified
+### Source update 0.10.0, 17 November 2026 — delivered
 
 The user approved the simpler workspace and authorized complete documentation/
 website updates, the version bump, commit, PR merge, tag and push of main. The
@@ -38,6 +38,16 @@ website cases. Native acceptance covers 34 inspection methods through 160 calls
 and four lifecycle scenarios. Read
 [0.10.0 notes](releases/0.10.0.md) and [handoff](handoff.md) for current evidence
 and delivery state. Dated sections below preserve their historical constraints.
+
+[PR #89](https://github.com/uvar-apps/eigenvista/pull/89) merged the qualified
+feature tree as `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784`; annotated
+`v0.10.0` and main are pushed. Issues #84/#86/#87/#88 closed; #83/#85 stay open.
+The [Pages publisher](https://github.com/uvar-apps/eigenvista/actions/runs/44047989575)
+succeeded, and all 89 committed public files plus the custom nested 404 match
+the qualified local bytes. The first readback's only mismatch was two ignored
+macOS metadata files; its report is preserved. The corrected deployment-list
+check passes. This documentation-only delivery record follows the immutable
+tag without changing runtime, published binaries or the tag.
 
 ### Simple pane follow-up, 17 November 2026 — historical opt-in qualification
 

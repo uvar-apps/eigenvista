@@ -19,7 +19,8 @@ The published homepage hero highlights **AI-enabled viewing**, links directly to
 the AI overview, and names the compatible 0.8.0 package beside the callout.
 Keep that availability label aligned with the actual public release.
 
-The current source is **0.10.0**, preparing the approved 0.10.0 update. Its
+The current source is **0.10.0**, merged through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89)
+and tagged `v0.10.0`. Its
 scientific-inspection manual, tutorials and workspace guide describe the new
 source build, beyond the published 0.8.0 download. Normal startup uses one wide,
 resizable left/right pane with Molecule, Fields, Surfaces and Appearance tabs,
@@ -38,6 +39,17 @@ must make quantitative inspection discoverable through Fields and distinguish
 orbital amplitude (signed phase) from nonnegative electron density.
 
 ## A static directory, with a small publisher
+
+The 0.10.0 site is published from merge
+`8ab5a0a1e12f7314c93b29745ea75e4c4f11b784` by the successful
+[Pages-only deployment](https://github.com/uvar-apps/eigenvista/actions/runs/44047989575).
+All **89 committed public files** match the qualified local bytes, including
+the custom nested 404 body/status. The local 162-case website suite and visual
+review passed before pushing. The first readback also enumerated two ignored
+macOS `.DS_Store` files; those correctly returned 404. The corrected check uses
+the committed deployment file list and passes. Both reports are preserved under
+`tmp/version-0.10.0/public-files{,-attempt1}.json`. No application CI or binary
+release was started.
 
 The published payload is ordinary HTML, CSS, JavaScript, images and example
 downloads. It has no runtime framework, external fonts, analytics, account or
