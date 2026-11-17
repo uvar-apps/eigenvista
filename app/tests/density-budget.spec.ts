@@ -1,3 +1,4 @@
+import { activateWidget, hideToolsForScene } from "./workspace";
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
@@ -94,6 +95,7 @@ test("real density sampling stays responsive and cancellation discards its held 
     };
   });
   await page.goto("/");
+  await activateWidget(page, "field-rendering");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await page
     .getByLabel("Open molecular file")
@@ -258,6 +260,7 @@ for (const resolution of [24, 48]) {
     page.on("pageerror", (error) => errors.push(error.message));
     page.on("dialog", (dialog) => dialog.accept());
     await page.goto("/");
+    await activateWidget(page, "field-rendering");
     await expect(page.locator("footer [role=status]")).toContainText(
       "triangles",
     );
@@ -403,6 +406,7 @@ for (const resolution of [24, 48]) {
       generated,
     );
     await page.setViewportSize({ width: 390, height: 844 });
+    await hideToolsForScene(page);
     await page.getByRole("button", { name: "Fit scene", exact: true }).click();
     await rendered(page);
     await expect

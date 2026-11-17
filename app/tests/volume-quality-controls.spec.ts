@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
@@ -53,7 +54,7 @@ test("preview quality is a responsive session preference without worker jobs or 
       );
     };
   });
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await page
     .getByLabel("Open molecular file")

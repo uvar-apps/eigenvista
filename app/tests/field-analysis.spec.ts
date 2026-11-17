@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -153,10 +154,10 @@ async function centerImageDifference(
   );
 }
 async function openPanel(page: Page) {
-  const panel = page.getByLabel("Quantitative field inspection", {
+  const body = await activateWidget(page, "analysis");
+  const panel = body.getByLabel("Quantitative field inspection", {
     exact: true,
   });
-  await panel.locator(":scope > details > summary").click();
   await expect(
     panel.getByLabel("Analysis field", { exact: true }),
   ).toBeVisible();
@@ -240,8 +241,13 @@ test("collapsed field inspection starts no metadata work until first opening and
     panel.getByLabel("Analysis field", { exact: true }),
   ).toBeHidden();
   expect(await actions()).not.toContain("describe_field");
-  const summary = panel.locator(":scope > details > summary");
-  await summary.click();
+  await activateWidget(page, "analysis");
+  const summary = page.locator(".panel-disclosure").and(
+    page.getByRole("button", {
+      name: "Quantitative field inspection",
+      exact: true,
+    }),
+  );
   await expect
     .poll(
       async () =>

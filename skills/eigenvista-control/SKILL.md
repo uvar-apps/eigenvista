@@ -21,10 +21,10 @@ apps and tester ZIPs predate this package layout. If the bundled helper is absen
 a requested capability, explain what is missing and obtain the appropriate
 prebuilt package within the user's authorization.
 
-The scientific-inspection extension is **unreleased in 0.9.0** on
+The scientific-inspection extension is **unreleased in 0.10.0** on
 `codex/scientific-inspection`. Published 0.8.0 binaries lack its measurement,
 SES/SAS and quantitative-field operations. Discover the connected app's actual
-schemas and use a matching 0.9.0 test binary/helper; never infer these features
+schemas and use a matching 0.10.0 test binary/helper; never infer these features
 from the version string alone.
 
 ## Work from the user's goal

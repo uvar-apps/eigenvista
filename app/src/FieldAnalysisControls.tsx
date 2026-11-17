@@ -574,7 +574,10 @@ function AnalysisForm(props: FormProps) {
     }
   };
   return (
-    <section aria-label="Create quantitative analysis">
+    <section
+      className="workspace-form-grid"
+      aria-label="Create quantitative analysis"
+    >
       <h3>
         {props.editing
           ? "Edit sampling definition"

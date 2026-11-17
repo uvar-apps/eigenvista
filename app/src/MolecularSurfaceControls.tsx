@@ -327,7 +327,11 @@ function SurfaceForm({
     await command("molecularSurfaces.generate", { request });
   };
   return (
-    <fieldset disabled={disabled} style={fieldsetStyle}>
+    <fieldset
+      className="workspace-form-grid"
+      disabled={disabled}
+      style={fieldsetStyle}
+    >
       <label>
         Edit or create
         <select

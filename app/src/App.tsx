@@ -24,6 +24,7 @@ import { useScientificInspection } from "./useScientificInspection";
 import { InspectionControls } from "./InspectionControls";
 import { MolecularSurfaceControls } from "./MolecularSurfaceControls";
 import { FieldAnalysisControls } from "./FieldAnalysisControls";
+import { WorkspaceFrame } from "./WorkspacePane";
 import { controlPreset, updateDeclaredUniforms } from "./control/presets";
 import {
   patchStructureDisplay,
@@ -102,6 +103,9 @@ import type {
   SurfaceShading,
   Surface,
 } from "./types";
+
+const WORKSPACE_LAB_ENABLED =
+  new URLSearchParams(window.location.search).get("workspace") !== "legacy";
 
 export default function App() {
   const panels = usePanelExpansion();
@@ -571,7 +575,7 @@ export default function App() {
     }
   }
   useEffect(() => {
-    void example();
+    if (!current.current) void example();
     return () => {
       ++generation.current;
       cancel();
@@ -1448,6 +1452,45 @@ export default function App() {
         (f) => f.id === doc.view.field,
       )?.label
     : "";
+  const experimentTools = doc
+    ? {
+        geometry: (
+          <InspectionControls
+            doc={doc}
+            selectedAtoms={inspection.selectedAtoms}
+            orderedAtoms={inspection.orderedAtoms}
+            measurements={inspection.measurements}
+            busy={!!busy}
+            error={inspection.error}
+            pickEnabled={inspection.pickEnabled}
+            onPickEnabled={inspection.setPickEnabled}
+            onCancel={stop}
+            onCommand={sendInspectionCommand}
+          />
+        ),
+        analysis: (
+          <FieldAnalysisControls
+            doc={doc}
+            selectedAtoms={inspection.selectedAtoms}
+            orderedAtoms={inspection.orderedAtoms}
+            busy={!!busy}
+            error={inspection.error}
+            onCancel={stop}
+            onCommand={sendInspectionCommand}
+          />
+        ),
+        molecular: (
+          <MolecularSurfaceControls
+            doc={doc}
+            selectedAtoms={inspection.selectedAtoms}
+            busy={!!busy}
+            error={inspection.error}
+            onCancel={stop}
+            onCommand={sendInspectionCommand}
+          />
+        ),
+      }
+    : { geometry: null, analysis: null, molecular: null };
   return (
     <div className="application">
       <NativeExitGuard
@@ -1562,7 +1605,17 @@ export default function App() {
         </div>
       )}
       {doc ? (
-        <main>
+        <WorkspaceFrame
+          enabled={WORKSPACE_LAB_ENABLED}
+          tools={experimentTools}
+          context={`${doc.title} · ${doc.atoms.positions.length} atoms`}
+          unsaved={dirty}
+          busy={busy}
+          cancellable={!!calculation || !!inspection.progress}
+          progress={inspection.progress?.stage ?? calculation?.stage}
+          warnings={importReport?.warnings.length ?? 0}
+          onCancel={stop}
+        >
           <PanelSidebar
             pane="left"
             order={panelOrder.order.left}
@@ -1631,18 +1684,7 @@ export default function App() {
                 value={structureDisplay}
                 onChange={setStructureDisplay}
               />
-              <InspectionControls
-                doc={doc}
-                selectedAtoms={inspection.selectedAtoms}
-                orderedAtoms={inspection.orderedAtoms}
-                measurements={inspection.measurements}
-                busy={!!busy}
-                error={inspection.error}
-                pickEnabled={inspection.pickEnabled}
-                onPickEnabled={inspection.setPickEnabled}
-                onCancel={stop}
-                onCommand={sendInspectionCommand}
-              />
+              {!WORKSPACE_LAB_ENABLED && experimentTools.geometry}
             </PanelSection>
             <PanelSection
               key="quantum-fields"
@@ -1706,15 +1748,7 @@ export default function App() {
                   ),
               )}
               {!doc.view.field && <p className="empty">No quantum fields</p>}
-              <FieldAnalysisControls
-                doc={doc}
-                selectedAtoms={inspection.selectedAtoms}
-                orderedAtoms={inspection.orderedAtoms}
-                busy={!!busy}
-                error={inspection.error}
-                onCancel={stop}
-                onCommand={sendInspectionCommand}
-              />
+              {!WORKSPACE_LAB_ENABLED && experimentTools.analysis}
             </PanelSection>
             <PanelSection
               key="provenance"
@@ -1905,14 +1939,7 @@ export default function App() {
                     : ""}
                 </p>
               )}
-              <MolecularSurfaceControls
-                doc={doc}
-                selectedAtoms={inspection.selectedAtoms}
-                busy={!!busy}
-                error={inspection.error}
-                onCancel={stop}
-                onCommand={sendInspectionCommand}
-              />
+              {!WORKSPACE_LAB_ENABLED && experimentTools.molecular}
             </PanelSection>
             <PanelSection
               key="appearance"
@@ -2241,7 +2268,7 @@ export default function App() {
               ))}
             </PanelSection>
           </PanelSidebar>
-        </main>
+        </WorkspaceFrame>
       ) : (
         <div className="loading">
           <Atom size={36} />

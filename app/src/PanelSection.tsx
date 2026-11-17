@@ -52,7 +52,7 @@ export function PanelSection({
   className = "",
   children,
 }: {
-  id: PanelId;
+  id: string;
   title: string;
   expanded: boolean;
   onToggle: () => void;

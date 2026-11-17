@@ -1,0 +1,452 @@
+{
+  "capturedAt": "2026-11-17T03:48:57.202Z",
+  "baseline": "9617a31e7824fbe93ccc78829afa6079ed1080f5",
+  "runtime": [
+    {
+      "file": "app/src/App.tsx",
+      "sha256": "8029ec6420ef6cd6adb510e2380bd68943a2858dfec46fe1624b529c6821c284"
+    },
+    {
+      "file": "app/src/Viewport.tsx",
+      "sha256": "45841644d4fdec1ad5d4f9f17f8a78407e852fc883be65aa711ad76c873f558d"
+    },
+    {
+      "file": "app/src/WorkspacePane.tsx",
+      "sha256": "d752a461cc6ab89c69486595eb5bc9d97613f5e672f5e205710fa9069da21013"
+    },
+    {
+      "file": "app/src/workspace-pane.css",
+      "sha256": "1c021d913a96c0ec93ce8a196ccffc32c5bfdb343a2db64fd90968a16c4421eb"
+    },
+    {
+      "file": "app/src/useWorkspacePane.ts",
+      "sha256": "6a4022be1f5710ec76143e0b1acfdd678210237489b0a21f1b22ab62b477a2bc"
+    },
+    {
+      "file": "app/src/PanelSidebar.tsx",
+      "sha256": "bb55c83d647f4e9724aaed283a90f2285be1dfffc9872af9e8870aa90336cb6c"
+    },
+    {
+      "file": "app/src/PanelSection.tsx",
+      "sha256": "5ed95711fb8c38ce5bbb0395b9ba6163bce2e6c22b778f3ef85dc5c03f301a81"
+    }
+  ],
+  "images": [
+    {
+      "file": "crambin-shape-left-1280.png",
+      "width": 1280,
+      "height": 800,
+      "subject": "crambin-shape",
+      "layout": "left",
+      "presentation": "tools-shown",
+      "viewport": {
+        "x": 480,
+        "y": 104,
+        "width": 800,
+        "height": 632
+      },
+      "tool": {
+        "x": 0,
+        "y": 104,
+        "width": 480,
+        "height": 667
+      },
+      "content": {
+        "clientWidth": 479,
+        "scrollWidth": 479,
+        "clientHeight": 575,
+        "scrollHeight": 575
+      },
+      "widgets": [
+        {
+          "id": "molecular",
+          "expanded": "true"
+        },
+        {
+          "id": "saved-surfaces",
+          "expanded": "true"
+        }
+      ],
+      "state": {
+        "apiVersion": 1,
+        "revision": 4,
+        "document": {
+          "id": "1crn.bcif",
+          "title": "1crn.bcif",
+          "atomCount": 327,
+          "bondCount": 337,
+          "basisCount": 0,
+          "orbitalCount": 0,
+          "densityCount": 0,
+          "gridCount": 0,
+          "surfaceCount": 0
+        },
+        "dirty": true,
+        "busy": "",
+        "progress": null,
+        "view": {
+          "representation": "ball-stick",
+          "positive_color": "#259d86",
+          "negative_color": "#cb4e72",
+          "opacity": 0.78,
+          "isovalue": 0.08,
+          "field": null
+        },
+        "mode": "mesh",
+        "resolution": 40,
+        "shading": "diffuse",
+        "ambientOcclusion": {
+          "enabled": false,
+          "strength": 1,
+          "radiusAngstrom": 2.25,
+          "automaticRadius": true
+        },
+        "shader": {
+          "vertexName": "x-ray.vert",
+          "fragmentName": "x-ray.frag",
+          "target": "workspace-crambin",
+          "transparency": true,
+          "uniforms": {
+            "eyePosition": [
+              0,
+              0,
+              0
+            ],
+            "minOpacity": 0,
+            "maxOpacity": 1,
+            "color": [
+              0.482353,
+              0.956863,
+              0.917647
+            ],
+            "da": 0
+          },
+          "error": ""
+        },
+        "palette": {
+          "custom": true,
+          "name": "MatterViz Pastel"
+        },
+        "volumeQuality": 2,
+        "camera": {
+          "position": [
+            121.73331212657484,
+            103.59374213146144,
+            107.95648788354508
+          ],
+          "target": [
+            20.018466472625732,
+            19.29734539985657,
+            11.65194606781006
+          ],
+          "up": [
+            0,
+            1,
+            0
+          ]
+        },
+        "backgroundColor": "#17232d",
+        "structureDisplay": {
+          "colorMode": "element",
+          "hiddenChains": [],
+          "hiddenChainCount": 0,
+          "hiddenKinds": [],
+          "isolatedChain": null,
+          "selectedResidueCount": null,
+          "chainStyles": {},
+          "chainStyleCount": 0,
+          "componentStyles": {},
+          "visibleAtomCount": 327
+        },
+        "inspection": {
+          "lastPick": null,
+          "pickEnabled": false,
+          "selectedCount": 0,
+          "orderedAtoms": [],
+          "measurementCount": 0,
+          "molecularSurfaceCount": 1,
+          "analysisCount": 0
+        }
+      },
+      "sha256": "01c3abdef7b9bde45241dc1623368f6d1182ef9dbdbb3aec2cb3887010a83c6b",
+      "source": "tmp/gui-design-simple/accepted/crambin-shape-left-1280.png"
+    },
+    {
+      "file": "homo-analysis-right-1280.png",
+      "width": 1280,
+      "height": 800,
+      "subject": "homo-analysis",
+      "layout": "right",
+      "presentation": "tools-shown",
+      "viewport": {
+        "x": 0,
+        "y": 104,
+        "width": 800,
+        "height": 632
+      },
+      "tool": {
+        "x": 800,
+        "y": 104,
+        "width": 480,
+        "height": 667
+      },
+      "content": {
+        "clientWidth": 479,
+        "scrollWidth": 479,
+        "clientHeight": 575,
+        "scrollHeight": 575
+      },
+      "widgets": [
+        {
+          "id": "quantum-fields",
+          "expanded": "false"
+        },
+        {
+          "id": "field-rendering",
+          "expanded": "false"
+        },
+        {
+          "id": "analysis",
+          "expanded": "true"
+        }
+      ],
+      "state": {
+        "apiVersion": 1,
+        "revision": 7,
+        "document": {
+          "id": "bicyclic-c7h10.molden",
+          "title": "bicyclic-c7h10.molden",
+          "atomCount": 17,
+          "bondCount": 18,
+          "basisCount": 125,
+          "orbitalCount": 118,
+          "densityCount": 1,
+          "gridCount": 0,
+          "surfaceCount": 0
+        },
+        "dirty": true,
+        "busy": "",
+        "progress": null,
+        "view": {
+          "representation": "ball-stick",
+          "positive_color": "#259d86",
+          "negative_color": "#cb4e72",
+          "opacity": 0.78,
+          "isovalue": 0.08,
+          "field": "molden-mo-26"
+        },
+        "mode": "mesh",
+        "resolution": 48,
+        "shading": "diffuse",
+        "ambientOcclusion": {
+          "enabled": false,
+          "strength": 1,
+          "radiusAngstrom": 1.5,
+          "automaticRadius": true
+        },
+        "shader": {
+          "vertexName": "x-ray.vert",
+          "fragmentName": "x-ray.frag",
+          "target": "workspace-crambin",
+          "transparency": true,
+          "uniforms": {
+            "eyePosition": [
+              0,
+              0,
+              0
+            ],
+            "minOpacity": 0,
+            "maxOpacity": 1,
+            "color": [
+              0.482353,
+              0.956863,
+              0.917647
+            ],
+            "da": 0
+          },
+          "error": ""
+        },
+        "palette": {
+          "custom": true,
+          "name": "MatterViz Pastel"
+        },
+        "volumeQuality": 2,
+        "camera": {
+          "position": [
+            9.999999999999996,
+            -12.999999999999998,
+            23.000000000000004
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "up": [
+            0,
+            1,
+            0
+          ]
+        },
+        "backgroundColor": "#17232d",
+        "structureDisplay": {
+          "colorMode": "element",
+          "hiddenChains": [],
+          "hiddenChainCount": 0,
+          "hiddenKinds": [],
+          "isolatedChain": null,
+          "selectedResidueCount": null,
+          "chainStyles": {},
+          "chainStyleCount": 0,
+          "componentStyles": {},
+          "visibleAtomCount": 17
+        },
+        "inspection": {
+          "lastPick": null,
+          "pickEnabled": false,
+          "selectedCount": 0,
+          "orderedAtoms": [],
+          "measurementCount": 0,
+          "molecularSurfaceCount": 0,
+          "analysisCount": 1
+        }
+      },
+      "sha256": "d278decc6df7e7507e8bffb8593938802c8a1e1d0a3e32dba136aaa7f362416b",
+      "source": "tmp/gui-design-simple/accepted/homo-analysis-right-1280.png"
+    },
+    {
+      "file": "homo-analysis-zen-1280.png",
+      "width": 1280,
+      "height": 800,
+      "subject": "homo-analysis",
+      "layout": "right",
+      "presentation": "zen",
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 800
+      },
+      "tool": null,
+      "content": null,
+      "widgets": null,
+      "state": {
+        "apiVersion": 1,
+        "revision": 7,
+        "document": {
+          "id": "bicyclic-c7h10.molden",
+          "title": "bicyclic-c7h10.molden",
+          "atomCount": 17,
+          "bondCount": 18,
+          "basisCount": 125,
+          "orbitalCount": 118,
+          "densityCount": 1,
+          "gridCount": 0,
+          "surfaceCount": 0
+        },
+        "dirty": true,
+        "busy": "",
+        "progress": null,
+        "view": {
+          "representation": "ball-stick",
+          "positive_color": "#259d86",
+          "negative_color": "#cb4e72",
+          "opacity": 0.78,
+          "isovalue": 0.08,
+          "field": "molden-mo-26"
+        },
+        "mode": "mesh",
+        "resolution": 48,
+        "shading": "diffuse",
+        "ambientOcclusion": {
+          "enabled": false,
+          "strength": 1,
+          "radiusAngstrom": 1.5,
+          "automaticRadius": true
+        },
+        "shader": {
+          "vertexName": "x-ray.vert",
+          "fragmentName": "x-ray.frag",
+          "target": "workspace-crambin",
+          "transparency": true,
+          "uniforms": {
+            "eyePosition": [
+              0,
+              0,
+              0
+            ],
+            "minOpacity": 0,
+            "maxOpacity": 1,
+            "color": [
+              0.482353,
+              0.956863,
+              0.917647
+            ],
+            "da": 0
+          },
+          "error": ""
+        },
+        "palette": {
+          "custom": true,
+          "name": "MatterViz Pastel"
+        },
+        "volumeQuality": 2,
+        "camera": {
+          "position": [
+            9.999999999999996,
+            -12.999999999999998,
+            23.000000000000004
+          ],
+          "target": [
+            0,
+            0,
+            0
+          ],
+          "up": [
+            0,
+            1,
+            0
+          ]
+        },
+        "backgroundColor": "#17232d",
+        "structureDisplay": {
+          "colorMode": "element",
+          "hiddenChains": [],
+          "hiddenChainCount": 0,
+          "hiddenKinds": [],
+          "isolatedChain": null,
+          "selectedResidueCount": null,
+          "chainStyles": {},
+          "chainStyleCount": 0,
+          "componentStyles": {},
+          "visibleAtomCount": 17
+        },
+        "inspection": {
+          "lastPick": null,
+          "pickEnabled": false,
+          "selectedCount": 0,
+          "orderedAtoms": [],
+          "measurementCount": 0,
+          "molecularSurfaceCount": 0,
+          "analysisCount": 1
+        }
+      },
+      "sha256": "4be27f20fabdc5e924aa2e906587bff2e0539509823b2f5f9e872b5addb1733b",
+      "source": "tmp/gui-design-simple/accepted/homo-analysis-zen-1280.png"
+    }
+  ],
+  "inputs": [
+    {
+      "file": "fixtures/bcif/1crn.bcif",
+      "sha256": "9b0b12f855cbe1ec15b45d893e28c8f22cf4a616565474dae85d69af30648d86"
+    },
+    {
+      "file": "tools/site/examples/bicyclic-c7h10.molden",
+      "sha256": "9309464ace24326f70c344852d4bbc49bc1bca418876a1a0d6b42863202b4645"
+    },
+    {
+      "file": "palettes/matterviz-pastel.json",
+      "sha256": "6d3624bc9019e0540352865d45fa1ae4d6e5ed9083cba558bde0820556b1f802"
+    }
+  ]
+}

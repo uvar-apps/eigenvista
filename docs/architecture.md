@@ -1,6 +1,6 @@
 # As-built architecture
 
-This describes the **unreleased 0.9.0 development preview**, including the shared
+This describes the **unreleased 0.10.0 development preview**, including the shared
 application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
@@ -8,11 +8,11 @@ not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
-This branch also contains the **unreleased scientific-inspection implementation**
+This source contains the **unreleased scientific-inspection implementation**
 ([Plan 009](../plans/009-scientific-inspection-implementation.md), #83–#86).
 Its selections/measurements/labels, SES/SAS meshes and quantitative field
-analyses are described below. Published 0.8.0 binaries predate them; the branch
-now identifies itself as 0.9.0. Qualification evidence is tracked
+analyses are described below. Published 0.8.0 binaries predate them; the source
+now identifies itself as 0.10.0. Qualification evidence is tracked
 separately from the existing release; no merge/release is implied here.
 The [scientific-inspection decision](design/2026-11-16-scientific-inspection.md)
 records source identity, transport, scientific conventions and qualification boundaries.
@@ -78,7 +78,8 @@ by native saving. There is no calculation server, remote service, or database.
 | [Connectivity](../crates/eigenvista-core/src/bonds.rs) | Exact k-d-tree neighbors, explicit-plus-inferred display bonds |
 | [Native format](../crates/eigenvista-format/src/lib.rs) and [filesystem adapter](../crates/eigenvista-format/src/native.rs) | Portable container, checksums/validation, atomic native writes |
 | [WASM bridge](../crates/eigenvista-wasm/src/lib.rs) | Document import/validation/encoding, immutable registered document with one sampled-field cache, typed display buffers, compatibility JSON sampling/meshing and point/gradient probes |
-| [Document UI](../app/src/App.tsx) and [types](../app/src/types.ts) | Document state, controls, dirty state, generation replacement, error recovery |
+| [Document UI](../app/src/App.tsx) and [types](../app/src/types.ts) | One document/controller owner, controls, dirty state, generation replacement, error recovery |
+| [Workspace pane](../app/src/WorkspacePane.tsx), [preferences](../app/src/useWorkspacePane.ts) and [widget stack](../app/src/PanelSidebar.tsx) | Default left/right resizable pane, four task tabs, stable mounted tools, bounded presentation preferences, reusable drag/keyboard/menu ordering |
 | [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
 | [Worker client](../app/src/science.ts), [registration identity](../app/src/scienceRegistration.ts), and [worker](../app/src/science.worker.ts) | Owned FIFO requests, per-request abort, worker lifecycle, bounded resident registration/cache |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
@@ -755,7 +756,16 @@ The larger 256 cubed transient-grid limit does not extend native source-grid or
 128 MiB container limits; generated meshes can record their larger generation
 resolution without embedding the transient samples in `Document.grids`.
 
-Sidebar expansion is a separate profile preference, managed by
+The default workspace is one **480 px** tool pane, initially on the right and
+selectable on the left. **Molecule**, **Fields**, **Surfaces** and **Appearance**
+each expose a scrollable stack of the existing widgets. At narrow widths the
+pane overlays the scene; hiding it returns its allocated width to the viewport.
+`WorkspacePane` keeps one viewport parent and one mounted instance of every
+scientific widget through side changes, tab changes, closing and Zen. Tab scroll
+positions are restored. Hidden form bodies and shader file inputs are retained;
+an application reload is not a promise to recover unsaved drafts.
+
+Widget expansion is a separate profile preference, managed by
 [`PanelSection`](../app/src/PanelSection.tsx). Eight whitelisted booleans live
 under `eigenvista:panel-expansion:v1` in localStorage; reads are size-bounded and
 storage errors fall back to in-memory state. Accessible heading buttons control
@@ -764,15 +774,31 @@ edit the scientific document, mark it dirty or request worker calculations.
 During scientific activity the Field rendering body is forced open and its
 disclosure disabled, without overwriting the user's preference.
 
-[PanelSidebar](../app/src/PanelSidebar.tsx) separately manages within-pane order
-under `eigenvista:panel-order:v1`. Only complete permutations of each pane's
-known IDs are accepted from bounded storage. Stable keyed React siblings are
-sorted in actual DOM order, preserving mounted controls (including ShaderPanel's
-local state), reading order and tab order. Reordering uses a dedicated drag handle
-or keyboard/tap move controls, announces positions, and retains keyboard focus.
-Cross-pane moves are rejected. The two pane memberships stay fixed on desktop
-and mobile; no scientific data or worker registration changes. See the
+`useWorkspacePane` owns `eigenvista:workspace-pane:v1`: pane side, finite bounded
+width, visibility, active tab, complete per-tab widget permutations and the
+three additional widget disclosures. Reads are limited to 4 KiB and validate
+each preference; unavailable storage falls back to session state. Zen and actual
+fullscreen state are transient. Neither this store nor the original disclosure
+store contains scientific arrays, shader sources, file grants or job state.
+
+The shared `PanelStack` in [PanelSidebar](../app/src/PanelSidebar.tsx) sorts stable
+keyed React siblings into actual DOM order, preserving mounted controls,
+reading order and tab order. A dedicated drag handle or keyboard/tap move
+controls announce positions and retain keyboard focus. Cross-tab/scope moves
+are rejected. The legacy `PanelSidebar` wrapper retains its original two-sidebar
+membership, `{pane,id}` drag payload and `eigenvista:panel-order:v1` preference
+for compatibility; it does not supply the default pane's orders. See the
+[simple-pane decision](design/2026-11-17-simple-workspace-pane.md) and earlier
 [ordering decision](design/2026-11-13-sidebar-reordering.md).
+
+Closing tools or entering Zen never transfers document/controller ownership,
+restarts a worker or cancels a job. An activity strip outside the pane retains
+progress and cancellation for cancellable calculations. Browser fullscreen uses
+the actual Fullscreen API and reports rejection; it is not a detached native
+window implementation or native macOS fullscreen qualification. Presentation
+settings currently have no application-control API methods. Quantitative field
+metadata stays lazy until its widget is opened, so selecting the Fields tab
+alone does not parse an unused source or start an analysis.
 
 Browser saving encodes through WASM and requests a download. Desktop saving
 encodes through WASM, revalidates in native Rust, asks for a destination, writes

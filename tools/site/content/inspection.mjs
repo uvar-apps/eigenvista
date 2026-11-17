@@ -1,28 +1,33 @@
 import { application } from "../application.mjs";
 import { release } from "../release.mjs";
+import { workspaceFigure } from "./workspace.mjs";
 
-const development = `<div class="notice" data-unreleased-inspection><strong>EigenVista ${application.version} · Unreleased scientific-inspection test build.</strong> These controls are on the development branch and are not included in the published ${release.version} download. Use the ${application.version} test application and have your agent confirm its available features. This page is preparation for testing, not a new release announcement.</div>`;
-const figure = (file, alt, caption) => `<figure class="plate"><a href="assets/inspection/${file}.webp"><img src="assets/inspection/${file}.webp" width="1650" height="1232" loading="lazy" alt="${alt}"></a><figcaption>${caption} Actual unreleased-app export; original proportions retained. <a href="assets/inspection/provenance.json">Capture provenance</a>.</figcaption></figure>`;
+const development = `<div class="notice" data-unreleased-inspection><strong>EigenVista ${application.version} · Unreleased source build.</strong> The four-tab workspace and scientific-inspection controls described here are not included in the published ${release.version} download. Use a matching current build and have your agent confirm its available features. This guide does not announce a new downloadable package.</div>`;
+const figure = (file, alt, caption) =>
+  `<figure class="plate"><a href="assets/inspection/${file}.webp"><img src="assets/inspection/${file}.webp" width="1650" height="1232" loading="lazy" alt="${alt}"></a><figcaption>${caption} Actual unreleased-app export; original proportions retained. <a href="assets/inspection/provenance.json">Capture provenance</a>.</figcaption></figure>`;
 const prompt = (text) => `<pre><code>${text}</code></pre>`;
 
 export default [
   {
     file: "reference-inspection.html",
     title: "Scientific inspection",
-    searchTitle: "Measurements, SES SAS molecular surfaces, quantitative field probes slices profiles",
-    description: "Unreleased EigenVista test-build manual: select atoms, measure geometry, inspect ligand neighborhoods, create SES/SAS surfaces and analyze scalar fields quantitatively.",
+    searchTitle:
+      "Measurements, SES SAS molecular surfaces, quantitative field probes slices profiles",
+    description:
+      "Unreleased EigenVista test-build manual: select atoms, measure geometry, inspect ligand neighborhoods, create SES/SAS surfaces and analyze scalar fields quantitatively.",
     section: "reference",
     number: "03.F",
     body: `${development}
 <p class="lede">Go from a molecular picture to a scientific observation. Select the atoms, measure their geometry, inspect molecular shape, and put numbers on a field.</p>
-${figure("orbital-slice", "Signed HOMO amplitude sampled on an oblique rectangular plane through the 17-atom C7H10 structure, with contours and a blue-white-red numerical key", "A true HOMO section of C₇H₁₀: 192 × 192 samples in the z = 0 bohr plane, displayed from −0.06 to +0.06 bohr⁻³ᐟ². The molecule, signed values, contours and key come from the running viewer.")}
+${workspaceFigure("homo-analysis-right", "The Fields tab and Quantitative field inspection widget beside a true signed HOMO plane, contour lines and an amplitude colorbar", "A true C₇H₁₀ HOMO section, with the controls used to make it: signed amplitude, contours and a continuous −0.06 to +0.06 bohr⁻³ᐟ² key. Open Fields, collapse Quantum fields and Field rendering when you want more room, then expand Quantitative field inspection.")}
 
 <h2 id="where">Find the new controls</h2>
-<div class="table-wrap"><table><thead><tr><th scope="col">Sidebar area</th><th scope="col">Expand</th><th scope="col">Use it for</th></tr></thead><tbody>
-<tr><th scope="row">Molecular data</th><td>Selection, measurements and labels</td><td>Ordered picks, named sets, monitors, labels and individual-ligand neighborhoods.</td></tr>
-<tr><th scope="row">Field rendering</th><td>Molecular surfaces (SES/SAS)</td><td>Coordinate-derived molecular shape with an explicit radius table, probe and spacing.</td></tr>
-<tr><th scope="row">Quantum fields</th><td>Quantitative field inspection</td><td>Field meaning/units, numerical probes, planes/contours and line profiles.</td></tr>
+<div class="table-wrap"><table><thead><tr><th scope="col">Pane tab</th><th scope="col">Expand this widget</th><th scope="col">Use it for</th></tr></thead><tbody>
+<tr><th scope="row">Molecule</th><td>Selections and measurements</td><td>Ordered picks, named sets, monitors, labels and individual-ligand neighborhoods.</td></tr>
+<tr><th scope="row">Surfaces</th><td>Molecular surfaces</td><td>Coordinate-derived SES/SAS shape with an explicit radius table, probe and spacing.</td></tr>
+<tr><th scope="row">Fields</th><td>Quantitative field inspection</td><td>Field meaning/units, numerical probes, planes/contours and line profiles.</td></tr>
 </tbody></table></div>
+<p>The Tools pane starts 480 px wide on the right; its Position control moves it left. Resize the divider, collapse or drag widgets within a tab, or close Tools to recover the scene. Show tools or Shift+T reopens it without losing drafts. Zen and browser fullscreen are separate. <a href="reference.html#keyboard">Workspace and keyboard guide →</a></p>
 <p>The same operations are available to your <a href="ai.html">external AI assistant</a>. Request a scientific result in ordinary language. There is no requirement to learn programming commands, operate a file picker for the agent, or enter a model key inside EigenVista.</p>
 
 <h2 id="selection">Select source atoms in a useful order</h2>
@@ -51,7 +56,8 @@ ${figure("orbital-slice", "Signed HOMO amplitude sampled on an oblique rectangul
 <p>A molecular-shape surface is not electron density or electrostatic potential. Save retains its cached mesh without requiring its original input file or another calculation on reopen.</p>
 
 <h2 id="meaning">Give a field an honest meaning</h2>
-<p>Under <strong>Quantitative field inspection</strong>, choose the analysis field and expand <strong>Field meaning and units</strong>. Known analytic orbitals/density matrices have their supported interpretation; cube values remain <strong>unspecified</strong> until a meaning is supplied. Knowing the coordinate unit or filename does not identify the scalar quantity.</p>
+<p>Open <strong>Fields → Quantitative field inspection</strong>, choose the analysis field and expand <strong>Field meaning and units</strong>. Known analytic orbitals/density matrices have their supported interpretation; cube values remain <strong>unspecified</strong> until a meaning is supplied. Knowing the coordinate unit or filename does not identify the scalar quantity.</p>
+<p>An orbital section shows the signed amplitude <strong>ψ</strong>: positive and negative values identify phase. Total electron density <strong>ρ = Σ n<sub>i</sub>|ψ<sub>i</sub>|²</strong> is nonnegative and uses density units. Choose the total-density field for a density section; changing a label or colormap does not square an orbital. Spin or difference densities can have either sign and must retain their own meaning.</p>
 <p><strong>Apply field meaning</strong> records a user declaration. Declaring source units labels the existing values without rescaling them. Supported <strong>Display and export unit</strong> conversions change readouts/keys/CSV while keeping raw samples intact. Orbital sign colors represent phase, not positive and negative charge.</p>
 
 <h2 id="quantitative">Read points, planes and lines</h2>
@@ -60,6 +66,7 @@ ${figure("orbital-slice", "Signed HOMO amplitude sampled on an oblique rectangul
 <p>Use <strong>View meshes and analyses</strong> when a 3D volume hides a slice. This changes the viewing mode without generating a mesh. Existing saved meshes keep their own visibility; hide them separately if needed. Return explicitly to volume/raycast when you want that preview again.</p>
 <p>Each result supports <strong>Edit sampling</strong>, <strong>Recompute</strong>, visibility, label, colormap and range choices. A fixed range is useful for comparisons; <strong>Automatic sampled range</strong> restores the sampled range. Enter comma-separated plane <strong>Contour levels</strong>, then <strong>Apply result settings</strong>.</p>
 <p>Use <strong>Show numeric key</strong> for a quantitative slice's continuous colorbar. <strong>Show current field rendering key</strong> is different: it identifies the actual signed isovalues of mesh/raycast or the two-color volume's opacity transfer. It does not invent a continuous linear scale for those modes.</p>
+${workspaceFigure("homo-analysis-zen", "The same C7H10 signed HOMO section in Zen, with its colorbar and contours retained and minimal controls at the upper right", "Zen gives the same molecular section the full window while retaining its quantitative key and contours. Exit Zen or Tools returns to the pane; hiding controls does not change the analysis.")}
 <p><strong>Numerical samples and provenance</strong> and <strong>Export analysis CSV</strong> keep coordinates, values/units, domain status, method and source identity. CSV reports coordinates/profile distances in Å and values in the chosen display/export unit. Finite numerical data can remain inspectable/exportable when a particular 3D depiction reaches its graphics-precision limit; read the displayed explanation.</p>
 
 <h2 id="keep">Keep the scientific result</h2>
@@ -75,7 +82,8 @@ ${figure("orbital-slice", "Signed HOMO amplitude sampled on an oblique rectangul
   {
     file: "tutorials-geometry.html",
     title: "Measure, label and keep the geometry",
-    description: "Unreleased test-build tutorial: select a real C7H10 bond, measure distance and torsion, export labelled figures and tables, then extend to ligand neighborhoods.",
+    description:
+      "Unreleased test-build tutorial: select a real C7H10 bond, measure distance and torsion, export labelled figures and tables, then extend to ligand neighborhoods.",
     section: "tutorials",
     number: "04.5",
     body: `${development}
@@ -83,9 +91,9 @@ ${figure("orbital-slice", "Signed HOMO amplitude sampled on an oblique rectangul
 ${figure("geometry-annotations", "C7H10 ball-and-stick structure with a measured carbon-carbon distance and a label on the bridge carbon", "The first two carbons of the 17-atom C₇H₁₀ example are about 1.525 Å apart. The bridge-carbon label targets atom 7; annotations are exported by the app.")}
 <h2 id="prepare">1. Open the example</h2>
 <p>Use the matching test build and <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a>. This is the same calculated example used by the orbital tutorials. For this lesson you need only its geometry. Preserve the input and use new names for output files.</p>
-<p>Choose <strong>Ball and stick</strong>. If a volume obscures the atoms, expand <strong>Quantum fields → Quantitative field inspection</strong> and choose <strong>View meshes and analyses</strong>; hide any saved surfaces separately.</p>
+<p>Choose <strong>Ball and stick</strong>. If a volume obscures the atoms, expand <strong>Fields → Quantitative field inspection</strong> and choose <strong>View meshes and analyses</strong>; hide any saved surfaces separately.</p>
 <h2 id="distance">2. Measure the C–C bond</h2>
-<ol><li>Open <strong>Molecular data → Selection, measurements and labels</strong>.</li><li>Enter <strong>1, 2</strong> in the atom-number box and choose <strong>Select atom numbers</strong>. Alternatively enable picking and click those atoms in order.</li><li>Expand <strong>Geometry measurements</strong>, choose <strong>Distance</strong>, name it <strong>C–C bond</strong>, and choose <strong>Add measurement</strong>.</li><li>Check a value near <strong>1.525 Å</strong> in the table and scene monitor. Rotating/zooming must not change it.</li></ol>
+<ol><li>Open <strong>Molecule → Selections and measurements</strong>.</li><li>Enter <strong>1, 2</strong> in the atom-number box and choose <strong>Select atom numbers</strong>. Alternatively enable picking and click those atoms in order.</li><li>Expand <strong>Geometry measurements</strong>, choose <strong>Distance</strong>, name it <strong>C–C bond</strong>, and choose <strong>Add measurement</strong>.</li><li>Check a value near <strong>1.525 Å</strong> in the table and scene monitor. Rotating/zooming must not change it.</li></ol>
 <div class="notice"><strong>Checkpoint:</strong> the monitor measures the original coordinates. It does not estimate a distance from the picture or depend on the display sphere radius.</div>
 <h2 id="order">3. Keep selection and pick order separate</h2>
 <p>Save the two atoms under <strong>Named selections</strong> as <strong>Measured bond</strong>. Then try four ordered atoms <strong>1, 2, 7, 3</strong> for a connected carbon-path torsion. Choose <strong>Signed torsion</strong> and add a separate monitor. Read its signed value rather than assuming a planar structure.</p>
@@ -104,7 +112,8 @@ ${prompt("Use the scientific-inspection test build and the C7H10 example. Measur
   {
     file: "tutorials-molecular-surfaces.html",
     title: "Compare solvent-accessible and excluded shape",
-    description: "Unreleased EigenVista tutorial: generate genuine SES/SAS molecular surfaces with explicit radius tables, probe and spacing, compare views and retain cached geometry.",
+    description:
+      "Unreleased EigenVista tutorial: generate genuine SES/SAS molecular surfaces with explicit radius tables, probe and spacing, compare views and retain cached geometry.",
     section: "tutorials",
     number: "04.6",
     body: `${development}
@@ -114,7 +123,7 @@ ${figure("molecular-ses", "Translucent teal solvent-excluded surface around the 
 <p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in the matching test build. Its 17 atoms make a quick first comparison; the surface needs their coordinates/radii, not the file's quantum fields. PDB/XYZ/mmCIF structures can use the same controls.</p>
 <p>Choose <strong>View meshes and analyses</strong> to remove a sampled volume, and hide unrelated saved quantum meshes. Keep the atomic framework visible.</p>
 <h2 id="ses">2. Generate the first SES</h2>
-<ol><li>Under <strong>Field rendering</strong>, expand <strong>Molecular surfaces (SES/SAS)</strong>.</li><li>Choose <strong>Solvent excluded (SES)</strong>, all source atoms, and <strong>Bondi / Mantina</strong> radii.</li><li>Start with a <strong>1.4 Å</strong> probe and <strong>0.5 Å</strong> spacing. Name the surface and choose <strong>Generate molecular surface</strong>.</li><li>Wait for completion and inspect the saved surface's scientific provenance. It should echo your kind, radii, probe and actual spacing.</li></ol>
+<ol><li>Choose the <strong>Surfaces</strong> tab and expand <strong>Molecular surfaces</strong>.</li><li>Choose <strong>Solvent excluded (SES)</strong>, all source atoms, and <strong>Bondi / Mantina</strong> radii.</li><li>Start with a <strong>1.4 Å</strong> probe and <strong>0.5 Å</strong> spacing. Name the surface and choose <strong>Generate molecular surface</strong>.</li><li>Wait for completion and inspect the saved surface's scientific provenance. It should echo your kind, radii, probe and actual spacing.</li></ol>
 <p>Smaller spacing gives finer geometry. To obtain the illustrated finish, generate or regenerate explicitly at <strong>0.15 Å</strong> after the first test succeeds. No automatic coarsening is used. Cancellation/error retains the earlier accepted mesh.</p>
 <h2 id="sas">3. Compare SAS using the same inputs</h2>
 <p>Keep the SES, choose <strong>Create a new surface</strong>, and select <strong>Solvent accessible (SAS)</strong> with the same atoms, radii, probe and spacing. Give it a different name. Toggle visibility so you compare one surface at a time from the same camera.</p>
@@ -122,6 +131,7 @@ ${figure("molecular-ses", "Translucent teal solvent-excluded surface around the 
 <h2 id="selection">4. Understand selected surfaces</h2>
 <p>Choose <strong>Current selection</strong> or a named set when inspecting a local object. The calculation treats only those atoms as an isolated object: omitted atoms cease to occlude the surface. It is not a window cut out of the full molecule's existing mesh.</p>
 <p>For a large protein, first select/name the intended chain or ligand neighborhood. Your agent can resolve the source identities and prepare the set for you. A small selected surface is often a more useful first test than requesting an entire assembly at very fine spacing.</p>
+${workspaceFigure("crambin-shape-left", "The left-hand Surfaces pane with molecular-surface controls beside a translucent X-ray-shaded crambin SES and its Pastel atomic framework", "The same Surfaces widget on the left: 327-atom crambin with a solvent-excluded surface, Pastel atoms and the X-ray finish. This is a separate protein example, not the C₇H₁₀ surface above.")}
 <h2 id="appearance">5. Reveal the interior and keep the result</h2>
 <p>Choose <strong>Ball and stick</strong> or <strong>Liquorice</strong> to avoid the coincident-contact interference of Van der Waals spheres with SES. Expand the saved surface and change its color or opacity: the view updates immediately, with no Apply button or mesh regeneration.</p>
 <p>Use opacity or the <a href="surface-shaders.html">X-ray/clipping surface shaders</a> to reveal the framework. Choose the particular molecular surface as the shader target if you want other meshes untouched. Molecular AO continues to apply to atom/bond instances, not the SAS/SES mesh.</p>
@@ -136,15 +146,16 @@ ${prompt("Using the scientific-inspection test build, compare solvent-excluded a
   {
     file: "tutorials-quantitative-fields.html",
     title: "Inspect an orbital quantitatively",
-    description: "Unreleased test-build tutorial: probe a real HOMO, sample a true plane with contours and a fixed numerical key, plot a bond profile and export the values.",
+    description:
+      "Unreleased test-build tutorial: probe a real HOMO, sample a true plane with contours and a fixed numerical key, plot a bond profile and export the values.",
     section: "tutorials",
     number: "04.7",
     body: `${development}
 <p class="lede">A colored surface suggests shape. A probe, slice and line profile tell you what values are actually there.</p>
 ${figure("orbital-slice", "An oblique view of a signed HOMO slice with the molecular framework, contour lines and a numerical amplitude key", "C₇H₁₀ HOMO (MO 26), z = 0 bohr: 14 × 12 bohr plane, 192 × 192 samples, fixed ±0.06 bohr⁻³ᐟ² range and contours at −0.04, −0.02, +0.02 and +0.04 bohr⁻³ᐟ².")}
 <h2 id="field">1. Select a field with known provenance</h2>
-<p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in the matching test build. Expand <strong>Quantum fields → Quantitative field inspection</strong> and choose the example's <strong>HOMO, MO 26</strong>, as the analysis field.</p>
-<p>Inspect <strong>Field meaning and units</strong>: this is a real orbital amplitude, with values expressed in bohr⁻³ᐟ² under the supplied basis/coefficients. The signs are orbital phase, not positive and negative charge. This tutorial does not calculate a new wavefunction.</p>
+<p>Open <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> in the matching test build. Expand <strong>Fields → Quantitative field inspection</strong> and choose the example's <strong>HOMO, MO 26</strong>, as the analysis field.</p>
+<p>Inspect <strong>Field meaning and units</strong>: this is the real orbital amplitude <strong>ψ</strong>, with values expressed in bohr⁻³ᐟ² under the supplied basis/coefficients. The signs are orbital phase, not positive and negative charge. Total electron density is a different, nonnegative field, <strong>ρ = Σ n<sub>i</sub>|ψ<sub>i</sub>|²</strong>, in electrons/bohr³. This tutorial samples the supplied HOMO; it does not calculate a new wavefunction or a density from its color.</p>
 <h2 id="probe">2. Read one source point</h2>
 <p>Choose <strong>Point probe</strong>. Enter a coordinate with an explicit Å/bohr choice, or select exactly one atom and choose selected source atoms. Create the result and inspect its numerical value, unit and sampling method. Moving the camera or changing 3D preview resolution must not change the number.</p>
 <p>Analytic Molden fields are evaluated directly; imported cube fields are interpolated from their original samples. These are different methods and are identified as such.</p>

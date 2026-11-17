@@ -10,6 +10,76 @@ Start with the [documentation map](README.md), [user guide](user-guide.md),
 
 ## Verification policy: 14 November 2026
 
+<a id="source-version-0100"></a>
+
+### Source update 0.10.0, 17 November 2026 — locally qualified
+
+The user approved the simpler workspace and authorized complete documentation/
+website updates, the version bump, commit, PR merge, tag and push of main. The
+single resizable four-tab pane becomes normal startup. `?workspace=legacy`
+retains the historical layout for explicit comparison/regression tests. Guides
+describe the same scientific inspection through GUI and connector, including
+**Fields → Quantitative field inspection** and signed orbital amplitude versus
+electron density.
+
+Fresh local macOS/default-GUI, build/native, packaging and two-engine website
+checks are required before pushing; the previous 638-case opt-in qualification
+below does not establish the new default. Published binaries remain the verified
+0.8.0 release, with their original hashes/DOI. No new binary release, Linux or
+native multiwindow or green-button fullscreen qualification is implied. Local
+native acceptance now includes the actual Tauri WebKit fullscreen facility,
+plane creation, pane restoration, connector round trips and lifecycle scenarios;
+the complete browser suite passes **646/646 cases**, 323 per engine, in 24.3
+minutes with one worker, no failures/skips/flaky cases/retries and all 234
+frozen source hashes unchanged. Fresh checks also pass 336 default Rust and
+eight desktop tests, strict Clippy, WASM/TypeScript/production and native debug
+builds, 17 packaging-support and six connector-packaging tests, plus all 162
+website cases. Native acceptance covers 34 inspection methods through 160 calls
+and four lifecycle scenarios. Read
+[0.10.0 notes](releases/0.10.0.md) and [handoff](handoff.md) for current evidence
+and delivery state. Dated sections below preserve their historical constraints.
+
+### Simple pane follow-up, 17 November 2026 — historical opt-in qualification
+
+The user selected a single wide left/right pane with four internal top tabs and
+the original collapsible/draggable widgets and chrome. This supersedes the earlier
+three-placement `?workspace=lab` candidate below; ordinary startup remains the
+comparison. Active sources are WorkspacePane/useWorkspacePane/CSS, with reusable
+PanelStack and original PanelSection markup. No scientific/native/controller/
+dependency/version changes. Fresh local macOS 27.0/arm64 checks pass: TypeScript,
+formatting, production frontend build and **638/638 Chromium/WebKit cases**
+(319 per engine, 26.1 minutes, one worker, zero failures/skips/flaky cases/retries).
+All 124 recorded runtime/test/dependency hashes match before and after the run.
+This includes 24 workspace cases and all existing widget regressions. WebKit's
+hidden-tab scroll reset was reproduced and fixed; both engines retain their tab
+positions. Twenty new scientific comparison images are saved and three originals
+with provenance illustrate the current guide. A fresh preview tab is open and
+ready; ordinary startup still awaits a user adoption decision. Earlier 636-case
+results/captures are historical. No commit/tag/push/PR/merge/release. Read the
+[current design](design/2026-11-17-simple-workspace-pane.md) and [handoff](handoff.md).
+
+### Desktop workspace experiments, 17 November 2026 — validated for browser review
+
+[#88](https://github.com/uvar-apps/eigenvista/issues/88) adds an opt-in local
+workspace lab (`?workspace=lab`) for user review: a resizable tabbed dock, bottom
+workbench and in-app floating palette, tool hide/reopen, Zen and independent
+browser fullscreen. Ordinary startup remains the comparison layout. Scientific
+controls, controller and workers retain their existing owners; native detached
+windows and native fullscreen are not claimed. See the
+[design analysis](design/2026-11-16-desktop-workspaces.md) and current
+[handoff](handoff.md). Fresh local macOS 27.0/arm64 checks pass: TypeScript,
+Prettier, production frontend build and **636/636 Chromium/WebKit application
+cases** (318 per engine, 22.8 minutes, one worker, zero skips/retries/failures).
+All 125 captured runtime/test/dependency hashes match before/after the run.
+This includes 22 new workspace cases for actual scientific controls, camera/
+draft/file-DOM preservation, progress/cancel, focus/scroll, short windows, real
+fullscreen and compositor/legend pixels. Twenty final comparison PNGs are saved;
+five originals with provenance illustrate the report. Earlier visual and sizing
+failures are preserved separately. One visible tool host, the existing modal
+orbital chooser and no workspace API/native window qualification remain explicit
+prototype limits. User design review precedes choosing a default. Source remains
+0.9.0 unreleased; no new native package, commit/tag/push/PR/merge/release.
+
 ### Local 0.9.0 checkpoint, 16 November 2026
 
 The user authorized a local commit and annotated **`v0.9.0`** tag on

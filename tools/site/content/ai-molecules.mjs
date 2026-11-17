@@ -1,13 +1,17 @@
+import { agentWorkspaceNote } from "./workspace.mjs";
+
 export default [
   {
     file: "ai-tutorial-ao.html",
     title: "Read crowded molecules with AO",
-    searchTitle: "AI tutorial: large molecules, atomic representations and ambient occlusion",
+    searchTitle:
+      "AI tutorial: large molecules, atomic representations and ambient occlusion",
     description:
       "Ask an external agent to compare atomic representations and matched-camera ambient-occlusion images of the 58,870-atom 1AON complex in EigenVista.",
     section: "ai",
     number: "07.3",
     body: `
+${agentWorkspaceNote}
       <p class="lede page-lede">Turn a crowded atomic view into a readable study of molecular packing. Ask your agent to compare three representations, add matte ambient occlusion, and keep a pair of images from exactly the same camera.</p>
 
       <h2 id="get-ready">Get ready</h2>
@@ -75,12 +79,14 @@ export default [
   {
     file: "ai-tutorial-representations.html",
     title: "Read a large protein assembly",
-    searchTitle: "AI tutorial: protein trace, tube, ribbon and cartoon representations",
+    searchTitle:
+      "AI tutorial: protein trace, tube, ribbon and cartoon representations",
     description:
       "Use natural-language prompts to compare four protein representations of 1AON, distinguish chains and entities, and focus on one protein chain.",
     section: "ai",
     number: "07.4",
     body: `
+${agentWorkspaceNote}
       <p class="lede page-lede">Step back from atomic packing to see how a large complex is organized. Ask your agent to compare backbone traces, smooth tubes, ribbons and cartoons, then study the deposited fold of one chain.</p>
 
       <h2 id="get-ready">Get ready</h2>

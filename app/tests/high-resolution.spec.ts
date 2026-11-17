@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
@@ -30,7 +31,7 @@ type CacheProbedWindow = Window & {
 async function ready(page: Page) {
   await trackSceneDraws(page);
   page.on("dialog", (dialog) => dialog.accept());
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText(
     "triangles",
     { timeout: 45_000 },

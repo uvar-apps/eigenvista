@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -12,7 +13,7 @@ interface Client {
 }
 
 async function ready(page: Page) {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
 }
 

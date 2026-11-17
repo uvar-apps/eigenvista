@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
@@ -13,7 +14,7 @@ const upload = {
 
 async function ready(page: Page) {
   await trackSceneDraws(page);
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   page.on("dialog", (dialog) => dialog.accept());
 }
@@ -195,7 +196,9 @@ test("cube Open retains both scalar signs and mesh-free controls on mobile", asy
   expect(errors).toEqual([]);
 });
 
-test("cube raycast rotation settles and preserves both scalar signs", async ({ page }) => {
+test("cube raycast rotation settles and preserves both scalar signs", async ({
+  page,
+}) => {
   // Hosted rendering spent 13 s delivering the same 12-step gesture and more
   // than 42 s finishing real damping draws. Give this independent interaction
   // its own bounded budget without changing damping, geometry or pixel checks.

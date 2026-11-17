@@ -276,7 +276,7 @@ assert.equal(application.status, "unreleased", "Source version is preparation fo
 assert(html.get("index.html").includes("data-current-development") && html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
 assert(html.get("install.html").includes(`Published download: ${release.version}`));
 assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download remains the existing verified package");
-assert(html.get("about.html").includes("This DOI identifies the released version 0.8.0"));
+assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive, not the newer source"));
 assert(html.get("about.html").includes(`${application.version} test build is unreleased and has no version-specific DOI yet`));
 assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
 const media = JSON.parse(
@@ -332,7 +332,30 @@ for (const pair of media.comparisons) {
 const mediaFiles = files.filter(
   (row) => row.path.startsWith("assets/media/") && row.path.endsWith(".webp"),
 );
-assert.equal(mediaFiles.length, 16, "All curated genuine captures");
+const workspaceMedia = media.workspacePaneCaptures;
+assert.equal(workspaceMedia.application.version, "0.9.0", "Preserve the actual capture version");
+assert.equal(workspaceMedia.application.publishedRelease, false);
+assert.equal(workspaceMedia.application.sourceBaseline, "9617a31e7824fbe93ccc78829afa6079ed1080f5");
+assert.equal(workspaceMedia.images.length, 3);
+for (const row of workspaceMedia.images) {
+  assert(/^simple-[a-z0-9-]+\.webp$/.test(row.file), row.file);
+  const image = fs.readFileSync(path.join(site, "assets/media", row.file));
+  assert.equal(image.length, row.bytes);
+  assert.equal(hash(image), row.sha256);
+  assert.equal(image.toString("ascii", 0, 4), "RIFF");
+  assert.equal(image.toString("ascii", 8, 12), "WEBP");
+  const original = fs.readFileSync(path.join(root, row.sourcePng));
+  assert.equal(hash(original), row.sourcePngSha256);
+  assert.equal(original.readUInt32BE(16), row.width);
+  assert.equal(original.readUInt32BE(20), row.height);
+  assert.equal(row.width, 1280);
+  assert.equal(row.height, 800);
+}
+for (const row of workspaceMedia.inputs)
+  assert.equal(hash(fs.readFileSync(path.join(root, row.file))), row.sha256);
+assert.deepEqual(mediaFiles.map((row) => path.basename(row.path)).sort(),
+  [...media.images, ...workspaceMedia.images].map((row) => row.file).sort(),
+  "Complete curated capture inventory, including three approved-workspace images");
 const inspectionMedia = JSON.parse(fs.readFileSync(path.join(site, "assets/inspection/provenance.json")));
 assert.equal(inspectionMedia.application.publishedRelease, false);
 assert.equal(inspectionMedia.application.branch, "codex/scientific-inspection");

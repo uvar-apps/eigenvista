@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -217,7 +218,7 @@ async function png(page: Page, transparent: boolean) {
   }, image);
 }
 
-test("normal startup has no public automation entry point or new GUI", async ({
+test("normal startup uses the approved four-tab pane without a public automation entry point", async ({
   page,
 }) => {
   await page.goto("/");
@@ -230,6 +231,12 @@ test("normal startup has no public automation entry point or new GUI", async ({
   await expect(
     page.getByRole("button", { name: "Molecular data", exact: true }),
   ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Workspace tools", exact: true })
+      .getByRole("tab"),
+  ).toHaveText(["Molecule", "Fields", "Surfaces", "Appearance"]);
+  await activateWidget(page, "field-rendering");
   await expect(
     page.getByRole("button", { name: "Generate surfaces", exact: true }),
   ).toBeVisible();

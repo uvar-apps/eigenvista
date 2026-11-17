@@ -1,13 +1,17 @@
+import { agentWorkspaceNote } from "./workspace.mjs";
+
 export default [
   {
     file: "ai-tutorial-orbitals.html",
     title: "From a prompt to an orbital",
-    searchTitle: "AI tutorial: reproduce the recorded EigenVista HOMO and X-ray session",
+    searchTitle:
+      "AI tutorial: reproduce the recorded EigenVista HOMO and X-ray session",
     description:
       "Follow seven natural-language prompts from a recorded EigenVista session: inspect Molden orbitals, render the HOMO, export PNGs and refine an X-ray surface.",
     section: "ai",
     number: "07.1",
     body: `
+${agentWorkspaceNote}
 <p class="lede page-lede">Seven exchanges take a real calculation from a Molden file to a smooth, luminous orbital. Give each prompt to your external agent, watch EigenVista respond, and check the result before continuing.</p>
 
 <h2 id="get-ready">Start with the connected app</h2>
@@ -68,12 +72,14 @@ export default [
   {
     file: "ai-tutorial-density.html",
     title: "Look inside electron density",
-    searchTitle: "AI tutorial: density volume rendering, X-ray surfaces and clipping",
+    searchTitle:
+      "AI tutorial: density volume rendering, X-ray surfaces and clipping",
     description:
       "Ask an external AI agent to discover occupation-derived density, compare volume and raycast previews, generate a mesh, reveal its interior and save the molecular document.",
     section: "ai",
     number: "07.2",
     body: `
+${agentWorkspaceNote}
 <p class="lede page-lede">Move from a signed orbital to a density envelope. Explore the sampled field first, then make geometry you can shade, cut open and save.</p>
 
 <h2 id="get-ready">Use the same real calculation</h2>

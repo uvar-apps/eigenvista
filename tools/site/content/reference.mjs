@@ -1,18 +1,18 @@
 import { application } from "../application.mjs";
 import { release } from "../release.mjs";
+import { workspaceFigure, workspaceNotice } from "./workspace.mjs";
 
 export default [
   {
     file: "reference.html",
     title: "User reference",
     searchTitle: "Molecular and quantum chemistry viewer reference manual",
-    description:
-      `The EigenVista ${application.version} test-build manual: files, scene controls, quantum fields, scientific inspection, biological structures, and saving.`,
+    description: `The EigenVista ${application.version} test-build manual: files, scene controls, quantum fields, scientific inspection, biological structures, and saving.`,
     section: "reference",
     number: "03",
     body: `
 <div class="prose">
-  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference covers the <strong>${application.version} unreleased test build</strong>, including <a href="reference-inspection.html">scientific inspection</a>. The published Mac download is still <strong>${release.version}</strong>; the new inspection controls require the matching test build. Use the <a href="install.html">installation guide</a> for the published app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
+  <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference covers the <strong>${application.version} unreleased source build</strong>, including the four-tab workspace and <a href="reference-inspection.html">scientific inspection</a>. The published Mac download is still <strong>${release.version}</strong>; its earlier layout and tools differ. Use the <a href="install.html">installation guide</a> for that published app, or follow a <a href="tutorials.html">worked tutorial</a> with a downloadable example and a matching build.</p>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">
@@ -26,34 +26,34 @@ export default [
   </ul>
 
   <h2 id="workspace">The application workspace</h2>
+  <p>One Tools pane starts on the right at <strong>480 px</strong> wide. Its four tabs are inside the pane; choose <strong>Position → Left</strong> to move it across the scene. Drag the inner divider to resize it. The existing header, file buttons, viewport toolbar and footer stay in their familiar places.</p>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Area</th><th scope="col">What you do there</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Top bar</th><td>Read the document title and unsaved indicator; choose <strong>Open</strong>, <strong>Convert files</strong>, or <strong>Save</strong>.</td></tr>
-      <tr><th scope="row">Molecular data</th><td>Check atom, bond, and basis counts; choose <strong>Representation</strong>; open a mathematical example; access biological controls when metadata exists.</td></tr>
-      <tr><th scope="row">Quantum fields</th><td>Choose an orbital, density matrix, or sampled field. <strong>Orbitals (count)</strong> opens the orbital browser.</td></tr>
-      <tr><th scope="row">Provenance</th><td>Read source descriptions, import policies, omitted information, and warnings.</td></tr>
+      <tr><th scope="row">Top bar</th><td>Read the document title and unsaved indicator; choose <strong>Open</strong>, <strong>Convert</strong>, or <strong>Save</strong>. Three compact buttons show/hide Tools, enter Zen and toggle fullscreen.</td></tr>
+      <tr><th scope="row">Molecule tab</th><td><strong>Molecular data</strong>: counts, representation and biological controls. <strong>Selections and measurements</strong>: ordered picks, named sets, labels and neighborhoods. <strong>Provenance</strong>: source decisions and warnings.</td></tr>
+      <tr><th scope="row">Fields tab</th><td><strong>Quantum fields</strong>: orbitals, densities and sampled fields. <strong>Field rendering</strong>: volume/raycast, isovalue, resolution and mesh generation. <strong>Quantitative field inspection</strong>: probes, true planes, contours and line profiles.</td></tr>
+      <tr><th scope="row">Surfaces tab</th><td><strong>Molecular surfaces</strong>: coordinate-derived SES/SAS and live saved appearance. <strong>Saved surfaces</strong>: quantum/imported mesh visibility and triangle counts.</td></tr>
+      <tr><th scope="row">Appearance tab</th><td><strong>Appearance</strong>: field colors/opacity, surface shading and molecular AO. <strong>Atom colours</strong>: element palettes. <strong>Surface shader</strong>: custom GLSL sources, targets and live parameters.</td></tr>
       <tr><th scope="row">Central scene</th><td>Rotate, pan, zoom, and pick an atom or saved surface. Inspection information appears below the scene.</td></tr>
-      <tr><th scope="row">Field rendering</th><td>Choose <strong>Mode</strong>, <strong>Isovalue</strong>, and <strong>Grid resolution</strong>; generate surfaces or cancel work.</td></tr>
-      <tr><th scope="row">Appearance</th><td>Set positive/negative field colors, opacity, surface shading, and molecular ambient occlusion.</td></tr>
-      <tr><th scope="row">Atom colours / Surface shader</th><td>Load an element palette or an optional vertex/fragment shader pair.</td></tr>
-      <tr><th scope="row">Saved surfaces</th><td>Inspect triangle counts, toggle individual meshes, or delete them.</td></tr>
       <tr><th scope="row">Footer and progress panel</th><td>Read operation status, completed sampling slices, signed meshing passes, elapsed time, and errors.</td></tr>
     </tbody>
   </table></div>
-  <p>The runtime badge says <strong>Native (Tauri)</strong> in the Mac app and <strong>WebAssembly</strong> in the browser viewer. On narrow windows, the panels rearrange and you may need to scroll.</p>
+  <p>Close Tools to give its width back to the scene. The header's <strong>Show tools</strong> button or <strong>Shift+T</strong> brings back the same pane. At narrow widths it overlays the scene instead of squeezing it. Switching tabs, changing side or hiding the pane retains tool drafts and the current camera; a hidden pane does not cancel a calculation.</p>
 
-  <figure><a href="assets/media/app-overview.webp" aria-label="Open the full-size EigenVista workspace image"><img src="assets/media/app-overview.webp" alt="EigenVista workspace showing the C7H10 molecular density with a custom X-ray shader and editable parameters" loading="lazy"></a><figcaption>The C₇H₁₀ density envelope with an X-ray shader. Field controls are on the right; shader parameters update the surface live. <a href="assets/media/app-overview.webp">Open the full-size image</a> or <a href="surface-shaders.html">try the shader workflow</a>.</figcaption></figure>
+  ${workspaceFigure("homo-analysis-right", "The single right-hand Tools pane with its four tabs, showing Quantitative field inspection beside a signed HOMO plane and numerical colorbar", "Fields → Quantitative field inspection beside a true C₇H₁₀ HOMO section. The orbital amplitude ψ has both signs; its blue–white–red key spans −0.06 to +0.06 bohr⁻³ᐟ², with contours on the sampled plane.")}
 
-  <h2 id="keyboard">Keyboard and sidebar controls</h2>
-  <p>Use Tab to move between controls and Enter or Space to activate buttons. A sidebar heading is a button: activate it to collapse or expand that section. Collapsing a section retains its controls' settings and selections. In Safari on macOS, use Option-Tab if ordinary Tab skips buttons, or enable macOS Keyboard Navigation.</p>
+  <h2 id="keyboard">Keyboard and widget controls</h2>
+  <p>Use Tab to move between controls and Enter or Space to activate buttons. Left/Right and Home/End move among the four pane tabs. A widget heading is a button: activate it to collapse or expand that section. Collapsing retains settings and selections. In Safari on macOS, use Option-Tab if ordinary Tab skips buttons, or enable macOS Keyboard Navigation.</p>
   <ol>
-    <li>To move a section, drag its <strong>Reorder</strong> handle onto the upper or lower half of another heading in the same sidebar.</li>
+    <li>To move a widget, drag its <strong>Reorder</strong> handle onto the upper or lower half of another heading in the same tab.</li>
     <li>Alternatively, click or tap the handle and choose <strong>Move up</strong> or <strong>Move down</strong>.</li>
-    <li>With keyboard focus on the handle, use Up/Down to move one place, or Home/End to move to the start/end of that sidebar. Focus stays on the handle and the new position is announced.</li>
+    <li>With keyboard focus on the handle, use Up/Down to move one place, or Home/End to move to the start/end of that tab's stack. Focus stays on the handle and the new position is announced.</li>
     <li>Escape closes the move controls and returns focus to the handle.</li>
   </ol>
-  <p>The eight sections start expanded. Section order and expansion are remembered in the current browser or desktop profile across Open and restart, separately from molecular documents. Without profile storage, they last for the session. <strong>Field rendering</strong> stays open during calculations so progress and <strong>Cancel</strong> remain available; its previous expansion choice returns afterward. Reordering is available during a calculation.</p>
+  <p>Widget order stays within its tab. Pane side, width, active tab and visibility are profile preferences, alongside widget order/expansion; they are not part of a molecular document. Without profile storage they last for the session. On the focused divider, use Left/Right, Shift+arrows for a larger step, or Home/End to resize. Closing a widget differs from closing the whole pane: only closing the pane reclaims its scene width.</p>
+  <p><strong>Shift+Z</strong> enters Zen: header, footer and Tools hide while Exit Zen, Tools, source identity and essential scene controls remain. Choose Tools to leave Zen and reopen the pane. Fullscreen is separate and uses the browser's actual facility. While fullscreen is active the platform handles Escape first; after leaving fullscreen, Escape can leave Zen. Visible exits remain available. Shortcuts leave editable inputs and modal dialogs alone. The orbital browser remains a modal chooser.</p>
+  <p>Progress and <strong>Cancel calculation</strong> remain available outside the pane, including in Zen, for cancellable work. Hiding Tools or switching tabs neither restarts nor cancels it. A noncancellable Save shows status without a misleading Cancel action. Browser fullscreen does not establish native macOS fullscreen or multi-monitor qualification.</p>
   <p>The scene's <strong>Zoom in</strong>, <strong>Zoom out</strong>, <strong>Fit scene</strong>, and <strong>Reset view</strong> buttons provide alternatives to mouse gestures. See <a href="reference-scene.html#navigation">scene navigation</a>.</p>
 
   <h2 id="persistence">What is saved?</h2>
@@ -61,10 +61,10 @@ export default [
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Kind of state</th><th scope="col">Examples</th><th scope="col">After reopening or restarting</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Saved molecular data</th><td>Selected atoms and biological identities, bonds, supplied basis/orbitals/density matrices or original sampled grids, provenance, saved meshes and generation settings.</td><td>Retained in <code>.eigenvista</code>.</td></tr>
+      <tr><th scope="row">Saved molecular data</th><td>Atoms and biological identities, bonds, supplied basis/orbitals/density matrices or original sampled grids, provenance, saved meshes, named selections, measurements/labels and quantitative analysis definitions/caches.</td><td>Retained in <code>.eigenvista</code> by a matching current build.</td></tr>
       <tr><th scope="row">Saved document appearance</th><td>Global molecular representation, surface colors, opacity, and saved-mesh visibility.</td><td>Retained in <code>.eigenvista</code>.</td></tr>
-      <tr><th scope="row">Session display settings</th><td>Camera, render mode, background, AO, atom palette, surface shading, shader/uniforms, preview quality, biological filters/styles, orbital checkboxes, and sampling cache.</td><td>Not stored in the molecular file. Reapply after restarting; some settings continue across Open within a session.</td></tr>
-      <tr><th scope="row">Profile preferences</th><td>Sidebar section order and expansion.</td><td>Remembered on that browser/desktop profile when storage is available; not shared with the document.</td></tr>
+      <tr><th scope="row">Session display settings</th><td>Camera, render mode, background, AO, atom palette, surface shading, shader/uniforms, preview quality, biological filters/styles, orbital checkboxes, and preview sampling cache.</td><td>Not stored in the molecular file. Reapply after restarting; some settings continue across Open within a session.</td></tr>
+      <tr><th scope="row">Profile preferences</th><td>Pane side, width, active tab and visibility; per-tab widget order and expansion.</td><td>Remembered on that browser/desktop profile when storage is available; not shared with the document. Zen is transient.</td></tr>
     </tbody>
   </table></div>
   <p>Each mesh records the grid used to generate it, but the <strong>Grid resolution</strong> control resets in a new application session. Generated orbital/density grids are transient; their analytic inputs and saved meshes persist. Imported cube grids retain their original values. See <a href="reference-files.html#saving">saving and sharing</a> and <a href="reference-fields.html#cache">field caching</a>.</p>
@@ -99,13 +99,14 @@ export default [
     number: "03.1",
     body: `
 <div class="prose">
+  ${workspaceNotice}
   <p>Open an existing calculation or structure, inspect the import report, and save a self-contained <code>.eigenvista</code> document. Opening never overwrites the input. Keep original files: the preview deliberately imports a selected, supported subset rather than every source annotation.</p>
 
   <h2 id="open">Open and check a file</h2>
   <ol>
     <li>Choose <strong>Open</strong> in the app's top bar, then select a supported local file. Use this button: Finder file associations and drag-and-drop loading are not implemented.</li>
     <li>If prompted about unsaved work, save or deliberately discard it before replacing the scene.</li>
-    <li>Check atom, bond, basis, and field counts in <strong>Molecular data</strong> and <strong>Quantum fields</strong>. Read <strong>Import report</strong> and <strong>Provenance</strong>, including warnings.</li>
+    <li>Check counts under <strong>Molecule → Molecular data</strong> and <strong>Fields → Quantum fields</strong>. Read <strong>Import report</strong> and <strong>Molecule → Provenance</strong>, including warnings.</li>
     <li>Use <strong>Fit scene</strong> if necessary. Imported structures show automatic display bonds; cube fields normally start in <strong>Volume preview</strong>.</li>
     <li>Choose <strong>Save</strong> and a new <code>.eigenvista</code> filename to retain the imported data and subsequent changes.</li>
   </ol>
@@ -158,7 +159,7 @@ export default [
   <p><strong>Cancel</strong> stops that queue's pending work and retains completed results. Closing the conversion window preserves them in memory; <strong>Clear</strong> discards them. Saved/downloaded result bytes are released. Unwritten results do not survive closing the application. Conversion preserves supplied fields and existing native meshes but does not generate new surfaces.</p>
 
   <h2 id="saving">Save, reopen, and share</h2>
-  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. A matching preview installation can show saved meshes without the original inputs or recalculation.</p>
+  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. The current source also retains named selections, labels/measurements, SES/SAS meshes and accepted quantitative field definitions/caches. A matching installation can reopen results without their original inputs or silent recalculation; the published 0.8.0 reader cannot open documents requiring these newer capabilities.</p>
   <ol>
     <li>Generate any meshes you want to keep, check visibility and appearance, and choose <strong>Save</strong>.</li>
     <li>On desktop, choose a destination. Cancelling leaves the document unsaved. In a browser, confirm the requested download completed.</li>
@@ -195,6 +196,7 @@ eigenvista-convert --help</code></pre>
     number: "03.2",
     body: `
 <div class="prose">
+  ${workspaceNotice}
   <p>Frame a molecule, choose how atoms and fields are drawn, then export the current viewport. Global representation and field colors/opacity belong to the document. Camera, background, lighting choices, palettes, and shaders are display preferences for the session.</p>
 
   <h2 id="navigation">Navigate and inspect</h2>
@@ -212,7 +214,7 @@ eigenvista-convert --help</code></pre>
   <p>Tab to toolbar buttons and activate with Enter or Space. Hover an icon to read its name. The published 0.8.0 app displays picked information; the <a href="reference-inspection.html#measure">unreleased scientific-inspection test build</a> also supports distance, angle and signed-torsion measurements. Neither modifies molecular coordinates. The camera is not saved in <code>.eigenvista</code>.</p>
 
   <h2 id="representations">Molecular representations</h2>
-  <p>Choose <strong>Representation</strong> in <strong>Molecular data</strong>. The global choice is saved with the document.</p>
+  <p>Choose <strong>Representation</strong> in <strong>Molecule → Molecular data</strong>. The global choice is saved with the document.</p>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Choice</th><th scope="col">Depiction and use</th></tr></thead>
     <tbody>
@@ -229,16 +231,16 @@ eigenvista-convert --help</code></pre>
   <p>Element colors cover atomic numbers 1–118. Display radii use published van der Waals tables where available and a covalent-radius-based continuation for Fm–Og; they are visual models. Automatic bonds use a separate covalent-radius heuristic. A drawn rod is not a bond-order or chemical-validity result.</p>
 
   <h2 id="field-appearance">Field colors, opacity, and surface shading</h2>
-  <p>Under <strong>Appearance</strong>, <strong>Positive</strong> and <strong>Negative</strong> choose signed field colors, and <strong>Opacity</strong> controls field transparency. These apply across the document's surfaces, not just the selected field, and are retained when saved. They do not recompute the field.</p>
+  <p>Under <strong>Appearance</strong>, <strong>Positive</strong> and <strong>Negative</strong> choose signed field colors, and <strong>Opacity</strong> controls field transparency. These apply across quantum/imported-field surfaces, not just the selected field, and are retained when saved. Molecular SES/SAS has its own live saved color and opacity under <strong>Surfaces → Molecular surfaces</strong>. Appearance edits do not recompute either field or geometry.</p>
   <p><strong>Surface shading</strong> offers <strong>Diffuse</strong> (the default) and <strong>Blinn-Phong</strong> (specular highlights on saved meshes and sampled raycast isosurfaces). It is a session preference, separate from atom/bond materials, and is not stored in the molecular document. Choose <a href="reference-fields.html#modes">the rendering mode</a> under Field rendering.</p>
   <p>Six equally strong lights surround the view symmetrically, with neutral ambient fill. They follow the camera during orbit, pan and roll, so the other side does not become a permanently dark back. Atoms, bonds, protein depictions and built-in mesh/raycast surfaces share this arrangement. Visible geometry and specular highlights still provide shape cues. Custom shaders keep their declared lighting; volume compositing stays unlit.</p>
-  <p>In <strong>Saved surfaces</strong>, the eye icon toggles one mesh's visibility and the trash icon removes it. There is no undo. Save to retain those changes. In sampled modes, the active field's meshes are visually replaced by the sampled display; eye/trash controls still manage saved meshes. Return to <strong>Isosurface mesh</strong> to inspect their effect independently.</p>
+  <p>In <strong>Surfaces → Saved surfaces</strong>, the eye icon toggles one mesh's visibility and the trash icon removes it. There is no undo. Save to retain those changes. In sampled modes, the active field's meshes are visually replaced by the sampled display; eye/trash controls still manage saved meshes. Return to <strong>Isosurface mesh</strong> to inspect their effect independently.</p>
 
   <h2 id="ao">Molecular ambient occlusion</h2>
   <p>Ambient occlusion emphasizes atom contacts and broad recesses in dense molecules. It starts off. While enabled with nonzero strength, atoms and bonds use <strong>Lambert shading plus screen-space ambient occlusion (SSAO)</strong>, without specular highlights.</p>
   <ol>
     <li>For space-filling detail, choose <strong>Representation → Van der Waals</strong>.</li>
-    <li>For best results, download <a href="downloads/matterviz-pastel.json" download>matterviz-pastel.json</a> and load it through <strong>Atom colours → Colours file…</strong>. For a biological structure, choose <strong>Coloring → Element</strong> to see that palette.</li>
+    <li>For best results, download <a href="downloads/matterviz-pastel.json" download>matterviz-pastel.json</a> and load it through <strong>Appearance → Atom colours → Colours file…</strong>. For a biological structure, choose <strong>Coloring → Element</strong> to see that palette.</li>
     <li>Under <strong>Appearance</strong>, enable <strong>Ambient occlusion</strong>. Adjust <strong>AO strength</strong> from 0–100%; zero restores the normal molecular view.</li>
     <li>Leave <strong>Automatic AO radius</strong> checked initially. Read the chosen neighborhood in <strong>AO radius (angstrom)</strong>.</li>
     <li>To tune the scale, uncheck Automatic AO radius. The manual slider starts at the current automatic radius and covers 0.25–50 Å in quarter-angstrom steps. Smaller radii emphasize nearby contacts; larger radii emphasize broader recesses.</li>
@@ -248,7 +250,7 @@ eigenvista-convert --help</code></pre>
   <p>AO controls last through Open within the session; restart/reload begins with AO off. PNG exports include the current shading. Atom colors and picking still work. Quantum fields, saved surfaces, and protein depiction geometry keep their own materials; AO shades the atomic spheres and bonds. Turning AO off releases its image buffers. If enhancement fails, a message appears and normal rendering stays available; disable/re-enable to retry. A lost graphics context requires reload/restart.</p>
 
   <h2 id="palettes">Atom colours</h2>
-  <p>The <strong>Atom colours</strong> section identifies <strong>Built-in default (118 elements)</strong> or the palette file loaded this session. <strong>Colours file…</strong> opens a JSON palette. <strong>Reset to defaults</strong> restores the bundled colors. Biological <strong>Coloring → Element</strong> displays these element overrides; other biological color modes use their own legends.</p>
+  <p>The <strong>Appearance → Atom colours</strong> widget identifies <strong>Built-in default (118 elements)</strong> or the palette file loaded this session. <strong>Colours file…</strong> opens a JSON palette. <strong>Reset to defaults</strong> restores the bundled colors. Biological <strong>Coloring → Element</strong> displays these element overrides; other biological color modes use their own legends.</p>
   <p>Two optional MatterViz palettes are supplied: <a href="downloads/matterviz-pastel.json" download>Pastel</a> is lighter with pale-pink oxygen and is recommended for AO; <a href="downloads/matterviz-muted.json" download>Muted</a> has subdued colors with dusty-rose oxygen. They also live in the source checkout's <code>palettes/</code> and tester ZIP's <code>Palettes/</code>. Both cover elements 1–109; 110–118 keep built-in defaults. Their <a href="downloads/LICENSE-MatterViz.txt">upstream MIT notice</a> accompanies the examples.</p>
   <h3>Write a partial palette</h3>
   <pre><code>{
@@ -274,7 +276,7 @@ eigenvista-convert --help</code></pre>
 
   <h2 id="shaders">Custom surface shaders</h2>
   <p>See the <a href="surface-shaders.html">illustrated shader guide</a> for X-ray and cutaway views, downloadable presets and a complete worked example.</p>
-  <p>The <strong>Surface shader</strong> panel optionally replaces built-in surface materials with a vertex/fragment GLSL pair. It affects surfaces, not atom/bond AO. Shader sources and uniform values last for the session and are not stored in <code>.eigenvista</code>.</p>
+  <p>The <strong>Appearance → Surface shader</strong> widget optionally replaces built-in surface materials with a vertex/fragment GLSL pair. It affects surfaces, not atom/bond AO. Shader sources and uniform values last for the session and are not stored in <code>.eigenvista</code>.</p>
   <ol>
     <li>Choose a <strong>Vertex shader</strong> and a <strong>Fragment shader</strong> file. The picker accepts <code>.vert</code>, <code>.frag</code>, <code>.glsl</code>, or text files.</li>
     <li>Optionally load a <strong>Parameters file</strong> (<code>.params</code>) with default uniform values.</li>
@@ -301,17 +303,18 @@ eigenvista-convert --help</code></pre>
     number: "03.3",
     body: `
 <div class="prose">
+  ${workspaceNotice}
   <p>Render orbitals and densities from Molden or native documents, or open a cube to visualize a sampled scalar field. Use a raycast or volume preview to explore the field, and generate an isosurface mesh when you want to save its geometry.</p>
 
   <h2 id="choose">Choose a field</h2>
-  <p>In <strong>Quantum fields</strong>, select under <strong>Orbitals</strong>, <strong>Density matrices</strong>, or <strong>Sampled fields</strong>. Only one field is active for volume/raycast preview. Orbitals come from supplied coefficients; density matrices come from the document or the <a href="reference-files.html#molden">reported occupation-derived Molden interpretation</a>. A cube supplies scalar samples without orbital coefficients.</p>
+  <p>In <strong>Fields → Quantum fields</strong>, select under <strong>Orbitals</strong>, <strong>Density matrices</strong>, or <strong>Sampled fields</strong>. Only one field is active for volume/raycast preview. Orbitals come from supplied coefficients; density matrices come from the document or the <a href="reference-files.html#molden">reported occupation-derived Molden interpretation</a>. A cube supplies scalar samples without orbital coefficients.</p>
   <p>Try <a href="downloads/bicyclic-c7h10.molden" download>bicyclic-c7h10.molden</a> for the molecular orbitals and density shown in the gallery, or <a href="downloads/complex-field.cube" download>complex-field.cube</a> for a 29-atom structure with a sampled scalar grid. The flask-shaped example menu beside <strong>Molecular data</strong> offers <strong>Hydrogen pair</strong> and <strong>Fractional open shell</strong>: mathematical demonstrations, not calculated molecular reference results. Opening an example replaces the current document after an unsaved-change confirmation.</p>
   <p>Orbital values use <code>bohr^-3/2</code>; density controls use electrons per <code>bohr^3</code>. Imported grid scalar units remain unspecified: consult the producer rather than guessing from a label. A positive/negative orbital surface represents field sign, not positive/negative electrical charge.</p>
 
   <h2 id="one-field">Generate a saved surface for one field</h2>
   <ol>
-    <li>Select the field in Quantum fields.</li>
-    <li>Under <strong>Field rendering</strong>, enter a finite positive <strong>Isovalue</strong> magnitude. Generation attempts both the positive and negative level; only nonempty results are added. A nonnegative density may therefore yield one positive surface.</li>
+    <li>Select the field in Fields → Quantum fields.</li>
+    <li>Under <strong>Fields → Field rendering</strong>, enter a finite positive <strong>Isovalue</strong> magnitude. Generation attempts both the positive and negative level; only nonempty results are added. A nonnegative density may therefore yield one positive surface.</li>
     <li>Choose <strong>Grid resolution</strong>. The default is <strong>40³</strong>. Available points per axis are 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, and 256. These cubic labels describe the full grid.</li>
     <li>Click <strong>Generate surfaces</strong>. Sampling, signed meshing, and validation run in the background. The button becomes <strong>Cancel</strong> while work is active.</li>
     <li>On success, inspect the result in <strong>Isosurface mesh</strong>. Adjust colors/opacity, manage meshes under <strong>Saved surfaces</strong>, then <strong>Save</strong> to retain them on disk.</li>
@@ -357,7 +360,7 @@ eigenvista-convert --help</code></pre>
   <p><strong>Grid resolution</strong> bounds the display/meshing grid: a larger source can be downsampled while preserving its affine extent; a smaller source is not upsampled. Increasing the control cannot add missing source detail. The complete original f64 samples and affine grid are retained and saved alongside generated geometry.</p>
 
   <h2 id="progress">Progress and cancellation</h2>
-  <p>While work runs, Field rendering remains expanded and <strong>Cancel</strong> stays available. Read the current field, orbital/batch position, phase, counts, and elapsed time. Sampling reports completed z slices and a per-field percentage. Meshing reports completion of the two signed passes, not progress within each cell pass. Preparation, transfer, and validation are indeterminate.</p>
+  <p>While work runs, Field rendering remains expanded when visible. A global activity strip keeps <strong>Cancel calculation</strong> reachable even when you change tabs, close Tools or enter Zen. Read the current field, orbital/batch position, phase, counts, and elapsed time. Sampling reports completed z slices and a per-field percentage. Meshing reports completion of the two signed passes, not progress within each cell pass. Preparation, transfer, and validation are indeterminate.</p>
   <p>Percentages restart for each phase and field; they are not a percentage of the whole batch. There is no remaining-time estimate. A single slice or meshing pass may take longer than another, brief phases may finish before they appear, and cached fields skip sampling. A phase label staying visible is not by itself a failure.</p>
   <p>Cancel terminates the current calculation and retains previous completed meshes/preview. The app runs one scientific operation at a time; other queued work, such as file conversion, continues in order. Batch cancellation does not publish a partial set. If work is too expensive, retry with fewer orbitals or a lower grid resolution. Density cost also depends strongly on basis size.</p>
 
@@ -398,7 +401,8 @@ eigenvista-convert --help</code></pre>
     number: "03.4",
     body: `
 <div class="prose">
-  <p>Open PDB, mmCIF, or BinaryCIF with chain, residue, and atom identities to use <strong>Molecular data → Biological structure</strong>. Try the public <a href="downloads/1AON.cif" download>1AON complex</a> and compare the real application images in the <a href="gallery.html">gallery</a>.</p>
+  ${workspaceNotice}
+  <p>Open PDB, mmCIF, or BinaryCIF with chain, residue, and atom identities to use <strong>Molecule → Molecular data → Biological structure</strong>. Try the public <a href="downloads/1AON.cif" download>1AON complex</a> and compare the real application images in the <a href="gallery.html">gallery</a>.</p>
 
   <h2 id="import-selection">What the importer selects</h2>
   <p>The reader retains the first model/structure, common atoms, and one alternate conformer per residue, choosing the alternate with the highest mean occupancy. Zero-occupancy atoms are omitted. Unknown mmCIF element symbols are skipped with a notice rather than guessed. These policies can make displayed counts differ from the deposited source; read <strong>Import report</strong> and <strong>Provenance</strong>.</p>

@@ -1,9 +1,10 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { test, expect } from "@playwright/test";
 
 test("brick ranges include shared faces and partial final bricks", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await page.evaluate(async () => {
     const url = "/src/volumeRanges.ts";
     const { volumeBrickRanges } = await import(/* @vite-ignore */ url);
@@ -34,7 +35,7 @@ test("brick ranges include shared faces and partial final bricks", async ({
 test("brick bounds contain independent trilinear samples throughout signed nonsquare fields", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await page.evaluate(async () => {
     const url = "/src/volumeRanges.ts";
     const { volumeBrickRanges } = await import(/* @vite-ignore */ url);
@@ -99,7 +100,7 @@ test("brick bounds contain independent trilinear samples throughout signed nonsq
 test("brick range construction rejects malformed dimensions, layout, and nonfinite values", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const rejected = await page.evaluate(async () => {
     const url = "/src/volumeRanges.ts";
     const { volumeBrickRanges } = await import(/* @vite-ignore */ url);

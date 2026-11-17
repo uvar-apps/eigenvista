@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 
@@ -159,6 +160,7 @@ async function openMolden(page: Page) {
   await expect(page.locator("footer [role=status]")).toContainText(
     "Opened molden.input",
   );
+  await activateWidget(page, "field-rendering");
   await page.evaluate(() => {
     const state = window as unknown as ProbeWindow;
     state.progressEvents = [];

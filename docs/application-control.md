@@ -20,12 +20,17 @@ The additive palette/biological-presentation work in
 catalog to 28 methods in the published 0.8.0 release. Discover the connected instance's catalog before using
 these additions; an older source-built instance may lack them.
 
-**Unreleased 0.9.0 extension:** `codex/scientific-inspection` adds the geometry,
+**Unreleased 0.10.0 extension:** `codex/scientific-inspection` adds the geometry,
 SES/SAS and quantitative-field methods documented below (#83–#86). Published
-0.8.0 downloads do not have these methods. Use the matching 0.9.0 test
+0.8.0 downloads do not have these methods. Use the matching 0.10.0 test
 binary/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
 establish availability. No PR/merge/release is implied by this reference.
+
+The default pane only changes presentation: the same controls use this service.
+Fields → Quantitative field inspection maps to the probe/plane/profile commands,
+not sampled preview quality. Pane, Zen and fullscreen have no API; GUI changes
+must not change source or cache identity.
 
 For manual installation, a setup prompt and interaction instructions for Codex,
 Claude Code, Pi, OpenCode and generic local agents, start with the

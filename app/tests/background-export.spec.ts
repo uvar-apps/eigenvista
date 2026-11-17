@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -31,7 +32,7 @@ async function ready(page: Page, bounded = true) {
       return Reflect.apply(upload, this, args);
     };
   });
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   if (bounded) {
     await page.addStyleTag({
@@ -272,7 +273,7 @@ async function expectComposite(
 test("the RGBA oracle distinguishes empty, opaque white and fractional signed pixels", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const encoded = await page.evaluate(() => {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 2;

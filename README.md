@@ -6,7 +6,7 @@ EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**Source version: 0.9.0 — unreleased, awaiting testing.**
+**Source version: 0.10.0 — development preview.** Published binaries remain at 0.8.0.
 
 **[Download published 0.8.0 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.8.0)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
@@ -53,10 +53,15 @@ The [file reference](https://uvar-apps.github.io/eigenvista/reference-files.html
 describes the supported profiles; the standalone converter supports the same
 imports.
 
-## 0.9.0: scientific inspection (unreleased)
+## A wider workspace and scientific inspection
 
-The `codex/scientific-inspection` branch adds scientific inspection through both
-the GUI and the AI connector:
+The current source uses a single resizable tools pane, with four tabs:
+**Molecule**, **Fields**, **Surfaces** and **Appearance**. Put it on either side,
+widen it to let widgets flow into two columns, or hide it to reclaim the view.
+Zen mode removes the surrounding interface; fullscreen is a separate action.
+Existing collapsible, draggable widgets and camera/export controls stay familiar.
+
+Scientific inspection is available through the GUI and the AI connector:
 
 - Ordered atom selections, distance/angle/torsion measurements, labels, named
   sets and individual-ligand neighborhoods.
@@ -65,13 +70,17 @@ the GUI and the AI connector:
 - Quantitative field meaning/units, probes, planes/contours, line profiles,
   numerical keys, CSV and annotated/transparent PNG output.
 
-Read the [test-build user guide](docs/user-guide.md#scientific-inspection-in-the-unreleased-test-build).
-These additions are **not included in the published 0.8.0 download**. Version
-0.9.0 is prepared on this branch; the local annotated `v0.9.0` tag marks the
-development checkpoint. Read the [unreleased release notes](docs/releases/0.9.0.md).
-Use a matching test build and have an agent discover its available operations.
-The branch is awaiting user testing and is
-not merged into `main`; [handoff](docs/handoff.md) records verification state.
+To draw an orbital on a plane, open **Fields → Quantitative field inspection**,
+choose an orbital and **Plane / contours**, then **Create plane**. The color bar
+reports signed orbital amplitude; choose an electron-density field for density.
+Read the [user guide](docs/user-guide.md) for probes, contours and line profiles.
+
+These additions are **not included in the published 0.8.0 download**. Use a
+matching source/test build. Read the [0.10.0 source notes](docs/releases/0.10.0.md).
+The [workspace design](docs/design/2026-11-17-simple-workspace-pane.md)
+records the approved layout; [handoff](docs/handoff.md) records current
+validation and delivery. The local `v0.9.0` tag remains the earlier scientific
+inspection checkpoint.
 
 ## Start here
 
@@ -104,9 +113,9 @@ documentation and gallery.
 
 ## Cite EigenVista
 
-For the unreleased 0.9.0 source, [CITATION.cff](CITATION.cff) uses the
+For the 0.10.0 source, [CITATION.cff](CITATION.cff) uses the
 [project concept DOI](https://doi.org/10.5281/zenodo.24246123). A version-specific
-0.9.0 DOI will be added when supplied. The published 0.8.0 citation remains:
+0.10.0 DOI will be added when supplied. The published 0.8.0 citation remains:
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
 (Version 0.8.0) [Computer software]. Zenodo.
@@ -137,9 +146,10 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Current source:** version **0.9.0**, unreleased, adds the scientific-inspection
-workflows described above. See [0.9.0 notes](docs/releases/0.9.0.md) and
-[current status](docs/status.md#source-version-090) for preparation and testing.
+**Current source:** version **0.10.0**, a development preview, combines the wider
+workspace with the scientific-inspection workflows above. See
+[0.10.0 notes](docs/releases/0.10.0.md) and
+[current status](docs/status.md#source-version-0100) for qualification and delivery.
 
 Version **0.8.0** introduced AI-enabled viewing through an external local
 agent, with a prebuilt connector inside the Apple Silicon application. Ask Codex,
@@ -307,9 +317,9 @@ and no Apple notarization. They include source and notices under the
   recalculation, meshing, or changing the saved document.
 - Custom surface shaders have an explicit **Shader transparency** control,
   enabled by default; disabling it forces opaque alpha and depth writes.
-- Collapse sidebar sections with their heading buttons. Controls retain their
+- Collapse widgets with their heading buttons. Controls retain their
   state, expansion is remembered in the current profile, and calculation
-  progress/Cancel stay visible while busy. Reorder within each sidebar by
+  progress/Cancel stay visible while busy. Reorder within each pane tab by
   dragging a dedicated handle, using its arrow keys or clicking/tapping its
   move controls; order is saved separately from molecular documents.
 - Self-contained `.eigenvista` preview files containing quantum data, binary numeric arrays, saved meshes, isovalues, grid geometry, scientific hashes, provenance, and material settings. Reopen displays saved geometry without recomputation.

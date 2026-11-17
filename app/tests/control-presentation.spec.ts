@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { expect, test, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
@@ -213,6 +214,7 @@ test("palette API matches GUI rendering, rejects malformed input atomically and 
     name: "pink-carbon.json",
     text: pinkCarbon,
   });
+  await activateWidget(page, "atom-colours");
   await expect(
     page.getByText("Overridden by pink-carbon.json", { exact: true }),
   ).toBeVisible();
@@ -244,17 +246,16 @@ test("palette API matches GUI rendering, rejects malformed input atomically and 
   expect((await frame(page, pose)).hash).toBe(api.hash);
 
   await call(page, "palette.reset");
+  await activateWidget(page, "atom-colours");
   await expect(
     page.getByText(/^Built-in default \(\d+ elements\)$/),
   ).toBeVisible();
   expect((await frame(page, pose)).hash).toBe(builtin.hash);
-  await page
-    .getByLabel("Atom colours file", { exact: true })
-    .setInputFiles({
-      name: "pink-carbon.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(pinkCarbon),
-    });
+  await page.getByLabel("Atom colours file", { exact: true }).setInputFiles({
+    name: "pink-carbon.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(pinkCarbon),
+  });
   await expect(
     page.getByText("Overridden by pink-carbon.json", { exact: true }),
   ).toBeVisible();
@@ -492,6 +493,7 @@ test("real protein representations prepare distinct scenes and automatic AO radi
     probe.actions.filter((action) => /sample|generate|register/.test(action)),
   ).toEqual([]);
 
+  await activateWidget(page, "appearance");
   await call(page, "scene.set", {
     representation: "space-fill",
     ambientOcclusion: { enabled: true, strength: 0.6, radiusAngstrom: 0.5 },

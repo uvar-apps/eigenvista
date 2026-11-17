@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -106,6 +107,7 @@ async function openBytes(page: Page, name: string, bytes: Buffer) {
 }
 
 async function expand(page: Page, label: string) {
+  await activateWidget(page, "geometry");
   const summary = page
     .locator(".inspection-controls summary")
     .filter({ hasText: label });
@@ -355,9 +357,9 @@ test("renaming a saved neighborhood preserves provenance through native reopen u
     items: [20],
   });
   expect(replacement.neighborhood).toBeUndefined();
-  expect(
-    await call(page, "selection.list", { id, seeds: true }),
-  ).toMatchObject({ total: 0, items: [] });
+  expect(await call(page, "selection.list", { id, seeds: true })).toMatchObject(
+    { total: 0, items: [] },
+  );
 });
 
 test("overlapping additive selections are idempotent and retain ordered source picks", async ({

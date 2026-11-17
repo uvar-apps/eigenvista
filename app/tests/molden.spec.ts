@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
@@ -28,7 +29,7 @@ const upload = {
 };
 
 async function ready(page: Page) {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   page.on("dialog", (dialog) => dialog.accept());
 }
@@ -247,7 +248,7 @@ for (const outcome of ["success", "failure"]) {
 test("edits during a file read are protected by a fresh replacement confirmation", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   const title = await page.locator(".document-title").innerText();
   const download = page.waitForEvent("download");
@@ -422,7 +423,7 @@ for (const name of [
   test(`imported Molden WASM fields and gradients match independent reference: ${name}`, async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/?workspace=legacy");
     const result = await page.evaluate(
       async ({ bytes, name, reference }) => {
         const url = "/src/wasm/eigenvista_wasm.js";

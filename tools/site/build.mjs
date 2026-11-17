@@ -62,7 +62,9 @@ fs.mkdirSync(path.join(out, "assets"), { recursive: true });
 const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );
-const dimensions = new Map(media.images.map((row) => [row.file, row]));
+const dimensions = new Map(
+  [...media.images, ...media.workspacePaneCaptures.images].map((row) => [row.file, row]),
+);
 const cssVersion = createHash("sha256")
   .update(fs.readFileSync(path.join(site, "assets/site.css")))
   .digest("hex")

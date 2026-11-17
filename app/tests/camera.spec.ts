@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 
@@ -31,7 +32,7 @@ async function ready(page: Page) {
       if (event.target instanceof HTMLCanvasElement) probe.canvasPointerDowns++;
     });
   });
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await expect(page.getByRole("alert")).toHaveCount(0);
   await settled(page);

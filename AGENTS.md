@@ -113,30 +113,29 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current source version is **0.9.0, unreleased**, on
-  `codex/scientific-inspection`. The user authorized this version bump before
-  personal testing and any PR/merge. Read the [0.9.0 notes](docs/releases/0.9.0.md),
+- Current source version is **0.10.0**, the approved source
+  update on `codex/scientific-inspection`. The user tested and approved the simple
+  workspace, then authorized documentation/website updates, the 0.10.0 bump,
+  commit, PR merge, annotated tag and push of main. This explicitly supersedes
+  the earlier wait-before-merge constraint. Read the [0.10.0 notes](docs/releases/0.10.0.md),
   [scientific-inspection design](docs/design/2026-11-16-scientific-inspection.md)
-  and living handoff/status. Current user/agent/site labels must identify 0.9.0;
+  and living handoff/status. Keep current user/agent/site version labels aligned;
   download metadata still identifies the actual published 0.8.0 assets until a
-  new release is authorized and built. Do not invent a 0.9.0 release URL, archive
-  digest or version DOI. Citation uses the concept DOI while 0.9.0 is unreleased;
+  new release is authorized and built. Do not invent a new release URL, archive
+  digest or version DOI. Citation uses the concept DOI for the current source;
   the 0.8.0 DOI and original artifact/capture evidence remain historical.
   Keep dependencies, frozen fixtures, format/profile versions, vendored Sesmesh
-  metadata, icon and logo unchanged. No commit/tag/push/PR/merge/publication is
-  authorized by the version bump alone.
-  The user subsequently authorized a local commit and annotated `v0.9.0` tag
-  on 16 November 2026. That checkpoint does not authorize pushing, opening a PR,
-  merging or publishing. Keep the source marked unreleased until publication
-  is explicitly requested.
-  Metadata/build/Rust/CLI/citation and website checks passed at version preparation.
-  Later user testing prompted live SES color/opacity controls and balanced
-  camera-relative lighting (#87). The living handoff records fresh complete
-  614-case application and 162-case website Chromium/WebKit validation, known
-  SES/van der Waals interference and the pending-inspection/Save coordination gap
-  separately.
-  Earlier complete feature qualification and the unchanged 0.8.0 test ZIP remain
-  historical evidence. No 0.9.0 package is implied by source metadata.
+  metadata, icon and logo unchanged. No new GitHub release or redistributable
+  publication is requested by the current source-tag delivery. The local
+  `v0.9.0` checkpoint remains historical and must not move. Run fresh applicable
+  local checks after promoting the pane to normal startup; the earlier 638-case
+  opt-in qualification does not establish the new default. Record current
+  evidence in the living handoff. Fresh qualification now passes all 646 browser
+  cases (323 per engine, no skips/flaky cases/retries) with all 234 frozen hashes
+  unchanged, alongside the Rust/build/native/packaging and 162 website checks.
+  Keep SES/van der Waals interference and the
+  pending-inspection/Save coordination gap explicit. Earlier qualification and
+  the unchanged 0.8.0 test ZIP remain historical evidence.
 
 - Published version **0.8.0** has local runtime, clean-source package,
   extracted-native connector, downloaded-asset and public website verification (#78–#81): shared controller, authenticated opt-in native connection,
@@ -535,6 +534,35 @@ Required local verification order before pushing runtime changes (details and co
 - This is a development preview, not v1 or the historical M0-M7 plan. Do not mark
   those complete from preview checks. Record evidence in `docs/status.md` and
   behavior changes in the user/architecture docs.
+
+## Simple workspace pane (#88)
+
+On 17 November 2026 the user selected a simpler IDE-style direction after the
+initial GUI experiments. Read [the current design](docs/design/2026-11-17-simple-workspace-pane.md)
+and living handoff. Normal startup uses one 480 px resizable pane,
+selectable left or right, with four top tabs **inside the pane**: Molecule, Fields,
+Surfaces and Appearance. Preserve the original header/footer/viewport controls,
+collapsible widgets and drag/keyboard/menu reordering. Do not reintroduce the
+earlier bottom/floating alternatives or a general docking framework for this scope.
+The user approved this design. `?workspace=legacy` retains the old comparison
+layout for reference and exact historical regression oracles; production
+workflows must also be tested through normal startup. `?workspace=lab` remains
+a compatible alias for the approved pane.
+
+`WorkspacePane.tsx`, `useWorkspacePane.ts` and `workspace-pane.css` own this
+presentation. Reuse `PanelStack` for actual keyed widget order, keeping the legacy
+eight-ID stores, markup and drag payload compatible. Preserve one mounted
+viewport and tool bodies, lazy quantitative activation, drafts and global
+scientific cancellation. Zen/browser fullscreen remain independent. The original
+636-case result and initial screenshots describe the earlier candidate; the
+638-case result qualifies the subsequent opt-in simple pane. Both are historical
+after default promotion. Use fresh current-source qualification in the handoff.
+Layout itself adds no connector methods; scientific/controller operations remain
+shared. The rebuilt 0.10.0 app has local macOS 27.0/arm64 UI acceptance for file
+loading, the pane, real field-plane creation, Zen, WebKit fullscreen entry/exit
+and the Cmd+Q guard. See the handoff for exact evidence. Native detached windows,
+green-button fullscreen, multi-monitor use, assistive technology and the full
+deployment-OS range remain unqualified.
 
 ## Issue-first workflow
 

@@ -12,11 +12,12 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="assets/site.css?v=00b6a4494e27">
 <script src="assets/site.js" defer></script></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small data-application-version>0.9.0 test build</small></a>
+<header class="top"><a class="brand" href="./"><img src="assets/favicon.svg" width="32" height="32" alt=""><span>EigenVista</span><small data-application-version>0.10.0 test build</small></a>
 <nav aria-label="Main navigation"><a href="./">Home</a><a href="install.html">Install</a><a href="reference.html">Manual</a><a href="surface-shaders.html" aria-current="page">Shaders</a><a href="ai.html">AI</a><a href="tutorials.html">Tutorials</a><a href="gallery.html">Gallery</a><a href="about.html">About</a></nav>
 <div class="site-tools"><button type="button" data-search-open hidden aria-haspopup="dialog">Search <kbd>/</kbd></button><button type="button" data-theme-toggle hidden aria-label="Switch color theme">Dark</button></div></header>
 <div class="element-strip" aria-hidden="true"></div>
 <main id="main" tabindex="-1"><div class="page-heading"><p class="eyebrow">05 / EIGENVISTA FIELD MANUAL</p><h1>Shape the light<span class="accent">.</span></h1></div>
+<div class="notice" data-current-workspace><strong>This guide follows the 0.10.0 source interface.</strong> Use the four tabs in the single Tools pane: Molecule, Fields, Surfaces and Appearance. The published 0.8.0 Mac download has the earlier layout and lacks the new scientific-inspection tools. <a href="reference.html#workspace">Find your way around the current workspace →</a></div>
 <p class="lede page-lede">Reveal the molecular framework through an X-ray shell. Cut into a density surface. Change the lighting, color and transparency while you explore.</p>
 <p><a href="./#shader-demo">Watch the 30-second demonstration of these live controls →</a></p>
 
@@ -30,11 +31,11 @@
 <article class="prose">
 
 <h2 id="prepare">Start with a molecular surface</h2>
-<p>Custom shaders give you direct control over how an isosurface is drawn. Load a ready-made preset to get started, or bring your own vertex and fragment GLSL files. EigenVista turns their parameters into editable controls in the <strong>Surface shader</strong> panel.</p>
+<p>Custom shaders give you direct control over how an isosurface is drawn. Load a ready-made preset to get started, or bring your own vertex and fragment GLSL files. Choose <strong>Appearance → Surface shader</strong> in the single Tools pane for the editable controls.</p>
 <ol>
-  <li>Open <a href="downloads/bicyclic-c7h10.molden" download="bicyclic-c7h10.molden">bicyclic-c7h10.molden</a> and select its total density under <strong>Quantum fields → Density matrices</strong>.</li>
-  <li>Set <strong>Isovalue</strong> to <strong>0.04</strong> electrons/bohr³ and <strong>Grid resolution</strong> to <strong>256³</strong>, then click <strong>Generate surfaces</strong>. The images here use this same density mesh.</li>
-  <li>Under <strong>Field rendering → Mode</strong>, select <strong>Isosurface mesh</strong>. Use <strong>Ball and stick</strong> to see the atomic framework alongside it.</li>
+  <li>Open <a href="downloads/bicyclic-c7h10.molden" download="bicyclic-c7h10.molden">bicyclic-c7h10.molden</a> and select its total density under <strong>Fields → Quantum fields → Density matrices</strong>.</li>
+  <li>In the same <strong>Fields</strong> tab, expand <strong>Field rendering</strong>. Set <strong>Isovalue</strong> to <strong>0.04</strong> electrons/bohr³ and <strong>Grid resolution</strong> to <strong>256³</strong>, then click <strong>Generate surfaces</strong>. The images here use this same density mesh.</li>
+  <li>Under <strong>Fields → Field rendering → Mode</strong>, select <strong>Isosurface mesh</strong>. Use <strong>Ball and stick</strong> to see the atomic framework alongside it.</li>
   <li>Frame the molecule with the rotate, zoom and <strong>Fit scene</strong> controls.</li>
 </ol>
 <p>For the complete field workflow, see <a href="tutorials-orbitals.html">the orbital tutorial</a>. The shaders below work on the generated surface, so you can try several finishes on the same geometry.</p>
@@ -43,7 +44,7 @@
 <p>This preset makes front-facing areas more transparent and keeps the outline stronger. It is useful when a surface would otherwise hide the atoms inside.</p>
 <ol>
   <li>Download <a href="downloads/shaders/x-ray.vert" download="x-ray.vert">x-ray.vert</a>, <a href="downloads/shaders/x-ray.frag" download="x-ray.frag">x-ray.frag</a> and <a href="downloads/shaders/x-ray.params" download="x-ray.params">x-ray.params</a>.</li>
-  <li>Expand <strong>Surface shader</strong>. Use <strong>Vertex shader…</strong> for <code>x-ray.vert</code> and <strong>Fragment shader…</strong> for <code>x-ray.frag</code>.</li>
+  <li>Choose <strong>Appearance</strong> and expand <strong>Surface shader</strong>. Use <strong>Vertex shader…</strong> for <code>x-ray.vert</code> and <strong>Fragment shader…</strong> for <code>x-ray.frag</code>.</li>
   <li>Use <strong>Parameters file…</strong> to load <code>x-ray.params</code>. Leave <strong>Shader transparency</strong> checked.</li>
   <li>Choose <strong>All surfaces</strong> under <strong>Apply to</strong>, or select an individual surface, then click <strong>Apply shader</strong>.</li>
   <li>For the illustrated finish, set <code>maxOpacity</code> to <strong>0.85</strong>, <code>minOpacity</code> to <strong>0</strong> and <code>da</code> to <strong>0.03</strong>. Use the toolbar’s background picker for <code>#17232d</code>. Rotate the molecule and adjust <strong>color</strong> to suit your view.</li>
@@ -69,7 +70,7 @@
 
 <h2 id="live">Tune the view live</h2>
 <p>The parameter names come directly from the shader. Numbers, checkboxes, vector components and color pickers appear as appropriate. Once a shader is applied, editing these controls updates the scene immediately: there is no need to generate the surface again.</p>
-<div class="shader-details"><figure><a href="assets/media/quantum-xray.webp?v=bb992e35fa35"><img src="assets/media/quantum-xray.webp?v=bb992e35fa35" alt="The molecular framework visible through the density envelope with the X-ray shader" loading="lazy" width="2050" height="1671"></a><figcaption>Adjust the finish while keeping the same molecular surface. <a href="assets/media/app-overview.webp?v=1d0e4a964654">See the complete workspace</a>.</figcaption></figure><figure class="shader-controls-figure"><a href="assets/media/shader-controls.webp?v=e1070e8fb022"><img src="assets/media/shader-controls.webp?v=e1070e8fb022" alt="Close-up of the actual shader panel with color, minimum and maximum opacity, threshold and Save parameters controls" loading="lazy" width="490" height="1654"></a><figcaption><a href="assets/media/shader-controls.webp?v=e1070e8fb022">Open the controls at full size</a>.</figcaption></figure></div>
+<div class="shader-details"><figure><a href="assets/media/quantum-xray.webp?v=bb992e35fa35"><img src="assets/media/quantum-xray.webp?v=bb992e35fa35" alt="The molecular framework visible through the density envelope with the X-ray shader" loading="lazy" width="2050" height="1671"></a><figcaption>Adjust the finish while keeping the same molecular surface. <a href="reference.html#workspace">Tour the current four-tab workspace</a>.</figcaption></figure><figure class="shader-controls-figure"><a href="assets/media/shader-controls.webp?v=e1070e8fb022"><img src="assets/media/shader-controls.webp?v=e1070e8fb022" alt="Close-up of the actual shader panel with color, minimum and maximum opacity, threshold and Save parameters controls" loading="lazy" width="490" height="1654"></a><figcaption><a href="assets/media/shader-controls.webp?v=e1070e8fb022">Open the controls at full size</a>. This earlier 0.7.2 close-up illustrates shader parameters; find the current widget under Appearance → Surface shader.</figcaption></figure></div>
 <p>To switch the underlying shape, choose another field or isovalue and generate its surface. To change only the appearance, keep the geometry and adjust the shader. <strong>Clear shader</strong> returns to the built-in <strong>Diffuse</strong> or <strong>Blinn-Phong</strong> surface shading.</p>
 
 <h2 id="save">Keep the result</h2>
@@ -89,6 +90,6 @@
 <div class="next-step"><span>Explore further</span><a href="gallery.html">Browse the gallery →</a><a href="reference-fields.html">Fields and surfaces →</a></div>
 
 </article></div></main>
-<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span data-application-status>v0.9.0 / UNRELEASED TEST BUILD</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#citation">Cite EigenVista</a><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
+<footer class="footer"><div><a class="footer-brand" href="./">EigenVista</a><p>Molecular structures. Quantum fields. Your perspective.</p><p class="site-attribution">Author: Ugo Varetto<br>Copyright (c) 2026 - Ugo Varetto</p></div><div><span data-application-status>v0.10.0 / UNRELEASED TEST BUILD</span><a href="install.html">Download &amp; install</a><a href="https://github.com/uvar-apps/eigenvista">Source &amp; issues ↗</a><a href="https://github.com/uvar-apps/eigenvista/releases">Release history ↗</a></div><div><a href="about.html#citation">Cite EigenVista</a><a href="about.html#credits">Data &amp; image credits</a><a href="LICENSE.txt">GPL-2.0-or-later</a><a href="https://uvar-apps.github.io/sesmesh/">Also by uvar-apps: Sesmesh ↗</a></div></footer>
 <dialog class="search-dialog" data-search-dialog aria-labelledby="search-title"><div class="dialog-head"><h2 id="search-title">Find a topic</h2><button type="button" data-search-close aria-label="Close search">Close ×</button></div><label for="site-search">Search the manual, tutorials and installation guide</label><input id="site-search" type="search" placeholder="Try orbitals, AO or cube" autocomplete="off"><p class="small" data-search-status role="status">Type to search.</p><ul data-search-results></ul></dialog>
 </body></html>

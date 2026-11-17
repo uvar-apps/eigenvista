@@ -68,11 +68,25 @@ test("EigenVista branding and unchanged atom logo fit desktop and mobile, with r
       if (index > 0)
         expect(box.left).toBeGreaterThanOrEqual(layout.boxes[index - 1].right);
     }
+    const actions = page.locator(".topbar .file-actions").getByRole("button");
+    await expect(actions).toHaveCount(6);
+    for (const action of await actions.all()) {
+      await expect(action).toBeVisible();
+      const bounds = (await action.boundingBox())!;
+      expect(bounds.x).toBeGreaterThanOrEqual(0);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+    }
     await page.screenshot({
       path: `../artifacts/branding-${width}-${testInfo.project.name}.png`,
       fullPage: true,
     });
   }
+  // At phone widths the pane overlays the viewport; use its real header launcher
+  // to reach viewport actions rather than clicking through the open pane.
+  await page
+    .locator(".topbar")
+    .getByRole("button", { name: "Hide tools", exact: true })
+    .click();
   const image = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export image", exact: true }).click();
   expect((await image).suggestedFilename()).toBe("eigenvista-view.png");

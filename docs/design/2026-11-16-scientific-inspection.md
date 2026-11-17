@@ -1,10 +1,12 @@
 # Scientific inspection: identity, surfaces and quantitative fields
 
-16 November 2026. Status: implemented and locally qualified on
-`codex/scientific-inspection`, awaiting user testing. Current source version is
-**0.9.0 (unreleased)**; preparing that version does not publish it. This work is based on main
+Initial implementation record: 16 November 2026, locally qualified on
+`codex/scientific-inspection` with **0.9.0** metadata. This work is based on main
 `6a728d918cfdf4291a6a04ae9327d668fd449283`; published 0.8.0 binaries do not
-contain it. The user requires personal testing before a PR or merge.
+contain it. After personal testing, the user approved the simpler workspace
+and authorized the 0.10.0 documentation/source update and PR merge on
+17 November. The living handoff records current verification and delivery;
+this document preserves the scientific decisions and earlier evidence.
 
 Scope: [Plan 009](../../plans/009-scientific-inspection-implementation.md),
 parent [#83](https://github.com/uvar-apps/eigenvista/issues/83),

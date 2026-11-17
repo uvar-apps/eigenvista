@@ -1,9 +1,10 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels, settleScene, trackSceneDraws } from "./scenePixels";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 
 async function ready(page: Page) {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText(
     "triangles",
     { timeout: 45000 },
@@ -248,7 +249,7 @@ test("cold start is clean and the first real edit marks unsaved changes", async 
 test("a worker construction failure rejects the request instead of throwing synchronously", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   const result = await page.evaluate(async () => {
     const spec = "/src/science.ts?isolated=1";
     const mod = (await import(/* @vite-ignore */ spec)) as unknown as {
@@ -286,7 +287,7 @@ test("a worker construction failure rejects the request instead of throwing sync
 test("clicking an instanced atom resolves its per-instance selection label", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   // A structure-only document has no surfaces to occlude the atoms. Atoms render
   // as a single InstancedMesh, so the label must come from the raycast
   // instanceId rather than a per-object userData.label.

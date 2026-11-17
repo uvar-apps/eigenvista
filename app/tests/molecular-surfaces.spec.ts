@@ -1,3 +1,4 @@
+import { activateWidget } from "./workspace";
 import { expect, test, type Page } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
@@ -294,6 +295,7 @@ test("molecular shader targets affect only the chosen mesh and survive uniform u
   await generate(page, request("right", "ses", [1]));
   await call(page, "camera.fit");
   await settleScene(page);
+  await activateWidget(page, "surface-shader");
   const panel = page.getByRole("button", {
     name: "Surface shader",
     exact: true,
@@ -532,7 +534,7 @@ test("GUI and API share named selections, radius overrides and complete cached-s
     "carbon.xyz",
     Array.from(new TextEncoder().encode("1\ncarbon\nC 0 0 0\n")),
   );
-  await page.getByText("Molecular surfaces (SES/SAS)", { exact: true }).click();
+  await activateWidget(page, "molecular");
   await page
     .getByLabel("Molecular surface source", { exact: true })
     .selectOption("current");
@@ -650,7 +652,7 @@ test("real 1CRN saved-surface color and opacity update live, coalesce and persis
   await settleScene(page);
   const original = (await savedDocument(page)).doc;
   const originalMesh = original.molecular_surfaces![0];
-  await page.getByText("Molecular surfaces (SES/SAS)", { exact: true }).click();
+  await activateWidget(page, "molecular");
   await page.getByText(/^Live crambin SES · SES ·/).click();
   const color = page.getByLabel("Color for Live crambin SES", { exact: true });
   const opacity = page.getByLabel("Opacity for Live crambin SES", {
@@ -827,7 +829,7 @@ test("live appearance queues isolate two surfaces, preserve partial input and fo
   );
   await generate(page, request("Queue A"));
   await generate(page, request("Queue B", "sas"));
-  await page.getByText("Molecular surfaces (SES/SAS)", { exact: true }).click();
+  await activateWidget(page, "molecular");
   await page.getByText(/^Queue A · SES ·/).click();
   await page.getByText(/^Queue B · SAS ·/).click();
   const colorA = page.getByLabel("Color for Queue A", { exact: true });
@@ -1135,7 +1137,7 @@ test("coordinate-only GUI import clears stale quantum state before creating a mo
     "Opened 1crn.cif",
   );
   await generate(page, request("Coordinate-only SES"));
-  await page.getByText("Molecular surfaces (SES/SAS)", { exact: true }).click();
+  await activateWidget(page, "molecular");
   await expect(
     page.getByRole("alert").filter({ hasText: "Unknown field" }),
   ).toHaveCount(0);

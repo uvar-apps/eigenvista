@@ -1,5 +1,6 @@
 // Installed-app guidance; the published pages contain no executable scripts.
 import { application } from "../application.mjs";
+import { agentWorkspaceNote } from "./workspace.mjs";
 const code = (value) =>
   `<pre class="wrap-code"><code>${value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</code></pre>`;
 
@@ -49,6 +50,7 @@ export default [
       "Use Codex, Claude Code, Pi, OpenCode or another local agent to open molecules, change their appearance and export images in the installed EigenVista app.",
     body: `
 <p class="lede">Find an orbital, reveal a density surface, load a palette or focus on one protein chain. Tell your agent what you want and watch the same EigenVista window respond.</p>
+${agentWorkspaceNote}
 <div class="notice"><strong>Included in EigenVista 0.8.0 for Mac.</strong> The app ships its connection helper, launcher, agent instructions and examples together. <a href="ai-install.html">Set up your agent</a> and start exploring with ordinary prompts.</div>
 <div class="actions"><a class="button primary" href="ai-install.html">Connect the installed app →</a><a class="button" href="ai-guide.html">What to ask your agent →</a></div>
 <figure class="plate"><div class="plate-label"><span>RECORDED AGENT SESSION</span><span>C₇H₁₀ / HOMO</span></div><a href="assets/media/ai-session-xray.webp"><img src="assets/media/ai-session-xray.webp" width="1700" height="1328" alt="Translucent cyan orbital lobes surround the carbon and hydrogen framework of C7H10 on a dark blue background" fetchpriority="high"></a><figcaption>An actual app export from a recorded external-agent session: the C₇H₁₀ HOMO (MO 26), on a 128³ grid, with an X-ray finish. <a href="ai-tutorial-orbitals.html">Follow the orbital workflow →</a></figcaption></figure>
@@ -62,7 +64,7 @@ export default [
 </div>
 
 <h2 id="connection">The app includes the connection tools</h2>
-<div class="notice"><strong>Testing the ${application.version} scientific tools?</strong> The unreleased test build also supports geometry measurements/labels, ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field probes/planes/profiles through your agent. These additions are not in the published 0.8.0 binaries. Use the ${application.version} test app and ask your agent to confirm available features. <a href="reference-inspection.html">Read the test-build manual →</a></div>
+<div class="notice"><strong>Working with the ${application.version} source build?</strong> Ask for geometry measurements/labels, ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field probes/planes/profiles. These additions are not in the published 0.8.0 binaries. Use a matching current app and ask your agent to confirm available features. A HOMO plane shows signed amplitude ψ; a total-density plane shows nonnegative electron density. <a href="reference-inspection.html">Read the scientific-inspection manual →</a></div>
 <p>A compatible EigenVista Mac app ships its connection helper, standalone agent instructions, launcher, examples and palettes together. You do not need a separate MCP plugin. Your agent reads those instructions and handles discovery, commands and progress checks.</p>
 <p>Use <strong>Codex Desktop or CLI, Claude Code, Pi, OpenCode</strong>, or another agent with local terminal and file access. Codex Desktop already has terminal access; its CLI is optional. An image viewer lets the agent inspect and show actual PNG exports. There is no chat box or model account inside EigenVista; you keep using your chosen agent.</p>
 
@@ -173,6 +175,7 @@ ${code(setupPrompt)}
 <p>You can ask for palette loading/reset, element/chain/entity/secondary-structure coloring, hiding and isolation, residue ranges, per-chain/component styles, focus and automatic AO radius directly. The agent handles these choices; no manual palette loading is needed.</p>
 
 <h2 id="context">Say what matters in the view</h2>
+${agentWorkspaceNote}
 <p>Tell the agent which part of the molecule matters and what you want to compare. “Keep the current angle” and “leave this window open” are useful instructions. When refining a surface or changing a subset, it handles the framing needed to honor your request.</p>
 <p>Opening another file can retain the previous background, AO and surface finish. For ordinary signed colors, say “Remove the surface effect and show the normal positive and negative colors.” The agent checks the current appearance rather than assuming it reset.</p>
 <p>The view depends on data actually supplied in your input. Ask the agent to explain what supports the picture. Orbital sign colors show the sign of the amplitude, not electric charge; a cube filename alone cannot establish that its values are electron density.</p>
@@ -196,7 +199,7 @@ ${code(setupPrompt)}
 
 <h2 id="inspection">Scientific inspection in the unreleased test build</h2>
 <p>The <a href="reference-inspection.html">new inspection controls</a> are available through both the GUI and the ${application.version} unreleased test app's connector. Published 0.8.0 downloads predate them. Ask the agent to confirm that your connected application has these capabilities before starting.</p>
-<ul><li>“Choose this ligand copy, show complete residues within 4 angstroms, label the selected distance and save the figure and numbers.”</li><li>“Generate an SES with explicit radii, a 1.4 angstrom solvent probe and 0.25 angstrom spacing. Apply X-ray shading only to that surface and keep its cached geometry.”</li><li>“Make a true HOMO slice with units and a fixed numerical key, plot values along the selected bond, and export the tables and image.”</li></ul>
+<ul><li>“Choose this ligand copy, show complete residues within 4 angstroms, label the selected distance and save the figure and numbers.”</li><li>“Generate an SES with explicit radii, a 1.4 angstrom solvent probe and 0.25 angstrom spacing. Apply X-ray shading only to that surface and keep its cached geometry.”</li><li>“Make a true HOMO amplitude slice with a fixed colorbar from minus 0.06 to plus 0.06 and signed contours at 0.02 and 0.04. Show units, plot values along the selected bond, and export the tables and image.”</li></ul>
 <p>The agent handles selections, palettes, parameters, cancellation, file access and exports without handing those steps back as GUI chores. Follow the <a href="tutorials-geometry.html">measurement</a>, <a href="tutorials-molecular-surfaces.html">molecular-shape</a> or <a href="tutorials-quantitative-fields.html">quantitative-field</a> lesson for an exact worked example.</p>
 
 <h2 id="walkthroughs">Try a focused workflow</h2>

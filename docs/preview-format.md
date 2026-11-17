@@ -118,7 +118,7 @@ field hashes. See the [biological-view decision](design/2026-11-14-biological-st
 
 ### Scientific inspection capabilities (unreleased)
 
-The unreleased 0.9.0 `codex/scientific-inspection` test build adds three optional
+The unreleased 0.10.0 `codex/scientific-inspection` test build adds three optional
 payloads. These are not understood by the published 0.8.0 reader. Matching
 capabilities, not the displayed version alone, establish support. The container
 version remains `[0,1]`; the application-version bump does not replace its

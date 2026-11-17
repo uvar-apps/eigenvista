@@ -1,3 +1,4 @@
+// Historical comparison UI (workspace=legacy); these reference oracles do not qualify the production pane.
 import { scenePixels } from "./scenePixels";
 import { installNativeIpc } from "./nativeIpc";
 import { test, expect, type Page } from "@playwright/test";
@@ -7,7 +8,7 @@ import fs from "node:fs";
 const shadersDir = path.resolve("../app/shaders");
 
 async function ready(page: Page) {
-  await page.goto("/");
+  await page.goto("/?workspace=legacy");
   await expect(page.locator("footer [role=status]")).toContainText(
     "triangles",
     { timeout: 45000 },
@@ -161,7 +162,9 @@ test("a malformed parameter file is rejected instead of pushing NaN into a unifo
   await page.locator('[data-shader-input="params"]').setInputFiles({
     name: "broken.params",
     mimeType: "text/plain",
-    buffer: Buffer.from("# deliberately malformed\nfloat saturation nonsense\n"),
+    buffer: Buffer.from(
+      "# deliberately malformed\nfloat saturation nonsense\n",
+    ),
   });
   await expect(page.locator(".shader-log")).toContainText("non-numeric value");
   await expect(page.locator(".shader-log")).toContainText("line 2");
@@ -179,11 +182,18 @@ test("a malformed parameter file is rejected instead of pushing NaN into a unifo
   await page.screenshot({ path: "../artifacts/malformed-params.png" });
 });
 
-test("parameter type and arity failures retain the applied shader and document", async ({ page }) => {
+test("parameter type and arity failures retain the applied shader and document", async ({
+  page,
+}) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await ready(page);
-  await loadShaderFiles(page, path.join(shadersDir, "surface-lambert.vert"), path.join(shadersDir, "surface-lambert.frag"), path.join(shadersDir, "surface-lambert.params"));
+  await loadShaderFiles(
+    page,
+    path.join(shadersDir, "surface-lambert.vert"),
+    path.join(shadersDir, "surface-lambert.frag"),
+    path.join(shadersDir, "surface-lambert.params"),
+  );
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
   await expect(page.locator(".shader-status")).toContainText("Applied");
   const before = await pixels(page);
@@ -193,19 +203,38 @@ test("parameter type and arity failures retain the applied shader and document",
     ["vec4 lightDir 1 0 0 1\n", "expects vec3"],
     ["bool lightDir true\n", "expects vec3"],
   ]) {
-    await page.locator('[data-shader-input="params"]').setInputFiles({ name: "mismatch.params", mimeType: "text/plain", buffer: Buffer.from(text) });
+    await page.locator('[data-shader-input="params"]').setInputFiles({
+      name: "mismatch.params",
+      mimeType: "text/plain",
+      buffer: Buffer.from(text),
+    });
     await expect(page.locator(".shader-log")).toContainText(message);
-    await expect(page.getByLabel("lightDir[0]", { exact: true })).toHaveValue("0");
-    await expect(page.getByLabel("saturation", { exact: true })).toHaveValue("1");
+    await expect(page.getByLabel("lightDir[0]", { exact: true })).toHaveValue(
+      "0",
+    );
+    await expect(page.getByLabel("saturation", { exact: true })).toHaveValue(
+      "1",
+    );
     await expect(page.locator("h1")).toHaveText("EigenVista");
     expect((await pixels(page)).checksum).toBe(before.checksum);
   }
-  await page.screenshot({ path: "../artifacts/shader-type-rejection-desktop.png" });
+  await page.screenshot({
+    path: "../artifacts/shader-type-rejection-desktop.png",
+  });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: "../artifacts/shader-type-rejection-mobile.png", fullPage: true });
-  await page.locator('[data-shader-input="params"]').setInputFiles({ name: "valid.params", mimeType: "text/plain", buffer: Buffer.from("vec3 lightDir 1 0 0\nfloat saturation 0.5\n") });
+  await page.screenshot({
+    path: "../artifacts/shader-type-rejection-mobile.png",
+    fullPage: true,
+  });
+  await page.locator('[data-shader-input="params"]').setInputFiles({
+    name: "valid.params",
+    mimeType: "text/plain",
+    buffer: Buffer.from("vec3 lightDir 1 0 0\nfloat saturation 0.5\n"),
+  });
   await expect(page.locator(".shader-log")).toHaveCount(0);
-  await expect(page.getByLabel("lightDir[0]", { exact: true })).toHaveValue("1");
+  await expect(page.getByLabel("lightDir[0]", { exact: true })).toHaveValue(
+    "1",
+  );
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Save document" }).click();
   const saved = await download;
@@ -213,47 +242,121 @@ test("parameter type and arity failures retain the applied shader and document",
   expect(errors).toEqual([]);
 });
 
-test("changing a shader uniform kind resets its editor value without breaking the applied shader", async ({ page }) => {
+test("changing a shader uniform kind resets its editor value without breaking the applied shader", async ({
+  page,
+}) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await ready(page);
-  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "simple.vert", mimeType: "text/plain", buffer: Buffer.from("void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "scalar.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "simple.vert",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+    ),
+  });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "scalar.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}",
+    ),
+  });
   await page.getByLabel("amount", { exact: true }).fill("0.8");
   const original = await pixels(page);
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
   await expect(page.locator(".shader-status")).toContainText("Applied");
-  await expect.poll(async () => (await pixels(page)).checksum).not.toBe(original.checksum);
+  await expect
+    .poll(async () => (await pixels(page)).checksum)
+    .not.toBe(original.checksum);
   const before = await pixels(page);
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "vector.frag", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}") });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "vector.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}",
+    ),
+  });
   await expect(page.getByLabel("amount[0]", { exact: true })).toHaveValue("0");
   await page.getByLabel("amount[0]", { exact: true }).fill("1");
   expect((await pixels(page)).checksum).toBe(before.checksum);
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
-  await expect.poll(async () => (await pixels(page)).checksum).not.toBe(before.checksum);
-  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "conflict.vert", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
-  await expect(page.locator(".shader-log")).toContainText("conflicting shader types");
-  await expect(page.getByRole("button", { name: "simple.vert", exact: true })).toBeVisible();
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "scalar-again.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await expect
+    .poll(async () => (await pixels(page)).checksum)
+    .not.toBe(before.checksum);
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "conflict.vert",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform float amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+    ),
+  });
+  await expect(page.locator(".shader-log")).toContainText(
+    "conflicting shader types",
+  );
+  await expect(
+    page.getByRole("button", { name: "simple.vert", exact: true }),
+  ).toBeVisible();
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "scalar-again.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}",
+    ),
+  });
   await expect(page.getByLabel("amount", { exact: true })).toHaveValue("0");
   await page.getByRole("button", { name: "Clear shader", exact: true }).click();
   await expect(page.locator(".shader-log")).toHaveCount(0);
   await expect(page.getByLabel("amount", { exact: true })).toHaveCount(0);
-  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "shared.vert", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "shared.frag", mimeType: "text/plain", buffer: Buffer.from("uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}") });
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "shared.vert",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform vec3 amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+    ),
+  });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "shared.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform vec3 amount;\nvoid main(){gl_FragColor=vec4(amount,1.);}",
+    ),
+  });
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "changed-shared.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
-  await expect(page.locator(".shader-log")).toContainText("conflicting shader types");
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "changed-shared.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}",
+    ),
+  });
+  await expect(page.locator(".shader-log")).toContainText(
+    "conflicting shader types",
+  );
   await page.getByRole("button", { name: "Clear shader", exact: true }).click();
-  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "new-shared.vert", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}") });
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "new-shared.frag", mimeType: "text/plain", buffer: Buffer.from("uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}") });
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "new-shared.vert",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform float amount;\nvoid main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+    ),
+  });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "new-shared.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "uniform float amount;\nvoid main(){gl_FragColor=vec4(amount,0.2,0.3,1.);}",
+    ),
+  });
   await page.getByLabel("amount", { exact: true }).fill("0.5");
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
   await expect(page.locator(".shader-log")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
-test("out-of-order shader reads compose and Clear discards pending reads", async ({ page }) => {
+test("out-of-order shader reads compose and Clear discards pending reads", async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     const state = globalThis as unknown as {
       releaseShaderRead: () => void;
@@ -265,50 +368,143 @@ test("out-of-order shader reads compose and Clear discards pending reads", async
       const source = await read.call(this);
       if (this.name === "delayed.vert" || this.name === "cleared.vert") {
         state.pendingShaderRead = this.name;
-        await new Promise<void>((resolve) => { state.releaseShaderRead = resolve; });
+        await new Promise<void>((resolve) => {
+          state.releaseShaderRead = resolve;
+        });
         state.finishedShaderRead = this.name;
       }
       return source;
     };
   });
   await ready(page);
-  const vertex = Buffer.from("void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}");
-  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "delayed.vert", mimeType: "text/plain", buffer: vertex });
-  await page.locator('[data-shader-input="fragment"]').setInputFiles({ name: "fast.frag", mimeType: "text/plain", buffer: Buffer.from("void main(){gl_FragColor=vec4(1.,0.,0.,1.);}") });
-  await expect(page.getByRole("button", { name: "fast.frag", exact: true })).toBeVisible();
-  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { pendingShaderRead: string }).pendingShaderRead)).toBe("delayed.vert");
-  await page.evaluate(() => (globalThis as unknown as { releaseShaderRead: () => void }).releaseShaderRead());
-  await expect(page.getByRole("button", { name: "delayed.vert", exact: true })).toBeVisible();
+  const vertex = Buffer.from(
+    "void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
+  );
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "delayed.vert",
+    mimeType: "text/plain",
+    buffer: vertex,
+  });
+  await page.locator('[data-shader-input="fragment"]').setInputFiles({
+    name: "fast.frag",
+    mimeType: "text/plain",
+    buffer: Buffer.from("void main(){gl_FragColor=vec4(1.,0.,0.,1.);}"),
+  });
+  await expect(
+    page.getByRole("button", { name: "fast.frag", exact: true }),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (globalThis as unknown as { pendingShaderRead: string })
+            .pendingShaderRead,
+      ),
+    )
+    .toBe("delayed.vert");
+  await page.evaluate(() =>
+    (
+      globalThis as unknown as { releaseShaderRead: () => void }
+    ).releaseShaderRead(),
+  );
+  await expect(
+    page.getByRole("button", { name: "delayed.vert", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Apply shader", exact: true }).click();
-  await page.locator('[data-shader-input="vertex"]').setInputFiles({ name: "cleared.vert", mimeType: "text/plain", buffer: vertex });
-  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { pendingShaderRead: string }).pendingShaderRead)).toBe("cleared.vert");
+  await page.locator('[data-shader-input="vertex"]').setInputFiles({
+    name: "cleared.vert",
+    mimeType: "text/plain",
+    buffer: vertex,
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (globalThis as unknown as { pendingShaderRead: string })
+            .pendingShaderRead,
+      ),
+    )
+    .toBe("cleared.vert");
   await page.getByRole("button", { name: "Clear shader", exact: true }).click();
-  await page.evaluate(() => (globalThis as unknown as { releaseShaderRead: () => void }).releaseShaderRead());
-  await expect.poll(() => page.evaluate(() => (globalThis as unknown as { finishedShaderRead: string }).finishedShaderRead)).toBe("cleared.vert");
+  await page.evaluate(() =>
+    (
+      globalThis as unknown as { releaseShaderRead: () => void }
+    ).releaseShaderRead(),
+  );
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (globalThis as unknown as { finishedShaderRead: string })
+            .finishedShaderRead,
+      ),
+    )
+    .toBe("cleared.vert");
   await page.evaluate(() => new Promise(requestAnimationFrame));
-  await expect(page.getByRole("button", { name: "Apply shader", exact: true })).toBeDisabled();
-  await expect(page.getByRole("button", { name: "delayed.vert", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "cleared.vert", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "fast.frag", exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Apply shader", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "delayed.vert", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "cleared.vert", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "fast.frag", exact: true }),
+  ).toHaveCount(0);
   await expect(page.locator(".shader-log")).toHaveCount(0);
 });
 
 for (const outcome of ["saved", "cancelled", "failed"] as const) {
-  test(`native parameter export uses its text command and handles ${outcome}`, async ({ page }) => {
+  test(`native parameter export uses its text command and handles ${outcome}`, async ({
+    page,
+  }) => {
     await installNativeIpc(page, { parameterOutcome: outcome });
     await ready(page);
-    await loadShaderFiles(page, path.join(shadersDir, "surface-lambert.vert"), path.join(shadersDir, "surface-lambert.frag"), path.join(shadersDir, "surface-lambert.params"));
+    await loadShaderFiles(
+      page,
+      path.join(shadersDir, "surface-lambert.vert"),
+      path.join(shadersDir, "surface-lambert.frag"),
+      path.join(shadersDir, "surface-lambert.params"),
+    );
     const status = await page.locator("footer [role=status]").innerText();
-    await page.getByRole("button", { name: "Save parameters", exact: true }).click();
-    if (outcome === "failed") await expect(page.locator(".shader-log")).toContainText("Deliberate parameter write failure");
+    await page
+      .getByRole("button", { name: "Save parameters", exact: true })
+      .click();
+    if (outcome === "failed")
+      await expect(page.locator(".shader-log")).toContainText(
+        "Deliberate parameter write failure",
+      );
     else await expect(page.locator(".shader-log")).toHaveCount(0);
-    await expect.poll(() => page.evaluate(() => (globalThis as unknown as { parameterExports: unknown[] }).parameterExports.length)).toBe(1);
-    const saved = await page.evaluate(() => (globalThis as unknown as { parameterExports: { args: { text: string } }[] }).parameterExports[0]);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (globalThis as unknown as { parameterExports: unknown[] })
+              .parameterExports.length,
+        ),
+      )
+      .toBe(1);
+    const saved = await page.evaluate(
+      () =>
+        (
+          globalThis as unknown as {
+            parameterExports: { args: { text: string } }[];
+          }
+        ).parameterExports[0],
+    );
     expect(saved.args.text).toContain("vec3 lightDir\t0 0 1");
     const roundtrip = await page.evaluate(async (text) => {
       const url = "/src/shaderTools.ts";
-      const { parseParams, serializeParams } = await import(/* @vite-ignore */ url);
-      const defs = [{ name: "lightDir", kind: "vec3" }, { name: "enabled", kind: "bool" }, { name: "count", kind: "int" }];
+      const { parseParams, serializeParams } = await import(
+        /* @vite-ignore */ url
+      );
+      const defs = [
+        { name: "lightDir", kind: "vec3" },
+        { name: "enabled", kind: "bool" },
+        { name: "count", kind: "int" },
+      ];
       const values = { ...parseParams(text), enabled: true, count: 3 };
       return parseParams(serializeParams(defs, values), defs);
     }, saved.args.text);

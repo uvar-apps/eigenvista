@@ -9,9 +9,9 @@ tester ZIPs predate it. Confirm the installed files and live capabilities
 rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
 qualification is pending; non-Unix attachment is unsupported.
 
-The scientific-inspection methods below are **unreleased in 0.9.0**, tracked on
+The scientific-inspection methods below are **unreleased in 0.10.0**, tracked on
 `codex/scientific-inspection`. Published 0.8.0 downloads lack them. Use a matching
-0.9.0 test application/helper/instruction
+0.10.0 test application/helper/instruction
 pair and inspect its live schemas. Do not promise these additions from a version
 comparison or require a source checkout to use an installed test binary.
 
