@@ -20,8 +20,14 @@ website module syntax/static checks and all **162 Chromium/WebKit website cases*
 DOI check requires CFF and the published website release metadata to agree.
 All 234 frozen application/test hashes match the existing 646-case qualification;
 application tests were not rerun for this citation-only change. Evidence is under
-`tmp/doi-0.10.0/`. Commit/push, GitHub release-note update and Pages/public readback
-follow these checks; no retag or package rebuild.
+`tmp/doi-0.10.0/`. Commit `fd5751f39926956e3c038947a85333693959c18b` is pushed,
+the GitHub 0.10.0 release notes include the DOI, and
+[Pages deployment 44055609073](https://github.com/uvar-apps/eigenvista/actions/runs/44055609073)
+succeeded. All three changed public website files and current GitHub CFF match
+local SHA-256 values. Release asset identities/digests and the existing tag are
+unchanged (`release-verified.json`, `public-readback.json`). Static payload is
+26,204,829 bytes. This later living-document delivery record does not retag,
+rebuild packages or repeat unchanged runtime/site-browser tests.
 
 ## Mac package 0.10.0 — published, 17 November 2026
 

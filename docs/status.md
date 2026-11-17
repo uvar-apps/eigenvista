@@ -18,6 +18,10 @@ Current citation, documentation, release notes and website metadata use it.
 The all-version concept DOI and historical 0.8.0 citation remain distinct.
 Packages, tag and runtime are unchanged; current validation/publication evidence
 is recorded in the living handoff.
+Citation schema, links/static checks and all 162 website cases pass. Metadata
+commit `fd5751f` is pushed; Pages deployment 44055609073 succeeds. The three
+changed served files and current CFF match local bytes, and GitHub release notes
+use the new DOI without changing assets or tag. Evidence: `tmp/doi-0.10.0/`.
 
 <a id="source-version-0100"></a>
 
