@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { PanelStack } from "./PanelSidebar";
 import { PanelSection } from "./PanelSection";
+import { MolecularSurfaceProgress } from "./MolecularSurfaceProgress";
+import type { InspectionProgress } from "./inspectionProgress";
 import {
   useWorkspacePane,
   workspaceTabs,
@@ -37,6 +39,7 @@ interface WorkspaceProps {
   busy: string;
   cancellable: boolean;
   progress?: string;
+  molecularProgress?: InspectionProgress | null;
   warnings: number;
   onCancel: () => void;
 }
@@ -323,7 +326,14 @@ function WorkspacePane(props: WorkspaceProps) {
             role="status"
             aria-label="Workspace activity"
           >
-            <span>{props.progress || props.busy}</span>
+            {props.molecularProgress ? (
+              <MolecularSurfaceProgress
+                progress={props.molecularProgress}
+                compact
+              />
+            ) : (
+              <span>{props.progress || props.busy}</span>
+            )}
             {props.cancellable && (
               <button onClick={props.onCancel}>Cancel calculation</button>
             )}

@@ -560,6 +560,21 @@ checks, just like stale completion.
 Progress UI state is cleared on success, cancellation, and failure; it is not
 persisted in native documents.
 
+Source preview #97 also presents molecular SES/SAS progress in the surface
+controls and a compact viewport activity card, including hidden Tools and Zen
+mode. `useScientificInspection` retains the operation, label and monotonic
+start time across phase changes and clears old counts when a phase has none.
+The existing Sesmesh `geometry`/`classify`/`mesh`/`assemble`/`measure` callbacks
+remain unchanged: only `mesh` reports incremental block completion. Other
+phases display indeterminate activity and elapsed time. The worker reports
+`transferring` after generation returns; the publication path reports
+`validating` before its actual container preflight. Shared job progress retains
+its existing stage/count contract; `app.state` additionally exposes active
+`elapsedSeconds`. The progress components own their timers, so elapsed ticks
+do not rebuild the viewport or run scientific work. Cancellation, source guards,
+prior accepted results, scientific hashes and saved formats are unchanged.
+The published 0.10.1 package predates this presentation and elapsed readback.
+
 App and Convert Files each create a stable scientific client. The bridge keeps
 one FIFO queue and posts only one request at a time. A client's `cancel()` removes
 only its jobs; the fourth request argument accepts `{ signal }` for a single

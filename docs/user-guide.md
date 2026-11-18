@@ -475,7 +475,19 @@ Display sphere radii and bond-detection radii are separate from these inputs.
 Choose **Generate molecular surface**. Smaller spacing gives finer geometry and
 requires more memory. Progress and cancellation remain available; automatic
 coarsening is disabled and cavities are retained. Regeneration replaces a cached
-surface only on success. Saved molecular-surface controls expose visibility,
+surface only on success.
+
+**Source preview after 0.10.1 — live molecular-surface progress:** the surface
+controls and the workspace activity display show the current phase and elapsed
+time. During mesh generation, a bar shows the completed blocks and percentage
+for that phase. Other phases show activity without guessing a percentage or
+completion time. The bar describes the **current phase**, so it can restart
+when the phase changes. Progress and **Cancel calculation** stay visible when
+Tools is hidden or Zen is active. Cancellation keeps the previous accepted
+surface. Your external AI assistant can report the same calculation status.
+The published 0.10.1 download predates these detailed progress displays.
+
+Saved molecular-surface controls expose visibility,
 color, opacity, regeneration/removal and scientific provenance. Expand a saved
 surface to change its color and opacity immediately, without an Apply button or
 regenerating its mesh. **Rename surface** commits a name separately. Empty or

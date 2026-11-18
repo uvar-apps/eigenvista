@@ -1,5 +1,37 @@
 # Implementation status
 
+## Molecular-surface progress (#97) — source preview, 18 November 2026
+
+Tracked by [#97](https://github.com/uvar-apps/eigenvista/issues/97). Live SES/SAS
+phase, elapsed time and genuine mesh-block counts/phase percentage are visible
+in the surface controls and viewport card, including hidden Tools and Zen mode.
+Other stages remain indeterminate; no global completion estimate is invented.
+Cancel and prior accepted geometry remain available. Shared API/AI progress is
+retained and active `app.state` adds `elapsedSeconds`. This changes presentation
+and progress metadata, not scientific meshes, hashes, saved formats or limits.
+
+Final local macOS checks pass **148 application cases**, 74 per browser, with
+zero failures/skips/flaky cases/retries, plus TypeScript, formatting and production/
+native debug builds. All **427 source/input hashes** remain unchanged. Desktop,
+narrow-Zen, indeterminate and real Crambin progress captures are reviewed.
+The source-built native app/helper passes **78 calls**, including real mesh
+progress, SES/SAS completion, cancellation, retained geometry and cached Save/
+reopen, with one reviewed PNG. The native harness was corrected to accept the
+expected cancellation envelope; the first attempt is retained as diagnostics.
+All **162 website cases** and build/static checks pass. The 182 unchanged backend
+inputs retain prior 378-workspace/13-explicit-desktop qualification; those suites
+were not rerun. Evidence: `tmp/molecular-progress/FINAL.json` and adjacent logs.
+The user tested and accepted the implementation and authorizes commit/push on
+main. Before delivery, the complete current-source browser suite passes **720
+cases**, 360 per engine, with zero failures, skips, flaky cases or retries and
+all 427 source/input hashes unchanged. Fresh packaging/connector checks pass all
+23 cases; formatting and website static checks pass. The earlier 78-call native
+and 162-case website qualifications remain applicable; all 91 site files are
+unchanged. Exact delivery evidence is in `tmp/molecular-progress-push/PREFLIGHT.json`
+and adjacent reports. Issue #97 tracks acceptance and delivery. No version/tag/
+release/distribution rebuild is requested. The
+published 0.10.1 download is unchanged; Linux/clean-Mac qualification is pending.
+
 ## Visible atom picking (#96) — source preview, 18 November 2026
 
 The user reports no visible feedback for mouse-picked atoms. Confirmed by a real

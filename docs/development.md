@@ -47,6 +47,17 @@ Canvas-only screenshot oracles hide the separate workspace progress badge as
 well as toolbar/error overlays; do not confuse changing progress text with
 changed molecular rendering. The published 0.10.1 package remains unchanged.
 
+Source-preview molecular-surface progress is tracked by #97. The focused
+`molecular-progress.spec.ts` tests run real SES/SAS Rust/WASM calculations in
+both browsers. Instrumentation holds genuine worker callbacks to check live
+counts, phase-local percentages, elapsed time, API readback, cancellation and
+hidden-Tools/Zen/narrow layouts. It does not fabricate generated meshes. Binary
+start/end phases remain indeterminate; a callback failure must clear activity,
+retain accepted geometry and permit retry. Run the existing molecular-surface,
+inspection, workspace, quantum-progress and controller tests as regressions.
+Native acceptance must separately verify authenticated helper progress/readback;
+in-page tests alone do not qualify the installed connector.
+
 Build test bundles in the optimized target directory or repository-local
 staging; do not rebuild the debug bundle over a running user app. Label/monitor
 edits preflight the actual bounded text layout before publication, independently

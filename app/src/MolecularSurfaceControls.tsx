@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ELEMENTS } from "./elements";
 import { inspectionId } from "./inspectionId";
+import { MolecularSurfaceProgress } from "./MolecularSurfaceProgress";
+import type { InspectionProgress } from "./inspectionProgress";
 import type { EigenVistaDocument } from "./types";
 import type {
   MolecularSurface,
@@ -13,6 +15,7 @@ export interface MolecularSurfaceControlsProps {
   selectedAtoms: number[];
   busy: boolean;
   error: string;
+  progress?: InspectionProgress | null;
   onCommand: (
     method: string,
     params?: Record<string, unknown>,
@@ -186,6 +189,9 @@ export function MolecularSurfaceControls(props: MolecularSurfaceControlsProps) {
         </p>
         {props.busy && props.onCancel && (
           <button onClick={props.onCancel}>Cancel molecular surface</button>
+        )}
+        {props.progress?.operation === "molecularSurfaces.generate" && (
+          <MolecularSurfaceProgress progress={props.progress} />
         )}
         {(localError || props.error) && (
           <p className="structure-error" role="alert">

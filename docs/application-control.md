@@ -242,6 +242,18 @@ rules below. Results may include additional metadata.
 | `job.get` | `jobId` | Operation status, progress and terminal result/error |
 | `job.cancel` | `jobId` | Job state after owned cancellation/cleanup |
 
+Source preview #97 adds detailed molecular-surface progress presentation.
+The existing `job.get.progress` retains raw `stage` and optional
+`counts:{completed,total}`. Engine phases are `geometry`, `classify`, `mesh`,
+`assemble` and `measure`; `preparing`, `transferring` and `validating` describe
+the surrounding work. Mesh counts are completed/total blocks for that phase.
+Other engine phases report only start/end, so their binary counts are not an
+overall percentage. `app.state.progress` adds the active `operation`, `label`
+and `elapsedSeconds`. Its `started` uses the WebView's monotonic clock, not Unix
+time. Wait for terminal job status rather than a phase reaching 100%, and cancel
+only an owned receipt. No overall percentage or ETA is inferred. These GUI
+displays and elapsed metadata are absent from the published 0.10.1 package.
+
 `scene.set` supports `representation`, `positiveColor`, `negativeColor`, `opacity`,
 `isovalue`, `shading`, `backgroundColor`, `volumeQuality` and
 `ambientOcclusion: {enabled?, strength?, radiusAngstrom?, automaticRadius?}`.

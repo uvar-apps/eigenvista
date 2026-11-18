@@ -1,5 +1,32 @@
 # EigenVista agent guide
 
+## Molecular-surface progress (#97) — source preview, 18 November 2026
+
+Tracked by [#97](https://github.com/uvar-apps/eigenvista/issues/97). The accepted
+implementation adds live SES/SAS phase, elapsed time and genuine
+mesh-block counts/phase percentage to the surface controls and viewport activity
+card. Hidden Tools and Zen mode retain progress and Cancel. Other phases stay
+indeterminate; there is no fabricated global percentage or ETA. The existing
+shared API/AI job progress remains available and active `app.state` adds
+`elapsedSeconds`. Operation/source guards, old-result retention and cancellation
+are preserved; no Rust/WASM/vendor/scientific/format/limit/version/icon changes.
+The user tested and accepted the implementation and authorizes commit/push on
+current **main**, explicitly without a tag or new release. No distribution
+rebuild is requested. See the living handoff/status for delivery evidence.
+Preserve the user's preview/tab and immutable published 0.10.1 assets.
+Local qualification passes 148 application cases (74 per browser), 162 website
+cases, types/format/production/native debug builds, and 78 authenticated native
+calls. All 427 runtime/test/input hashes remain fixed; the 182 unchanged backend
+inputs retain prior Rust/WASM qualification. Evidence: `tmp/molecular-progress/FINAL.json`.
+Before delivery, the complete current-source browser suite passes **720 cases**,
+360 per engine, with zero failures, skips, flaky cases or retries and all 427
+source/input hashes unchanged. Fresh packaging/connector checks pass all 23
+cases; formatting and website static checks also pass. The earlier 78-call/
+one-PNG native qualification and 162-case website checks remain applicable;
+all 91 site files are unchanged. Exact delivery evidence is in
+`tmp/molecular-progress-push/PREFLIGHT.json` and adjacent reports. Version/tag/
+release/package identities remain unchanged; Linux/clean-Mac checks are pending.
+
 ## Visible atom picking (#96) — source preview, 18 November 2026
 
 The user reports no visible feedback for mouse-picked atoms. Confirmed by a real

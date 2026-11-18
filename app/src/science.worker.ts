@@ -129,6 +129,7 @@ self.onmessage = async (event: MessageEvent) => {
             self.postMessage({ id, progress: stage, completed, total }),
         );
         try {
+          progress("transferring");
           const positions = mesh.take_positions(),
             normals = mesh.take_normals();
           const indices = mesh.take_indices(),

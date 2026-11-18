@@ -1,5 +1,53 @@
 # Development handoff
 
+## Molecular-surface progress (#97) — source preview, 18 November 2026
+
+Tracked by [#97](https://github.com/uvar-apps/eigenvista/issues/97). The user tested
+and accepted the implementation and authorizes commit/push on current **main**,
+explicitly without a tag or new release. No distribution rebuild is requested.
+SES/SAS generation now shows human-readable phase, elapsed time,
+and genuine mesh-block counts/phase percentage in the surface widget and a
+compact viewport card. The card remains visible with Tools hidden or Zen mode
+enabled; Cancel remains reachable. Binary start/end phases are indeterminate.
+Elapsed ticks update only the small components. Active shared `app.state`
+includes `elapsedSeconds`; `job.get` retains its existing raw stage/count shape.
+Preparing, post-generation transfer and actual publication-validation phases
+are reported without changing the engine or scientific results. Source guards,
+cancellation and accepted-geometry retention remain intact.
+
+Final local macOS qualification passes **148 application cases**, 74 per
+browser, with zero failures/skips/flaky cases/retries: eight new real-WASM cases
+and 140 existing surface, inspection, field-analysis, plane/controller, orbital
+progress and workspace regressions. Types, formatting, production frontend and
+fresh native debug builds pass. All **427 source/input hashes** remain unchanged
+through final qualification. Desktop controls/card, narrow Zen, indeterminate
+phases and real Crambin checkpoints have been visually reviewed in both engines.
+The actual native app/helper passes **78 authenticated calls**, including real
+partial mesh counts/elapsed readback, SES/SAS completion, cancellation, prior-mesh
+retention and cached Save/reopen, with one reviewed SES PNG. A first harness
+attempt incorrectly rejected the expected cancelled-job error envelope; its
+corrected full rerun passes without an application change. All **162 website
+route/viewport cases** and static/build checks pass.
+
+Exact evidence: `tmp/molecular-progress/FINAL.json` and adjacent reports/captures.
+The 182 unchanged Rust/native/generated-WASM inputs match prior qualification;
+378 workspace and 13 explicit desktop tests are reused, not claimed rerun.
+Before delivery, the complete current-source browser suite passes **720 cases**,
+360 per engine, with zero failures, skips, flaky cases or retries. All 427
+runtime/test/input hashes match the accepted implementation and remain unchanged
+through the full run. Fresh packaging/connector checks pass all 23 cases;
+formatting and website static checks also pass. Earlier native/build/backend
+qualification and 162 website cases remain applicable to these unchanged inputs;
+all 91 site files are unchanged. Exact delivery evidence is in
+`tmp/molecular-progress-push/PREFLIGHT.json` and adjacent reports. The independently
+listed test inventory matches the complete report by identity as well as count.
+User/API/AI/agent/architecture and website
+documentation are synchronized. Issue #97 tracks acceptance and delivery.
+No Rust/WASM/vendor, dependency, format, allocation
+policy, version or icon changes. The published 0.10.1 package predates this source
+feature. Preserve the existing Vite server/user tab and release assets.
+Linux/clean-Mac qualification remains pending.
+
 ## Visible atom picking (#96) — source preview, 18 November 2026
 
 The user reports no visible feedback for mouse-picked atoms. Confirmed by a real

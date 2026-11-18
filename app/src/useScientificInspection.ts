@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { createScienceClient } from "./science";
+import { createScienceClient, type WorkProgress } from "./science";
+import type { InspectionProgress } from "./inspectionProgress";
 import { ControlError, type ControlExecution } from "./control";
 import { native } from "./files";
 import { fieldRenderingIssue } from "./fieldAnalysisRendering";
@@ -115,11 +116,7 @@ export function useScientificInspection(options: Options) {
     Array<MeasurementDefinition & { result: MeasurementResult }>
   >([]);
   const [error, setError] = useState("");
-  const [progress, setProgress] = useState<{
-    stage: string;
-    completed?: number;
-    total?: number;
-  } | null>(null);
+  const [progress, setProgress] = useState<InspectionProgress | null>(null);
   const source = useRef<EigenVistaDocument["atoms"] | undefined>(undefined);
   const selection = useRef<number[]>([]),
     picks = useRef<number[]>([]);
@@ -181,6 +178,7 @@ export function useScientificInspection(options: Options) {
     pickedGeometry.current = null;
     setMeasurements([]);
     setError("");
+    setProgress(null);
   }, [options.doc?.atoms, options.doc?.structure, client]);
   useEffect(() => {
     const doc = options.doc;
@@ -226,20 +224,26 @@ export function useScientificInspection(options: Options) {
           "The source changed before inspection completed",
         );
     };
-    const request = <T>(action: string, args: Record<string, unknown>) =>
-      client.request<T>(
-        action,
-        args,
-        (stage, counts) => {
-          check();
-          execution.progress(stage, counts);
-          setProgress({ stage, ...counts });
-        },
-        { signal: execution.signal },
+    const report = (stage: string, counts?: WorkProgress) => {
+      check();
+      execution.progress(stage, counts);
+      setProgress((current) =>
+        current?.operation === method
+          ? {
+              ...current,
+              stage,
+              completed: counts?.completed,
+              total: counts?.total,
+            }
+          : current,
       );
+    };
+    const request = <T>(action: string, args: Record<string, unknown>) =>
+      client.request<T>(action, args, report, { signal: execution.signal });
     const commit = async (patch: Partial<EigenVistaDocument>) => {
       check();
       const candidate = { ...read(), ...patch };
+      if (method === "molecularSurfaces.generate") report("validating");
       await request("inspection_validate", { doc: candidate });
       check();
       const table =
@@ -857,7 +861,22 @@ export function useScientificInspection(options: Options) {
       ].includes(method);
       if (background) {
         latest.current.setBusy("Scientific inspection");
-        setProgress({ stage: "preparing" });
+        const request = params.request as
+          | { kind?: string; label?: string }
+          | undefined;
+        setProgress({
+          stage: "preparing",
+          started: performance.now(),
+          operation: method,
+          label:
+            method === "molecularSurfaces.generate"
+              ? `${request?.kind === "sas" ? "SAS" : "SES"} · ${request?.label ?? "Molecular surface"}`
+              : method === "analysis.create"
+                ? "Quantitative field analysis"
+                : "Atom neighborhood",
+        });
+        if (method === "molecularSurfaces.generate")
+          execution.progress("preparing");
       }
       try {
         return await execute(method, params, execution);

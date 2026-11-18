@@ -1,0 +1,47 @@
+.molecular-surface-progress {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 10px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.surface-progress-title {
+  font-weight: 600;
+  min-width: 0;
+}
+.surface-progress-phase,
+.surface-progress-detail {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-width: 0;
+}
+.surface-progress-completion,
+.surface-progress-detail {
+  color: #3f5c56;
+}
+.surface-progress-detail > :last-child {
+  white-space: nowrap;
+}
+.molecular-surface-progress progress {
+  display: block;
+  width: 100%;
+  height: 9px;
+  accent-color: #258873;
+}
+.molecular-surface-progress.is-compact {
+  flex: 1 1 240px;
+  width: 240px;
+  max-width: 100%;
+  margin: 0;
+  gap: 4px;
+}
+.molecular-surface-progress.is-compact .surface-progress-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

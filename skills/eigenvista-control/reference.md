@@ -1,5 +1,17 @@
 # EigenVista connector reference for agents
 
+Source preview #97 shows molecular-surface progress in both the controls and
+viewport, including hidden Tools/Zen. Poll the existing `job.get` receipt:
+`progress.stage` reports `geometry`, `classify`, `mesh`, `assemble`, `measure`,
+with `preparing`, `transferring` and `validating` around the engine work.
+`progress.counts` is stage-local. Meshing counts are completed/total blocks;
+binary stages report start/end only, not a measured overall percentage.
+`app.state.progress` supplies active `operation`, `label` and `elapsedSeconds`.
+Its `started` value uses the WebView's monotonic clock, not Unix time; use the
+reported elapsed value instead. Wait for terminal job status rather than a
+stage reaching 100%. Cancel only the owned job. No new method or file-format
+feature is needed; the published 0.10.1 GUI predates these progress displays.
+
 Source preview after 0.10.1: active selection has gold reticles; the latest typed
 inspection pick has cyan rings for attributed atoms not already selected. These
 use shared `selection.set`/mouse state and `selection.get.lastPick`; normal

@@ -1402,7 +1402,17 @@ export default function App() {
           : saving.current || hasNativeSave()
             ? "Saving document"
             : "",
-      progress: inspection.progress ?? calculation,
+      progress: inspection.progress
+        ? {
+            ...inspection.progress,
+            elapsedSeconds: Math.max(
+              0,
+              Math.floor(
+                (performance.now() - inspection.progress.started) / 1000,
+              ),
+            ),
+          }
+        : calculation,
       mode,
       resolution,
       shading: surfaceShading,
@@ -1479,6 +1489,7 @@ export default function App() {
             selectedAtoms={inspection.selectedAtoms}
             busy={!!busy}
             error={inspection.error}
+            progress={inspection.progress}
             onCancel={stop}
             onCommand={sendInspectionCommand}
           />
@@ -1607,6 +1618,11 @@ export default function App() {
           busy={busy}
           cancellable={!!calculation || !!inspection.progress}
           progress={inspection.progress?.stage ?? calculation?.stage}
+          molecularProgress={
+            inspection.progress?.operation === "molecularSurfaces.generate"
+              ? inspection.progress
+              : null
+          }
           warnings={importReport?.warnings.length ?? 0}
           onCancel={stop}
         >
