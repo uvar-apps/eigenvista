@@ -1,5 +1,35 @@
 # Development handoff
 
+## Button visibility (#94) — source preview, 18 November 2026
+
+The user reports that action buttons blend into labels in dense tools panels.
+Track [#94](https://github.com/uvar-apps/eigenvista/issues/94). The shared button
+style now uses a pale green fill, darker border, semibold text and a subtle
+raised edge; hover/pressed feedback and readable muted disabled states remain
+distinct. Existing keyboard focus is retained. Flat headings, reorder handles,
+menus, orbital rows and tabs opt out of the raised treatment; primary actions
+retain their existing green fill. The compact icon-only rule is scoped to header
+buttons so a narrow tools pane no longer squeezes the palette file label into
+an icon-sized box. Only `app/src/style.css` and
+`app/src/workspace-pane.css` change application behavior.
+
+Formatting, TypeScript and the production frontend build pass. Fresh Chromium
+and WebKit captures cover all four tabs at desktop width and WebKit at 390/320
+px; the before/after geometry controls and surface actions have been reviewed.
+The final CSS passes all **192 existing UI/conversion cases** (96 per browser;
+zero failures, skips, flaky cases or retries), with all 419 source/input hashes
+unchanged throughout the final run. Live hover, pressed, keyboard-focus, disabled
+and flat-control checks pass in both engines; the palette action stays on one
+line at narrow width and the conversion dialog fits. WebKit uses its documented
+Option-Tab navigation. The earlier plain-Tab probe is retained as a diagnostic,
+not a product failure. Evidence is under
+`tmp/button-affordance/`. The user accepted the appearance and authorizes
+commit/push on **main**. No tag or release is requested. The 419 qualified
+source/input hashes were rechecked before committing; tests were not repeated
+for unchanged sources. No scientific/API/worker or version change is included.
+Preserve the original preview server/tab; CSS updates apply without restarting
+the app. The existing 0.10.1 tag and packages retain their released contents.
+
 ## Zenodo citation update — 18 November 2026
 
 The user published EigenVista 0.10.1 with version DOI

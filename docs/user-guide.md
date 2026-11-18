@@ -100,6 +100,13 @@ are not implemented.
 
 ## The workspace
 
+**Current source preview (#94):** action buttons have a tinted fill, stronger
+border and bold text to distinguish them from labels. Green primary actions
+retain their emphasis; unavailable actions remain visibly muted. Keyboard focus
+uses an outlined ring. Tabs, section disclosures and orbital rows keep their
+existing flat presentation. This appearance update is not yet in the published
+0.10.1 package.
+
 EigenVista 0.10.1 opens with one wide tools pane, initially **480 px**
 wide on the **right**. This is the approved default workspace
 ([#88](https://github.com/uvar-apps/eigenvista/issues/88)); no special preview URL

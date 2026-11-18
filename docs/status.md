@@ -1,5 +1,27 @@
 # Implementation status
 
+## Button visibility (#94) — accepted source preview, 18 November 2026
+
+Action buttons now use a distinct tinted fill, stronger border, semibold text
+and subtle elevation. Disabled buttons keep a readable muted appearance;
+keyboard focus and flat tabs/disclosures/field rows are preserved. This is
+tracked in [#94](https://github.com/uvar-apps/eigenvista/issues/94), with changes
+limited to the shared and workspace CSS plus current documentation. It is not
+part of the immutable 0.10.1 package or website. The user accepted the change
+and authorized commit/push on main, explicitly without a new tag or release.
+The narrow header's icon-only sizing is also scoped to header actions, keeping
+the tools pane's palette-file button label readable.
+
+Formatting, TypeScript and production frontend checks pass. Four-tab Chromium/
+WebKit desktop captures and 390/320 px WebKit captures were reviewed. The final
+CSS passes all **192 existing UI/conversion cases**, 96 per engine, with zero
+failures/skips/flaky cases/retries and 419 stable source/input hashes. Live
+button-state, keyboard-focus, flat-control, mobile palette-label and conversion
+layout checks pass. See `tmp/button-affordance/FINAL.json` and the current
+handoff for exact evidence. Scientific/native sources and all APIs are unchanged;
+their full suites have not been rerun for this cosmetic change. The 419 qualified
+source/input hashes were rechecked unchanged before committing.
+
 ## Zenodo citation update — 18 November 2026
 
 The current EigenVista 0.10.1 citation is

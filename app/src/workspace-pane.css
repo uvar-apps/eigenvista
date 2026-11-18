@@ -95,6 +95,7 @@ main.workspace-lab {
   padding: 4px;
   border: 0;
   background: transparent;
+  box-shadow: none;
 }
 .workspace-pane-tabs {
   display: flex;
@@ -110,6 +111,8 @@ main.workspace-lab {
   border-radius: 0;
   background: transparent;
   font-size: 12px;
+  font-weight: 400;
+  box-shadow: none;
 }
 .workspace-pane-tabs > button[aria-selected="true"] {
   color: #155e50;
