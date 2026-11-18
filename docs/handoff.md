@@ -1,42 +1,36 @@
 # Development handoff
 
-## Release 0.10.2 preparation (#98) — 18 November 2026
+## Release 0.10.2 qualified — publication pending (#98)
 
-User authorizes version0.10.2, commit/tag/push/publication with release notes and
-fresh redistributables, tracked by [#98](https://github.com/uvar-apps/eigenvista/issues/98).
-Current main starts clean at `52d7622d8174df1a761a963204213bf1abbfb7b2`.
-The release packages accepted fixes #94–#97: button styling, automatic field-plane
-updates, visible picking, live molecular-surface progress. First-party version
-metadata is being synchronized; dependency/toolchain pins, icon, science,
-formats and allocation policy are unchanged. Use the concept DOI
-**10.5281/zenodo.24246123** until the user supplies a 0.10.2 DOI. The published
-0.10.1 version DOI 24328295 and old packages/tags remain historical identities.
+Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
 
-Release gates: complete local scientific/desktop/build/browser/packaging checks
-on frozen source; clean release-source commit; rebuilt optimized ZIP, converter,
-AI helper/launcher, notices and guides; independent extraction/audit and actual
-packaged native acceptance; measured website download facts; immutable annotated
-tag; push main/tag; GitHub release notes/three assets; public asset/Pages readback.
-Fresh source checks pass: **378 Rust workspace tests**, **13 explicit desktop
-tests**, fmt/strict Clippy, WASM/TypeScript/production/native-debug builds,
-**23 packaging/connector checks**, and all **720 browser cases**, 360 per
-engine, with zero failures/skips/flaky cases/retries. All **427 runtime/test/input
-hashes** stay unchanged through the complete browser run. Version and CFF parsing
-checks pass; seven own crates and both app manifests/config agree on 0.10.2,
-with dependency/toolchain pins, science and icon unchanged. The source-stage
-website build/static check passes with published download facts still truthfully
-at 0.10.1. Evidence includes `checks.json`, `browser-qualification.json`,
-`version-check.json` and source snapshots under the directory below.
+ZIP: `artifacts/distributions/EigenVista-0.10.2-apple-silicon-20261118T081849Z-21c8307.zip` — **82,241,275 bytes**.
 
-Next: commit clean release source, then build/audit/launch its actual optimized
-redistributable before changing download facts. No 0.10.2 tag, pushes or
-publication have occurred yet. Evidence/scripts stay in
-`tmp/release-0.10.2/`, acceptance ledger in `.unlazy/release-0.10.2/`.
-Documentation and website authors work on disjoint owned files; root performs
-all actual builds/browser/native checks sequentially. Preserve the existing
-preview server PID7087 and user's tab. Linux/clean-Mac/Gatekeeper/full macOS
-range/Intel qualification remains pending; the package remains ad-hoc signed,
-not notarized. Update this section as qualification/publication progresses.
+SHA-256: `cb9221b2e887eecdf5e7f574b6b2336253b64271400315b828b803dee77f551e`.
+
+The `.zip.sha256` and `.json` companions identify the same clean build; the ZIP includes the optimized app, converter, AI helper/launcher, guides, examples, palettes, notices and source/dependency archives.
+
+Fresh local macOS checks pass 378 Rust workspace tests, 13 explicit desktop tests, fmt/strict Clippy, WASM/TypeScript/production/native-debug builds, 23 packaging/connector checks and all **720 Chromium/WebKit cases**, 360 per engine, with zero failures/skips/flaky cases/retries.
+
+All **427 runtime/test/input hashes** stay fixed through source and optimized-package qualification. Version/CFF checks pass; dependency/toolchain pins, science, format, icon and allocation policy are unchanged.
+
+Independent extraction/source/notices/signature/embedded-assets audit passes: 718 source files, 57 Sesmesh files, 14 connector files and five exact production assets. The actual packaged app/helper passes **34 inspection methods**, **1,479 recorded helper calls** and **11 reviewed PNG exports**.
+
+Native acceptance includes genuine plane supersession, 323 independent linear-field samples (maximum error 4.45e-16), selected/cleared and Pastel/AO/transparent-PNG pixels, full 58,870-atom 1AON SES with 2,091,126 vertices and 4,182,788 triangles, real partial mesh progress/elapsed, owned cancellation and cache Save/reopen.
+
+All **162 website route/viewport cases** and final build/static checks pass. Measured download facts identify this qualified package.
+
+Prequalification harness corrections retained as diagnostics: camera comparison allows 1e-12 roundoff; completed job receipts retain outer status instead of unwrapping result; the externally stopped controlled diagnostic app/descriptor received independent cleanup verification; gold-pixel classification excludes red oxygen highlights. Corrected complete native/pixel checks pass without product or package changes, and cleared water pixels exactly restore the unselected baseline. Later metadata/docs commits must not retag or rebuild the qualified unchanged runtime.
+
+Publication is pending: create/push immutable annotated `v0.10.2` at the clean package source above, publish GitHub notes and all three assets, verify anonymous downloads, then push the prepared main/site and verify the Pages-only publisher and all served bytes. No application CI.
+
+User authorization covers commits, tag, pushes, public release and rebuilt redistributables. Track [#98](https://github.com/uvar-apps/eigenvista/issues/98), including accepted #94–#97: buttons, automatic planes, visible picks and live SES/SAS progress.
+
+Use concept DOI **10.5281/zenodo.24246123** until the user supplies a 0.10.2 DOI; 24328295 identifies 0.10.1 only. Preserve old tags/assets, pins/icon/scientific contracts/allocation policy and Vite PID7087/user tab.
+
+The Mac tester ZIP remains ad-hoc signed, not notarized. Linux/Windows/Intel, clean-Mac/Gatekeeper, physical native mouse/OS actions, hidden/inactive native behavior and the entire macOS deployment range remain separate qualification gaps.
+
+Evidence/scripts: `tmp/release-0.10.2/`; acceptance ledger: `.unlazy/release-0.10.2/`. Exact current receipts include package-identity.json, package-qualification.json, browser-qualification.json, native/native-latest.json and site-browser.log.
 
 ## Molecular-surface progress (#97) — source preview, 18 November 2026
 

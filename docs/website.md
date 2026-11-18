@@ -1,20 +1,26 @@
 # User-facing website
 
-## 0.10.2 release preparation — 18 November 2026
+## Release 0.10.2 qualified — publication pending (#98)
 
-The current source is **0.10.2**, tracked by
-[#98](https://github.com/uvar-apps/eigenvista/issues/98). Current content describes
-clearer buttons, automatic field-plane updates, visible atom picking and live
-molecular-surface progress. Until the new clean-source package is qualified,
-`tools/site/release.mjs` continues to identify the immutable published 0.10.1
-download; `application.mjs` distinguishes source from verified download facts.
-Only record measured new asset bytes/hashes/source after extraction and native
-acceptance. The final release will publish all three assets and the prepared
-site through the existing Pages-only publisher, then independently compare
-public downloads and served pages. No application CI. Follow the living
-[handoff](handoff.md) and [status](status.md) for current qualification/publication.
-Use concept DOI **10.5281/zenodo.24246123** until the user supplies a 0.10.2 DOI.
-Preserve historical version DOIs, release identities and media provenance.
+Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
+
+ZIP: `artifacts/distributions/EigenVista-0.10.2-apple-silicon-20261118T081849Z-21c8307.zip` — **82,241,275 bytes**.
+
+SHA-256: `cb9221b2e887eecdf5e7f574b6b2336253b64271400315b828b803dee77f551e`.
+
+The `.zip.sha256` and `.json` companions identify the same clean build; the ZIP includes the optimized app, converter, AI helper/launcher, guides, examples, palettes, notices and source/dependency archives.
+
+Current authored/generated website content describes shipped 0.10.2 behavior. All 162 local browser cases and final build/static checks pass; media retain original capture identities, dimensions and aspect ratios. Publish the qualified release assets before pushing main/site, so download links are available when Pages publishes.
+
+Publication is pending: create/push immutable annotated `v0.10.2` at the clean package source above, publish GitHub notes and all three assets, verify anonymous downloads, then push the prepared main/site and verify the Pages-only publisher and all served bytes. No application CI.
+
+User authorization covers commits, tag, pushes, public release and rebuilt redistributables. Track [#98](https://github.com/uvar-apps/eigenvista/issues/98), including accepted #94–#97: buttons, automatic planes, visible picks and live SES/SAS progress.
+
+Use concept DOI **10.5281/zenodo.24246123** until the user supplies a 0.10.2 DOI; 24328295 identifies 0.10.1 only. Preserve old tags/assets, pins/icon/scientific contracts/allocation policy and Vite PID7087/user tab.
+
+The Mac tester ZIP remains ad-hoc signed, not notarized. Linux/Windows/Intel, clean-Mac/Gatekeeper, physical native mouse/OS actions, hidden/inactive native behavior and the entire macOS deployment range remain separate qualification gaps.
+
+Evidence/scripts: `tmp/release-0.10.2/`; acceptance ledger: `.unlazy/release-0.10.2/`. Exact current receipts include package-identity.json, package-qualification.json, browser-qualification.json, native/native-latest.json and site-browser.log.
 
 ## 0.10.1 citation publication — 18 November 2026
 
