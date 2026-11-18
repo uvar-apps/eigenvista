@@ -1,7 +1,7 @@
 // Download facts from the qualified, self-contained 0.10.1 distribution.
 export const release = Object.freeze({
   "version": "0.10.1",
-  "doi": "10.5281/zenodo.24246123",
+  "doi": "10.5281/zenodo.24328295",
   "source": "927a2962e8193b41918737ee34adbd2b7a545c29",
   "url": "https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.1",
   "base": "https://github.com/uvar-apps/eigenvista/releases/download/v0.10.1/",

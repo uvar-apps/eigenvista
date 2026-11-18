@@ -304,9 +304,11 @@ assert(html.get("install.html").includes(`Published download: ${release.version}
 assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download identifies the verified package");
 assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive"), "Historical DOI remains attributed to its actual archive");
 assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
+assert(html.get("about.html").includes("Published 0.10.0 archive"), "Previous version DOI stays attributed to its actual archive");
 if (release.doi === "10.5281/zenodo.24246123") {
   assert(html.get("about.html").includes("A new version-specific DOI has not been supplied"), "Concept DOI is not presented as a new version archive");
-  assert(html.get("about.html").includes("Published 0.10.0 archive"), "Previous version DOI stays attributed to its actual archive");
+} else {
+  assert(!html.get("about.html").includes("A new version-specific DOI has not been supplied"), "Supplied version DOI replaces the pending-citation explanation");
 }
 const citation = fs.readFileSync(path.join(root, "CITATION.cff"), "utf8");
 assert.equal(citation.match(/^version: "([^"]+)"$/m)?.[1], application.version);

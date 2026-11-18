@@ -1,5 +1,16 @@
 # Implementation status
 
+## Zenodo citation update — 18 November 2026
+
+The current EigenVista 0.10.1 citation is
+[10.5281/zenodo.24328295](https://doi.org/10.5281/zenodo.24328295), supplied by the
+user after Zenodo publication. Citation, current guides and website metadata are
+synchronized; the concept DOI and older version citations remain distinct.
+This documentation-only follow-up preserves existing tags, redistributables,
+source identity and runtime qualification. CFF parsing, citation/site static checks and all 162
+Chromium/WebKit website route/viewport cases pass, with desktop/mobile citation
+review. Website/GitHub release-note publication is next.
+
 ## Release 0.10.1 — published, 18 November 2026
 
 Version **0.10.1** includes smooth camera-relative lighting (#91) and
@@ -73,8 +84,9 @@ two ignored Finder metadata files; the retained diagnostic was corrected to the
 exact Git-tracked tree that Pages publishes. Both files remain ignored locally.
 
 No application CI. Keep v0.10.0 and its assets/captures immutable. Current citation
-uses concept DOI 10.5281/zenodo.24246123 until a version DOI is supplied;
-24302658 identifies only 0.10.0. Scientific profiles, dependency/toolchain pins
+uses version DOI 10.5281/zenodo.24328295 for 0.10.1. Concept DOI
+10.5281/zenodo.24246123 identifies all versions; 24302658 identifies only 0.10.0.
+Scientific profiles, dependency/toolchain pins
 and icon are unchanged. Work only in EigenVista; Molekel is read-only.
 
 Linux, clean-Mac/Gatekeeper installation, the full supported macOS range and

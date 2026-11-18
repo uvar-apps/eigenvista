@@ -72,9 +72,12 @@ verified assets. All 90 served website files and nested404 match Pages deploymen
 and issue #93 delivery ledger for exact evidence. Historical pre-publication
 snapshots remain truthful records. Preserve tags, packages and capture provenance.
 
-Current citation uses concept DOI 10.5281/zenodo.24246123 until a version DOI
-is supplied; 24302658 identifies 0.10.0 only. Keep scientific profiles, pinned
-toolchain/dependencies and icon unchanged. No application CI. All relevant
+The user supplied version DOI **10.5281/zenodo.24328295** for 0.10.1 on
+18 November 2026. Use it in current citation metadata and website content.
+Concept DOI 10.5281/zenodo.24246123 identifies all versions; 24302658 identifies
+0.10.0 only. Keep historical citation/package snapshots intact. This citation
+follow-up does not move the existing tag or rebuild its assets. Keep scientific
+profiles, pinned toolchain/dependencies and icon unchanged. No application CI. All relevant
 local checks must pass before pushing. Later delivery/docs/site commits do
 not change runtime code or retag/rebuild the qualified archive.
 
