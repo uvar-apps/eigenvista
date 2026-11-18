@@ -194,6 +194,7 @@ export function Viewport({
   onAtomPick,
   onInspectionPick,
   inspectionSelection = EMPTY_INSPECTION_SELECTION,
+  inspectedPick = null,
   inspectionMeasurements = EMPTY_INSPECTION_MEASUREMENTS,
   onShaderLog,
   controlRef,
@@ -215,6 +216,7 @@ export function Viewport({
     source: EigenVistaDocument["atoms"],
   ) => void;
   inspectionSelection?: number[];
+  inspectedPick?: InspectionPick | null;
   inspectionMeasurements?: Array<
     MeasurementDefinition & { result: MeasurementResult }
   >;
@@ -380,9 +382,26 @@ export function Viewport({
   const requestedScene = useRef(sceneInput);
   requestedScene.current = sceneInput;
   const committedScene = useRef<object | null>(null);
+  const committedInspectedPick = useRef<InspectionPick | null>(null);
   const [proteinMessages, setProteinMessages] = useState<string[]>([]);
   const committedDoc = useRef(doc);
   const committedDisplay = useRef(display);
+  const inspectionAnnotations = () => {
+    const visible = (atom: number) =>
+      Number.isSafeInteger(atom) &&
+      atom >= 0 &&
+      atom < doc.atoms.positions.length &&
+      isAtomVisible(doc, displayRef.current, atom);
+    const inspected =
+      inspectedPick?.atoms ??
+      (inspectedPick?.atom === undefined ? [] : [inspectedPick.atom]);
+    return buildAnnotations(
+      doc,
+      inspectionMeasurements,
+      inspectionSelection.filter(visible),
+      inspected.filter(visible),
+    );
+  };
   const focusSeen = useRef<StructureDisplayState["focus"]>(null);
   const focusSource = useRef({ atoms: doc.atoms, structure: doc.structure });
   const engine = useRef<{
@@ -1068,9 +1087,7 @@ export function Viewport({
         }
         group.add(mesh);
       }
-      group.add(
-        buildAnnotations(doc, inspectionMeasurements, inspectionSelection),
-      );
+      group.add(inspectionAnnotations());
       group.add(buildFieldAnalysisGroup(doc, contours));
       if (shader) {
         // Compile once so GLSL errors surface in the shader panel.
@@ -1170,6 +1187,7 @@ export function Viewport({
     e.group.add(group);
     committedDoc.current = doc;
     committedScene.current = sceneInput;
+    committedInspectedPick.current = inspectedPick;
     committedDisplay.current = stagedDisplay;
     atomsRef.current = stagedAtomIndices;
     setProteinMessages(stagedMessages);
@@ -1193,6 +1211,43 @@ export function Viewport({
     contours,
     contourPending,
     contourPreparationFailed,
+  ]);
+  useEffect(() => {
+    const e = engine.current;
+    if (
+      !e ||
+      committedInspectedPick.current === inspectedPick ||
+      committedDoc.current !== doc ||
+      committedScene.current !== sceneInput
+    )
+      return;
+    // Inspecting a different atom updates only annotations, not the potentially
+    // large molecular meshes. Source/visibility changes use the staged rebuild.
+    let next: THREE.Group;
+    try {
+      next = inspectionAnnotations();
+    } catch (cause) {
+      setError(`Unable to update inspection markers: ${String(cause)}`);
+      return;
+    }
+    const previous = e.group.getObjectByName("inspection-annotations");
+    previous?.removeFromParent();
+    if (previous) dispose(previous);
+    e.group.add(next);
+    committedInspectedPick.current = inspectedPick;
+    setError((message) =>
+      message.startsWith("Unable to update inspection markers:") ? "" : message,
+    );
+    e.allocationPending = true;
+    e.needsRender = true;
+  }, [
+    inspectedPick,
+    doc,
+    sceneInput,
+    inspectionSelection,
+    inspectionMeasurements,
+    layoutKey,
+    contours,
   ]);
   useEffect(() => {
     const e = engine.current;

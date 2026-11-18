@@ -399,6 +399,17 @@ ordered list has earlier/later and remove buttons; order matters for geometry.
 **Focus selection**, **Show only selection**, and **Show full structure** help
 inspect a local region. Clear the selection before starting a different set.
 
+**Source preview after 0.10.1 — visible picking cues:** selected atoms have gold
+hollow reticles. With selection picking off, an ordinary click shows a cyan
+ring at the latest inspected atom, or at both endpoints of an inspected bond;
+it does not replace your selection. Gold takes precedence for atoms already
+selected. Reticles stay readable as you zoom and preserve element/palette colors.
+They mark source-atom positions, even behind other scene geometry; they do not
+trace atom or molecular-surface boundaries. Atoms hidden by display filters have
+no marker. **Clear selection** removes both cues, and opening a new source resets
+them. The markers are included in PNG exports. The published 0.10.1 package
+predates this correction.
+
 In **Geometry measurements**, choose distance, angle or signed torsion, select
 exactly 2, 3 or 4 distinct atoms in order, and choose **Add measurement**.
 Distances are reported in Å. An angle is centered on the middle atom. Torsions

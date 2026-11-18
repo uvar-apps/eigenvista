@@ -105,6 +105,11 @@ export function InspectionControls(props: InspectionControlsProps) {
           />
           Pick atoms for inspection
         </label>
+        <p className="structure-note">
+          Gold reticles mark selected atoms; a cyan ring marks the latest
+          inspected atom or bond endpoints. Enable picking to add atoms to the
+          selection. Clear selection removes both cues.
+        </p>
         {props.busy && props.onCancel && (
           <button onClick={props.onCancel}>Cancel inspection</button>
         )}

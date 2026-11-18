@@ -139,6 +139,15 @@ sets are distinct from ordered measurement/plane/profile atom sequences.
 Typed `lastPick` readback distinguishes atoms, bonds, residues and quantum/
 molecular surfaces, retaining original identity and explicit mesh-vertex or
 backbone-Cα attribution. A changed/removed source mesh invalidates its old pick.
+Source preview #96 renders selected atoms as gold target markers and inspected
+atoms as cyan rings, using batched foreground points with owned textures.
+Markers retain source identities but respect visibility filters; they identify
+positions rather than physical silhouettes. An ordinary inspection updates only
+the annotation group, preserving molecular geometry, palettes, shaders and AO.
+Selection and ordered-pick props are guarded by source identity before passive
+reset effects run, preventing a stale cue on the first replacement-source frame.
+Clearing selection also clears the transient inspection cue. PNGs use the same
+scene markers as the interactive view; the published 0.10.1 app predates this fix.
 Source geometry-only requests omit basis/density/grids and do not replace QC
 registration. Quantitative requests reuse prepared immutable numeric inputs and
 transfer f64 caches separately from f32 preview values. Active cancellation

@@ -1,5 +1,13 @@
 # EigenVista connector reference for agents
 
+Source preview after 0.10.1: active selection has gold reticles; the latest typed
+inspection pick has cyan rings for attributed atoms not already selected. These
+use shared `selection.set`/mouse state and `selection.get.lastPick`; normal
+inspection does not overwrite selection. `selection.clear` clears selection and
+the transient last pick. Visibility filters suppress markers without changing
+original-ID readback. Foreground cues identify source positions and appear in
+PNG exports; they are not atom/surface outlines. Published 0.10.1 lacks this fix.
+
 This reference works with an installed connector-enabled EigenVista package and
 its prebuilt helper. The installed package supplies the required tools. This is
 technical agent guidance; users can request all operations in ordinary language.

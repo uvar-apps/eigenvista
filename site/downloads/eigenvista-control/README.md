@@ -219,6 +219,13 @@ no manual palette loading is needed.
 
 ## Say what matters in the view
 
+In the newer source preview, ask “Select these atoms and show me which ones are
+selected.” Gold reticles identify selected atoms; a cyan ring identifies the
+latest atom or bond inspected without adding it to the selection. Ask to clear
+the selection to remove both cues. Display-hidden atoms remain hidden, and the
+markers are included in exported images. The published 0.10.1 download predates
+this visibility correction.
+
 Tell the agent which part of the molecule matters and what you want to compare.
 “Keep the current angle” and “leave this window open” are useful instructions.
 When refining a surface or changing a subset, it handles the framing needed to

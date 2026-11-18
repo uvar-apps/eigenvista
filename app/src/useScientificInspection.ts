@@ -368,6 +368,8 @@ export function useScientificInspection(options: Options) {
     }
     if (method === "selection.clear") {
       setSelection([]);
+      setLastPick(null);
+      pickedGeometry.current = null;
       latest.current.display(null, false, false);
       return { selectedCount: 0 };
     }
@@ -807,8 +809,10 @@ export function useScientificInspection(options: Options) {
     return lastPick;
   }
   return {
-    selectedAtoms: selected,
-    orderedAtoms: ordered,
+    // A new source can render before the passive reset effect clears local
+    // state. Never paint the previous document's indices on that first frame.
+    selectedAtoms: source.current === options.doc?.atoms ? selected : [],
+    orderedAtoms: source.current === options.doc?.atoms ? ordered : [],
     pickEnabled,
     setPickEnabled,
     measurements,

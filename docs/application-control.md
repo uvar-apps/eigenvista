@@ -413,6 +413,17 @@ back the accepted settings/results. No GUI operation is a required workaround.
 
 ### Inspection object shapes and scientific conventions
 
+Source preview after 0.10.1 renders shared active selection as gold hollow
+reticles; the latest typed inspection pick has cyan rings for attributed atoms
+that are not already selected. `selection.set`, mouse accumulation and named-set
+activation share this rendering path. Normal inspection clicks still update
+`selection.get.lastPick` without modifying the selected set. `selection.clear`
+clears both active selection and the last inspection pick. Hidden atoms are
+filtered out of depiction only, retaining their original indices in readback.
+Markers are foreground source-position cues included in PNG exports, not
+scientific geometry or molecular outlines. No new method or saved-file feature
+is required; the published 0.10.1 binary predates the visible-marker correction.
+
 `measurement` contains `id,label,kind,atoms,visible,color,always_visible`.
 Distance uses two distinct IDs and returns Å; angle uses three, centered on the
 middle atom; ordered torsion uses four and reports degrees in `[-180,180)`.

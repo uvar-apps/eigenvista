@@ -1773,6 +1773,7 @@ export default function App() {
               onSelect={setInspected}
               onInspectionPick={inspection.recordPick}
               inspectionSelection={inspection.selectedAtoms}
+              inspectedPick={inspection.getPick()}
               inspectionMeasurements={inspection.measurements}
               onShaderLog={(log) => {
                 if (log) {

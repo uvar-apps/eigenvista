@@ -1,5 +1,48 @@
 # EigenVista agent guide
 
+## Visible atom picking (#96) — source preview, 18 November 2026
+
+The user reports no visible feedback for mouse-picked atoms. Confirmed by a real
+export: selecting one atom changed zero pixels, because the old seven-pixel
+center point was hidden inside its atom sphere. Tracked by
+[#96](https://github.com/uvar-apps/eigenvista/issues/96). Selected atoms now have
+gold hollow target markers; the latest inspected atom/bond endpoints have cyan
+rings unless already selected. Ordinary inspection retains its existing
+selection semantics and updates only the annotation group. Markers preserve
+element/palette colors, shader/AO ownership and source identities, respect
+visibility filters, and appear in PNGs. Clear selection removes both transient
+cues. Source-identity guards suppress old selection/ordered indices before the
+passive replacement reset. One batched point draw per marker kind, owned textures
+and existing disposal; no per-atom draw calls, resource ceilings or scientific
+Rust/WASM/format/version/icon changes.
+
+Final focused Chromium/WebKit validation passes all 38 cases, including eight
+new real-pixel/mouse tests and existing inspection/plane-update integration.
+TypeScript, formatting and production/native debug builds pass. The final
+additional rendering suite passes all 96 cases (AO, molecular surfaces, lighting,
+field analysis and workspace), for **134 current-source application cases** total,
+67 per engine, with zero failures/skips/flaky cases/retries. All 423 source/input
+hashes remain unchanged across final rendering/native qualification. All 162
+website cases and static checks pass. Native selection/readback passes 16 calls
+and four reviewed PNG exports, including Pastel/AO/space-fill/transparency.
+The initial capture framing was corrected with camera fit; its earlier images
+remain diagnostic records. An initial AA-edge count assertion was corrected to
+test marker visibility over changing atom shading, rather than equal threshold
+counts. Source evidence is in `tmp/atom-selection/FINAL.json` and adjacent logs.
+Rust/native/WASM sources match prior qualification (182 hashes); those unchanged
+backend suites are reused, not claimed rerun. The user tested and accepted #96
+and explicitly authorized commit/push on **main**, without a tag, version bump
+or release. Before delivery, the complete current-source browser suite passes
+all **712 cases**, 356 per engine, with zero failures, skips, flaky cases or
+retries and all 423 runtime/test/input hashes unchanged. Fresh packaging/connector
+checks pass all 23 cases; formatting and website static checks also pass. The
+earlier 16-call/four-PNG native check and 162-case website qualification remain
+applicable; all 91 tracked site files are unchanged. Exact delivery evidence is
+in `tmp/atom-selection-push/PREFLIGHT.json` and adjacent reports. No release asset
+rebuild is requested.
+Preserve the original preview server/tab and immutable 0.10.1 release assets.
+Linux/clean-Mac qualification remains pending.
+
 ## Automatic quantitative plane updates (#95) — source preview, 18 November 2026
 
 Tracked by [#95](https://github.com/uvar-apps/eigenvista/issues/95). The user tested

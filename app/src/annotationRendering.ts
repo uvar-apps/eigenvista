@@ -40,8 +40,10 @@ export function buildAnnotations(
   doc: EigenVistaDocument,
   monitors: Monitor[],
   selected: number[],
+  inspected: number[] = [],
 ): THREE.Group {
   const group = new THREE.Group();
+  group.name = "inspection-annotations";
   const sprite = (
     text: string,
     color: string,
@@ -105,6 +107,56 @@ export function buildAnnotations(
     label.position.fromArray(point);
     group.add(label);
   };
+  const markers = (atoms: number[], color: string, selected: boolean) => {
+    if (!atoms.length) return;
+    const geometry = new THREE.BufferGeometry();
+    const material = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 28,
+      sizeAttenuation: false,
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+      toneMapped: false,
+    });
+    const points = new THREE.Points(geometry, material);
+    points.renderOrder = selected ? 1101 : 1100;
+    // Attach ownership before allocating geometry/texture data so a later
+    // preparation failure disposes this batch along with the other annotations.
+    group.add(points);
+    geometry.setFromPoints(
+      atoms.map((atom) => new THREE.Vector3(...doc.atoms.positions[atom])),
+    );
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 64;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Selection marker rendering is unavailable");
+    context.translate(32, 32);
+    context.lineCap = "round";
+    context.beginPath();
+    context.arc(0, 0, 19, 0, Math.PI * 2);
+    if (selected) {
+      for (const [x, y] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ]) {
+        context.moveTo(x * 24, y * 24);
+        context.lineTo(x * 27, y * 27);
+      }
+    }
+    context.lineWidth = 8;
+    context.strokeStyle = "#17242a";
+    context.stroke();
+    context.lineWidth = 4;
+    context.strokeStyle = color;
+    context.stroke();
+    const texture = new THREE.CanvasTexture(canvas);
+    material.map = texture;
+    points.userData.texture = texture;
+    texture.colorSpace = THREE.SRGBColorSpace;
+  };
   try {
     for (const item of doc.annotations?.labels ?? []) {
       if (!item.visible) continue;
@@ -149,23 +201,15 @@ export function buildAnnotations(
         anchor.toArray(),
       );
     }
-    // Selection halos are depiction, never a replacement source atom array.
-    if (selected.length) {
-      const geometry = new THREE.BufferGeometry().setFromPoints(
-        selected.map((atom) => new THREE.Vector3(...doc.atoms.positions[atom])),
-      );
-      group.add(
-        new THREE.Points(
-          geometry,
-          new THREE.PointsMaterial({
-            color: "#d39700",
-            size: 7,
-            sizeAttenuation: false,
-            depthWrite: false,
-          }),
-        ),
-      );
-    }
+    // Foreground position cues remain visible over atom spheres and surfaces.
+    // Hollow centers preserve element colors; batched points avoid a draw per
+    // atom. The selected reticle wins over an inspected ring at the same source.
+    markers(
+      inspected.filter((atom) => !selected.includes(atom)),
+      "#28d9ff",
+      false,
+    );
+    markers(selected, "#ffbd38", true);
     return group;
   } catch (cause) {
     disposeAnnotations(group);
