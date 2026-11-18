@@ -1,6 +1,6 @@
 # User-facing website
 
-## Release 0.10.2 qualified — publication pending (#98)
+## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
 
@@ -10,9 +10,9 @@ SHA-256: `cb9221b2e887eecdf5e7f574b6b2336253b64271400315b828b803dee77f551e`.
 
 The `.zip.sha256` and `.json` companions identify the same clean build; the ZIP includes the optimized app, converter, AI helper/launcher, guides, examples, palettes, notices and source/dependency archives.
 
-Current authored/generated website content describes shipped 0.10.2 behavior. All 162 local browser cases and final build/static checks pass; media retain original capture identities, dimensions and aspect ratios. Publish the qualified release assets before pushing main/site, so download links are available when Pages publishes.
+Current authored/generated website content describes shipped 0.10.2 behavior. All 162 local browser cases and final build/static checks pass; media retain original capture identities, dimensions and aspect ratios. Release assets were published before main/site; the deployed download links resolve to the verified assets.
 
-Publication is pending: create/push immutable annotated `v0.10.2` at the clean package source above, publish GitHub notes and all three assets, verify anonymous downloads, then push the prepared main/site and verify the Pages-only publisher and all served bytes. No application CI.
+Published [EigenVista 0.10.2](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.2) on 18 November 2026 with all three qualified assets. Independent anonymous downloads match complete ZIP/checksum/build-info bytes. All **90 served website files** and the custom nested404 match the prepared site, through [Pages deployment 44270783358](https://github.com/uvar-apps/eigenvista/actions/runs/44270783358) at metadata commit `0f32876d1bf54f8992c8869f5ffe1cb814654534`. No application CI was run. Old tags and the 0.10.1 ZIP bytes/hash are unchanged.
 
 User authorization covers commits, tag, pushes, public release and rebuilt redistributables. Track [#98](https://github.com/uvar-apps/eigenvista/issues/98), including accepted #94–#97: buttons, automatic planes, visible picks and live SES/SAS progress.
 

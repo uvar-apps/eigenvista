@@ -1,6 +1,6 @@
 # Implementation status
 
-## Release 0.10.2 qualified — publication pending (#98)
+## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
 
@@ -20,7 +20,7 @@ Native acceptance includes genuine plane supersession, 323 independent linear-fi
 
 All **162 website route/viewport cases** and final build/static checks pass. Measured download facts identify this qualified package.
 
-Publication is pending: create/push immutable annotated `v0.10.2` at the clean package source above, publish GitHub notes and all three assets, verify anonymous downloads, then push the prepared main/site and verify the Pages-only publisher and all served bytes. No application CI.
+Published [EigenVista 0.10.2](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.2) on 18 November 2026 with all three qualified assets. Independent anonymous downloads match complete ZIP/checksum/build-info bytes. All **90 served website files** and the custom nested404 match the prepared site, through [Pages deployment 44270783358](https://github.com/uvar-apps/eigenvista/actions/runs/44270783358) at metadata commit `0f32876d1bf54f8992c8869f5ffe1cb814654534`. No application CI was run. Old tags and the 0.10.1 ZIP bytes/hash are unchanged.
 
 User authorization covers commits, tag, pushes, public release and rebuilt redistributables. Track [#98](https://github.com/uvar-apps/eigenvista/issues/98), including accepted #94–#97: buttons, automatic planes, visible picks and live SES/SAS progress.
 
