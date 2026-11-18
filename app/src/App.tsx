@@ -237,14 +237,22 @@ export default function App() {
   const controlHost = useRef<ControlHost | null>(null);
   const controller = useRef<ApplicationControl | null>(null);
   const inspectionCommandRef = useRef<
-    | ((method: string, params?: Record<string, unknown>) => Promise<unknown>)
+    | ((
+        method: string,
+        params?: Record<string, unknown>,
+        options?: { signal?: AbortSignal },
+      ) => Promise<unknown>)
     | null
   >(null);
   const sendInspectionCommand = useCallback(
-    (method: string, params?: Record<string, unknown>) => {
+    (
+      method: string,
+      params?: Record<string, unknown>,
+      options?: { signal?: AbortSignal },
+    ) => {
       if (!inspectionCommandRef.current)
         return Promise.reject(new Error("Inspection control is not ready"));
-      return inspectionCommandRef.current(method, params);
+      return inspectionCommandRef.current(method, params, options);
     },
     [],
   );
@@ -1305,25 +1313,44 @@ export default function App() {
   async function inspectionCommand(
     method: string,
     params: Record<string, unknown> = {},
+    options: { signal?: AbortSignal } = {},
   ): Promise<unknown> {
     const api = controller.current;
     if (!api) throw new Error("Application control is not ready");
+    if (options.signal?.aborted)
+      throw new ControlError("cancelled", "Operation cancelled");
     let result = (await api.request(method, params)) as Record<string, unknown>;
     if (typeof result?.jobId === "string") {
       const jobId = result.jobId;
-      while (true) {
-        await new Promise((resolve) => setTimeout(resolve, 80));
-        const job = (await api.request("job.get", { jobId })) as {
-          status: string;
-          result?: Record<string, unknown>;
-          error?: { message: string };
-        };
-        if (job.status === "completed") {
-          result = job.result ?? {};
-          break;
+      // The form owns this receipt only. Closing an editor must never call the
+      // global Stop action or cancel a later, unrelated background operation.
+      const cancelOwned = () => {
+        void api.request("job.cancel", { jobId }).catch(() => {});
+      };
+      options.signal?.addEventListener("abort", cancelOwned, { once: true });
+      if (options.signal?.aborted) cancelOwned();
+      try {
+        while (true) {
+          await new Promise((resolve) => setTimeout(resolve, 80));
+          const job = (await api.request("job.get", { jobId })) as {
+            status: string;
+            result?: Record<string, unknown>;
+            error?: { message: string; data?: { kind?: string } };
+          };
+          if (job.status === "completed") {
+            result = job.result ?? {};
+            break;
+          }
+          if (job.status === "cancelled")
+            throw new ControlError(
+              "cancelled",
+              job.error?.message ?? "Operation cancelled",
+            );
+          if (job.status === "failed")
+            throw new Error(job.error?.message ?? "Operation failed");
         }
-        if (job.status === "failed" || job.status === "cancelled")
-          throw new Error(job.error?.message ?? "Operation cancelled");
+      } finally {
+        options.signal?.removeEventListener("abort", cancelOwned);
       }
     }
     if (method === "table.export" && typeof result?.text === "string") {

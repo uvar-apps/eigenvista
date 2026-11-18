@@ -592,7 +592,7 @@ test("atom-based probe, plane and profile persist exact caches with declared mea
     .click();
   await expect.poll(async () => (await analyses(page)).length).toBe(2);
   await expect(
-    panel.getByRole("button", { name: "Create plane", exact: true }),
+    panel.getByRole("button", { name: "Recompute analysis", exact: true }),
   ).toBeEnabled();
   const plane = (await analyses(page)).find(
     (item) => item.label === "Water plane",

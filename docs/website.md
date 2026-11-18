@@ -158,9 +158,11 @@ The three simple-pane illustrations retain original PNGs and complete capture
 metadata under `docs/design/assets/simple-workspace-pane-2026-11-17/`. Public
 copies are lossless WebP at the same 1280 × 800 dimensions, with zero decoded
 pixel differences. Their source version remains 0.9.0; the design introduced
-in 0.10.0 is retained in 0.10.1. The public provenance JSON is compactly serialized to keep
-all capture data and the new imagery within the existing 25 MiB payload bound.
-Existing image bytes, metadata values and palette provenance are preserved.
+in 0.10.0 is retained in 0.10.1. The public provenance JSON is compactly serialized;
+existing image bytes, metadata values and palette provenance are preserved.
+Source update #95 removes the earlier arbitrary 25 MiB static-payload gate.
+The checker reports the measured payload and validates asset consistency without
+rejecting documentation growth against a byte ceiling.
 Project history traces EigenVista to Molekel, developed by Ugo Varetto from
 2006 to 2010. Link the original repository and website from README/About History.
 Describe the Rust/TypeScript code as the new implementation; repository subtree

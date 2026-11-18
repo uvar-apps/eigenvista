@@ -302,8 +302,8 @@ export const INSPECTION_METHODS = {
     mutation({ descriptor }, ["descriptor"]),
   ),
   "analysis.create": entry(
-    "Create or replace a quantitative f64 probe, plane or profile in the background.",
-    mutation({ request: analysis }, ["request"]),
+    "Create or replace a quantitative f64 analysis. For planes, supersede:true replaces only prior supersede:true work for the same source and plane ID; newest request wins after cleanup. Other work remains busy.",
+    mutation({ request: analysis, supersede: bool }, ["request"]),
   ),
   "analysis.plane_atoms": entry(
     "Resolve an ordered three-atom plane in bohr coordinates.",

@@ -74,6 +74,13 @@ stay unspecified unless the user supplies an interpretation. Numerical values
 come from authoritative f64 sources, not GPU colors. SES/SAS use explicit radii,
 probe and spacing; a selected subset is an isolated object. Read back changed
 settings/results, inspect exported artifacts, and wait/cancel only your owned jobs.
+For source-preview plane edits, discover whether `analysis.create` accepts
+`supersede`; use the same analysis ID with a complete plane definition and
+`supersede:true` for latest-request replacement. This is absent from published
+0.10.1. It only supersedes a replaceable job for that plane/source, never unrelated
+work. Keep requested resolution, appearance and scientific units; poll the
+returned job and cancel only your owned receipt. See the reference for revisions
+and publication boundaries.
 Use typed pick attribution rather than parsing inspection text or compact display
 indices. Read complete molecular-surface diagnostics from summaries or the
 paginated warning query. A shader can target one returned quantum/molecular

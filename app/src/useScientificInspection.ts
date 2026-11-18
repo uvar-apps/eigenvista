@@ -858,7 +858,10 @@ export function useScientificInspection(options: Options) {
       try {
         return await execute(method, params, execution);
       } catch (cause) {
-        setError(String(cause));
+        // Replaced automatic plane edits are expected cancellation, not an
+        // error belonging to the current draft or an unrelated calculation.
+        if (!(params.supersede === true && execution.signal.aborted))
+          setError(String(cause));
         throw cause;
       } finally {
         if (background) {

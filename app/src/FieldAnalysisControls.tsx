@@ -17,12 +17,18 @@ import {
 } from "./fieldAnalysisRendering";
 import "./structure-controls.css";
 import { inspectionId } from "./inspectionId";
+import { PlaneNumberInput } from "./PlaneNumberInput";
 
 const BOHR = 0.529177210903;
 type Command = (
   method: string,
   params?: Record<string, unknown>,
+  options?: { signal?: AbortSignal },
 ) => Promise<unknown>;
+type EditableAnalysis = Pick<
+  FieldAnalysisItem,
+  "id" | "label" | "field" | "definition"
+>;
 export interface FieldAnalysisControlsProps {
   doc: EigenVistaDocument;
   selectedAtoms: number[];
@@ -77,7 +83,8 @@ export function FieldAnalysisControls(props: FieldAnalysisControlsProps) {
   const [fieldKey, setFieldKey] = useState(
     props.doc.field_analysis?.show_field_key ?? false,
   );
-  const [editing, setEditing] = useState<FieldAnalysisItem | null>(null);
+  const [editing, setEditing] = useState<EditableAnalysis | null>(null);
+  const [liveActive, setLiveActive] = useState(false);
   const commandRef = useRef(props.onCommand);
   commandRef.current = props.onCommand;
   useEffect(() => {
@@ -123,7 +130,9 @@ export function FieldAnalysisControls(props: FieldAnalysisControlsProps) {
     props.doc.grids,
     props.doc.field_analysis?.descriptors,
   ]);
-  const run: Command = async (method, params) => {
+  const run: Command = async (method, params, options) => {
+    // The live editor owns its request lifetime and ignores superseded errors.
+    if (options?.signal) return commandRef.current(method, params, options);
     const locksControls = method !== "analysis.samples";
     if (locksControls) setPending(true);
     setLocalError("");
@@ -166,7 +175,7 @@ export function FieldAnalysisControls(props: FieldAnalysisControlsProps) {
               Probe authoritative values and sample true 2D slices or lines.
               Preview resolution does not change these numerical results.
             </p>
-            {props.busy && props.onCancel && (
+            {props.busy && !liveActive && props.onCancel && (
               <button onClick={props.onCancel}>Cancel field analysis</button>
             )}
             {(localError || props.error) && (
@@ -234,16 +243,19 @@ export function FieldAnalysisControls(props: FieldAnalysisControlsProps) {
                   }
                 />
               )}
-              <AnalysisForm
-                key={`${props.doc.id}:${editing?.id ?? "new"}`}
-                {...props}
-                field={field}
-                editing={editing}
-                command={run}
-                onDone={() => setEditing(null)}
-                onError={setLocalError}
-              />
             </fieldset>
+            <AnalysisForm
+              key={`${props.doc.id}:${editing?.id ?? "new"}`}
+              {...props}
+              field={field}
+              editing={editing}
+              disabled={pending || (props.busy && !liveActive)}
+              command={run}
+              onDone={() => setEditing(null)}
+              onPlaneSaved={setEditing}
+              onLiveActivity={setLiveActive}
+              onError={setLocalError}
+            />
           </>
         )}
         {!!items.length && (
@@ -385,11 +397,13 @@ function VectorInputs({
   value,
   unit,
   onChange,
+  onCommit,
 }: {
   title: string;
   value: string[];
   unit: string;
   onChange: (value: string[]) => void;
+  onCommit?: () => void;
 }) {
   return (
     <div
@@ -402,17 +416,30 @@ function VectorInputs({
       {value.map((entry, index) => (
         <label key={index}>
           {title} {"XYZ"[index]}
-          <input
-            type="number"
-            step="any"
-            aria-label={`${title} ${"XYZ"[index]} (${unit})`}
-            value={entry}
-            onChange={(event) =>
-              onChange(
-                value.map((old, i) => (i === index ? event.target.value : old)),
-              )
-            }
-          />
+          {onCommit ? (
+            <PlaneNumberInput
+              label={`${title} ${"XYZ"[index]} (${unit})`}
+              value={entry}
+              onChange={(next) =>
+                onChange(value.map((old, i) => (i === index ? next : old)))
+              }
+              onCommit={onCommit}
+            />
+          ) : (
+            <input
+              type="number"
+              step="any"
+              aria-label={`${title} ${"XYZ"[index]} (${unit})`}
+              value={entry}
+              onChange={(event) =>
+                onChange(
+                  value.map((old, i) =>
+                    i === index ? event.target.value : old,
+                  ),
+                )
+              }
+            />
+          )}
         </label>
       ))}
     </div>
@@ -421,13 +448,44 @@ function VectorInputs({
 
 interface FormProps extends FieldAnalysisControlsProps {
   field: string;
-  editing: FieldAnalysisItem | null;
+  editing: EditableAnalysis | null;
+  disabled: boolean;
   command: Command;
   onDone: () => void;
+  onPlaneSaved: (request: AnalysisRequest) => void;
+  onLiveActivity: (active: boolean) => void;
   onError: (error: string) => void;
 }
 function AnalysisForm(props: FormProps) {
   const saved = props.editing?.definition;
+  const current = useRef(props);
+  current.current = props;
+  const mounted = useRef(true);
+  const intent = useRef(0);
+  const timer = useRef<number | undefined>(undefined);
+  const preparing = useRef<AbortController | null>(null);
+  const controllers = useRef(new Set<AbortController>());
+  const work = useRef(new Set<Promise<void>>());
+  const [automatic, setAutomatic] = useState(true);
+  const [committed, setCommitted] = useState(0);
+  const [autoStatus, setAutoStatus] = useState<"idle" | "queued" | "updating">(
+    "idle",
+  );
+  const [manualBusy, setManualBusy] = useState(false);
+  const invalidate = () => {
+    intent.current++;
+    window.clearTimeout(timer.current);
+    preparing.current?.abort();
+    for (const controller of controllers.current) controller.abort();
+  };
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      invalidate();
+      current.current.onLiveActivity(false);
+    };
+  }, [props.doc.atoms]);
   const [kind, setKind] = useState<AnalysisDefinition["kind"]>(
     saved?.kind ?? "probe",
   );
@@ -487,7 +545,9 @@ function AnalysisForm(props: FormProps) {
     setExtent(convert(extent));
     setUnit(next);
   };
-  const definition = async (): Promise<AnalysisDefinition> => {
+  const definition = async (options?: {
+    signal?: AbortSignal;
+  }): Promise<AnalysisDefinition> => {
     if (kind === "probe") {
       if (source === "atoms") {
         if (atoms.length !== 1)
@@ -524,17 +584,25 @@ function AnalysisForm(props: FormProps) {
       number,
       number,
     ];
+    if (samples.some((v) => !Number.isSafeInteger(v) || v < 2))
+      throw new Error("Plane sample counts must be integers of at least two");
     const widths = extent.map((v) => finite(v, "Plane extent"));
     if (widths.some((v) => v <= 0))
       throw new Error("Plane extents must be positive");
     if (axis === "atoms") {
       if (atoms.length !== 3)
         throw new Error("Select exactly three atoms in plane order");
-      return (await props.command("analysis.plane_atoms", {
-        atoms,
-        extentAngstrom: widths.map((v) => (unit === "angstrom" ? v : v * BOHR)),
-        dims: samples,
-      })) as AnalysisDefinition;
+      return (await props.command(
+        "analysis.plane_atoms",
+        {
+          atoms,
+          extentAngstrom: widths.map((v) =>
+            unit === "angstrom" ? v : v * BOHR,
+          ),
+          dims: samples,
+        },
+        options,
+      )) as AnalysisDefinition;
     }
     const spans = widths.map((v) => v * sourceFactor);
     let u: Vec3, v: Vec3;
@@ -558,8 +626,98 @@ function AnalysisForm(props: FormProps) {
       dims: samples,
     };
   };
+  const commitPlane = () => {
+    if (!automatic || kind !== "plane" || !props.editing) return;
+    invalidate();
+    props.onError("");
+    setAutoStatus("queued");
+    setCommitted(intent.current);
+  };
+  const schedule = (
+    request: AnalysisRequest,
+    sequence: number,
+    controller: AbortController,
+  ) => {
+    timer.current = window.setTimeout(() => {
+      if (
+        !mounted.current ||
+        sequence !== intent.current ||
+        controller.signal.aborted
+      )
+        return;
+      // An unrelated calculation owns the app. Keep its work intact and wait.
+      if (current.current.busy && controllers.current.size === 0) {
+        schedule(request, sequence, controller);
+        return;
+      }
+      controllers.current.add(controller);
+      current.current.onLiveActivity(true);
+      setAutoStatus("updating");
+      let retry = false;
+      const task = Promise.resolve().then(async () => {
+        try {
+          await current.current.command(
+            "analysis.create",
+            { request, supersede: true },
+            { signal: controller.signal },
+          );
+        } catch (error) {
+          if (sequence !== intent.current || controller.signal.aborted) return;
+          const failure = error as { kind?: string; data?: { kind?: string } };
+          if ((failure.kind ?? failure.data?.kind) === "busy") {
+            retry = true;
+            setAutoStatus("queued");
+            schedule(request, sequence, controller);
+          } else {
+            current.current.onError(
+              error instanceof Error ? error.message : String(error),
+            );
+          }
+        } finally {
+          controllers.current.delete(controller);
+          work.current.delete(task);
+          if (mounted.current) {
+            current.current.onLiveActivity(controllers.current.size > 0);
+            if (sequence === intent.current && !retry) setAutoStatus("idle");
+          }
+        }
+      });
+      work.current.add(task);
+    }, 180);
+  };
+  useEffect(() => {
+    if (!committed || committed !== intent.current) return;
+    const controller = new AbortController();
+    preparing.current = controller;
+    const prepare = async () => {
+      try {
+        const request: AnalysisRequest = {
+          id: props.editing!.id,
+          label: label.trim() || `${human(kind)} · ${props.field}`,
+          field: props.field,
+          definition: await definition({ signal: controller.signal }),
+        };
+        if (committed === intent.current && !controller.signal.aborted)
+          schedule(request, committed, controller);
+      } catch (error) {
+        if (committed === intent.current && !controller.signal.aborted) {
+          setAutoStatus("idle");
+          props.onError(error instanceof Error ? error.message : String(error));
+        }
+      }
+    };
+    void prepare();
+    // Only an explicit step/Enter/select commit starts work, not draft typing,
+    // accepted document publication, appearance edits or coordinate conversion.
+  }, [committed]);
   const submit = async () => {
+    invalidate();
+    const sequence = intent.current;
+    setAutoStatus("idle");
+    setManualBusy(true);
     try {
+      await Promise.allSettled([...work.current]);
+      if (!mounted.current || sequence !== intent.current) return;
       const request: AnalysisRequest = {
         id: props.editing?.id ?? inspectionId("analysis"),
         label: label.trim() || `${human(kind)} · ${props.field}`,
@@ -567,9 +725,15 @@ function AnalysisForm(props: FormProps) {
         definition: await definition(),
       };
       await props.command("analysis.create", { request });
-      props.onDone();
+      if (!mounted.current || sequence !== intent.current) return;
+      if (request.definition.kind === "plane") {
+        props.onPlaneSaved(request);
+      } else props.onDone();
     } catch (error) {
-      props.onError(error instanceof Error ? error.message : String(error));
+      if (mounted.current && sequence === intent.current)
+        props.onError(error instanceof Error ? error.message : String(error));
+    } finally {
+      if (mounted.current) setManualBusy(false);
     }
   };
   return (
@@ -588,178 +752,241 @@ function AnalysisForm(props: FormProps) {
           bind a new atom-based definition.
         </p>
       )}
-      <label>
-        Analysis type
-        <select
-          aria-label="Analysis type"
-          value={kind}
-          onChange={(event) =>
-            setKind(event.target.value as AnalysisDefinition["kind"])
-          }
-        >
-          <option value="probe">Point probe</option>
-          <option value="plane">Plane / contours</option>
-          <option value="profile">Line profile</option>
-        </select>
-      </label>
-      <label>
-        Analysis label
-        <input
-          aria-label="Analysis label"
-          value={label}
-          placeholder={`${human(kind)} · ${props.field}`}
-          onChange={(event) => setLabel(event.target.value)}
-        />
-      </label>
-      <label>
-        Coordinate units
-        <select
-          aria-label="Analysis coordinate units"
-          value={unit}
-          onChange={(event) => changeUnit(event.target.value)}
-        >
-          <option value="angstrom">Å</option>
-          <option value="bohr">bohr</option>
-        </select>
-      </label>
-      {kind !== "plane" && (
+      {props.editing && kind === "plane" && (
+        <>
+          <label className="structure-check">
+            <input
+              type="checkbox"
+              aria-label="Auto-update plane"
+              checked={automatic}
+              disabled={manualBusy}
+              onChange={(event) => {
+                const enabled = event.target.checked;
+                invalidate();
+                setAutomatic(enabled);
+                setAutoStatus(enabled ? "queued" : "idle");
+                if (enabled) {
+                  props.onError("");
+                  setCommitted(intent.current);
+                }
+              }}
+            />
+            Auto-update plane
+          </label>
+          <p className="structure-note">
+            Step a numeric control or press Enter after typing to update the
+            plane and contours. The previous result remains visible while the
+            new one is calculated. Turn this off to recompute manually.
+          </p>
+          {autoStatus !== "idle" && (
+            <div className="structure-actions">
+              <span role="status">
+                {autoStatus === "queued"
+                  ? "Plane update queued…"
+                  : "Updating plane…"}
+              </span>
+              <button
+                onClick={() => {
+                  invalidate();
+                  setAutoStatus("idle");
+                }}
+              >
+                Cancel plane update
+              </button>
+            </div>
+          )}
+        </>
+      )}
+      <fieldset
+        className="workspace-form-grid"
+        disabled={props.disabled || manualBusy}
+        style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+      >
         <label>
-          Positions from
+          Analysis type
           <select
-            aria-label="Analysis position source"
-            value={source}
-            onChange={(event) => setSource(event.target.value)}
+            aria-label="Analysis type"
+            value={kind}
+            onChange={(event) => {
+              invalidate();
+              setAutoStatus("idle");
+              setKind(event.target.value as AnalysisDefinition["kind"]);
+            }}
           >
-            <option value="coordinates">Entered coordinates</option>
-            <option value="atoms">Selected source atoms</option>
+            <option value="probe">Point probe</option>
+            <option value="plane">Plane / contours</option>
+            <option value="profile">Line profile</option>
           </select>
         </label>
-      )}
-      {kind === "probe" && source === "coordinates" && (
-        <VectorInputs
-          title="Probe"
-          value={point}
-          unit={unit === "angstrom" ? "Å" : "bohr"}
-          onChange={setPoint}
-        />
-      )}
-      {kind === "profile" && (
-        <>
-          {source === "coordinates" && (
-            <>
-              <VectorInputs
-                title="Profile start"
-                value={start}
-                unit={unit === "angstrom" ? "Å" : "bohr"}
-                onChange={setStart}
-              />
-              <VectorInputs
-                title="Profile end"
-                value={end}
-                unit={unit === "angstrom" ? "Å" : "bohr"}
-                onChange={setEnd}
-              />
-            </>
-          )}
+        <label>
+          Analysis label
+          <input
+            aria-label="Analysis label"
+            value={label}
+            placeholder={`${human(kind)} · ${props.field}`}
+            onChange={(event) => setLabel(event.target.value)}
+          />
+        </label>
+        <label>
+          Coordinate units
+          <select
+            aria-label="Analysis coordinate units"
+            value={unit}
+            onChange={(event) => changeUnit(event.target.value)}
+          >
+            <option value="angstrom">Å</option>
+            <option value="bohr">bohr</option>
+          </select>
+        </label>
+        {kind !== "plane" && (
           <label>
-            Profile samples
-            <input
-              type="number"
-              aria-label="Profile samples"
-              min={2}
-              step={1}
-              value={count}
-              onChange={(event) => setCount(event.target.value)}
-            />
-          </label>
-        </>
-      )}
-      {kind === "plane" && (
-        <>
-          <label>
-            Plane orientation
+            Positions from
             <select
-              aria-label="Plane orientation"
-              value={axis}
-              onChange={(event) => setAxis(event.target.value)}
+              aria-label="Analysis position source"
+              value={source}
+              onChange={(event) => setSource(event.target.value)}
             >
-              <option value="xy">XY</option>
-              <option value="xz">XZ</option>
-              <option value="yz">YZ</option>
-              <option value="atoms">Three selected atoms</option>
-              {saved?.kind === "plane" && (
-                <option value="saved">Saved world frame</option>
-              )}
+              <option value="coordinates">Entered coordinates</option>
+              <option value="atoms">Selected source atoms</option>
             </select>
           </label>
-          {axis !== "atoms" && (
-            <VectorInputs
-              title="Plane center"
-              value={center}
-              unit={unit === "angstrom" ? "Å" : "bohr"}
-              onChange={setCenter}
-            />
-          )}
-          <div className="structure-range">
-            {extent.map((value, i) => (
-              <label key={i}>
-                {i ? "Height" : "Width"} ({unit === "angstrom" ? "Å" : "bohr"})
-                <input
-                  type="number"
-                  step="any"
-                  min="0"
-                  aria-label={`Plane ${i ? "height" : "width"}`}
-                  value={value}
-                  onChange={(event) =>
-                    setExtent(
-                      extent.map((old, index) =>
-                        index === i ? event.target.value : old,
-                      ),
-                    )
-                  }
-                />
-              </label>
-            ))}
-          </div>
-          <div className="structure-range">
-            {dims.map((value, i) => (
-              <label key={i}>
-                {i ? "Rows" : "Columns"}
-                <input
-                  type="number"
-                  step={1}
-                  min={2}
-                  aria-label={`Plane ${i ? "rows" : "columns"}`}
-                  value={value}
-                  onChange={(event) =>
-                    setDims(
-                      dims.map((old, index) =>
-                        index === i ? event.target.value : old,
-                      ),
-                    )
-                  }
-                />
-              </label>
-            ))}
-          </div>
-        </>
-      )}
-      {((source === "atoms" && kind !== "plane") ||
-        (axis === "atoms" && kind === "plane")) && (
-        <p className="structure-note">
-          Selected atom order:{" "}
-          {atoms.length ? atoms.map((v) => v + 1).join(" → ") : "none"}. Source
-          numbering is one based here.
-        </p>
-      )}
-      <div className="structure-actions">
-        <button onClick={() => void submit()} disabled={!props.field}>
-          {props.editing ? "Recompute analysis" : `Create ${kind}`}
-        </button>
-        {props.editing && (
-          <button onClick={props.onDone}>Cancel editing</button>
         )}
-      </div>
+        {kind === "probe" && source === "coordinates" && (
+          <VectorInputs
+            title="Probe"
+            value={point}
+            unit={unit === "angstrom" ? "Å" : "bohr"}
+            onChange={setPoint}
+          />
+        )}
+        {kind === "profile" && (
+          <>
+            {source === "coordinates" && (
+              <>
+                <VectorInputs
+                  title="Profile start"
+                  value={start}
+                  unit={unit === "angstrom" ? "Å" : "bohr"}
+                  onChange={setStart}
+                />
+                <VectorInputs
+                  title="Profile end"
+                  value={end}
+                  unit={unit === "angstrom" ? "Å" : "bohr"}
+                  onChange={setEnd}
+                />
+              </>
+            )}
+            <label>
+              Profile samples
+              <input
+                type="number"
+                aria-label="Profile samples"
+                min={2}
+                step={1}
+                value={count}
+                onChange={(event) => setCount(event.target.value)}
+              />
+            </label>
+          </>
+        )}
+        {kind === "plane" && (
+          <>
+            <label>
+              Plane orientation
+              <select
+                aria-label="Plane orientation"
+                value={axis}
+                onChange={(event) => {
+                  setAxis(event.target.value);
+                  commitPlane();
+                }}
+              >
+                <option value="xy">XY</option>
+                <option value="xz">XZ</option>
+                <option value="yz">YZ</option>
+                <option value="atoms">Three selected atoms</option>
+                {saved?.kind === "plane" && (
+                  <option value="saved">Saved world frame</option>
+                )}
+              </select>
+            </label>
+            {axis !== "atoms" && (
+              <VectorInputs
+                title="Plane center"
+                value={center}
+                unit={unit === "angstrom" ? "Å" : "bohr"}
+                onChange={setCenter}
+                onCommit={commitPlane}
+              />
+            )}
+            <div className="structure-range">
+              {extent.map((value, i) => (
+                <label key={i}>
+                  {i ? "Height" : "Width"} ({unit === "angstrom" ? "Å" : "bohr"}
+                  )
+                  <PlaneNumberInput
+                    min={0}
+                    label={`Plane ${i ? "height" : "width"}`}
+                    value={value}
+                    onChange={(next) =>
+                      setExtent(
+                        extent.map((old, index) => (index === i ? next : old)),
+                      )
+                    }
+                    onCommit={commitPlane}
+                  />
+                </label>
+              ))}
+            </div>
+            <div className="structure-range">
+              {dims.map((value, i) => (
+                <label key={i}>
+                  {i ? "Rows" : "Columns"}
+                  <PlaneNumberInput
+                    step={1}
+                    min={2}
+                    label={`Plane ${i ? "rows" : "columns"}`}
+                    value={value}
+                    onChange={(next) =>
+                      setDims(
+                        dims.map((old, index) => (index === i ? next : old)),
+                      )
+                    }
+                    onCommit={commitPlane}
+                  />
+                </label>
+              ))}
+            </div>
+          </>
+        )}
+        {((source === "atoms" && kind !== "plane") ||
+          (axis === "atoms" && kind === "plane")) && (
+          <p className="structure-note">
+            Selected atom order:{" "}
+            {atoms.length ? atoms.map((v) => v + 1).join(" → ") : "none"}.
+            Source numbering is one based here.
+          </p>
+        )}
+        <div className="structure-actions">
+          <button onClick={() => void submit()} disabled={!props.field}>
+            {props.editing ? "Recompute analysis" : `Create ${kind}`}
+          </button>
+        </div>
+      </fieldset>
+      {props.editing && (
+        <div className="structure-actions">
+          <button
+            onClick={() => {
+              invalidate();
+              props.onDone();
+            }}
+            disabled={manualBusy}
+          >
+            Cancel editing
+          </button>
+        </div>
+      )}
     </section>
   );
 }

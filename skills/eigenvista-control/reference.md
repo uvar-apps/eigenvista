@@ -353,6 +353,16 @@ colors are not charge, and occupation-derived density is not a correlated-densit
 claim. The app does not compute an electrostatic potential from coordinates.
 
 An `analysis.create` request contains `{id,label,field,definition,descriptor?}`.
+
+Source preview after 0.10.1 adds optional top-level `supersede:true` for plane
+definitions. Discover its presence in the live schema first; the published
+0.10.1 binary does not accept it. Reuse the same analysis ID and submit a complete
+definition on every edit. The ordinary job receipt is immediate. Only an earlier
+replaceable plane job for the same ID and scientific source can be superseded;
+other work returns `busy`. Unpublished obsolete work is cancelled, its unwind is
+awaited, and obsolete queued definitions do not run. Accepted prior results and
+appearance remain until successful replacement. Explicit `expectedRevision`
+is rechecked after waiting. Poll each receipt and cancel only the job you own.
 Use a discovered field ID. Definition shapes, in bohr:
 
 ```json

@@ -250,6 +250,8 @@ export function Viewport({
   } | null>(null);
   const contourFailureRef = useRef(contourFailure);
   contourFailureRef.current = contourFailure;
+  const contourPreparationFailed =
+    contourFailure !== null && contourFailure.source === doc.field_analysis;
   const contourCache = useRef(
     new Map<string, { key: string; values: Float64Array }>(),
   );
@@ -833,6 +835,9 @@ export function Viewport({
   useEffect(() => {
     const e = engine.current;
     if (!e) return;
+    // Keep the last complete scene while the replacement plane's contours are
+    // prepared. Publishing a plane without its lines causes visible flicker.
+    if (contourPending || contourPreparationFailed) return;
     const shader = shaderRef.current;
     const group = new THREE.Group();
     let stagedAtomIndices: number[] = [];
@@ -1186,6 +1191,8 @@ export function Viewport({
     inspectionSelection,
     inspectionMeasurements,
     contours,
+    contourPending,
+    contourPreparationFailed,
   ]);
   useEffect(() => {
     const e = engine.current;
@@ -1629,6 +1636,14 @@ export function Viewport({
       queued.current.shift();
       try {
         const current = available();
+        const contourError = contourFailureRef.current;
+        if (
+          contourError &&
+          contourError.source === operation.document.field_analysis
+        )
+          throw new Error(
+            `Contours could not be prepared: ${contourError.message}`,
+          );
         if (
           committedDoc.current !== operation.document ||
           committedScene.current !== requestedScene.current

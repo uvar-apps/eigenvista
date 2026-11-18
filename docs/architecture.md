@@ -109,6 +109,19 @@ owns accepted selection/pick order, worker requests and publication. Its
 operations are dispatched through the existing controller/helper, not a second
 document, scripting runtime or GUI-driving automation layer.
 
+Source preview after 0.10.1 adds committed-input plane auto-update. The React
+editor retains numeric drafts until a native step or Enter commit, coalesces
+rapid commits and owns receipt-specific cancellation through an AbortSignal.
+An additive `supersede:true` on `analysis.create` serializes replacement of only
+the same replaceable plane/source job. Obsolete queued definitions do not sample;
+unpublished obsolete work cannot commit. Manual/unrelated jobs stay protected,
+and explicit revision preconditions are rechecked after waiting. The viewport
+keeps its last complete scene until replacement contours are prepared; contour
+failure retains that scene and makes synchronized export report the failure.
+Accepted numerical samples remain inspectable. Appearance-only changes reuse
+samples. No scientific evaluator, format, requested resolution or allocation
+policy changes. These controls are absent from the published 0.10.1 binary.
+
 | Component | Ownership |
 | --- | --- |
 | [Rust geometry inspection](../crates/eigenvista-core/src/inspection.rs) | Document-local atom references, annotation validation, f64 distance/angle/torsion, exact zero-radius coincidence and nearest-seed k-d-tree neighborhoods |

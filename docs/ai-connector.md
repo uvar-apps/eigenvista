@@ -239,6 +239,14 @@ density is nonnegative; an orbital amplitude is signed. Ask for a fixed range
 when comparing planes, or for a probe/profile when numbers matter. GUI users find
 these under **Fields → Quantitative field inspection**.
 
+In the newer source preview, you can also say “Move this plane half an angstrom
+along Z, keeping its contours, colors and resolution” or “Use only the last
+position I asked for.” The agent updates the existing plane and waits for the
+completed result. GUI users can leave **Auto-update plane** enabled, use a
+spinner, or press **Enter** after typing a sampling value. The published 0.10.1
+package still uses manual recomputation; the agent checks what the connected
+app supports.
+
 ## Protect your work and wait for results
 
 The agent should preserve unsaved work and wait for calculations and exports to

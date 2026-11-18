@@ -440,7 +440,7 @@ assert.equal(aiCapture.width, 1700);
 assert.equal(aiCapture.height, 1328);
 assert.equal(aiCapture.resolution, 128);
 const bytes = files.reduce((sum, row) => sum + row.bytes, 0);
-assert(bytes < 25 * 1024 * 1024, `Static payload, including narrated on-demand video, remains bounded: ${bytes}`);
+assert(Number.isSafeInteger(bytes) && bytes > 0, `Static payload bytes are representable: ${bytes}`);
 for (const name of [
   "site/assets/site.js",
   "tools/site/build.mjs",

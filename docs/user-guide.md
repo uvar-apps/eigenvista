@@ -566,6 +566,21 @@ then choose **Apply result settings**. Out-of-domain cells do not bridge contour
 lines. The sample/provenance table and **Export analysis CSV** provide the raw
 numerical evidence, including coordinates, units, method and domain status.
 
+**Source preview after 0.10.1 — automatic plane updates:** creating a plane
+keeps its sampling editor open. **Auto-update plane** is enabled by default.
+Use a coordinate/extent/sample-count spinner or its up/down arrow keys to move
+or refine the plane; when typing a value, press **Enter** to commit it. Changing
+the orientation also updates the plane. Rapid committed changes are combined,
+and the newest valid definition replaces the same saved result. The previous
+complete plane and contours remain visible while the replacement is prepared.
+The editor stays usable during its own updates; **Cancel plane update** stops
+that update. Invalid values retain the accepted result and show an explanation.
+Turn off **Auto-update plane** to make several edits before choosing
+**Recompute analysis**. **Cancel editing** stops pending automatic work.
+Collapsing the widget or hiding Tools keeps the calculation running.
+Changing the coordinate display unit alone does not resample the field.
+These automatic controls are not in the published 0.10.1 download.
+
 **Show current field rendering key** is separate: mesh/raycast keys identify
 their signed isovalues, and volume keys describe its actual color/opacity
 transfer. They do not pretend that the existing two-color volume is a linear

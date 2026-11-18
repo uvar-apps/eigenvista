@@ -553,6 +553,8 @@ type Job = {
   error?: ReturnType<typeof controlErrorResponse>;
   abort: AbortController;
   done: Promise<void>;
+  /** Only explicitly replaceable plane work belongs to a supersession chain. */
+  planeUpdate?: { id: string; document: EigenVistaDocument | null };
 };
 const terminal = (job: Job) =>
   ["completed", "failed", "cancelled"].includes(job.status);
@@ -677,8 +679,22 @@ export function createApplicationControl(getHost: () => ControlHost) {
     ...(error ? { error } : {}),
   });
   const startJob = (method: string, params: Record<string, unknown>) => {
-    idle();
     const source = getHost().snapshot();
+    const planeUpdate =
+      method === "analysis.create" && params.supersede === true
+        ? {
+            id: (params.request as { id: string }).id,
+            document: source.document,
+          }
+        : undefined;
+    const previous =
+      planeUpdate &&
+      active?.planeUpdate?.id === planeUpdate.id &&
+      sameSource(active.planeUpdate.document, source.document) &&
+      !mutating
+        ? active
+        : undefined;
+    if (!previous) idle();
     const abort = new AbortController();
     let finish!: () => void;
     const job: Job = {
@@ -686,6 +702,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
       operation: method,
       status: "accepted",
       abort,
+      planeUpdate,
       published: false,
       done: new Promise<void>((resolve) => {
         finish = resolve;
@@ -693,8 +710,14 @@ export function createApplicationControl(getHost: () => ControlHost) {
     };
     jobs.set(job.jobId, job);
     active = job;
+    // Receipt ownership is established before cancelling the old request. Its
+    // finally block cannot clear a replacement's active-job reservation.
+    if (previous && !previous.published) previous.abort.abort();
     queueMicrotask(async () => {
       try {
+        // Even an aborted queued request waits for its predecessor to unwind.
+        // The newest request therefore cannot overlap an earlier host.execute.
+        if (previous) await previous.done;
         if (abort.signal.aborted)
           throw new ControlError("cancelled", "Operation cancelled");
         job.status = "running";
@@ -709,6 +732,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
             job.published = true;
           },
         );
+        context.assertCurrent();
         job.result = await getHost().execute(method, params, context);
         if (abort.signal.aborted && !job.published)
           throw new ControlError("cancelled", "Operation cancelled");
@@ -740,6 +764,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
         delete job.result;
       } finally {
         if (active === job) active = undefined;
+        delete job.planeUpdate;
         finish();
       }
     });
@@ -788,6 +813,16 @@ export function createApplicationControl(getHost: () => ControlHost) {
               if (typeof id === "string") identifier(id, "Field ID");
         }
         validate(params, definition.inputSchema);
+        if (
+          method === "analysis.create" &&
+          params.supersede === true &&
+          (params.request as { definition: { kind: string } }).definition
+            .kind !== "plane"
+        )
+          throw new ControlError(
+            "invalid_arguments",
+            "Only plane analyses support superseding updates",
+          );
         if (method === "scene.set") {
           const ao = params.ambientOcclusion as
             | { automaticRadius?: boolean; radiusAngstrom?: number }

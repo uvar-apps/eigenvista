@@ -37,6 +37,16 @@ helper acceptance must cover every new method, updates/readback, cancellation,
 CSV/PNG, source preservation, file scopes/no-clobber and save/reopen. In-page
 controller tests alone do not establish installed connector support.
 
+Source-preview plane auto-update is tracked by #95. Focused tests are
+`plane-auto-update.spec.ts` (real GUI/WASM/contours, input commits, numerical
+oracle, cache recovery and failure retention) and `plane-controller.spec.ts`
+(deterministic ownership, queued cancellation, publication/source/revision races).
+Run these in both Chromium and WebKit from `app/`, then the full affected suites.
+Numeric mouse-step tests target the native arrow inside the input's padding.
+Canvas-only screenshot oracles hide the separate workspace progress badge as
+well as toolbar/error overlays; do not confuse changing progress text with
+changed molecular rendering. The published 0.10.1 package remains unchanged.
+
 Build test bundles in the optimized target directory or repository-local
 staging; do not rebuild the debug bundle over a running user app. Label/monitor
 edits preflight the actual bounded text layout before publication, independently

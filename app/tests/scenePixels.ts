@@ -34,7 +34,8 @@ export async function settleScene(page: Page) {
     for (let frame = 0; frame < 240; frame++) {
       await new Promise(requestAnimationFrame);
       const draws = (window as unknown as DrawProbedWindow).sceneDraws;
-      if (draws === undefined) throw new Error("Scene draw probe not installed");
+      if (draws === undefined)
+        throw new Error("Scene draw probe not installed");
       stable = draws === previous ? stable + 1 : 0;
       previous = draws;
       if (stable === 4) return;
@@ -146,7 +147,7 @@ export async function scenePixels(page: Page) {
       // canvas-only export/readPixels oracle by hiding these separate overlays;
       // visibility preserves layout and does not touch the renderer or camera.
       style:
-        ".viewport-tools, .scene-label, .viewport-error { visibility: hidden !important; }",
+        ".viewport-tools, .scene-label, .viewport-error, .workspace-activity { visibility: hidden !important; }",
     }),
   );
   return { ...result, error };

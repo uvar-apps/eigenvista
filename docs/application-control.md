@@ -402,7 +402,7 @@ back the accepted settings/results. No GUI operation is a required workaround.
 | `fields.describe` | `fieldId` | Accepted or derived scalar interpretation/provenance |
 | `fields.set_key` | `visible` | Persists truthful current mesh/raycast/volume-key visibility |
 | `fields.set_metadata` | `descriptor` below | Records scalar interpretation/display units; raw sources/hash stay unchanged |
-| `analysis.create` | Complete `request` below | Background create/replace probe, plane or profile with f64 cache |
+| `analysis.create` | Complete `request` below; optional `supersede:true` for planes in the source preview | Background create/replace probe, plane or profile with f64 cache |
 | `analysis.plane_atoms` | Ordered `atoms` (3), `extentAngstrom` (width/height), `dims` | Resolves an atom plane definition in world bohr |
 | `analysis.list` | Page | Analysis definitions, interpretation/counts and rendering warnings; no sample arrays |
 | `analysis.get` | `id` | One analysis summary/settings/provenance |
@@ -479,6 +479,20 @@ plane may bind three ordered `atoms`; a profile may bind two. Resolved coordinat
 must agree with those source references. Use `analysis.plane_atoms` to construct
 the exact three-atom frame: centered at A, horizontal along B−A, normal along
 `(B−A)×(C−A)`, with a nondegenerate third point. Endpoints are included.
+
+**Source preview after 0.10.1:** discover `analysis.create`'s input schema before
+using its optional top-level `supersede:true`. This is supported for plane
+definitions only. Send the full request with the same analysis ID on each edit;
+the ordinary job receipt is returned immediately. A replacement can supersede
+only another replaceable plane job for that ID and the same scientific source.
+It aborts unpublished obsolete work, waits for its unwind, and samples only the
+newest queued definition. Other jobs, including ordinary manual analysis jobs,
+return `busy` and are never cancelled by this option. Once an earlier result has
+been published, it remains accepted until a newer successful publication.
+Existing appearance is preserved. Cancel only a receipt owned by your request
+with `job.cancel`. Explicit `expectedRevision` is checked again before queued
+execution; refresh state after a stale outcome. Source replacement and disposal
+prevent obsolete publication. The published 0.10.1 binary lacks this option.
 
 `appearance` supports `visible`, `colormap` (`diverging`, `viridis`, `grayscale`),
 `show_key`, `show_labels`, optional ordered `range:[min,max]` and finite

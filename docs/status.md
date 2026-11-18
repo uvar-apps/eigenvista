@@ -1,5 +1,43 @@
 # Implementation status
 
+## Automatic quantitative plane updates (#95) — source preview, 18 November 2026
+
+Tracked by [#95](https://github.com/uvar-apps/eigenvista/issues/95). The user tested
+and accepted the implementation and authorized commit/push on **main**. No
+version bump, tag or release is requested. Creating a plane keeps its editor open with
+**Auto-update plane** enabled. Native numeric steps, Enter commits and orientation
+changes coalesce into the latest request. Typed drafts alone do not calculate.
+Manual mode, owned cancellation, focus, exact resolution and accepted appearance
+are preserved. The shared API/AI path supports optional plane-only
+`analysis.create {request, supersede:true}`; unrelated/manual jobs stay protected.
+Source/revision guards and serialization prevent obsolete publication. The
+viewport retains the complete previous plane while contours prepare; contour
+failure retains that scene and synchronized export reports the failure.
+
+Focused local Chromium/WebKit checks pass: 16 controller race/ownership cases
+and 10 actual GUI/WASM cases, with independent scalar values and cache Save/reopen.
+Rust workspace 378 tests (365 scientific/support + 13 desktop), explicit desktop
+13, fmt/strict Clippy, TypeScript/production frontend, and 23 packaging/connector
+checks pass. A fresh source-built native debug app passes 40 authenticated
+connector calls and two visually reviewed PNG exports, including real HOMO
+updates/cancellation and cached-plane reopening. All **704 application browser
+cases pass**, 352 per engine, with zero failures, skips, flaky cases or retries,
+and all 422 source/input hashes unchanged. All 162 website checks pass; the
+manual/AI/API guides and source-preview notice are synchronized. Final real HOMO
+editor captures in both browsers confirm native stepping, retained focus and
+cleared progress after completion. Scientific/WASM inputs match the previous
+qualified snapshot (159 hashes); unchanged generated WASM was reused.
+The website reports measured payload bytes instead of rejecting documentation
+growth against an arbitrary 25 MiB threshold. Evidence and aggregate assertions
+live in `tmp/plane-auto-update/FINAL.json` and adjacent logs/captures. Failed early
+capture-harness attempts remain diagnostic records, not qualification passes.
+The 422 qualified source/input hashes were rechecked unchanged before committing;
+the completed suites were not repeated for unchanged sources. Issue #95 tracks
+the accepted implementation and its delivery. Preserve the published 0.10.1 tag,
+DOI and package identities and the user's running preview/tab. No scientific
+Rust/WASM/format/dependency/profile/icon or allocation-policy changes. Linux and
+clean-Mac qualification remain pending.
+
 ## Button visibility (#94) — accepted source preview, 18 November 2026
 
 Action buttons now use a distinct tinted fill, stronger border, semibold text
