@@ -1,11 +1,10 @@
 # Implementation status
 
-**Distribution follow-up (18 November):** the first clean 0.10.1 candidate
-passed runtime/archive checks, but final guide review found its newly linked
-allocation-policy.md missing from the standalone guide folders. The package
-copy lists and checks are being corrected, followed by a new clean-source
-build/audit/extracted acceptance. Earlier candidate identity below is historical;
-no 0.10.1 tag or assets have been pushed or published. Runtime code is unchanged.
+**Final local delivery gate:** all 162 site route/viewport cases pass in
+Chromium/WebKit, with static checks (27 pages, 1,077 local references,
+76 image uses, 23 exact downloads) and desktop/mobile visual review.
+The final source tag is prepared and all applicable local checks are complete.
+Public release, anonymous download and Pages byte readback remain pending.
 
 ## Release 0.10.1 — qualified distribution, 18 November 2026
 
@@ -16,12 +15,12 @@ commit, annotated tag, push and a published release with notes and rebuilt
 redistributables. **Package qualification is complete; public release/Pages
 publication and independent remote byte verification are still pending.**
 
-The immutable release source is **`5794a6ef6328fd3aa326e429a00779f24cf90fbb`**, annotated tag
+The immutable release source is **`927a2962e8193b41918737ee34adbd2b7a545c29`**, annotated tag
 `v0.10.1`. The clean optimized Apple Silicon distribution is:
 
-- ZIP: `EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.zip` (82,174,932 bytes).
-- SHA256: `76732e155f73f57748f796e28917acbebed0a33f0ac6dd38431efa2411a7d9a5`.
-- Companions: `EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.zip.sha256` and `EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.json`.
+- ZIP: `EigenVista-0.10.1-apple-silicon-20261118T012726Z-927a296.zip` (82,185,967 bytes).
+- SHA256: `3260c5ed0b59b23b6ff6345e5fffe80ba6f9605072f67b9e180a1a9bb50ff16c`.
+- Companions: `EigenVista-0.10.1-apple-silicon-20261118T012726Z-927a296.zip.sha256` and `EigenVista-0.10.1-apple-silicon-20261118T012726Z-927a296.json`.
 - Local output: `artifacts/distributions/`; build identity reports
   `sourceDirty: false`, arm64, macOS 13.0 deployment target and ad-hoc signing.
 - Release destination: [v0.10.1](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.1).
@@ -30,8 +29,10 @@ Fresh local macOS 27 arm64 source checks pass: formatting, 365 workspace Rust
 tests, 13 desktop tests, strict workspace/all-target Clippy, WASM/TypeScript/
 production frontend and native builds, 23 packaging/connector checks and all
 678 application browser cases (339 each in Chromium/WebKit; one worker;
-zero failures/skips/flaky cases/retries). All 419 frozen runtime/test/input
-hashes match before/after both the browser suite and release packaging.
+zero failures/skips/flaky cases/retries). All 419 frozen hashes matched across the full browser suite and first package.
+The documentation follow-up changes only three packaging-tool/test inputs; all
+416 scientific/UI/test/fixture hashes remain unchanged, and the 23 packaging
+checks are rerun for the corrected distribution.
 The complete planned-case identities and final JSON results were verified.
 
 Both browsers generate/render/save/reopen the full 58,870-atom 1AON SES at
@@ -40,11 +41,11 @@ Geometry, source hash and physical/topological metrics match the scientific
 reference; both reopened caches export successfully. Their images were reviewed.
 The packager reran its Rust/production/converter/WASM checks successfully.
 
-Independent archive qualification checks **708 first-party source files**
+Independent archive qualification checks **709 first-party source files**
 against the clean commit and live source, both dependency/source archives,
 all 21 pinned Sesmesh patches, licenses, bytes/modes, arm64/system libraries,
 ad-hoc signatures, five actual executable-embedded frontend/WASM assets, and
-all 13 bundled connector files. Protected documents are filtered before access.
+all 14 bundled connector files. Protected documents are filtered before access.
 The actual extracted optimized app launched through its packaged launcher with
 only system runtime paths, exercising **34 inspection methods through
 184 calls and six PNG exports**. It passed authentic cancellation,

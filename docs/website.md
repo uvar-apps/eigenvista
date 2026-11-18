@@ -1,5 +1,11 @@
 # User-facing website
 
+**Final local delivery gate:** all 162 site route/viewport cases pass in
+Chromium/WebKit, with static checks (27 pages, 1,077 local references,
+76 image uses, 23 exact downloads) and desktop/mobile visual review.
+The final source tag is prepared and all applicable local checks are complete.
+Public release, anonymous download and Pages byte readback remain pending.
+
 The public website lives in `site/` on `main` and is intended for application
 users: installation, a detailed reference, worked tutorials and a gallery.
 It is published at <https://uvar-apps.github.io/eigenvista/>. Completed issue
@@ -21,27 +27,21 @@ The published homepage hero highlights **AI-enabled viewing**, links directly to
 the AI overview, and names the compatible published package beside the callout.
 Keep that availability label aligned with the actual public release.
 
-The current source is **0.10.1**, prepared under
-[issue #93](https://github.com/uvar-apps/eigenvista/issues/93). Current authored
-manual, tutorial and AI setup copy follows that version. The rebuilt Apple
-Silicon package from source `5794a6ef6328fd3aa326e429a00779f24cf90fbb` passed
-independent package audit and extracted-app native acceptance. Its measured
-download facts are now recorded in `tools/site/release.mjs`: ZIP
-`EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.zip`, 82,174,932 bytes,
-SHA-256 `76732e155f73f57748f796e28917acbebed0a33f0ac6dd38431efa2411a7d9a5`.
-Public release and GitHub Pages publication/readback remain pending; local
-package qualification does not establish their completion. The previous
-0.10.0 source was merged through
-[PR #89](https://github.com/uvar-apps/eigenvista/pull/89) and tagged `v0.10.0`.
-Older 0.8.0 downloads predate scientific inspection. Normal startup uses one wide,
-resizable left/right pane with Molecule, Fields, Surfaces and Appearance tabs,
-hide/reopen and Zen mode. Keep current instructions aligned with that default.
-Published download links, DOI and historical capture versions must continue to
-identify their actual artifacts. A source tag does not imply a new binary
-download. `tools/site/release.mjs` identifies the independently qualified 0.10.1
-package, and the generated site uses those measured facts for the planned
-release. Verify its actual public assets and Pages payload after publication;
-preserve existing source tags and historical package records.
+The current source is **0.10.1**, tracked through
+[issue #93](https://github.com/uvar-apps/eigenvista/issues/93). The final clean
+package uses source `927a2962e8193b41918737ee34adbd2b7a545c29`; its archive audit,
+self-contained guide/connector resources and actual extracted app/helper have
+passed qualification. A first unpublished candidate was superseded after the
+last dependency review found the linked allocation guide missing from its
+standalone folders. Both the website and corrected package now carry it.
+
+Current authored content and generated download facts identify the corrected
+package. Local browser verification and public release/Pages readback remain
+separate gates; this section does not yet assert public delivery. See the living
+[handoff](handoff.md) and [status](status.md) for the final ledger. Preserve
+historical source tags, artifact facts, version DOIs and media capture provenance.
+The four-tab, resizable left/right workspace and scientific inspection were
+introduced in 0.10.0; the 0.8.0 download predates these additions.
 
 The 0.10.1 reference explains a single camera-aligned light with neutral fill,
 smooth diffuse shape cues and one Blinn-Phong highlight. AO retains Lambert +

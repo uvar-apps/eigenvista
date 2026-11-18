@@ -1,11 +1,10 @@
 # EigenVista agent guide
 
-**Distribution follow-up (18 November):** the first clean 0.10.1 candidate
-passed runtime/archive checks, but final guide review found its newly linked
-allocation-policy.md missing from the standalone guide folders. The package
-copy lists and checks are being corrected, followed by a new clean-source
-build/audit/extracted acceptance. Earlier candidate identity below is historical;
-no 0.10.1 tag or assets have been pushed or published. Runtime code is unchanged.
+**Final local delivery gate:** all 162 site route/viewport cases pass in
+Chromium/WebKit, with static checks (27 pages, 1,077 local references,
+76 image uses, 23 exact downloads) and desktop/mobile visual review.
+The final source tag is prepared and all applicable local checks are complete.
+Public release, anonymous download and Pages byte readback remain pending.
 
 Standalone [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) checkout.
 Rust workspace, `app/`, `crates/`, `docs/`, `tools/`, and `fixtures/` live at the
@@ -60,7 +59,7 @@ documents; older `.molekel` preview documents remain readable. Check
 
 The user authorizes commit/tag/push/publication with rebuilt redistributables,
 tracked by [#93](https://github.com/uvar-apps/eigenvista/issues/93), including
-accepted fixes #91/#92. Clean source `5794a6ef6328fd3aa326e429a00779f24cf90fbb` is tagged `v0.10.1`.
+accepted fixes #91/#92. Clean source `927a2962e8193b41918737ee34adbd2b7a545c29` is tagged `v0.10.1`.
 Fresh local source checks pass: 365 workspace and 13 desktop Rust tests,
 fmt/strict Clippy, production/native builds, 23 packaging checks and all
 678 browser cases on 419 frozen hashes (339 per engine; zero failures/skips/
