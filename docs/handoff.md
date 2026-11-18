@@ -1,19 +1,12 @@
 # Development handoff
 
-**Final local delivery gate:** all 162 site route/viewport cases pass in
-Chromium/WebKit, with static checks (27 pages, 1,077 local references,
-76 image uses, 23 exact downloads) and desktop/mobile visual review.
-The final source tag is prepared and all applicable local checks are complete.
-Public release, anonymous download and Pages byte readback remain pending.
-
-## Release 0.10.1 — qualified distribution, 18 November 2026
+## Release 0.10.1 — published, 18 November 2026
 
 Version **0.10.1** includes smooth camera-relative lighting (#91) and
 allocation-driven workloads (#92). Delivery is tracked in
 [#93](https://github.com/uvar-apps/eigenvista/issues/93). The user authorizes
 commit, annotated tag, push and a published release with notes and rebuilt
-redistributables. **Package qualification is complete; public release/Pages
-publication and independent remote byte verification are still pending.**
+redistributables. **Package acceptance, release publication and independent public byte verification are complete.**
 
 The immutable release source is **`927a2962e8193b41918737ee34adbd2b7a545c29`**, annotated tag
 `v0.10.1`. The clean optimized Apple Silicon distribution is:
@@ -32,7 +25,7 @@ production frontend and native builds, 23 packaging/connector checks and all
 zero failures/skips/flaky cases/retries). All 419 frozen hashes matched across the full browser suite and first package.
 The documentation follow-up changes only three packaging-tool/test inputs; all
 416 scientific/UI/test/fixture hashes remain unchanged, and the 23 packaging
-checks are rerun for the corrected distribution.
+checks passed again for the corrected distribution.
 The complete planned-case identities and final JSON results were verified.
 
 Both browsers generate/render/save/reopen the full 58,870-atom 1AON SES at
@@ -60,9 +53,25 @@ native/native-latest.json). The release issue provides the durable public ledger
 The tagged source/archive preserve their truthful pre-publication snapshot;
 subsequent delivery/site records do not change runtime code or retag/rebuild it.
 
-Next: finish measured website generation/local checks, commit the delivery/site
-record, push main and the tag, publish all three assets with notes, verify
-anonymous downloads and Pages bytes, then close #91/#92/#93 and record delivery.
+Release **0.10.1 is published**, with notes and all three rebuilt assets.
+Anonymous downloads of ZIP/checksum/build-info JSON match complete local bytes.
+[Pages deployment 44216922047](https://github.com/uvar-apps/eigenvista/actions/runs/44216922047)
+published delivery/site commit `c4109f63a9bb4b40b64426dc620c305fe5a82d63`.
+All **90 tracked public files** and the custom nested 404 match the prepared
+site. All 162 local Chromium/WebKit route/viewport cases and interactions pass,
+with 27 pages, 1,077 local references, 76 image uses and 23 exact downloads;
+desktop/mobile pages were visually reviewed. No application CI was used.
+
+[#91](https://github.com/uvar-apps/eigenvista/issues/91),
+[#92](https://github.com/uvar-apps/eigenvista/issues/92) and
+[#93](https://github.com/uvar-apps/eigenvista/issues/93) are completed. Read the
+[durable delivery ledger](https://github.com/uvar-apps/eigenvista/issues/93#issuecomment-6966374399).
+Evidence includes `published-release.json`, `published-download-check.json`,
+`public-files.json` and site report
+`tmp/2026-11-15-website/browser-friivO/RESULT.json`. The initial readback included
+two ignored Finder metadata files; the retained diagnostic was corrected to the
+exact Git-tracked tree that Pages publishes. Both files remain ignored locally.
+
 No application CI. Keep v0.10.0 and its assets/captures immutable. Current citation
 uses concept DOI 10.5281/zenodo.24246123 until a version DOI is supplied;
 24302658 identifies only 0.10.0. Scientific profiles, dependency/toolchain pins

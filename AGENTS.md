@@ -1,11 +1,5 @@
 # EigenVista agent guide
 
-**Final local delivery gate:** all 162 site route/viewport cases pass in
-Chromium/WebKit, with static checks (27 pages, 1,077 local references,
-76 image uses, 23 exact downloads) and desktop/mobile visual review.
-The final source tag is prepared and all applicable local checks are complete.
-Public release, anonymous download and Pages byte readback remain pending.
-
 Standalone [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) checkout.
 Rust workspace, `app/`, `crates/`, `docs/`, `tools/`, and `fixtures/` live at the
 repository root. There is no `next/` wrapper and no legacy C++ / Molekel build here.
@@ -55,7 +49,7 @@ documents; older `.molekel` preview documents remain readable. Check
 - [User website](https://uvar-apps.github.io/eigenvista/) ·
   [Website maintenance](docs/website.md): static `site/` output, content, media and publishing.
 
-## Release 0.10.1 qualification — 18 November 2026
+## Release 0.10.1 published — 18 November 2026
 
 The user authorizes commit/tag/push/publication with rebuilt redistributables,
 tracked by [#93](https://github.com/uvar-apps/eigenvista/issues/93), including
@@ -64,14 +58,19 @@ Fresh local source checks pass: 365 workspace and 13 desktop Rust tests,
 fmt/strict Clippy, production/native builds, 23 packaging checks and all
 678 browser cases on 419 frozen hashes (339 per engine; zero failures/skips/
 flaky cases/retries). Both browsers pass full 1AON SES and cache Save/reopen.
+The final guide fix changes only three packaging-tool/test inputs; all 416
+scientific/UI/test/fixture hashes remain unchanged, and all 23 packaging checks
+passed again. The corrected clean package has independent extracted acceptance.
 
 The clean optimized ZIP and companions are rebuilt and independently audited;
 the actual extracted launcher/app/helper passed all 34 inspection methods,
 184 calls and six reviewed PNGs, including full 1AON cache recovery.
 Read current handoff/status for exact source, artifact bytes/hash and gaps.
-Website validation and public release/download/Pages readback are still pending;
-do not infer completion from the source tag. Historical pre-publication snapshots
-remain truthful records. Preserve old tags, packages and capture provenance.
+Website validation passes all 162 cases; the release is published with all three
+verified assets. All 90 served website files and nested404 match Pages deployment
+44216922047. Issues #91/#92/#93 are completed. Read the living handoff/status
+and issue #93 delivery ledger for exact evidence. Historical pre-publication
+snapshots remain truthful records. Preserve tags, packages and capture provenance.
 
 Current citation uses concept DOI 10.5281/zenodo.24246123 until a version DOI
 is supplied; 24302658 identifies 0.10.0 only. Keep scientific profiles, pinned

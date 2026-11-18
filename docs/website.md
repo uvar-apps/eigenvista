@@ -1,11 +1,5 @@
 # User-facing website
 
-**Final local delivery gate:** all 162 site route/viewport cases pass in
-Chromium/WebKit, with static checks (27 pages, 1,077 local references,
-76 image uses, 23 exact downloads) and desktop/mobile visual review.
-The final source tag is prepared and all applicable local checks are complete.
-Public release, anonymous download and Pages byte readback remain pending.
-
 The public website lives in `site/` on `main` and is intended for application
 users: installation, a detailed reference, worked tutorials and a gallery.
 It is published at <https://uvar-apps.github.io/eigenvista/>. Completed issue
@@ -36,8 +30,10 @@ last dependency review found the linked allocation guide missing from its
 standalone folders. Both the website and corrected package now carry it.
 
 Current authored content and generated download facts identify the corrected
-package. Local browser verification and public release/Pages readback remain
-separate gates; this section does not yet assert public delivery. See the living
+package. All 162 local browser cases pass. Public release/Pages readback is complete:
+all three release downloads and all 90 tracked site files plus nested404 match.
+Pages deployment [44216922047](https://github.com/uvar-apps/eigenvista/actions/runs/44216922047)
+serves delivery commit `c4109f63a9bb4b40b64426dc620c305fe5a82d63`. See the living
 [handoff](handoff.md) and [status](status.md) for the final ledger. Preserve
 historical source tags, artifact facts, version DOIs and media capture provenance.
 The four-tab, resizable left/right workspace and scientific inspection were
