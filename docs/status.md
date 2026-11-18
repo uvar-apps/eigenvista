@@ -9,7 +9,11 @@ synchronized; the concept DOI and older version citations remain distinct.
 This documentation-only follow-up preserves existing tags, redistributables,
 source identity and runtime qualification. CFF parsing, citation/site static checks and all 162
 Chromium/WebKit website route/viewport cases pass, with desktop/mobile citation
-review. Website/GitHub release-note publication is next.
+review. Published through citation commit `7dca1b257218689fedb9d6069e13b5a1d4aed297`
+and [Pages deployment 44220703219](https://github.com/uvar-apps/eigenvista/actions/runs/44220703219).
+All 90 public files and nested404 match the checked local site. GitHub release
+notes also use the new DOI; asset identities and the annotated tag are unchanged.
+Evidence: `tmp/doi-0.10.1/`; runtime tests were not rerun for this citation-only change.
 
 ## Release 0.10.1 — published, 18 November 2026
 

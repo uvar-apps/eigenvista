@@ -1,5 +1,15 @@
 # User-facing website
 
+## 0.10.1 citation publication — 18 November 2026
+
+The current version DOI is [10.5281/zenodo.24328295](https://doi.org/10.5281/zenodo.24328295).
+Published through citation commit `7dca1b257218689fedb9d6069e13b5a1d4aed297`
+and [Pages deployment 44220703219](https://github.com/uvar-apps/eigenvista/actions/runs/44220703219).
+All 90 public files and nested404 match the checked local site. GitHub release
+notes also use the new DOI; asset identities and the annotated tag are unchanged.
+Evidence: `tmp/doi-0.10.1/`; runtime tests were not rerun for this citation-only change.
+All 162 local Chromium/WebKit website cases and citation desktop/mobile review pass.
+
 The public website lives in `site/` on `main` and is intended for application
 users: installation, a detailed reference, worked tutorials and a gallery.
 It is published at <https://uvar-apps.github.io/eigenvista/>. Completed issue

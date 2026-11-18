@@ -10,7 +10,11 @@ retain their original attribution. This documentation-only follow-up preserves
 the existing release tag, package bytes, source identity and runtime qualification.
 CFF parsing, DOI/link/static consistency and all 162 website route/viewport
 cases pass locally in Chromium/WebKit. The changed citation page was visually
-reviewed on desktop and mobile. Website/GitHub release-note publication is next.
+reviewed on desktop and mobile. Published through citation commit `7dca1b257218689fedb9d6069e13b5a1d4aed297`
+and [Pages deployment 44220703219](https://github.com/uvar-apps/eigenvista/actions/runs/44220703219).
+All 90 public files and nested404 match the checked local site. GitHub release
+notes also use the new DOI; asset identities and the annotated tag are unchanged.
+Evidence: `tmp/doi-0.10.1/`; runtime tests were not rerun for this citation-only change.
 
 ## Release 0.10.1 — published, 18 November 2026
 
