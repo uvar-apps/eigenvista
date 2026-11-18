@@ -1,24 +1,16 @@
 //! Molecular SES/SAS generation from accepted source atoms, independently of QC fields.
 
-use crate::{BOHR_TO_ANGSTROM, Document, MAX_VERTICES, Result, valid_color};
+use crate::{BOHR_TO_ANGSTROM, Document, Result, valid_color};
 use serde::{Deserialize, Serialize};
 use sesmesh::{Control, Sphere, SurfaceParams, radii::BuiltinRadii, structure::Element};
 use sha2::{Digest, Sha256};
 use std::{
     cell::RefCell,
-    collections::BTreeMap,
     sync::atomic::{AtomicBool, Ordering},
 };
 
 /// Fixed, provenance-bearing scientific engine, including the reviewed WASM bridge patch.
 pub const ENGINE: &str = "sesmesh-1.1.2+eigenvista-wasm-v1";
-/// Engine estimate limit; accepted documents and renderer resources need additional memory.
-pub const MAX_ENGINE_BYTES: u64 = 256 * 1024 * 1024;
-/// Bound output topology before converting buffers or publishing a replacement.
-pub const MAX_TRIANGLES: usize = 4_000_000;
-/// Bound saved molecular surface count independently of legacy quantum surfaces.
-pub const MAX_MOLECULAR_SURFACES: usize = 32;
-
 /// The solvent-centre boundary (SAS) or the solvent-excluded molecular boundary (SES).
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -104,8 +96,8 @@ pub struct MolecularSurface {
     pub warnings: Vec<String>,
 }
 
-fn text(value: &str, maximum: usize, what: &str) -> Result<()> {
-    if value.is_empty() || value.len() > maximum || value.chars().any(char::is_control) {
+fn text(value: &str, what: &str) -> Result<()> {
+    if value.is_empty() || value.chars().any(char::is_control) {
         return Err(format!("Invalid molecular-surface {what}"));
     }
     Ok(())
@@ -119,12 +111,8 @@ fn appearance(color: &str, opacity: f64) -> Result<()> {
 }
 
 fn geometry_parameters(probe: f64, spacing: f64) -> Result<()> {
-    if !probe.is_finite()
-        || !(0.05..=10.0).contains(&probe)
-        || !spacing.is_finite()
-        || !(0.05..=3.0).contains(&spacing)
-    {
-        return Err("Molecular surface requires probe 0.05–10 Å and spacing 0.05–3 Å".into());
+    if !probe.is_finite() || probe < 0.0 || !spacing.is_finite() || spacing <= 0.0 {
+        return Err("Molecular surface requires a finite nonnegative probe radius and finite positive spacing".into());
     }
     Ok(())
 }
@@ -132,21 +120,27 @@ fn geometry_parameters(probe: f64, spacing: f64) -> Result<()> {
 impl MolecularSurfaceRequest {
     /// Resolve explicit original atoms and radii without changing the accepted document.
     pub fn resolve(&self, doc: &Document) -> Result<(Vec<usize>, Vec<f64>)> {
-        text(&self.id, 128, "ID")?;
-        text(&self.label, 256, "label")?;
+        text(&self.id, "ID")?;
+        text(&self.label, "label")?;
         appearance(&self.color, self.opacity)?;
         geometry_parameters(self.probe_radius, self.spacing)?;
-        if doc.atoms.is_empty() || doc.atoms.len() > 100_000 {
-            return Err("Molecular surfaces require 1–100,000 accepted atoms".into());
+        if doc.atoms.is_empty() {
+            return Err("Molecular surfaces require accepted atoms".into());
         }
-        let indices: Vec<_> = if self.atom_indices.is_empty() {
-            (0..doc.atoms.len()).collect()
+        let count = if self.atom_indices.is_empty() {
+            doc.atoms.len()
         } else {
-            if self.atom_indices.len() > doc.atoms.len() {
-                return Err("Molecular surface selection exceeds source atom count".into());
-            }
-            self.atom_indices.clone()
+            self.atom_indices.len()
         };
+        let mut indices = Vec::new();
+        indices
+            .try_reserve_exact(count)
+            .map_err(|e| format!("Cannot allocate molecular atom indices: {e}"))?;
+        if self.atom_indices.is_empty() {
+            indices.extend(0..count);
+        } else {
+            indices.extend_from_slice(&self.atom_indices);
+        }
         if indices.iter().any(|&i| i >= doc.atoms.len())
             || indices.windows(2).any(|pair| pair[0] >= pair[1])
         {
@@ -162,7 +156,7 @@ impl MolecularSurfaceRequest {
         let mut radii = Vec::new();
         radii
             .try_reserve_exact(indices.len())
-            .map_err(|_| "Cannot allocate molecular radii")?;
+            .map_err(|e| format!("Cannot allocate molecular radii: {e}"))?;
         let mut missing = Vec::new();
         for &i in &indices {
             let atom = &doc.atoms[i];
@@ -173,15 +167,15 @@ impl MolecularSurfaceRequest {
                 .ok()
                 .and_then(Element::from_atomic_number)
                 .ok_or("Invalid molecular surface element")?;
-            match overrides
-                .get(&atom.element)
-                .copied()
-                .or_else(|| table.element_radius(element))
-            {
+            match overrides[usize::from(atom.element)].or_else(|| table.element_radius(element)) {
                 Some(radius) => radii.push(radius),
                 None => {
                     if !missing.contains(&atom.element) {
-                        missing.push(atom.element);
+                        crate::allocation::push(
+                            &mut missing,
+                            atom.element,
+                            "missing element radii",
+                        )?;
                     }
                 }
             }
@@ -195,23 +189,34 @@ impl MolecularSurfaceRequest {
     }
 }
 
-fn override_table(values: &[RadiusOverride]) -> Result<BTreeMap<u16, f64>> {
-    if values.len() > 118 {
-        return Err("Too many molecular radius overrides".into());
-    }
-    let mut result = BTreeMap::new();
+fn override_table(values: &[RadiusOverride]) -> Result<[Option<f64>; 119]> {
+    let mut result = [None; 119];
     for value in values {
         if !(1..=118).contains(&value.element)
             || !value.radius_angstrom.is_finite()
-            || !(0.1..=10.0).contains(&value.radius_angstrom)
-            || result
-                .insert(value.element, value.radius_angstrom)
+            || value.radius_angstrom <= 0.0
+            || result[usize::from(value.element)]
+                .replace(value.radius_angstrom)
                 .is_some()
         {
-            return Err("Radius overrides require unique elements and radii 0.1–10 Å".into());
+            return Err(
+                "Radius overrides require unique elements and finite positive radii".into(),
+            );
         }
     }
     Ok(result)
+}
+
+fn copy<T: Copy>(values: &[T], label: &str) -> Result<Vec<T>> {
+    let mut out = crate::allocation::buffer(values.len(), label)?;
+    out.extend_from_slice(values);
+    Ok(out)
+}
+
+fn copy_text(value: &str) -> Result<String> {
+    let mut out = String::new();
+    crate::allocation::append(&mut out, value, "molecular surface text")?;
+    Ok(out)
 }
 
 fn number(hash: &mut Sha256, value: f64) {
@@ -258,16 +263,21 @@ pub fn source_hash(
 impl MolecularSurface {
     /// Validate loaded cache and source association without rerunning Sesmesh.
     pub fn validate(&self, doc: &Document) -> Result<()> {
+        let mut radii_overrides = crate::allocation::buffer(
+            self.radii_overrides.len(),
+            "cached molecular radius overrides",
+        )?;
+        radii_overrides.extend(self.radii_overrides.iter().cloned());
         let request = MolecularSurfaceRequest {
-            id: self.id.clone(),
-            label: self.label.clone(),
+            id: copy_text(&self.id)?,
+            label: copy_text(&self.label)?,
             kind: self.kind,
-            atom_indices: self.atom_indices.clone(),
+            atom_indices: copy(&self.atom_indices, "cached molecular atom indices")?,
             radii_set: self.radii_set,
-            radii_overrides: self.radii_overrides.clone(),
+            radii_overrides,
             probe_radius: self.probe_radius,
             spacing: self.spacing,
-            color: self.color.clone(),
+            color: copy_text(&self.color)?,
             opacity: self.opacity,
         };
         let (indices, radii) = request.resolve(doc)?;
@@ -292,13 +302,11 @@ impl MolecularSurface {
         }
         let vertices = self.positions.len() / 3;
         if vertices == 0
-            || vertices > MAX_VERTICES
             || !self.positions.len().is_multiple_of(3)
             || self.normals.len() != self.positions.len()
             || self.vertex_atoms.len() != vertices
             || self.indices.is_empty()
             || !self.indices.len().is_multiple_of(3)
-            || self.indices.len() / 3 > MAX_TRIANGLES
             || !self
                 .positions
                 .iter()
@@ -316,7 +324,7 @@ impl MolecularSurface {
                 .iter()
                 .any(|n| (n[0].hypot(n[1]).hypot(n[2]) - 1.0).abs() > 0.02)
         {
-            return Err("Invalid or over-budget molecular mesh arrays".into());
+            return Err("Invalid molecular mesh arrays".into());
         }
         if !self.stats.area_angstrom2.is_finite()
             || self.stats.area_angstrom2 <= 0.0
@@ -324,12 +332,8 @@ impl MolecularSurface {
             || self.stats.volume_angstrom3 <= 0.0
             || !self.stats.elapsed_seconds.is_finite()
             || self.stats.elapsed_seconds < 0.0
-            || self.stats.estimated_engine_bytes > MAX_ENGINE_BYTES
             || self.stats.components == 0
             || self.stats.cavities > self.stats.components
-            || self.stats.kernel.len() > 64
-            || self.warnings.len() > 128
-            || self.warnings.iter().any(|w| w.len() > 1024)
         {
             return Err("Invalid molecular surface diagnostics".into());
         }
@@ -350,13 +354,13 @@ pub fn create(
     let mut spheres = Vec::new();
     spheres
         .try_reserve_exact(atom_indices.len())
-        .map_err(|_| "Cannot allocate molecular spheres")?;
+        .map_err(|e| format!("Cannot allocate molecular spheres: {e}"))?;
     for (&index, &radius) in atom_indices.iter().zip(&radii_angstrom) {
         let center = std::array::from_fn(|axis| {
             (doc.atoms[index].position[axis] - local_origin_bohr[axis]) * BOHR_TO_ANGSTROM
         });
-        if !center.iter().all(|v| v.is_finite()) || center.iter().any(|v| v.abs() > 100_000.0) {
-            return Err("Molecular surface local coordinate span exceeds 100,000 Å".into());
+        if !center.iter().all(|v| v.is_finite()) {
+            return Err("Molecular surface local coordinates are not finite".into());
         }
         spheres.push(Sphere::new(center, radius));
     }
@@ -365,8 +369,6 @@ pub fn create(
         MolecularSurfaceKind::Sas => SurfaceParams::sas(request.probe_radius),
     }
     .with_spacing(request.spacing)
-    .with_max_memory(MAX_ENGINE_BYTES)
-    .with_auto_coarsen(false)
     .with_smoothing(0);
     let cancelled = AtomicBool::new(false);
     let error = RefCell::new(None);
@@ -391,21 +393,16 @@ pub fn create(
         return Err("Molecular surface engine changed the requested spacing".into());
     }
     let vertices = output.mesh.positions.len();
-    if vertices > MAX_VERTICES || output.mesh.triangles.len() > MAX_TRIANGLES {
-        return Err(
-            "Molecular surface exceeds mesh allocation limits; choose a coarser spacing".into(),
-        );
-    }
     let mut positions = Vec::new();
     let mut normals = Vec::new();
     let mut indices = Vec::new();
     let mut vertex_atoms = Vec::new();
     positions
         .try_reserve_exact(vertices.checked_mul(3).ok_or("Mesh size overflow")?)
-        .map_err(|_| "Cannot allocate molecular positions")?;
+        .map_err(|e| format!("Cannot allocate molecular positions: {e}"))?;
     normals
-        .try_reserve_exact(vertices * 3)
-        .map_err(|_| "Cannot allocate molecular normals")?;
+        .try_reserve_exact(vertices.checked_mul(3).ok_or("Mesh size overflow")?)
+        .map_err(|e| format!("Cannot allocate molecular normals: {e}"))?;
     indices
         .try_reserve_exact(
             output
@@ -415,10 +412,10 @@ pub fn create(
                 .checked_mul(3)
                 .ok_or("Mesh size overflow")?,
         )
-        .map_err(|_| "Cannot allocate molecular triangles")?;
+        .map_err(|e| format!("Cannot allocate molecular triangles: {e}"))?;
     vertex_atoms
         .try_reserve_exact(vertices)
-        .map_err(|_| "Cannot allocate molecular atom identities")?;
+        .map_err(|e| format!("Cannot allocate molecular atom identities: {e}"))?;
     for p in &output.mesh.positions {
         positions.extend(
             (0..3).map(|axis| f64::from(p[axis]) / BOHR_TO_ANGSTROM + local_origin_bohr[axis]),
@@ -428,14 +425,20 @@ pub fn create(
     indices.extend(output.mesh.triangles.iter().flatten().copied());
     for &atom in &output.mesh.vertex_atom {
         vertex_atoms.push(
-            *atom_indices
-                .get(atom as usize)
-                .ok_or("Invalid surface atom attribution")? as u32,
+            u32::try_from(
+                *atom_indices
+                    .get(atom as usize)
+                    .ok_or("Invalid surface atom attribution")?,
+            )
+            .map_err(|_| "Surface atom attribution cannot be represented by u32 indices")?,
         );
     }
+    let mut radii_overrides =
+        crate::allocation::buffer(request.radii_overrides.len(), "molecular radius overrides")?;
+    radii_overrides.extend(request.radii_overrides.iter().cloned());
     let surface = MolecularSurface {
-        id: request.id.clone(),
-        label: request.label.clone(),
+        id: copy_text(&request.id)?,
+        label: copy_text(&request.label)?,
         kind: request.kind,
         source_hash: source_hash(
             doc,
@@ -447,7 +450,7 @@ pub fn create(
         )?,
         atom_indices,
         radii_set: request.radii_set,
-        radii_overrides: request.radii_overrides.clone(),
+        radii_overrides,
         radii_angstrom,
         probe_radius: request.probe_radius,
         spacing: output.stats.spacing,
@@ -459,7 +462,7 @@ pub fn create(
         normals,
         indices,
         vertex_atoms,
-        color: request.color.clone(),
+        color: copy_text(&request.color)?,
         opacity: request.opacity,
         visible: true,
         stats: MolecularSurfaceStats {

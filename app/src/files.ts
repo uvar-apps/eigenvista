@@ -2,11 +2,11 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { trackNativeSave } from "./nativeSaveActivity";
+import { makeNativeTransfer } from "./nativeTransfer";
 
 export const native = isTauri();
 export const molecularExtensions =
   ".eigenvista,.molekel,.xyz,.pdb,.cif,.mcif,.pdbx,.bcif,.gz,.cube,.cub,.molden,.molf,.input";
-export const fileByteLimit = 128 * 1024 * 1024;
 export interface SourceFile {
   name: string;
   path?: string;
@@ -16,8 +16,6 @@ export function browserSource(file: File): SourceFile {
   return {
     name: file.name,
     read: async () => {
-      if (file.size > fileByteLimit)
-        throw new Error("File exceeds the 128 MiB preview budget");
       return new Uint8Array(await file.arrayBuffer());
     },
   };
@@ -53,11 +51,13 @@ export async function saveBytes(
 ) {
   if (native) {
     return trackNativeSave(() =>
-      invoke<boolean>("save_native", {
-        bytes: Array.from(bytes),
-        name,
-        protectedPaths,
-      }),
+      invoke<boolean>(
+        "save_native",
+        makeNativeTransfer(bytes, {
+          name,
+          protectedPaths,
+        }),
+      ),
     );
   } else {
     const url = URL.createObjectURL(

@@ -302,13 +302,12 @@ function SurfaceForm({
         (value, index) =>
           !overrides[index].radius.trim() ||
           !Number.isFinite(value.radius_angstrom) ||
-          value.radius_angstrom < 0.1 ||
-          value.radius_angstrom > 10,
+          value.radius_angstrom <= 0,
       ) ||
       new Set(radii.map((value) => value.element)).size !== radii.length
     ) {
       onError(
-        "Radius overrides require distinct elements and values from 0.1 to 10 Å.",
+        "Radius overrides require distinct elements and finite positive radii.",
       );
       return;
     }
@@ -352,7 +351,6 @@ function SurfaceForm({
         <input
           aria-label="Molecular surface name"
           value={label}
-          maxLength={256}
           onChange={(event) => setLabel(event.target.value)}
           style={{ width: "100%" }}
         />
@@ -429,8 +427,7 @@ function SurfaceForm({
         <input
           aria-label="Molecular surface probe radius"
           type="number"
-          min={0.05}
-          max={10}
+          min={0}
           step={0.05}
           value={probe}
           onChange={(event) => setProbe(event.target.value)}
@@ -441,8 +438,7 @@ function SurfaceForm({
         <input
           aria-label="Molecular surface grid spacing"
           type="number"
-          min={0.05}
-          max={3}
+          min={Number.MIN_VALUE}
           step={0.05}
           value={spacing}
           onChange={(event) => setSpacing(event.target.value)}
@@ -485,8 +481,7 @@ function SurfaceForm({
             <input
               aria-label={`Radius override value ${index + 1}`}
               type="number"
-              min={0.1}
-              max={10}
+              min={Number.MIN_VALUE}
               step={0.01}
               value={value.radius}
               placeholder="Å"
@@ -608,7 +603,6 @@ function SavedSurface({
           <input
             aria-label={`Name for ${surface.label}`}
             value={label}
-            maxLength={256}
             onChange={(event) => setLabel(event.target.value)}
             style={{ width: "100%" }}
           />

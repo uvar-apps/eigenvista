@@ -4,18 +4,17 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashSet},
-    io::{Cursor, Read, Write},
+    io::{Cursor, Write},
 };
 use zip::{CompressionMethod, ZipArchive, ZipWriter, write::SimpleFileOptions};
 
+mod buffer;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native;
 #[cfg(test)]
 mod preflight_tests;
 mod typed;
 
-const BUDGET: usize = 128 * 1024 * 1024;
-const MANIFEST_BUDGET: usize = 8 * 1024 * 1024;
 const PROFILE: &str = "eigenvista-preview-polynomial-v1";
 const LEGACY_PROFILE: &str = "molekel-preview-polynomial-v1";
 const BIO_PROFILE: &str = "eigenvista-biological-structure-v1";
@@ -62,20 +61,6 @@ fn digest(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
 
-#[derive(Clone, Copy)]
-struct PreviewBudget {
-    array_entries: usize,
-    manifest_bytes: usize,
-    total_bytes: usize,
-}
-
-const PREVIEW_BUDGET: PreviewBudget = PreviewBudget {
-    // The manifest occupies the remaining slot in the 8192-entry ZIP limit.
-    array_entries: 8191,
-    manifest_bytes: MANIFEST_BUDGET,
-    total_bytes: BUDGET,
-};
-
 struct PreparedDocument {
     manifest: Vec<u8>,
     entries: Vec<(String, Vec<u8>)>,
@@ -83,13 +68,13 @@ struct PreparedDocument {
 
 // Publication and Save use the same typed packing and exact manifest accounting.
 // The existing preview layout, numeric bits and source hashes remain unchanged.
-fn preflight(doc: &Document, budget: PreviewBudget) -> Result<PreparedDocument> {
+fn preflight(doc: &Document) -> Result<PreparedDocument> {
     doc.validate()?;
     let typed::PackedDocument {
         document,
         arrays,
         entries,
-    } = typed::pack(doc, budget)?;
+    } = typed::pack(doc)?;
     let required_features = required_features(&document);
     let manifest = Manifest {
         format: "eigenvista".into(),
@@ -99,53 +84,64 @@ fn preflight(doc: &Document, budget: PreviewBudget) -> Result<PreparedDocument> 
         arrays,
         document,
     };
-    let manifest = serde_json::to_vec(&manifest).map_err(|e| e.to_string())?;
-    if manifest.len() > budget.manifest_bytes
-        || entries.iter().map(|e| e.1.len()).sum::<usize>() + manifest.len() > budget.total_bytes
-    {
-        return Err("Native document exceeds preview budget".into());
-    }
+    let mut bytes = buffer::Buffer::default();
+    serde_json::to_writer(&mut bytes, &manifest).map_err(|e| e.to_string())?;
+    let manifest = bytes.into_inner();
     Ok(PreparedDocument { manifest, entries })
 }
 
-/// Validate scientific inputs, saved-surface identity and exact native budgets.
+/// Validate scientific inputs and saved-surface identity using fallible native packing.
 ///
 /// Builds the same uncompressed entries and manifest as `encode`, without ZIP
 /// construction or compression. Retained scientific inputs and meshes are still
 /// visited, serialized and hashed; this is not a constant-cost mesh-only check.
 pub fn validate_document(doc: &Document) -> Result<()> {
-    preflight(doc, PREVIEW_BUDGET).map(|_| ())
+    preflight(doc).map(|_| ())
 }
 
 pub fn encode(doc: &Document) -> Result<Vec<u8>> {
-    encode_prepared(preflight(doc, PREVIEW_BUDGET)?)
+    encode_prepared(preflight(doc)?)
 }
 
 fn encode_prepared(prepared: PreparedDocument) -> Result<Vec<u8>> {
     let PreparedDocument { manifest, entries } = prepared;
-    let mut zip = ZipWriter::new(Cursor::new(vec![]));
+    let mut zip = ZipWriter::new(buffer::Buffer::default());
     let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
-    zip.start_file("manifest.json", options)
-        .map_err(|e| e.to_string())?;
+    zip.start_file(
+        "manifest.json",
+        options.large_file(manifest.len() as u64 > u32::MAX as u64),
+    )
+    .map_err(|e| e.to_string())?;
     zip.write_all(&manifest).map_err(|e| e.to_string())?;
     for (name, bytes) in entries {
-        zip.start_file(name, options).map_err(|e| e.to_string())?;
+        zip.start_file(
+            name,
+            options.large_file(bytes.len() as u64 > u32::MAX as u64),
+        )
+        .map_err(|e| e.to_string())?;
         zip.write_all(&bytes).map_err(|e| e.to_string())?;
     }
     Ok(zip.finish().map_err(|e| e.to_string())?.into_inner())
 }
 
-fn reshape(values: &[Value], shape: &[usize]) -> Value {
-    if shape.len() == 1 {
-        return Value::Array(values.to_vec());
+fn reshape(values: Vec<Value>, shape: &[usize]) -> Result<Value> {
+    fn rows(values: &mut impl Iterator<Item = Value>, shape: &[usize]) -> Result<Value> {
+        let mut row = Vec::new();
+        row.try_reserve_exact(shape[0])
+            .map_err(|_| "Cannot allocate native array rows")?;
+        for _ in 0..shape[0] {
+            row.push(if shape.len() == 1 {
+                values.next().ok_or("Native array shape mismatch")?
+            } else {
+                rows(values, &shape[1..])?
+            });
+        }
+        Ok(Value::Array(row))
     }
-    let stride = shape[1..].iter().product();
-    Value::Array(
-        values
-            .chunks_exact(stride)
-            .map(|v| reshape(v, &shape[1..]))
-            .collect(),
-    )
+    if shape.len() == 1 {
+        return Ok(Value::Array(values));
+    }
+    rows(&mut values.into_iter(), shape)
 }
 fn unpack(
     v: &mut Value,
@@ -174,6 +170,9 @@ fn unpack(
                 return Err("Column row already consumed".into());
             }
             *v = std::mem::replace(slot, Value::Null);
+            referenced
+                .try_reserve(1)
+                .map_err(|_| "Cannot allocate native array reference set")?;
             referenced.insert(id);
         } else {
             if object.len() != 1 {
@@ -182,6 +181,9 @@ fn unpack(
             *v = arrays
                 .remove(&id)
                 .ok_or("Unknown or multiply referenced array")?;
+            referenced
+                .try_reserve(1)
+                .map_err(|_| "Cannot allocate native array reference set")?;
             referenced.insert(id);
         }
     } else {
@@ -203,18 +205,17 @@ fn unpack(
 }
 
 pub fn decode(bytes: &[u8]) -> Result<Document> {
-    if bytes.len() > BUDGET {
-        return Err("File exceeds 128 MiB preview budget".into());
-    }
     let mut zip = ZipArchive::new(Cursor::new(bytes)).map_err(|e| e.to_string())?;
-    if zip.len() > 8192 {
-        return Err("Too many ZIP entries".into());
-    }
     let mut names = HashSet::new();
-    let mut total = 0u64;
     for i in 0..zip.len() {
         let file = zip.by_index(i).map_err(|e| e.to_string())?;
         let name = file.name();
+        names
+            .try_reserve(1)
+            .map_err(|_| "Cannot allocate native ZIP entry names")?;
+        names
+            .try_reserve(1)
+            .map_err(|_| "Cannot allocate ZIP entry directory")?;
         if name.starts_with('/')
             || name.contains('\\')
             || name
@@ -227,27 +228,13 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
         {
             return Err("Unsafe, duplicate, or unsupported ZIP entry".into());
         }
-        total = total
-            .checked_add(file.size())
-            .ok_or("ZIP length overflow")?;
-        if total > BUDGET as u64 {
-            return Err("Decompressed document exceeds preview budget".into());
-        }
     }
     let manifest_file = zip
         .by_name("manifest.json")
         .map_err(|_| "Missing manifest.json")?;
-    if manifest_file.size() > MANIFEST_BUDGET as u64 {
-        return Err("Manifest too large".into());
-    }
-    let mut manifest_bytes = vec![];
-    manifest_file
-        .take(MANIFEST_BUDGET as u64 + 1)
-        .read_to_end(&mut manifest_bytes)
-        .map_err(|e| e.to_string())?;
-    if manifest_bytes.len() > MANIFEST_BUDGET {
-        return Err("Manifest exceeds inflated budget".into());
-    }
+    // Grow from bytes actually produced by decompression rather than trusting a
+    // declared uncompressed size, and read through EOF to verify the ZIP CRC.
+    let manifest_bytes = buffer::read(manifest_file)?;
     let mut manifest: Manifest =
         serde_json::from_slice(&manifest_bytes).map_err(|e| e.to_string())?;
     let expected_features = required_features(&manifest.document);
@@ -263,6 +250,8 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
     }
     let mut decoded = BTreeMap::new();
     let mut used = HashSet::from(["manifest.json".to_string()]);
+    used.try_reserve(manifest.arrays.len())
+        .map_err(|_| "Cannot allocate native array entry set")?;
     for (id, a) in manifest.arrays {
         let width = match a.dtype.as_str() {
             "f64" => 8,
@@ -274,11 +263,12 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
             .iter()
             .try_fold(1usize, |n, d| n.checked_mul(*d))
             .ok_or("Array shape overflow")?;
+        used.try_reserve(1)
+            .map_err(|_| "Cannot allocate native array entry names")?;
         if a.shape.is_empty()
             || a.shape.len() > 4
             || a.shape.contains(&0)
             || n.checked_mul(width) != Some(a.bytes)
-            || a.bytes > BUDGET
             || !a.entry.starts_with("arrays/")
             || !used.insert(a.entry.clone())
         {
@@ -288,17 +278,17 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
         if file.size() != a.bytes as u64 {
             return Err("Array byte length mismatch".into());
         }
-        let mut bytes = vec![];
-        file.take(a.bytes as u64 + 1)
-            .read_to_end(&mut bytes)
-            .map_err(|e| e.to_string())?;
+        let bytes = buffer::read(file)?;
         if bytes.len() != a.bytes {
             return Err("Inflated array length mismatch".into());
         }
         if digest(&bytes) != a.sha256 {
             return Err("Array checksum mismatch".into());
         }
-        let mut values = Vec::with_capacity(n);
+        let mut values = Vec::new();
+        values
+            .try_reserve_exact(n)
+            .map_err(|_| "Cannot allocate decoded native array")?;
         for b in bytes.chunks_exact(width) {
             if width == 4 {
                 values.push(json!(u32::from_le_bytes(b.try_into().unwrap())));
@@ -310,12 +300,15 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
                 values.push(json!(v));
             }
         }
-        decoded.insert(id, reshape(&values, &a.shape));
+        decoded.insert(id, reshape(values, &a.shape)?);
     }
     if used != names {
         return Err("Unreferenced entries are not supported by the preview profile".into());
     }
     let mut referenced = HashSet::new();
+    referenced
+        .try_reserve(decoded.len())
+        .map_err(|_| "Cannot allocate native array reference set")?;
     unpack(&mut manifest.document, &mut decoded, &mut referenced)?;
     if !decoded.keys().all(|id| referenced.contains(id)) {
         return Err("Unreferenced arrays".into());
@@ -329,6 +322,7 @@ pub fn decode(bytes: &[u8]) -> Result<Document> {
 mod tests {
     use super::*;
     use eigenvista_core::{compute, fixtures};
+    use std::io::Read;
     #[test]
     fn saved_mesh_rejects_changed_inputs_but_allows_appearance_edits() {
         let mut d = fixtures::hydrogen_pair();
@@ -345,7 +339,7 @@ mod tests {
     fn array_digest_is_checked() {
         let bytes = encode(&fixtures::open_shell()).unwrap();
         let mut input = ZipArchive::new(Cursor::new(bytes)).unwrap();
-        let mut output = ZipWriter::new(Cursor::new(vec![]));
+        let mut output = ZipWriter::new(buffer::Buffer::default());
         for i in 0..input.len() {
             let mut f = input.by_index(i).unwrap();
             let name = f.name().to_owned();
@@ -390,7 +384,7 @@ mod tests {
     }
     #[test]
     fn unsafe_paths_rejected() {
-        let mut z = ZipWriter::new(Cursor::new(vec![]));
+        let mut z = ZipWriter::new(buffer::Buffer::default());
         z.start_file("../manifest.json", SimpleFileOptions::default())
             .unwrap();
         z.write_all(b"{}").unwrap();
@@ -401,7 +395,7 @@ mod tests {
         let d = fixtures::hydrogen_pair();
         let bytes = encode(&d).unwrap();
         let mut source = ZipArchive::new(Cursor::new(bytes)).unwrap();
-        let mut out = ZipWriter::new(Cursor::new(vec![]));
+        let mut out = ZipWriter::new(buffer::Buffer::default());
         for i in 0..source.len() {
             let mut f = source.by_index(i).unwrap();
             let name = f.name().to_owned();

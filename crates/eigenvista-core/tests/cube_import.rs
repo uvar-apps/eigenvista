@@ -94,28 +94,33 @@ fn low_amplitude_cube_gets_a_visible_initial_isovalue_without_changing_samples()
 }
 
 #[test]
-fn cube_limits_and_unsupported_channels_fail_explicitly() {
+fn cube_dimensions_truncation_and_unsupported_channels_fail_explicitly() {
     for (text, expected) in [
         (CUBE.replace("3 -1 2 3", "3 -1 2 3 2"), "single-channel"),
-        (CUBE.replace("3 -1 2 3", "-2147483648 -1 2 3"), "atom count"),
-        (CUBE.replace("3 -1 2 3", "100001 -1 2 3"), "atom count"),
+        (
+            CUBE.replace("3 -1 2 3", "-2147483648 -1 2 3"),
+            "Truncated cube atoms",
+        ),
+        (
+            CUBE.replace("3 -1 2 3", "100001 -1 2 3"),
+            "Truncated cube atoms",
+        ),
         (CUBE.replace("2 1 0 0", "-2 1 0 0"), "positive"),
-        (CUBE.replace("2 1 0 0", "1 1 0 0"), "sample budget"),
-        (CUBE.replace("2 1 0 0", "2000000 1 0 0"), "sample budget"),
+        (CUBE.replace("2 1 0 0", "1 1 0 0"), "at least two"),
+        (CUBE.replace("2 1 0 0", "2000000 1 0 0"), "sample count"),
         (CUBE.replace("2 0 0 -1", "2 0 0 0"), "invalid axes"),
         (CUBE.replace("8 8 0 0 0", "0 0 0 0 0"), "atomic number"),
         (
             CUBE.replace("-1 1 -1 1 -1 1 -1 1", "-1 1 NaN 1 -1 1 -1 1"),
             "Non-finite",
         ),
-        (CUBE.replace("-1 1 -1 1 -1 1 -1 1", "-1 1"), "Truncated"),
-        (format!("{CUBE} 9"), "extra cube values"),
+        (CUBE.replace("-1 1 -1 1 -1 1 -1 1", "-1 1"), "sample count"),
+        (format!("{CUBE} 9"), "sample count"),
     ] {
+        let actual = import::cube(&text, "bad.cube").unwrap_err();
         assert!(
-            import::cube(&text, "bad.cube")
-                .unwrap_err()
-                .contains(expected),
-            "{expected}"
+            actual.contains(expected),
+            "expected an error containing {expected:?}, received {actual:?}"
         );
     }
     let orbital = CUBE.replace("3 -1 2 3", "-3 -1 2 3");

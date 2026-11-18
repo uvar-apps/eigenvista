@@ -8,7 +8,7 @@
 
 use super::SurfaceKind;
 use crate::control::Control;
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::geom::{Arrangement, CellGrid, EPS, Sphere, Status, Vec3};
 
 /// What carries the closest point of a field sample.
@@ -95,24 +95,31 @@ pub(crate) struct LocalCandidates {
 }
 
 impl LocalCandidates {
-    fn clear(&mut self) {
+    fn clear(&mut self) -> Result<()> {
         self.inside.clear();
         self.near.clear();
         self.spheres.clear();
         self.s_off.clear();
-        self.s_off.push(0);
+        error::push(&mut self.s_off, 0, "local sphere offsets")?;
         self.s_blk.clear();
         self.circles.clear();
         self.c_off.clear();
-        self.c_off.push(0);
+        error::push(&mut self.c_off, 0, "local circle offsets")?;
         self.c_blk.clear();
         self.vertices.clear();
         self.order.clear();
+        Ok(())
     }
 
     /// Appends the members of `row` that are in `near` to `out`.
-    fn filter_blockers(near: &[u32], row: &[u32], out: &mut Vec<u32>) {
-        out.extend(row.iter().filter(|k| near.binary_search(k).is_ok()));
+    fn filter_blockers(near: &[u32], row: &[u32], out: &mut Vec<u32>) -> Result<()> {
+        error::extend(
+            out,
+            row.iter()
+                .filter(|k| near.binary_search(k).is_ok())
+                .copied(),
+            "local blockers",
+        )
     }
 }
 
@@ -205,13 +212,16 @@ impl SesField {
         arr.neighbors.retain_rows(|i| status[i] == Status::Exposed);
         let cell = (2.0 * arr.max_expanded).max(1e-6);
         let circle_cells = CellGrid::new(
-            &arr.circles.iter().map(|c| c.center).collect::<Vec<_>>(),
+            &error::collect(arr.circles.iter().map(|c| c.center), "circle centers")?,
             cell,
-        );
+        )?;
         let vertex_cells = CellGrid::new(
-            &arr.vertices.iter().map(|v| v.position).collect::<Vec<_>>(),
+            &error::collect(
+                arr.vertices.iter().map(|v| v.position),
+                "triple point positions",
+            )?,
             cell,
-        );
+        )?;
         let rho_max = arr.circles.iter().map(|c| c.radius).fold(0.0, f64::max);
         let extent = match arr.centers.first() {
             None => 0.0,
@@ -454,91 +464,114 @@ impl SesField {
     /// point within `rho` of
     /// `b` (the same completeness argument as the kernel's gathering,
     /// Design §7.4), nearest first.
-    pub(crate) fn gather_local(&self, b: Vec3, rho: f64, band: f64, out: &mut LocalCandidates) {
+    pub(crate) fn gather_local(
+        &self,
+        b: Vec3,
+        rho: f64,
+        band: f64,
+        out: &mut LocalCandidates,
+    ) -> Result<()> {
         let a = &self.arr;
-        out.clear();
+        out.clear()?;
         match self.kind {
             SurfaceKind::Ses => {
                 // A closest point q of a point x of the ball is within
                 // `cutoff` of x, hence within `reach` of b: a sphere that can
                 // block q satisfies |b − c| < R + reach.
                 let reach = self.probe + band + rho;
-                a.cells.for_each_near(b, reach + a.max_expanded, |k| {
+                a.cells.try_for_each_near(b, reach + a.max_expanded, |k| {
                     let ku = k as usize;
                     if a.status[ku] == Status::Contained {
-                        return;
+                        return Ok(());
                     }
                     let d = b.dist(a.centers[ku]);
                     if d < a.expanded[ku] + reach {
-                        out.near.push(k);
+                        error::push(&mut out.near, k, "local candidates")?;
                     }
                     // Can contain a point of the ball (SAS inside test).
                     if d < a.expanded[ku] + rho {
-                        out.inside.push(k);
+                        error::push(&mut out.inside, k, "local candidates")?;
                     }
                     let lb = (d - a.expanded[ku]).abs();
                     if a.status[ku] == Status::Exposed && lb <= reach {
-                        out.order.push((lb, k));
+                        error::push(&mut out.order, (lb, k), "local candidates")?;
                     }
-                });
+                    Ok(())
+                })?;
                 out.near.sort_unstable();
                 sort_nearest(&mut out.order);
                 for &(_, k) in &out.order {
-                    out.spheres.push(k);
+                    error::push(&mut out.spheres, k, "local candidates")?;
                     LocalCandidates::filter_blockers(
                         &out.near,
                         a.neighbors.row(k as usize),
                         &mut out.s_blk,
-                    );
-                    out.s_off.push(out.s_blk.len() as u32);
+                    )?;
+                    error::push(&mut out.s_off, out.s_blk.len() as u32, "local candidates")?;
                 }
                 out.order.clear();
                 self.circle_cells
-                    .for_each_near(b, reach + self.rho_max, |ci| {
+                    .try_for_each_near(b, reach + self.rho_max, |ci| {
                         let c = &a.circles[ci as usize];
                         let y = b - c.center;
                         let along = y.dot(c.axis);
                         let wl = (y - c.axis * along).norm();
                         let dist = (along * along + (wl - c.radius) * (wl - c.radius)).sqrt();
                         if dist <= reach {
-                            out.order.push((dist, ci));
+                            error::push(&mut out.order, (dist, ci), "local candidates")?;
                         }
-                    });
+                        Ok(())
+                    })?;
                 sort_nearest(&mut out.order);
                 for &(_, ci) in &out.order {
-                    out.circles.push(ci);
+                    error::push(&mut out.circles, ci, "local candidates")?;
                     LocalCandidates::filter_blockers(
                         &out.near,
                         a.circle_blockers.row(ci as usize),
                         &mut out.c_blk,
-                    );
-                    out.c_off.push(out.c_blk.len() as u32);
+                    )?;
+                    error::push(&mut out.c_off, out.c_blk.len() as u32, "local candidates")?;
                 }
                 out.order.clear();
-                self.vertex_cells.for_each_near(b, reach, |vi| {
+                self.vertex_cells.try_for_each_near(b, reach, |vi| {
                     let d = b.dist(a.vertices[vi as usize].position);
                     if d <= reach {
-                        out.order.push((d, vi));
+                        error::push(&mut out.order, (d, vi), "local candidates")?;
                     }
-                });
+                    Ok(())
+                })?;
                 sort_nearest(&mut out.order);
-                out.vertices.extend(out.order.iter().map(|o| o.1));
+                error::extend(
+                    &mut out.vertices,
+                    out.order.iter().map(|o| o.1),
+                    "local vertices",
+                )?;
             }
             SurfaceKind::Sas | SurfaceKind::Vdw => {
                 let reach = band + rho;
-                a.cells.for_each_near(b, reach + a.max_expanded, |k| {
+                a.cells.try_for_each_near(b, reach + a.max_expanded, |k| {
                     let ku = k as usize;
                     if a.status[ku] != Status::Contained
                         && b.dist(a.centers[ku]) - a.expanded[ku] < reach
                     {
-                        out.order.push((b.dist(a.centers[ku]) - a.expanded[ku], k));
+                        error::push(
+                            &mut out.order,
+                            (b.dist(a.centers[ku]) - a.expanded[ku], k),
+                            "local candidates",
+                        )?;
                     }
-                });
+                    Ok(())
+                })?;
                 sort_nearest(&mut out.order);
-                out.inside.extend(out.order.iter().map(|o| o.1));
+                error::extend(
+                    &mut out.inside,
+                    out.order.iter().map(|o| o.1),
+                    "local spheres",
+                )?;
             }
         }
         out.order.clear();
+        Ok(())
     }
 
     /// Field value near the surface (exact where `|F| < band`) with the

@@ -82,6 +82,15 @@ pub fn shutdown(app: &tauri::AppHandle) {
         broker.take();
     }
 }
+/// A reload/closed frontend cannot complete requests from its former controller.
+pub fn unready(app: &tauri::AppHandle) {
+    if let Some(state) = app.try_state::<ControlState>()
+        && let Ok(broker) = state.broker.lock()
+        && let Some(broker) = broker.as_ref()
+    {
+        broker.unready();
+    }
+}
 fn disabled() -> RpcError {
     RpcError::new(
         -32010,
@@ -128,15 +137,11 @@ pub fn control_respond(
 pub async fn control_read_file(
     state: tauri::State<'_, ControlState>,
     path: String,
-    max_bytes: Option<usize>,
 ) -> Result<tauri::ipc::Response, RpcError> {
     let files = state.files.clone().ok_or_else(disabled)?;
     tauri::async_runtime::spawn_blocking(move || {
         files
-            .read_with_limit(
-                std::path::Path::new(&path),
-                max_bytes.unwrap_or(eigenvista_control::MAX_FILE_BYTES),
-            )
+            .read(std::path::Path::new(&path))
             .map(tauri::ipc::Response::new)
     })
     .await
@@ -145,22 +150,41 @@ pub async fn control_read_file(
 #[tauri::command]
 pub async fn control_save_document(
     state: tauri::State<'_, ControlState>,
-    path: String,
-    bytes: Vec<u8>,
-    protected_paths: Vec<String>,
-    overwrite: bool,
+    request: tauri::ipc::Request<'_>,
 ) -> Result<FileReceipt, RpcError> {
     let files = state.files.clone().ok_or_else(disabled)?;
-    tauri::async_runtime::spawn_blocking(move || {
-        files.save_document(
-            std::path::Path::new(&path),
-            &bytes,
-            &protected_paths,
-            overwrite,
+    let transfer =
+        crate::native_transfer::decode_body::<crate::native_transfer::ControlSaveMetadata>(
+            request.body(),
         )
-    })
-    .await
-    .map_err(|_| RpcError::new(-32006, "io_error", "Document save task failed"))?
+        .map_err(transfer_error)?;
+    tauri::async_runtime::spawn_blocking(move || save_transferred_document(&files, transfer))
+        .await
+        .map_err(|_| RpcError::new(-32006, "io_error", "Document save task failed"))?
+}
+
+fn transfer_error(error: crate::native_transfer::TransferError) -> RpcError {
+    match error {
+        crate::native_transfer::TransferError::Invalid(message) => {
+            RpcError::new(-32602, "invalid_params", message)
+        }
+        crate::native_transfer::TransferError::Allocation(message) => {
+            RpcError::new(-32005, "allocation_failed", message)
+        }
+    }
+}
+
+fn save_transferred_document(
+    files: &ScopedFiles,
+    transfer: crate::native_transfer::Transfer<crate::native_transfer::ControlSaveMetadata>,
+) -> Result<FileReceipt, RpcError> {
+    let crate::native_transfer::Transfer { metadata, bytes } = transfer;
+    files.save_document(
+        std::path::Path::new(&metadata.path),
+        &bytes,
+        &metadata.protected_paths,
+        metadata.overwrite,
+    )
 }
 #[tauri::command]
 pub async fn control_write_image(
@@ -202,6 +226,84 @@ pub async fn control_write_csv(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::native_transfer::{ControlSaveMetadata, Transfer, decode_body};
+
+    fn raw_transfer(
+        path: &std::path::Path,
+        protected: &[String],
+        payload: &[u8],
+    ) -> Transfer<ControlSaveMetadata> {
+        let metadata =
+            serde_json::to_vec(&json!({"path":path,"protectedPaths":protected,"overwrite":false}))
+                .unwrap();
+        let mut frame = b"EVT1".to_vec();
+        frame.extend_from_slice(&(metadata.len() as u64).to_le_bytes());
+        frame.extend_from_slice(&metadata);
+        frame.extend_from_slice(payload);
+        decode_body(&tauri::ipc::InvokeBody::Raw(frame)).unwrap()
+    }
+
+    #[test]
+    fn raw_save_command_writer_keeps_scopes_source_protection_and_atomic_no_clobber() {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tmp")
+            .join(format!("raw-native-save-{}-{nonce}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        let root = root.canonicalize().unwrap();
+        let files = ScopedFiles::new(std::slice::from_ref(&root)).unwrap();
+        let original = eigenvista_core::fixtures::hydrogen_pair();
+        let bytes = eigenvista_format::encode(&original).unwrap();
+        let destination = root.join("结果.eigenvista");
+        let receipt =
+            save_transferred_document(&files, raw_transfer(&destination, &[], &bytes)).unwrap();
+        assert_eq!(receipt.bytes, bytes.len());
+        assert_eq!(std::fs::read(&destination).unwrap(), bytes);
+        assert_eq!(
+            eigenvista_format::decode(&std::fs::read(&destination).unwrap()).unwrap(),
+            original
+        );
+        assert_eq!(
+            save_transferred_document(&files, raw_transfer(&destination, &[], &bytes))
+                .unwrap_err()
+                .data
+                .unwrap()["kind"],
+            "destination_exists"
+        );
+        let source = root.join("source.eigenvista");
+        std::fs::write(&source, &bytes).unwrap();
+        let protected = vec![source.to_string_lossy().into_owned()];
+        assert_eq!(
+            save_transferred_document(&files, raw_transfer(&source, &protected, &bytes))
+                .unwrap_err()
+                .data
+                .unwrap()["kind"],
+            "source_protected"
+        );
+        let invalid = root.join("invalid.eigenvista");
+        assert!(
+            save_transferred_document(&files, raw_transfer(&invalid, &[], b"not a native archive"))
+                .is_err()
+        );
+        assert!(!invalid.exists());
+        assert!(
+            save_transferred_document(
+                &files,
+                raw_transfer(
+                    &root.parent().unwrap().join("outside.eigenvista"),
+                    &[],
+                    &bytes
+                )
+            )
+            .is_err()
+        );
+        assert_eq!(std::fs::read(source).unwrap(), bytes);
+        assert_eq!(std::fs::read_dir(&root).unwrap().count(), 2);
+        std::fs::remove_dir_all(root).unwrap();
+    }
     fn args(values: &[&str]) -> impl Iterator<Item = std::ffi::OsString> {
         values
             .iter()

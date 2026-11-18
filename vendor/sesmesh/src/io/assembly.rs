@@ -11,7 +11,7 @@
 use rustc_hash::FxHashMap;
 
 use super::cif::lexer::{Lexer, Token};
-use crate::error::{Error, ParseError, Result};
+use crate::error::{self, Error, ParseError, Result};
 use crate::structure::{Model, Structure};
 
 /// A rigid transform `x ↦ R·x + t`.
@@ -80,13 +80,20 @@ impl AssemblyData {
     pub(crate) fn summaries(&self) -> Result<Vec<AssemblySummary>> {
         let mut out: Vec<AssemblySummary> = Vec::new();
         for g in &self.generators {
-            let copies = parse_expression(&g.expression)?
-                .iter()
-                .map(Vec::len)
-                .product::<usize>();
+            let copies =
+                parse_expression(&g.expression)?
+                    .iter()
+                    .try_fold(1usize, |count, factor| {
+                        count
+                            .checked_mul(factor.len())
+                            .ok_or(Error::SizeOverflow("assembly summary copies"))
+                    })?;
             match out.iter_mut().find(|s| s.id == g.assembly) {
                 Some(s) => {
-                    s.copies += copies;
+                    s.copies = s
+                        .copies
+                        .checked_add(copies)
+                        .ok_or(Error::SizeOverflow("assembly summary copies"))?;
                     for c in &g.chains {
                         if !s.chains.contains(c) {
                             s.chains.push(c.clone());
@@ -139,12 +146,15 @@ pub(crate) fn parse_expression(expr: &str) -> Result<Vec<Vec<String>>> {
                     Some((a, b)) => {
                         let (a, b): (u32, u32) =
                             (a.parse().map_err(|_| bad())?, b.parse().map_err(|_| bad())?);
-                        if a > b || b - a > 1_000_000 {
+                        if a > b {
                             return Err(bad());
                         }
+                        let count = usize::try_from(u64::from(b) - u64::from(a) + 1)
+                            .map_err(|_| Error::SizeOverflow("assembly operator range"))?;
+                        error::reserve(&mut items, count, "assembly operators")?;
                         items.extend((a..=b).map(|i| i.to_string()));
                     }
-                    None => items.push(item.to_string()),
+                    None => error::push(&mut items, item.to_string(), "assembly operators")?,
                 }
             }
             Ok(items)
@@ -359,12 +369,6 @@ pub(crate) fn parse_pdb(data: &[u8]) -> AssemblyData {
     out
 }
 
-/// Most copies one assembly may generate (real assemblies have at most a
-/// few thousand; malformed expressions could ask for 10¹²).
-const MAX_COPIES: usize = 100_000;
-/// Most atoms an expanded model may hold.
-const MAX_ATOMS: usize = 500_000_000;
-
 /// Replaces every model of `structure` by assembly `id`.
 pub(crate) fn expand(mut structure: Structure, data: &AssemblyData, id: &str) -> Result<Structure> {
     let gens: Vec<&Generator> = data
@@ -384,18 +388,17 @@ pub(crate) fn expand(mut structure: Structure, data: &AssemblyData, id: &str) ->
     let mut plans: Vec<(Vec<Transform>, &[String])> = Vec::new();
     for g in gens {
         let factors = parse_expression(&g.expression)?;
-        let copies = factors
-            .iter()
-            .try_fold(1usize, |n, f| n.checked_mul(f.len()))
-            .filter(|&n| n <= MAX_COPIES)
-            .ok_or_else(|| Error::ResourceLimit {
-                what: format!("assembly {id}: operator expression {:?}", g.expression),
-                limit: MAX_COPIES as u64,
-            })?;
-        let _ = copies;
-        let mut combos = vec![Transform::IDENTITY];
+        factors.iter().try_fold(1usize, |n, f| {
+            n.checked_mul(f.len())
+                .ok_or(Error::SizeOverflow("assembly operator products"))
+        })?;
+        let mut combos = error::filled(1, Transform::IDENTITY, "assembly transforms")?;
         for factor in factors {
-            let mut next = Vec::with_capacity(combos.len() * factor.len());
+            let count = combos
+                .len()
+                .checked_mul(factor.len())
+                .ok_or(Error::SizeOverflow("assembly transforms"))?;
+            let mut next = error::capacity(count, "assembly transforms")?;
             for c in &combos {
                 for op in &factor {
                     let t = data.operators.get(op).ok_or_else(|| {
@@ -406,64 +409,37 @@ pub(crate) fn expand(mut structure: Structure, data: &AssemblyData, id: &str) ->
             }
             combos = next;
         }
-        plans.push((combos, &g.chains));
+        error::push(&mut plans, (combos, &g.chains[..]), "assembly plans")?;
     }
     let strings = &structure.strings;
+    let mut models = error::capacity(structure.models.len(), "assembly models")?;
     for m in &structure.models {
-        let atoms: usize = plans
-            .iter()
-            .map(|(transforms, chains)| {
-                let n = m
-                    .atoms
-                    .iter()
-                    .filter(|a| {
-                        let sym = if data.label_chains {
-                            a.label_chain
-                        } else {
-                            a.chain
-                        };
-                        chains.iter().any(|c| c == strings.get(sym))
-                    })
-                    .count();
-                n.saturating_mul(transforms.len())
-            })
-            .fold(0usize, usize::saturating_add);
-        if atoms > MAX_ATOMS {
-            return Err(Error::ResourceLimit {
-                what: format!("assembly {id} with {atoms} atoms"),
-                limit: MAX_ATOMS as u64,
-            });
-        }
-    }
-    let models = structure
-        .models
-        .iter()
-        .map(|m| {
-            let mut out = Model::new(m.number);
-            for (transforms, chains) in &plans {
-                let atoms: Vec<_> = m
-                    .atoms
-                    .iter()
-                    .filter(|a| {
-                        let sym = if data.label_chains {
-                            a.label_chain
-                        } else {
-                            a.chain
-                        };
-                        chains.iter().any(|c| c == strings.get(sym))
-                    })
-                    .collect();
-                for t in transforms {
-                    out.atoms.extend(atoms.iter().map(|a| {
-                        let mut b = (*a).clone();
-                        b.position = t.apply(a.position);
-                        b
-                    }));
-                }
+        let mut out = Model::new(m.number);
+        for (transforms, chains) in &plans {
+            let mut atoms = error::capacity(m.atoms.len(), "assembly source atoms")?;
+            atoms.extend(m.atoms.iter().filter(|a| {
+                let sym = if data.label_chains {
+                    a.label_chain
+                } else {
+                    a.chain
+                };
+                chains.iter().any(|c| c == strings.get(sym))
+            }));
+            let count = atoms
+                .len()
+                .checked_mul(transforms.len())
+                .ok_or(Error::SizeOverflow("expanded assembly atoms"))?;
+            error::reserve(&mut out.atoms, count, "expanded assembly atoms")?;
+            for t in transforms {
+                out.atoms.extend(atoms.iter().map(|a| {
+                    let mut b = (*a).clone();
+                    b.position = t.apply(a.position);
+                    b
+                }));
             }
-            out
-        })
-        .collect();
+        }
+        models.push(out);
+    }
     structure.models = models;
     Ok(structure)
 }
@@ -487,7 +463,7 @@ mod tests {
     }
 
     #[test]
-    fn huge_expressions_are_refused() {
+    fn large_expression_is_validated_by_operator_identity() {
         let cif = "data_x\nloop_\n_pdbx_struct_assembly_gen.assembly_id\n\
                    _pdbx_struct_assembly_gen.oper_expression\n_pdbx_struct_assembly_gen.asym_id_list\n\
                    1 '(1-1000)(1-1000)' A\n";
@@ -504,7 +480,7 @@ mod tests {
         };
         assert!(matches!(
             expand(s, &d, "1"),
-            Err(Error::ResourceLimit { .. })
+            Err(Error::InvalidInput(message)) if message.contains("unknown operator")
         ));
     }
 

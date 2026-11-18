@@ -15,15 +15,16 @@ export function volumeBrickRanges(
   if (
     !Array.isArray(grid.dims) ||
     grid.dims.length !== 3 ||
-    grid.dims.some((n) => !Number.isInteger(n) || n < 2 || n > 256)
+    grid.dims.some((n) => !Number.isSafeInteger(n) || n < 2)
   ) {
     throw new Error(
-      "Volume range dimensions must be three integers from 2 to 256",
+      "Volume range dimensions must be three safe integers of at least 2",
     );
   }
   const [nx, ny, nz] = grid.dims;
   if (
     !(grid.values instanceof Float32Array) ||
+    !Number.isSafeInteger(nx * ny * nz) ||
     grid.values.length !== nx * ny * nz
   ) {
     throw new Error(

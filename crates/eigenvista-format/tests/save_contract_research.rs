@@ -34,6 +34,15 @@ fn actual_writers_keep_complete_contents_private_mode_bits_and_no_clobber() {
             report[field]["after"]["metadata"]["inode"]
         );
     }
+    let large = &report["parameter_replace"]["above_former_limit"];
+    assert_eq!(large["result"]["ok"], true);
+    assert!(large["after"]["metadata"]["length"].as_u64().unwrap() > 128 * 1024);
+    assert_eq!(large["after"]["metadata"]["mode"], "0600");
+    assert_eq!(large["after"]["sha256"], large["expected_sha256"]);
+    assert_ne!(
+        large["after"]["metadata"]["inode"],
+        report["parameter_replace"]["after"]["metadata"]["inode"]
+    );
     assert!(report["concurrent"]["old_complete_reads"].as_u64().unwrap() > 0);
     assert!(report["concurrent"]["new_complete_reads"].as_u64().unwrap() > 0);
     assert_eq!(

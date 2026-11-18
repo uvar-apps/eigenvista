@@ -1,3 +1,4 @@
+import { release } from "../release.mjs";
 import { agentWorkspaceNote } from "./workspace.mjs";
 
 export default [
@@ -15,7 +16,7 @@ ${agentWorkspaceNote}
       <p class="lede page-lede">Turn a crowded atomic view into a readable study of molecular packing. Ask your agent to compare three representations, add matte ambient occlusion, and keep a pair of images from exactly the same camera.</p>
 
       <h2 id="get-ready">Get ready</h2>
-      <p>Complete <a href="ai-install.html">external-agent setup</a> and read the <a href="ai-guide.html">AI control guide</a> first. Give the prompts to Codex, Claude Code, Pi, OpenCode, or another connected local agent that can inspect images. The connection tools are included in the <strong>EigenVista 0.10.0 Mac app</strong>.</p>
+      <p>Complete <a href="ai-install.html">external-agent setup</a> and read the <a href="ai-guide.html">AI control guide</a> first. Give the prompts to Codex, Claude Code, Pi, OpenCode, or another connected local agent that can inspect images. The connection tools are included in the <strong>EigenVista ${release.version} Mac app</strong>.</p>
       <p>The agent can download <a href="downloads/1AON.cif" download>1AON.cif</a> into your input folder and use the included MatterViz Pastel palette. If you already have those files, give it their locations. The palette is also available as <a href="downloads/matterviz-pastel.json" download>matterviz-pastel.json</a>. Keep original inputs and choose new output names for repeated runs.</p>
       <p>The input is the deposited GroEL–GroES chaperonin complex, <a href="https://www.rcsb.org/structure/1AON">RCSB PDB 1AON</a>. EigenVista imports <strong>58,870 selected atoms</strong>. The goal is two comparison PNGs, a closer finished view, and a native molecular document.</p>
 
@@ -90,7 +91,7 @@ ${agentWorkspaceNote}
       <p class="lede page-lede">Step back from atomic packing to see how a large complex is organized. Ask your agent to compare backbone traces, smooth tubes, ribbons and cartoons, then study the deposited fold of one chain.</p>
 
       <h2 id="get-ready">Get ready</h2>
-      <p>Complete <a href="ai-install.html">external-agent setup</a> and read the <a href="ai-guide.html">AI control guide</a>. The connection tools are included in the <strong>EigenVista 0.10.0 Mac app</strong>. Give the prompts to your connected Codex, Claude Code, Pi, OpenCode, or another local agent with an image viewer.</p>
+      <p>Complete <a href="ai-install.html">external-agent setup</a> and read the <a href="ai-guide.html">AI control guide</a>. The connection tools are included in the <strong>EigenVista ${release.version} Mac app</strong>. Give the prompts to your connected Codex, Claude Code, Pi, OpenCode, or another local agent with an image viewer.</p>
       <p>Use <a href="downloads/1AON.cif" download>1AON.cif</a> again, this time to study the GroEL–GroES assembly rather than its crowded atomic envelope. Give your agent the file location and the folder where you want the pictures saved, using the connection established during setup. Keep original inputs and use new output names for repeated runs.</p>
       <p>Outcome: four protein-view PNGs, a chain-colored assembly overview, and a focused chain illustration.</p>
 

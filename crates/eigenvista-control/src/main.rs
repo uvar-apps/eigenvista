@@ -1,8 +1,6 @@
-use eigenvista_control::{
-    Connection, MAX_FRAME_BYTES, REQUEST_TIMEOUT, RpcError, call, wait_for_job,
-};
+use eigenvista_control::{Connection, RpcError, call_until_complete, wait_for_job};
 use serde_json::{Value, json};
-use std::{io::Read, path::PathBuf, time::Duration};
+use std::{path::PathBuf, time::Duration};
 
 const HELP: &str = "Usage: eigenvista-ctl --connection FILE METHOD [--params JSON | --params-file FILE] [--wait SECONDS]\n\nConnects to an opt-in running EigenVista instance. Prints the JSON result; failures\nprint {\"error\":{code,message,data}} and exit 1. --wait polls accepted jobs; a wait\ntimeout does not cancel a job. The private descriptor/token is never printed.\n";
 
@@ -35,39 +33,18 @@ fn run(args: Vec<String>) -> Result<Value, RpcError> {
                     ));
                 }
                 let value = args.next().ok_or_else(missing)?;
-                let text = if arg == "--params-file" {
+                let parsed: Value = if arg == "--params-file" {
                     let file = std::fs::File::open(value).map_err(|_| {
                         RpcError::new(-32006, "io_error", "Could not open params file")
                     })?;
-                    let mut bytes = Vec::new();
-                    file.take((MAX_FRAME_BYTES + 1) as u64)
-                        .read_to_end(&mut bytes)
-                        .map_err(|_| {
-                            RpcError::new(-32006, "io_error", "Could not read params file")
-                        })?;
-                    if bytes.len() > MAX_FRAME_BYTES {
-                        return Err(RpcError::new(
-                            -32005,
-                            "limit_exceeded",
-                            "Params file exceeds wire limit",
-                        ));
-                    }
-                    String::from_utf8(bytes).map_err(|_| {
-                        RpcError::new(-32602, "invalid_params", "Params must be UTF-8 JSON")
-                    })?
+                    serde_json::from_reader(file)
                 } else {
-                    value
-                };
-                if text.len() > MAX_FRAME_BYTES {
-                    return Err(RpcError::new(
-                        -32005,
-                        "limit_exceeded",
-                        "Params exceed wire limit",
-                    ));
+                    serde_json::from_str(&value)
                 }
-                params = Some(serde_json::from_str::<Value>(&text).map_err(|_| {
-                    RpcError::new(-32602, "invalid_params", "Params must be valid JSON")
-                })?);
+                .map_err(|_| {
+                    RpcError::new(-32602, "invalid_params", "Params must be valid UTF-8 JSON")
+                })?;
+                params = Some(parsed);
             }
             "--wait" => {
                 wait = args
@@ -78,14 +55,17 @@ fn run(args: Vec<String>) -> Result<Value, RpcError> {
                         RpcError::new(
                             -32602,
                             "invalid_params",
-                            "Wait must be whole seconds from 0 to 86400",
+                            "Wait must be nonnegative whole seconds",
                         )
                     })?;
-                if wait > 86400 {
+                if std::time::Instant::now()
+                    .checked_add(Duration::from_secs(wait))
+                    .is_none()
+                {
                     return Err(RpcError::new(
                         -32602,
                         "invalid_params",
-                        "Wait exceeds one day",
+                        "Wait duration cannot be represented by this platform",
                     ));
                 }
             }
@@ -109,12 +89,7 @@ fn run(args: Vec<String>) -> Result<Value, RpcError> {
             "An application method is required",
         )
     })?;
-    let result = call(
-        &connection,
-        &method,
-        params.unwrap_or_else(|| json!({})),
-        REQUEST_TIMEOUT + Duration::from_secs(2),
-    )?;
+    let result = call_until_complete(&connection, &method, params.unwrap_or_else(|| json!({})))?;
     wait_for_job(&connection, result, Duration::from_secs(wait))
 }
 fn main() {
@@ -133,5 +108,17 @@ fn main() {
             println!("{}", json!({"error":error}));
             std::process::exit(1);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unrepresentable_wait_is_rejected_before_connection_or_dispatch() {
+        let error = run(vec!["--wait".into(), u64::MAX.to_string()]).unwrap_err();
+        assert_eq!(error.data.unwrap()["kind"], "invalid_params");
+        assert!(error.message.contains("represented"));
     }
 }

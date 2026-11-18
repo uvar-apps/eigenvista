@@ -7,6 +7,7 @@
 //! face-averaged normals and per-atom areas (§9.6).
 
 use super::{Component, Mesh, PatchKind, triangle_area_volume};
+use crate::error::{self, Result};
 
 /// Reorders triangles so each component's triangles are contiguous, keeping
 /// their relative order (deterministic), and sets
@@ -15,20 +16,24 @@ pub(crate) fn group_by_component(
     mesh: &mut Mesh,
     vertex_component: &[u32],
     comps: &mut [Component],
-) {
+) -> Result<()> {
     let mut start = 0;
     for c in comps.iter_mut() {
         c.first_triangle = start;
         start += c.triangles;
     }
-    let mut next: Vec<usize> = comps.iter().map(|c| c.first_triangle).collect();
-    let mut out = vec![[0u32; 3]; mesh.triangles.len()];
+    let mut next = error::collect(
+        comps.iter().map(|c| c.first_triangle),
+        "component triangle offsets",
+    )?;
+    let mut out = error::filled(mesh.triangles.len(), [0u32; 3], "grouped mesh triangles")?;
     for t in &mesh.triangles {
         let c = vertex_component[t[0] as usize] as usize;
         out[next[c]] = *t;
         next[c] += 1;
     }
     mesh.triangles = out;
+    Ok(())
 }
 
 /// Axis-aligned bounding box of each component.

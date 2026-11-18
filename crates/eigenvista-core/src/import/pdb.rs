@@ -1,4 +1,4 @@
-use crate::{Atom, BOHR_TO_ANGSTROM, Document, MAX_BONDS, Result, bonds};
+use crate::{Atom, BOHR_TO_ANGSTROM, Document, Result, bonds};
 use pdbtbx::{Element, Format, ReadOptions, StrictnessLevel};
 use std::collections::HashMap;
 use std::io::BufReader;
@@ -46,13 +46,13 @@ fn element(line: &str) -> Result<(Element, bool)> {
 /// Read the first geometry, select one occupancy-ranked conformer per residue,
 /// retain explicit connectivity, then infer missing connections from coordinates.
 pub fn pdb(text: &str, name: &str) -> Result<Document> {
-    if text.len() > 32 * 1024 * 1024 {
-        return Err("PDB exceeds the 32 MiB preview file budget".into());
-    }
     if !text.is_ascii() {
         return Err("PDB fixed-column records must contain ASCII text".into());
     }
     let mut normalized = String::new();
+    normalized
+        .try_reserve(text.len())
+        .map_err(|error| format!("Cannot allocate PDB normalization: {error}"))?;
     let mut atom_order = HashMap::new();
     let mut connections = Vec::new();
     let mut title = Vec::new();
@@ -104,9 +104,6 @@ pub fn pdb(text: &str, name: &str) -> Result<Document> {
                     ));
                 }
                 let id = serial(column(line, 6, 11))?;
-                if atom_order.len() == 100_000 {
-                    return Err("PDB exceeds the 100000 atom budget".into());
-                }
                 if atom_order.insert(id, atom_order.len()).is_some() {
                     return Err(format!(
                         "Duplicate PDB atom serial {id} in the selected model"
@@ -185,14 +182,11 @@ pub fn pdb(text: &str, name: &str) -> Result<Document> {
                     if endpoint.is_empty() {
                         continue;
                     }
-                    if connections.len() == MAX_BONDS {
-                        return Err("PDB CONECT exceeds the connection budget".into());
-                    }
                     let to = serial(endpoint)?;
                     if to == from {
                         return Err(format!("PDB CONECT self-bond at atom {from}"));
                     }
-                    connections.push([from, to]);
+                    crate::allocation::push(&mut connections, [from, to], "PDB connections")?;
                 }
             }
             _ => (),
@@ -268,7 +262,7 @@ pub fn pdb(text: &str, name: &str) -> Result<Document> {
     if unresolved_annotations > 0 {
         doc.provenance.push(format!("PDB parser: {unresolved_annotations} ambiguous, absent or conflicting secondary annotation matches left unknown."));
     }
-    for warning in warnings.iter().take(5) {
+    for warning in &warnings {
         doc.provenance
             .push(format!("PDB parser: {}", warning.short_description()));
     }

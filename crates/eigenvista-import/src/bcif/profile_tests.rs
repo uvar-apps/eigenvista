@@ -1,6 +1,6 @@
 //! Full-container protocol checks with an independent, test-only wire encoder.
 
-use super::encoding::{Budget, Column, Record, decode};
+use super::encoding::{Column, Record, decode};
 use super::messagepack::Value;
 use eigenvista_core::Document;
 use std::collections::BTreeMap;
@@ -212,7 +212,7 @@ fn declared_row_counts_are_checked_before_column_expansion() {
 
 #[test]
 fn version_header_and_data_block_profile_are_explicit() {
-    for version in ["0.4.0", "0.3.x", "0.3.123456", "0.3.", ""] {
+    for version in ["0.4.0", "0.3.x", "0.3.", ""] {
         reject(file(
             version,
             vec![block(
@@ -221,13 +221,7 @@ fn version_header_and_data_block_profile_are_explicit() {
             )],
         ));
     }
-    let long_header = "a".repeat(257);
-    for header in [
-        "",
-        "bad block",
-        "bad\n_struct_conn.id",
-        long_header.as_str(),
-    ] {
+    for header in ["", "bad block", "bad\n_struct_conn.id"] {
         reject(file(
             "0.3.0",
             vec![block(
@@ -236,10 +230,10 @@ fn version_header_and_data_block_profile_are_explicit() {
             )],
         ));
     }
-    let maximum_header = "a".repeat(256);
+    let maximum_header = "a".repeat(257);
     assert!(
         load(file(
-            "0.3.12345",
+            "0.3.123456",
             vec![block(
                 &maximum_header,
                 vec![category("_atom_site", Value::Uint(1), atom_columns())]
@@ -261,7 +255,31 @@ fn version_header_and_data_block_profile_are_explicit() {
 }
 
 #[test]
-fn category_column_names_duplicates_and_column_ceiling_are_checked() {
+fn gzip_payload_above_the_former_byte_ceiling_imports_complete_geometry() {
+    let padding = vec![0u8; 64 * 1024 * 1024 + 1];
+    let mut value = file(
+        "0.3.0",
+        vec![block(
+            "LARGE",
+            vec![category("_atom_site", Value::Uint(1), atom_columns())],
+        )],
+    );
+    let Value::Map(root) = &mut value else {
+        panic!("root map")
+    };
+    root.insert("uninterpreted_payload", Value::Bin(&padding));
+    let packed = wire(&value);
+    let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+    encoder.write_all(&packed).unwrap();
+    let compressed = encoder.finish().unwrap();
+    let document = super::parse(&compressed, "large.bcif.gz").unwrap();
+    assert_eq!(document.atoms.len(), 1);
+    assert_eq!(document.atoms[0].position, [0.; 3]);
+    document.validate().unwrap();
+}
+
+#[test]
+fn category_column_names_and_duplicates_are_checked_without_a_count_ceiling() {
     reject(file(
         "0.3.0",
         vec![block(
@@ -290,7 +308,7 @@ fn category_column_names_duplicates_and_column_ceiling_are_checked() {
         reject(document(columns));
     }
     let names: Vec<_> = (0..253).map(|index| format!("extra_{index}")).collect();
-    for (extra, valid) in [(252, true), (253, false)] {
+    for (extra, valid) in [(252, true), (253, true)] {
         let mut columns = atom_columns();
         columns.extend(names[..extra].iter().map(|name| numeric_column(name)));
         assert_eq!(
@@ -411,11 +429,43 @@ fn unsigned_packing_words_still_reconstruct_only_signed_int32_values() {
             unreachable!()
         };
         let value: Record<'_> = value;
-        let result = decode(&value, &mut Budget::new());
+        let result = decode(&value);
         if valid {
             assert_eq!(result.unwrap(), Column::Int(vec![i64::from(i32::MAX)]));
         } else {
             assert!(result.unwrap_err().contains("32 bits"));
         }
     }
+}
+
+#[test]
+fn deeply_nested_dictionary_encodings_report_the_actual_type_error_without_recursion() {
+    // Build wire bytes directly from repeatable prefix/suffix templates. Neither
+    // the independent encoder nor a test-owned Value tree needs to recurse.
+    let wrapper = wire(&object([
+        ("kind", Value::Str("StringArray")),
+        ("dataEncoding", Value::Array(vec![Value::Nil])),
+        ("offsetEncoding", Value::Array(vec![byte_array(4)])),
+        ("offsets", Value::Bin(&[0, 1])),
+        ("stringData", Value::Str("C")),
+    ]));
+    let hole = wrapper.iter().position(|byte| *byte == 0xc0).unwrap();
+    assert_eq!(wrapper.iter().filter(|byte| **byte == 0xc0).count(), 1);
+    let column = wire(&encoded(&[0], vec![Value::Nil]));
+    let column_hole = column.iter().position(|byte| *byte == 0xc0).unwrap();
+    let depth = 10_000;
+    let mut packed = column[..column_hole].to_vec();
+    for _ in 0..depth {
+        packed.extend_from_slice(&wrapper[..hole]);
+    }
+    packed.extend(wire(&byte_array(4)));
+    for _ in 0..depth {
+        packed.extend_from_slice(&wrapper[hole + 1..]);
+    }
+    packed.extend_from_slice(&column[column_hole + 1..]);
+    let parsed = super::messagepack::parse(&packed).unwrap();
+    let root = super::encoding::object(&parsed).unwrap();
+    let error = decode(root).unwrap_err();
+    assert!(error.contains("requires an integer array"), "{error}");
+    // Parsed::drop must also clean up all 10,000 nested maps/arrays iteratively.
 }

@@ -485,13 +485,13 @@ fn annotation_interpretation_and_material_edits_preserve_all_legacy_field_hashes
 }
 
 #[test]
-fn aggregate_cache_preflight_rejects_oversize_state_without_constructing_an_archive() {
+fn aggregate_cache_above_the_former_sixteen_mib_limit_roundtrips() {
     let mut doc = fixtures::hydrogen_pair();
     let template = field_analysis::sample(
         &doc,
         &AnalysisRequest {
             id: "large-plane".into(),
-            label: "Bounded cache limit fixture".into(),
+            label: "Large cache fixture".into(),
             field: "antibonding".into(),
             definition: AnalysisDefinition::Plane {
                 origin: [-1., -1., 0.],
@@ -517,7 +517,6 @@ fn aggregate_cache_preflight_rejects_oversize_state_without_constructing_an_arch
         descriptors: vec![],
         items,
     });
-    let preflight = validate_document(&doc).unwrap_err();
-    assert!(preflight.contains("16 MiB aggregate"), "{preflight}");
-    assert_eq!(encode(&doc).unwrap_err(), preflight);
+    validate_document(&doc).unwrap();
+    assert_eq!(decode(&encode(&doc).unwrap()).unwrap(), doc);
 }

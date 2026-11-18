@@ -272,10 +272,10 @@ fn validation_rejects_bad_parameters_identity_arrays_and_source_cache() {
     req.atom_indices.clear();
     req.spacing = f64::NAN;
     assert!(req.resolve(&doc).is_err());
-    req.spacing = 0.01;
+    req.spacing = 0.0;
     assert!(req.resolve(&doc).is_err());
     req.spacing = 0.5;
-    req.probe_radius = 0.0;
+    req.probe_radius = -0.1;
     assert!(req.resolve(&doc).is_err());
     req.probe_radius = 1.4;
     let surface = generate(&doc, &req);
@@ -331,15 +331,71 @@ fn honest_stage_progress_and_callback_cancellation_are_preserved() {
 }
 
 #[test]
-fn engine_memory_refusal_does_not_change_requested_spacing_or_return_partial_geometry() {
-    let params = sesmesh::SurfaceParams::ses(1.4)
-        .with_spacing(0.25)
-        .with_max_memory(1)
-        .with_auto_coarsen(false);
-    let error =
-        sesmesh::compute_surface(&[sesmesh::Sphere::new([0.0; 3], 1.5)], &params).unwrap_err();
-    assert!(error.to_string().contains("memory"));
-    assert_eq!(params.spacing(), 0.25);
+fn engine_preserves_requested_spacing_without_a_memory_policy() {
+    let params = sesmesh::SurfaceParams::ses(1.4).with_spacing(0.25);
+    let output = sesmesh::compute_surface(&[sesmesh::Sphere::new([0.0; 3], 1.5)], &params).unwrap();
+    assert_eq!(output.stats.spacing, 0.25);
+    assert!(!output.mesh.triangles.is_empty());
+    // Estimates are metadata, including when loading caches from large runs.
+    let doc = document(&[[0.0; 3]]);
+    let mut surface = generate(&doc, &request(MolecularSurfaceKind::Ses, 0.5));
+    surface.stats.estimated_engine_bytes = 2 * 1024 * 1024 * 1024;
+    surface.validate(&doc).unwrap();
+}
+
+#[test]
+fn molecular_surface_resolution_accepts_positive_values_without_policy_ranges() {
+    let doc = document(&[[0.0; 3]]);
+    for spacing in [0.001, 4.0] {
+        request(MolecularSurfaceKind::Ses, spacing)
+            .resolve(&doc)
+            .unwrap();
+    }
+    let mut req = request(MolecularSurfaceKind::Ses, 0.5);
+    req.probe_radius = 0.0;
+    req.resolve(&doc).unwrap();
+    for spacing in [0.0, -1.0, f64::INFINITY, f64::NAN] {
+        assert!(
+            request(MolecularSurfaceKind::Ses, spacing)
+                .resolve(&doc)
+                .is_err()
+        );
+    }
+}
+
+#[test]
+fn unrepresentable_lattice_reports_a_size_error_without_panicking() {
+    let doc = document(&[[0.0; 3]]);
+    for spacing in [f64::MAX, f64::MIN_POSITIVE] {
+        let req = request(MolecularSurfaceKind::Ses, spacing);
+        req.resolve(&doc).unwrap();
+        let error = create(&doc, &req, |_, _, _| Ok(())).unwrap_err();
+        assert!(error.contains("cannot be represented"), "{error}");
+    }
+}
+
+#[test]
+fn far_sparse_atoms_generate_without_a_dense_empty_neighbor_lattice() {
+    let single = document(&[[0.0; 3]]);
+    let pair = document(&[[0.0; 3], [10_000.0; 3]]);
+    let req = request(MolecularSurfaceKind::Ses, 0.5);
+    let one = generate(&single, &req);
+    let two = generate(&pair, &req);
+    assert_eq!(two.atom_indices, [0, 1]);
+    assert_eq!(two.spacing, 0.5);
+    assert_eq!(two.stats.components, 2);
+    assert_eq!(two.stats.cavities, 0);
+    relative(
+        two.stats.area_angstrom2,
+        2.0 * one.stats.area_angstrom2,
+        0.01,
+    );
+    relative(
+        two.stats.volume_angstrom3,
+        2.0 * one.stats.volume_angstrom3,
+        0.01,
+    );
+    two.validate(&pair).unwrap();
 }
 
 // Independent SAS oracle: cover each atom sphere with spherical triangles.
@@ -491,6 +547,6 @@ fn real_crambin_and_selected_1aon_residues_generate_bounded_shapes() {
             .iter()
             .all(|atom| req.atom_indices.binary_search(&(*atom as usize)).is_ok())
     );
-    assert!(selected.stats.estimated_engine_bytes <= MAX_ENGINE_BYTES);
+    assert!(selected.stats.estimated_engine_bytes > 0);
     selected.validate(&complex).unwrap();
 }

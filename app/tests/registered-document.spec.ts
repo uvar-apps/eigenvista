@@ -330,7 +330,7 @@ test("registered documents reject invalid sources and material, and recover from
       const badField = failure(() => owner.prepare("missing", 12, undefined));
       const clearedAfterField = failure(() => owner.metadata());
       const afterBadField = owner.prepare(field, 12, undefined);
-      const badResolution = failure(() => owner.prepare(field, 257, undefined));
+      const badResolution = failure(() => owner.prepare(field, 1, undefined));
       const clearedAfterResolution = failure(() => owner.metadata());
       const afterBadResolution = owner.prepare(field, 12, undefined);
       return {
@@ -376,7 +376,7 @@ test("registered documents reject invalid sources and material, and recover from
   expect(report.badField).not.toBe("");
   expect(report.clearedAfterField).toBe("No sampled field is prepared");
   expect(report.afterBadField).toBe(true);
-  expect(report.badResolution).toContain("between 12 and 256");
+  expect(report.badResolution).toMatch(/at least 2|at least two|resolution/i);
   expect(report.clearedAfterResolution).toBe("No sampled field is prepared");
   expect(report.afterBadResolution).toBe(true);
 });

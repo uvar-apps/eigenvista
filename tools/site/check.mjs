@@ -101,6 +101,16 @@ for (const name of inspectionPages) {
   assert(!content.includes("test build still displays"), `Test-build identity must match source metadata: ${name}`);
   assert(!/\b[A]GENTS\.md\b|expectedRevision|fieldIds|read app\.state/.test(content), `No internal setup/API chores: ${name}`);
 }
+const fieldReference = html.get("reference-fields.html");
+const shapeReference = html.get("reference-inspection.html");
+const sceneReference = html.get("reference-scene.html");
+assert(fieldReference.includes("custom positive integer") && fieldReference.includes("not a maximum"), "Grid presets are not a resolution ceiling");
+assert(shapeReference.includes("without fixed memory or item-count quotas") && shapeReference.includes("Requested spacing, cavities and source atoms are preserved"), "Scientific inspection describes allocation attempts without silent quality reduction");
+assert(fieldReference.includes("actual texture/framebuffer capabilities") && fieldReference.includes("unrepresentable size/index"), "Real device and representation constraints remain explicit");
+assert(sceneReference.includes("single camera-aligned light") && sceneReference.includes("one coherent specular highlight"), "Current illumination uses a smooth headlight instead of opposing-light bands");
+for (const name of ["reference-files.html", "reference-fields.html", "reference-inspection.html", "reference-scene.html", "tutorials-molecular-surfaces.html"]) {
+  assert(!/32 MiB PDB|64 MiB (?:text|expanded)|bounded to <strong>128 MiB|1–32 orbitals|100,000 atoms|two-million vertices|two-million-vertex|four-million triangles|256 MiB surface-engine|16 MiB aggregate|128 KiB text bound|Six equally strong lights/.test(html.get(name)), `No obsolete resource ceilings or lighting advice: ${name}`);
+}
 const ids = new Map(
   [...html].map(([name, text]) => {
     const all = [...text.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
@@ -294,6 +304,10 @@ assert(html.get("install.html").includes(`Published download: ${release.version}
 assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download identifies the verified package");
 assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive"), "Historical DOI remains attributed to its actual archive");
 assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
+if (release.doi === "10.5281/zenodo.24246123") {
+  assert(html.get("about.html").includes("A new version-specific DOI has not been supplied"), "Concept DOI is not presented as a new version archive");
+  assert(html.get("about.html").includes("Published 0.10.0 archive"), "Previous version DOI stays attributed to its actual archive");
+}
 const citation = fs.readFileSync(path.join(root, "CITATION.cff"), "utf8");
 assert.equal(citation.match(/^version: "([^"]+)"$/m)?.[1], application.version);
 if (published) assert.equal(citation.split("\n").find((line) => line.startsWith("doi: ")), `doi: ${release.doi}`, "CFF and released website DOI agree");

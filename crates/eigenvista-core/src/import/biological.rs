@@ -3,9 +3,6 @@
 use crate::{ComponentKind, Result, SecondaryStructure, StructureMetadata};
 use std::collections::BTreeMap;
 
-pub(super) const MAX_METADATA_ROWS: usize = 100_000;
-const MAX_ANNOTATION_VISITS: usize = 2_000_000;
-
 pub(super) struct SecondaryRange {
     pub label: bool,
     pub chain: String,
@@ -22,9 +19,6 @@ pub(super) fn secondary_ranges(
     metadata: &mut StructureMetadata,
     ranges: &[SecondaryRange],
 ) -> Result<usize> {
-    if ranges.len() > MAX_METADATA_ROWS {
-        return Err("Too many biological secondary annotations".into());
-    }
     if ranges.is_empty() {
         return Ok(0);
     }
@@ -58,7 +52,8 @@ pub(super) fn secondary_ranges(
                 .push(index);
         }
     }
-    let mut conflicts = vec![false; metadata.residues.len()];
+    let mut conflicts =
+        crate::allocation::filled(metadata.residues.len(), false, "secondary annotations")?;
     let mut visits = 0usize;
     let mut unresolved = 0;
     for range in ranges {
@@ -75,9 +70,6 @@ pub(super) fn secondary_ranges(
             visits = visits
                 .checked_add(residues.len())
                 .ok_or("Secondary annotation work overflow")?;
-            if visits > MAX_ANNOTATION_VISITS {
-                return Err("Secondary annotations exceed the work budget".into());
-            }
             if residues.len() != 1 {
                 ambiguous = true;
                 break;
@@ -98,7 +90,7 @@ pub(super) fn secondary_ranges(
                 ambiguous = true;
                 break;
             }
-            selected.push(residue);
+            crate::allocation::push(&mut selected, residue, "secondary annotation residues")?;
         }
         // A single range must never cross source TER segments or chain instances.
         if let Some(&first) = selected.first() {

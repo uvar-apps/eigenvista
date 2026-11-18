@@ -18,7 +18,13 @@ type Luminance = {
   q50: number;
   q90: number;
 };
-type Frame = Luminance & { direction: number[]; up: number[]; shading: string };
+type Pattern = { radius: number; mean: number; rms: number; span: number }[];
+type Frame = Luminance & {
+  direction: number[];
+  up: number[];
+  shading: string;
+  pattern?: Pattern;
+};
 
 // Opposed cardinal views expose the old dark-back lighting. The two diagonals
 // prevent a camera rig that only happens to work along its three chosen axes.
@@ -155,11 +161,70 @@ async function luminance(page: Page, dataUrl: string): Promise<Luminance> {
   }, dataUrl);
 }
 
+async function radialPattern(page: Page, dataUrl: string): Promise<Pattern> {
+  return page.evaluate(async (url) => {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let left = canvas.width,
+      right = 0,
+      top = canvas.height,
+      bottom = 0;
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        if (pixels[(y * canvas.width + x) * 4 + 3] >= 250) {
+          left = Math.min(left, x);
+          right = Math.max(right, x);
+          top = Math.min(top, y);
+          bottom = Math.max(bottom, y);
+        }
+      }
+    }
+    const centerX = (left + right) / 2,
+      centerY = (top + bottom) / 2;
+    const size = Math.min(right - left, bottom - top) / 2;
+    if (size < 50)
+      throw Error("Sphere is too small for a lighting quality check");
+    return [0.3, 0.45, 0.6, 0.75].map((radius) => {
+      const values = Array.from({ length: 180 }, (_, i) => {
+        const angle = (i * Math.PI) / 90;
+        const x = Math.round(centerX + size * radius * Math.cos(angle));
+        const y = Math.round(centerY + size * radius * Math.sin(angle));
+        const k = (y * canvas.width + x) * 4;
+        return (
+          (0.2126 * pixels[k] +
+            0.7152 * pixels[k + 1] +
+            0.0722 * pixels[k + 2]) /
+          255
+        );
+      });
+      const mean = values.reduce((a, b) => a + b) / values.length;
+      const sorted = [...values].sort((a, b) => a - b);
+      return {
+        radius,
+        mean,
+        rms: Math.sqrt(
+          values.reduce((sum, value) => sum + (value - mean) ** 2, 0) /
+            values.length,
+        ),
+        span: sorted[171] - sorted[9],
+      };
+    });
+  }, dataUrl);
+}
+
 async function views(
   page: Page,
   info: TestInfo,
   subject: string,
   shading: string,
+  measurePattern = false,
 ) {
   await call(page, "scene.set", { shading });
   const { camera } = await call<{ camera: Camera }>(page, "app.state");
@@ -197,6 +262,9 @@ async function views(
       up,
       shading,
       ...(await luminance(page, image.dataUrl)),
+      ...(measurePattern
+        ? { pattern: await radialPattern(page, image.dataUrl) }
+        : {}),
     });
     const file = info.outputPath(`${subject}-${shading}-${i}.png`);
     fs.writeFileSync(file, Buffer.from(image.dataUrl.split(",")[1], "base64"));
@@ -237,6 +305,63 @@ function balancedSphere(frames: Frame[]) {
       0.06,
     );
   }
+}
+
+for (const element of ["H", "O"]) {
+  test(`${element} atom has a smooth radial gradient without repeated highlights under orbit and roll`, async ({
+    page,
+  }, info) => {
+    const errors = await ready(page);
+    await open(
+      page,
+      `${element}-sphere.xyz`,
+      Buffer.from(`1\nLighting quality reference\n${element} 0 0 0\n`),
+    );
+    const frames = await views(page, info, `${element}-atom`, "diffuse", true);
+    balancedSphere(frames);
+    for (const frame of frames) {
+      expect(frame.pattern).toHaveLength(4);
+      for (const ring of frame.pattern!) {
+        // The old rig has RMS 0.026 (H) / 0.099 (O) and 3-fold peaks;
+        // the headlight is smooth around a ring, while preserving radial shape.
+        expect(ring.rms, JSON.stringify({ element, frame })).toBeLessThan(
+          0.012,
+        );
+        expect(ring.span, JSON.stringify({ element, frame })).toBeLessThan(
+          0.035,
+        );
+      }
+      expect(frame.pattern![0].mean - frame.pattern![3].mean).toBeGreaterThan(
+        0.025,
+      );
+    }
+    if (element === "H") {
+      await open(
+        page,
+        "hydroxyl-uhf-sto3g.molden",
+        fs.readFileSync(
+          path.resolve("../fixtures/molden/hydroxyl-uhf-sto3g.molden"),
+        ),
+      );
+      const { document } = await call<{
+        document: { atomCount: number; bondCount: number };
+      }>(page, "app.state");
+      expect(document.atomCount).toBe(2);
+      expect(document.bondCount).toBe(1);
+      const { dataUrl } = await call<{ dataUrl: string }>(
+        page,
+        "image.export",
+        { transparent: true },
+      );
+      const file = info.outputPath("reported-hydroxyl.png");
+      fs.writeFileSync(file, Buffer.from(dataUrl.split(",")[1], "base64"));
+      await info.attach("reported-hydroxyl.png", {
+        path: file,
+        contentType: "image/png",
+      });
+    }
+    expect(errors).toEqual([]);
+  });
 }
 
 test("molecular sphere lighting preserves balanced brightness and depth cues from opposed and oblique views", async ({

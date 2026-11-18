@@ -1,9 +1,8 @@
+import { GridResolutionInput } from "./GridResolutionInput";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ListX, Play, Search, X } from "lucide-react";
 import { gridResolutions, isGridResolution } from "./resolution";
 import type { EigenVistaDocument } from "./types";
-
-export const maxOrbitalBatch = 32;
 
 export function OrbitalBrowser({
   document,
@@ -222,11 +221,6 @@ export function OrbitalBrowser({
           </tbody>
         </table>
       </div>
-      {selected.size > maxOrbitalBatch && (
-        <p className="orbital-selection-error" role="alert">
-          Select at most {maxOrbitalBatch} orbitals per generation.
-        </p>
-      )}
       <div className="orbital-browser-footer">
         <span className="orbital-selection-count" aria-live="polite">
           {selected.size} selected
@@ -254,6 +248,9 @@ export function OrbitalBrowser({
                 setGridResolution(Number(event.target.value))
               }
             >
+              {!gridResolutions.some((n) => n === gridResolution) && (
+                <option value={gridResolution}>{gridResolution}³</option>
+              )}
               {gridResolutions.map((value) => (
                 <option
                   key={value}
@@ -265,16 +262,16 @@ export function OrbitalBrowser({
                 </option>
               ))}
             </select>
+            <GridResolutionInput
+              label="Custom orbital grid resolution"
+              value={gridResolution}
+              onApply={setGridResolution}
+            />
           </label>
         </div>
         <button
           className="primary orbital-generate"
-          disabled={
-            selected.size === 0 ||
-            selected.size > maxOrbitalBatch ||
-            !validIso ||
-            !validResolution
-          }
+          disabled={selected.size === 0 || !validIso || !validResolution}
           onClick={() => {
             if (!validIso || !validResolution) return;
             onGenerate(

@@ -161,13 +161,13 @@ fn persisted_annotations_validate_identity_order_targets_and_bounds() {
     annotations.labels[0].id = "measurement".into();
     assert!(annotations.validate(&document).is_err());
     annotations.labels[0].id = "label".into();
-    annotations.labels[0].text = "x".repeat(257);
-    assert!(annotations.validate(&document).is_err());
+    annotations.labels[0].text = "x".repeat(65_537);
+    annotations.validate(&document).unwrap();
     annotations.labels[0].text = "valid".into();
-    annotations.measurements = (0..=MAX_MEASUREMENTS)
+    annotations.measurements = (0..=256)
         .map(|index| definition(&format!("measure-{index}"), &[0, 1]))
         .collect();
-    assert!(annotations.validate(&document).is_err());
+    annotations.validate(&document).unwrap();
 }
 
 #[test]

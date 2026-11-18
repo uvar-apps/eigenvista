@@ -324,7 +324,6 @@ function NamedSelections({
           aria-label="Named selection name"
           value={label}
           onChange={(event) => setLabel(event.target.value)}
-          maxLength={256}
         />
       </label>
       <div className="structure-actions">
@@ -484,7 +483,6 @@ function Measurements({
           aria-label="Measurement name"
           value={label}
           onChange={(event) => setLabel(event.target.value)}
-          maxLength={256}
           placeholder="Optional descriptive name"
         />
       </label>
@@ -689,7 +687,6 @@ function Labels({
           aria-label="Annotation text"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          maxLength={256}
         />
       </label>
       <div className="structure-range">
@@ -941,7 +938,6 @@ function Neighborhoods({
           aria-label="Neighborhood selection name"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          maxLength={256}
           placeholder="Optional named selection"
         />
       </label>
@@ -950,7 +946,8 @@ function Neighborhoods({
           disabled={
             !selectedAtoms.length ||
             !Number.isFinite(Number(radius)) ||
-            Number(radius) < 0 || Number(radius) > 1000 ||
+            Number(radius) < 0 ||
+            Number(radius) > 1000 ||
             radius.trim() === ""
           }
           onClick={generate}

@@ -731,7 +731,7 @@ test("production analytic sampling matches frozen independent PySCF values and c
           origin: [0, 0, 0],
           u: [1, 0, 0],
           v: [0, 1, 0],
-          dims: [513, 2],
+          dims: [1, 2],
         },
       },
     }),

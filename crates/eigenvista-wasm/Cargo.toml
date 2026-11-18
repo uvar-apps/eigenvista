@@ -12,5 +12,6 @@ eigenvista-core = { path = "../eigenvista-core" }
 eigenvista-format = { path = "../eigenvista-format" }
 eigenvista-import = { path = "../eigenvista-import" }
 serde_json.workspace = true
+serde.workspace = true
 wasm-bindgen = "=0.2.108"
 js-sys = "=0.3.85"

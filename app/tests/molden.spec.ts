@@ -105,7 +105,7 @@ test("Molden Open generates a field and saves quantum data plus durable surfaces
     has: page.getByRole("heading", { name: "Density matrices", exact: true }),
   });
   await density.getByRole("button").first().click();
-  await page.getByLabel("Grid resolution").selectOption("24");
+  await page.getByLabel("Grid resolution", { exact: true }).selectOption("24");
   await page.getByRole("button", { name: "Generate surfaces" }).click();
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await expect(page.locator(".surface-row")).not.toHaveCount(0);

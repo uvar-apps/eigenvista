@@ -5,15 +5,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-pub fn validate_text(text: &str) -> Result<(), String> {
-    if text.len() > 128 * 1024 {
-        return Err("Shader parameters exceed the 128 KiB export budget".into());
-    }
-    Ok(())
-}
-
 pub fn save(path: &Path, text: &str) -> Result<(), String> {
-    validate_text(text)?;
     if !path
         .extension()
         .is_some_and(|ext| ext.eq_ignore_ascii_case("params"))
@@ -65,8 +57,9 @@ mod tests {
         let text = "float opacity 0.5\nvec3 lightDir 0 0 1\nbool enabled 1\n";
         save(&path, text).unwrap();
         assert_eq!(std::fs::read_to_string(&path).unwrap(), text);
-        assert!(save(&path, &"x".repeat(128 * 1024 + 1)).is_err());
-        assert_eq!(std::fs::read_to_string(&path).unwrap(), text);
+        let large = "x".repeat(128 * 1024 + 1);
+        save(&path, &large).unwrap();
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), large);
         let molecular = root.join("original.eigenvista");
         std::fs::write(&molecular, "original bytes").unwrap();
         assert!(save(&molecular, text).is_err());

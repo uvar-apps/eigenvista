@@ -3,5 +3,5 @@ export const gridResolutions = [
 ] as const;
 
 export function isGridResolution(value: number): boolean {
-  return gridResolutions.some((resolution) => resolution === value);
+  return Number.isSafeInteger(value) && value >= 2;
 }

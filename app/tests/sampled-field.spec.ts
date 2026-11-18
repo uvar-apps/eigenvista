@@ -83,7 +83,7 @@ test("owned WASM samples match legacy orbital and density paths and reject stale
     }
     let resolutionError = "";
     try {
-      const unexpected = new core.SampledField(json, fields[0], 257);
+      const unexpected = new core.SampledField(json, fields[0], 1);
       unexpected.free();
     } catch (error) {
       resolutionError = String(error);
@@ -114,7 +114,7 @@ test("owned WASM samples match legacy orbital and density paths and reject stale
         expect(mesh.levels).toContain(-mesh.iso);
     }
   }
-  expect(result.resolutionError).toContain("between 12 and 256");
+  expect(result.resolutionError).toMatch(/at least 2|at least two|resolution/i);
 });
 
 test("owned WASM cube samples preserve signed affine source data and match legacy meshes", async ({

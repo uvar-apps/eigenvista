@@ -236,7 +236,11 @@ pub fn protein_backbone(document: &Document) -> Result<ProteinBackbone> {
             ],
         });
     };
-    let mut atoms = vec![Candidates::default(); metadata.residues.len()];
+    let mut atoms = crate::allocation::filled(
+        metadata.residues.len(),
+        Candidates::default(),
+        "protein backbone candidates",
+    )?;
     for (index, (name, &residue)) in metadata
         .atom_names
         .iter()
@@ -265,7 +269,11 @@ pub fn protein_backbone(document: &Document) -> Result<ProteinBackbone> {
     }
     let mut counts = Counts::default();
     let mut segments = Vec::new();
-    let mut ambiguous_positions = vec![false; metadata.residues.len()];
+    let mut ambiguous_positions = crate::allocation::filled(
+        metadata.residues.len(),
+        false,
+        "protein backbone ambiguities",
+    )?;
     for ((chain, segment), observed) in groups {
         let mut indices: Vec<_> = observed
             .iter()

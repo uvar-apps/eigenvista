@@ -22,16 +22,17 @@ fn count(s: &str) -> Result<usize> {
 }
 
 pub fn xyz(text: &str, name: &str) -> Result<Document> {
-    if text.len() > 16 * 1024 * 1024 {
-        return Err("XYZ exceeds the preview file budget".into());
-    }
     let mut lines = text.lines();
     let n = count(lines.next().ok_or("Missing atom count")?.trim())?;
-    if n == 0 || n > 100_000 {
-        return Err("XYZ atom count must be 1..100000".into());
+    if n == 0 {
+        return Err("XYZ atom count must be positive".into());
     }
     let title = lines.next().ok_or("Missing XYZ comment line")?;
     let mut d = Document::empty(if title.trim().is_empty() { name } else { title });
+    if n > lines.clone().count() {
+        return Err("Truncated XYZ".into());
+    }
+    d.atoms = crate::allocation::buffer(n, "XYZ atoms")?;
     let elements: Vec<_> = ELEMENTS.split_whitespace().collect();
     for index in 0..n {
         let row: Vec<_> = lines
@@ -75,9 +76,6 @@ pub fn xyz(text: &str, name: &str) -> Result<Document> {
 }
 
 pub fn cube(text: &str, name: &str) -> Result<Document> {
-    if text.len() > 64 * 1024 * 1024 {
-        return Err("Cube exceeds the preview file budget".into());
-    }
     let mut lines = text.lines();
     let title = lines.next().ok_or("Missing cube title")?;
     let comment = lines.next().ok_or("Missing cube comment")?;
@@ -89,10 +87,7 @@ pub fn cube(text: &str, name: &str) -> Result<Document> {
     if header.len() < 4 || header.len() > 5 {
         return Err("Invalid cube origin line".into());
     }
-    let n: i32 = header[0].parse().map_err(|_| "Invalid cube atom count")?;
-    if !(-100_000..=100_000).contains(&n) {
-        return Err("Cube atom count must have an absolute value no larger than 100000".into());
-    }
+    let n: i64 = header[0].parse().map_err(|_| "Invalid cube atom count")?;
     if header.len() == 5 && count(header[4])? != 1 {
         return Err("Only single-channel cubes are supported; NVAL must be one".into());
     }
@@ -117,11 +112,16 @@ pub fn cube(text: &str, name: &str) -> Result<Document> {
         .iter()
         .try_fold(1usize, |n, d| n.checked_mul(*d))
         .ok_or("Cube dimensions overflow")?;
-    if dims.iter().any(|d| *d < 2) || size > MAX_SAMPLES {
-        return Err("Cube exceeds the 128^3 sample budget".into());
+    if dims.iter().any(|d| *d < 2) {
+        return Err("Cube axis counts must be at least two".into());
     }
     let mut d = Document::empty(if title.trim().is_empty() { name } else { title });
-    for _ in 0..n.unsigned_abs() {
+    let atoms = usize::try_from(n.unsigned_abs()).map_err(|_| "Cube atom count overflows")?;
+    if atoms > lines.clone().count() {
+        return Err("Truncated cube atoms".into());
+    }
+    d.atoms = crate::allocation::buffer(atoms, "cube atoms")?;
+    for _ in 0..atoms {
         let row: Vec<_> = lines
             .next()
             .ok_or("Truncated cube atoms")?
@@ -159,7 +159,11 @@ pub fn cube(text: &str, name: &str) -> Result<Document> {
     } else {
         None
     };
-    let mut values = vec![0.; size];
+    // A claimed count is not enough to justify an allocation: require actual tokens.
+    if tokens.clone().count() != size {
+        return Err("Cube sample count differs from the available values".into());
+    }
+    let mut values = crate::allocation::filled(size, 0., "cube samples")?;
     for x in 0..dims[0] {
         for y in 0..dims[1] {
             for z in 0..dims[2] {

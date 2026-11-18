@@ -295,7 +295,6 @@ export function StructureControls({
           type="search"
           aria-label="Filter chains"
           placeholder="Filter chain or entity"
-          maxLength={128}
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
         />
@@ -435,7 +434,6 @@ export function StructureControls({
             <input
               aria-label="First residue"
               value={first}
-              maxLength={256}
               placeholder="THR 1 or 1"
               onChange={(event) => setFirst(event.target.value)}
             />
@@ -445,7 +443,6 @@ export function StructureControls({
             <input
               aria-label="Last residue"
               value={last}
-              maxLength={256}
               placeholder="ARG 10 or 10"
               onChange={(event) => setLast(event.target.value)}
             />

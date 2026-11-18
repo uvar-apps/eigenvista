@@ -244,17 +244,14 @@ fn cif_large_fixture_1aon_is_bounded_and_sane() {
 }
 
 #[test]
-fn cif_is_rejected_when_over_the_preview_budget() {
-    // A payload past the 64 MiB mmCIF budget must fail on size, not be
-    // truncated or partially parsed.
+fn cif_retains_atoms_past_the_former_text_budget() {
+    // A complete comment after the atom loop may exceed the old byte ceiling.
     let mut text = cif_body("ATOM 1 N N . ALA A 1 1 ? 0.0 0.0 0.0 1.00 20.00 ? 1 ALA A N 1\n");
     text.push_str(&"#".repeat(64 * 1024 * 1024 + 1 - text.len()));
     assert!(text.len() > 64 * 1024 * 1024);
-    let error = import_bytes(text.as_bytes(), "huge.cif").unwrap_err();
-    assert!(
-        error.contains("budget"),
-        "expected a size-budget error, got {error}"
-    );
+    let imported = import_bytes(text.as_bytes(), "huge.cif").unwrap();
+    assert_eq!(imported.document.atoms.len(), 1);
+    imported.document.validate().unwrap();
 }
 
 #[test]

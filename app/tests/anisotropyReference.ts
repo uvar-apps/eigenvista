@@ -217,29 +217,17 @@ export function linearRaycastReference(
   const forward = unit(add(profile.target, scale(profile.eye, -1)));
   const right = unit(cross(forward, profile.up));
   const screenUp = cross(right, forward);
-  const normal = unit(profile.gradient);
+  const gradient = unit(profile.gradient);
+  // The shader shades either side toward the actual eye ray. Opposed lights
+  // previously hid this sign; the directional headlight makes it explicit.
+  const normal = dot(gradient, direction) > 0 ? scale(gradient, -1) : gradient;
   const viewNormal: V3 = [
     dot(normal, right),
     dot(normal, screenUp),
     -dot(normal, forward),
   ];
-  // Three orthogonal axes meet the view axis at acos(1/sqrt(3)), with
-  // azimuths separated by 120 degrees. Each opposite pair contributes |N·L|.
-  const radial = Math.sqrt(2 / 3),
-    axial = 1 / Math.sqrt(3);
-  const irradiance = [0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].reduce(
-    (sum, angle) =>
-      sum +
-      Math.abs(
-        dot(viewNormal, [
-          radial * Math.cos(angle),
-          radial * Math.sin(angle),
-          axial,
-        ]),
-      ),
-    0,
-  );
-  const light = 0.1 + (0.9 / Math.sqrt(3)) * irradiance;
+  // Independent camera-axis headlight projection and neutral diffuse fill.
+  const light = 0.35 + 0.65 * Math.max(viewNormal[2], 0);
   const rgb = [0, 0, 0];
   let alpha = 0;
   for (const hit of hits) {

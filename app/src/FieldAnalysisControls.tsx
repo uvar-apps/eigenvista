@@ -364,7 +364,6 @@ function FieldMeaning({
         Interpretation note
         <input
           aria-label="Interpretation note"
-          maxLength={2048}
           value={draft.note}
           onChange={(event) => setDraft({ ...draft, note: event.target.value })}
         />
@@ -607,7 +606,6 @@ function AnalysisForm(props: FormProps) {
         Analysis label
         <input
           aria-label="Analysis label"
-          maxLength={256}
           value={label}
           placeholder={`${human(kind)} · ${props.field}`}
           onChange={(event) => setLabel(event.target.value)}
@@ -669,7 +667,6 @@ function AnalysisForm(props: FormProps) {
               type="number"
               aria-label="Profile samples"
               min={2}
-              max={4096}
               step={1}
               value={count}
               onChange={(event) => setCount(event.target.value)}
@@ -732,7 +729,6 @@ function AnalysisForm(props: FormProps) {
                   type="number"
                   step={1}
                   min={2}
-                  max={512}
                   aria-label={`Plane ${i ? "rows" : "columns"}`}
                   value={value}
                   onChange={(event) =>
@@ -858,8 +854,6 @@ function AnalysisCard({
             .split(/[,\s]+/)
             .map((v) => finite(v, "Contour level") / factor)
         : [];
-      if (contours.length > 32)
-        throw new Error("Use at most 32 contour levels");
       act("analysis.set", {
         id: item.id,
         label,
@@ -931,7 +925,6 @@ function AnalysisCard({
           Result label
           <input
             aria-label={`Result label ${item.label}`}
-            maxLength={256}
             value={label}
             onChange={(event) => setLabel(event.target.value)}
           />

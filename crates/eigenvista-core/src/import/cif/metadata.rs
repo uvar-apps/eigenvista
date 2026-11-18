@@ -1,10 +1,9 @@
-//! Small bounded metadata categories share CIF tokenization, but never retain
+//! Interpreted metadata categories share CIF tokenization, but never retain
 //! entire sequences/descriptions or reinterpret the selected coordinate model.
 use super::{
-    MAX_CIF_COLUMNS, MAX_LINE_FIELDS, Site, boundary_line_end, control_token, is_null,
-    raw_scalar_value, text_block_value, tokens,
+    Site, boundary_line_end, control_token, is_null, raw_scalar_value, text_block_value, tokens,
 };
-use crate::import::biological::{MAX_METADATA_ROWS, SecondaryRange, secondary_ranges};
+use crate::import::biological::{SecondaryRange, secondary_ranges};
 use crate::structure::{StructureBuilder, is_ion, named_kind, optional, polymer_kind};
 use crate::{
     ComponentKind, Result, SecondaryStructure, StructureChain, StructureMetadata, StructureResidue,
@@ -12,7 +11,6 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 type Row = BTreeMap<String, String>;
-const MAX_METADATA_BYTES: usize = 4 * 1024 * 1024;
 const CATEGORIES: [&str; 6] = [
     "entity",
     "entity_poly",
@@ -58,11 +56,15 @@ pub(super) struct CifMetadata {
 
 impl CifMetadata {
     fn push(&mut self, category: &str, row: Row) -> Result<()> {
-        self.count += 1;
-        if self.count > MAX_METADATA_ROWS {
-            return Err("mmCIF biological metadata exceeds the row budget".into());
-        }
-        self.rows.entry(category.into()).or_default().push(row);
+        self.count = self
+            .count
+            .checked_add(1)
+            .ok_or("mmCIF metadata row count overflow")?;
+        crate::allocation::push(
+            self.rows.entry(category.into()).or_default(),
+            row,
+            "mmCIF metadata rows",
+        )?;
         Ok(())
     }
 
@@ -72,13 +74,11 @@ impl CifMetadata {
         }
         self.bytes = self
             .bytes
-            .checked_add(column.len() + value.len())
+            .checked_add(column.len())
+            .and_then(|bytes| bytes.checked_add(value.len()))
             .ok_or("mmCIF metadata size overflow")?;
-        if value.len() > 256
-            || value.chars().any(char::is_control)
-            || self.bytes > MAX_METADATA_BYTES
-        {
-            return Err("mmCIF biological metadata exceeds the string budget".into());
+        if value.chars().any(char::is_control) {
+            return Err("mmCIF biological metadata contains a control character".into());
         }
         Ok(value.into())
     }
@@ -153,10 +153,9 @@ impl CifMetadata {
                 }
                 if block == selected_block && tags.first().and_then(|t| category(t)).is_some() {
                     let prefix = tags[0].split_once('.').unwrap().0;
-                    if tags.len() > MAX_CIF_COLUMNS
-                        || tags
-                            .iter()
-                            .any(|tag| tag.split_once('.').map(|(p, _)| p) != Some(prefix))
+                    if tags
+                        .iter()
+                        .any(|tag| tag.split_once('.').map(|(p, _)| p) != Some(prefix))
                         || tags.iter().collect::<BTreeSet<_>>().len() != tags.len()
                     {
                         return Err("Invalid biological metadata loop columns".into());
@@ -184,7 +183,7 @@ impl CifMetadata {
                 continue;
             }
             if !header.is_empty() {
-                for token in tokens(raw, MAX_LINE_FIELDS)? {
+                for token in tokens(raw)? {
                     if !token.quoted && control_token(token.value) {
                         return Err("Inline control in biological metadata loop".into());
                     }

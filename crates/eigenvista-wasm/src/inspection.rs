@@ -1,5 +1,5 @@
-//! Bounded inspection bridge. Mesh/sample payloads cross WASM as typed buffers.
-use super::{err, parse, report_progress};
+//! Inspection bridge. Mesh/sample payloads cross WASM as typed buffers.
+use super::{err, parse, report_progress, to_string};
 use eigenvista_core::{Document, field_analysis, inspection, molecular_surface};
 use wasm_bindgen::prelude::*;
 
@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::*;
 pub fn inspection_measure(json: &str, request: &str) -> Result<String, JsValue> {
     let doc = parse(json)?;
     let request = serde_json::from_str(request).map_err(err)?;
-    serde_json::to_string(&inspection::measure(&doc, &request).map_err(err)?).map_err(err)
+    to_string(&inspection::measure(&doc, &request).map_err(err)?).map_err(err)
 }
 
 #[wasm_bindgen]
@@ -18,30 +18,34 @@ pub fn inspection_neighborhood(
 ) -> Result<Vec<u32>, JsValue> {
     let doc = parse(json)?;
     let request = serde_json::from_str(request).map_err(err)?;
-    inspection::neighborhood_with_progress(&doc, &request, |done, total| {
+    let indices = inspection::neighborhood_with_progress(&doc, &request, |done, total| {
         report_progress(&progress, done, total).map_err(|e| format!("{e:?}"))
     })
-    .map(|indices| indices.into_iter().map(|i| i as u32).collect())
-    .map_err(err)
+    .map_err(err)?;
+    let mut output =
+        eigenvista_core::allocation::buffer(indices.len(), "neighborhood transfer").map_err(err)?;
+    for index in indices {
+        output.push(
+            u32::try_from(index)
+                .map_err(|_| err("Atom index exceeds the u32 bridge representation"))?,
+        );
+    }
+    Ok(output)
 }
 
 #[wasm_bindgen]
 pub fn inspection_measurements(json: &str) -> Result<String, JsValue> {
     let doc = parse(json)?;
-    let results = doc
-        .annotations
-        .as_ref()
-        .map(|annotations| {
-            annotations
-                .measurements
-                .iter()
-                .map(|definition| inspection::measure(&doc, &definition.request()))
-                .collect::<eigenvista_core::Result<Vec<_>>>()
-        })
-        .transpose()
-        .map_err(err)?
-        .unwrap_or_default();
-    serde_json::to_string(&results).map_err(err)
+    let mut results = Vec::new();
+    if let Some(annotations) = &doc.annotations {
+        results
+            .try_reserve_exact(annotations.measurements.len())
+            .map_err(|_| err("Cannot allocate measurement transfer"))?;
+        for definition in &annotations.measurements {
+            results.push(inspection::measure(&doc, &definition.request()).map_err(err)?);
+        }
+    }
+    to_string(&results).map_err(err)
 }
 
 /// Exact publication accounting is intentionally separate from QC registration.
@@ -58,22 +62,18 @@ pub fn analysis_plane_atoms(
     extent: Vec<f64>,
     dims: Vec<u32>,
 ) -> Result<String, JsValue> {
-    let atoms: [usize; 3] = atoms
-        .into_iter()
-        .map(|v| v as usize)
-        .collect::<Vec<_>>()
+    let atoms: [u32; 3] = atoms
         .try_into()
         .map_err(|_| err("An atom-defined plane requires three ordered atoms"))?;
+    let atoms = atoms.map(|value| value as usize);
     let extent: [f64; 2] = extent
         .try_into()
         .map_err(|_| err("A plane requires two extents"))?;
-    let dims: [usize; 2] = dims
-        .into_iter()
-        .map(|v| v as usize)
-        .collect::<Vec<_>>()
+    let dims: [u32; 2] = dims
         .try_into()
         .map_err(|_| err("A plane requires two dimensions"))?;
-    serde_json::to_string(
+    let dims = dims.map(|value| value as usize);
+    to_string(
         &field_analysis::plane_through_atoms(&parse(json)?, atoms, extent, dims).map_err(err)?,
     )
     .map_err(err)
@@ -105,7 +105,7 @@ pub fn analysis_csv(json: &str) -> Result<String, JsValue> {
     field_analysis::export_csv(&serde_json::from_str(json).map_err(err)?).map_err(err)
 }
 
-/// Resolve only a bounded page, without reparsing a field source or full cache.
+/// Resolve a page, without reparsing a field source or full cache.
 #[wasm_bindgen]
 pub fn analysis_sample_rows(
     definition: &str,
@@ -116,15 +116,14 @@ pub fn analysis_sample_rows(
     let definition: field_analysis::AnalysisDefinition =
         serde_json::from_str(definition).map_err(err)?;
     let count = definition.count().map_err(err)?;
-    if values.len() > 100
-        || values.len() != valid.len()
+    if values.len() != valid.len()
         || offset
             .checked_add(values.len())
             .is_none_or(|end| end > count)
         || values.iter().any(|v| !v.is_finite())
         || valid.iter().any(|v| *v > 1)
     {
-        return Err(err("Invalid bounded sample page"));
+        return Err(err("Invalid sample page"));
     }
     let profile_length =
         if let field_analysis::AnalysisDefinition::Profile { start, end, .. } = &definition {
@@ -137,7 +136,9 @@ pub fn analysis_sample_rows(
         } else {
             None
         };
-    let mut rows = Vec::with_capacity(values.len());
+    let mut rows = Vec::new();
+    rows.try_reserve_exact(values.len())
+        .map_err(|_| err("Cannot allocate sample rows"))?;
     for (index, value) in values.iter().enumerate() {
         let position = field_analysis::sample_position(&definition, offset + index).map_err(err)?;
         if position.iter().any(|v| !v.is_finite()) || profile_length.is_some_and(|v| !v.is_finite())
@@ -149,7 +150,7 @@ pub fn analysis_sample_rows(
         rows.push(serde_json::json!({"index":offset+index,"value":if valid[index]==1 {Some(value)}else{None},
             "status":if valid[index]==1 {"valid"}else{"outside"},"position":position,"distanceAngstrom":distance}));
     }
-    serde_json::to_string(&serde_json::json!({"items":rows,"profileLengthAngstrom":profile_length}))
+    to_string(&serde_json::json!({"items":rows,"profileLengthAngstrom":profile_length}))
         .map_err(err)
 }
 
@@ -199,7 +200,7 @@ impl MolecularMesh {
     /// Call after taking the large buffers, which remain empty placeholders here
     /// only for the transfer metadata; the worker assembles the complete result.
     pub fn metadata(&self) -> Result<String, JsValue> {
-        serde_json::to_string(&self.surface).map_err(err)
+        to_string(&self.surface).map_err(err)
     }
 }
 
@@ -221,6 +222,6 @@ impl QuantitativeResult {
         std::mem::take(&mut self.item.valid)
     }
     pub fn metadata(&self) -> Result<String, JsValue> {
-        serde_json::to_string(&self.item).map_err(err)
+        to_string(&self.item).map_err(err)
     }
 }

@@ -117,13 +117,17 @@ fn parameters(root: &Path) -> Result<Value, String> {
         return Err("Parameter replacement byte contract failed".into());
     }
     let after = snapshot(&destination)?;
-    let oversized = actual_parameters::save(&destination, &"x".repeat(128 * 1024 + 1));
-    if oversized.is_ok() || fs::read(&destination).map_err(|e| e.to_string())? != bytes {
-        return Err("Rejected oversized parameter export changed destination".into());
+    let large = "float opacity 0.5\n".repeat(8193);
+    actual_parameters::save(&destination, &large)?;
+    if fs::read(&destination).map_err(|e| e.to_string())? != large.as_bytes() {
+        return Err(
+            "Parameter export above the former byte ceiling published incomplete bytes".into(),
+        );
     }
+    let large_after = snapshot(&destination)?;
     Ok(
         json!({"result":outcome(result),"requested_0640_mode":requested_mode,"before":before,"after":after,
-        "oversized_rejected":outcome(oversized)}),
+        "above_former_limit":{"result":{"ok":true},"after":large_after,"expected_sha256":digest(large.as_bytes())}}),
     )
 }
 

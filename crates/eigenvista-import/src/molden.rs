@@ -3,10 +3,6 @@ use eigenvista_core::{
 };
 use std::collections::{HashMap, HashSet};
 
-const MAX_LINES: usize = 500_000;
-const MAX_LINE_BYTES: usize = 16_384;
-const MAX_BASIS: usize = 1024;
-const MAX_ORBITALS: usize = 512;
 const ELEMENTS: &str = "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og";
 
 #[derive(Clone, Copy)]
@@ -52,9 +48,6 @@ fn sections(text: &str) -> Result<Vec<Section<'_>>, String> {
             number: index + 1,
             text: text.trim(),
         };
-        if index >= MAX_LINES || text.len() > MAX_LINE_BYTES {
-            return Err(line.error("Input exceeds the Molden line/count budget"));
-        }
         if line.text.is_empty() || line.text.starts_with(['#', '!']) {
             continue;
         }
@@ -63,21 +56,21 @@ fn sections(text: &str) -> Result<Vec<Section<'_>>, String> {
                 .text
                 .find(']')
                 .ok_or_else(|| line.error("Unclosed section header"))?;
-            if result.len() >= 128 {
-                return Err(line.error("Too many Molden sections"));
-            }
-            result.push(Section {
-                line,
-                name: line.text[1..end].trim().to_ascii_uppercase(),
-                argument: line.text[end + 1..].trim(),
-                rows: vec![],
-            });
+            eigenvista_core::allocation::push(
+                &mut result,
+                Section {
+                    line,
+                    name: line.text[1..end].trim().to_ascii_uppercase(),
+                    argument: line.text[end + 1..].trim(),
+                    rows: vec![],
+                },
+                "Molden sections",
+            )?;
         } else {
-            result
+            let section = result
                 .last_mut()
-                .ok_or_else(|| line.error("Expected [Molden Format] header"))?
-                .rows
-                .push(line);
+                .ok_or_else(|| line.error("Expected [Molden Format] header"))?;
+            eigenvista_core::allocation::push(&mut section.rows, line, "Molden section lines")?;
         }
     }
     if result
@@ -138,7 +131,6 @@ pub(super) fn parse(text: &str, name: &str) -> Result<(Document, Vec<String>), S
                     .filter(move |_| index > 0)
                     .chain(line.text.chars())
             })
-            .take(1024)
             .collect();
         if !title.is_empty() {
             document.title = title;
@@ -210,15 +202,18 @@ fn parse_atoms(
     };
     let elements: Vec<_> = ELEMENTS.split_whitespace().collect();
     let mut ids = HashMap::new();
+    ids.try_reserve(section.rows.len())
+        .map_err(|error| format!("Cannot allocate Molden atom IDs: {error}"))?;
+    document
+        .atoms
+        .try_reserve(section.rows.len())
+        .map_err(|error| format!("Cannot allocate Molden atoms: {error}"))?;
     for &line in &section.rows {
         let row: Vec<_> = line.text.split_whitespace().collect();
         if row.len() != 6 {
             return Err(
                 line.error("Atom needs symbol, index, atomic number, and three coordinates")
             );
-        }
-        if document.atoms.len() >= 100_000 {
-            return Err(line.error("Atom count exceeds 100000"));
         }
         let id = integer(row[1], line)?;
         let element = integer(row[2], line)?;
@@ -357,12 +352,13 @@ fn parse_basis(
             return Err(line.error("This orca_2mkl profile is qualified only for S/P/spherical 5D shells; SP, Cartesian D, and F/G need independent producer-specific validation"));
         }
         let count = integer(row[1], line)?;
-        if !(1..=64).contains(&count) {
-            return Err(line.error("Primitive count must be 1..64"));
+        if count == 0 || count > rows.len() {
+            return Err(line
+                .error("Primitive count must be positive and match the available primitive rows"));
         }
-        let mut exponents = Vec::with_capacity(count);
-        let mut coefficients = Vec::with_capacity(count);
-        let mut p_coefficients = Vec::with_capacity(count);
+        let mut exponents = eigenvista_core::allocation::buffer(count, "Molden primitives")?;
+        let mut coefficients = eigenvista_core::allocation::buffer(count, "Molden primitives")?;
+        let mut p_coefficients = eigenvista_core::allocation::buffer(count, "Molden primitives")?;
         for _ in 0..count {
             let primitive = rows
                 .next()
@@ -558,11 +554,10 @@ fn append_shell(
     line: Line<'_>,
 ) -> Result<bool, String> {
     let components = components(angular, spherical);
-    if document.basis.len() + components.len() > MAX_BASIS {
-        return Err(line.error(format!(
-            "Basis exceeds the preview limit of {MAX_BASIS} atomic orbitals"
-        )));
-    }
+    document
+        .basis
+        .try_reserve(components.len())
+        .map_err(|error| line.error(format!("Cannot allocate Molden basis: {error}")))?;
     // Normalized primitives of equal angular degree have a component-independent overlap.
     let mut norm = 0.;
     for (i, &a) in exponents.iter().enumerate() {
@@ -624,8 +619,8 @@ fn parse_orbitals(section: &Section<'_>, document: &mut Document) -> Result<(), 
                 block.line = line.number;
             }
             let value = value.trim();
-            if value.is_empty() || value.len() > 256 {
-                return Err(line.error("Invalid or oversized orbital header value"));
+            if value.is_empty() {
+                return Err(line.error("Empty orbital header value"));
             }
             match key.trim().to_ascii_lowercase().as_str() {
                 "sym" => {
@@ -687,16 +682,17 @@ fn parse_orbitals(section: &Section<'_>, document: &mut Document) -> Result<(), 
 
 fn push_orbital(block: OrbitalBlock, document: &mut Document) -> Result<(), String> {
     let error = |message| format!("Molden orbital starting at line {}: {message}", block.line);
-    if document.orbitals.len() >= MAX_ORBITALS {
-        return Err(error("More than 512 molecular orbitals"));
-    }
     if block.values.is_empty() {
         return Err(error("Missing coefficients; truncated or empty orbital"));
     }
     let spin = block
         .spin
         .ok_or_else(|| error("Explicit Spin=Alpha/Beta is required"))?;
-    let mut coefficients = vec![0.; document.basis.len()];
+    let mut coefficients = eigenvista_core::allocation::filled(
+        document.basis.len(),
+        0.,
+        "Molden orbital coefficients",
+    )?;
     for (index, value) in block.values {
         coefficients[index] = value;
     }
@@ -704,6 +700,10 @@ fn push_orbital(block: OrbitalBlock, document: &mut Document) -> Result<(), Stri
         return Err(error("All-zero molecular orbital"));
     }
     let index = document.orbitals.len() + 1;
+    document
+        .orbitals
+        .try_reserve(1)
+        .map_err(|error| error.to_string())?;
     document.orbitals.push(Orbital {
         id: format!("molden-mo-{index}"),
         label: format!(
@@ -762,9 +762,13 @@ fn finish_orbitals(document: &mut Document, warnings: &mut Vec<String>) -> Resul
             "Some occupations are missing; no occupation-derived density was constructed.".into(),
         );
     } else {
-        let size = document.basis.len() * document.basis.len();
-        let mut alpha = vec![0.; size];
-        let mut beta = vec![0.; size];
+        let size = document
+            .basis
+            .len()
+            .checked_mul(document.basis.len())
+            .ok_or("Molden density matrix dimensions overflow")?;
+        let mut alpha = eigenvista_core::allocation::filled(size, 0., "Molden alpha density")?;
+        let mut beta = eigenvista_core::allocation::filled(size, 0., "Molden beta density")?;
         for orbital in &document.orbitals {
             let occupation = orbital.occupation.unwrap();
             // Virtual orbitals retain their validated metadata and coefficients.
@@ -783,8 +787,10 @@ fn finish_orbitals(document: &mut Document, warnings: &mut Vec<String>) -> Resul
             }
         }
         if has_alpha && has_beta {
-            let total = alpha.iter().zip(&beta).map(|(a, b)| a + b).collect();
-            let spin = alpha.iter().zip(&beta).map(|(a, b)| a - b).collect();
+            let mut total = eigenvista_core::allocation::buffer(size, "Molden total density")?;
+            total.extend(alpha.iter().zip(&beta).map(|(a, b)| a + b));
+            let mut spin = eigenvista_core::allocation::buffer(size, "Molden spin density")?;
+            spin.extend(alpha.iter().zip(&beta).map(|(a, b)| a - b));
             for (kind, matrix) in [
                 ("total", total),
                 ("alpha", alpha),

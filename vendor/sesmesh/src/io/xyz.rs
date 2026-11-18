@@ -200,9 +200,11 @@ pub(crate) fn parse(data: &[u8], radius_column: Option<&str>) -> Result<Parsed, 
             atom.name = strings.intern_bytes(species);
             atom.element = species_element(species, layout.atomic_numbers);
             if atom.element.is_none() {
-                diagnostics.warn(WarningKind::UnknownElement, "unrecognized species", || {
-                    format!("line {lineno}: '{}'", show(species))
-                });
+                diagnostics
+                    .warn(WarningKind::UnknownElement, "unrecognized species", || {
+                        format!("line {lineno}: '{}'", show(species))
+                    })
+                    .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
             }
             if let Some(col) = layout.radius {
                 let t = tokens[col];

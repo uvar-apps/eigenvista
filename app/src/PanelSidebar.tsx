@@ -33,7 +33,7 @@ function readOrder(): Order {
   const order: Order = { left: [...paneIds.left], right: [...paneIds.right] };
   try {
     const text = localStorage.getItem(storageKey);
-    if (!text || text.length > 1024) return order;
+    if (!text) return order;
     const stored: unknown = JSON.parse(text);
     if (!stored || typeof stored !== "object" || Array.isArray(stored))
       return order;
@@ -226,7 +226,7 @@ export function PanelStack({
     setDragging(null);
     try {
       const text = event.dataTransfer.getData(dragType);
-      if (!text || text.length > 128) return;
+      if (!text) return;
       const payload: unknown = JSON.parse(text);
       if (!payload || typeof payload !== "object" || Array.isArray(payload))
         return;

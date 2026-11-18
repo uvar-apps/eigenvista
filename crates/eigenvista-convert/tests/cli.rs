@@ -298,11 +298,9 @@ fn batch_output_collisions_and_input_replacement_are_rejected_before_writing() {
 }
 
 #[test]
-fn oversized_input_and_invalid_conversion_leave_no_partial_document() {
+fn invalid_conversion_leaves_no_partial_document_and_preserves_existing_output() {
     let dir = Scratch::new();
-    let file = fs::File::create(dir.0.join("large.xyz")).unwrap();
-    file.set_len(eigenvista_import::MAX_IMPORT_BYTES as u64 + 1)
-        .unwrap();
+    fs::write(dir.0.join("large.xyz"), "invalid molecular input").unwrap();
     assert_eq!(dir.run(&["large.xyz"]).status.code(), Some(1));
     assert!(!dir.0.join("large.eigenvista").exists());
     dir.water("source.xyz");
@@ -576,4 +574,27 @@ fn malformed_binarycif_does_not_replace_an_existing_native_output() {
     assert!(!report[0]["error"].as_str().unwrap().is_empty());
     assert_eq!(fs::read(dir.0.join("crambin.eigenvista")).unwrap(), saved);
     assert_eq!(fs::read(dir.0.join("crambin.bcif")).unwrap(), truncated);
+}
+
+#[test]
+fn check_accepts_a_batch_above_the_former_256_file_limit() {
+    let dir = Scratch::new();
+    dir.water("water.xyz");
+    let mut args = vec!["--check", "--json"];
+    args.extend(std::iter::repeat_n("water.xyz", 257));
+    let output = dir.run(&args);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let reports: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(reports.as_array().unwrap().len(), 257);
+    assert!(
+        reports
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|report| report["status"] == "validated")
+    );
 }

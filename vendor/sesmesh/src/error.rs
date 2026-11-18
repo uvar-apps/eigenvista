@@ -41,6 +41,22 @@ pub enum Error {
         message: String,
     },
 
+    /// Processing input failed for a reason other than malformed content.
+    #[error("{}:{line}:{column}: {format} processing failed: {source}", display_path(path.as_deref()))]
+    InputProcessing {
+        /// Input format.
+        format: Format,
+        /// Input path, when available.
+        path: Option<PathBuf>,
+        /// Source line associated with the operation.
+        line: usize,
+        /// Source column associated with the operation.
+        column: usize,
+        /// Original allocator or representation failure.
+        #[source]
+        source: Box<Error>,
+    },
+
     /// The input format could not be determined or is not supported by this
     /// build (for example gzip input without the `gzip` feature).
     #[error("unsupported input: {0}")]
@@ -64,14 +80,70 @@ pub enum Error {
     #[error("internal error: {0}")]
     Internal(String),
 
-    /// A configured resource limit would be exceeded.
-    #[error("{what} exceeds the configured limit of {limit} bytes")]
-    ResourceLimit {
-        /// What hit the limit.
-        what: String,
-        /// The limit in bytes.
-        limit: u64,
+    /// An allocator refused a requested buffer (including address-space overflow).
+    #[error("cannot allocate {what}: {source}")]
+    Allocation {
+        /// Buffer being allocated.
+        what: &'static str,
+        /// Actual allocator/capacity failure.
+        #[source]
+        source: std::collections::TryReserveError,
     },
+
+    /// A size or index cannot be represented by the engine's storage type.
+    #[error("{0} cannot be represented by this platform or mesh index type")]
+    SizeOverflow(&'static str),
+}
+
+/// Allocate actual requested storage, without an estimated-memory policy.
+pub(crate) fn capacity<T>(length: usize, what: &'static str) -> Result<Vec<T>> {
+    let mut out = Vec::new();
+    reserve(&mut out, length, what)?;
+    Ok(out)
+}
+
+pub(crate) fn reserve<T>(out: &mut Vec<T>, additional: usize, what: &'static str) -> Result<()> {
+    out.try_reserve(additional)
+        .map_err(|source| Error::Allocation { what, source })
+}
+
+pub(crate) fn filled<T: Clone>(length: usize, value: T, what: &'static str) -> Result<Vec<T>> {
+    let mut out = capacity(length, what)?;
+    out.resize(length, value);
+    Ok(out)
+}
+
+pub(crate) fn collect<T>(
+    values: impl IntoIterator<Item = T>,
+    what: &'static str,
+) -> Result<Vec<T>> {
+    let values = values.into_iter();
+    let mut out = capacity(values.size_hint().0, what)?;
+    for value in values {
+        push(&mut out, value, what)?;
+    }
+    Ok(out)
+}
+
+pub(crate) fn push<T>(out: &mut Vec<T>, value: T, what: &'static str) -> Result<()> {
+    if out.len() == out.capacity() {
+        reserve(out, 1, what)?;
+    }
+    out.push(value);
+    Ok(())
+}
+
+pub(crate) fn extend<T>(
+    out: &mut Vec<T>,
+    values: impl IntoIterator<Item = T>,
+    what: &'static str,
+) -> Result<()> {
+    let values = values.into_iter();
+    reserve(out, values.size_hint().0, what)?;
+    for value in values {
+        push(out, value, what)?;
+    }
+    Ok(())
 }
 
 fn display_path(path: Option<&Path>) -> String {
@@ -80,11 +152,12 @@ fn display_path(path: Option<&Path>) -> String {
 
 /// Parse failure produced by the format readers before the file path and
 /// format are attached.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub(crate) struct ParseError {
     pub(crate) line: usize,
     pub(crate) column: usize,
     pub(crate) message: String,
+    cause: Option<Error>,
 }
 
 impl ParseError {
@@ -93,10 +166,29 @@ impl ParseError {
             line,
             column,
             message: message.into(),
+            cause: None,
+        }
+    }
+
+    pub(crate) fn caused_by(line: usize, column: usize, error: Error) -> Self {
+        Self {
+            line,
+            column,
+            message: String::new(),
+            cause: Some(error),
         }
     }
 
     pub(crate) fn into_error(self, format: Format, path: Option<PathBuf>) -> Error {
+        if let Some(source) = self.cause {
+            return Error::InputProcessing {
+                format,
+                path,
+                line: self.line,
+                column: self.column,
+                source: Box::new(source),
+            };
+        }
         Error::Parse {
             format,
             path,
@@ -109,6 +201,52 @@ impl ParseError {
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}:{}: {}", self.line, self.column, self.message)
+        match &self.cause {
+            Some(cause) => write!(f, "{}:{}: {}", self.line, self.column, cause),
+            None => write!(f, "{}:{}: {}", self.line, self.column, self.message),
+        }
+    }
+}
+
+#[cfg(test)]
+mod allocation_tests {
+    use super::*;
+
+    #[test]
+    fn impossible_capacity_returns_the_allocator_error() {
+        let error = capacity::<u8>(usize::MAX, "test buffer").unwrap_err();
+        assert!(matches!(
+            error,
+            Error::Allocation {
+                what: "test buffer",
+                ..
+            }
+        ));
+        assert!(error.to_string().contains("cannot allocate test buffer"));
+    }
+
+    #[test]
+    fn failed_growth_preserves_existing_buffer() {
+        let mut values = vec![11u64, 13];
+        let error = reserve(&mut values, usize::MAX, "test growth").unwrap_err();
+        assert!(matches!(error, Error::Allocation { .. }));
+        assert_eq!(values, [11, 13]);
+    }
+
+    #[test]
+    fn parser_context_preserves_the_allocator_error() {
+        let source = capacity::<u8>(usize::MAX, "diagnostic examples").unwrap_err();
+        let error = ParseError::caused_by(12, 3, source).into_error(Format::Pdb, None);
+        assert!(
+            error
+                .to_string()
+                .contains("12:3: PDB processing failed: cannot allocate diagnostic examples")
+        );
+        match error {
+            Error::InputProcessing { source, .. } => {
+                assert!(matches!(*source, Error::Allocation { .. }))
+            }
+            other => panic!("unexpected error: {other}"),
+        }
     }
 }

@@ -637,7 +637,7 @@ test("bounded AO PNGs match the actual current compositor after orbit, HiDPI res
   }
 });
 
-test("AO targets are lazy, capped in physical pixels and released through resize and toggle cycles", async ({
+test("AO targets are lazy, sized to device capabilities and released through resize and toggle cycles", async ({
   page,
 }, info) => {
   await page.goto("/?workspace=legacy");
@@ -668,12 +668,12 @@ test("AO targets are lazy, capped in physical pixels and released through resize
   }
   expect(
     byName.capped.resources.allocations.some(
-      (size) => size.width === 1024 && size.height === 119,
+      (size) => size.width === 2200 && size.height === 256,
     ),
   ).toBe(true);
   expect(
     byName.capped.resources.allocations.every(
-      (size) => Math.max(size.width, size.height) <= 1024,
+      (size) => Math.max(size.width, size.height) <= 2200,
     ),
   ).toBe(true);
   expect(

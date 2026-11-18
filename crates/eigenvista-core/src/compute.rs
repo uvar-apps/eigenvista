@@ -1,22 +1,14 @@
+use crate::allocation::buffer;
 use crate::*;
 use lin_alg::f32::Vec3;
 use mcubes::{MarchingCubes, MeshSide};
 use sha2::{Digest, Sha256};
 use std::sync::OnceLock;
 
-fn buffer<T>(count: usize, label: &str) -> Result<Vec<T>> {
-    let mut values = Vec::new();
-    values
-        .try_reserve_exact(count)
-        .map_err(|_| format!("Not enough memory for {label}; reduce grid resolution"))?;
-    Ok(values)
-}
-
 fn sample_count(dims: [usize; 3]) -> Result<usize> {
     dims.into_iter()
         .try_fold(1usize, |n, d| n.checked_mul(d))
-        .filter(|n| *n <= MAX_TRANSIENT_SAMPLES)
-        .ok_or_else(|| "Grid exceeds the 256^3 transient sample memory budget".into())
+        .ok_or_else(|| "Grid sample count overflow".into())
 }
 
 /// A deliberately transparent f64 reference evaluator, shared by native and WASM.
@@ -57,7 +49,8 @@ pub fn evaluate(doc: &Document, field: &str, p: [f64; 3]) -> Result<(f64, [f64; 
     if !p.into_iter().all(f64::is_finite) {
         return Err("Evaluation coordinates must be finite".into());
     }
-    let ao: Vec<_> = doc.basis.iter().map(|b| basis_value(b, p)).collect();
+    let mut ao = buffer(doc.basis.len(), "basis values and gradients")?;
+    ao.extend(doc.basis.iter().map(|b| basis_value(b, p)));
     if let Some(o) = doc.orbitals.iter().find(|o| o.id == field) {
         return Ok((
             ao.iter().zip(&o.coefficients).map(|(a, c)| a.0 * c).sum(),
@@ -217,8 +210,8 @@ pub fn sample_with_progress(
 ) -> Result<Grid> {
     doc.validate()?;
     doc.check_field(field)?;
-    if !(12..=256).contains(&resolution) {
-        return Err("Preview resolution must be between 12 and 256".into());
+    if resolution < 2 {
+        return Err("Grid resolution must be at least two".into());
     }
     if let Some(g) = doc.grids.iter().find(|g| g.id == field) {
         if g.values.iter().any(|v| !(*v as f32).is_finite()) {
@@ -298,8 +291,8 @@ pub fn sample_with_progress(
         .copied()
         .fold(f64::INFINITY, f64::min);
     let margin = (12. / min_exp).sqrt();
-    if !margin.is_finite() || margin > 100. {
-        return Err("Diffuse basis exceeds the preview domain budget".into());
+    if !margin.is_finite() {
+        return Err("Basis sampling domain is not representable".into());
     }
     let scalar = ScalarField::new(doc, field)?;
     for b in &doc.basis {
@@ -412,8 +405,7 @@ fn mesh_vertex_count(values: &[f32], dims: [usize; 3], iso: f32) -> Result<usize
                 }
                 vertices = vertices
                     .checked_add(counts[mask])
-                    .filter(|count| *count <= MAX_VERTICES)
-                    .ok_or("Surface exceeds the 2,000,000-vertex memory budget; reduce resolution or change the isovalue")?;
+                    .ok_or("Surface vertex count overflow")?;
             }
         }
     }
@@ -444,6 +436,12 @@ pub fn mesh(
         values.push(value);
     }
     let vertex_count = mesh_vertex_count(&values, grid.dims, iso.abs() as f32)?;
+    if vertex_count
+        .checked_sub(1)
+        .is_some_and(|index| u32::try_from(index).is_err())
+    {
+        return Err("Surface vertex indices exceed the u32 mesh representation".into());
+    }
     let coordinates = vertex_count
         .checked_mul(3)
         .ok_or("Surface coordinate allocation overflow")?;
@@ -563,8 +561,8 @@ mod tests {
     }
 
     #[test]
-    fn exact_mesh_preflight_accepts_the_largest_complete_triangle_budget() {
-        let cells = MAX_VERTICES / 6;
+    fn exact_mesh_preflight_accepts_more_than_the_former_vertex_ceiling() {
+        let cells = 2_000_000 / 6;
         let mut dims = [2, 2, cells + 1];
         let mut values: Vec<f32> = (0..dims.into_iter().product())
             .map(|i| (i % 2) as f32)
@@ -572,17 +570,21 @@ mod tests {
         assert_eq!(mesh_vertex_count(&values, dims, 0.5).unwrap(), cells * 6);
         dims[2] += 1;
         values.extend([0., 1., 0., 1.]);
-        let error = mesh_vertex_count(&values, dims, 0.5).unwrap_err();
-        assert!(error.contains("2,000,000-vertex memory budget"), "{error}");
+        assert_eq!(
+            mesh_vertex_count(&values, dims, 0.5).unwrap(),
+            (cells + 1) * 6
+        );
+        assert!(
+            mesh_vertex_count(&values, [usize::MAX, 2, 2], 0.5)
+                .unwrap_err()
+                .contains("overflow")
+        );
     }
 
     #[test]
     fn fallible_buffers_reject_capacity_overflow() {
         let error = buffer::<f64>(usize::MAX, "sampled field").unwrap_err();
-        assert!(
-            error.contains("Not enough memory for sampled field"),
-            "{error}"
-        );
+        assert!(error.contains("Cannot allocate sampled field"), "{error}");
     }
 
     #[test]

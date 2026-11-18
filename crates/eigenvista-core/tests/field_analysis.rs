@@ -417,7 +417,7 @@ fn saddle_topology_preserves_product_sign_across_f64_dynamic_range_and_near_ties
 }
 
 #[test]
-fn caches_validate_fingerprints_masks_ranges_budgets_and_serde_strictness() {
+fn caches_validate_fingerprints_masks_ranges_and_serde_strictness() {
     let doc = grid_doc([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]], [0.; 3]);
     let item = analysis::sample(
         &doc,
@@ -448,11 +448,11 @@ fn caches_validate_fingerprints_masks_ranges_budgets_and_serde_strictness() {
     invalid = item.clone();
     invalid.descriptor.note = "changed interpretation".into();
     assert!(invalid.validate(&doc).is_err());
-    state.items = vec![item; analysis::MAX_PROBES + 1];
+    state.items = vec![item; 129];
     for (i, item) in state.items.iter_mut().enumerate() {
         item.id = format!("probe-{i}");
     }
-    assert!(state.validate(&doc).is_err());
+    state.validate(&doc).unwrap();
     assert!(
         AnalysisDefinition::Plane {
             origin: [0.; 3],
@@ -462,7 +462,7 @@ fn caches_validate_fingerprints_masks_ranges_budgets_and_serde_strictness() {
             atoms: None
         }
         .validate(&doc)
-        .is_err()
+        .is_ok()
     );
     assert!(
         AnalysisDefinition::Profile {
@@ -472,14 +472,14 @@ fn caches_validate_fingerprints_masks_ranges_budgets_and_serde_strictness() {
             atoms: None
         }
         .validate(&doc)
-        .is_err()
+        .is_ok()
     );
     assert!(serde_json::from_value::<AnalysisRequest>(serde_json::json!({"id":"a","label":"x","field":"grid","definition":{"kind":"probe","point":[0,0,0]},"unknown":true})).is_err());
 }
 
 #[test]
-fn aggregate_cache_and_contour_budgets_reject_complete_outputs_without_truncation() {
-    let mut doc = Document::empty("dense contour budget");
+fn aggregate_caches_and_contours_are_complete_above_the_former_ceilings() {
+    let mut doc = Document::empty("dense contours");
     let values: Vec<_> = (0..2)
         .flat_map(|_| {
             (0..512).flat_map(|y| (0..512).map(move |x| if (x + y) % 2 == 0 { 1. } else { -1. }))
@@ -515,14 +515,11 @@ fn aggregate_cache_and_contour_budgets_reject_complete_outputs_without_truncatio
         descriptors: vec![],
         items,
     };
-    assert!(state.validate(&doc).unwrap_err().contains("16 MiB"));
+    state.validate(&doc).unwrap();
     item.appearance.contour_levels = vec![-0.5, 0., 0.5];
-    assert!(
-        analysis::contours(&item)
-            .unwrap_err()
-            .contains("one-million")
-    );
-    assert!(item.validate(&doc).unwrap_err().contains("one-million"));
+    let contours = analysis::contours(&item).unwrap();
+    assert_eq!(contours.len(), 3 * 2 * 511 * 511);
+    item.validate(&doc).unwrap();
     assert_eq!(item.values.len(), 512 * 512);
     item.appearance.contour_levels = vec![0.];
     item.validate(&doc).unwrap();
@@ -535,12 +532,7 @@ fn aggregate_cache_and_contour_budgets_reject_complete_outputs_without_truncatio
         items: vec![item, other],
         show_field_key: false,
     };
-    assert!(
-        aggregate
-            .validate(&doc)
-            .unwrap_err()
-            .contains("aggregate contour")
-    );
+    aggregate.validate(&doc).unwrap();
 }
 
 #[test]

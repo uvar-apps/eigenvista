@@ -208,9 +208,13 @@ test("256-cubed density meshes render and retain their requested resolution on s
     .click();
   const browser = page.getByRole("dialog", { name: "Orbitals", exact: true });
   await expect(
-    browser.getByLabel("Orbital grid resolution").locator("option"),
+    browser
+      .getByLabel("Orbital grid resolution", { exact: true })
+      .locator("option"),
   ).toHaveText(resolutions.map((n) => `${n}\u00b3`));
-  await browser.getByLabel("Orbital grid resolution").selectOption("256");
+  await browser
+    .getByLabel("Orbital grid resolution", { exact: true })
+    .selectOption("256");
   await expect(
     browser.getByRole("button", { name: "Generate selected", exact: true }),
   ).toBeEnabled();

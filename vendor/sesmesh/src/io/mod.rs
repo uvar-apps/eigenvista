@@ -31,7 +31,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 
 use crate::diag::Diagnostics;
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::structure::{Model, Source, StringPool, Structure};
 
 /// Supported structure file formats.
@@ -147,15 +147,6 @@ pub struct ReadOptions {
     /// `assembly_id`, PDB `REMARK 350` biomolecule number) instead of the
     /// deposited coordinates (Spec FR-IN-8). Default `None`.
     pub assembly: Option<String>,
-    /// Maximum size of decompressed gzip input, protecting against
-    /// decompression bombs. Default [`ReadOptions::DEFAULT_MAX_DECOMPRESSED`]
-    /// (the largest PDB entries decompress to a few hundred MB).
-    pub max_decompressed_bytes: u64,
-}
-
-impl ReadOptions {
-    /// Default for [`ReadOptions::max_decompressed_bytes`]: 8 GiB.
-    pub const DEFAULT_MAX_DECOMPRESSED: u64 = 8 << 30;
 }
 
 impl Default for ReadOptions {
@@ -165,7 +156,6 @@ impl Default for ReadOptions {
             data_block: None,
             radius_column: None,
             assembly: None,
-            max_decompressed_bytes: Self::DEFAULT_MAX_DECOMPRESSED,
         }
     }
 }
@@ -187,10 +177,11 @@ pub(crate) struct Parsed {
 /// content, [`Error::Unsupported`] if the format cannot be determined.
 pub fn read_path(path: impl AsRef<Path>, options: &ReadOptions) -> Result<Structure> {
     let path = path.as_ref();
-    let data = std::fs::read(path).map_err(|source| Error::Io {
+    let mut file = std::fs::File::open(path).map_err(|source| Error::Io {
         path: Some(path.to_path_buf()),
         source,
     })?;
+    let data = read_buffer(&mut file, Some(path))?;
     let format = options.format.or_else(|| Format::from_path(path));
     read_impl(Cow::Owned(data), format, options, Some(path.to_path_buf()))
 }
@@ -201,10 +192,7 @@ pub fn read_path(path: impl AsRef<Path>, options: &ReadOptions) -> Result<Struct
 /// # Errors
 /// See [`read_path`].
 pub fn read_reader<R: Read>(mut reader: R, options: &ReadOptions) -> Result<Structure> {
-    let mut data = Vec::new();
-    reader
-        .read_to_end(&mut data)
-        .map_err(|source| Error::Io { path: None, source })?;
+    let data = read_buffer(&mut reader, None)?;
     read_impl(Cow::Owned(data), options.format, options, None)
 }
 
@@ -222,7 +210,7 @@ fn read_impl(
     options: &ReadOptions,
     path: Option<PathBuf>,
 ) -> Result<Structure> {
-    let data = decompress(data, path.as_deref(), options.max_decompressed_bytes)?;
+    let data = decompress(data, path.as_deref())?;
     let format = match format {
         Some(f) => f,
         None => Format::sniff(&data).ok_or_else(|| {
@@ -282,11 +270,12 @@ pub fn read_assemblies(
     options: &ReadOptions,
 ) -> Result<Vec<AssemblySummary>> {
     let path = path.as_ref();
-    let data = std::fs::read(path).map_err(|source| Error::Io {
+    let mut file = std::fs::File::open(path).map_err(|source| Error::Io {
         path: Some(path.to_path_buf()),
         source,
     })?;
-    let data = decompress(Cow::Owned(data), Some(path), options.max_decompressed_bytes)?;
+    let data = read_buffer(&mut file, Some(path))?;
+    let data = decompress(Cow::Owned(data), Some(path))?;
     let format = match options.format {
         Some(f) => f,
         None => Format::from_path(path)
@@ -296,33 +285,37 @@ pub fn read_assemblies(
     assembly_data(&data, format, options, Some(path.to_path_buf()))?.summaries()
 }
 
+fn read_buffer(reader: &mut impl Read, path: Option<&Path>) -> Result<Vec<u8>> {
+    let mut out = Vec::new();
+    let mut chunk = [0u8; 64 * 1024];
+    loop {
+        let n = match reader.read(&mut chunk) {
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            result => result.map_err(|source| Error::Io {
+                path: path.map(Path::to_path_buf),
+                source,
+            })?,
+        };
+        if n == 0 {
+            return Ok(out);
+        }
+        error::extend(&mut out, chunk[..n].iter().copied(), "input bytes")?;
+    }
+}
+
 const GZIP_MAGIC: [u8; 2] = [0x1f, 0x8b];
 
 #[cfg(feature = "gzip")]
-fn decompress<'a>(data: Cow<'a, [u8]>, path: Option<&Path>, limit: u64) -> Result<Cow<'a, [u8]>> {
+fn decompress<'a>(data: Cow<'a, [u8]>, path: Option<&Path>) -> Result<Cow<'a, [u8]>> {
     if !data.starts_with(&GZIP_MAGIC) {
         return Ok(data);
     }
-    let guess = data.len().saturating_mul(4);
-    let mut out = Vec::with_capacity(guess.min(usize::try_from(limit).unwrap_or(usize::MAX)));
-    flate2::read::MultiGzDecoder::new(&data[..])
-        .take(limit.saturating_add(1))
-        .read_to_end(&mut out)
-        .map_err(|source| Error::Io {
-            path: path.map(Path::to_path_buf),
-            source,
-        })?;
-    if out.len() as u64 > limit {
-        return Err(Error::ResourceLimit {
-            what: "decompressed input".into(),
-            limit,
-        });
-    }
-    Ok(Cow::Owned(out))
+    let mut decoder = flate2::read::MultiGzDecoder::new(&data[..]);
+    Ok(Cow::Owned(read_buffer(&mut decoder, path)?))
 }
 
 #[cfg(not(feature = "gzip"))]
-fn decompress<'a>(data: Cow<'a, [u8]>, _path: Option<&Path>, _limit: u64) -> Result<Cow<'a, [u8]>> {
+fn decompress<'a>(data: Cow<'a, [u8]>, _path: Option<&Path>) -> Result<Cow<'a, [u8]>> {
     if data.starts_with(&GZIP_MAGIC) {
         return Err(Error::Unsupported(
             "gzip-compressed input requires the `gzip` feature".into(),
@@ -383,29 +376,13 @@ mod tests {
 
     #[cfg(feature = "gzip")]
     #[test]
-    fn decompression_limit() {
+    fn decompression_preserves_all_input_without_a_policy_limit() {
         use std::io::Write;
+        let content = vec![b' '; 100_000];
         let mut enc = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
-        enc.write_all(&[b' '; 10_000]).unwrap();
+        enc.write_all(&content).unwrap();
         let gz = enc.finish().unwrap();
-        let small = ReadOptions {
-            max_decompressed_bytes: 9_999,
-            ..ReadOptions::default()
-        };
-        let err = read_bytes(&gz, &small).unwrap_err();
-        assert!(
-            matches!(err, Error::ResourceLimit { limit: 9_999, .. }),
-            "{err}"
-        );
-        let exact = ReadOptions {
-            max_decompressed_bytes: 10_000,
-            ..ReadOptions::default()
-        };
-        // Within the limit: decompresses, then fails only because it is blank.
-        assert!(matches!(
-            read_bytes(&gz, &exact),
-            Err(Error::Unsupported(_))
-        ));
+        assert_eq!(&*decompress(Cow::Borrowed(&gz), None).unwrap(), &content);
     }
 
     #[cfg(not(feature = "gzip"))]

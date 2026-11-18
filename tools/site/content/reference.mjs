@@ -79,7 +79,7 @@ export default [
       <tr><th scope="row">No field appears</th><td>Use <strong>Fit scene</strong>, check the selected mode and field, and try a smaller positive isovalue. Read any preview error. An all-zero field has no nonzero surface.</td></tr>
       <tr><th scope="row">A structure seems missing</th><td>Fit the scene, try <strong>Ball and stick</strong>, and check counts and biological visibility filters. <strong>Show all components</strong> clears those filters.</td></tr>
       <tr><th scope="row">Atom/bond counts differ from the source</th><td>Read <strong>Provenance</strong>: model, alternate, occupancy, unknown-element, declared-connection, and inferred-bond policies can change the selected display structure.</td></tr>
-      <tr><th scope="row">A calculation is slow or exceeds a bound</th><td>Read phase/counts and elapsed time. Cancel, then use fewer orbitals or a lower grid resolution. Existing completed surfaces are retained on recoverable errors.</td></tr>
+      <tr><th scope="row">A calculation is slow or memory allocation fails</th><td>Read the phase, counts and elapsed time. Cancel if needed. If the computer cannot allocate the requested data, retry with fewer orbitals, a lower grid resolution or a smaller explicit selection. Existing completed results are retained on recoverable errors.</td></tr>
       <tr><th scope="row">Volume changes unexpectedly with quality</th><td>Use 0.5.14 or later; earlier builds had an opacity/quality interaction. In all versions, volume intersections with opaque objects remain approximate.</td></tr>
       <tr><th scope="row">A file is rejected</th><td>Read the exact error and supported profile. Export an appropriate supported file rather than removing producer, units, or validation markers.</td></tr>
       <tr><th scope="row">WebGL2 is unavailable / graphics context lost</th><td>Check graphics acceleration. A lost context requires restart/reload; save if possible beforehand. Unsaved data can be lost.</td></tr>
@@ -128,7 +128,7 @@ export default [
   </table></div>
   <p>OBJ, legacy atom-color text formats, direct ORCA output/GBW, and Gaussian logs are not implemented. Atom palettes use the separate <a href="reference-scene.html#palettes">JSON palette picker</a>.</p>
   <p>For biological selection, identities, and omitted annotations, see <a href="reference-structures.html#import-selection">structure import policy</a>. For exact accepted cube features and what a sampled field means, see <a href="reference-fields.html#cube">cube fields</a>.</p>
-  <p>Per-format byte limits include 32 MiB PDB text and 64 MiB text mmCIF/cube. BinaryCIF has separate 64 MiB expanded-payload and expanded-text limits. These sit inside broader numerical, atom, bond, and allocation bounds; they are rejection limits, not a promise that the largest accepted file will be interactive. See <a href="reference-fields.html#precision">resource bounds</a>.</p>
+  <p>EigenVista does not impose fixed file-byte, atom or bond quotas. Import attempts to allocate the required data and reports allocation failures or values that cannot be represented. Supported format profiles and scientific validation still apply. Large files can take longer to read and display; see <a href="reference-fields.html#precision">memory and precision</a>.</p>
 
   <h2 id="molden">Molden wavefunctions and density interpretation</h2>
   <p>A supported Molden input supplies one <code>[Atoms]</code> section with explicit AU or Angs units, one <code>[GTO]</code> basis, and real orbitals in one or more <code>[MO]</code> sections. Missing geometry/basis, ambiguous repeated sections, unsupported shell conventions, or invalid coefficients are errors. The reader does not repair an unrecognized producer convention by guessing.</p>
@@ -151,15 +151,15 @@ export default [
   <h2 id="conversion">Convert files without replacing the scene</h2>
   <ol>
     <li>Choose <strong>Convert files</strong>. The separate <strong>Convert Files</strong> window leaves the current scene open.</li>
-    <li>Add supported input files and click <strong>Convert</strong>. The queue accepts at most <strong>32 files</strong>.</li>
+    <li>Add supported input files and click <strong>Convert</strong>. Files are processed sequentially.</li>
     <li>Review each row's report. A failed row shows its own error and does not discard successful results.</li>
     <li>Click a successful row's <strong>Save</strong>. Desktop Save opens a destination dialog; browser Save requests a download. <strong>Conversion alone writes nothing.</strong></li>
-    <li>Save or clear completed results before adding more work. Retained outputs together are bounded to <strong>128 MiB</strong>.</li>
+    <li>Save completed results when ready. Clear results you no longer need to release their memory.</li>
   </ol>
   <p><strong>Cancel</strong> stops that queue's pending work and retains completed results. Closing the conversion window preserves them in memory; <strong>Clear</strong> discards them. Saved/downloaded result bytes are released. Unwritten results do not survive closing the application. Conversion preserves supplied fields and existing native meshes but does not generate new surfaces.</p>
 
   <h2 id="saving">Save, reopen, and share</h2>
-  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. Version 0.10.0 also retains named selections, labels/measurements, SES/SAS meshes and accepted quantitative field definitions/caches. A matching installation can reopen results without their original inputs or silent recalculation; older 0.8.0 readers cannot open documents requiring these newer capabilities.</p>
+  <p><strong>Save</strong> creates a self-contained <code>.eigenvista</code> file containing selected structure and biological identities when available, bonds, supplied analytic fields or original sampled grids, provenance, saved surface geometry and generation metadata, visibility, colors, opacity, and global representation. Since 0.10.0, this also includes named selections, labels/measurements, SES/SAS meshes and accepted quantitative field definitions/caches. A matching installation can reopen results without their original inputs or silent recalculation; older 0.8.0 readers cannot open documents requiring these newer capabilities.</p>
   <ol>
     <li>Generate any meshes you want to keep, check visibility and appearance, and choose <strong>Save</strong>.</li>
     <li>On desktop, choose a destination. Cancelling leaves the document unsaved. In a browser, confirm the requested download completed.</li>
@@ -182,7 +182,7 @@ eigenvista-convert --output-dir converted water.molden structure.cif
 eigenvista-convert --check --json calculation.cube
 eigenvista-convert --help</code></pre>
   <p>A single input defaults to a sibling <code>.eigenvista</code> output; multiple inputs require <code>--output-dir</code>. <code>--output</code> (or <code>-o</code>) chooses one destination. <code>--check</code> validates and reports without writing. <code>--json</code> writes per-file results, counts, warnings, and errors as an array on standard output; otherwise summaries go to standard error. Use <code>--</code> before filenames beginning with a hyphen.</p>
-  <p>Existing outputs need explicit <code>--force</code>; an input can never be its own destination. The converter rejects colliding destinations and output symlinks. New outputs use no-clobber publication even with force, and require filesystem hard-link support; unsupported publication is an error, not a partial-write fallback. At most 256 inputs are processed sequentially. Later per-file failures retain successful outputs.</p>
+  <p>Existing outputs need explicit <code>--force</code>; an input can never be its own destination. The converter rejects colliding destinations and output symlinks. New outputs use no-clobber publication even with force, and require filesystem hard-link support; unsupported publication is an error, not a partial-write fallback. Inputs are processed sequentially. Later per-file failures retain successful outputs.</p>
   <p>Exit status is <code>0</code> for complete success, <code>1</code> for a per-file import/write failure, and <code>2</code> for invalid options or path preflight errors. Conversion creates no new meshes. Open its output in the app, generate surfaces, and Save when you need portable geometry.</p>
 </div>`,
   },
@@ -233,7 +233,7 @@ eigenvista-convert --help</code></pre>
   <h2 id="field-appearance">Field colors, opacity, and surface shading</h2>
   <p>Under <strong>Appearance</strong>, <strong>Positive</strong> and <strong>Negative</strong> choose signed field colors, and <strong>Opacity</strong> controls field transparency. These apply across quantum/imported-field surfaces, not just the selected field, and are retained when saved. Molecular SES/SAS has its own live saved color and opacity under <strong>Surfaces → Molecular surfaces</strong>. Appearance edits do not recompute either field or geometry.</p>
   <p><strong>Surface shading</strong> offers <strong>Diffuse</strong> (the default) and <strong>Blinn-Phong</strong> (specular highlights on saved meshes and sampled raycast isosurfaces). It is a session preference, separate from atom/bond materials, and is not stored in the molecular document. Choose <a href="reference-fields.html#modes">the rendering mode</a> under Field rendering.</p>
-  <p>Six equally strong lights surround the view symmetrically, with neutral ambient fill. They follow the camera during orbit, pan and roll, so the other side does not become a permanently dark back. Atoms, bonds, protein depictions and built-in mesh/raycast surfaces share this arrangement. Visible geometry and specular highlights still provide shape cues. Custom shaders keep their declared lighting; volume compositing stays unlit.</p>
+  <p>A single camera-aligned light and neutral fill give a smooth shape gradient as you orbit, pan or roll. Every viewing direction uses the same lighting, without opposing-light bands or repeated highlight spots. Atoms, bonds, protein depictions and built-in mesh/raycast surfaces share this arrangement. Blinn-Phong adds one coherent specular highlight; Diffuse keeps the built-in surface matte. Custom shaders keep their declared lighting; volume compositing stays unlit.</p>
   <p>In <strong>Surfaces → Saved surfaces</strong>, the eye icon toggles one mesh's visibility and the trash icon removes it. There is no undo. Save to retain those changes. In sampled modes, the active field's meshes are visually replaced by the sampled display; eye/trash controls still manage saved meshes. Return to <strong>Isosurface mesh</strong> to inspect their effect independently.</p>
 
   <h2 id="ao">Molecular ambient occlusion</h2>
@@ -287,7 +287,7 @@ eigenvista-convert --help</code></pre>
   </ol>
   <p>Examples are included in the tester/source packages under <code>Shaders/</code>; repository examples also live in <code>app/shaders/</code> and <code>shaders/</code>. Classic GLSL 1.x built-ins such as <code>ftransform()</code>, <code>gl_Vertex</code>, <code>gl_Normal</code>, and <code>gl_Color</code> are mapped onto the current rendering environment. Surface colors feed <code>gl_Color</code>.</p>
   <h3>Parameters and validation</h3>
-  <p>Matching uniform types retain their values when new sources load; changed types reset to defaults. A parameter file with a nonnumeric value, unsupported/mismatched kind, or wrong component count is rejected with its parameter name and line number, preserving current values and the applied shader. Clear before loading another pair when shared uniform types conflict. Parameter export uses lines such as <code>float name&lt;TAB&gt;value</code>; native export has a 128 KiB text bound and writes a complete replacement file.</p>
+  <p>Matching uniform types retain their values when new sources load; changed types reset to defaults. A parameter file with a nonnumeric value, unsupported/mismatched kind, or wrong component count is rejected with its parameter name and line number, preserving current values and the applied shader. Clear before loading another pair when shared uniform types conflict. Parameter export uses lines such as <code>float name&lt;TAB&gt;value</code> and writes a complete replacement file.</p>
   <h3>Transparency and errors</h3>
   <p><strong>Shader transparency</strong> starts checked and blends fragment alpha even when document opacity is 100%. Uncheck it for opaque rendering: final alpha becomes one and depth writes are enabled. It updates an applied shader live and is saved in neither the document nor parameter file. <strong>Clear shader</strong> resets it to checked.</p>
   <p>Compile/link errors appear in red in the panel after Apply. Correct and reapply the pair, or Clear shader to restore built-in materials. Transparent objects use ordinary object sorting; intersecting layers can show ordering artifacts.</p>
@@ -315,7 +315,7 @@ eigenvista-convert --help</code></pre>
   <ol>
     <li>Select the field in Fields → Quantum fields.</li>
     <li>Under <strong>Fields → Field rendering</strong>, enter a finite positive <strong>Isovalue</strong> magnitude. Generation attempts both the positive and negative level; only nonempty results are added. A nonnegative density may therefore yield one positive surface.</li>
-    <li>Choose <strong>Grid resolution</strong>. The default is <strong>40³</strong>. Available points per axis are 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, and 256. These cubic labels describe the full grid.</li>
+    <li>Choose <strong>Grid resolution</strong>. The default is <strong>40³</strong>. Presets offer 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224 and 256 points per axis; use a custom positive integer for another resolution. These cubic labels describe the full grid.</li>
     <li>Click <strong>Generate surfaces</strong>. Sampling, signed meshing, and validation run in the background. The button becomes <strong>Cancel</strong> while work is active.</li>
     <li>On success, inspect the result in <strong>Isosurface mesh</strong>. Adjust colors/opacity, manage meshes under <strong>Saved surfaces</strong>, then <strong>Save</strong> to retain them on disk.</li>
   </ol>
@@ -327,7 +327,7 @@ eigenvista-convert --help</code></pre>
     <li>Click <strong>Orbitals (count)</strong>, such as <strong>Orbitals (24)</strong> for the water example. Its tooltip is <strong>Browse and select orbitals</strong>.</li>
     <li>Inspect the table: one-based row, label, spin, occupation, energy in hartree, and saved-mesh count. Missing numbers show <code>--</code>, not zero; unspecified spin is <strong>Unknown</strong>.</li>
     <li>Use <strong>Search orbitals</strong> to filter by row number, label, identifier, or spin. Check individual rows. The header checkbox selects/clears the currently listed rows; filtering preserves checked rows outside the current list. <strong>Clear orbital selection</strong> clears every check.</li>
-    <li>Set positive <strong>Isovalue</strong> and <strong>Grid resolution</strong>, then click <strong>Generate selected</strong>. Select <strong>1–32 orbitals</strong> per generation. The full table can contain more than 32.</li>
+    <li>Set positive <strong>Isovalue</strong> and <strong>Grid resolution</strong>, check the orbitals you want, then click <strong>Generate selected</strong>.</li>
     <li>The window closes and progress identifies each orbital and its batch position. On complete success, all new meshes appear together in <strong>Isosurface mesh</strong>. Save when ready.</li>
   </ol>
   <p>Batch results are applied only after the entire batch passes validation. Cancellation or a recoverable error retains prior surfaces. Only checked orbitals' meshes are replaced; meshes of other fields remain. Multi-selection creates separate orbital meshes, not a combined orbital or a new density matrix.</p>
@@ -369,22 +369,19 @@ eigenvista-convert --help</code></pre>
   <p>Generate surfaces replaces that field's saved meshes, retaining other fields. A mesh records the isovalue actually used to generate it, even if the control is edited later. Save separate documents to keep multiple isovalues of one field. Colors/opacity can be changed without resampling; changing the isovalue does not silently change stored geometry.</p>
   <p>Native Save retains analytic inputs, original imported grids, and completed meshes with generation metadata. It does <strong>not</strong> save the transient analytic calculation/display grid, active mode, camera, sampling quality, or orbital checkbox selection. A reopened document with meshes starts in mesh mode. Stored grids rebuild previews from their saved source; analytic fields can be sampled again directly when you select a sampled mode.</p>
 
-  <h2 id="precision">Precision and resource bounds</h2>
+  <h2 id="precision">Memory and numerical precision</h2>
   <p>Original imported scalar values are f64; current display textures and meshing use f32. A finite source grid that overflows f32 produces a preview/meshing error rather than silent clamping. Its valid document, bonds, and existing meshes remain open and savable with the authoritative f64 grid. This differs from a malformed import, which leaves the previous document open.</p>
-  <p>Analytic grids can reach 256³ transient samples, displayed at the selected resolution without silently lowering it. Imported/native authoritative grids remain limited to 128³ total samples. The maximum is a rejection bound, not a recommended workload or an accuracy/performance promise.</p>
+  <p>Grid presets through 256³ are convenient starting points, not a maximum. EigenVista attempts the requested allocation for custom analytic grids, imported samples and saved geometry. It does not impose fixed memory, grid, basis, orbital or mesh quotas, or silently lower resolution to make a request fit.</p>
   <div class="notice"><p>At 256³, one field has <strong>16,777,216 samples</strong>: 128 MiB of f64 calculation values plus 64 MiB of f32 display values, before meshes, copies, and graphics memory. Save before large calculations. Recoverable errors preserve prior work; browser, driver, or operating-system termination can still lose unsaved work.</p></div>
   <div class="table-wrap"><table>
-    <thead><tr><th scope="col">Resource</th><th scope="col">Current guard</th></tr></thead>
+    <thead><tr><th scope="col">Resource</th><th scope="col">What can prevent completion</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Input / inflated native arrays</th><td>128 MiB shared budget; stricter per-format limits also apply.</td></tr>
-      <tr><th scope="row">Selected atoms / bonds</th><td>100,000 atoms; 600,000 display bonds.</td></tr>
-      <tr><th scope="row">Gaussian basis / orbitals</th><td>1,024 basis functions; 64 primitives per basis function; 512 total orbitals across spin blocks.</td></tr>
-      <tr><th scope="row">Imported/native grids</th><td>128³ total samples.</td></tr>
-      <tr><th scope="row">Transient analytic sampling</th><td>Up to 256³ samples.</td></tr>
-      <tr><th scope="row">Mesh output / document surfaces</th><td>Two-million-vertex output bound; 128 saved surfaces; estimated 128 MiB geometry check before native validation.</td></tr>
+      <tr><th scope="row">Files, calculation arrays and saved results</th><td>A real allocation failure, address-space exhaustion or an unrepresentable size/index.</td></tr>
+      <tr><th scope="row">Numerical evaluation</th><td>Unsupported scientific inputs, nonfinite results or insufficient floating-point precision for the requested coordinates.</td></tr>
+      <tr><th scope="row">3D previews and image export</th><td>The graphics device's actual texture/framebuffer capabilities or an unsuccessful graphics allocation.</td></tr>
     </tbody>
   </table></div>
-  <p>The orbital and basis caps are independent. A complete spatial set with one orbital per basis function fits through 512 functions; complete alpha and beta sets fit through 256 functions each. A partial export can use the separate 1,024-basis limit while listing at most 512 orbitals. Omitted orbitals are not recovered. Smaller workloads can still be slow or exceed another numerical/geometry/file limit.</p>
+  <p>Read the reported error before changing a request. A graphics-device constraint can prevent a 3D preview even when numerical data remain valid and exportable. If memory allocation fails, close unneeded results or retry with an explicitly smaller calculation. Progress and cancellation remain available during background generation; only you choose a lower resolution or coarser molecular-surface spacing.</p>
 
   <h2 id="rendering-limits">Rendering limits</h2>
   <p>Raycasting can miss narrow features or tangencies between grid samples. Use <strong>Fine</strong> sampling quality for a smoother preview, or increase grid resolution to sample the field more densely. For imported cube data, detail is limited by the source grid.</p>
@@ -410,7 +407,7 @@ eigenvista-convert --help</code></pre>
   <p>mmCIF nonpolymer rows without label sequence numbers use author residue/insertion identity to distinguish waters and ligands. Different monomer names at the same sequence position can both remain selected. Protein paths break at that ambiguous position rather than selecting an invented conformer; inspect it in an atomic view or with a named residue range.</p>
   <h3>Connectivity and source losses</h3>
   <p>PDB CONECT and supported mmCIF/BinaryCIF covalent, disulfide, and metal declarations are retained, including accepted links beyond automatic distance cutoffs. Coordinate-based display connections fill gaps. Source declaration details and unresolved, duplicate, or omitted links are recorded in Provenance. Different/unknown symmetry images are reported without generating mates.</p>
-  <p>Occupancies, B-factors, and formal charges are not retained as atom attributes; the complete source hierarchy and all annotations/models/conformers are not preserved. Cell/symmetry reporting is not crystal-image expansion. The importer is bounded, not a complete mmCIF dictionary validator. Gzip input is supported only for BinaryCIF, not compressed text mmCIF or PDB. Keep the original structure file.</p>
+  <p>Occupancies, B-factors, and formal charges are not retained as atom attributes; the complete source hierarchy and all annotations/models/conformers are not preserved. Cell/symmetry reporting is not crystal-image expansion. The importer supports a defined format profile, not complete mmCIF dictionary validation. Gzip input is supported only for BinaryCIF, not compressed text mmCIF or PDB. Keep the original structure file.</p>
   <h3>Secondary assignments</h3>
   <p>Supported PDB HELIX/SHEET and mmCIF/BinaryCIF deposited annotations supply secondary structure. Missing, unsupported, ambiguous, or conflicting assignments remain unknown with notices. EigenVista does not run DSSP or infer secondary structure from coordinates. An unassigned gray loop is an explicit uncertainty, not a predicted coil.</p>
 

@@ -281,9 +281,10 @@ test("API imports and inspects real orbital metadata with explicit invalid/stale
   await expect(
     call(page, "scene.set", { unexpected: true }),
   ).rejects.toMatchObject({ kind: "invalid_arguments" });
-  await expect(
-    call(page, "fields.list", { limit: 10000 }),
-  ).rejects.toMatchObject({ kind: "invalid_arguments" });
+  expect(
+    (await call<{ items: Field[] }>(page, "fields.list", { limit: 10000 }))
+      .items,
+  ).toEqual(fields);
   await expect(call(page, "missing.operation")).rejects.toMatchObject({
     kind: "method_not_found",
   });
@@ -532,7 +533,7 @@ test("browser API exports validated native bytes without falsely clearing unsave
   expect((await call<State>(page, "app.state")).dirty).toBe(true);
 });
 
-test("API returns real identifiers at its boundary and rejects longer native IDs explicitly", async ({
+test("API retains complete identifiers beyond the former selector ceiling", async ({
   page,
 }) => {
   await ready(page);
@@ -567,14 +568,12 @@ test("API returns real identifiers at its boundary and rejects longer native IDs
   expect(fields.items[0].id).toBe("x".repeat(512));
   await call(page, "field.select", { fieldId: fields.items[0].id });
   await nativeWithId("field", 513);
-  await expect(call(page, "fields.list")).rejects.toMatchObject({
-    kind: "limit_exceeded",
-  });
-  await expect(
-    call(page, "field.select", { fieldId: "x".repeat(513) }),
-  ).rejects.toMatchObject({ kind: "limit_exceeded" });
+  expect(
+    (await call<{ items: Field[] }>(page, "fields.list")).items[0].id,
+  ).toBe("x".repeat(513));
+  await call(page, "field.select", { fieldId: "x".repeat(513) });
   await nativeWithId("surface", 513);
-  await expect(call(page, "surfaces.list")).rejects.toMatchObject({
-    kind: "limit_exceeded",
-  });
+  expect(
+    (await call<{ items: Surface[] }>(page, "surfaces.list")).items[0].id,
+  ).toBe("x".repeat(513));
 });

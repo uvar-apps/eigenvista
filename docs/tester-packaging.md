@@ -1,10 +1,12 @@
 # macOS tester ZIP
 
-The current release is **0.10.0**. Its rebuilt Mac package includes the approved
-workspace and scientific-inspection additions. Updating a source version alone
-does not rebuild an archive; follow [status](status.md) and the package's
-`BUILD-INFO.json` for the verified artifact identity. Older 0.8.0 artifacts remain
-historical and predate these additions.
+Release **0.10.1** adds smooth camera-relative lighting and
+[allocation-driven workloads](allocation-policy.md) to the approved workspace,
+scientific inspection and packaged AI connector. Updating a source version alone
+does not rebuild an archive; rebuild and follow [status](status.md) and the
+package's `BUILD-INFO.json` for its verified artifact identity. The historical
+0.10.0 package retains its original behavior; older 0.8.0 artifacts predate
+scientific inspection and the current workspace.
 
 A newly built source package uses the approved **480 px** left/right tools pane
 with **Molecule**, **Fields**, **Surfaces** and **Appearance** tabs. Its widgets

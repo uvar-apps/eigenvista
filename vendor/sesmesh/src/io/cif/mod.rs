@@ -202,8 +202,8 @@ fn read_loop<'a>(
             row.clear();
         }
     }
-    if let Some(Err(e)) = lexer.peek() {
-        return Err(e.clone());
+    if matches!(lexer.peek(), Some(Err(_))) {
+        return Err(lexer.next().expect("peeked lexer failure").unwrap_err());
     }
     if !row.is_empty() {
         return Err(ParseError::new(
@@ -293,11 +293,14 @@ impl RowReader {
         if let Some(id) = get(self.cols.id) {
             match super::num::parse_i64(id).and_then(|v| u32::try_from(v).ok()) {
                 Some(v) => atom.serial = v,
-                None => self.diagnostics.warn(
-                    WarningKind::InvalidField,
-                    "invalid _atom_site.id; using 0",
-                    || format!("line {line}: '{}'", show(id)),
-                ),
+                None => self
+                    .diagnostics
+                    .warn(
+                        WarningKind::InvalidField,
+                        "invalid _atom_site.id; using 0",
+                        || format!("line {line}: '{}'", show(id)),
+                    )
+                    .map_err(|error| ParseError::caused_by(line, 1, error))?,
             }
         }
         let name = get(self.cols.auth_atom_id)
@@ -321,50 +324,56 @@ impl RowReader {
         atom.label_seq = get(self.cols.label_seq_id).and_then(parse_i32);
         let seq = get(self.cols.auth_seq_id).or_else(|| get(self.cols.label_seq_id));
         atom.res_seq = match seq {
-            Some(s) => parse_i32(s).unwrap_or_else(|| {
-                self.diagnostics.warn(
+            Some(s) => self
+                .diagnostics
+                .or_warn(
+                    parse_i32(s),
+                    0,
                     WarningKind::InvalidField,
                     "invalid residue number; using 0",
                     || format!("line {line}: '{}'", show(s)),
-                );
-                0
-            }),
+                )
+                .map_err(|error| ParseError::caused_by(line, 1, error))?,
             None => 0,
         };
         atom.ins_code = get(self.cols.ins_code)
             .and_then(|c| c.first())
             .map(|&c| char::from(c));
         if let Some(occ) = get(self.cols.occupancy) {
-            atom.occupancy = parse_f32(occ).unwrap_or_else(|| {
-                self.diagnostics.warn(
+            atom.occupancy = self
+                .diagnostics
+                .or_warn(
+                    parse_f32(occ),
+                    1.0,
                     WarningKind::InvalidField,
                     "invalid occupancy; using 1.0",
                     || format!("line {line}: '{}'", show(occ)),
-                );
-                1.0
-            });
+                )
+                .map_err(|error| ParseError::caused_by(line, 1, error))?;
         }
         if let Some(b) = get(self.cols.b_iso) {
-            atom.b_factor = parse_f32(b).unwrap_or_else(|| {
-                self.diagnostics.warn(
+            atom.b_factor = self
+                .diagnostics
+                .or_warn(
+                    parse_f32(b),
+                    0.0,
                     WarningKind::InvalidField,
                     "invalid B-factor; using 0.0",
                     || format!("line {line}: '{}'", show(b)),
-                );
-                0.0
-            });
+                )
+                .map_err(|error| ParseError::caused_by(line, 1, error))?;
         }
         if let Some(q) = get(self.cols.formal_charge) {
-            atom.formal_charge = parse_i32(q)
-                .and_then(|v| i8::try_from(v).ok())
-                .unwrap_or_else(|| {
-                    self.diagnostics.warn(
-                        WarningKind::InvalidField,
-                        "invalid formal charge; using 0",
-                        || format!("line {line}: '{}'", show(q)),
-                    );
-                    0
-                });
+            atom.formal_charge = self
+                .diagnostics
+                .or_warn(
+                    parse_i32(q).and_then(|v| i8::try_from(v).ok()),
+                    0,
+                    WarningKind::InvalidField,
+                    "invalid formal charge; using 0",
+                    || format!("line {line}: '{}'", show(q)),
+                )
+                .map_err(|error| ParseError::caused_by(line, 1, error))?;
         }
         let symbol = get(self.cols.type_symbol);
         atom.element = symbol.and_then(Element::from_symbol_bytes);
@@ -373,33 +382,44 @@ impl RowReader {
             let res_str = String::from_utf8_lossy(res_name);
             atom.element = Element::infer_from_name(&name_str, &res_str, atom.het);
             match (atom.element, symbol) {
-                (Some(e), None) => self.diagnostics.warn(
-                    WarningKind::InferredElement,
-                    "no type_symbol; element inferred from the atom name",
-                    || format!("line {line}: '{name_str}' -> {e}"),
-                ),
-                (Some(e), Some(s)) => self.diagnostics.warn(
-                    WarningKind::UnknownElement,
-                    "unrecognized type_symbol; element inferred from the atom name",
-                    || format!("line {line}: '{}' -> {e}", show(s)),
-                ),
-                (None, _) => self.diagnostics.warn(
-                    WarningKind::UnknownElement,
-                    "element could not be determined",
-                    || format!("line {line}: atom '{name_str}'"),
-                ),
+                (Some(e), None) => self
+                    .diagnostics
+                    .warn(
+                        WarningKind::InferredElement,
+                        "no type_symbol; element inferred from the atom name",
+                        || format!("line {line}: '{name_str}' -> {e}"),
+                    )
+                    .map_err(|error| ParseError::caused_by(line, 1, error))?,
+                (Some(e), Some(s)) => self
+                    .diagnostics
+                    .warn(
+                        WarningKind::UnknownElement,
+                        "unrecognized type_symbol; element inferred from the atom name",
+                        || format!("line {line}: '{}' -> {e}", show(s)),
+                    )
+                    .map_err(|error| ParseError::caused_by(line, 1, error))?,
+                (None, _) => self
+                    .diagnostics
+                    .warn(
+                        WarningKind::UnknownElement,
+                        "element could not be determined",
+                        || format!("line {line}: atom '{name_str}'"),
+                    )
+                    .map_err(|error| ParseError::caused_by(line, 1, error))?,
             }
         }
 
         let model_number = match get(self.cols.model) {
-            Some(m) => parse_i32(m).unwrap_or_else(|| {
-                self.diagnostics.warn(
+            Some(m) => self
+                .diagnostics
+                .or_warn(
+                    parse_i32(m),
+                    1,
                     WarningKind::InvalidField,
                     "invalid pdbx_PDB_model_num; using 1",
                     || format!("line {line}: '{}'", show(m)),
-                );
-                1
-            }),
+                )
+                .map_err(|error| ParseError::caused_by(line, 1, error))?,
             None => 1,
         };
         self.model_mut(model_number).atoms.push(atom);

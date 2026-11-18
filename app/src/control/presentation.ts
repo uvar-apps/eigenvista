@@ -1,4 +1,4 @@
-import { ControlError, CONTROL_LIMITS } from "../control";
+import { ControlError } from "../control";
 import {
   defaultStructureDisplay,
   isAtomVisible,
@@ -148,14 +148,6 @@ export const patchStructureDisplay = (
       if (representation === null) delete next.chainStyles[String(chainIndex)];
       else next.chainStyles[String(chainIndex)] = representation;
     }
-    if (
-      Object.keys(next.chainStyles).length >
-      CONTROL_LIMITS.presentationSelectors
-    )
-      throw new ControlError(
-        "limit_exceeded",
-        "Too many active chain representation overrides",
-      );
   }
   if (patch.componentStyles !== undefined) {
     next.kindStyles = { ...next.kindStyles };
@@ -197,20 +189,12 @@ export const structureDisplaySummary = (
   display: StructureDisplayState,
 ) => ({
   colorMode: display.colorMode,
-  hiddenChains: display.hiddenChains.slice(
-    0,
-    CONTROL_LIMITS.presentationSelectors,
-  ),
+  hiddenChains: [...display.hiddenChains],
   hiddenChainCount: display.hiddenChains.length,
   hiddenKinds: display.hiddenKinds,
   isolatedChain: display.isolatedChain,
   selectedResidueCount: display.residueSelection?.length ?? null,
-  chainStyles: Object.fromEntries(
-    Object.entries(display.chainStyles).slice(
-      0,
-      CONTROL_LIMITS.presentationSelectors,
-    ),
-  ),
+  chainStyles: { ...display.chainStyles },
   chainStyleCount: Object.keys(display.chainStyles).length,
   componentStyles: display.kindStyles,
   visibleAtomCount: document?.structure

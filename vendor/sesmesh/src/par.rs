@@ -9,6 +9,27 @@
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
+use crate::error::{Result, capacity};
+
+/// Fallible, ordered iteration used by EigenVista's allocation-driven engine.
+/// The serial engine does not allocate hidden per-task collections.
+pub(crate) fn try_map<T>(n: usize, mut f: impl FnMut(usize) -> Result<T>) -> Result<Vec<T>> {
+    let mut out = capacity(n, "task results")?;
+    for i in 0..n {
+        out.push(f(i)?);
+    }
+    Ok(out)
+}
+
+pub(crate) fn try_map_init<S, T>(
+    n: usize,
+    init: impl FnOnce() -> Result<S>,
+    mut f: impl FnMut(&mut S, usize) -> Result<T>,
+) -> Result<Vec<T>> {
+    let mut state = init()?;
+    try_map(n, |i| f(&mut state, i))
+}
+
 /// `(0..n).map(f).collect()`, in parallel when enabled.
 #[cfg(feature = "parallel")]
 pub(crate) fn map<T, F>(n: usize, f: F) -> Vec<T>

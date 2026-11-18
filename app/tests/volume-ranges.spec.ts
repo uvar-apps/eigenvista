@@ -106,7 +106,7 @@ test("brick range construction rejects malformed dimensions, layout, and nonfini
     const { volumeBrickRanges } = await import(/* @vite-ignore */ url);
     const inputs = [
       { dims: [1, 2, 2], values: new Float32Array(4) },
-      { dims: [257, 2, 2], values: new Float32Array(1028) },
+      { dims: [Number.MAX_SAFE_INTEGER, 2, 2], values: new Float32Array(0) },
       { dims: [2.5, 2, 2], values: new Float32Array(8) },
       { dims: [2, 2], values: new Float32Array(4) },
       { dims: [2, 2, 2, 2], values: new Float32Array(16) },

@@ -1,11 +1,8 @@
-//! Optional, bounded biological identity for selected atoms. Coordinates and
+//! Optional biological identity for selected atoms. Coordinates and
 //! quantum inputs remain in their existing scientific model.
 use crate::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-
-const MAX_RECORDS: usize = 100_000;
-const MAX_STRING_BYTES: usize = 4 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -60,23 +57,19 @@ pub struct StructureMetadata {
     pub secondary_source: String,
 }
 
-fn string_budget(value: &str, limit: usize, bytes: &mut usize) -> Result<()> {
-    if value.trim().is_empty() || value.len() > limit || value.chars().any(char::is_control) {
-        return Err("Invalid or excessive biological metadata string".into());
+fn validate_string(value: &str, bytes: &mut usize) -> Result<()> {
+    if value.trim().is_empty() || value.chars().any(char::is_control) {
+        return Err("Invalid biological metadata string".into());
     }
     *bytes = bytes
         .checked_add(value.len())
         .ok_or("Biological metadata size overflow")?;
-    if *bytes > MAX_STRING_BYTES {
-        return Err("Biological metadata strings exceed the 4 MiB budget".into());
-    }
     Ok(())
 }
 
 impl StructureMetadata {
     pub fn validate(&self, atoms: usize) -> Result<()> {
         if atoms == 0
-            || atoms > MAX_RECORDS
             || self.atom_names.len() != atoms
             || self.atom_residues.len() != atoms
             || self.chains.is_empty()
@@ -109,13 +102,14 @@ impl StructureMetadata {
                 .into_iter()
                 .flatten()
             {
-                string_budget(value, 128, &mut bytes)?;
+                validate_string(value, &mut bytes)?;
             }
         }
-        let mut used_chains = vec![false; self.chains.len()];
-        let mut used_residues = vec![false; self.residues.len()];
+        let mut used_chains = crate::allocation::filled(self.chains.len(), false, "used chains")?;
+        let mut used_residues =
+            crate::allocation::filled(self.residues.len(), false, "used residues")?;
         for residue in &self.residues {
-            if residue.chain >= self.chains.len() || residue.segment >= MAX_RECORDS {
+            if residue.chain >= self.chains.len() {
                 return Err("Biological residue has an invalid chain or segment index".into());
             }
             if residue.label_seq_id.is_some_and(|n| n <= 0)
@@ -155,19 +149,19 @@ impl StructureMetadata {
                 return Err("Protein secondary annotations require a protein residue".into());
             }
             used_chains[residue.chain] = true;
-            string_budget(&residue.name, 128, &mut bytes)?;
+            validate_string(&residue.name, &mut bytes)?;
             if let Some(value) = &residue.author_seq_id {
-                string_budget(value, 64, &mut bytes)?;
+                validate_string(value, &mut bytes)?;
             }
             if let Some(value) = &residue.insertion_code {
-                string_budget(value, 16, &mut bytes)?;
+                validate_string(value, &mut bytes)?;
             }
             if self.secondary_source == "none" && residue.secondary != SecondaryStructure::Unknown {
                 return Err("Secondary annotations require a deposited source".into());
             }
         }
         for (name, &residue) in self.atom_names.iter().zip(&self.atom_residues) {
-            string_budget(name, 128, &mut bytes)?;
+            validate_string(name, &mut bytes)?;
             let Some(used) = used_residues.get_mut(residue) else {
                 return Err("Biological atom has an invalid residue index".into());
             };
@@ -281,10 +275,7 @@ impl StructureBuilder {
         mut residue: StructureResidue,
         atom_name: String,
     ) -> Result<()> {
-        if self.metadata.atom_names.len() >= MAX_RECORDS {
-            return Err("Biological atom budget exceeded".into());
-        }
-        string_budget(&atom_name, 128, &mut self.string_bytes)?;
+        validate_string(&atom_name, &mut self.string_bytes)?;
         let chain_index = if let Some(&index) = self.chains.get(&chain) {
             index
         } else {
@@ -292,10 +283,14 @@ impl StructureBuilder {
                 .into_iter()
                 .flatten()
             {
-                string_budget(value, 128, &mut self.string_bytes)?;
+                validate_string(value, &mut self.string_bytes)?;
             }
             let index = self.metadata.chains.len();
-            self.metadata.chains.push(chain.clone());
+            crate::allocation::push(
+                &mut self.metadata.chains,
+                chain.clone(),
+                "biological chains",
+            )?;
             self.chains.insert(chain, index);
             index
         };
@@ -311,20 +306,28 @@ impl StructureBuilder {
         let index = if let Some(&index) = self.residues.get(&key) {
             index
         } else {
-            string_budget(&residue.name, 128, &mut self.string_bytes)?;
+            validate_string(&residue.name, &mut self.string_bytes)?;
             if let Some(value) = &residue.author_seq_id {
-                string_budget(value, 64, &mut self.string_bytes)?;
+                validate_string(value, &mut self.string_bytes)?;
             }
             if let Some(value) = &residue.insertion_code {
-                string_budget(value, 16, &mut self.string_bytes)?;
+                validate_string(value, &mut self.string_bytes)?;
             }
             let index = self.metadata.residues.len();
-            self.metadata.residues.push(residue);
+            crate::allocation::push(&mut self.metadata.residues, residue, "biological residues")?;
             self.residues.insert(key, index);
             index
         };
-        self.metadata.atom_names.push(atom_name);
-        self.metadata.atom_residues.push(index);
+        crate::allocation::push(
+            &mut self.metadata.atom_names,
+            atom_name,
+            "biological atom names",
+        )?;
+        crate::allocation::push(
+            &mut self.metadata.atom_residues,
+            index,
+            "biological atom references",
+        )?;
         Ok(())
     }
 }

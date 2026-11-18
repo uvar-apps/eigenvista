@@ -10,12 +10,14 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
-### 0.10.0 scientific-inspection source
+### 0.10.1 source
 
-Source version 0.10.0 implements [Plan 009](../plans/009-scientific-inspection-implementation.md),
-merged from `codex/scientific-inspection` through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89).
-The annotated `v0.10.0` source tag, Mac package and updated website provide
-these additions. Older 0.8.0 downloads predate them. The [design record](design/2026-11-16-scientific-inspection.md)
+Source version 0.10.1 adds smooth camera-relative lighting (#91) and
+[allocation-driven workloads](allocation-policy.md) (#92). It retains
+[Plan 009](../plans/009-scientific-inspection-implementation.md), introduced in 0.10.0
+from `codex/scientific-inspection` through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89).
+The historical `v0.10.0` source tag and its Mac package retain their original
+behavior and identities. Older 0.8.0 downloads predate scientific inspection. The [design record](design/2026-11-16-scientific-inspection.md)
 explains source identity, optional native capabilities, Sesmesh provenance and
 the quantitative sampling/publication contracts. See [handoff](handoff.md) for
 fresh acceptance evidence and current delivery state.
@@ -296,8 +298,8 @@ binary, input and file hashes when recording new observations.
 
 `h2` samples 128³ and retains one surface. `water` samples independent PySCF
 water orbitals at 64³ and retains each nonempty signed mesh. `worst` constructs
-1,999,998 distinct raw corner tuples to stress postprocessing at the existing
-cap; it is **not** a maximum-cap extraction benchmark or a scientific field.
+1,999,998 distinct raw corner tuples to stress postprocessing at the earlier
+comparison marker; it is **not** a maximum-cap extraction benchmark or a scientific field.
 `raw` retains unchanged arrays; `hash` and `sort` apply research-only exact
 first-seen packing. No restoration or Save runs in these measurement processes.
 
@@ -402,17 +404,17 @@ explains ownership, validation, and cache boundaries.
 | --- | --- |
 | Scientific model/evaluator | Core unit tests plus [independent references](../crates/eigenvista-core/tests/independent_references.rs) |
 | XYZ/PDB and connectivity | [Connectivity regressions](../crates/eigenvista-core/tests/connectivity.rs), including read-only legacy fixtures |
-| Radius-bucket bond queries | Four [independent exhaustive/stress regressions](../crates/eigenvista-core/tests/bond_radius_queries.rs): all 118 elements, minimum/cutoff boundaries, translated coordinates, explicit/tied/duplicate pairs, and a 100,000-atom outlier budget case; existing guards and chemistry remain unchanged |
+| Radius-bucket bond queries | Four [independent exhaustive/stress regressions](../crates/eigenvista-core/tests/bond_radius_queries.rs): all 118 elements, minimum/cutoff boundaries, translated coordinates, explicit/tied/duplicate pairs, and a 100,000-atom outlier stress case; finite-coordinate/radius validation and chemistry remain unchanged |
 | Declared mmCIF connectivity | Eight [resolver module tests](../crates/eigenvista-core/src/import/cif/connections.rs), 20 [shared-import regressions](../crates/eigenvista-import/tests/cif_connections.rs), real CLI coverage within the 15-case [converter suite](../crates/eigenvista-convert/tests/cli.rs), and two [browser workflows](../app/tests/cif-connections.spec.ts) per engine (four total): selected source identity, types/order/provenance, precedence/gap fill, alternates/non-polymers/models, common/different images, bounded lexical errors, trailing constraints, repeated long IDs, native roundtrips, and retained scenes |
-| BinaryCIF transport | Four [public import contracts](../crates/eigenvista-import/tests/bcif_import.rs), 22 internal [codec examples](../crates/eigenvista-import/src/bcif/tests.rs)/[MessagePack bounds](../crates/eigenvista-import/src/bcif/messagepack.rs)/[full-container profiles](../crates/eigenvista-import/src/bcif/profile_tests.rs), [independent real/policy twins](../fixtures/bcif/README.md), the converter suite, and six [browser cases](../app/tests/bcif.spec.ts): raw/gzip content detection, malformed lengths/expansion budgets, element/occupancy/alternate/connection parity, original-byte hashes, native roundtrips, conversion, simulated native picker filters, and desktop/mobile geometry |
+| BinaryCIF transport | Four [public import contracts](../crates/eigenvista-import/tests/bcif_import.rs), 22 internal [codec examples](../crates/eigenvista-import/src/bcif/tests.rs)/[MessagePack bounds](../crates/eigenvista-import/src/bcif/messagepack.rs)/[full-container profiles](../crates/eigenvista-import/src/bcif/profile_tests.rs), [independent real/policy twins](../fixtures/bcif/README.md), the converter suite, and six [browser cases](../app/tests/bcif.spec.ts): raw/gzip content detection, malformed lengths and allocation-driven expansion, element/occupancy/alternate/connection parity, original-byte hashes, native roundtrips, conversion, simulated native picker filters, and desktop/mobile geometry |
 | Cube fields and all-import bonds | [Cube regressions](../crates/eigenvista-core/tests/cube_import.rs), shared importer/CLI tests, and [browser cube workflows](../app/tests/cube.spec.ts); analytic signed/skewed grid, negative atom counts, source preservation, native bond backfill, reflected rendering, precision rejection |
 | Molden and converter | [Independent imports](../crates/eigenvista-import/tests/independent_molden.rs), parser unit tests, [CLI regressions](../crates/eigenvista-convert/tests/cli.rs), [fixtures/provenance](../fixtures/molden/README.md) |
 | Container/native saving | Format unit tests and [reference roundtrips](../crates/eigenvista-format/tests/reference_roundtrips.rs) |
 | Indexed-column validation | [Native column regressions](../crates/eigenvista-format/tests/columnar_packing.rs) and [actual WASM decoding](../app/tests/format-validation.spec.ts): oversized/wrapped indices, swapped/duplicate rows, invalid reference forms, and valid roundtrips |
-| Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, controlled out-of-order reads and clearing, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations/budgets. Native dialog interaction remains a separate acceptance check. |
+| Shader parameters and native export | [Browser workflows](../app/tests/shaders.spec.ts): type/arity rejection, safe source switches, controlled out-of-order reads and clearing, pixels, downloads, and native IPC success/cancel/error simulation. [Desktop writer](../app/src-tauri/src/shader_parameters.rs) tests actual text writes/replacement and rejected destinations and complete large exports. Native dialog interaction remains a separate acceptance check. |
 | Custom shader transparency | [Alpha/depth and UI regressions](../app/tests/shader-transparency.spec.ts): fragment alpha independent of document opacity, view-dependent alpha, opaque depth writes, unchanged built-in materials, live checkbox changes, and Clear reset |
-| Default workspace and legacy widget compatibility | [Workspace workflows](../app/tests/workspace-experiments.spec.ts): four task tabs, left/right pane, bounded resize/storage, real widget ordering, hide/Zen/fullscreen, scroll/draft/file-node/source/camera retention, calculation cancellation and scientific exports. [Panel workflows](../app/tests/panels.spec.ts) and [ordering regressions](../app/tests/panel-order.spec.ts) retain the original eight-widget disclosure/order contract on the explicit legacy route. Fresh default-startup qualification is separate from historical opt-in results; record the exact source and run in [status](status.md). |
-| Molecular ambient occlusion | [AO browser checks](../app/tests/molecular-ao.spec.ts), 10 cases per engine within the complete local suite: independent contact/isolated and gloss/Lambert controls, Auto/manual radius, instancing, exact Off/zero/material restoration, field/document/worker isolation, resource bounds and fault recovery. PNG case A retains three full-size desktop samples; case B bounds only the real `.scene` host at DPR 2 (240×128 → 160×160 CSS; 480×256 → 320×320 physical), keeping real toolbar/actions, all five original samples and unchanged oracles. Separate 1024-cap checks and tracked actual-app 1AON qualification remain; 4PJ1 is secondary. Keep 60-second tests, 35-minute suite steps, 60-minute jobs and one worker. The failed combined-case run is historical; complete all relevant local checks before pushing. Results belong in [status](status.md). |
+| Default workspace and legacy widget compatibility | [Workspace workflows](../app/tests/workspace-experiments.spec.ts): four task tabs, left/right pane, validated resize/storage, real widget ordering, hide/Zen/fullscreen, scroll/draft/file-node/source/camera retention, calculation cancellation and scientific exports. [Panel workflows](../app/tests/panels.spec.ts) and [ordering regressions](../app/tests/panel-order.spec.ts) retain the original eight-widget disclosure/order contract on the explicit legacy route. Fresh default-startup qualification is separate from historical opt-in results; record the exact source and run in [status](status.md). |
+| Molecular ambient occlusion | [AO browser checks](../app/tests/molecular-ao.spec.ts), 10 cases per engine within the complete local suite: independent contact/isolated and gloss/Lambert controls, Auto/manual radius, instancing, exact Off/zero/material restoration, field/document/worker isolation, device capabilities and fault recovery. PNG case A retains three full-size desktop samples; case B bounds only the real `.scene` host at DPR 2 (240×128 → 160×160 CSS; 480×256 → 320×320 physical), keeping real toolbar/actions, all five original samples and unchanged oracles. Separate actual-device texture checks and tracked actual-app 1AON qualification remain; 4PJ1 is secondary. Keep 60-second tests, 35-minute suite steps, 60-minute jobs and one worker. The failed combined-case run is historical; complete all relevant local checks before pushing. Results belong in [status](status.md). |
 | Native save contract research | [Actual-writer regressions](../crates/eigenvista-format/tests/save_contract_research.rs) and [opt-in filesystem probe](../crates/eigenvista-format/examples/save_contract_probe.rs): modes, bytes, bounded complete-file visibility and unique no-clobber races; no crash-durability claim |
 | Anisotropic rendering and volume visibility | [Affine analytic checks](../app/tests/anisotropy-research.spec.ts) with [independent physical oracle](../app/tests/anisotropyReference.ts); normal [visibility](../app/tests/volume-visibility.spec.ts), [depth/opaque objects](../app/tests/volume-visibility-depth.spec.ts) and [prefix](../app/tests/volume-visibility-prefix.spec.ts) regressions preserve fixed expectations |
 | Indexed-mesh qualification only | [Frozen layout corpus](../fixtures/indexed-mesh-qualification/README.md), native research example and [real shader/Save checks](../app/tests/indexed-mesh-qualification.spec.ts): exact raw VBO/IBO restoration, both handednesses/signs and negative controls; no production compaction |
@@ -429,7 +431,7 @@ explains ownership, validation, and cache boundaries.
 | PNG capture without retained backbuffers | [PNG export workflows](../app/tests/png-export.spec.ts): known PNG positive/background controls, non-preserved context attributes, idle/repeated captures, mesh/raycast/volume colours, camera/resize dimensions, encoder failure/retry, actual context loss, and retained document state |
 | Runtime badge | [Browser/native branch checks](../app/tests/platform-label.spec.ts): `WebAssembly` versus neutral `Native (Tauri)`, without claiming additional OS support |
 | Orbital selection and batch rendering | [Orbital browser workflows](../app/tests/orbitals.spec.ts): complete imported lists and metadata, filtering/checkboxes, bounded generation, preserved meshes, cancellation, save/reopen, desktop/mobile layout |
-| Density sampling and remaining bounds | [Scalar reference parity](../crates/eigenvista-core/tests/scalar_sampling.rs), [real Molden density](../crates/eigenvista-import/tests/density_sampling.rs), [allocation limits](../crates/eigenvista-core/tests/allocation_limits.rs), and [browser regression](../app/tests/density-budget.spec.ts): value-only sampling, nonsymmetric/signed matrices, finite extremes, 125-AO density regressions, real-worker cancellation/responsiveness, and retained numerical/allocation bounds |
+| Density sampling and allocation recovery | [Scalar reference parity](../crates/eigenvista-core/tests/scalar_sampling.rs), [real Molden density](../crates/eigenvista-import/tests/density_sampling.rs), [allocation limits](../crates/eigenvista-core/tests/allocation_limits.rs), and [browser regression](../app/tests/density-budget.spec.ts): value-only sampling, nonsymmetric/signed matrices, finite extremes, 125-AO density regressions, real-worker cancellation/responsiveness, and checked numerical representation/allocation recovery |
 | High-resolution grids and typed transfer | [256-cubed workflows](../app/tests/high-resolution.spec.ts) and [owned WASM field parity](../app/tests/sampled-field.spec.ts): real simple-field completion, exact saved resolution, typed display buffers, cached meshing, source validation, cancellation and injected recoverable failure paths |
 | Packaging safety/notices | [Packaging tests](../tools/package-support.test.mjs), followed by a full ZIP build when packaging changes |
 
@@ -543,12 +545,13 @@ intra-pass mesher percentage. Cancel during a longer job,
 verify previous geometry remains intact, then generate again to check worker
 restart. Record failures and the actual requested dimensions.
 
-Keep the separate limits covered: API resolution 12 through 256, 256 cubed
-transient samples, 128 cubed total authoritative source samples, finite/domain
-validation, two-million actual output vertices, 128 saved surfaces, 32 orbitals
-per batch, and 128 MiB geometry/native-container budgets. Validate actual-cell
-mesher preflight against the pinned library's case behavior; do not reintroduce
-the all-cells worst-case rejection or silently change the classic mesher.
+Follow [allocation-driven workloads](allocation-policy.md). Do not reintroduce
+byte/count ceilings for sampling, meshes, imports, persistence or the connector.
+Test complete results beyond the former ceilings, invalid data, checked size/index
+overflow, actual fallible-buffer errors and retained results after cancellation.
+The worker must reject unrepresentable WASM32 arguments before narrowing, never
+wrap them to smaller requested dimensions. Validate actual-cell mesher preflight
+against the pinned library cases; do not silently change the classic mesher.
 Check typed-array display dimensions and values without treating the transient
 f32 transfer as persistent scientific data. A 256 cubed test needs at least
 128 MiB of f64 samples and 64 MiB of f32 display samples, plus meshes, temporary
@@ -567,7 +570,7 @@ Cancel another batch and check that it leaves previous surfaces intact. Closing
 the browser without generating must not edit the document, and reopening it
 must initialize selection from the active orbital rather than restore old checks.
 For a file with more than 32 orbitals, check that the entire list is available
-but generation above the 32-orbital batch limit is disabled. Check keyboard
+and generation above the former 32-orbital threshold remains available. Check keyboard
 Escape, narrow-window table scrolling, and a single active field in sampled
 volume/raycast modes. These manual steps are acceptance criteria, not a claim
 that the packaged native WebView has passed them.
@@ -599,3 +602,15 @@ active application window. Current gaps are in [status](status.md).
 
 For an agent taking over, continue with [handoff](handoff.md). For distributing
 instead of developing, follow [tester packaging](tester-packaging.md).
+
+
+### Reproduce a large SES allocation request
+
+From the repository root, run
+`cargo run --locked --release -p eigenvista-core --example ses_memory_probe -- fixtures/cif/1AON.cif 0.5`
+with repository-local temporary environment variables set as above. This requests
+all 58,870 source atoms with Alvarez radii and a 1.4 Å probe. Progress goes to
+stderr and JSON statistics/source identity go to stdout. The requested spacing
+is retained; estimated engine bytes are diagnostic metadata, never a rejection
+allowance. This CPU probe complements, rather than replaces, the browser/native
+render, Save/reopen, cancellation and connector acceptance checks.

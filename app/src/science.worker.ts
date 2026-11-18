@@ -3,6 +3,17 @@ import type { SampledGrid } from "./types";
 import { auxiliaryScienceActions } from "./scienceActions";
 
 const ready = init();
+// wasm-bindgen narrows scalar usize/u32 arguments and typed arrays. Validate the
+// original JS values first so an unrepresentable request can never wrap.
+function wasmIndex(value: number, label: string): number {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff_ffff)
+    throw new Error(`${label} cannot be represented by the WASM32 runtime`);
+  return value;
+}
+function wasmIndices(values: number[], label: string): Uint32Array {
+  for (const value of values) wasmIndex(value, label);
+  return new Uint32Array(values);
+}
 let registered: { id: number; document: core.RegisteredDocument } | null = null;
 function clearCache() {
   registered?.document.free();
@@ -40,7 +51,7 @@ self.onmessage = async (event: MessageEvent) => {
         break;
       case "validate":
         progress("validating");
-        // Share Save's exact source/array/manifest budgets without ZIP compression.
+        // Share Save's source/array/manifest validation without ZIP compression.
         core.validate_document(JSON.stringify(args.doc));
         result = null;
         break;
@@ -86,9 +97,9 @@ self.onmessage = async (event: MessageEvent) => {
         result = JSON.parse(
           core.analysis_plane_atoms(
             JSON.stringify(args.doc),
-            new Uint32Array(args.atoms),
+            wasmIndices(args.atoms, "Atom index"),
             new Float64Array(args.extent),
-            new Uint32Array(args.dims),
+            wasmIndices(args.dims, "Plane dimension"),
           ),
         );
         break;
@@ -105,8 +116,8 @@ self.onmessage = async (event: MessageEvent) => {
           core.analysis_sample_rows(
             JSON.stringify(args.definition),
             new Float64Array(args.values),
-            new Uint32Array(args.valid),
-            args.offset,
+            wasmIndices(args.valid, "Validity mask"),
+            wasmIndex(args.offset, "Sample offset"),
           ),
         );
         break;
@@ -193,7 +204,7 @@ self.onmessage = async (event: MessageEvent) => {
         const document = registered.document;
         document.prepare(
           args.field,
-          args.resolution,
+          wasmIndex(args.resolution, "Grid resolution"),
           measuredProgress("sampling"),
         );
         const surfaces =

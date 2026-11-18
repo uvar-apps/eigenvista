@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import {
   browserSource,
-  fileByteLimit,
   molecularExtensions,
   native,
   pickNative,
@@ -45,7 +44,6 @@ const stateLabels: Record<State, string> = {
   failed: "Failed",
   cancelled: "Cancelled",
 };
-const queueLimit = 32;
 
 export function ConvertFiles({
   open,
@@ -118,10 +116,6 @@ export function ConvertFiles({
     );
   }
   function addFiles(sources: SourceFile[]) {
-    if (items.length + sources.length > queueLimit) {
-      setError(`A conversion queue can contain at most ${queueLimit} files.`);
-      return;
-    }
     setError("");
     setItems((previous) => [
       ...previous,
@@ -155,10 +149,6 @@ export function ConvertFiles({
     const token = ++run.current;
     setRunning(true);
     setError("");
-    let retainedBytes = items.reduce(
-      (sum, item) => sum + (item.bytes?.length ?? 0),
-      0,
-    );
     let completed = 0;
     for (const item of pending) {
       if (token !== run.current) break;
@@ -169,8 +159,6 @@ export function ConvertFiles({
       try {
         const bytes = await item.source.read();
         if (token !== run.current) break;
-        if (bytes.length > fileByteLimit)
-          throw new Error("File exceeds the 128 MiB preview budget");
         const result = await request<ImportResult>("import_document", {
           bytes,
           name: item.source.name,
@@ -180,11 +168,6 @@ export function ConvertFiles({
           doc: result.document,
         });
         if (token !== run.current) break;
-        if (retainedBytes + output.length > fileByteLimit)
-          throw new Error(
-            "Converted results exceed the 128 MiB queue budget. Save ready files, then retry.",
-          );
-        retainedBytes += output.length;
         update(item.id, {
           state: "ready",
           bytes: output,
@@ -270,9 +253,7 @@ export function ConvertFiles({
               <FolderPlus size={16} />
               Add files
             </button>
-            <span>
-              {items.length} / {queueLimit} files
-            </span>
+            <span>{items.length} files</span>
             <button
               title="Clear conversion queue"
               aria-label="Clear conversion queue"

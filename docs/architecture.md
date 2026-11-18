@@ -1,6 +1,9 @@
 # As-built architecture
 
-This describes the **0.10.0 application preview**, including the shared
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
+This describes the **0.10.1 application preview**, including the shared
 application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
@@ -8,10 +11,10 @@ not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
-Version 0.10.0 includes the **scientific-inspection implementation**
+Version 0.10.1 includes the **scientific-inspection implementation** introduced in 0.10.0
 ([Plan 009](../plans/009-scientific-inspection-implementation.md), #83–#86).
 Its selections/measurements/labels, SES/SAS meshes and quantitative field
-analyses are described below and ship in the 0.10.0 Mac package. Older 0.8.0
+analyses are described below and are included in the 0.10.1 Mac package. Older 0.8.0
 binaries predate them. Read the living handoff for source, artifact identity
 and actual qualification boundaries.
 The [scientific-inspection decision](design/2026-11-16-scientific-inspection.md)
@@ -70,25 +73,25 @@ by native saving. There is no calculation server, remote service, or database.
 
 | Component | Responsibility and entry points |
 | --- | --- |
-| [Core model](../crates/eigenvista-core/src/model.rs) | `Document`, validation, explicit scientific units, affine grid geometry, resource limits |
+| [Core model](../crates/eigenvista-core/src/model.rs) | `Document`, validation, explicit scientific units, affine grid geometry, checked allocation |
 | [Computation](../crates/eigenvista-core/src/compute.rs) | AO/field values and gradients, sampling/resampling, source hashes, classic marching cubes |
 | [Imports](../crates/eigenvista-core/src/import.rs), [PDB importer](../crates/eigenvista-core/src/import/pdb.rs) and [mmCIF importer](../crates/eigenvista-core/src/import/cif.rs) | Supported text profiles and recorded conversion losses |
-| [Import library](../crates/eigenvista-import/src/lib.rs) and [BinaryCIF transport](../crates/eigenvista-import/src/bcif/mod.rs) | Shared byte detection/dispatch, bounded binary decoding, Molden conventions, import reports, source-byte digest |
-| [Converter CLI](../crates/eigenvista-convert/src/main.rs) | Bounded file reads, batch/JSON/check mode, destination preflight and no-clobber saves |
+| [Import library](../crates/eigenvista-import/src/lib.rs) and [BinaryCIF transport](../crates/eigenvista-import/src/bcif/mod.rs) | Shared byte detection/dispatch, checked binary decoding, Molden conventions, import reports, source-byte digest |
+| [Converter CLI](../crates/eigenvista-convert/src/main.rs) | Fallible file reads, batch/JSON/check mode, destination preflight and no-clobber saves |
 | [Connectivity](../crates/eigenvista-core/src/bonds.rs) | Exact k-d-tree neighbors, explicit-plus-inferred display bonds |
 | [Native format](../crates/eigenvista-format/src/lib.rs) and [filesystem adapter](../crates/eigenvista-format/src/native.rs) | Portable container, checksums/validation, atomic native writes |
 | [WASM bridge](../crates/eigenvista-wasm/src/lib.rs) | Document import/validation/encoding, immutable registered document with one sampled-field cache, typed display buffers, compatibility JSON sampling/meshing and point/gradient probes |
 | [Document UI](../app/src/App.tsx) and [types](../app/src/types.ts) | One document/controller owner, controls, dirty state, generation replacement, error recovery |
 | [Workspace pane](../app/src/WorkspacePane.tsx), [preferences](../app/src/useWorkspacePane.ts) and [widget stack](../app/src/PanelSidebar.tsx) | Default left/right resizable pane, four task tabs, stable mounted tools, bounded presentation preferences, reusable drag/keyboard/menu ordering |
-| [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, bounded multi-orbital generation settings |
-| [Worker client](../app/src/science.ts), [registration identity](../app/src/scienceRegistration.ts), and [worker](../app/src/science.worker.ts) | Owned FIFO requests, per-request abort, worker lifecycle, bounded resident registration/cache |
+| [Orbital browser](../app/src/OrbitalBrowser.tsx) | Full orbital metadata table, filtering, transient checkbox selection, multi-orbital generation settings |
+| [Worker client](../app/src/science.ts), [registration identity](../app/src/scienceRegistration.ts), and [worker](../app/src/science.worker.ts) | Owned FIFO requests, per-request abort, worker lifecycle, owned resident registration/cache |
 | [Viewport](../app/src/Viewport.tsx) and [sampled renderer](../app/src/volume.ts) | Scene/materials, OrbitControls, picking, PNG download, sampled raycast/volume shaders |
 | [Preview brick ranges](../app/src/volumeRanges.ts) | Conservative min/max bounds over sampled f32 values for renderer-only empty-space skipping |
 | [Element display table](../app/src/elements.ts) | Symbol and van der Waals display radius for elements 1-118. Presentation data only; [element_display.rs](../crates/eigenvista-core/tests/element_display.rs) re-derives every radius from the `pdbtbx` source tables so the table cannot drift. Carries no colour — that lives in `atom-colors.json` |
 | [Atom colour palette](../app/src/atom-colors.json) and [loader](../app/src/atomColors.ts) | Single source of truth for the default per-element colour. `parseAtomColors` validates a loaded file and rejects it whole; `resolveAtomColor` resolves session override → bundled default → `#b294b9` sentinel. Session-only, never persisted to `.eigenvista`. See the [design record](design/2026-10-12-atom-colors-from-file.md) |
 | [File adapter](../app/src/files.ts) | Browser file/download versus native dialog/read/save |
 | [Desktop entry point](../app/src-tauri/src/main.rs) | Tauri plugins and `save_native`/version commands |
-| [Shader parameter export](../app/src-tauri/src/shader_parameters.rs) | Bounded `.params` text, sibling-file write/sync/replacement, separate from molecular-document validation |
+| [Shader parameter export](../app/src-tauri/src/shader_parameters.rs) | Complete `.params` text, sibling-file write/sync/replacement, separate from molecular-document validation |
 | [Runner](../tools/run.mjs) and [packager](../tools/package-macos.mjs) | Repeatable builds/tests and verified tester artifacts |
 
 The Rust workspace's six default members are core, format, import, converter,
@@ -101,7 +104,7 @@ workspace check or Tauri build. `cargo test` alone is not a desktop check.
 
 All GUI inspection controls use the same discovered application operations as
 the external connector. [Inspection schemas](../app/src/inspectionSchemas.ts)
-declare strict bounded parameters; [the inspection hook](../app/src/useScientificInspection.ts)
+declare strict validated parameters; [the inspection hook](../app/src/useScientificInspection.ts)
 owns accepted selection/pick order, worker requests and publication. Its
 operations are dispatched through the existing controller/helper, not a second
 document, scripting runtime or GUI-driving automation layer.
@@ -111,7 +114,7 @@ document, scripting runtime or GUI-driving automation layer.
 | [Rust geometry inspection](../crates/eigenvista-core/src/inspection.rs) | Document-local atom references, annotation validation, f64 distance/angle/torsion, exact zero-radius coincidence and nearest-seed k-d-tree neighborhoods |
 | [Rust molecular surfaces](../crates/eigenvista-core/src/molecular_surface.rs) | Selected accepted atoms, explicit radii/Å parameters, Sesmesh adapter, rebased mesh precision, independent provenance/hash and mesh validation |
 | [Rust field analysis](../crates/eigenvista-core/src/field_analysis.rs) | Quantity/unit declarations, prepared f64 evaluation, affine-grid interpolation, planes/profiles, contours, caches/fingerprints and CSV |
-| [WASM inspection bridge](../crates/eigenvista-wasm/src/inspection.rs) | Validated operations, typed mesh/quantitative buffers and bounded sample pages |
+| [WASM inspection bridge](../crates/eigenvista-wasm/src/inspection.rs) | Validated operations, typed mesh/quantitative buffers and paginated samples |
 | [Annotation rendering](../app/src/annotationRendering.ts) | Sparse scene sprites/monitors and selection markers; no scientific geometry calculation |
 | [Field depiction](../app/src/fieldAnalysisRendering.ts) | Slice/probe/profile depiction, numeric keys, GPU precision warnings and contour geometry |
 | [Geometry controls](../app/src/InspectionControls.tsx), [shape controls](../app/src/MolecularSurfaceControls.tsx), [field controls](../app/src/FieldAnalysisControls.tsx) | Forms/readouts sharing the controller; no duplicate TS scientific evaluator |
@@ -147,9 +150,8 @@ limits prevent a particular depiction; summaries expose that rendering warning.
 
 Publication validates a whole candidate with exact native preflight before
 replacing accepted state. Failed/cancelled jobs retain prior meshes/results.
-Annotation edits additionally preflight actual CPU text layout against the
-16 MiB texture budget before publication, disposing temporary resources without
-a GPU upload; a rejected layout leaves the accepted annotations intact.
+Annotation edits preflight actual CPU text layout before publication and dispose
+temporary resources. Layout/allocation failures retain accepted annotations.
 Durable optional `annotations`, `molecular_surfaces` and `field_analysis` payloads
 have explicit required capabilities; the typed writer packs bulk numeric arrays.
 Annotation, style and interpretation changes leave old quantum hashes intact.
@@ -164,7 +166,7 @@ it is not a general arbitrary-text writer.
 
 ## External application control (introduced in 0.8.0)
 
-`app/src/control.ts` owns versioned method schemas, validation, bounded metadata,
+`app/src/control.ts` owns versioned method schemas, validation, complete metadata,
 revision guards and calculation jobs. Its host in `App.tsx` invokes the existing
 import, sampling, mesh, save and presentation flows. Scientific work remains in
 the existing owned WASM worker; the API does not create a second document or
@@ -175,13 +177,12 @@ The #80 extension exposes palette load/reset and biological presentation through
 the same controller (28 methods in the published 0.8.0 API v1 catalog). The
 0.10.0 inspection extension remains additive in API v1; discover live
 schemas rather than inferring a method count from the version. Palette loading uses the GUI's
-`parseAtomColors` parser and commits only a fully valid palette; native reads
-apply a 256 KiB limit before reserving the buffer. Palette and biological colors,
+`parseAtomColors` parser and commits only a fully valid palette; native reads grow their buffers fallibly. Palette and biological colors,
 visibility, residue subsets and representation overrides stay session-only.
 `control/presentation.ts` validates a whole biological patch before state changes,
 uses the existing source-index visibility/range helpers and mirrors GUI isolate/
 range transitions. Focus uses currently visible atoms. Summary replies expose
-bounded selectors and counts instead of per-atom arrays. Global representation
+complete selectors and counts instead of per-atom arrays. Global representation
 retains its existing persisted-document/dirty semantics. Automatic AO radius can
 be restored after a manual radius, with the same transitions as the checkbox.
 These presentation changes do not invoke quantum evaluation or replace source
@@ -194,6 +195,19 @@ NDJSON JSON-RPC broker, scoped filesystem adapter, client library and
 controller; the broker does not interpret scientific commands. File grants use
 Unix directory descriptors and no-follow traversal, protect imported sources,
 validate encoded documents/PNGs and publish without overwriting destinations.
+Native Save sends the encoded archive through Tauri as raw binary, avoiding
+conversion into millions of JSON numbers. A checked `EVT1` frame carries a
+little-endian u64 metadata length, UTF-8 JSON metadata and the unchanged archive
+bytes. The [native transfer adapter](../app/src/nativeTransfer.ts) and
+[native decoder](../app/src-tauri/src/native_transfer.rs) share this internal
+transport; it does not change the native document format or public controller
+result shapes. Allocation/serialization failures preserve the accepted document
+and clear save activity through the existing error paths.
+The standard Tauri window configuration disables background throttling. Current
+Wry applies public WebKit inactive scheduling policy on macOS 14+, keeping
+scientific and encoding workers runnable when the window is inactive. This
+setting does not prevent OS sleep/termination and is ignored on older macOS
+and unsupported platforms; it does not change deployment requirements.
 Unsupported native platforms reject explicit control activation; their normal
 startup is independent of it. Only local macOS is currently qualified.
 
@@ -238,12 +252,12 @@ missing wavefunctions, or infer a density matrix from a PDB file.
 
 The file adapter obtains bytes. The shared `eigenvista-import::import_bytes`
 returns a validated document and structured format/warning/`requires_save` report.
-Native ZIPs go through bounded decoding. BinaryCIF map/gzip signatures are handled
+Native ZIPs go through checked decoding. BinaryCIF map/gzip signatures are handled
 before UTF-8 text decoding, independently of filename; gzip is restricted to that
 transport. The Molden header takes precedence over a text filename. Other
 supported extensions use existing Rust importers. Successful loading
 replaces the document and resets the camera/render mode. If the selected field
-is an authoritative grid, Open prepares its bounded display sample immediately;
+is an authoritative grid, Open prepares its owned display sample immediately;
 without saved meshes the initial mode is volume. A sampling failure still opens
 the validated document in mesh mode with an error, so its full data can be saved.
 An import failure leaves the previous document available and shows an error.
@@ -273,7 +287,7 @@ boundary, not hidden in the evaluator. See [the exact profile](molden-import.md)
 and [independent producer fixtures](../fixtures/molden/README.md).
 
 The [Convert Files dialog](../app/src/ConvertFiles.tsx) uses the same worker and
-library, serializing imports and retaining bounded encoded outputs separately
+library, serializing imports and retaining encoded outputs separately
 from the open document. It requires explicit per-result Save, supports cancellation,
 and does not replace the scene. Scene and conversion pipelines have separate
 request owners; cancellation of one cannot reject the other's queued work.
@@ -284,7 +298,7 @@ vendor programs. The CLI is a separate headless frontend for scripts/batches.
 
 All supported imports compute display bonds from positions, including cube and
 native documents. XYZ/PDB convert angstrom positions to bohr. PDB uses `pdbtbx`
-plus bounded compatibility preflight and explicit
+plus checked compatibility preflight and explicit
 connection handling. `kiddo` supplies exact immutable k-d trees partitioned by
 0.5-angstrom covalent-radius buckets. Each query uses that bucket's observed
 maximum radius, then the unchanged pair cutoff and deterministic coordination
@@ -302,26 +316,26 @@ rows. `covale`, `disulf`, and `metalc` pairs seed explicit untyped edges before
 perception fills gaps; other types or three-partner declarations are recorded
 without forcing rods. Perception can independently add the same pair.
 
-One bounded JSON provenance record per declaration retains raw columns,
+One JSON provenance record per declaration retains raw columns,
 type/order, selected source row IDs/atom indices, edge, and status/reason. This
 preserves import provenance through existing native encoding without a schema or
 typed-renderer change. Matching valid image codes, or both omitted/inapplicable
 images, map to selected-site pairs; unknown/different/mixed images are reported
-without symmetry expansion. The bounded lexer rejects unsupported layouts rather
+without symmetry expansion. The lexer rejects unsupported layouts rather
 than silently dropping columns; it is not a general CIF dictionary validator.
 See the [design record](design/2026-11-06-bond-search-and-cif-connections.md) for
 limits, common-image reasoning, and declared/perceived precedence.
 
 BinaryCIF transport lives in the import library, separately from scientific
 selection. Its borrowing MessagePack tree and checked inverse column pipelines
-expand only `atom_site`, `struct_conn`, bounded biological metadata and supported cell/symmetry categories
-into bounded canonical CIF text. That text enters the same core tokenizer and
+expand only `atom_site`, `struct_conn`, supported biological metadata and supported cell/symmetry categories
+into canonical CIF text. That text enters the same core tokenizer and
 connection resolver described above. Unused category columns are not expanded,
 and no Molstar or external MessagePack/CIF runtime is required. `flate2` uses
-its pure Rust backend for bounded gzip expansion. Source hashes always identify
+its pure Rust backend for checked gzip expansion. Source hashes always identify
 the received raw/compressed bytes, not the canonical intermediate text.
-The single-block 0.3.x profile has separate 64 MiB payload/text caps plus node,
-depth, decoded-value, column, and row budgets; see the exact
+The single-block 0.3.x profile uses fallible expansion and actual-payload length
+validation and iterative parser/encoding traversal without nesting ceilings; see the exact
 [BinaryCIF limits](structure-imports.md#binarycif-profile) and
 [independent twins](../fixtures/bcif/README.md).
 
@@ -356,7 +370,7 @@ and label/author namespaces remain distinct. Unavailable identity is not invente
 Deposited secondary ranges are retained with provenance; there is no DSSP fallback.
 
 PDB, text mmCIF and BinaryCIF feed this same metadata contract. BinaryCIF now also
-expands bounded entity/polymer/asym/chemical-component/secondary categories before
+expands supported entity/polymer/asym/chemical-component/secondary categories before
 the shared CIF reader. The optional metadata is included in worker registration
 identity and native validation, but excluded from existing quantum-field hashes.
 Native documents containing it declare `eigenvista-biological-structure-v1` in
@@ -375,7 +389,7 @@ index-bound settings; coloring survives only when the new document has metadata.
 ordering, continuity breaks and deposited secondary assignments in Rust, separate
 from heuristic display bonds. The [backbone hook](../app/src/useProteinBackbone.ts)
 requests derived backbone data lazily for visible protein depictions, with request
-ownership and cancellation on replacement/unmount. The viewport builds bounded
+ownership and cancellation on replacement/unmount. The viewport builds owned
 display meshes and preserves source atom/residue picking. These meshes do not
 replace imported coordinates, change a field's source hash or become quantum
 surfaces. Colors, subset masks and atomic style changes need no backbone job.
@@ -387,9 +401,8 @@ receiver set.
 Backbone preparation sends only atoms/identity in a minimal validated document;
 it does not replace the worker's resident quantum registration. Nonfatal
 depiction errors preserve that registration. Geometry interpolation/extrusion
-runs in the viewport on the main thread, with at most two million display
-vertices including lines/markers/caps. Curve subdivisions decrease within that
-budget while retaining source C-alpha points; allocation/precision failures
+runs in the viewport on the main thread with fallible typed-array allocation.
+All requested source points and the standard curve subdivisions are retained; allocation/precision failures
 report atomic-detail fallback without replacing field data. Mesh/line buffers
 and materials are batch owned and disposed on replacement/unmount.
 
@@ -447,16 +460,14 @@ original full matrix. Extreme intermediate products use an alternate
 multiplication order rather than overflowing an otherwise representable value.
 There is no estimated CPU-work cutoff for analytic sampling. The previous
 150-million-work-unit rejection has been removed, not increased or bypassed
-for selected files. The sampling API accepts 12 through 256 per axis; both UI
-selectors use [shared options](../app/src/resolution.ts) of 24, 32, 40, 48, 64,
-80, 96, 128, 160, 192, 224, and 256, with a default of 40. It does not silently
-lower the requested resolution. Transient sampling permits up to 256 cubed
-values, distinct from the unchanged 128 cubed total-sample bound for grids
-stored in `Document`. Finite-value, domain, and native-container validation
-remain. Neither the removed CPU estimate nor the larger transient-grid limit
-establishes a maximum runtime or removes memory-related rejections.
+for selected files. The current source accepts safe integer resolutions of at least two. UI presets
+remain 24 through 256; custom values apply on Enter or leaving the input, so
+typing does not start intermediate calculations. Stored and transient grids use
+the same allocation-driven policy. The WASM boundary checks actual u32
+representability before narrowing numeric arguments or typed arrays. It never
+wraps a large requested dimension into a smaller one.
 
-Meshing retains the two-million-vertex output bound but preflights the actual
+Meshing preflights the actual
 per-cell triangle counts instead of assuming the maximum output for every cell.
 The case counts are obtained from public binary-case probes of the pinned
 `mcubes` implementation and applied using that implementation's case convention.
@@ -483,22 +494,18 @@ surface field IDs, including hidden meshes. The browser owns checkbox selection
 and draft isovalue/resolution locally, with the active orbital initially checked.
 Closing without generating does not change the document.
 
-Multi-orbital generation uses the same `generate` operation serially for up to
-32 distinct orbital IDs in document order. The parent rechecks the selection
-and stages all results without publishing partial meshes. The retained plus
-generated geometry is bounded by 128 surfaces and an estimated 128 MiB of
-f64 positions/normals and u32 indices. The worker's `validate` operation calls the
-Rust format's full `validate_document` preflight, shared with Save. It checks
-model/source identity, array-entry count, exact manifest bytes and total
-uncompressed bytes including all retained scientific inputs before commit.
+Multi-orbital generation uses `generate` serially for all selected distinct
+orbital IDs in document order, stages complete results and commits only after
+`validate_document` checks the complete candidate. No byte/count allowance limits
+the batch, retained geometry or native file. Actual allocations, source identity,
+manifest/array relationships and checked lengths determine whether it succeeds.
 Its [typed writer](../crates/eigenvista-format/src/typed.rs) emits binary arrays
 directly from the Rust model and builds metadata/reference JSON, without a
 per-number JSON tree or flattened numeric clones. Preflight hashes these entries
 without creating or compressing a ZIP. Save still compresses the same prepared
 entries. The older
-WASM `validate` API remains model-only and is not the publication guard. Preflight
-still scales with retained data and allocates temporary arrays; these are preview rejection
-budgets, not guarantees of acceptable memory use or latency. Cancellation or
+WASM `validate` API remains model-only and is not the publication guard. Preflight still scales with retained data and allocates temporary arrays; actual
+allocation errors are reported rather than guessed from a fixed budget. Cancellation or
 a recoverable batch error leaves previous surfaces untouched. A successful batch replaces
 only selected fields' meshes, keeps unrelated saved meshes, and enters mesh mode.
 The active field stays unchanged if its orbital was selected, otherwise it
@@ -557,7 +564,7 @@ remain unchanged. See the [ownership/registration decisions](design/2026-11-06-w
 
 Mesh mode renders durable surface records. Sampled raycast and volume modes
 use a 3D texture and replace the selected field's mesh display. Other fields'
-meshes may remain. These shaders are bounded sampled previews, not direct
+meshes may remain. These shaders are sampled-field previews, not direct
 analytic evaluation or robust root isolation. Ordinary mesh transparency and
 single-volume compositing do not correctly solve all mixed-scene overlaps.
 
@@ -576,7 +583,7 @@ Skewed and reflected affine grids use the full grid transform; reflected box
 winding is corrected for back-face ray-entry rendering, including inside views.
 
 Display steps follow ray length in voxel coordinates, with Draft/Standard/Fine
-using 1/2/4 samples per voxel-distance (default 2). Traversal is bounded to 4096
+using 1/2/4 samples per voxel-distance (default 2). Traversal follows monotonic sample/brick steps rather than an arbitrary 4096
 iterations, including empty-brick jumps. Quality changes reuse the current grid
 without worker requests, scientific edits, mesh generation, or serialization.
 Bracket refinement still cannot guarantee tangencies, multiple unseen crossings,
@@ -585,8 +592,8 @@ or features unresolved by the sampled grid.
 The renderer bounds each eight-cell brick using all its f32 vertices, including
 shared faces and partial tail bricks. Padded min/max comparisons skip only bricks
 that exclude both signed raycast isovalues or the volume opacity band. The
-sampling lattice is preserved across jumps. Dimensions are checked at 2..256
-per axis; the maximum 32-cubed range array is 256 KiB, with an accompanying RG
+sampling lattice is preserved across jumps. Dimensions are checked for valid safe-integer products. Range arrays grow with
+the requested field and have an accompanying RG
 3D texture. A weak cache keyed by immutable sampled-value arrays and dimensions
 reuses CPU ranges on scene rebuilds; replace the array when values change.
 Each scene object owns its field and range textures, and the viewport disposes
@@ -640,20 +647,18 @@ Scene objects are rebuilt on document/grid/mode changes; atoms and bonds use
 instanced meshes with per-instance atom picking. Rendering at every maximum
 input size still requires separate platform acceptance.
 
-The scene uses [camera-relative lighting](../app/src/sceneLighting.ts): six equal
-directional lights at the vertices of a rotated octahedron, plus neutral ambient
-fill. Lights and targets are children of the camera, which belongs to the scene;
-orbit/pan/roll therefore preserve the view-space arrangement. Front directions
-are orthogonal and 120° apart in azimuth; their antipodes complete the rig.
-Light intensities multiply the declared weights by π to compensate Three's
-Lambert BRDF factor of 1/π, matching the shared GLSL irradiance weights.
-Built-in Blinn–Phong
-mesh and sampled-raycast shaders rotate their world normals/view vectors to
-camera space and use the same six directions. Ambient/diffuse weights are
-0.1/0.9, giving a pure-Lambert response from approximately 0.620 to 1 before
-material/color processing; the finite rig preserves shape cues rather than
-claiming isotropic illumination for every normal. Blinn specular remains an
-explicit additional term. Existing PBR, Lambert and custom materials remain
+Version 0.10.1's #91 correction uses [camera-relative lighting](../app/src/sceneLighting.ts):
+one directional headlight on camera-local +Z, plus neutral ambient fill.
+Light and target are children of a camera-owned group; orbit/pan/roll preserve
+the view-space arrangement. This replaces 0.10.0's six-light octahedral rig,
+whose absolute-dot diffuse seams and multiple specular lobes produced visible
+bands and repeating highlights. Light intensities multiply declared weights by
+π to compensate Three's Lambert BRDF factor of 1/π.
+Built-in Blinn–Phong mesh and sampled-raycast shaders orient normals toward
+the actual eye ray, then use the same camera-axis headlight. Ambient/diffuse
+weights are 0.35/0.65: pure Lambert response is 0.35 + 0.65 max(Nview.z, 0)
+before material/color processing. Blinn uses one broad half-vector lobe with
+exponent 32 and strength 0.25. Existing PBR, Lambert and custom materials remain
 distinct; equal illumination does not imply identical BRDFs or images of
 different sides of an asymmetric molecule. User/bundled custom GLSL keeps its
 declared lighting; pure volume compositing, numerical planes and labels remain
@@ -678,8 +683,8 @@ field bounds and display representation do not change it. Turning Auto off
 retains its current value for manual adjustment over 0.25–50 Å. This is a session
 display choice, not a scientific radius stored in the document.
 
-Target dimensions follow the full physical drawing buffer, capped proportionally
-at 1024 per edge (ideal attachment payload at most 28 MiB plus noise/driver overhead).
+Target dimensions follow the full physical drawing buffer up to the actual
+device texture/renderbuffer capability. There is no software edge/memory cap.
 GTAO uses sample parameter 32 and distance exponent 2; Poisson denoise uses
 8 samples, radius 4 and luma rejection 0.25. No half-resolution stage or beauty
 composer is used.
@@ -710,8 +715,9 @@ in-memory copies.
 The [typed encoding decision](design/2026-11-12-typed-native-encoding.md)
 preserves the earlier writer's exact logical bytes: sorted metadata, array IDs,
 column-before-row coalescing, flat shapes, f64 bits, integer fallback and hashes.
-That typed-writer change introduced no schema/profile migration. Checked byte accounting and fallible
-binary-buffer reservation preserve the existing preflight thresholds. Metadata,
+That typed-writer change introduced no schema/profile migration. Checked byte
+accounting and fallible binary-buffer reservation report actual allocation or
+representation failures without an application byte threshold. Metadata,
 prepared arrays, ZIP output and unchanged decoder allocations remain; saved-source
 validation still uses core's separate JSON-based hashing. The native benchmark
 and its measurement limits are documented in [development](development.md#native-encoding-measurements).
@@ -733,7 +739,7 @@ Production generation still stores raw triangle-corner arrays. The separate
 [#37 qualification](design/2026-11-12-indexed-mesh-qualification.md) demonstrates
 exact tuple sharing and generated-layout shader-ID reconstruction, but does not
 enable either. Unconditional postprocessing increases no-sharing peak memory;
-future compaction requires an explicit benefit/budget raw-fallback policy.
+future compaction requires an explicit measured benefit and fallible-allocation/raw-result fallback policy.
 Existing arbitrary indexed saved surfaces continue to draw their original
 arrays. Qualification markers in test fixtures are not a new supported profile.
 
@@ -754,9 +760,8 @@ sampled modes available immediately. Selecting a sampled rendering mode prepares
 an analytic orbital/density field's transient grid after reopening, without
 mesh generation. No sampled
 preview is a substitute for the complete authoritative grid saved in the file.
-The larger 256 cubed transient-grid limit does not extend native source-grid or
-128 MiB container limits; generated meshes can record their larger generation
-resolution without embedding the transient samples in `Document.grids`.
+Generated meshes retain their requested generation resolution without embedding
+transient samples in `Document.grids`. Neither kind has a policy memory ceiling.
 
 The default workspace is one **480 px** tool pane, initially on the right and
 selectable on the left. **Molecule**, **Fields**, **Surfaces** and **Appearance**
@@ -769,7 +774,7 @@ an application reload is not a promise to recover unsaved drafts.
 
 Widget expansion is a separate profile preference, managed by
 [`PanelSection`](../app/src/PanelSection.tsx). Eight whitelisted booleans live
-under `eigenvista:panel-expansion:v1` in localStorage; reads are size-bounded and
+under `eigenvista:panel-expansion:v1` in localStorage; reads are validated and
 storage errors fall back to in-memory state. Accessible heading buttons control
 hidden, mounted bodies, retaining form and shader state. Layout changes never
 edit the scientific document, mark it dirty or request worker calculations.
@@ -778,8 +783,8 @@ disclosure disabled, without overwriting the user's preference.
 
 `useWorkspacePane` owns `eigenvista:workspace-pane:v1`: pane side, finite bounded
 width, visibility, active tab, complete per-tab widget permutations and the
-three additional widget disclosures. Reads are limited to 4 KiB and validate
-each preference; unavailable storage falls back to session state. Zen and actual
+three additional widget disclosures. Reads validate each preference;
+unavailable storage falls back to session state. Zen and actual
 fullscreen state are transient. Neither this store nor the original disclosure
 store contains scientific arrays, shader sources, file grants or job state.
 
@@ -845,7 +850,7 @@ even with `--force`. This uses same-directory hard links; filesystems that do
 not support them fail explicitly instead of falling back to an unsafe overwrite.
 
 Shader parameter export uses the separate `save_shader_parameters` command.
-It accepts at most 128 KiB of UTF-8 text, offers a `.params` dialog, checks the
+It accepts complete UTF-8 text using fallible buffers, offers a `.params` dialog, checks the
 extension, and writes/syncs a new sibling before replacement. It does not route
 text through `save_native` or weaken native document decoding/source protection.
 The UI catches export failures and preserves document state on cancellation.
@@ -878,11 +883,12 @@ validate manifest references.
 ## Safety and distribution
 
 Importers, model validation, computation, and ZIP parsing each enforce bounds.
-These include file/inflated byte limits, finite numbers, checked dimensions,
-indices, supported profiles, checksums, entry coverage, and safe archive paths.
-They are defensive limits, not performance promises. The desktop read adapter
-currently reads a selected file before the UI byte-budget check; avoid claiming
-streaming or universal pre-allocation protection at the UI boundary.
+These include finite numbers, checked dimensions, actual index/address
+representation, validated identifiers/references, hashes, versioned profiles and
+safe archive paths. Reads, buffers and native serialization attempt allocations
+without fixed application byte/count ceilings. Actual GPU uploads are staged
+before retiring the prior rendered group; recoverable device allocation failure
+retains that graph. Device texture limits are queried from the actual renderer.
 
 The [Tauri config](../app/src-tauri/tauri.conf.json) defines a local-content CSP
 and embedded frontend; [capabilities](../app/src-tauri/capabilities/default.json)
@@ -900,7 +906,7 @@ components make Linux/Windows feasible but do not establish support.
 
 The clean-Rust requirement supersedes the early scientific C-library proposal.
 The scalar Rust evaluator, classic marching cubes, bohr scene, JSON bridge,
-single worker/cache, preview schema, and sampled renderers are current bounded
+single worker/cache, preview schema, and sampled renderers are current implementation
 choices, not all final architecture decisions. Native parallel jobs, optimized
 collocation, topology-certified meshing, analytic shaders, shrinkwrap, full
 converters, formal schema evolution, camera persistence, and qualified release

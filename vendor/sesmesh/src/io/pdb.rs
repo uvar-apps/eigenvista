@@ -51,7 +51,9 @@ fn parse_with(data: &[u8], parallel_min: usize, chunk_bytes: usize) -> Result<Pa
             .iter()
             .map(|(_, s)| strings.intern(s))
             .collect();
-        diagnostics.merge(chunk.diagnostics);
+        diagnostics
+            .merge(chunk.diagnostics)
+            .map_err(|error| ParseError::caused_by(1, 1, error))?;
         for event in chunk.events {
             match event {
                 Event::Atom(mut atom) => {
@@ -152,11 +154,14 @@ fn process_line(line: &[u8], lineno: usize, chunk: &mut Chunk) -> Result<(), Par
     } else if line.starts_with(b"MODEL") {
         let number = parse_i32(&line[5..]);
         if number.is_none() {
-            chunk.diagnostics.warn(
-                WarningKind::InvalidField,
-                "invalid MODEL number; numbering sequentially",
-                || format!("line {lineno}"),
-            );
+            chunk
+                .diagnostics
+                .warn(
+                    WarningKind::InvalidField,
+                    "invalid MODEL number; numbering sequentially",
+                    || format!("line {lineno}"),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
         }
         chunk.events.push(Event::Model(number));
     }
@@ -204,11 +209,13 @@ fn parse_atom(
         Some(Ok(v)) => v,
         _ => {
             if !serial.trim_ascii().is_empty() {
-                diags.warn(
-                    WarningKind::InvalidField,
-                    "invalid atom serial number; using 0",
-                    || format!("line {lineno}: '{}'", show(serial)),
-                );
+                diags
+                    .warn(
+                        WarningKind::InvalidField,
+                        "invalid atom serial number; using 0",
+                        || format!("line {lineno}: '{}'", show(serial)),
+                    )
+                    .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
             }
             0
         }
@@ -226,11 +233,13 @@ fn parse_atom(
     atom.res_seq = match hybrid36::decode(4, seq).map(i32::try_from) {
         Some(Ok(v)) => v,
         _ => {
-            diags.warn(
-                WarningKind::InvalidField,
-                "missing or invalid residue number; using 0",
-                || format!("line {lineno}: '{}'", show(seq)),
-            );
+            diags
+                .warn(
+                    WarningKind::InvalidField,
+                    "missing or invalid residue number; using 0",
+                    || format!("line {lineno}: '{}'", show(seq)),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
             0
         }
     };
@@ -238,25 +247,27 @@ fn parse_atom(
 
     let occupancy = col(54, 60);
     if !occupancy.trim_ascii().is_empty() {
-        atom.occupancy = parse_f32(occupancy).unwrap_or_else(|| {
-            diags.warn(
+        atom.occupancy = diags
+            .or_warn(
+                parse_f32(occupancy),
+                1.0,
                 WarningKind::InvalidField,
                 "invalid occupancy; using 1.0",
                 || format!("line {lineno}: '{}'", show(occupancy)),
-            );
-            1.0
-        });
+            )
+            .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
     }
     let b_factor = col(60, 66);
     if !b_factor.trim_ascii().is_empty() {
-        atom.b_factor = parse_f32(b_factor).unwrap_or_else(|| {
-            diags.warn(
+        atom.b_factor = diags
+            .or_warn(
+                parse_f32(b_factor),
+                0.0,
                 WarningKind::InvalidField,
                 "invalid temperature factor; using 0.0",
                 || format!("line {lineno}: '{}'", show(b_factor)),
-            );
-            0.0
-        });
+            )
+            .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
     }
 
     let element = col(76, 78).trim_ascii();
@@ -265,11 +276,13 @@ fn parse_atom(
     } else {
         let parsed = Element::from_symbol_bytes(element);
         if parsed.is_none() {
-            diags.warn(
-                WarningKind::UnknownElement,
-                "unrecognized element symbol; inferring the element from the atom name",
-                || format!("line {lineno}: '{}'", show(element)),
-            );
+            diags
+                .warn(
+                    WarningKind::UnknownElement,
+                    "unrecognized element symbol; inferring the element from the atom name",
+                    || format!("line {lineno}: '{}'", show(element)),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
         }
         parsed
     };
@@ -279,29 +292,34 @@ fn parse_atom(
         let res = std::str::from_utf8(res_name).unwrap_or("");
         atom.element = Element::infer_from_pdb_name(&padded, res, het);
         match atom.element {
-            Some(e) if element.is_empty() => diags.warn(
-                WarningKind::InferredElement,
-                "element columns 77-78 blank; element inferred from the atom name",
-                || format!("line {lineno}: '{}' -> {e}", show(name_field)),
-            ),
+            Some(e) if element.is_empty() => diags
+                .warn(
+                    WarningKind::InferredElement,
+                    "element columns 77-78 blank; element inferred from the atom name",
+                    || format!("line {lineno}: '{}' -> {e}", show(name_field)),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?,
             Some(_) => {}
-            None => diags.warn(
-                WarningKind::UnknownElement,
-                "element could not be determined",
-                || format!("line {lineno}: atom '{}'", show(name_field)),
-            ),
+            None => diags
+                .warn(
+                    WarningKind::UnknownElement,
+                    "element could not be determined",
+                    || format!("line {lineno}: atom '{}'", show(name_field)),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?,
         }
     }
 
     let charge = col(78, 80);
-    atom.formal_charge = parse_charge(charge).unwrap_or_else(|| {
-        diags.warn(
+    atom.formal_charge = diags
+        .or_warn(
+            parse_charge(charge),
+            0,
             WarningKind::InvalidField,
             "invalid formal charge; using 0",
             || format!("line {lineno}: '{}'", show(charge)),
-        );
-        0
-    });
+        )
+        .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
     Ok(atom)
 }
 

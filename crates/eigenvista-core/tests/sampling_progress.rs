@@ -53,7 +53,7 @@ fn validation_and_callback_failure_never_report_false_completion() {
     let field = &doc.orbitals[0].id;
     let mut events = Vec::new();
     assert!(
-        compute::sample_with_progress(&doc, field, 257, |done, total| {
+        compute::sample_with_progress(&doc, field, 1, |done, total| {
             events.push((done, total));
             Ok(())
         })

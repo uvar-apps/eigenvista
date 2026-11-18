@@ -17,7 +17,7 @@ use std::f64::consts::TAU;
 use super::Sphere;
 use super::cells::{CellGrid, morton};
 use super::vec::{Vec3, orthonormal_basis};
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::par;
 
 /// Absolute geometric tolerance (Å) for containment, intersection and
@@ -49,13 +49,17 @@ pub(crate) struct Csr {
 
 impl Csr {
     /// An empty table with room for `rows` rows of `items` entries in all.
-    fn with_capacity(rows: usize, items: usize) -> Self {
-        let mut offsets = Vec::with_capacity(rows + 1);
+    fn with_capacity(rows: usize, items: usize) -> Result<Self> {
+        let mut offsets = error::capacity(
+            rows.checked_add(1)
+                .ok_or(Error::SizeOverflow("CSR offsets"))?,
+            "CSR offsets",
+        )?;
         offsets.push(0);
-        Self {
+        Ok(Self {
             offsets,
-            items: Vec::with_capacity(items),
-        }
+            items: error::capacity(items, "CSR items")?,
+        })
     }
 
     /// Releases unused capacity.
@@ -64,31 +68,37 @@ impl Csr {
         self.items.shrink_to_fit();
     }
 
-    fn push_row(&mut self, row: impl IntoIterator<Item = u32>) {
-        self.items.extend(row);
-        self.close_row();
+    fn push_row(&mut self, row: impl IntoIterator<Item = u32>) -> Result<()> {
+        error::extend(&mut self.items, row, "CSR items")?;
+        self.close_row()
     }
 
-    /// Ends the current row: the entries pushed to `items` since the last
-    /// row end.
-    fn close_row(&mut self) {
+    fn close_row(&mut self) -> Result<()> {
         if self.offsets.is_empty() {
-            self.offsets.push(0);
+            error::push(&mut self.offsets, 0, "CSR offsets")?;
         }
-        self.offsets
-            .push(u32::try_from(self.items.len()).expect("fewer than 2^32 entries"));
+        let end =
+            u32::try_from(self.items.len()).map_err(|_| Error::SizeOverflow("CSR item offsets"))?;
+        error::push(&mut self.offsets, end, "CSR offsets")
     }
 
-    /// Appends the rows of `other`.
-    fn append(&mut self, other: &Csr) {
+    fn append(&mut self, other: &Csr) -> Result<()> {
         if self.offsets.is_empty() {
-            self.offsets.push(0);
+            error::push(&mut self.offsets, 0, "CSR offsets")?;
         }
         let base = *self.offsets.last().expect("offsets start with 0");
-        self.items.extend_from_slice(&other.items);
-        u32::try_from(self.items.len()).expect("fewer than 2^32 entries");
-        self.offsets
-            .extend(other.offsets.iter().skip(1).map(|&o| base + o));
+        let end = self
+            .items
+            .len()
+            .checked_add(other.items.len())
+            .ok_or(Error::SizeOverflow("CSR items"))?;
+        u32::try_from(end).map_err(|_| Error::SizeOverflow("CSR item offsets"))?;
+        error::extend(&mut self.items, other.items.iter().copied(), "CSR items")?;
+        error::extend(
+            &mut self.offsets,
+            other.offsets.iter().skip(1).map(|&o| base + o),
+            "CSR offsets",
+        )
     }
 
     /// Number of rows.
@@ -331,10 +341,16 @@ struct Merged {
 /// Appends to `out` the exposed arcs left by `intervals` and returns `true`,
 /// or returns `false` (appending nothing) if the circle is fully covered.
 /// `merged` is scratch space.
-fn exposed_arcs(intervals: &mut [Buried], merged: &mut Vec<Merged>, out: &mut Vec<Arc>) -> bool {
+fn exposed_arcs(
+    intervals: &mut [Buried],
+    merged: &mut Vec<Merged>,
+    out: &mut Vec<Arc>,
+) -> Result<bool> {
     if intervals.is_empty() {
-        return true;
+        return Ok(true);
     }
+    error::reserve(merged, intervals.len(), "merged buried intervals")?;
+    error::reserve(out, intervals.len(), "exposed arcs")?;
     intervals.sort_unstable_by(|x, y| {
         x.start
             .total_cmp(&y.start)
@@ -400,7 +416,7 @@ fn exposed_arcs(intervals: &mut [Buried], merged: &mut Vec<Merged>, out: &mut Ve
             }
         }
     }
-    out.len() > before
+    Ok(out.len() > before)
 }
 
 impl Arrangement {
@@ -458,15 +474,18 @@ impl Arrangement {
             input: spheres.len(),
             ..ArrangementStats::default()
         };
-        let mut active: Vec<u32> = (0..spheres.len())
-            .filter(|&i| spheres[i].radius > 0.0)
-            .map(|i| u32::try_from(i).expect("fewer than 2^32 spheres"))
-            .collect();
+        let mut active = error::capacity(spheres.len(), "active spheres")?;
+        for i in (0..spheres.len()).filter(|&i| spheres[i].radius > 0.0) {
+            active.push(u32::try_from(i).map_err(|_| Error::SizeOverflow("sphere indices"))?);
+        }
         stats.zero_radius = spheres.len() - active.len();
         let max_expanded = active
             .iter()
             .map(|&i| spheres[i as usize].radius + probe)
             .fold(0.0, f64::max);
+        if !max_expanded.is_finite() || !(2.0 * max_expanded).is_finite() {
+            return Err(Error::SizeOverflow("expanded sphere coordinates"));
+        }
         let cell = (2.0 * max_expanded).max(1e-6);
 
         // Morton order of cells (ties: input order) for locality.
@@ -479,16 +498,21 @@ impl Arrangement {
                 let p = (Vec3::from_array(spheres[i as usize].center) - lo) / cell;
                 morton([p.x, p.y, p.z].map(|v| (v as u64).min(0x1f_ffff) as u32))
             };
-            active.sort_by_key(|&i| (key(i), i));
+            active.sort_unstable_by_key(|&i| (key(i), i));
         }
-        let centers: Vec<Vec3> = active
-            .iter()
-            .map(|&i| Vec3::from_array(spheres[i as usize].center))
-            .collect();
-        let radii: Vec<f64> = active.iter().map(|&i| spheres[i as usize].radius).collect();
-        let expanded: Vec<f64> = radii.iter().map(|r| r + probe).collect();
+        let centers = error::collect(
+            active
+                .iter()
+                .map(|&i| Vec3::from_array(spheres[i as usize].center)),
+            "sphere centers",
+        )?;
+        let radii = error::collect(
+            active.iter().map(|&i| spheres[i as usize].radius),
+            "sphere radii",
+        )?;
+        let expanded = error::collect(radii.iter().map(|r| r + probe), "expanded radii")?;
         let n = centers.len();
-        let cells = CellGrid::new(&centers, cell);
+        let cells = CellGrid::new(&centers, cell)?;
 
         // Containment: j contains i if i's expanded sphere is inside j's;
         // exact duplicates keep the one with the lower input index.
@@ -497,7 +521,7 @@ impl Arrangement {
             d + expanded[i] <= expanded[j] + EPS
                 && (expanded[j] - expanded[i] > EPS || d > EPS || active[j] < active[i])
         };
-        let contained: Vec<bool> = par::map(n, |i| {
+        let contained = par::try_map(n, |i| {
             let mut found = false;
             cells.for_each_near(centers[i], expanded[i] + max_expanded, |j| {
                 let j = j as usize;
@@ -505,8 +529,8 @@ impl Arrangement {
                     found = true;
                 }
             });
-            found
-        });
+            Ok(found)
+        })?;
         stats.contained = contained.iter().filter(|&&c| c).count();
         control.check()?;
 
@@ -515,29 +539,34 @@ impl Arrangement {
         let chunk = par::chunk_len(n);
         let chunks = n.div_ceil(chunk);
         let range = |c: usize| par::chunk_range(n, chunk, c);
-        let parts: Vec<Csr> = par::map(chunks, |c| {
-            let mut part = Csr::with_capacity(chunk, 0);
+        let parts = par::try_map(chunks, |c| {
+            let mut part = Csr::with_capacity(chunk, 0)?;
             for i in range(c) {
                 let start = part.items.len();
                 if !contained[i] {
-                    cells.for_each_near(centers[i], expanded[i] + max_expanded, |j| {
+                    cells.try_for_each_near(centers[i], expanded[i] + max_expanded, |j| {
                         let ju = j as usize;
                         if ju != i
                             && !contained[ju]
                             && centers[i].dist(centers[ju]) < expanded[i] + expanded[ju] - EPS
                         {
-                            part.items.push(j);
+                            error::push(&mut part.items, j, "sphere neighbors")?;
                         }
-                    });
+                        Ok(())
+                    })?;
                     part.items[start..].sort_unstable();
                 }
-                part.close_row();
+                part.close_row()?;
             }
-            part
-        });
-        let mut neighbors = Csr::with_capacity(n, parts.iter().map(Csr::total).sum());
+            Ok(part)
+        })?;
+        let entries = parts.iter().try_fold(0usize, |n, p| {
+            n.checked_add(p.total())
+                .ok_or(Error::SizeOverflow("sphere neighbor entries"))
+        })?;
+        let mut neighbors = Csr::with_capacity(n, entries)?;
         for part in parts {
-            neighbors.append(&part);
+            neighbors.append(&part)?;
         }
         debug_assert_eq!(neighbors.rows(), n);
         stats.neighbour_pairs = neighbors.total() / 2;
@@ -558,43 +587,45 @@ impl Arrangement {
             expanded: &expanded,
             neighbors: &neighbors,
         };
-        let mut exposed: Vec<bool> = (0..n)
-            .map(|i| !contained[i] && (!with_circles || neighbors.row(i).is_empty()))
-            .collect();
+        let mut exposed = error::collect(
+            (0..n).map(|i| !contained[i] && (!with_circles || neighbors.row(i).is_empty())),
+            "sphere exposure",
+        )?;
         let mut circles = Vec::new();
         let mut arcs = Vec::new();
-        let mut circle_blockers = Csr::with_capacity(0, 0);
+        let mut circle_blockers = Csr::with_capacity(0, 0)?;
         let mut vertices = Vec::new();
         for first in (0..small_chunks).step_by(WAVE) {
-            let parts: Vec<Part> = par::map_init(
+            let parts = par::try_map_init(
                 WAVE.min(small_chunks - first),
-                Scratch::default,
+                || Ok(Scratch::default()),
                 |scratch, c| {
                     let mut part = Part::default();
                     if with_circles {
                         for i in par::chunk_range(n, small, first + c) {
                             if !contained[i] && !control.is_cancelled() {
-                                geometry.circles_of(i, with_arcs, scratch, &mut part);
+                                geometry.circles_of(i, with_arcs, scratch, &mut part)?;
                             }
                         }
                     }
-                    part
+                    Ok(part)
                 },
-            );
+            )?;
             control.check()?;
             for part in parts {
-                let base = u32::try_from(arcs.len()).expect("fewer than 2^32 arcs");
+                let base =
+                    u32::try_from(arcs.len()).map_err(|_| Error::SizeOverflow("arc indices"))?;
                 for mut circle in part.circles {
                     exposed[circle.i as usize] = true;
                     exposed[circle.j as usize] = true;
                     if with_arcs {
                         circle.arcs = (circle.arcs.0 + base, circle.arcs.1 + base);
                     }
-                    circles.push(circle);
+                    error::push(&mut circles, circle, "intersection circles")?;
                 }
-                circle_blockers.append(&part.blockers);
-                arcs.extend(part.arcs);
-                vertices.extend(part.vertices);
+                circle_blockers.append(&part.blockers)?;
+                error::extend(&mut arcs, part.arcs, "intersection arcs")?;
+                error::extend(&mut vertices, part.vertices, "SAS vertices")?;
             }
         }
         // Exact capacities: these arrays live as long as the field.
@@ -604,8 +635,8 @@ impl Arrangement {
         vertices.shrink_to_fit();
         debug_assert_eq!(circle_blockers.rows(), circles.len());
 
-        let status: Vec<Status> = (0..n)
-            .map(|i| {
+        let status = error::collect(
+            (0..n).map(|i| {
                 if contained[i] {
                     Status::Contained
                 } else if exposed[i] {
@@ -613,8 +644,9 @@ impl Arrangement {
                 } else {
                     Status::Buried
                 }
-            })
-            .collect();
+            }),
+            "sphere status",
+        )?;
         stats.exposed = status.iter().filter(|&&s| s == Status::Exposed).count();
         stats.exposed_circles = circles.len();
         stats.arcs = arcs.len();
@@ -665,7 +697,13 @@ struct Part {
 
 impl SphereGeometry<'_> {
     /// Appends the circles of sphere `i` (with `j > i`) to `out`.
-    fn circles_of(&self, i: usize, with_arcs: bool, scratch: &mut Scratch, out: &mut Part) {
+    fn circles_of(
+        &self,
+        i: usize,
+        with_arcs: bool,
+        scratch: &mut Scratch,
+        out: &mut Part,
+    ) -> Result<()> {
         let (centers, expanded) = (self.centers, self.expanded);
         for &j in self.neighbors.row(i).iter().filter(|&&j| j as usize > i) {
             let ju = j as usize;
@@ -697,8 +735,12 @@ impl SphereGeometry<'_> {
                         break;
                     }
                     Cut::Interval { enter, leave } => {
-                        scratch.intervals.push(Buried::new(enter, leave, k));
-                        scratch.blockers.push(k);
+                        error::push(
+                            &mut scratch.intervals,
+                            Buried::new(enter, leave, k),
+                            "buried intervals",
+                        )?;
+                        error::push(&mut scratch.blockers, k, "circle blockers")?;
                     }
                 }
             }
@@ -706,7 +748,7 @@ impl SphereGeometry<'_> {
                 continue;
             }
             let first = out.arcs.len() as u32;
-            if !exposed_arcs(&mut scratch.intervals, &mut scratch.merged, &mut out.arcs) {
+            if !exposed_arcs(&mut scratch.intervals, &mut scratch.merged, &mut out.arcs)? {
                 continue;
             }
             if with_arcs {
@@ -732,16 +774,21 @@ impl SphereGeometry<'_> {
                             || q.dist(centers[l as usize]) >= expanded[l as usize] - EPS
                     });
                     if free {
-                        out.vertices.push(SasVertex {
-                            position: q,
-                            atoms: [i as u32, j, k],
-                        });
+                        error::push(
+                            &mut out.vertices,
+                            SasVertex {
+                                position: q,
+                                atoms: [i as u32, j, k],
+                            },
+                            "SAS triple vertices",
+                        )?;
                     }
                 }
             }
-            out.circles.push(circle);
-            out.blockers.push_row(scratch.blockers.iter().copied());
+            error::push(&mut out.circles, circle, "SAS circles")?;
+            out.blockers.push_row(scratch.blockers.iter().copied())?;
         }
+        Ok(())
     }
 }
 
@@ -903,9 +950,9 @@ mod tests {
     #[test]
     fn csr_retain_rows_compacts_in_place() {
         let rows: [&[u32]; 5] = [&[1, 2], &[], &[3], &[4, 5, 6], &[7]];
-        let mut csr = Csr::with_capacity(rows.len(), 7);
+        let mut csr = Csr::with_capacity(rows.len(), 7).unwrap();
         for row in rows {
-            csr.push_row(row.iter().copied());
+            csr.push_row(row.iter().copied()).unwrap();
         }
         csr.retain_rows(|i| i != 0 && i != 3);
         let got: Vec<&[u32]> = (0..rows.len()).map(|i| csr.row(i)).collect();
@@ -1088,7 +1135,9 @@ mod tests {
             .map(|(s, e, k)| Buried::new([s.cos(), s.sin()], [e.cos(), e.sin()], k))
             .collect();
         let mut out = Vec::new();
-        exposed_arcs(&mut buried, &mut Vec::new(), &mut out).then_some(out)
+        exposed_arcs(&mut buried, &mut Vec::new(), &mut out)
+            .unwrap()
+            .then_some(out)
     }
 
     #[test]

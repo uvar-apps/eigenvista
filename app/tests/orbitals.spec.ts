@@ -114,12 +114,10 @@ test("the orbital browser lists all 118 imported orbitals with metadata, filteri
   await expect(dialog.locator(".orbital-selection-count")).toHaveText(
     "118 selected",
   );
-  await expect(dialog.getByRole("alert")).toHaveText(
-    "Select at most 32 orbitals per generation.",
-  );
+  await expect(dialog.getByRole("alert")).toHaveCount(0);
   await expect(
     dialog.getByRole("button", { name: "Generate selected", exact: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await dialog.getByRole("button", { name: "Clear orbital selection" }).click();
   await dialog.getByLabel("Filter orbitals").fill("118");
   await expect(
@@ -155,7 +153,7 @@ test("the orbital browser lists all 118 imported orbitals with metadata, filteri
     .check();
   await expect(
     dialog.getByRole("button", { name: "Generate selected", exact: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await dialog
     .getByRole("checkbox", { name: "Select orbital 33", exact: true })
     .uncheck();
@@ -349,7 +347,7 @@ for (const outcome of [
   "cancel-without-active",
   "worker-error",
   "invalid-mesh",
-  "native-budget",
+  "allocation-failure",
 ] as const) {
   test(`a second-orbital ${outcome} retains the entire previous document atomically`, async ({
     page,
@@ -398,6 +396,21 @@ for (const outcome of [
         message,
         options?: StructuredSerializeOptions | Transferable[],
       ) {
+        if (outcome === "allocation-failure" && message.action === "validate") {
+          queueMicrotask(() =>
+            this.onmessage?.call(
+              this,
+              new MessageEvent("message", {
+                data: {
+                  id: message.id,
+                  error:
+                    "Cannot allocate native document buffer (injected allocation failure)",
+                },
+              }),
+            ),
+          );
+          return;
+        }
         if (message.action === "generate" && ++control.orbitalRequests === 2) {
           if (outcome.startsWith("cancel")) return;
           if (outcome === "worker-error") {
@@ -422,10 +435,6 @@ for (const outcome of [
             ) {
               if (outcome === "invalid-mesh")
                 event.data.result.surfaces[0].source_hash = "0".repeat(64);
-              else
-                event.data.result.surfaces[0].label = "x".repeat(
-                  8 * 1024 * 1024,
-                );
               this.onmessage = receive;
             }
             receive?.call(this, event);
@@ -477,7 +486,7 @@ for (const outcome of [
         await expect(page.getByRole("alert")).toContainText("source");
       else
         await expect(page.getByRole("alert")).toContainText(
-          "Native document exceeds preview budget",
+          "Cannot allocate native document buffer",
         );
     }
     await page.evaluate(() =>

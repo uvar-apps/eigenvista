@@ -7,7 +7,6 @@ import type {
 import { elementDisplay } from "./elements";
 
 type Monitor = MeasurementDefinition & { result: MeasurementResult };
-const MAX_TEXTURE_BYTES = 16 * 1024 * 1024;
 
 /** Sparse labels use real scene sprites, so depth testing and PNG agree. */
 /** Dispose owned textures/materials without disposing Three's shared Sprite geometry. */
@@ -27,7 +26,7 @@ const disposeAnnotations = (group: THREE.Group): void => {
   });
 };
 
-/** Use the actual bounded layout before committing durable annotation edits.
+/** Use the actual layout before committing durable annotation edits.
  * These CPU textures are disposed before publication and never uploaded to WebGL.
  */
 export const validateAnnotationRendering = (
@@ -43,7 +42,6 @@ export function buildAnnotations(
   selected: number[],
 ): THREE.Group {
   const group = new THREE.Group();
-  let bytes = 0;
   const sprite = (
     text: string,
     color: string,
@@ -76,11 +74,6 @@ export function buildAnnotations(
       ),
     );
     canvas.height = lines.length * 21 + 10;
-    bytes += canvas.width * canvas.height * 4;
-    if (bytes > MAX_TEXTURE_BYTES)
-      throw new Error(
-        "Visible labels exceed the 16 MiB texture budget; hide some labels",
-      );
     context.font = "600 15px system-ui, sans-serif";
     context.textBaseline = "top";
     context.lineJoin = "round";

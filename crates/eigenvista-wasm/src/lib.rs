@@ -1,6 +1,8 @@
 use eigenvista_core::{Document, Grid, View, compute, fixtures, valid_color};
 use wasm_bindgen::prelude::*;
 mod inspection;
+mod serialization;
+use serialization::to_string;
 fn err(e: impl ToString) -> JsValue {
     JsValue::from_str(&e.to_string())
 }
@@ -11,7 +13,7 @@ fn parse(s: &str) -> Result<Document, JsValue> {
 }
 #[wasm_bindgen]
 pub fn example(open_shell: bool) -> String {
-    serde_json::to_string(&if open_shell {
+    to_string(&if open_shell {
         fixtures::open_shell()
     } else {
         fixtures::hydrogen_pair()
@@ -22,7 +24,7 @@ pub fn example(open_shell: bool) -> String {
 pub fn validate(json: &str) -> Result<(), JsValue> {
     parse(json).map(|_| ())
 }
-/// Check publication against the same scientific and native budgets as Save.
+/// Check publication against the same scientific validation and fallible packing as Save.
 #[wasm_bindgen]
 pub fn validate_document(json: &str) -> Result<(), JsValue> {
     let doc = serde_json::from_str(json).map_err(err)?;
@@ -35,28 +37,26 @@ pub fn encode(json: &str) -> Result<Vec<u8>, JsValue> {
 }
 #[wasm_bindgen]
 pub fn decode(bytes: &[u8]) -> Result<String, JsValue> {
-    serde_json::to_string(&eigenvista_format::decode(bytes).map_err(err)?).map_err(err)
+    to_string(&eigenvista_format::decode(bytes).map_err(err)?).map_err(err)
 }
 #[wasm_bindgen]
 pub fn import_text(text: &str, name: &str) -> Result<String, JsValue> {
     let result = eigenvista_import::import_bytes(text.as_bytes(), name).map_err(err)?;
-    serde_json::to_string(&result.document).map_err(err)
+    to_string(&result.document).map_err(err)
 }
 #[wasm_bindgen]
 pub fn import_document(bytes: &[u8], name: &str) -> Result<String, JsValue> {
-    serde_json::to_string(&eigenvista_import::import_bytes(bytes, name).map_err(err)?).map_err(err)
+    to_string(&eigenvista_import::import_bytes(bytes, name).map_err(err)?).map_err(err)
 }
 /// Prepare display-only biological topology without touching registered QC inputs.
 #[wasm_bindgen]
 pub fn protein_backbone(json: &str) -> Result<String, JsValue> {
     let document: Document = serde_json::from_str(json).map_err(err)?;
-    serde_json::to_string(&eigenvista_core::protein::protein_backbone(&document).map_err(err)?)
-        .map_err(err)
+    to_string(&eigenvista_core::protein::protein_backbone(&document).map_err(err)?).map_err(err)
 }
 #[wasm_bindgen]
 pub fn sample(json: &str, field: &str, resolution: usize) -> Result<String, JsValue> {
-    serde_json::to_string(&compute::sample(&parse(json)?, field, resolution).map_err(err)?)
-        .map_err(err)
+    to_string(&compute::sample(&parse(json)?, field, resolution).map_err(err)?).map_err(err)
 }
 #[wasm_bindgen]
 pub fn surfaces(json: &str, grid_json: &str, field: &str, iso: f64) -> Result<String, JsValue> {
@@ -101,7 +101,7 @@ fn mesh_surfaces(
         }
         progress(index + 1, 2)?;
     }
-    serde_json::to_string(&surfaces).map_err(err)
+    to_string(&surfaces).map_err(err)
 }
 
 /// Retain the authoritative f64 samples inside WASM instead of roundtripping grid JSON.
@@ -151,7 +151,7 @@ impl SampledField {
 
     pub fn metadata(&self) -> Result<String, JsValue> {
         let grid = &self.grid;
-        serde_json::to_string(&serde_json::json!({
+        to_string(&serde_json::json!({
             "id": grid.id,
             "label": grid.label,
             "quantity": grid.quantity,
@@ -278,7 +278,7 @@ impl RegisteredDocument {
 
     /// Interpretation is validated independently of the registered numeric source.
     pub fn describe_field(&self, field: &str) -> Result<String, JsValue> {
-        serde_json::to_string(
+        to_string(
             &eigenvista_core::field_analysis::describe_field(&self.document, field).map_err(err)?,
         )
         .map_err(err)
@@ -290,7 +290,7 @@ impl RegisteredDocument {
         descriptor.origin = "user_declared".into();
         descriptor.validate(&self.document).map_err(err)?;
         let interpretation_hash = descriptor.interpretation_hash().map_err(err)?;
-        serde_json::to_string(
+        to_string(
             &serde_json::json!({"descriptor":descriptor,"interpretation_hash":interpretation_hash}),
         )
         .map_err(err)

@@ -42,14 +42,14 @@ fn basis_capacity_matches_the_core_without_requiring_a_complete_mo_set() {
 
     document.basis.push(document.basis[0].clone());
     document.orbitals[0].coefficients.push(0.);
-    assert!(document.validate().unwrap_err().contains("resource budget"));
-    let error =
-        import_bytes(wavefunction(1025, 1, 0).as_bytes(), "too-many-aos.molden").unwrap_err();
-    assert!(error.contains("1024 atomic orbitals"), "{error}");
+    document.validate().unwrap();
+    let larger = import_bytes(wavefunction(1025, 1, 0).as_bytes(), "larger-aos.molden").unwrap();
+    assert_eq!(larger.document.basis.len(), 1025);
+    larger.document.validate().unwrap();
 }
 
 #[test]
-fn complete_spatial_and_two_spin_sets_share_the_total_mo_cap() {
+fn complete_spatial_and_two_spin_sets_extend_beyond_former_mo_ceiling() {
     for (basis, alpha, beta, spin) in [(512, 512, 0, "spatial"), (256, 256, 256, "alpha")] {
         let imported = import_bytes(
             wavefunction(basis, alpha, beta).as_bytes(),
@@ -69,23 +69,36 @@ fn complete_spatial_and_two_spin_sets_share_the_total_mo_cap() {
         let mut extra = document.orbitals.last().unwrap().clone();
         extra.id = "outside-orbital-limit".into();
         document.orbitals.push(extra);
-        assert!(document.validate().unwrap_err().contains("resource budget"));
-        let error = import_bytes(
+        document.validate().unwrap();
+        let larger = import_bytes(
             wavefunction(
                 basis,
                 alpha + usize::from(beta == 0),
                 beta + usize::from(beta != 0),
             )
             .as_bytes(),
-            "too-many-mos.molden",
+            "larger-mos.molden",
         )
-        .unwrap_err();
-        assert!(error.contains("512 molecular orbitals"), "{error}");
+        .unwrap();
+        assert_eq!(larger.document.orbitals.len(), 513);
+        larger.document.validate().unwrap();
     }
 }
 
 #[test]
-fn complete_300_ao_unrestricted_export_is_rejected_instead_of_truncated() {
-    let error = import_bytes(wavefunction(300, 300, 300).as_bytes(), "uhf-300.molden").unwrap_err();
-    assert!(error.contains("512 molecular orbitals"), "{error}");
+fn complete_300_ao_unrestricted_export_retains_all_600_orbitals() {
+    let imported = import_bytes(wavefunction(300, 300, 300).as_bytes(), "uhf-300.molden").unwrap();
+    assert_eq!(imported.document.basis.len(), 300);
+    assert_eq!(imported.document.orbitals.len(), 600);
+    assert!(
+        imported.document.orbitals[..300]
+            .iter()
+            .all(|mo| mo.spin == "alpha")
+    );
+    assert!(
+        imported.document.orbitals[300..]
+            .iter()
+            .all(|mo| mo.spin == "beta")
+    );
+    imported.document.validate().unwrap();
 }

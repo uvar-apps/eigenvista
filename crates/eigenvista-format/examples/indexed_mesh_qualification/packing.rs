@@ -1,11 +1,10 @@
 //! Qualification prototypes only: no public library or application path uses these.
-use eigenvista_core::{MAX_VERTICES, Result, Surface, determinant};
+use eigenvista_core::{Result, Surface, determinant};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 
 pub const MARKER: &str = "qualification-mcubes-0.1.7-exact-tuples-v1";
-const TEMP_BUDGET: usize = 512 * 1024 * 1024;
 type Key = [u64; 6];
 
 #[derive(Clone, Copy)]
@@ -34,12 +33,6 @@ pub fn capacity_bytes(surface: &Surface) -> usize {
 }
 
 fn buffer<T>(count: usize) -> Result<Vec<T>> {
-    let bytes = count
-        .checked_mul(std::mem::size_of::<T>())
-        .ok_or("Qualification capacity overflow")?;
-    if bytes > TEMP_BUDGET {
-        return Err("Qualification buffer exceeds temporary budget".into());
-    }
     let mut values = Vec::new();
     values
         .try_reserve_exact(count)
@@ -98,25 +91,30 @@ fn metadata(raw: &Surface) -> Surface {
     }
 }
 
-pub fn canonical_indices(corners: usize, reflected: bool) -> Vec<u32> {
-    let mut indices: Vec<_> = (0..corners as u32).collect();
+pub fn canonical_indices(corners: usize, reflected: bool) -> Result<Vec<u32>> {
+    if corners > 0 {
+        u32::try_from(corners - 1).map_err(|_| "Corner index exceeds u32 representation")?;
+    }
+    let mut indices = buffer(corners)?;
+    for index in 0..corners {
+        indices.push(index as u32);
+    }
     if reflected {
         for triangle in indices.as_chunks_mut::<3>().0 {
             triangle.swap(1, 2);
         }
     }
-    indices
+    Ok(indices)
 }
 
 fn check_raw(raw: &Surface) -> Result<usize> {
     let count = raw.positions.len() / 3;
-    if count > MAX_VERTICES
-        || !raw.positions.len().is_multiple_of(3)
+    if !raw.positions.len().is_multiple_of(3)
         || raw.normals.len() != raw.positions.len()
         || raw.indices.len() != count
         || !count.is_multiple_of(3)
     {
-        return Err("Not a bounded generated corner stream".into());
+        return Err("Not a generated corner stream".into());
     }
     // Independently check the actual extractor's complete raw index convention.
     let reflected = determinant(raw.grid_axes) < 0.;
@@ -155,7 +153,7 @@ pub fn compact(raw: &Surface, strategy: Strategy) -> Result<(Surface, Layout)> {
                 .checked_mul(8)
                 .and_then(|n| n.checked_add(6))
                 .map(|n| n / 7)
-                .unwrap_or(usize::MAX)
+                .ok_or("Hash capacity overflow")?
                 .max(8)
                 .checked_next_power_of_two()
                 .ok_or("Hash capacity overflow")?;
@@ -163,12 +161,6 @@ pub fn compact(raw: &Surface, strategy: Strategy) -> Result<(Surface, Layout)> {
                 .checked_mul(std::mem::size_of::<(Key, u32)>() + 1)
                 .and_then(|n| n.checked_add(32))
                 .ok_or("Hash byte bound overflow")?;
-            if hash_reserved_bound_bytes
-                .checked_add(count * 4)
-                .is_none_or(|n| n > TEMP_BUDGET)
-            {
-                return Err("Qualification hash/scratch exceeds temporary budget".into());
-            }
             let mut map = HashMap::<Key, u32>::new();
             map.try_reserve(count)
                 .map_err(|_| "Qualification hash allocation failed")?;
@@ -276,10 +268,7 @@ pub fn compact(raw: &Surface, strategy: Strategy) -> Result<(Surface, Layout)> {
 /// Restore only explicitly identified newly generated prototype layout. Old or
 /// arbitrary indexed files must retain their original shader identity untouched.
 pub fn restore(compact: &Surface) -> Result<Surface> {
-    if compact.algorithm != MARKER
-        || !compact.indices.len().is_multiple_of(3)
-        || compact.indices.len() > MAX_VERTICES
-    {
+    if compact.algorithm != MARKER || !compact.indices.len().is_multiple_of(3) {
         return Err("Unsupported raw-identity reconstruction layout".into());
     }
     let count = compact.indices.len();
@@ -319,9 +308,17 @@ pub fn restore(compact: &Surface) -> Result<Surface> {
     drop(seen);
     let mut output = metadata(compact);
     output.algorithm = "mcubes-0.1.7-classic".into();
-    output.positions = buffer(count * 3)?;
-    output.normals = buffer(count * 3)?;
-    output.indices = canonical_indices(count, reflected);
+    output.positions = buffer(
+        count
+            .checked_mul(3)
+            .ok_or("Corner attribute count overflow")?,
+    )?;
+    output.normals = buffer(
+        count
+            .checked_mul(3)
+            .ok_or("Corner attribute count overflow")?,
+    )?;
+    output.indices = canonical_indices(count, reflected)?;
     for ordinal in 0..count {
         let slot = raw_slot(ordinal, reflected);
         let index = compact.indices[slot] as usize;
@@ -354,8 +351,20 @@ fn raw_slot(ordinal: usize, reflected: bool) -> usize {
 pub fn naive_unroll(compact: &Surface) -> Result<Surface> {
     let mut output = metadata(compact);
     output.algorithm = "qualification-naive-triangle-order".into();
-    output.positions = buffer(compact.indices.len() * 3)?;
-    output.normals = buffer(compact.indices.len() * 3)?;
+    output.positions = buffer(
+        compact
+            .indices
+            .len()
+            .checked_mul(3)
+            .ok_or("Corner attribute count overflow")?,
+    )?;
+    output.normals = buffer(
+        compact
+            .indices
+            .len()
+            .checked_mul(3)
+            .ok_or("Corner attribute count overflow")?,
+    )?;
     for index in &compact.indices {
         let i = *index as usize * 3;
         output
@@ -365,7 +374,7 @@ pub fn naive_unroll(compact: &Surface) -> Result<Surface> {
             .normals
             .extend_from_slice(compact.normals.get(i..i + 3).ok_or("Invalid index")?);
     }
-    output.indices = canonical_indices(compact.indices.len(), false);
+    output.indices = canonical_indices(compact.indices.len(), false)?;
     Ok(output)
 }
 

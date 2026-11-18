@@ -8,6 +8,7 @@
 //! The library never prints (Spec FR-DIAG-1): warnings are aggregated here and
 //! returned to the caller, which decides how to report them.
 
+use crate::error::{self, Error, Result};
 use std::fmt;
 
 /// Category of a [`Warning`].
@@ -30,7 +31,7 @@ pub enum WarningKind {
 }
 
 /// An aggregated warning: one entry per distinct `(kind, message)`, with an
-/// occurrence count and a few examples.
+/// occurrence count and every example.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Warning {
@@ -40,7 +41,7 @@ pub struct Warning {
     pub message: String,
     /// Number of occurrences.
     pub count: u64,
-    /// Up to [`Diagnostics::MAX_EXAMPLES`] example locations or values.
+    /// Every recorded example location or value, in occurrence order.
     pub examples: Vec<String>,
 }
 
@@ -51,7 +52,13 @@ impl fmt::Display for Warning {
             write!(f, " ({} times)", self.count)?;
         }
         if !self.examples.is_empty() {
-            write!(f, "; e.g. {}", self.examples.join(", "))?;
+            write!(f, "; e.g. ")?;
+            for (index, example) in self.examples.iter().enumerate() {
+                if index != 0 {
+                    write!(f, ", ")?;
+                }
+                write!(f, "{example}")?;
+            }
             if self.count > self.examples.len() as u64 {
                 write!(f, ", ...")?;
             }
@@ -67,53 +74,119 @@ pub struct Diagnostics {
 }
 
 impl Diagnostics {
-    /// Maximum number of examples kept per warning.
-    pub const MAX_EXAMPLES: usize = 5;
-
     /// Creates an empty collection.
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Records one occurrence of a warning. `example` is only evaluated while
-    /// fewer than [`Self::MAX_EXAMPLES`] examples are stored.
-    pub fn warn(&mut self, kind: WarningKind, message: &str, example: impl FnOnce() -> String) {
-        let i = self
+    /// Records one occurrence and every example, using fallible storage growth.
+    /// Allocation/count failure leaves existing diagnostics intact.
+    pub fn warn(
+        &mut self,
+        kind: WarningKind,
+        message: &str,
+        example: impl FnOnce() -> String,
+    ) -> Result<()> {
+        if let Some(entry) = self
             .warnings
-            .iter()
-            .position(|w| w.kind == kind && w.message == message)
-            .unwrap_or_else(|| {
-                self.warnings.push(Warning {
-                    kind,
-                    message: message.to_owned(),
-                    count: 0,
-                    examples: Vec::new(),
-                });
-                self.warnings.len() - 1
-            });
-        let entry = &mut self.warnings[i];
-        entry.count += 1;
-        if entry.examples.len() < Self::MAX_EXAMPLES {
+            .iter_mut()
+            .find(|w| w.kind == kind && w.message == message)
+        {
+            let count = entry
+                .count
+                .checked_add(1)
+                .ok_or(Error::SizeOverflow("diagnostic occurrence count"))?;
+            error::reserve(&mut entry.examples, 1, "diagnostic examples")?;
             entry.examples.push(example());
+            entry.count = count;
+        } else {
+            error::reserve(&mut self.warnings, 1, "diagnostic warnings")?;
+            let mut description = String::new();
+            description
+                .try_reserve_exact(message.len())
+                .map_err(|source| Error::Allocation {
+                    what: "diagnostic message",
+                    source,
+                })?;
+            description.push_str(message);
+            let mut examples = error::capacity(1, "diagnostic examples")?;
+            examples.push(example());
+            self.warnings.push(Warning {
+                kind,
+                message: description,
+                count: 1,
+                examples,
+            });
+        }
+        Ok(())
+    }
+
+    /// Reports a missing optional field before choosing its documented default.
+    pub(crate) fn or_warn<T>(
+        &mut self,
+        value: Option<T>,
+        default: T,
+        kind: WarningKind,
+        message: &str,
+        example: impl FnOnce() -> String,
+    ) -> Result<T> {
+        match value {
+            Some(value) => Ok(value),
+            None => {
+                self.warn(kind, message, example)?;
+                Ok(default)
+            }
         }
     }
 
-    /// Adds all warnings of `other`, aggregating identical entries.
-    pub fn merge(&mut self, other: Diagnostics) {
-        for w in other.warnings {
-            match self
+    /// Adds all occurrences/examples in first-warning/example order.
+    /// Reserve before consuming `other`, so failure cannot publish a partial merge.
+    pub fn merge(&mut self, other: Diagnostics) -> Result<()> {
+        let new_warnings = other
+            .warnings
+            .iter()
+            .filter(|w| {
+                !self
+                    .warnings
+                    .iter()
+                    .any(|x| x.kind == w.kind && x.message == w.message)
+            })
+            .count();
+        error::reserve(
+            &mut self.warnings,
+            new_warnings,
+            "merged diagnostic warnings",
+        )?;
+        for w in &other.warnings {
+            if let Some(existing) = self
                 .warnings
                 .iter_mut()
                 .find(|x| x.kind == w.kind && x.message == w.message)
             {
-                Some(x) => {
-                    x.count += w.count;
-                    let room = Self::MAX_EXAMPLES.saturating_sub(x.examples.len());
-                    x.examples.extend(w.examples.into_iter().take(room));
-                }
-                None => self.warnings.push(w),
+                existing
+                    .count
+                    .checked_add(w.count)
+                    .ok_or(Error::SizeOverflow("merged diagnostic occurrence count"))?;
+                error::reserve(
+                    &mut existing.examples,
+                    w.examples.len(),
+                    "merged diagnostic examples",
+                )?;
             }
         }
+        for w in other.warnings {
+            if let Some(existing) = self
+                .warnings
+                .iter_mut()
+                .find(|x| x.kind == w.kind && x.message == w.message)
+            {
+                existing.count += w.count;
+                existing.examples.extend(w.examples);
+            } else {
+                self.warnings.push(w);
+            }
+        }
+        Ok(())
     }
 
     /// The aggregated warnings in first-occurrence order.
@@ -146,33 +219,74 @@ mod tests {
         for i in 0..7 {
             d.warn(WarningKind::InvalidField, "bad serial", || {
                 format!("line {i}")
-            });
+            })
+            .unwrap();
         }
         d.warn(WarningKind::UnknownElement, "unknown element", || {
             "X1".into()
-        });
+        })
+        .unwrap();
         assert_eq!(d.warnings().len(), 2);
         assert_eq!(d.warnings()[0].count, 7);
-        assert_eq!(d.warnings()[0].examples.len(), Diagnostics::MAX_EXAMPLES);
+        assert_eq!(d.warnings()[0].examples.len(), 7);
         assert_eq!(d.count(WarningKind::UnknownElement), 1);
         let text = d.warnings()[0].to_string();
         assert!(
             text.starts_with("bad serial (7 times); e.g. line 0"),
             "{text}"
         );
-        assert!(text.ends_with(", ..."));
+        assert!(text.ends_with("line 6"));
     }
 
     #[test]
     fn merge_combines_counts() {
         let mut a = Diagnostics::new();
-        a.warn(WarningKind::InvalidField, "m", || "a".into());
+        a.warn(WarningKind::InvalidField, "m", || "a".into())
+            .unwrap();
         let mut b = Diagnostics::new();
-        b.warn(WarningKind::InvalidField, "m", || "b".into());
-        b.warn(WarningKind::InferredElement, "n", || "c".into());
-        a.merge(b);
+        b.warn(WarningKind::InvalidField, "m", || "b".into())
+            .unwrap();
+        b.warn(WarningKind::InferredElement, "n", || "c".into())
+            .unwrap();
+        a.merge(b).unwrap();
         assert_eq!(a.count(WarningKind::InvalidField), 2);
         assert_eq!(a.warnings()[0].examples, ["a", "b"]);
         assert_eq!(a.warnings().len(), 2);
+    }
+    #[test]
+    fn merge_retains_every_example_beyond_the_former_ceiling() {
+        let mut a = Diagnostics::new();
+        let mut b = Diagnostics::new();
+        for i in 0..20 {
+            let target = if i < 9 { &mut a } else { &mut b };
+            target
+                .warn(WarningKind::InvalidField, "all", || format!("example {i}"))
+                .unwrap();
+        }
+        a.merge(b).unwrap();
+        assert_eq!(a.warnings()[0].count, 20);
+        assert_eq!(
+            a.warnings()[0].examples,
+            (0..20).map(|i| format!("example {i}")).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn occurrence_overflow_preserves_existing_diagnostics() {
+        let mut a = Diagnostics::new();
+        a.warn(WarningKind::InvalidField, "all", || "first".into())
+            .unwrap();
+        a.warnings[0].count = u64::MAX;
+        let before = a.clone();
+        assert!(matches!(
+            a.warn(WarningKind::InvalidField, "all", || "unused".into()),
+            Err(Error::SizeOverflow(_))
+        ));
+        assert_eq!(a, before);
+        let mut b = Diagnostics::new();
+        b.warn(WarningKind::InvalidField, "all", || "unused".into())
+            .unwrap();
+        assert!(matches!(a.merge(b), Err(Error::SizeOverflow(_))));
+        assert_eq!(a, before);
     }
 }

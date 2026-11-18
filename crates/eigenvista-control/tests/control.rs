@@ -1,9 +1,6 @@
 #![cfg(unix)]
 use base64::Engine;
-use eigenvista_control::{
-    Broker, Connection, MAX_FILE_BYTES, MAX_FRAME_BYTES, MAX_PNG_DATA_URL_BYTES, RpcError,
-    ScopedFiles, call,
-};
+use eigenvista_control::{Broker, Connection, RpcError, ScopedFiles, call, call_until_complete};
 use serde_json::{Value, json};
 use std::{
     fs,
@@ -58,7 +55,7 @@ fn raw(connection: &Connection, bytes: &[u8]) -> Value {
 }
 
 #[test]
-fn scientific_csv_is_scoped_bounded_source_protected_and_no_clobber() {
+fn scientific_csv_is_scoped_source_protected_and_no_clobber() {
     let dir = Scratch::new("csv");
     let files = scope(&dir);
     let source = dir.0.join("source.csv");
@@ -110,6 +107,33 @@ fn scientific_csv_is_scoped_bounded_source_protected_and_no_clobber() {
             .is_err()
     );
     assert_eq!(fs::read_to_string(&source).unwrap(), "original input");
+}
+
+#[test]
+fn csv_and_source_history_can_exceed_the_former_byte_and_count_limits() {
+    let dir = Scratch::new("large-csv");
+    let files = scope(&dir);
+    let protected: Vec<_> = (0..4097)
+        .map(|index| {
+            dir.0
+                .join(format!("source-{index}.csv"))
+                .to_string_lossy()
+                .into_owned()
+        })
+        .collect();
+    let text = "0,1\n".repeat(8 * 1024 * 1024 + 1);
+    let output = dir.0.join("large.csv");
+    let receipt = files.write_csv(&output, &text, &protected, false).unwrap();
+    assert!(receipt.bytes > 32 * 1024 * 1024);
+    assert_eq!(fs::metadata(&output).unwrap().len(), text.len() as u64);
+    assert_eq!(
+        kind(
+            &files
+                .write_csv(Path::new(&protected[4096]), "x,y\n", &[], false)
+                .unwrap_err()
+        ),
+        "source_protected"
+    );
 }
 
 #[test]
@@ -174,7 +198,7 @@ fn actual_socket_auth_readiness_correlation_and_private_descriptor() {
 }
 
 #[test]
-fn real_wire_rejects_batches_notifications_bad_json_and_oversized_frames() {
+fn real_wire_rejects_batches_notifications_bad_json_and_preserves_descriptor_security() {
     let dir = Scratch::new("wire");
     let file = dir.0.join("connection.json");
     let broker = Broker::start(&file, |_| {
@@ -194,12 +218,6 @@ fn real_wire_rejects_batches_notifications_bad_json_and_oversized_frames() {
         raw(&connection, notification.as_bytes())["error"]["code"],
         -32600
     );
-    let mut huge = vec![b' '; MAX_FRAME_BYTES + 1];
-    huge.push(b'\n');
-    assert_eq!(
-        raw(&connection, &huge)["error"]["data"]["kind"],
-        "limit_exceeded"
-    );
     let public = dir.0.join("public.json");
     fs::copy(&file, &public).unwrap();
     fs::set_permissions(&public, fs::Permissions::from_mode(0o644)).unwrap();
@@ -218,7 +236,7 @@ fn real_wire_rejects_batches_notifications_bad_json_and_oversized_frames() {
 }
 
 #[test]
-fn oversized_app_result_is_a_prompt_bounded_error() {
+fn requests_and_results_can_exceed_the_former_four_mib_wire_limit() {
     let dir = Scratch::new("result");
     let file = dir.0.join("connection.json");
     let (tx, rx) = mpsc::channel();
@@ -229,16 +247,196 @@ fn oversized_app_result_is_a_prompt_bounded_error() {
     .unwrap();
     broker.ready();
     let connection = Connection::load(&file).unwrap();
-    let client =
-        thread::spawn(move || call(&connection, "app.state", json!({}), Duration::from_secs(5)));
-    let request = rx.recv_timeout(Duration::from_secs(5)).unwrap();
+    let length = 4 * 1024 * 1024 + 1;
+    let client = thread::spawn(move || {
+        call(
+            &connection,
+            "app.state",
+            json!({"payload":"x".repeat(length)}),
+            Duration::from_secs(15),
+        )
+    });
+
+    let request = rx.recv_timeout(Duration::from_secs(15)).unwrap();
+    assert_eq!(request.params["payload"].as_str().unwrap().len(), length);
+    broker
+        .respond(request.request_id, json!({"result":"x".repeat(length)}))
+        .unwrap();
+    assert_eq!(
+        client.join().unwrap().unwrap().as_str().unwrap().len(),
+        length
+    );
+}
+
+#[test]
+fn default_requests_wait_for_controlled_completion_and_explicit_deadlines_are_optional() {
+    let dir = Scratch::new("completion");
+    let (requests, received) = mpsc::channel();
+    let broker = Broker::start(&dir.0.join("connection.json"), move |request| {
+        requests.send(request).unwrap();
+        Ok(())
+    })
+    .unwrap();
+    broker.ready();
+    let connection = Connection::load(&dir.0.join("connection.json")).unwrap();
+    let (completed, results) = mpsc::channel();
+    let first = connection.clone();
+    let length = 4 * 1024 * 1024 + 1;
+    let client = thread::spawn(move || {
+        completed
+            .send(call_until_complete(
+                &first,
+                "document.save",
+                json!({"payload":"x".repeat(length)}),
+            ))
+            .unwrap();
+    });
+    let pending = received.recv_timeout(Duration::from_secs(2)).unwrap();
+    assert_eq!(pending.params["payload"].as_str().unwrap().len(), length);
+    // The frontend owns this gate; no first-byte timeout may invent completion.
+    assert!(matches!(
+        results.recv_timeout(Duration::from_millis(150)),
+        Err(mpsc::RecvTimeoutError::Timeout)
+    ));
+    let bounded = thread::spawn(move || {
+        call(
+            &connection,
+            "app.state",
+            json!({}),
+            Duration::from_millis(100),
+        )
+    });
+    received.recv_timeout(Duration::from_secs(2)).unwrap();
+    assert_eq!(kind(&bounded.join().unwrap().unwrap_err()), "timeout");
+    assert!(matches!(results.try_recv(), Err(mpsc::TryRecvError::Empty)));
+    broker
+        .respond(
+            pending.request_id,
+            json!({"result":{"saved":true,"artifact":"x".repeat(length)}}),
+        )
+        .unwrap();
+    let result = results
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap()
+        .unwrap();
+    assert_eq!(result["saved"], true);
+    assert_eq!(result["artifact"].as_str().unwrap().len(), length);
+    client.join().unwrap();
+}
+
+#[test]
+fn controller_navigation_and_broker_shutdown_wake_pending_requests() {
+    for close in [false, true] {
+        let dir = Scratch::new("controller-disconnect");
+        let (requests, received) = mpsc::channel();
+        let broker = Broker::start(&dir.0.join("connection.json"), move |request| {
+            requests.send(request).unwrap();
+            Ok(())
+        })
+        .unwrap();
+        broker.ready();
+        let connection = Connection::load(&dir.0.join("connection.json")).unwrap();
+        let (done, result) = mpsc::channel();
+        let client = thread::spawn(move || {
+            done.send(call_until_complete(&connection, "document.save", json!({})))
+                .unwrap()
+        });
+        received.recv_timeout(Duration::from_secs(2)).unwrap();
+        if close {
+            drop(broker);
+        } else {
+            broker.unready();
+        }
+        assert_eq!(
+            kind(
+                &result
+                    .recv_timeout(Duration::from_secs(2))
+                    .unwrap()
+                    .unwrap_err()
+            ),
+            "not_ready"
+        );
+        client.join().unwrap();
+    }
+}
+
+#[test]
+fn write_half_closed_client_receives_the_complete_delayed_response() {
+    let dir = Scratch::new("half-closed-request");
+    let (requests, received) = mpsc::channel();
+    let broker = Broker::start(&dir.0.join("connection.json"), move |request| {
+        requests.send(request).unwrap();
+        Ok(())
+    })
+    .unwrap();
+    broker.ready();
+    let connection = Connection::load(&dir.0.join("connection.json")).unwrap();
+    let (completed, result) = mpsc::channel();
+    let client = thread::spawn(move || {
+        let mut stream = TcpStream::connect(&connection.address).unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .unwrap();
+        let frame = serde_json::to_string(&json!({"jsonrpc":"2.0","id":"half-close","method":"document.save","params":{},"auth":connection.token})).unwrap() + "\n";
+        stream.write_all(frame.as_bytes()).unwrap();
+        stream.shutdown(std::net::Shutdown::Write).unwrap();
+        let mut response = String::new();
+        BufReader::new(stream).read_line(&mut response).unwrap();
+        completed
+            .send(serde_json::from_str::<Value>(&response).unwrap())
+            .unwrap();
+    });
+    let request = received.recv_timeout(Duration::from_secs(2)).unwrap();
+    // Keep the frontend completion gated past the former peer-EOF polling
+    // interval. Half-closing the request must never invent a failed operation.
+    assert!(matches!(
+        result.recv_timeout(Duration::from_millis(200)),
+        Err(mpsc::RecvTimeoutError::Timeout)
+    ));
+    let length = 4 * 1024 * 1024 + 1;
     broker
         .respond(
             request.request_id,
-            json!({"result":"x".repeat(MAX_FRAME_BYTES)}),
+            json!({"result":{"artifact":"x".repeat(length)}}),
         )
         .unwrap();
-    assert_eq!(kind(&client.join().unwrap().unwrap_err()), "limit_exceeded");
+    let response = result.recv_timeout(Duration::from_secs(5)).unwrap();
+    assert_eq!(response["jsonrpc"], "2.0");
+    assert_eq!(response["id"], "half-close");
+    assert!(response.get("error").is_none());
+    assert_eq!(
+        response["result"]["artifact"].as_str().unwrap().len(),
+        length
+    );
+    client.join().unwrap();
+}
+
+#[test]
+fn closed_response_socket_reports_disconnect_instead_of_timeout() {
+    let dir = Scratch::new("response-disconnect");
+    let (requests, received) = mpsc::channel();
+    let broker = Broker::start(&dir.0.join("connection.json"), move |request| {
+        requests.send(request).unwrap();
+        Ok(())
+    })
+    .unwrap();
+    broker.ready();
+    let connection = Connection::load(&dir.0.join("connection.json")).unwrap();
+    // Establish a valid descriptor but make this request's peer close after read.
+    let listener = std::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
+    let mut disconnected = connection;
+    disconnected.address = listener.local_addr().unwrap().to_string();
+    let server = thread::spawn(move || {
+        let (stream, _) = listener.accept().unwrap();
+        let mut line = String::new();
+        BufReader::new(stream).read_line(&mut line).unwrap();
+    });
+    assert_eq!(
+        kind(&call_until_complete(&disconnected, "app.state", json!({})).unwrap_err()),
+        "connection_failed"
+    );
+    server.join().unwrap();
+    assert!(received.try_recv().is_err());
 }
 
 #[test]
@@ -291,46 +489,25 @@ fn scoped_files_reject_escapes_aliases_and_import_source_replacement() {
     let huge = dir.0.join("huge.xyz");
     fs::File::create(&huge)
         .unwrap()
-        .set_len(MAX_FILE_BYTES as u64 + 1)
+        .set_len(128 * 1024 * 1024 + 1)
         .unwrap();
-    assert_eq!(kind(&files.read(&huge).unwrap_err()), "limit_exceeded");
+    let bytes = files.read(&huge).unwrap();
+    assert_eq!(bytes.len(), 128 * 1024 * 1024 + 1);
+    assert!(bytes.iter().all(|byte| *byte == 0));
 }
 
 #[test]
-fn bounded_palette_sources_keep_scope_size_and_source_protection() {
+fn palette_sources_keep_scope_and_source_protection_without_a_read_budget() {
     let dir = Scratch::new("palette-limit");
     let outside = Scratch::new("palette-outside");
     let files = scope(&dir);
     let palette = dir.0.join("palette.json");
     let bytes = br##"{"format":"eigenvista-atom-colors","version":1,"colors":[{"z":8,"color":"#ffaaaa"}]}"##;
     fs::write(&palette, bytes).unwrap();
-    assert_eq!(files.read_with_limit(&palette, bytes.len()).unwrap(), bytes);
-    assert_eq!(
-        kind(
-            &files
-                .read_with_limit(&palette, bytes.len() - 1)
-                .unwrap_err()
-        ),
-        "limit_exceeded"
-    );
-    assert_eq!(
-        kind(&files.read_with_limit(&palette, 0).unwrap_err()),
-        "invalid_params"
-    );
-    assert_eq!(
-        kind(
-            &files
-                .read_with_limit(&palette, MAX_FILE_BYTES + 1)
-                .unwrap_err()
-        ),
-        "invalid_params"
-    );
+    assert_eq!(files.read(&palette).unwrap(), bytes);
     let escaped = outside.0.join("palette.json");
     fs::write(&escaped, bytes).unwrap();
-    assert_eq!(
-        kind(&files.read_with_limit(&escaped, bytes.len()).unwrap_err()),
-        "scope_denied"
-    );
+    assert_eq!(kind(&files.read(&escaped).unwrap_err()), "scope_denied");
     let alias = dir.0.join("palette-alias.eigenvista");
     fs::hard_link(&palette, &alias).unwrap();
     assert_eq!(
@@ -399,7 +576,7 @@ fn native_writes_validate_before_publication_and_racing_writes_never_clobber() {
 }
 
 #[test]
-fn png_exports_are_bounded_validated_and_no_clobber() {
+fn png_exports_validate_chunks_and_preserve_no_clobber() {
     let dir = Scratch::new("png");
     let files = scope(&dir);
     let icon = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../app/src-tauri/icons/icon.png");
@@ -422,15 +599,6 @@ fn png_exports_are_bounded_validated_and_no_clobber() {
             .write_image(&dir.0.join("bad.txt"), &url, false)
             .is_err()
     );
-    assert!(
-        files
-            .write_image(
-                &dir.0.join("large.png"),
-                &"x".repeat(MAX_PNG_DATA_URL_BYTES + 1),
-                false
-            )
-            .is_err()
-    );
     let mut corrupt = bytes;
     corrupt[30] ^= 1;
     let url = format!(
@@ -443,6 +611,32 @@ fn png_exports_are_bounded_validated_and_no_clobber() {
             .is_err()
     );
     assert_eq!(fs::read_dir(&dir.0).unwrap().count(), 1);
+}
+
+#[test]
+fn png_above_the_former_data_url_limit_exports_without_truncation() {
+    let dir = Scratch::new("large-png");
+    let files = scope(&dir);
+    let icon = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../app/src-tauri/icons/icon.png");
+    let mut bytes = fs::read(icon).unwrap();
+    let payload_length = 16 * 1024 * 1024;
+    let mut chunk = Vec::with_capacity(payload_length + 12);
+    chunk.extend_from_slice(&(payload_length as u32).to_be_bytes());
+    chunk.extend_from_slice(b"tEXt");
+    chunk.extend_from_slice(b"Comment\0");
+    chunk.resize(payload_length + 8, b'x');
+    chunk.extend_from_slice(&crc32fast::hash(&chunk[4..]).to_be_bytes());
+    bytes.splice(bytes.len() - 12..bytes.len() - 12, chunk);
+    let url = format!(
+        "data:image/png;base64,{}",
+        base64::engine::general_purpose::STANDARD.encode(&bytes)
+    );
+    let destination = dir.0.join("large.png");
+    assert_eq!(
+        files.write_image(&destination, &url, false).unwrap().bytes,
+        bytes.len()
+    );
+    assert_eq!(fs::read(destination).unwrap(), bytes);
 }
 
 #[test]
@@ -489,7 +683,7 @@ fn cli_uses_the_actual_socket_and_never_prints_the_auth_secret() {
 }
 
 #[test]
-fn cli_wait_polls_real_job_receipts_and_reads_bounded_params_file() {
+fn cli_wait_polls_real_job_receipts_and_reads_params_file() {
     let dir = Scratch::new("wait");
     let descriptor = dir.0.join("connection.json");
     let params = dir.0.join("params.json");
@@ -510,7 +704,7 @@ fn cli_wait_polls_real_job_receipts_and_reads_bounded_params_file() {
                 "--params-file",
                 params.to_str().unwrap(),
                 "--wait",
-                "3",
+                "86401",
             ])
             .output()
             .unwrap()

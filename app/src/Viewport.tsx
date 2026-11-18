@@ -390,12 +390,13 @@ export function Viewport({
     controls: OrbitControls;
     group: THREE.Group;
     ambientOcclusion: MolecularAmbientOcclusion;
-    draw: () => void;
+    draw: (checkAllocations?: boolean) => void;
     fit: () => void;
     focus: (atoms: readonly number[]) => void;
     setUp: (up: THREE.Vector3) => void;
     setSize: (width: number, height: number) => void;
     needsRender: boolean;
+    allocationPending: boolean;
   } | null>(null);
   type Engine = NonNullable<typeof engine.current>;
   const queued = useRef<
@@ -450,7 +451,7 @@ export function Viewport({
       );
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setClearColor(DEFAULT_BACKGROUND_COLOR, 1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.setAttribute("aria-label", "Molecular scene");
@@ -464,7 +465,7 @@ export function Viewport({
     scene.add(group);
     const occlusion = new MolecularAmbientOcclusion(renderer, scene, camera);
     // The viewport and synchronous PNG export must draw the same final frame.
-    const draw = () => {
+    const draw = (checkAllocations = false) => {
       updateAnnotationScale(group, camera, renderer.domElement.clientHeight);
       const settings = occlusionSettings.current;
       try {
@@ -481,26 +482,30 @@ export function Viewport({
         );
       }
       renderer.render(scene, camera);
+      // Query only at resource boundaries: getError synchronizes with the GPU
+      // process and must not stall every camera/damping frame.
+      if (checkAllocations || engine.current?.allocationPending) {
+        if (engine.current) engine.current.allocationPending = false;
+        const gl = renderer.getContext();
+        if (gl.getError() === gl.OUT_OF_MEMORY)
+          throw new Error(
+            "The graphics device could not allocate memory for this scene",
+          );
+      }
       const overlay = fieldKeyCanvas.current;
       if (overlay) {
-        const factor = Math.min(
-          1,
-          2048 / renderer.domElement.width,
-          2048 / renderer.domElement.height,
-        );
-        const width = Math.max(
-            1,
-            Math.round(renderer.domElement.width * factor),
-          ),
-          height = Math.max(1, Math.round(renderer.domElement.height * factor));
+        const width = Math.max(1, renderer.domElement.width),
+          height = Math.max(1, renderer.domElement.height);
         if (overlay.width !== width || overlay.height !== height) {
           overlay.width = width;
           overlay.height = height;
         }
         const context = overlay.getContext("2d");
+        if (!context)
+          throw new Error("Unable to allocate the field legend canvas");
         if (context) {
           context.clearRect(0, 0, width, height);
-          const pixelRatio = renderer.getPixelRatio() * factor;
+          const pixelRatio = renderer.getPixelRatio();
           context.save();
           context.scale(pixelRatio, pixelRatio);
           context.font = "600 12px system-ui, sans-serif";
@@ -598,11 +603,19 @@ export function Viewport({
         }
       }
     };
+    const rendererSize = new THREE.Vector2();
     const setSize = (width: number, height: number) => {
-      renderer.setSize(width, height);
-      camera.aspect = width / Math.max(height, 1);
+      renderer.getSize(rendererSize);
+      const sizeChanged = rendererSize.x !== width || rendererSize.y !== height;
+      const aspect = width / Math.max(height, 1);
+      if (!sizeChanged && camera.aspect === aspect) return;
+      if (sizeChanged) renderer.setSize(width, height);
+      camera.aspect = aspect;
       camera.updateProjectionMatrix();
-      if (engine.current) engine.current.needsRender = true;
+      if (engine.current) {
+        if (sizeChanged) engine.current.allocationPending = true;
+        engine.current.needsRender = true;
+      }
     };
     const fitBox = (box: THREE.Box3) => {
       if (box.isEmpty()) return;
@@ -693,6 +706,7 @@ export function Viewport({
         if (engine.current) engine.current.controls = controls;
       },
       needsRender: true,
+      allocationPending: true,
     };
     // Wheel and middle-drag handlers update the camera before the animation tick.
     const invalidate = () => {
@@ -777,6 +791,7 @@ export function Viewport({
     };
     const lost = (e: Event) => {
       e.preventDefault();
+      occlusion.resetContext();
       setError("Graphics context lost. Reload the document to recover.");
     };
     renderer.domElement.addEventListener("pointerdown", pointerdown);
@@ -1064,7 +1079,13 @@ export function Viewport({
           onShaderLogRef.current?.(log);
         }
       }
-      if (grid && mode !== "mesh")
+      if (grid && mode !== "mesh") {
+        const gl = e.renderer.getContext() as WebGL2RenderingContext;
+        const maxEdge = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE) as number;
+        if (grid.dims.some((edge) => edge > maxEdge))
+          throw new Error(
+            `The graphics device supports 3D texture dimensions up to ${maxEdge}; requested ${grid.dims.join(" × ")}`,
+          );
         group.add(
           volumeObject(
             grid,
@@ -1078,6 +1099,53 @@ export function Viewport({
             volumeQuality,
           ),
         );
+      }
+      // Three's render traversal uploads geometry/instance attributes, and its
+      // zero-count draw path still compiles programs, uploads textures and binds
+      // index buffers. Check those allocations without rasterizing the entire
+      // candidate before it is committed and drawn. compile() alone skips uploads.
+      const previousVisible = e.group.visible;
+      const culling: Array<[THREE.Object3D, boolean]> = [];
+      const ranges = new Map<
+        THREE.BufferGeometry,
+        { start: number; count: number }
+      >();
+      try {
+        group.traverse((object) => {
+          culling.push([object, object.frustumCulled]);
+          object.frustumCulled = false;
+          if (
+            object instanceof THREE.Mesh ||
+            object instanceof THREE.Line ||
+            object instanceof THREE.Points ||
+            object instanceof THREE.Sprite
+          ) {
+            const geometry = object.geometry;
+            // Sprite and instanced meshes can share geometry. Snapshot it once
+            // so a later occurrence cannot replace its original range with zero.
+            if (!ranges.has(geometry)) {
+              ranges.set(geometry, { ...geometry.drawRange });
+              geometry.setDrawRange(0, 0);
+            }
+          }
+        });
+        e.group.visible = false;
+        e.scene.add(group);
+        e.renderer.render(e.scene, e.camera);
+        const gl = e.renderer.getContext();
+        if (gl.isContextLost()) throw new Error("The graphics context is lost");
+        if (gl.getError() === gl.OUT_OF_MEMORY)
+          throw new Error(
+            "The graphics device could not allocate memory for the new scene",
+          );
+      } finally {
+        e.scene.remove(group);
+        e.group.visible = previousVisible;
+        for (const [object, enabled] of culling) object.frustumCulled = enabled;
+        for (const [geometry, range] of ranges)
+          geometry.setDrawRange(range.start, range.count);
+        e.needsRender = true;
+      }
     } catch (error) {
       dispose(group);
       setError(
@@ -1101,6 +1169,7 @@ export function Viewport({
     atomsRef.current = stagedAtomIndices;
     setProteinMessages(stagedMessages);
     if (!e.renderer.getContext().isContextLost()) setError("");
+    e.allocationPending = true;
     e.needsRender = true;
   }, [
     doc,
@@ -1164,6 +1233,7 @@ export function Viewport({
       committedDisplay.current,
       atomPalette,
     );
+    e.allocationPending = true;
     e.needsRender = true;
   }, [atomPalette]);
   useEffect(() => {
@@ -1222,7 +1292,7 @@ export function Viewport({
       // discarded. Zero-alpha black keeps antialiasing and translucent fields
       // compositable without baking the selected background into their RGB.
       if (transparent) e.renderer.setClearColor(0x000000, 0);
-      e.draw();
+      e.draw(true);
       if (
         fieldKeyCanvas.current &&
         (fieldAnalysisLegends(committedDoc.current).length ||

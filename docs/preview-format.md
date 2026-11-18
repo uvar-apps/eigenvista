@@ -1,5 +1,8 @@
 # Native preview profile
 
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
 This implementation is an experimental subset of the research proposal, not
 its frozen version-1 schema. New files use `format: eigenvista`,
 `version: [0, 1]`, a required polynomial feature (plus the biological and
@@ -97,9 +100,8 @@ in `required_features`. The optional `document.structure` contains:
 The atom collection stays unchanged. Atom-to-residue indices use one packed
 unsigned numeric row; other bounded metadata remains JSON. Validation requires
 matching atom counts, valid references, used chains/residues, unique identities,
-bounded strings and supported enums. Tables cannot exceed 100,000 atoms/records;
-combined metadata strings have a 4 MiB budget. The existing 8 MiB manifest,
-entry and uncompressed-byte limits still apply.
+supported enums and complete string metadata. Tables/strings have no arbitrary
+record/byte allowance; checked lengths and actual allocation success apply.
 
 The decoder requires the feature marker and non-null payload to agree, and
 rejects unknown required features. An older reader rejects a newly saved
@@ -170,11 +172,8 @@ interpretation identity covers scalar meaning/units/provenance. Label, range and
 compatible display-unit changes do not replace raw numeric samples. Sources
 retain bohr coordinates; source scalar units are independent declarations.
 
-The same 8 MiB manifest, 8,192-entry and 128 MiB inflated/archive guards apply.
-Additional limits include 64 named sets/1,000,000 aggregate references,
-256 measurements/256 labels, 32 molecular meshes, and 16 MiB aggregate f64/mask
-analysis cache (128 probes, 8 planes up to 512², 16 profiles up to 4,096 points).
-All publication and Save paths share exact preflight. A scientific request may
+Scientific records, caches, arrays, manifests and archives have no application
+byte/count ceiling. All publication and Save paths share exact preflight. A scientific request may
 fail publication if retained source/cache/mesh data cannot fit; nothing is
 silently discarded or downsampled to make it saveable.
 
@@ -192,7 +191,7 @@ Small scalar metadata is JSON. Basis radial weights already include normalizatio
 
 Saved surface records contain source field ID and scientific hash, signed isovalue, algorithm/version, grid origin/step vectors/resolution, precision, geometry/normals/indices, sRGB color, opacity, and visibility. Quantum inputs remain in the same document. A source mismatch is rejected in this preview; the later revision-aware model should preserve historical assets with their original inputs.
 
-Loading verifies ZIP paths, duplicate entries, supported compression, declared inflated size, reference coverage, column index bounds, shape products, byte lengths, digests, finite arrays, IDs, indices, and scientific dimensions. Entry count, file size, inflated size, grid size, and mesh size are bounded. The preview refuses unreferenced archive entries and unsupported required profiles. Original source attachments, arbitrary extensions, multiple geometry revisions, chunk streaming, and migrations are not implemented.
+Loading verifies ZIP paths, duplicate entries, supported compression, declared inflated size, reference coverage, column index bounds, shape products, byte lengths, digests, finite arrays, IDs, indices, and scientific dimensions. Entry/file/inflated/grid/mesh sizes are checked for actual representation and allocation success. The preview refuses unreferenced archive entries and unsupported required profiles. Original source attachments, arbitrary extensions, multiple geometry revisions, chunk streaming, and migrations are not implemented.
 
 `eigenvista-format::decode` preserves the validated document exactly. The shared
 import layer used by Open and conversion subsequently supplements missing
@@ -202,8 +201,8 @@ source. Scientific arrays, grids, and cached surface records remain unchanged;
 bonds are not part of a field's scientific hash.
 
 Surface publication and encoding share `validate_document` preflight: model and
-source-hash checks, at most 8,191 array entries plus the manifest, an 8 MiB
-manifest cap and a 128 MiB total uncompressed-byte cap. Publication prepares the
+source-hash checks, exact array/manifest relationships, checked byte counts and
+actual fallible allocations. ZIP64 handles large representable sizes/offsets. Publication prepares the
 same array bytes/hashes and exact manifest without creating or compressing a ZIP;
 Save compresses those entries. This keeps the current profile/layout and still
 requires metadata and binary-array allocations. The older WASM `validate` export checks only
@@ -222,7 +221,7 @@ identifier/profile or hash migration; the later optional biological capability
 is described above. See the [decision](design/2026-11-12-typed-native-encoding.md).
 
 Before emitting an entry, checked shape/byte arithmetic and fallible reservation
-bound its binary buffer against the existing preflight budget. Exact manifest
+bound its binary buffer using fallible allocation. Exact manifest
 and total accounting remain shared by publication and Save. This does not remove
 all allocations: model/source validation, metadata, prepared arrays, compression
 and decoding still use memory. Source hashing's numeric JSON is unchanged.

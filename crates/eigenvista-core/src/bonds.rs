@@ -1,13 +1,11 @@
 //! Nonperiodic display connectivity, not bond-order or aromaticity perception.
-use crate::{Atom, BOHR_TO_ANGSTROM, MAX_BONDS, Result};
+use crate::{Atom, BOHR_TO_ANGSTROM, Result};
 use kiddo::{ImmutableKdTree, SquaredEuclidean};
 use pdbtbx::Element;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub const TOLERANCE_ANGSTROM: f64 = 0.45;
 pub const MIN_DISTANCE_ANGSTROM: f64 = 0.4;
-const MAX_CANDIDATES: usize = 2_000_000;
-const MAX_NEIGHBOR_VISITS: usize = 10_000_000;
 // This partitions the index, not the chemical cutoff. Each query still uses
 // the actual largest covalent radius in its destination bucket.
 const RADIUS_BUCKET_WIDTH_ANGSTROM: f64 = 0.5;
@@ -18,24 +16,24 @@ struct RadiusBucket {
     max_radius: f64,
 }
 
-fn radius_buckets(radii: &[f64], positions: &[[f64; 3]]) -> Vec<RadiusBucket> {
+fn radius_buckets(radii: &[f64], positions: &[[f64; 3]]) -> Result<Vec<RadiusBucket>> {
     let mut groups = BTreeMap::<usize, Vec<usize>>::new();
     for (i, radius) in radii.iter().enumerate() {
         let key = (radius / RADIUS_BUCKET_WIDTH_ANGSTROM).floor() as usize;
-        groups.entry(key).or_default().push(i);
+        crate::allocation::push(groups.entry(key).or_default(), i, "bond radius bucket")?;
     }
-    groups
-        .into_values()
-        .map(|indices| {
-            let points: Vec<_> = indices.iter().map(|&i| positions[i]).collect();
-            let max_radius = indices.iter().map(|&i| radii[i]).fold(0., f64::max);
-            RadiusBucket {
-                tree: ImmutableKdTree::new_from_slice(&points),
-                indices,
-                max_radius,
-            }
-        })
-        .collect()
+    let mut buckets = crate::allocation::buffer(groups.len(), "bond radius buckets")?;
+    for indices in groups.into_values() {
+        let mut points = crate::allocation::buffer(indices.len(), "bond radius bucket points")?;
+        points.extend(indices.iter().map(|&i| positions[i]));
+        let max_radius = indices.iter().map(|&i| radii[i]).fold(0., f64::max);
+        buckets.push(RadiusBucket {
+            tree: ImmutableKdTree::new_from_slice(&points),
+            indices,
+            max_radius,
+        });
+    }
+    Ok(buckets)
 }
 
 pub struct PerceivedBonds {
@@ -70,11 +68,8 @@ fn coordination_limit(element: u16) -> usize {
 
 /// Explicit connections take precedence; remaining pairs are accepted shortest-first.
 pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBonds> {
-    if atoms.len() > 100_000 || explicit.len() > MAX_BONDS {
-        return Err("Bond detection exceeds the atom/connection budget".into());
-    }
-    let mut radii = Vec::with_capacity(atoms.len());
-    let mut positions = Vec::with_capacity(atoms.len());
+    let mut radii = crate::allocation::buffer(atoms.len(), "bond radii")?;
+    let mut positions = crate::allocation::buffer(atoms.len(), "bond positions")?;
     for atom in atoms {
         radii.push(covalent_radius(atom.element).ok_or("Invalid element for bond detection")?);
         let p = atom.position.map(|v| v * BOHR_TO_ANGSTROM);
@@ -84,7 +79,7 @@ pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBond
         positions.push(p);
     }
     let mut bonds = BTreeSet::new();
-    let mut degree = vec![0; atoms.len()];
+    let mut degree = crate::allocation::filled(atoms.len(), 0usize, "atom degrees")?;
     for &[a, b] in explicit {
         if a == b || a >= atoms.len() || b >= atoms.len() {
             return Err("Invalid explicit bond endpoints".into());
@@ -103,7 +98,7 @@ pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBond
     if atoms.len() < 2 {
         return Ok(result);
     }
-    let buckets = radius_buckets(&radii, &positions);
+    let buckets = radius_buckets(&radii, &positions)?;
     let mut candidates = Vec::new();
     for (i, p) in positions.iter().enumerate() {
         for bucket in &buckets {
@@ -116,10 +111,10 @@ pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBond
                 p,
                 search_radius.powi(2) * (1. + 8. * f64::EPSILON),
             ) {
-                result.neighbor_visits += 1;
-                if result.neighbor_visits > MAX_NEIGHBOR_VISITS {
-                    return Err("Bond detection exceeded the neighbor budget; coordinates may be excessively dense".into());
-                }
+                result.neighbor_visits = result
+                    .neighbor_visits
+                    .checked_add(1)
+                    .ok_or("Bond neighbor visit count overflow")?;
                 let j = bucket.indices[neighbor.item as usize];
                 if j <= i || bonds.contains(&[i, j]) {
                     continue;
@@ -128,10 +123,11 @@ pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBond
                 if neighbor.distance >= MIN_DISTANCE_ANGSTROM.powi(2)
                     && neighbor.distance <= (sum + TOLERANCE_ANGSTROM).powi(2)
                 {
-                    if candidates.len() == MAX_CANDIDATES {
-                        return Err("Bond detection exceeded the candidate budget; coordinates may be excessively dense".into());
-                    }
-                    candidates.push((neighbor.distance / sum.powi(2), i, j));
+                    crate::allocation::push(
+                        &mut candidates,
+                        (neighbor.distance / sum.powi(2), i, j),
+                        "bond candidates",
+                    )?;
                 }
             }
         }
@@ -145,13 +141,11 @@ pub fn perceive(atoms: &[Atom], explicit: &[[usize; 2]]) -> Result<PerceivedBond
             result.coordination_rejections += 1;
             continue;
         }
-        if bonds.len() == MAX_BONDS {
-            return Err("Bond count exceeds the preview budget".into());
-        }
         bonds.insert([i, j]);
         degree[i] += 1;
         degree[j] += 1;
     }
-    result.bonds = bonds.into_iter().collect();
+    result.bonds = crate::allocation::buffer(bonds.len(), "perceived bonds")?;
+    result.bonds.extend(bonds);
     Ok(result)
 }

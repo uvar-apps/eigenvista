@@ -1,3 +1,4 @@
+import { GridResolutionInput } from "./GridResolutionInput";
 import {
   useCallback,
   useEffect,
@@ -13,12 +14,12 @@ import {
   createApplicationControl,
   controlIdentifier,
   ControlError,
-  CONTROL_LIMITS,
   type ApplicationControl,
   type ControlExecution,
   type ControlHost,
 } from "./control";
 import { attachDesktopControl } from "./desktopControl";
+import { makeNativeTransfer } from "./nativeTransfer";
 import { INSPECTION_METHODS } from "./inspectionSchemas";
 import { useScientificInspection } from "./useScientificInspection";
 import { InspectionControls } from "./InspectionControls";
@@ -64,7 +65,6 @@ import {
 } from "./CalculationProgress";
 import {
   browserSource,
-  fileByteLimit,
   molecularExtensions,
   native,
   pickNative,
@@ -72,7 +72,7 @@ import {
   type SourceFile,
 } from "./files";
 import { ConvertFiles } from "./ConvertFiles";
-import { OrbitalBrowser, maxOrbitalBatch } from "./OrbitalBrowser";
+import { OrbitalBrowser } from "./OrbitalBrowser";
 import { gridResolutions, isGridResolution } from "./resolution";
 import { Viewport, type AmbientOcclusionSettings } from "./Viewport";
 import { StructureControls } from "./StructureControls";
@@ -383,13 +383,10 @@ export default function App() {
     if (!fields.length) return;
     if (
       orbitals &&
-      (fields.length > maxOrbitalBatch ||
-        new Set(fields).size !== fields.length ||
+      (new Set(fields).size !== fields.length ||
         fields.some((id) => !document.orbitals.some((o) => o.id === id)))
     ) {
-      setError(
-        `Select at most ${maxOrbitalBatch} distinct orbitals per generation.`,
-      );
+      setError("Select distinct available orbitals.");
       return;
     }
     const token = ++generation.current;
@@ -407,9 +404,6 @@ export default function App() {
       );
       const generated: Surface[] = [];
       let activeGrid: SampledGrid | null = null;
-      const meshBytes = (s: Surface) =>
-        8 * (s.positions.length + s.normals.length) + 4 * s.indices.length;
-      let bytes = retained.reduce((total, s) => total + meshBytes(s), 0);
       for (const [index, field] of fields.entries()) {
         const description = orbitals
           ? `Calculating orbital ${index + 1} of ${fields.length}: ${document.orbitals.find((o) => o.id === field)!.label}`
@@ -443,11 +437,6 @@ export default function App() {
             controlIdentifier(surface.field, "Field ID");
           }
         generated.push(...result.surfaces);
-        bytes += result.surfaces.reduce((total, s) => total + meshBytes(s), 0);
-        if (retained.length + generated.length > 128 || bytes > fileByteLimit)
-          throw new Error(
-            "Generated geometry exceeds the preview budget. Select fewer orbitals or lower the grid resolution; previous surfaces were retained.",
-          );
         if (field === document.view.field) activeGrid = result.grid;
       }
       // Publish the complete batch only after Rust validates its combined document.
@@ -716,8 +705,6 @@ export default function App() {
     try {
       const bytes = await source.read();
       if (!checkFlow(token, control?.execution)) return;
-      if (bytes.length > fileByteLimit)
-        throw new Error("File exceeds the 128 MiB preview budget");
       const result = await request<ImportResult>(
         "import_document",
         {
@@ -786,9 +773,7 @@ export default function App() {
         },
         report: {
           ...result.report,
-          warnings: result.report.warnings
-            .slice(0, 32)
-            .map((warning) => warning.slice(0, 2048)),
+          warnings: result.report.warnings,
         },
         previewError,
       };
@@ -930,7 +915,7 @@ export default function App() {
           const path = params.path;
           const bytes = await invoke<ArrayBuffer | Uint8Array | number[]>(
             "control_read_file",
-            { path, maxBytes: CONTROL_LIMITS.paletteBytes },
+            { path },
           );
           execution.assertCurrent();
           const buffer =
@@ -954,14 +939,6 @@ export default function App() {
           text = params.text;
           name = params.name;
         }
-        if (
-          new TextEncoder().encode(text).byteLength >
-          CONTROL_LIMITS.paletteBytes
-        )
-          throw new ControlError(
-            "limit_exceeded",
-            "Atom palette exceeds the 256 KiB input budget",
-          );
         execution.assertCurrent();
         applyAtomPalette(text, name, true);
       }
@@ -1039,11 +1016,6 @@ export default function App() {
         );
         execution.assertCurrent();
         if (!native) {
-          if (bytes.length > CONTROL_LIMITS.browserSaveBytes)
-            throw new ControlError(
-              "limit_exceeded",
-              "Encoded document exceeds the browser control result budget; use the normal Save action",
-            );
           return {
             revision,
             saved: false,
@@ -1053,12 +1025,14 @@ export default function App() {
           };
         }
         const receipt = await trackNativeSave(() =>
-          invoke<{ path: string; bytes: number }>("control_save_document", {
-            path: params.path,
-            bytes: Array.from(bytes),
-            protectedPaths: protectedSourcePath ? [protectedSourcePath] : [],
-            overwrite: false,
-          }),
+          invoke<{ path: string; bytes: number }>(
+            "control_save_document",
+            makeNativeTransfer(bytes, {
+              path: params.path,
+              protectedPaths: protectedSourcePath ? [protectedSourcePath] : [],
+              overwrite: false,
+            }),
+          ),
         );
         const unchanged = current.current === snapshot;
         if (unchanged) setDirty(false);
@@ -1298,11 +1272,6 @@ export default function App() {
         );
       const captureRevision = documentRevision.current;
       const capture = await port().capture(params.transparent === true);
-      if (capture.dataUrl.length > CONTROL_LIMITS.imageDataUrlCharacters)
-        throw new ControlError(
-          "limit_exceeded",
-          "PNG exceeds the control artifact result budget",
-        );
       if (native) {
         const receipt = await invoke<{ path: string; bytes: number }>(
           "control_write_image",
@@ -1416,19 +1385,17 @@ export default function App() {
       },
       shader: appliedShader
         ? {
-            vertexName: appliedShader.vertexName.slice(0, 512),
-            fragmentName: appliedShader.fragmentName.slice(0, 512),
+            vertexName: appliedShader.vertexName,
+            fragmentName: appliedShader.fragmentName,
             target: appliedShader.target,
             transparency: appliedShader.transparent !== false,
-            uniforms: Object.fromEntries(
-              Object.entries(appliedShader.values).slice(0, 64),
-            ),
-            error: shaderError.slice(0, 2048),
+            uniforms: { ...appliedShader.values },
+            error: shaderError,
           }
         : null,
       palette: {
         custom: Boolean(atomPalette),
-        name: atomPaletteName.slice(0, 512),
+        name: atomPaletteName,
       },
       volumeQuality,
       structureDisplay: structureDisplaySummary(
@@ -1439,7 +1406,7 @@ export default function App() {
         lastPick: inspection.getPick(),
         pickEnabled: inspection.pickEnabled,
         selectedCount: inspection.selectedAtoms.length,
-        orderedAtoms: inspection.orderedAtoms.slice(0, 256),
+        orderedAtoms: inspection.orderedAtoms.slice(),
         measurementCount:
           current.current?.annotations?.measurements.length ?? 0,
         molecularSurfaceCount: current.current?.molecular_surfaces?.length ?? 0,
@@ -1898,6 +1865,9 @@ export default function App() {
                     }
                   }}
                 >
+                  {!gridResolutions.some((n) => n === resolution) && (
+                    <option value={resolution}>{resolution}³</option>
+                  )}
                   {gridResolutions.map((n) => (
                     <option key={n} value={n} title={`${n} x ${n} x ${n}`}>
                       {n}
@@ -1905,6 +1875,22 @@ export default function App() {
                     </option>
                   ))}
                 </select>
+                <GridResolutionInput
+                  label="Custom grid resolution"
+                  value={resolution}
+                  disabled={!!busy}
+                  onApply={(value) => {
+                    if (
+                      mode !== "mesh" ||
+                      doc.grids.some((g) => g.id === doc.view.field)
+                    )
+                      void prepareGrid(doc, value, mode);
+                    else {
+                      setResolution(value);
+                      setGrid(null);
+                    }
+                  }}
+                />
               </label>
               <button
                 className="primary generate"

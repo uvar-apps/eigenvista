@@ -274,7 +274,7 @@ export function vendoredRustSources(report, root, sourceManifest) {
     digest(originalBytes) !==
       "33101809581739e239eaaa8802a28c40683b9d386c8f32e6a7c2d683b807f03c" ||
     digest(patchBytes) !==
-      "c207c3c63d247707ccd422080d525e95303e2de135b93844b2bfdd5924bc09a9"
+      "65343244864bba51a983987391ef558cb02e587effa2b9300864f6fb8d758b67"
   )
     throw new Error("Sesmesh provenance changed without packaging review");
   const original = JSON.parse(originalBytes);

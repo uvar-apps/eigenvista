@@ -1,5 +1,171 @@
 # Development handoff
 
+## Release 0.10.1 — source qualification, 18 November 2026
+
+Version **0.10.1** includes accepted fixes [#91](https://github.com/uvar-apps/eigenvista/issues/91)
+(smooth camera-relative lighting) and [#92](https://github.com/uvar-apps/eigenvista/issues/92)
+(allocation-driven workloads). The user authorizes commit, a new annotated tag,
+push and publication with release notes and rebuilt Mac/AI connector
+redistributables; delivery is tracked in [#93](https://github.com/uvar-apps/eigenvista/issues/93).
+
+Fresh local macOS 27 arm64 checks on the 0.10.1 source pass: formatting,
+**365 workspace Rust tests, 13 desktop tests, strict workspace/all-target Clippy,
+production WASM/TypeScript/frontend and native debug builds, 23 packaging/connector
+checks, and all 678 browser cases** (339 each in Chromium/WebKit, one worker,
+zero failures/skips/flaky cases/retries). All 419 frozen runtime/test/input
+hashes match before/after. Complete-case identity and final JSON status were
+verified, rather than inferred from progress counters. Evidence lives under
+`tmp/release-0.10.1/`; the release issue records the durable delivery ledger.
+
+Both browsers independently generate/render/save/reopen full 1AON at the
+requested 0.5 Å spacing: 58,870 atoms, 2,091,126 vertices and 4,182,788 triangles.
+Source hash, area, volume, components and cavities match the scientific reference;
+reopened geometry exports without a viewport error. Both reopened PNGs were
+visually inspected. Current guide/connector links pass (478 links in 18 files).
+
+**Package acceptance and publication remain pending.** Next: commit the qualified
+source, build a fresh clean optimized distribution, independently audit/extract
+it and exercise its actual app/launcher/helper/converter; then record measured
+website facts, validate the site, tag/push/publish and verify public bytes.
+A debug bundle or earlier 0.10.0 package does not qualify the new distribution.
+Do not claim new native/package evidence until those checks finish.
+
+Work only in EigenVista on main; Molekel is read-only. Preserve v0.10.0, existing
+packages/capture provenance, icon and scientific profiles/toolchain/dependency
+pins. No application CI. Current citation uses concept DOI
+10.5281/zenodo.24246123 until a version DOI is supplied; 24302658 remains specific
+to 0.10.0. Keep preview servers 5178/5190 and the user's unsaved tab intact.
+Linux, clean-Mac/Gatekeeper and the full supported macOS range remain unqualified.
+The dated source-correction records below preserve their original authorization,
+version and inactive/hidden-window boundaries; their no-release statements are
+superseded by this explicit release request.
+
+## Allocation-driven memory correction (#92) — qualified for review, 17 November 2026
+
+Source remains 0.10.0 on main after 7b57851, preserving the accepted #91
+lighting changes. No branch, commit, tag, push, merge or release was requested.
+The published Mac download is unchanged and predates these source corrections.
+Read [allocation policy](allocation-policy.md) for the permanent contract.
+
+Application memory/byte/count quotas are removed across imports, quantum grids
+and meshes, molecular SES/SAS, saved documents, conversion, annotations/analyses,
+and the shared controller. Estimates are diagnostic; requests are not rejected,
+coarsened or truncated to fit them. Critical buffers reserve fallibly, with
+checked arithmetic and actual format/index/device validation. Cancellation,
+source protection, atomic/no-clobber saves and accepted-result recovery remain.
+BinaryCIF traversal is iterative; SES neighbors use exact occupied-cell indexing.
+Custom grid resolution retains the requested integer dimension. Viewport and
+field-key canvases use actual device resolution rather than fixed pixel caps.
+
+Full 1AON (58,870 atoms; Alvarez radii; 1.4 Å probe; requested 0.5 Å spacing)
+generates 2,091,126 vertices and 4,182,788 triangles. Native and both browsers
+render/save/reopen with matching geometry, source hash, area, volume, components
+and cavities. Browser reopened-cache exports have no viewport error. Inflated
+contents exceed the old 128 MiB ceiling. The earlier artificial 256 MiB rejection
+is retained in old-ses-rejection.json. Native Save now uses raw EVT1 binary IPC,
+avoiding millions of JSON numbers without a file-format/public-result migration.
+Default processing/transfer deadlines and the one-day CLI wait cap are removed.
+
+The rebuilt native app passes all 34 inspection methods through 179 recorded
+calls and six PNGs, including large Save/reopen while an AppKit probe confirms
+the app is inactive and nonhidden. The supported background scheduling setting
+keeps workers runnable on macOS 14+; older/unsupported systems ignore it.
+Hidden-window acceptance remains unqualified because macOS rejected programmatic
+hiding. This setting does not prevent OS sleep or process termination.
+
+Local macOS 27 arm64 qualification passes formatting, strict workspace/all-target
+Clippy, 13 desktop tests, WASM/TypeScript/production and debug native builds, and
+23 packaging/connector checks. The 365-test workspace Rust result applies to
+unchanged scientific/native sources and inputs, independently hash-verified
+after the frontend corrections. The exact-upstream SES harness passes 276
+executions with zero failures and six preexisting ignored executions; original
+fixtures/oracles/tolerances and dependency versions remain unchanged. All 21
+reviewed vendor patch hashes and original upstream provenance are verified.
+
+The final browser suite passes **678/678 cases**, 339 per engine, one worker,
+18.4 minutes, with zero failures/skips/flaky cases/retries.
+All 419 frozen source/test/fixture/generated-input hashes match before/after;
+planned identities and every result are checked independently. The 22 focused
+regressions also pass. No scientific/image tolerance or original test deadline
+was weakened. GPU allocation checks now use zero-draw upload staging and
+allocation/resize/upload/export boundaries, avoiding duplicate rasterization
+and synchronous error queries on ordinary camera/damping frames. AO's physical
+state restoration and context-loss recovery remain intact. A real native
+allocator failure reports its cause with the prior buffer unchanged.
+
+Earlier attempts remain diagnostic evidence: the first full run was 660/676
+with 16 failures (selectors, obsolete quota expectations, protein timeouts);
+the second was interrupted after two protein timeouts. Neither is qualification.
+Those findings were corrected and the entire final suite rerun on frozen source.
+Earlier hidden-window/JXA and suspended native attempts also do not count as passes.
+
+Evidence under tmp/allocation-policy/: FINAL.json, qualified-checks.json,
+qualified-acceptance.json, full-browser.json/log, source-before.json,
+source-after.json, ui-correction-source-delta.json, boundary-focused.json,
+native/native-latest.json, audit-*.json and sesmesh-upstream-test-results.json.
+Linux, clean-Mac/Gatekeeper and the full deployment-OS range remain unqualified.
+The preview server remains on port 5178. Keep #91/#92 open pending user review
+and authorized delivery; no redistributable has been republished for this fix.
+
+## Smooth view-relative lighting (#91) — validated for review, 17 November 2026
+
+User testing of the web preview's real hydroxyl Molden example revealed gray
+bands and polka-dot highlights from the six-light rig. #91 tracks the correction.
+Source remains 0.10.0 on the existing main checkout after `7b57851`; no branch,
+commit, tag, push, merge or release is requested. Preserve the user's live
+preview and existing unsaved tab. Published 0.10.0 binaries remain unchanged.
+
+The source candidate uses one camera-axis directional headlight and neutral
+ambient fill (0.65/0.35), shared with built-in mesh/raycast GLSL. Blinn has one
+broader, restrained lobe (32/0.25). Atom/bond materials, geometry and AO's matte
+Lambert conversion are unchanged. Fresh source/build/native/browser validation
+and independent visual review pass as recorded below. The independent
+anisotropic ray reference now explicitly faces the gradient toward the actual
+eye ray before projecting onto the headlight; root/depth/compositing bounds
+remain unchanged.
+
+Actual pre/post renders reproduce the user's hydroxyl and isolated H/O spheres.
+At 45% projected radius, angular RMS falls from 0.026 to 0.0011 for H and from
+0.099 to 0.00038 for O. The image oracle rejects both old renders and accepts
+the new ones, retaining radial shape contrast. New orbit/roll regressions
+exercise this pattern rather than only average brightness. Evidence:
+`tmp/smooth-lighting/{before,after}-capture.{json,log}` and original PNGs.
+The first diagnostic capture had a file-import wait race and the first focused
+suite used the wrong working directory; both attempts are retained separately
+and are not accepted qualification. No source/scientific defect is inferred
+from those harness mistakes.
+
+Fresh local macOS qualification passes **650/650 application browser cases**,
+325 per engine, one worker, 21.7 minutes, zero failures/skips/flaky cases/retries.
+Every planned identity/result is checked independently; all 234 frozen hashes
+match before/after. The new four H/O cases retain the previous 646 cases and
+all numerical/root/depth/compositing tolerances. Focused lighting tests pass
+10/10. TypeScript, scoped formatting, WASM/production frontend and actual debug
+native bundle builds pass. Rebuilt native acceptance passes all 34 existing
+inspection methods through 160 calls and five PNGs; its owned process exits.
+Independent review of actual hydroxyl, H/O, crambin and native 1AON pocket AO
+captures finds no material regression; matte AO retains contact depth, custom
+shaders/keys remain present. This is a source-built native test, not a new
+redistributable or clean-Mac qualification.
+
+Only sceneLighting and three affected test files differ in the 234-file
+runtime snapshot from the qualified 0.10.0 baseline. Rust/native sources,
+generated WASM and dependency pins are byte-identical. Rust, desktop-unit,
+Clippy and packaging suites were not rerun for this TypeScript-only correction;
+their prior results apply to those unchanged components, not as fresh renderer
+qualification. Current renderer evidence is the new full browser/native run.
+
+Evidence: `tmp/smooth-lighting/full-browser.{json,log}`, `planned.json`,
+`source-{before,after}.json`, `source-scope-audit.json`, `native-build.log`,
+`native/native-latest.json`, `focused-lighting.log`, `format.log`, `tsc.log`,
+`doc-check.json` and `test-advice/visual-review.json`. The first focused run's
+four failures/six passes are the wrong-CWD diagnostic, retained separately as
+`focused-wrong-cwd.log`; none qualifies this source. The final full run passes.
+The live EigenVista Vite server remains on port 5178; the original user tab is
+not reloaded or replaced. No Git-history change or package publication occurs.
+Keep #91 open for user review/delivery. When a new release is authorized, update
+guide availability wording before packaging so the archive describes itself.
+
 ## Zenodo DOI for 0.10.0 — 17 November 2026
 
 The user supplied **10.5281/zenodo.24302658** as the 0.10.0 version DOI.

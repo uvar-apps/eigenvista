@@ -198,7 +198,7 @@ fn self_check() -> Result<Value> {
     seam.normals = vec![
         0., 0., 1., 0., 0., 1., 0., 1., 0., 0., 0., 1., 0., 0., 1., 0., 0., 1.,
     ];
-    seam.indices = packing::canonical_indices(6, false);
+    seam.indices = packing::canonical_indices(6, false)?;
     let (compact, _, _) = qualify(&seam)?;
     if compact.positions.len() / 3 != 3 {
         return Err("Signed-zero or normal seam was welded".into());
@@ -223,11 +223,6 @@ fn self_check() -> Result<Value> {
     bad.indices.swap(0, 2);
     if packing::restore(&bad).is_ok() {
         return Err("Non-first-seen IDs accepted".into());
-    }
-    bad = compact;
-    bad.indices.resize(eigenvista_core::MAX_VERTICES + 1, 0);
-    if packing::restore(&bad).is_ok() {
-        return Err("Generated raw corner limit bypassed".into());
     }
     Ok(
         json!({"actual_mesh_affine_signed_cases": cases, "large_origin_distinct_f64_positions": distinct64.len(),
@@ -398,14 +393,14 @@ fn measure(workload: &str, method: &str, publication: bool) -> Result<()> {
         let doc = case_document("worst", false, false, false);
         let mut raw = case_mesh(&doc, 1.)?;
         let ((), phase) = allocation::measure("construct_unique_stress", 0, || {
-            let count = eigenvista_core::MAX_VERTICES / 3 * 3;
+            let count = 1_999_998;
             raw.positions = Vec::with_capacity(count * 3);
             raw.normals = Vec::with_capacity(count * 3);
             for i in 0..count {
                 raw.positions.extend([i as f64, 0., 0.]);
                 raw.normals.extend([0., 0., 1.]);
             }
-            raw.indices = packing::canonical_indices(count, false);
+            raw.indices = packing::canonical_indices(count, false).unwrap();
             raw.field = None;
             raw.source_hash = None;
         });

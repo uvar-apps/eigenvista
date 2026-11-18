@@ -1,5 +1,8 @@
 # EigenVista user guide
 
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
 ## What this program does
 
 EigenVista displays molecular structures and quantum-chemistry fields in an
@@ -10,22 +13,27 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version **0.10.0**, an experimental
+This guide describes version **0.10.1**, an experimental
 development preview. Scientific calculations and rendering have targeted tests,
 but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
 
-**New in 0.10.0:** measurements and labels, ligand neighborhoods, SES/SAS
+**Scientific inspection, introduced in 0.10.0:** measurements and labels, ligand neighborhoods, SES/SAS
 molecular surfaces, and quantitative field inspection are included in the Mac
 package and its AI connector. Older 0.8.0 apps do not include them. An AI
 assistant should confirm which features the connected application provides.
+
+**New in 0.10.1:** smooth camera-relative lighting removes repeated highlights
+and shading bands. Large calculations, files and meshes are allocation-driven;
+there is no artificial memory ceiling or automatic reduction of SES detail.
+The same behavior is available through the installed app and AI connector.
 
 Version 0.8.0 introduced optional AI-enabled viewing through your external coding
 agent. The Mac app bundles its connection helper, launcher, examples and
 palettes; no source checkout or compiler is required. Start with the
 [connector guide](ai-connector.md) and [0.8.0 release notes](releases/0.8.0.md).
-See [current status](status.md#source-version-0100) and the
-[0.10.0 notes](releases/0.10.0.md) for current release qualification.
+See [current status](status.md) and the
+[0.10.1 notes](releases/0.10.1.md) for current release qualification.
 
 Version 0.7.2 added scene background controls and transparent PNG export
 ([#73](https://github.com/uvar-apps/eigenvista/issues/73),
@@ -92,7 +100,7 @@ are not implemented.
 
 ## The workspace
 
-EigenVista 0.10.0 opens with one wide tools pane, initially **480 px**
+EigenVista 0.10.1 opens with one wide tools pane, initially **480 px**
 wide on the **right**. This is the approved default workspace
 ([#88](https://github.com/uvar-apps/eigenvista/issues/88)); no special preview URL
 is needed. Older 0.8.0 apps retain their earlier two-sidebar layout and lack
@@ -120,7 +128,7 @@ saved molecular data.
 
 See the [simple-pane guide](design/2026-11-17-simple-workspace-pane.md)
 for the design, retained behavior and validation boundaries. The following
-navigation describes the 0.10.0 Mac app.
+navigation describes the 0.10.1 Mac app.
 
 ## Finding your way around
 
@@ -175,7 +183,7 @@ for additional operating systems.
   keyboard users can Tab to either button and activate it with Enter or Space.
   On a touchscreen, one finger rotates and two fingers pinch/pan.
 - Click an atom to see its element/index and coordinates in angstroms. Click
-  a mesh to see its label and triangle count. Version 0.10.0 also has
+  a mesh to see its label and triangle count. EigenVista also has
   ordered selection and measurement controls described below.
 - **Fit scene** and **Reset view** currently do the same thing: fit all displayed
   objects and restore the default viewing direction.
@@ -369,7 +377,7 @@ every deposited annotation, model or conformer.
 
 ## Scientific inspection
 
-These controls are included in EigenVista 0.10.0 and its bundled AI connector.
+These controls are included in EigenVista 0.10.1 and its bundled AI connector.
 They work with the original loaded atoms: hiding a chain
 or changing a representation does not renumber the source atoms or alter the
 scientific data. Your external AI assistant can perform the same operations;
@@ -561,26 +569,14 @@ sampling definitions and result appearance. Reopening restores valid caches
 without silently recalculating them. Their persistence does not save the entire
 camera/AO/palette/shader scene configuration.
 
-### Inspection limits
+### Memory and large calculations
 
-There are at most 64 named sets with 1,000,000 aggregate atom references,
-256 measurements and 256 labels. Label text is limited to 256 UTF-8 bytes per
-record and 64 KiB aggregate annotation text; visible label textures have a
-16 MiB budget. Neighborhood controls accept 0–1,000 Å; zero means exact
-coincidence, while unrepresentably tiny positive radii are rejected explicitly.
-
-Molecular surfaces have at most 32 records, 2,000,000 vertices and 4,000,000
-triangles per mesh, and a 256 MiB engine memory-estimate guard. The whole job
-also needs memory for accepted sources, conversion buffers, native preflight
-and GPU upload. Probe radius is 0.05–10 Å and spacing 0.05–3 Å; these input bounds
-do not promise every combination fits.
-
-Field analysis allows 128 probes, 8 planes up to 512×512, 16 profiles up to
-4,096 samples and a 16 MiB aggregate cache. Contours are limited to 32 levels
-and 1,000,000 segments; CSV output is at most 32 MiB. The existing 128 MiB
-native-document budget still applies. The individual maxima cannot necessarily
-fit together. Failure/cancellation retains the previous accepted result; choose
-an explicit smaller extent/count or coarser surface spacing when needed.
+EigenVista 0.10.1 attempts requested allocations without byte/count ceilings for
+selections, labels, molecular meshes or numerical caches. SES spacing stays as
+requested. Recoverable allocation failures and cancellation retain previous
+accepted results. Actual runtime address space, numeric/index representation and
+graphics capabilities still apply. See [allocation policy](allocation-policy.md)
+for actual runtime constraints and allocation-failure recovery boundaries.
 
 ## Importing and converting Molden
 
@@ -607,9 +603,8 @@ Conversion alone writes nothing. Failed rows show individual errors and do not
 discard successful results. **Cancel** stops that conversion queue's pending
 work and keeps completed results. Closing the window preserves its results in
 memory; **Clear** discards them. Saved/downloaded bytes are released. Unwritten
-results do not survive closing the application. The queue allows 32 files and
-up to 128 MiB of retained
-outputs. Save or clear completed results before processing more.
+results do not survive closing the application. The queue retains all selected files and completed outputs using available
+memory. Save or clear completed results before processing more.
 
 ORCA's `orca_2mkl` can export Molden, so a direct ORCA reader is not needed for
 the supported subset. Preserve its producer title: ORCA uses different primitive
@@ -674,9 +669,8 @@ can also be generated from the source tree; see `fixtures/pyscf/README.md`.
    currently listed rows; filtering does not clear selections outside the list.
    **Clear orbital selection** removes all checks.
 3. Set a positive **Isovalue** and **Grid resolution**, then click
-   **Generate selected**. Select at most **32 orbitals per generation**; the
-   table itself is not limited to 32. Large jobs can still exceed the preview's
-   geometry budget, so use fewer orbitals or a lower resolution if rejected.
+   **Generate selected**. EigenVista accepts the complete selection;
+   there is no fixed orbital-count or geometry-memory allowance.
 4. The window closes. Beneath **Cancel**, live progress shows the current orbital,
    its position in the batch, completed sampling slices, per-phase percentage,
    signed mesh-pass checkpoints, and elapsed time. **Cancel** stops the batch.
@@ -703,8 +697,9 @@ new density matrix.
    and negative levels; only nonempty surfaces are added. A nonnegative density
    can therefore produce only a positive surface.
 3. Choose **Grid resolution**. Both this control and the orbital browser offer
-   24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, or 256 points per axis;
-   the cubic labels describe the full grid, and the default is 40. Larger values
+   presets from 24 through 256 points per axis, or enter a custom integer of at least two;
+   press Enter or leave the custom input to apply the complete value. The cubic
+   labels describe the full grid, and the default is 40. Larger values
    cost more memory and computation and are not an accuracy guarantee.
 4. For a volume or raycast, select **Volume preview** or **Sampled raycast
    preview** under Mode. This samples the selected field in the background;
@@ -727,12 +722,11 @@ new density matrix.
 Density calculation cost depends on the basis size as well as grid resolution.
 Analytic sampling has no estimated CPU-work cutoff and does not automatically
 lower the chosen resolution. Higher resolutions, including those for the
-repository's `fixtures/legacy/data/molden.input` density, can be requested subject to numerical,
-geometry, and file-size limits. A larger calculation may take longer, even
+repository's `fixtures/legacy/data/molden.input` density, can be requested subject to valid numerical representation and actual allocation success. A larger calculation may take longer, even
 while the same phase remains displayed. **Cancel** terminates the calculation
 and retains existing completed geometry. Other queued operations continue in order;
 the application runs one scientific operation at a time. Fewer orbitals or a
-lower resolution can help when a remaining limit is reached.
+lower resolution can reduce memory use if an allocation fails.
 
 At 256 cubed, one field has **16,777,216 samples**. Its f64 calculation values
 occupy **128 MiB**, and its f32 display values another **64 MiB**, before meshes,
@@ -798,9 +792,9 @@ The original cube data is f64, while rendering and current meshing use f32.
 If a finite grid overflows the preview's numeric range, an error is shown; its
 document, bonds, and existing meshes still open and remain savable. Saving
 does not reduce the precision of the authoritative grid to the preview's precision.
-Generated analytic grids can be up to 256 cubed and are transient: their
+Generated analytic grids accept custom resolutions and are transient: their
 full-resolution f32 values are used for display, without silently reducing the
-selected resolution. This does not increase the 128 cubed total-sample limit
+selected resolution. This does not invent detail beyond the supplied source grid
 for authoritative imported/native grids. Save retains the analytic inputs and
 generated meshes, not the transient calculation or display grid.
 
@@ -828,13 +822,16 @@ isosurfaces). Shading is a session display preference and is not written into
 icons toggle individual mesh visibility; trash icons remove meshes from the
 document. There is no undo.
 
-Scene illumination uses six equally strong lights spaced symmetrically around
-the view, with neutral ambient fill. The lights follow the camera as you orbit,
-pan or roll, so rotating to the other side does not reveal a permanently dark
-back. Saved molecular/quantum meshes, atoms, bonds and protein depictions share
-this arrangement; built-in raycast surfaces use the same directions. Shape and
-specular highlights still vary with the visible geometry. Custom surface shaders
-retain their own explicit lighting, and volume compositing stays unlit.
+Scene illumination follows the camera as you orbit, pan or roll, so rotating to
+the other side does not reveal a permanently dark back. Version 0.10.1's
+lighting correction (#91) uses one camera-aligned headlight plus
+neutral fill, giving smooth shading and a single highlight instead of the
+bands and repeated reflections from the published 0.10.0 six-light arrangement.
+Saved molecular/quantum meshes, atoms, bonds and protein depictions share the
+view-relative arrangement; built-in raycast surfaces use the same headlight
+direction. Their material responses remain distinct. Custom surface shaders
+retain their own explicit lighting, volume compositing stays unlit, and
+molecular ambient occlusion remains matte Lambert shading without highlights.
 
 ### Molecular ambient occlusion
 
@@ -936,8 +933,7 @@ Display→Shaders:
 5. **Save parameters** saves the current uniform values as a Molekel-style
    `.params` file (`float name<TAB>value` per line). The Mac application opens a
    `.params` save dialog; the browser downloads the file. Cancelling is harmless;
-   a write failure appears in the shader panel. Native export has a 128 KiB text
-   limit and writes a complete replacement file. **Clear shader** restores
+   a write failure appears in the shader panel. Native export writes a complete replacement file using fallible byte growth. **Clear shader** restores
    Diffuse / Blinn-Phong materials and clears the loaded files and parameters.
    Use it before loading a different pair when shared uniform types conflict.
 
@@ -1032,7 +1028,7 @@ Keep original data and backups because the native preview schema is not frozen.
 | Symptom | What to check |
 | --- | --- |
 | Generate surfaces is disabled | PDB/mmCIF/BinaryCIF/XYZ contain no quantum fields; open Molden, a native field document, cube, or example |
-| Generate selected is disabled | Check between 1 and 32 orbitals and enter a finite positive isovalue |
+| Generate selected is disabled | Select one or more orbitals and enter a finite positive isovalue |
 | Raycast/volume choices are disabled | Select a document with quantum fields; controls are also disabled while another operation is running. Orbital/density previews do not require meshes |
 | Cube opens but no field is visible | Check the isovalue and scalar range, Fit scene, and any preview error; an all-zero grid has no nonzero surface |
 | Volume disappears when preview quality increases | Upgrade to 0.5.14 or later, which fixes [#55](https://github.com/uvar-apps/eigenvista/issues/55); older builds can reproduce this opacity/quality interaction |
@@ -1044,22 +1040,11 @@ Keep original data and backups because the native preview schema is not frozen.
 | WebGL2 unavailable | Check graphics acceleration or try another compatible device/browser |
 | Graphics context lost | Save if possible, then restart/reload; unsaved data may be lost |
 
-Current guards include a 128 MiB file/inflated-array budget, a 32 MiB PDB text
-budget, separate 64 MiB BinaryCIF payload and expanded-text limits,
-100,000 selected atoms, 600,000 bonds, 1,024 basis functions, 512 total molecular
-orbitals across all spin blocks, 64 primitives per basis function,
-128 cubed total imported/native grid samples, 256 cubed transient
-samples, a two-million-vertex mesh-output bound, and 128 saved surfaces.
-Meshing counts the actual cell cases before extraction rather than rejecting
-every large grid on an all-cells worst-case estimate. Generation also checks an
-estimated 128 MiB geometry budget before native-format validation. These are
-rejection limits, not recommended workloads or guarantees of total memory use;
-large calculations can be slow well below them.
-
-For complete Molden sets with one orbital per AO, the orbital cap permits up to
-512 AOs for one spatial set or 256 AOs for separate alpha/beta sets. Partial
-listed orbital sets can reach the separate basis cap, subject to other budgets;
-omitted orbitals are not recovered. See [Molden limits](molden-import.md#limits-and-verification).
+EigenVista 0.10.1 applies no application memory/record ceilings. Invalid data,
+unsupported scientific profiles, unrepresentable sizes and actual allocation
+failures still produce errors. Complete imported orbital sets are retained;
+missing orbitals cannot be recovered. See [allocation policy](allocation-policy.md)
+and [Molden import](molden-import.md#limits-and-verification).
 
 For a problem report, include the package filename or `BUILD-INFO.json`, Mac
 model/processor, OS version, exact error, steps, and screenshot. Include a small
@@ -1083,7 +1068,7 @@ Connector-enabled binary packages offer optional external control for coding
 agents and other harnesses. The installed app includes a prebuilt connection
 helper and portable agent instructions; no source checkout, compiler or development
 server is needed. It operates the same document and renderer with explicitly
-chosen file access. The connector has shipped since version 0.8.0; the current 0.10.0 package also
+chosen file access. The connector has shipped since version 0.8.0; the current 0.10.1 package also
 includes scientific inspection. Older 0.7.2 packages do not include it. The
 normal interface remains available.
 The [connector guide](ai-connector.md) covers installation, a ready-to-use agent

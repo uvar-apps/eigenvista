@@ -22,7 +22,6 @@ export const isProteinRepresentation = (
   value === "cartoon";
 
 const BOHR = 0.529177210903;
-const MAX_VERTICES = 2_000_000;
 const SIDES = 8;
 interface Run {
   points: BackbonePoint[];
@@ -89,7 +88,7 @@ class MeshBuffers {
       !normal.toArray().every(Number.isFinite)
     )
       throw new Error(
-        "Protein geometry exceeds the display precision or allocation budget",
+        "Protein geometry exceeds the display precision or allocated buffer",
       );
     position.toArray(this.positions, index * 3);
     normal.toArray(this.normals, index * 3);
@@ -102,7 +101,7 @@ class MeshBuffers {
   triangle(a: number, b: number, c: number) {
     const offset = this.triangles * 3;
     if (offset + 3 > this.indices.length)
-      throw new Error("Protein triangle allocation budget exceeded");
+      throw new Error("Protein triangle exceeds the allocated buffer");
     const p = this.positions;
     const ux = p[b * 3] - p[a * 3],
       uy = p[b * 3 + 1] - p[a * 3 + 1],
@@ -437,14 +436,7 @@ export function createProteinGeometry(
       n + (r.style === "trace" ? Math.max(0, r.points.length - 1) * 2 : 0),
     0,
   );
-  const baseVertices = markerCount * 6 + curved.length * 26 + lineVertices;
-  const steps = spans
-    ? Math.min(8, Math.floor((MAX_VERTICES - baseVertices) / (spans * SIDES)))
-    : 8;
-  if (baseVertices > MAX_VERTICES || steps < 1)
-    throw new Error(
-      "Protein depiction exceeds the display geometry budget; use fewer visible chains",
-    );
+  const steps = 8;
   const capacity = markerCount * 6 + curved.length * 26 + spans * steps * SIDES;
   const buffer = new MeshBuffers(
     capacity,
@@ -534,10 +526,6 @@ export function createProteinGeometry(
   if (unknownSecondary)
     warnings.push(
       `${unknownSecondary} residues have no deposited secondary assignment and use thin gray unassigned loops.`,
-    );
-  if (steps < 8)
-    warnings.push(
-      "Curve subdivisions were reduced within the display vertex budget; all source alpha carbons are retained.",
     );
   return { group, warnings };
 }

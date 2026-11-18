@@ -1,3 +1,4 @@
+pub mod allocation;
 pub mod bonds;
 pub mod compute;
 pub mod field_analysis;

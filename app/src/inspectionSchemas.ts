@@ -1,10 +1,14 @@
 import type { ControlSchema as Schema } from "./control";
 
-const str: Schema = { type: "string", minLength: 1, maxLength: 512 };
+const str: Schema = { type: "string", minLength: 1 };
 const n: Schema = { type: "number" };
 const bool: Schema = { type: "boolean" };
-const index: Schema = { type: "integer", minimum: 0, maximum: 99_999 };
-const indices: Schema = { type: "array", maxItems: 100_000, items: index };
+const index: Schema = {
+  type: "integer",
+  minimum: 0,
+  maximum: Number.MAX_SAFE_INTEGER,
+};
+const indices: Schema = { type: "array", items: index };
 const vector: Schema = { type: "array", minItems: 3, maxItems: 3, items: n };
 const obj = (
   properties: Record<string, Schema>,
@@ -32,7 +36,7 @@ const mutation = (
   );
 const page = {
   offset: { type: "integer", minimum: 0 },
-  limit: { type: "integer", minimum: 1, maximum: 100 },
+  limit: { type: "integer", minimum: 1 },
 } satisfies Record<string, Schema>;
 const color: Schema = {
   type: "string",
@@ -55,7 +59,7 @@ const measurement = obj(
 const label = obj(
   {
     id: str,
-    text: { ...str, maxLength: 256 },
+    text: str,
     atom: index,
     residue: index,
     visible: bool,
@@ -70,7 +74,7 @@ const descriptor = obj(
     quantity: str,
     value_unit: str,
     origin: str,
-    note: { type: "string", maxLength: 2048 },
+    note: { type: "string" },
     display_unit: str,
   },
   ["field", "quantity", "value_unit", "origin"],
@@ -79,7 +83,7 @@ const dims: Schema = {
   type: "array",
   minItems: 2,
   maxItems: 2,
-  items: { type: "integer", minimum: 2, maximum: 512 },
+  items: { type: "integer", minimum: 2 },
 };
 const definition: Schema = {
   anyOf: [
@@ -103,7 +107,7 @@ const definition: Schema = {
         kind: { enum: ["profile"] },
         start: vector,
         end: vector,
-        count: { type: "integer", minimum: 2, maximum: 4096 },
+        count: { type: "integer", minimum: 2 },
         atoms: { ...indices, minItems: 2, maxItems: 2 },
       },
       ["kind", "start", "end", "count"],
@@ -120,7 +124,7 @@ const appearance = obj({
   show_key: bool,
   show_labels: bool,
   range: { type: "array", minItems: 2, maxItems: 2, items: n },
-  contour_levels: { type: "array", maxItems: 32, items: n },
+  contour_levels: { type: "array", items: n },
 });
 const surface = obj(
   {
@@ -140,8 +144,8 @@ const surface = obj(
         ["element", "radius_angstrom"],
       ),
     },
-    probe_radius: { type: "number", minimum: 0.05, maximum: 10 },
-    spacing: { type: "number", minimum: 0.05, maximum: 3 },
+    probe_radius: { type: "number", minimum: 0 },
+    spacing: { type: "number", minimum: Number.MIN_VALUE },
     color,
     opacity: { type: "number", minimum: 0, maximum: 1 },
   },
@@ -343,9 +347,9 @@ export const INSPECTION_METHODS = {
       {
         kind: { enum: ["measurements", "analysis"] },
         id: str,
-        path: { ...str, maxLength: 4096 },
+        path: str,
         offset: { type: "integer", minimum: 0 },
-        length: { type: "integer", minimum: 1, maximum: 1_048_576 },
+        length: { type: "integer", minimum: 1 },
         overwrite: { enum: [false] },
       },
       ["kind"],

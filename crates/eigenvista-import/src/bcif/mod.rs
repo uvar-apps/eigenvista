@@ -1,4 +1,4 @@
-//! Bounded BinaryCIF transport; scientific interpretation stays in the CIF importer.
+//! BinaryCIF transport; scientific interpretation stays in the CIF importer.
 
 mod encoding;
 mod messagepack;
@@ -8,13 +8,9 @@ mod profile_tests;
 mod tests;
 
 use eigenvista_core::{Document, import};
-use encoding::{Budget, Column, array, count, decode, field, object, text};
+use encoding::{Column, array, count, decode, field, object, text};
 use flate2::read::MultiGzDecoder;
 use std::io::Read;
-
-const MAX_PAYLOAD_BYTES: usize = 64 * 1024 * 1024;
-const MAX_CIF_BYTES: usize = 64 * 1024 * 1024;
-const MAX_COLUMNS: usize = 256;
 
 /// MessagePack object markers and gzip magic precede UTF-8 decoding.
 pub(super) fn candidate(bytes: &[u8]) -> bool {
@@ -24,14 +20,21 @@ pub(super) fn candidate(bytes: &[u8]) -> bool {
 pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
     let expanded;
     let payload = if bytes.starts_with(&[0x1f, 0x8b]) {
-        let mut reader = MultiGzDecoder::new(bytes).take((MAX_PAYLOAD_BYTES + 1) as u64);
+        let mut reader = MultiGzDecoder::new(bytes);
         expanded = {
             let mut output = Vec::new();
-            reader
-                .read_to_end(&mut output)
-                .map_err(|error| format!("BinaryCIF gzip decoding failed: {error}"))?;
-            if output.len() > MAX_PAYLOAD_BYTES {
-                return Err("BinaryCIF gzip output exceeds the 64 MiB payload budget".into());
+            let mut chunk = [0u8; 64 * 1024];
+            loop {
+                let length = reader
+                    .read(&mut chunk)
+                    .map_err(|error| format!("BinaryCIF gzip decoding failed: {error}"))?;
+                if length == 0 {
+                    break;
+                }
+                output
+                    .try_reserve(length)
+                    .map_err(|error| format!("Cannot allocate BinaryCIF gzip output: {error}"))?;
+                output.extend_from_slice(&chunk[..length]);
             }
             output
         };
@@ -39,9 +42,6 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
     } else {
         bytes
     };
-    if payload.len() > MAX_PAYLOAD_BYTES {
-        return Err("BinaryCIF exceeds the 64 MiB payload budget".into());
-    }
     let packed = messagepack::parse(payload)?;
     let root = object(&packed)?;
     let version = text(field(root, "version")?)?;
@@ -55,12 +55,11 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
     }
     let block = object(&blocks[0])?;
     let header = text(field(block, "header")?)?;
-    if header.is_empty() || header.len() > 256 || header.chars().any(char::is_whitespace) {
-        return Err("BinaryCIF block header is empty, excessive, or contains whitespace".into());
+    if header.is_empty() || header.chars().any(char::is_whitespace) {
+        return Err("BinaryCIF block header is empty or contains whitespace".into());
     }
     let mut output = CifText::new();
     output.push("data_EigenVista_BinaryCIF\n#\n")?;
-    let mut budget = Budget::new();
     let mut seen = std::collections::BTreeSet::new();
     let mut atoms = false;
     for category in array(field(block, "categories")?)? {
@@ -76,7 +75,7 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
         }
         let rows = count(field(category, "rowCount")?)?;
         let columns = array(field(category, "columns")?)?;
-        // Unused categories remain bounded borrowed MessagePack, without expanding
+        // Unused categories remain borrowed MessagePack, without expanding
         // their columns or pretending to preserve metadata the model cannot hold.
         if !matches!(
             category_name.as_str(),
@@ -94,24 +93,20 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
         ) {
             continue;
         }
-        if columns.is_empty() || columns.len() > MAX_COLUMNS {
-            return Err("BinaryCIF category needs 1..256 columns".into());
+        if columns.is_empty() {
+            return Err("BinaryCIF category needs at least one column".into());
         }
-        let maximum_rows = match category_name.as_str() {
-            "atom_site" => 250_000,
-            "struct_conn" | "entity" | "entity_poly" | "struct_asym" | "chem_comp"
-            | "struct_conf" | "struct_sheet_range" => 100_000,
-            _ => 1,
-        };
-        if rows > maximum_rows {
-            return Err(format!("BinaryCIF {category_name} exceeds its row budget"));
+        if matches!(category_name.as_str(), "cell" | "symmetry" | "space_group") && rows > 1 {
+            return Err(format!(
+                "BinaryCIF {category_name} must describe one scalar record"
+            ));
         }
         if rows == 0 {
             continue;
         }
         let columns = columns
             .iter()
-            .map(|column| DecodedColumn::new(column, rows, &mut budget))
+            .map(|column| DecodedColumn::new(column, rows))
             .collect::<Result<Vec<_>, _>>()?;
         let mut names = std::collections::BTreeSet::new();
         for column in &columns {
@@ -136,18 +131,17 @@ pub(super) fn parse(bytes: &[u8], name: &str) -> Result<Document, String> {
         return Err("BinaryCIF has no atom_site rows".into());
     }
     let mut document = import::cif(&output.0, name)?;
-    document.provenance.push(format!("BinaryCIF {version}; data block {header}; decoded through the shared mmCIF structure profile. Only atom sites, declared connections, bounded biological identity/secondary categories, cell and symmetry metadata were interpreted; no quantum data fabricated."));
+    document.provenance.push(format!("BinaryCIF {version}; data block {header}; decoded through the shared mmCIF structure profile. Only atom sites, declared connections, biological identity/secondary categories, cell and symmetry metadata were interpreted; no quantum data fabricated."));
     Ok(document)
 }
 
 fn valid_version(version: &str) -> bool {
-    version.strip_prefix("0.3.").is_some_and(|patch| {
-        !patch.is_empty() && patch.len() <= 5 && patch.bytes().all(|byte| byte.is_ascii_digit())
-    })
+    version
+        .strip_prefix("0.3.")
+        .is_some_and(|patch| !patch.is_empty() && patch.bytes().all(|byte| byte.is_ascii_digit()))
 }
 fn valid_name(name: &str, column: bool) -> bool {
     !name.is_empty()
-        && name.len() <= 256
         && name.bytes().all(|byte| {
             byte.is_ascii_alphanumeric()
                 || byte == b'_'
@@ -161,24 +155,20 @@ struct DecodedColumn<'a> {
     mask: Option<Vec<i64>>,
 }
 impl<'a> DecodedColumn<'a> {
-    fn new(
-        value: &'a messagepack::Value<'a>,
-        rows: usize,
-        budget: &mut Budget,
-    ) -> Result<Self, String> {
+    fn new(value: &'a messagepack::Value<'a>, rows: usize) -> Result<Self, String> {
         let record = object(value)?;
         let name = text(field(record, "name")?)?;
         if !valid_name(name, true) {
             return Err("BinaryCIF invalid column name".into());
         }
-        let values = decode(object(field(record, "data")?)?, budget)?;
+        let values = decode(object(field(record, "data")?)?)?;
         if values.len() != rows {
             return Err("BinaryCIF column length differs from rowCount".into());
         }
         let mask = match record.get("mask") {
             None | Some(messagepack::Value::Nil) => None,
             Some(value) => {
-                let mask = decode(object(value)?, budget)?.ints()?;
+                let mask = decode(object(value)?)?.ints()?;
                 if mask.len() != rows || mask.iter().any(|value| !(0..=2).contains(value)) {
                     return Err("BinaryCIF invalid presence mask".into());
                 }
@@ -219,14 +209,6 @@ impl CifText {
         Self(String::new())
     }
     fn push(&mut self, text: &str) -> Result<(), String> {
-        if self
-            .0
-            .len()
-            .checked_add(text.len())
-            .is_none_or(|len| len > MAX_CIF_BYTES)
-        {
-            return Err("BinaryCIF expanded CIF exceeds the 64 MiB text budget".into());
-        }
         self.0
             .try_reserve(text.len())
             .map_err(|_| "BinaryCIF could not allocate expanded CIF text")?;

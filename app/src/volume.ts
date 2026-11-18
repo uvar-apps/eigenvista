@@ -133,7 +133,7 @@ export function volumeObject(
         float stepSize=(end-start)/max(stepCount,1.0);
         vec4 accum=vec4(0);float first=-1.0;float prev=scalar(cameraPosition+direction*start);
         float t=start;
-        for(int i=0;i<4096;i++) {
+        while(t<end) {
           if(t>=end)break;
           #if SKIP_EMPTY_BRICKS
             vec3 voxel=clamp((o+d*t)*(gridSize-1.0),vec3(0),gridSize-1.0);

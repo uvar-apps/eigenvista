@@ -380,17 +380,12 @@ test("pane order and independent expansion preferences survive Open and reload",
   ).toHaveAttribute("aria-expanded", "false");
 });
 
-test("corrupt and bounded oversized stored preferences restore usable default panes", async ({
+test("malformed stored preferences fall back while valid padded orders restore and persist", async ({
   page,
 }) => {
   await ready(page);
   const reversed = { left: [...left].reverse(), right: [...right].reverse() };
-  for (const stored of [
-    "{",
-    "[]",
-    JSON.stringify({ left: null, right: 42 }),
-    " ".repeat(4096) + JSON.stringify(reversed),
-  ]) {
+  for (const stored of ["{", "[]", JSON.stringify({ left: null, right: 42 })]) {
     await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
       key: storageKey,
       value: stored,
@@ -406,6 +401,56 @@ test("corrupt and bounded oversized stored preferences restore usable default pa
   }
   await handle(page, "document").press("End");
   await expectOrder(page, "left", ["quantum-fields", "provenance", "document"]);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (key) => JSON.parse(localStorage.getItem(key)!),
+        storageKey,
+      ),
+    )
+    .toEqual({ left: ["quantum-fields", "provenance", "document"], right });
+
+  await page.evaluate(({ key, value }) => localStorage.setItem(key, value), {
+    key: storageKey,
+    value: " ".repeat(4096) + JSON.stringify(reversed),
+  });
+  await page.reload();
+  await expect(page.locator("footer [role=status]")).toContainText(
+    "triangles",
+    { timeout: 45000 },
+  );
+  await expectOrder(page, "left", reversed.left);
+  await expectOrder(page, "right", reversed.right);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      (key) => JSON.parse(localStorage.getItem(key)!),
+      storageKey,
+    ),
+  ).toEqual(reversed);
+
+  await handle(page, "document").press("Home");
+  const moved = {
+    left: ["document", "provenance", "quantum-fields"],
+    right: reversed.right,
+  };
+  await expectOrder(page, "left", moved.left);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (key) => JSON.parse(localStorage.getItem(key)!),
+        storageKey,
+      ),
+    )
+    .toEqual(moved);
+  await page.reload();
+  await expect(page.locator("footer [role=status]")).toContainText(
+    "triangles",
+    { timeout: 45000 },
+  );
+  await expectOrder(page, "left", moved.left);
+  await expectOrder(page, "right", moved.right);
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
 test("duplicates, wrong-pane, unknown and incomplete orders reject only their invalid pane", async ({

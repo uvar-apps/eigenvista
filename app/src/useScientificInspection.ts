@@ -71,7 +71,7 @@ const surfaceSummary = ({
   vertexCount: positions.length / 3,
   triangleCount: indices.length / 3,
   warningCount: warnings.length,
-  warnings: warnings.slice(0, 8).map((warning) => warning.slice(0, 256)),
+  warnings,
 });
 const upsert = <T extends { id: string }>(rows: T[], row: T): T[] =>
   rows.some((item) => item.id === row.id)
@@ -82,7 +82,7 @@ const requireId = <T extends { id: string }>(rows: T[], id: unknown): T => {
   if (!found)
     throw new ControlError(
       "not_found",
-      `Unknown inspection object ${String(id).slice(0, 128)}`,
+      `Unknown inspection object ${String(id)}`,
     );
   return found;
 };
@@ -328,7 +328,7 @@ export function useScientificInspection(options: Options) {
     if (method === "selection.get")
       return {
         ...page(active(), params),
-        orderedAtoms: picks.current.slice(0, 256),
+        orderedAtoms: picks.current.slice(),
         selectedCount: active().length,
         pickEnabled,
         lastPick: currentPick(),
@@ -748,8 +748,6 @@ export function useScientificInspection(options: Options) {
             .join("\n") +
           "\n";
       }
-      if (new TextEncoder().encode(text).length > 32 * 1024 * 1024)
-        throw new ControlError("limit_exceeded", "CSV exceeds 32 MiB");
       check();
       if (native && params.path !== undefined)
         return invoke("control_write_csv", {

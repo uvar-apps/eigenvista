@@ -24,7 +24,7 @@ mod tables;
 pub use rules::RadiusRules;
 
 use crate::diag::{Diagnostics, WarningKind};
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::structure::{AtomRecord, AtomSet, Element, Structure};
 
 /// Built-in radius sets that custom rules can build on.
@@ -188,7 +188,7 @@ pub fn assign(
         _ => false,
     };
     let mut missing: Vec<String> = Vec::new();
-    let mut radii = Vec::with_capacity(atoms.len());
+    let mut radii = error::capacity(atoms.len(), "assigned radii")?;
     for atom in atoms.iter() {
         if options.use_file_radii
             && let Some(r) = atom.radius
@@ -202,7 +202,7 @@ pub fn assign(
                 "explicit hydrogens with united-atom ProtOr radii (which already include \
                  hydrogens); using element radii for them",
                 || describe(structure, atom),
-            );
+            )?;
         }
         let found = lookup(structure, atom, &options.set);
         let r = match found {
@@ -216,9 +216,11 @@ pub fn assign(
                     f
                 } else {
                     if options.strict {
-                        if missing.len() < Diagnostics::MAX_EXAMPLES {
-                            missing.push(describe(structure, atom));
-                        }
+                        error::push(
+                            &mut missing,
+                            describe(structure, atom),
+                            "missing-radius diagnostic examples",
+                        )?;
                         radii.push(f64::NAN);
                         continue;
                     }
@@ -229,7 +231,7 @@ pub fn assign(
                             options.unknown_radius
                         ),
                         || describe(structure, atom),
-                    );
+                    )?;
                     options.unknown_radius
                 }
             }
@@ -238,10 +240,27 @@ pub fn assign(
     }
     if !missing.is_empty() {
         let total = radii.iter().filter(|r| r.is_nan()).count();
-        return Err(Error::InvalidInput(format!(
-            "{total} atom(s) have no radius in the selected set (strict mode), e.g. {}",
-            missing.join(", ")
-        )));
+        let prefix = format!("{total} atom(s) have no radius in the selected set (strict mode): ");
+        let bytes = missing.iter().try_fold(prefix.len(), |size, example| {
+            size.checked_add(example.len())
+                .and_then(|v| v.checked_add(2))
+                .ok_or(Error::SizeOverflow("missing-radius diagnostic text"))
+        })?;
+        let mut message = String::new();
+        message
+            .try_reserve_exact(bytes)
+            .map_err(|source| Error::Allocation {
+                what: "missing-radius diagnostic text",
+                source,
+            })?;
+        message.push_str(&prefix);
+        for (index, example) in missing.iter().enumerate() {
+            if index != 0 {
+                message.push_str(", ");
+            }
+            message.push_str(example);
+        }
+        return Err(Error::InvalidInput(message));
     }
     Ok(radii)
 }
@@ -339,6 +358,41 @@ HETATM    5  X1  UNK A 301       4.000   0.000   0.000  1.00  0.00
         opts.set = RadiusSet::Custom(Box::new(rules));
         let r = assign(&atoms, &opts, &mut d).unwrap();
         assert_eq!(r, [1.55, 1.70, 1.20, 1.40, 2.20]);
+    }
+
+    #[test]
+    fn strict_missing_radius_diagnostics_include_every_atom() {
+        let text = format!(
+            "8\nall unknown\n{}",
+            (0..8)
+                .map(|i| format!("Xx{i} {i} 0 0\n"))
+                .collect::<String>()
+        );
+        let structure = read_bytes(
+            text.as_bytes(),
+            &ReadOptions {
+                format: Some(Format::Xyz),
+                ..ReadOptions::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(structure.diagnostics.warnings()[0].examples.len(), 8);
+        let mut diags = Diagnostics::new();
+        let atoms = structure.select(&all_atoms(), &mut diags).unwrap();
+        let error = assign(
+            &atoms,
+            &RadiusOptions {
+                strict: true,
+                ..RadiusOptions::default()
+            },
+            &mut diags,
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(error.contains("8 atom(s)"), "{error}");
+        for index in 0..8 {
+            assert!(error.contains(&format!("Xx{index}")), "{error}");
+        }
     }
 
     #[test]

@@ -148,7 +148,7 @@ test("cube Open renders both scalar signs directly in volume and raycast on desk
       path: `../artifacts/cube-${testInfo.project.name}-${mode}-desktop.png`,
     });
   }
-  await page.getByLabel("Grid resolution").selectOption("24");
+  await page.getByLabel("Grid resolution", { exact: true }).selectOption("24");
   await expect(
     page.getByRole("button", { name: "Generate surfaces" }),
   ).toBeEnabled();
@@ -167,7 +167,7 @@ test("cube Open retains both scalar signs and mesh-free controls on mobile", asy
   await expect(page.getByLabel("Unsaved changes")).toHaveCount(1);
   await page.getByRole("slider", { name: "Opacity" }).press("End");
   // Preserve the original post-desktop 24-grid selection before Fit/mobile modes.
-  await page.getByLabel("Grid resolution").selectOption("24");
+  await page.getByLabel("Grid resolution", { exact: true }).selectOption("24");
   await expect(
     page.getByRole("button", { name: "Generate surfaces" }),
   ).toBeEnabled();
@@ -237,7 +237,7 @@ test("cube meshes persist with the authoritative affine field, and native Open f
 }, testInfo) => {
   await ready(page);
   await openCube(page);
-  await page.getByLabel("Grid resolution").selectOption("24");
+  await page.getByLabel("Grid resolution", { exact: true }).selectOption("24");
   await page.getByRole("button", { name: "Generate surfaces" }).click();
   await expect(page.locator("footer [role=status]")).toContainText("triangles");
   await expect(page.locator(".surface-row")).toHaveCount(2);

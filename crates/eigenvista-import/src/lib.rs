@@ -1,4 +1,4 @@
-//! Bounded, shared file detection and conversion for the viewer and command line.
+//! Shared file detection and conversion for the viewer and command line.
 
 mod bcif;
 mod molden;
@@ -9,8 +9,6 @@ use eigenvista_core::{Document, bonds, import};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::BTreeSet;
-
-pub const MAX_IMPORT_BYTES: usize = 128 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ImportReport {
@@ -66,8 +64,8 @@ fn native(bytes: &[u8]) -> Result<ImportResult, String> {
 /// Native documents retain scientific data and explicit bonds; missing display
 /// bonds are supplemented and reported as a change requiring an explicit save.
 pub fn import_bytes(bytes: &[u8], name: &str) -> Result<ImportResult, String> {
-    if bytes.is_empty() || bytes.len() > MAX_IMPORT_BYTES {
-        return Err("Input is empty or exceeds 128 MiB".into());
+    if bytes.is_empty() {
+        return Err("Input is empty".into());
     }
     let suffix = name.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
     if bytes.starts_with(b"PK\x03\x04") {

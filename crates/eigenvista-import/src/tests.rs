@@ -347,18 +347,53 @@ fn malformed_or_unsupported_scientific_inputs_fail_at_the_boundary() {
 }
 
 #[test]
-fn excessive_counts_are_rejected_before_unbounded_expansion() {
+fn large_molden_counts_and_text_are_imported_without_policy_ceilings() {
+    let primitives = HYDROGEN.replace(
+        "s 1 1.00\n1.0 1.0",
+        &format!("s 65\n{}", "1.0 1.0\n".repeat(65)),
+    );
+    assert_eq!(
+        import_bytes(primitives.as_bytes(), "primitives.molden")
+            .unwrap()
+            .document
+            .basis[0]
+            .exponents
+            .len(),
+        65
+    );
     let large_basis = HYDROGEN.replace("s 1 1.00\n1.0 1.0", &"g 1\n1 1\n".repeat(70));
-    fails(&large_basis, "1024 atomic orbitals");
+    assert_eq!(
+        import_bytes(large_basis.as_bytes(), "large.molden")
+            .unwrap()
+            .document
+            .basis
+            .len(),
+        1050
+    );
     let orbitals = format!(
         "{}{}",
         HYDROGEN,
         "Sym=A\nSpin=Alpha\nOccup=0\n1 1\n".repeat(512)
     );
-    fails(&orbitals, "512 molecular orbitals");
-    let long_line = format!("{HYDROGEN}{}", "X".repeat(16385));
-    fails(&long_line, "line/count budget");
-    fails(&format!("{HYDROGEN}{}", "[FREQ]\n".repeat(128)), "Too many");
+    assert_eq!(
+        import_bytes(orbitals.as_bytes(), "large.molden")
+            .unwrap()
+            .document
+            .orbitals
+            .len(),
+        513
+    );
+    let title = "X".repeat(16_385);
+    let long_line = HYDROGEN.replace("[Atoms]", &format!("[Title]\n{title}\n[Atoms]"));
+    assert_eq!(
+        import_bytes(long_line.as_bytes(), "long.molden")
+            .unwrap()
+            .document
+            .title,
+        title
+    );
+    let sections = format!("{HYDROGEN}{}", "[FREQ]\n".repeat(129));
+    assert!(import_bytes(sections.as_bytes(), "sections.molden").is_ok());
 }
 
 #[test]

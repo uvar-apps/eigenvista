@@ -27,7 +27,6 @@ export function automaticMolecularAoRadiusAngstrom(
 }
 
 const MOLECULE_LAYER = 1;
-const MAX_AO_EDGE = 1024;
 const AO_CHUNK = "#include <aomap_fragment>";
 const AO_PROGRAM_KEY = "eigenvista-molecular-ao-v5";
 
@@ -73,6 +72,7 @@ export class MolecularAmbientOcclusion {
   private failed = false;
   private disposed = false;
   private dimensions = new THREE.Vector2();
+  private maxRenderbufferSize: number | null = null;
   private uniforms = {
     eigenvistaMolecularAo: { value: null as THREE.Texture | null },
     eigenvistaMolecularAoViewport: { value: new THREE.Vector2(1, 1) },
@@ -98,6 +98,14 @@ export class MolecularAmbientOcclusion {
     this.failed = false;
   }
 
+  /** Context restoration must query the replacement device's capabilities. */
+  resetContext(): void {
+    this.maxRenderbufferSize = null;
+    this.pendingShaderError = null;
+    this.failed = false;
+    this.deactivate();
+  }
+
   render(options: MolecularAmbientOcclusionOptions): void {
     if (this.disposed) return;
     if (!options.enabled || options.strength === 0) {
@@ -119,6 +127,7 @@ export class MolecularAmbientOcclusion {
         throw new Error("AO strength must be 0–1 and radius must be positive.");
 
       let attachedMaterials = false;
+      let allocatedResources = false;
       this.withShaderDiagnostics(() => {
         this.withRestoredState(() => {
           const gl = this.renderer.getContext();
@@ -128,10 +137,12 @@ export class MolecularAmbientOcclusion {
             throw new Error("Floating-point render targets are unavailable.");
 
           this.renderer.getDrawingBufferSize(this.dimensions);
+          this.maxRenderbufferSize ??= gl.getParameter(
+            gl.MAX_RENDERBUFFER_SIZE,
+          ) as number;
           const limit = Math.min(
-            MAX_AO_EDGE,
             this.renderer.capabilities.maxTextureSize,
-            gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) as number,
+            this.maxRenderbufferSize,
           );
           const scale = Math.min(
             1,
@@ -161,7 +172,10 @@ export class MolecularAmbientOcclusion {
             needsValidation = true;
           }
           const pass = this.pass;
-          if (needsValidation) this.validateTargets(pass);
+          if (needsValidation) {
+            allocatedResources = true;
+            this.validateTargets(pass);
+          }
           pass.updateGtaoMaterial({
             radius: options.radius,
             thickness: options.radius,
@@ -208,6 +222,13 @@ export class MolecularAmbientOcclusion {
         }
       });
       if (this.pendingShaderError !== null) throw this.pendingShaderError;
+      if (allocatedResources) {
+        const gl = this.renderer.getContext();
+        if (gl.getError() === gl.OUT_OF_MEMORY)
+          throw new Error(
+            "The graphics device could not allocate memory for ambient occlusion.",
+          );
+      }
     } catch (error) {
       throw this.failure(error);
     }
@@ -334,7 +355,7 @@ reflectedLight.indirectDiffuse *= eigenvistaContact;
           gl.getShaderInfoLog(fragmentShader),
         ]
           .filter(Boolean)
-          .map((log) => log!.slice(0, 4096))
+          .map((log) => log!)
           .join("\n");
         this.pendingShaderError ??= new Error(
           `An AO shader failed to link${logs ? `: ${logs}` : "."}`,

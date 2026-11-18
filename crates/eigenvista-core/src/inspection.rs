@@ -5,11 +5,6 @@ use kiddo::{ImmutableKdTree, SquaredEuclidean};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
-pub const MAX_NAMED_SELECTIONS: usize = 64;
-pub const MAX_SELECTION_REFERENCES: usize = 1_000_000;
-pub const MAX_MEASUREMENTS: usize = 256;
-pub const MAX_LABELS: usize = 256;
-pub const MAX_ANNOTATION_TEXT_BYTES: usize = 64 * 1024;
 /// The same finite coordinate envelope used by display bond perception.
 pub const MAX_NEIGHBOR_COORDINATE_ANGSTROM: f64 = 1e9;
 const DEGENERACY_TOLERANCE: f64 = 64. * f64::EPSILON;
@@ -132,12 +127,6 @@ impl Annotations {
     /// Validate only this payload and its source references. Calling the full
     /// Document validator here would recurse when annotations belong to it.
     pub fn validate(&self, doc: &Document) -> Result<()> {
-        if self.selections.len() > MAX_NAMED_SELECTIONS
-            || self.measurements.len() > MAX_MEASUREMENTS
-            || self.labels.len() > MAX_LABELS
-        {
-            return Err("Inspection annotations exceed the record budget".into());
-        }
         let mut ids = BTreeSet::new();
         let mut text_bytes = 0;
         let mut references = 0usize;
@@ -147,9 +136,6 @@ impl Annotations {
             references = references
                 .checked_add(selection.atoms.len())
                 .ok_or("Selection reference count overflow")?;
-            if references > MAX_SELECTION_REFERENCES {
-                return Err("Named selections exceed the aggregate atom-reference budget".into());
-            }
             if let Some(query) = &selection.neighborhood {
                 validate_neighborhood(doc, query)?;
             }
@@ -188,21 +174,16 @@ fn record<'a>(
     bytes: &mut usize,
 ) -> Result<()> {
     if id.trim().is_empty()
-        || id.len() > 128
         || id.chars().any(char::is_control)
         || !ids.insert(id)
         || text.trim().is_empty()
-        || text.len() > 256
         || text.chars().any(char::is_control)
     {
-        return Err("Invalid, duplicate or excessive annotation ID/text".into());
+        return Err("Invalid or duplicate annotation ID/text".into());
     }
     *bytes = bytes
         .checked_add(text.len())
         .ok_or("Annotation text size overflow")?;
-    if *bytes > MAX_ANNOTATION_TEXT_BYTES {
-        return Err("Annotation text exceeds the 64 KiB budget".into());
-    }
     Ok(())
 }
 
@@ -373,8 +354,7 @@ pub fn measure(doc: &Document, request: &MeasurementRequest) -> Result<Measureme
 }
 
 fn validate_neighborhood(doc: &Document, request: &NeighborhoodRequest) -> Result<()> {
-    if doc.atoms.len() > 100_000
-        || request.seeds.is_empty()
+    if request.seeds.is_empty()
         || request.seeds.len() > doc.atoms.len()
         || request.seeds.iter().any(|&index| index >= doc.atoms.len())
         || !request.radius_angstrom.is_finite()
@@ -472,7 +452,8 @@ pub fn neighborhood_with_progress(
     }
     if request.whole_residues {
         let metadata = doc.structure.as_ref().expect("validated metadata");
-        let mut residues = vec![false; metadata.residues.len()];
+        let mut residues =
+            crate::allocation::filled(metadata.residues.len(), false, "neighborhood residues")?;
         for &index in &result {
             residues[metadata.atom_residues[index]] = true;
         }

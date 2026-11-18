@@ -342,7 +342,7 @@ test("molecular shader targets affect only the chosen mesh and survive uniform u
   ).toBe("right");
 });
 
-test("large valid cached warning collections remain bounded and fully pageable", async ({
+test("large valid cached warning collections remain complete and fully pageable", async ({
   page,
 }) => {
   await ready(page);
@@ -372,24 +372,20 @@ test("large valid cached warning collections remain bounded and fully pageable",
   await open(page, "warnings.eigenvista", bytes);
   const summaries = await list(page);
   expect(summaries.total).toBe(32);
-  expect(summaries.items.every((surface) => surface.warningCount === 128)).toBe(
-    true,
+  expect(summaries.items.map((surface) => surface.id)).toEqual(
+    Array.from({ length: 32 }, (_, surface) => "warnings-" + surface),
   );
-  expect(
-    summaries.items.every(
-      (surface) =>
-        surface.warnings.length <= 8 &&
-        surface.warnings.every((warning) => warning.length <= 256),
-    ),
-  ).toBe(true);
-  expect(summaries.items[31].warnings).toEqual(
-    Array.from({ length: 8 }, (_, warning) =>
-      ("31:" + warning + ":").padEnd(256, "w"),
-    ),
-  );
-  expect(Buffer.byteLength(JSON.stringify(summaries), "utf8")).toBeLessThan(
-    4 * 1024 * 1024,
-  );
+  for (const [surface, summary] of summaries.items.entries()) {
+    expect(summary.warningCount).toBe(128);
+    expect(
+      summary.warnings,
+      "Complete warnings for surface " + surface,
+    ).toEqual(
+      Array.from({ length: 128 }, (_, warning) =>
+        (surface + ":" + warning + ":").padEnd(1024, "w"),
+      ),
+    );
+  }
   const first = await call<{ total: number; offset: number; items: string[] }>(
     page,
     "molecularSurfaces.warnings",
@@ -405,7 +401,10 @@ test("large valid cached warning collections remain bounded and fully pageable",
     limit: 100,
   });
   expect(first.total).toBe(128);
+  expect(first.offset).toBe(0);
   expect(first.items).toHaveLength(100);
+  expect(next.total).toBe(128);
+  expect(next.offset).toBe(100);
   expect(next.items).toHaveLength(28);
   expect([...first.items, ...next.items]).toEqual(
     Array.from({ length: 128 }, (_, warning) =>

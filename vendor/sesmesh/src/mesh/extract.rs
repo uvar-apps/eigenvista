@@ -17,7 +17,7 @@ use rustc_hash::FxHashMap;
 
 use super::tables::{self, corner_offset, edge_axis_lower};
 use super::{Mesh, PatchKind};
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::field::{Engine, Feature, LocalCandidates, NearEval, SurfaceKind, pack};
 use crate::geom::Vec3;
 use crate::par;
@@ -87,11 +87,21 @@ impl ChunkMesh {
         key: [i32; 3],
         values: &[f32],
         refine: RefineMode,
-    ) {
-        mesh_brick(engine, key, values, refine, &mut self.mesh);
-        let end = |n: usize| u32::try_from(n).expect("fewer than 2^32 vertices per chunk");
-        self.vertex_end.push(end(self.mesh.edges.len()));
-        self.tri_end.push(end(self.mesh.tris.len()));
+    ) -> Result<()> {
+        mesh_brick(engine, key, values, refine, &mut self.mesh)?;
+        let end =
+            |n: usize| u32::try_from(n).map_err(|_| Error::SizeOverflow("chunk mesh offsets"));
+        error::push(
+            &mut self.vertex_end,
+            end(self.mesh.edges.len())?,
+            "chunk vertex offsets",
+        )?;
+        error::push(
+            &mut self.tri_end,
+            end(self.mesh.tris.len())?,
+            "chunk triangle offsets",
+        )?;
+        Ok(())
     }
 
     /// Exact field evaluations spent on vertices.
@@ -122,7 +132,7 @@ fn mesh_brick(
     values: &[f32],
     refine: RefineMode,
     out: &mut BrickMesh,
-) {
+) -> Result<()> {
     let lat = &engine.lattice;
     let b = lat.b as usize;
     let s = b + 1;
@@ -143,6 +153,34 @@ fn mesh_brick(
     let h = lat.h;
     let base = lat.point(origin);
     let rho = 0.5 * 3f64.sqrt() * sub as f64 * h * (1.0 + 1e-9) + 1e-9;
+    // Count the exact emitted topology before reserving. No worst-case memory
+    // estimate is used to refuse the request or to change spacing.
+    let corner_step: [usize; 8] = std::array::from_fn(|c| {
+        let o = corner_offset(c);
+        o[0] + o[1] * s + o[2] * s * s
+    });
+    let (mut vertex_count, mut triangle_count) = (0usize, 0usize);
+    for z in 0..b {
+        for y in 0..b {
+            for x in 0..b {
+                let i = (z * s + y) * s + x;
+                vertex_count += stride
+                    .iter()
+                    .filter(|&&st| (values[i] < 0.0) != (values[i + st] < 0.0))
+                    .count();
+                let case = corner_step.iter().enumerate().fold(0, |case, (c, &st)| {
+                    case | (usize::from(values[i + st] < 0.0) << c)
+                });
+                triangle_count += tables::triangles(case).len();
+            }
+        }
+    }
+    error::reserve(&mut out.edges, vertex_count, "chunk crossing edges")?;
+    error::reserve(&mut out.positions, vertex_count, "chunk positions")?;
+    error::reserve(&mut out.normals, vertex_count, "chunk normals")?;
+    error::reserve(&mut out.atoms, vertex_count, "chunk atom identities")?;
+    error::reserve(&mut out.patches, vertex_count, "chunk patches")?;
+    error::reserve(&mut out.tris, triangle_count, "chunk triangles")?;
     let mut locals: [Option<LocalCandidates>; 8] = Default::default();
     let t_min = edge_clamp(engine);
 
@@ -165,7 +203,8 @@ fn mesh_brick(
                     ib[axis] += 1;
                     let (pa, pb) = (lat.point(ia), lat.point(ib));
                     let sb = [x, y, z].map(|c| (c / sub).min(nsub - 1));
-                    let local = locals[sb[0] + 2 * sb[1] + 4 * sb[2]].get_or_insert_with(|| {
+                    let slot = &mut locals[sb[0] + 2 * sb[1] + 4 * sb[2]];
+                    if slot.is_none() {
                         let center = base
                             + Vec3::new(
                                 (sb[0] * sub) as f64 + 0.5 * sub as f64,
@@ -173,9 +212,12 @@ fn mesh_brick(
                                 (sb[2] * sub) as f64 + 0.5 * sub as f64,
                             ) * h;
                         let mut l = LocalCandidates::default();
-                        engine.field.gather_local(center, rho, engine.band, &mut l);
-                        l
-                    });
+                        engine
+                            .field
+                            .gather_local(center, rho, engine.band, &mut l)?;
+                        *slot = Some(l);
+                    }
+                    let local = slot.as_ref().expect("populated above");
                     let (fa, fb) = (f64::from(va), f64::from(vb));
                     let edge = Edge {
                         pa,
@@ -229,33 +271,7 @@ fn mesh_brick(
             }
         }
     }
-}
-
-/// Number of triangles [`mesh_brick`] emits for a brick of `b`³ cells with
-/// samples `values` (same layout): the cell pass without vertices. Used to
-/// estimate the mesh size before meshing (memory guard, Design §8.6).
-pub(crate) fn brick_triangles(b: usize, values: &[f32]) -> usize {
-    let s = b + 1;
-    let corner_step: [usize; 8] = std::array::from_fn(|c| {
-        let o = corner_offset(c);
-        o[0] + o[1] * s + o[2] * s * s
-    });
-    let mut n = 0;
-    for z in 0..b {
-        for y in 0..b {
-            for x in 0..b {
-                let i0 = (z * s + y) * s + x;
-                let mut case = 0;
-                for (c, &st) in corner_step.iter().enumerate() {
-                    if values[i0 + st] < 0.0 {
-                        case |= 1 << c;
-                    }
-                }
-                n += tables::triangles(case).len();
-            }
-        }
-    }
-    n
+    Ok(())
 }
 
 /// A crossing edge `pa → pb` with sampled values of opposite inside/outside
@@ -448,34 +464,36 @@ fn attributes(engine: &Engine, v: Vec3, e: &NearEval, outward: Vec3) -> (Vec3, P
 /// freed once copied, so the parts and the result do not coexist in full.
 ///
 /// # Errors
-/// [`Error::ResourceLimit`] beyond `u32` vertex indices; [`Error::Internal`]
+/// [`Error::SizeOverflow`] beyond `u32` vertex indices; [`Error::Internal`]
 /// for an unresolvable reference (a bug).
 pub(crate) fn assemble(bricks: &[[i32; 3]], chunk: usize, parts: Vec<ChunkMesh>) -> Result<Mesh> {
     debug_assert_eq!(parts.len(), bricks.len().div_ceil(chunk.max(1)));
     // Global index of the first vertex of every brick.
-    let mut base = Vec::with_capacity(bricks.len());
+    let mut base = error::capacity(bricks.len(), "mesh brick offsets")?;
     let mut total = 0usize;
     for p in &parts {
         base.extend(
             (0..p.vertex_end.len()).map(|l| total + ChunkMesh::range(&p.vertex_end, l).start),
         );
-        total += p.mesh.edges.len();
+        total = total
+            .checked_add(p.mesh.edges.len())
+            .ok_or(Error::SizeOverflow("mesh vertices"))?;
     }
-    if total > u32::MAX as usize {
-        return Err(Error::ResourceLimit {
-            what: format!("mesh with {total} vertices (u32 indices)"),
-            limit: u64::from(u32::MAX),
-        });
+    u32::try_from(total).map_err(|_| Error::SizeOverflow("mesh u32 vertex indices"))?;
+    let mut index: FxHashMap<u64, usize> = FxHashMap::default();
+    index
+        .try_reserve(bricks.len())
+        .map_err(|source| Error::Allocation {
+            what: "mesh brick lookup",
+            source,
+        })?;
+    for (i, key) in bricks.iter().enumerate() {
+        index.insert(pack(*key), i);
     }
-    let index: FxHashMap<u64, u32> = bricks
-        .iter()
-        .enumerate()
-        .map(|(i, k)| (pack(*k), i as u32))
-        .collect();
     let edges_of = |bi: usize| parts[bi / chunk].edges(bi % chunk);
-    let resolved = par::map(parts.len(), |c| -> Result<Vec<[u32; 3]>> {
+    let resolved = par::try_map(parts.len(), |c| -> Result<Vec<[u32; 3]>> {
         let part = &parts[c];
-        let mut tris = Vec::with_capacity(part.mesh.tris.len());
+        let mut tris = error::capacity(part.mesh.tris.len(), "resolved mesh triangles")?;
         for l in 0..part.tri_end.len() {
             let bi = c * chunk + l;
             let key = bricks[bi];
@@ -511,19 +529,18 @@ pub(crate) fn assemble(bricks: &[[i32; 3]], chunk: usize, parts: Vec<ChunkMesh>)
             }
         }
         Ok(tris)
-    });
+    })?;
     drop(base);
+    let triangles = resolved.iter().try_fold(0usize, |n, r| {
+        n.checked_add(r.len())
+            .ok_or(Error::SizeOverflow("mesh triangles"))
+    })?;
     let mut mesh = Mesh {
-        positions: Vec::with_capacity(total),
-        normals: Vec::with_capacity(total),
-        triangles: Vec::with_capacity(
-            resolved
-                .iter()
-                .map(|r| r.as_ref().map_or(0, Vec::len))
-                .sum(),
-        ),
-        vertex_atom: Vec::with_capacity(total),
-        vertex_patch: Vec::with_capacity(total),
+        positions: error::capacity(total, "mesh positions")?,
+        normals: error::capacity(total, "mesh normals")?,
+        triangles: error::capacity(triangles, "mesh triangles")?,
+        vertex_atom: error::capacity(total, "mesh atom identities")?,
+        vertex_patch: error::capacity(total, "mesh patches")?,
         vertex_component: Vec::new(),
     };
     for (p, tris) in parts.into_iter().zip(resolved) {
@@ -532,7 +549,7 @@ pub(crate) fn assemble(bricks: &[[i32; 3]], chunk: usize, parts: Vec<ChunkMesh>)
         mesh.normals.extend_from_slice(&p.normals);
         mesh.vertex_atom.extend_from_slice(&p.atoms);
         mesh.vertex_patch.extend_from_slice(&p.patches);
-        mesh.triangles.extend(tris?);
+        mesh.triangles.extend(tris);
     }
     Ok(mesh)
 }
@@ -647,12 +664,10 @@ mod tests {
                             fb: at(j),
                             t_min,
                         };
-                        engine.field.gather_local(
-                            (pa + pb) * 0.5,
-                            0.5 * h + 1e-9,
-                            engine.band,
-                            &mut local,
-                        );
+                        engine
+                            .field
+                            .gather_local((pa + pb) * 0.5, 0.5 * h + 1e-9, engine.band, &mut local)
+                            .unwrap();
                         let mut out = BrickMesh::default();
                         vertex(&engine, &edge, RefineMode::Exact, &local, &mut out);
                         let (t, e, ok) = refine_1_1(&engine, &edge, &local);

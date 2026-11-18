@@ -1,5 +1,8 @@
 # Gaussian cube import
 
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
 The shared Rust importer reads one bounded scalar field from `.cube` or `.cub`.
 Open, Convert files, and the standalone `eigenvista-convert` CLI use this same
 profile. A cube supplies an already sampled field: no basis, orbital coefficients,
@@ -118,10 +121,9 @@ by parsing. Raw native decoding remains exact and separate from this import poli
 
 ## Limits and regression evidence
 
-Cube text is limited to 64 MiB, absolute atom count to 100,000, and total grid
-samples to `128^3`. Every dimension must be at least two. Finite-number,
-checked-allocation, affine-grid, model, and bond-search limits also apply.
-These are rejection bounds, not interactive-performance promises.
+Cube input and scalar grids have no application byte/count ceilings. Each
+dimension must be at least two; checked products, complete payload validation,
+finite values, valid affine geometry and actual allocation success are required.
 
 [Cube core tests](../crates/eigenvista-core/tests/cube_import.rs) exercise ordering,
 affine grids, signed fields, bonds, single-orbital headers, malformed profiles,

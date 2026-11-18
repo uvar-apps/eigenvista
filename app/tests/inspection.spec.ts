@@ -140,7 +140,7 @@ async function rows<T>(page: Page, method: string) {
   return Array.isArray(response) ? response : response.items;
 }
 
-test("label texture preflight rejects an over-budget edit without publishing it", async ({
+test("label rendering allocates textures beyond the old 16 MiB ceiling", async ({
   page,
 }) => {
   await ready(page);
@@ -210,30 +210,27 @@ test("label texture preflight rejects an over-budget edit without publishing it"
       rejected,
     };
   }, source.bytes);
-  expect(fixture.rejected).toContain("16 MiB");
+  expect(fixture.rejected).toBe("");
   await openBytes(page, "label-budget.eigenvista", Buffer.from(fixture.bytes));
   await settleScene(page);
   const before = await call<{ revision: number }>(page, "app.state");
-  const imageBefore = await call<{ dataUrl: string }>(page, "image.export");
-  await expect(
-    call(page, "labels.upsert", {
-      label: { ...fixture.hidden, visible: true },
-      expectedRevision: before.revision,
-    }),
-  ).rejects.toThrow(/16 MiB texture budget/);
+  await call(page, "labels.upsert", {
+    label: { ...fixture.hidden, visible: true },
+    expectedRevision: before.revision,
+  });
   expect((await call<{ revision: number }>(page, "app.state")).revision).toBe(
-    before.revision,
+    before.revision + 1,
   );
   const labels = await rows<AnnotationLabel>(page, "labels.list");
   expect(labels.filter((label) => label.visible)).toHaveLength(
-    fixture.visibleCount,
+    fixture.visibleCount + 1,
   );
   expect(labels.find((label) => label.id === fixture.hidden.id)?.visible).toBe(
-    false,
+    true,
   );
-  expect((await call<{ dataUrl: string }>(page, "image.export")).dataUrl).toBe(
-    imageBefore.dataUrl,
-  );
+  expect(
+    (await call<{ dataUrl: string }>(page, "image.export")).dataUrl,
+  ).toMatch(/^data:image\/png;base64,/);
 });
 
 test("a revision-guarded saved neighborhood completes its own publication and display update", async ({

@@ -339,7 +339,25 @@ test("vendored Sesmesh notices and complete pinned source survive actual depende
   );
   assert.deepEqual(inventory[0].patchedFiles, [
     "src/control.rs",
+    "src/diag.rs",
+    "src/error.rs",
+    "src/field/kernel.rs",
+    "src/field/lattice.rs",
+    "src/field/point.rs",
+    "src/geom/arrangement.rs",
+    "src/geom/cells.rs",
+    "src/io/assembly.rs",
+    "src/io/cif/mod.rs",
+    "src/io/mod.rs",
+    "src/io/pdb.rs",
+    "src/io/pqr.rs",
+    "src/io/xyz.rs",
+    "src/mesh/extract.rs",
+    "src/mesh/mod.rs",
+    "src/mesh/post.rs",
     "src/par.rs",
+    "src/radii/mod.rs",
+    "src/structure/select.rs",
     "src/surface.rs",
   ]);
   assert.equal(inventory[0].fileCount, value.names.length);

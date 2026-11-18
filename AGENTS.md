@@ -49,9 +49,69 @@ documents; older `.molekel` preview documents remain readable. Check
 - [User website](https://uvar-apps.github.io/eigenvista/) ·
   [Website maintenance](docs/website.md): static `site/` output, content, media and publishing.
 
+## Release 0.10.1 preparation — 18 November 2026
+
+Fresh 0.10.1 source checks now pass: 365 workspace and 13 desktop Rust tests,
+fmt/strict Clippy, production WASM/frontend/native debug builds, 23 packaging
+checks and all 678 browser cases on 419 frozen hashes (339 per engine; no
+failures/skips/flaky cases/retries). Both browsers pass full 1AON SES generation
+and large cache Save/reopen. Clean-source packaging, extracted-native acceptance
+and public release/site verification remain separate pending gates. See the
+living handoff/status for actual evidence.
+
+The user authorizes bumping the current application to **0.10.1**, committing,
+annotating/pushing a new immutable tag and publishing a GitHub release with
+release notes and rebuilt redistributables. Track delivery through
+[#93](https://github.com/uvar-apps/eigenvista/issues/93), including fixes #91/#92.
+This authorization supersedes the older uncommitted/no-release statements in
+the dated 17 November qualification snapshots below. Continue on main; preserve
+existing v0.10.0 and all historical packages/capture provenance.
+
+Prepare and validate all changes locally before pushing. Build a clean committed
+source package, audit/extract it and use its actual bundled launcher/helper for
+acceptance; a debug build does not qualify a redistributable. Record source/tag,
+package bytes/hash and publication evidence in the living handoff/status.
+Do not invent a 0.10.1 version DOI: current citation uses concept DOI
+10.5281/zenodo.24246123; 10.5281/zenodo.24302658 identifies only 0.10.0.
+The icon, scientific format/profiles and dependency/toolchain versions stay fixed.
+
 ## Required local validation before pushing
 
-Current release (#90): the downloadable Mac package is **0.10.0**, with a
+User allocation policy, 17 November 2026 (#92): **never impose application
+memory ceilings**. Attempt requested allocations and report actual allocation
+failure. Do not reject files, fields, meshes, SES jobs, saved documents or API
+transfers using arbitrary byte/count budgets; do not silently coarsen or truncate
+them to fit. Use fallible allocation and checked arithmetic. Preserve scientific
+validation, cancellation, atomic/no-clobber saves and prior accepted results.
+Estimates are diagnostic information; never use them to reject a request or
+reduce its requested resolution. Do not introduce or restore resource quotas
+under the guise of defensive validation.
+Actual address-space, numeric/index representation and device capabilities still
+apply and must be reported accurately. This supersedes older preview-budget
+requirements and any older instruction to retain resource quotas in this guide.
+Historical release snapshots remain evidence of their original binaries.
+
+Source correction **#92** (qualified 17 November 2026) implements this allocation policy across the
+scientific, import, SES, persistence, UI and controller paths. Fresh source-built
+native and both-browser large 1AON save/reopen checks pass; the final browser
+suite passes 678 cases on 419 unchanged frozen hashes. GPU error/capability
+checks belong at allocation/resize/upload/export boundaries, not ordinary
+camera/damping frames. Preserve AO's exact physical state restoration. Read
+the current handoff for commands, reused unchanged-Rust qualification, native
+background/OS boundaries, earlier failed attempts and remaining delivery work.
+That qualified snapshot was uncommitted. It is now included in the authorized
+0.10.1 release preparation; the immutable 0.10.0 binary stays unchanged.
+
+Source correction **#91** (qualified 17 November 2026) replaces the six-light scene rig with one
+camera-axis headlight and neutral fill, removing repeated highlights/bands while
+preserving camera-relative shading and matte molecular AO. Its accepted
+implementation is included in 0.10.1; earlier no-release statements describe
+the original qualification snapshot.
+Read the latest handoff for its fresh frozen-source qualification. Released
+0.10.0 package evidence below describes the immutable artifact, not this newer
+source candidate. Preserve the user's unsaved preview tab.
+
+Previous release (#90): the downloadable Mac package is **0.10.0**, with a
 published GitHub release and synchronized website/download facts. The clean
 optimized ZIP and actual extracted packaged launcher/helper are qualified;
 all three downloaded release assets and all 89 served website files match.
@@ -124,7 +184,7 @@ preserve those historical results as evidence of what ran at the time.
   the shared controller, including palette and biological presentation changes;
   do not hand those steps back to the user as manual GUI chores.
 
-- Current application version is **0.10.0**. The approved workspace and scientific
+- Previous application version **0.10.0**: The approved workspace and scientific
   inspection were merged through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89).
   Preserve the existing annotated `v0.10.0` at
   `8ab5a0a1e12f7314c93b29745ea75e4c4f11b784`. Follow-up #90 explicitly authorizes
@@ -142,7 +202,8 @@ preserve those historical results as evidence of what ran at the time.
   checks pass. All 234 frozen hashes still match the 646-case application suite;
   updated website passes all 162 browser cases. Preserve historical 0.8.0 assets
   and capture provenance. The 0.10.0 version DOI is **10.5281/zenodo.24302658**;
-  keep CITATION.cff, README, release notes and website aligned. The concept DOI
+  that DOI identifies 0.10.0 only. New versions use their own supplied DOI or
+  the concept DOI until one is available. The concept DOI
   10.5281/zenodo.24246123 identifies all versions; 0.8.0 retains its own DOI.
   Citation-only updates do not rebuild immutable packages or move tags.
   Keep #83/#85 open for the documented Save/SES limits; Linux,
@@ -248,8 +309,8 @@ preserve those historical results as evidence of what ran at the time.
   replacements, no specular highlights and illustrative AO on both diffuse
   terms. The broad-fold renderer uses visibility exponent 6, GTAO sample
   parameter 32/distance exponent 2, denoise 8/radius 4/luma rejection 0.25 and
-  full physical targets proportionally capped at 1024 (ideal payload at most
-  28 MiB). Automatic radius is 5% of the atom-coordinate box diagonal in
+  full physical targets constrained only by actual device capabilities. The
+  historical 0.6.0 binary capped targets at 1024; #92 removes that source quota. Automatic radius is 5% of the atom-coordinate box diagonal in
   angstrom, rounded to a quarter angstrom and clamped to 1.5–30 Å; memoize by
   atoms reference, independently of camera/fields. Manual radius spans
   0.25–50 Å. Preserve exact original material references on Off/zero/failure,
@@ -268,7 +329,7 @@ preserve those historical results as evidence of what ran at the time.
   responsive resize, Fit and strength actions, but bounds only the real `.scene`
   render host to 240×128 → 160×160 CSS at DPR 2 (480×256 → 320×320 physical).
   Preserve all five original PNG samples and every pixel/identity oracle.
-  Separate resource checks still exercise the 1024 cap, and actual-app tracked
+  Separate resource checks exercise sizes above the former 1024 ceiling, and actual-app tracked
   1AON remains the primary visual qualification. The published 0.6.0 inventory was
   466 tests, 233 per engine, including 10 AO cases per engine. The published
   0.7.1 inventory was 504 cases (252 per engine), adding 19 biological cases
@@ -416,7 +477,7 @@ Required local verification order before pushing runtime changes (details and co
   tests do not establish physical Cmd+Q or native file-dialog acceptance. See
   [the lifecycle decisions](docs/design/2026-11-11-native-lifecycle-and-molden-limits.md).
 - BinaryCIF transport belongs in `eigenvista-import`, before UTF-8 dispatch.
-  Keep MessagePack/decompression/column/output bounds before allocation, the
+  Keep actual-payload/shape/overflow validation before fallible allocation, the
   original input-byte digest, and shared core mmCIF scientific interpretation.
   String indices below the `-1` sentinel are errors; IntegerPacking produces
   signed Int32 values even when its packed words are unsigned. Preserve source
@@ -436,8 +497,8 @@ Required local verification order before pushing runtime changes (details and co
   output. Keep idle/camera/resize/signed-field export and visible-error recovery
   checks. Export adds no persistent capture target or scientific state.
 - Bond queries use exact radius-bucket trees with each bucket's observed maximum;
-  preserve pair cutoffs, deterministic ordering, explicit precedence, and work/
-  allocation guards. mmCIF declarations resolve only against selected source
+  preserve pair cutoffs, deterministic ordering, explicit precedence, checked
+  allocation and complete results without work/memory quotas. mmCIF declarations resolve only against selected source
   rows, with consistent label/author/alternate/insertion constraints. Keep raw
   connection provenance, type/order, loss reporting, and the conservative common-
   image policy; display rods do not imply bond orders or symmetry expansion.
@@ -493,7 +554,7 @@ Required local verification order before pushing runtime changes (details and co
   default/hosted suite; measurements are opt-in. Preserve the separately frozen
   `fixtures/indexed-mesh-qualification/` corpus and raw/custom-shader identity
   negative controls. See Plan 003 before implementing packing; unconditional
-  automatic packing is NO-GO without a bounded benefit/budget raw-fallback policy.
+  automatic packing is NO-GO without a measured benefit and fallible-allocation/raw-result fallback policy.
 - **Port 5178 is strict.** Keep [vite](app/vite.config.ts), Tauri `devUrl`
   ([tauri.conf.json](app/src-tauri/tauri.conf.json)), and both Playwright URLs
   ([playwright.config.ts](app/playwright.config.ts)) aligned if you move it.
@@ -512,7 +573,7 @@ Required local verification order before pushing runtime changes (details and co
   `rustup target add wasm32-unknown-unknown --toolchain 1.99.0`.
 - Do not stop/restart the user's app or an unknown server. Check port ownership
   first; a server in another checkout is not this app.
-- Treat imported documents as untrusted. Keep validation, allocation bounds,
+- Treat imported documents as untrusted. Keep semantic validation, checked sizes/fallible allocation,
   source hashes, exact scientific data, and atomic-save guarantees intact.
 - Exclude private `chat-*.md` and `*-chat-*.md` exports from reads, commits, and
   source packages (including titled chat exports at the repo root).
@@ -538,9 +599,9 @@ Required local verification order before pushing runtime changes (details and co
   browser tests nor optional hosted runs establish physical macOS lifecycle/dialog
   acceptance or qualification of packaged Linux/Windows releases.
 - Publication uses `eigenvista_format::validate_document` through the distinct
-  WASM export, sharing exact semantic/entry/manifest/uncompressed-byte preflight
+  WASM export, sharing exact semantic/entry/manifest/byte-relationship preflight
   with Save without ZIP compression. The older WASM `validate` remains model-only.
-  Keep both contracts, source hashes and format limits; never replace publication
+  Keep both contracts, source hashes and actual format-representation checks; never replace publication
   validation with only a mesh-size estimate. Zero-occupation Molden terms may be
   skipped only after full orbital validation; virtual orbitals stay in documents.
 - This is a development preview, not v1 or the historical M0-M7 plan. Do not mark

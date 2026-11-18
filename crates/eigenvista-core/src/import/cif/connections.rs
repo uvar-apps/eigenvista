@@ -1,14 +1,10 @@
-//! Selected-site resolution and bounded provenance for deposited mmCIF links.
+//! Selected-site resolution and complete provenance for deposited mmCIF links.
 
 use crate::Result;
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{self, Write};
 
-const MAX_CONNECTION_ROWS: usize = 100_000;
-const MAX_CONNECTION_BYTES: usize = 4 * 1024 * 1024;
-const ROW_OVERHEAD: usize = 320;
-const MAX_REFERENCE_VISITS: usize = 2_000_000;
 const RECORD_PREFIX: &str = "mmCIF struct_conn: ";
 
 pub(super) type ConnectionRow = BTreeMap<String, String>;
@@ -40,32 +36,22 @@ fn normalized_sequence(value: &str) -> &str {
     if is_null(value) { "" } else { value }
 }
 
-/// Count JSON bytes without allocating a serialization larger than the budget.
-struct JsonBudget {
-    bytes: usize,
-    limit: usize,
-}
-
-impl Write for JsonBudget {
+/// Stream JSON through a fallible buffer rather than an infallible serializer allocation.
+struct JsonText(Vec<u8>);
+impl Write for JsonText {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
-        let next = self.bytes.checked_add(bytes.len());
-        if next.is_none_or(|next| next > self.limit) {
-            return Err(io::Error::other("mmCIF connection JSON budget exceeded"));
-        }
-        self.bytes = next.unwrap();
+        self.0.try_reserve(bytes.len()).map_err(io::Error::other)?;
+        self.0.extend_from_slice(bytes);
         Ok(bytes.len())
     }
-
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
 }
-
-fn json_bytes(value: &impl Serialize, limit: usize) -> Result<usize> {
-    let mut counter = JsonBudget { bytes: 0, limit };
-    serde_json::to_writer(&mut counter, value)
-        .map_err(|_| "mmCIF struct_conn provenance exceeds the 4 MiB budget".to_owned())?;
-    Ok(counter.bytes)
+fn json_text(value: &impl Serialize) -> Result<String> {
+    let mut output = JsonText(Vec::new());
+    serde_json::to_writer(&mut output, value).map_err(|error| error.to_string())?;
+    String::from_utf8(output.0).map_err(|error| error.to_string())
 }
 
 /// Validate a source declaration before retaining it. Duplicate IDs are checked
@@ -73,11 +59,8 @@ fn json_bytes(value: &impl Serialize, limit: usize) -> Result<usize> {
 pub(super) fn push_row(
     rows: &mut Vec<ConnectionRow>,
     row: ConnectionRow,
-    budget: &mut usize,
+    declaration_count: &mut usize,
 ) -> Result<()> {
-    if rows.len() >= MAX_CONNECTION_ROWS {
-        return Err("mmCIF struct_conn exceeds the 100000 declaration budget".into());
-    }
     for key in ["id", "conn_type_id"] {
         if row
             .get(key)
@@ -89,15 +72,10 @@ pub(super) fn push_row(
             ));
         }
     }
-    let bytes = json_bytes(&row, MAX_CONNECTION_BYTES)?;
-    let next = budget
-        .checked_add(bytes)
-        .and_then(|n| n.checked_add(ROW_OVERHEAD));
-    if next.is_none_or(|next| next > MAX_CONNECTION_BYTES) {
-        return Err("mmCIF struct_conn source/provenance exceeds the 4 MiB budget".into());
-    }
-    *budget = next.unwrap();
-    rows.push(row);
+    *declaration_count = declaration_count
+        .checked_add(1)
+        .ok_or("mmCIF connection count overflow")?;
+    crate::allocation::push(rows, row, "mmCIF connection declarations")?;
     Ok(())
 }
 
@@ -220,10 +198,9 @@ impl<'a> SiteIndex<'a> {
         };
         let mut matched = None;
         for &i in candidates {
-            *visits += 1;
-            if *visits > MAX_REFERENCE_VISITS {
-                return Err("mmCIF struct_conn exceeded the reference work budget; identifiers may be excessively ambiguous".into());
-            }
+            *visits = visits
+                .checked_add(1)
+                .ok_or("mmCIF connection reference count overflow")?;
             if !reference.matches(self.sites[i].0) {
                 continue;
             }
@@ -368,15 +345,16 @@ struct Record<'a> {
 fn push_record(
     provenance: &mut Vec<String>,
     record: &Record<'_>,
-    budget: &mut usize,
+    allocated_bytes: &mut usize,
 ) -> Result<()> {
-    let remaining = MAX_CONNECTION_BYTES
-        .saturating_sub(*budget)
-        .saturating_sub(RECORD_PREFIX.len());
-    let bytes = json_bytes(record, remaining)?;
-    let json = serde_json::to_string(record).map_err(|error| error.to_string())?;
-    provenance.push(format!("{RECORD_PREFIX}{json}"));
-    *budget += RECORD_PREFIX.len() + bytes;
+    let json = json_text(record)?;
+    let mut text = String::new();
+    crate::allocation::append(&mut text, RECORD_PREFIX, "mmCIF provenance")?;
+    crate::allocation::append(&mut text, &json, "mmCIF provenance")?;
+    *allocated_bytes = allocated_bytes
+        .checked_add(text.len())
+        .ok_or("mmCIF provenance size overflow")?;
+    crate::allocation::push(provenance, text, "mmCIF provenance records")?;
     Ok(())
 }
 
@@ -391,9 +369,6 @@ pub(super) fn resolve(
             explicit: vec![],
             provenance: vec![],
         });
-    }
-    if rows.len() > MAX_CONNECTION_ROWS || selected.len() > 100_000 {
-        return Err("mmCIF struct_conn exceeds the declaration/selected-atom budget".into());
     }
     let mut ids = BTreeSet::new();
     for (i, row) in rows.iter().enumerate() {
@@ -416,8 +391,13 @@ pub(super) fn resolve(
     let index = SiteIndex::new(selected);
     let mut visits = 0;
     let mut explicit = BTreeSet::new();
-    let mut provenance = Vec::with_capacity(rows.len() + 3);
-    let mut provenance_budget = 0;
+    let mut provenance = crate::allocation::buffer(
+        rows.len()
+            .checked_add(3)
+            .ok_or("mmCIF provenance count overflow")?,
+        "mmCIF provenance",
+    )?;
+    let mut provenance_allocated_bytes = 0;
     let mut counts = [0usize; 5];
     for (i, row) in rows.iter().enumerate() {
         let first = index.partner(&Partner::new(row, 1), &mut visits)?;
@@ -483,15 +463,13 @@ pub(super) fn resolve(
             _ => 3,
         };
         counts[category] += 1;
-        push_record(&mut provenance, &record, &mut provenance_budget)?;
+        push_record(&mut provenance, &record, &mut provenance_allocated_bytes)?;
     }
     provenance.push("mmCIF connection policy: pair-only covale/disulf/metalc declarations are explicit untyped display connections; they take precedence and coordinate perception fills missing pairs. Other types and declarations with a third partner are recorded without forcing rods. Orders and source columns remain in declaration provenance. Matching common symmetry codes or both omitted/inapplicable images use selected-site pairs; unknown or different images are not expanded.".into());
     provenance.push(format!("mmCIF declared connections: {} rows; {} retained explicit pairs, {} duplicate pairs, {} recorded-only declarations, {} unresolved declarations, {} symmetry-omitted declarations.", rows.len(), counts[0], counts[1], counts[2], counts[3], counts[4]));
     if counts[2] + counts[3] + counts[4] > 0 {
         provenance.push(format!("mmCIF parser: struct_conn display omissions: {} recorded-only, {} unresolved, {} symmetry-omitted declarations; full source records are retained in provenance, and no unavailable symmetry mates are guessed.", counts[2], counts[3], counts[4]));
     }
-    // Include the outer JSON string escaping used by the native manifest.
-    json_bytes(&provenance, MAX_CONNECTION_BYTES)?;
     Ok(ResolvedConnections {
         explicit: explicit.into_iter().collect(),
         provenance,
@@ -668,21 +646,20 @@ mod tests {
     }
 
     #[test]
-    fn source_schema_ids_and_json_budgets_fail_without_truncating() {
+    fn source_schema_ids_and_large_json_are_preserved_without_truncating() {
         let mut rows = vec![];
-        let mut budget = 0;
+        let mut allocated_bytes = 0;
         let mut invalid = row("?", "covale", "O1", "MG");
-        assert!(push_row(&mut rows, invalid.clone(), &mut budget).is_err());
+        assert!(push_row(&mut rows, invalid.clone(), &mut allocated_bytes).is_err());
         invalid.insert("id".into(), "valid".into());
-        push_row(&mut rows, invalid.clone(), &mut budget).unwrap();
+        push_row(&mut rows, invalid.clone(), &mut allocated_bytes).unwrap();
         assert_eq!(rows.len(), 1);
         assert!(resolve(&[invalid.clone(), invalid.clone()], &[]).is_err());
         let mut huge = invalid;
-        huge.insert("details".into(), "x".repeat(MAX_CONNECTION_BYTES));
-        let before = budget;
-        assert!(push_row(&mut rows, huge, &mut budget).is_err());
-        assert_eq!(budget, before);
-        assert_eq!(rows.len(), 1);
+        huge.insert("details".into(), "x".repeat(4 * 1024 * 1024 + 1));
+        push_row(&mut rows, huge, &mut allocated_bytes).unwrap();
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[1]["details"].len(), 4 * 1024 * 1024 + 1);
         assert!(resolve(&[], &[]).unwrap().provenance.is_empty());
     }
 
@@ -723,31 +700,26 @@ mod tests {
     }
 
     #[test]
-    fn nested_json_escaping_obeys_the_final_provenance_budget() {
+    fn nested_json_escaping_preserves_large_provenance() {
         let a = site("1", "O1");
         let b = site("2", "MG");
-        for (quote_count, accepted) in [(900_000, true), (1_200_000, false)] {
+        for quote_count in [900_000, 1_200_000] {
             let mut declaration = row("escaped", "covale", "O1", "MG");
             declaration.insert("details".into(), "\"".repeat(quote_count));
             let mut rows = vec![];
-            let mut source_budget = 0;
-            // Both sources fit the preflight. The larger one exceeds 4 MiB
-            // only when its JSON record is escaped again inside provenance.
-            push_row(&mut rows, declaration, &mut source_budget).unwrap();
-            assert_eq!(rows.len(), 1);
-            assert!(source_budget < MAX_CONNECTION_BYTES);
-            let result = resolve(&rows, &[(&a, 0), (&b, 1)]);
-            if accepted {
-                assert_eq!(result.unwrap().explicit, vec![[0, 1]]);
-            } else {
-                let error = result.err().expect("Outer JSON escaping must be bounded");
-                assert!(error.contains("provenance exceeds the 4 MiB budget"));
-            }
+            let mut source_allocated_bytes = 0;
+            push_row(&mut rows, declaration.clone(), &mut source_allocated_bytes).unwrap();
+            let result = resolve(&rows, &[(&a, 0), (&b, 1)]).unwrap();
+            assert_eq!(result.explicit, vec![[0, 1]]);
+            assert_eq!(
+                records(&result)[0]["source"],
+                serde_json::to_value(declaration).unwrap()
+            );
         }
     }
 
     #[test]
-    fn repeated_long_atom_site_ids_are_bounded_before_record_allocation() {
+    fn repeated_long_atom_site_ids_are_preserved_above_the_former_ceiling() {
         let a = site(&"a".repeat(1_100_000), "O1");
         let b = site("2", "MG");
         let declaration = row("large-selected-id", "covale", "O1", "MG");
@@ -761,19 +733,19 @@ mod tests {
             reason: None,
         };
         let mut provenance = vec![];
-        let mut budget = 0;
+        let mut allocated_bytes = 0;
         for _ in 0..3 {
-            push_record(&mut provenance, &record, &mut budget).unwrap();
+            push_record(&mut provenance, &record, &mut allocated_bytes).unwrap();
         }
-        let before = budget;
-        assert!(push_record(&mut provenance, &record, &mut budget).is_err());
-        assert_eq!(provenance.len(), 3);
-        assert_eq!(budget, before);
-        assert!(budget <= MAX_CONNECTION_BYTES);
+        push_record(&mut provenance, &record, &mut allocated_bytes).unwrap();
+        assert_eq!(provenance.len(), 4);
+        assert!(allocated_bytes > 4 * 1024 * 1024);
 
         let rows = (0..4)
             .map(|i| row(&format!("long-id-{i}"), "covale", "O1", "MG"))
             .collect::<Vec<_>>();
-        assert!(resolve(&rows, &[(&a, 0), (&b, 1)]).is_err());
+        let result = resolve(&rows, &[(&a, 0), (&b, 1)]).unwrap();
+        assert_eq!(result.explicit, vec![[0, 1]]);
+        assert_eq!(records(&result).len(), 4);
     }
 }

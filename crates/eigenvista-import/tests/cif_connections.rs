@@ -578,7 +578,7 @@ fn inline_comments_do_not_change_quoted_connection_identifiers() {
 }
 
 #[test]
-fn multiple_loop_header_tags_share_a_line_and_column_growth_is_bounded() {
+fn multiple_loop_header_tags_share_a_line_and_columns_exceed_the_former_ceiling() {
     let atoms = [site("1", "C", "C1", 0.), site("2", "N", "N1", 10.)];
     let text = document(
         &atoms,
@@ -605,14 +605,14 @@ fn multiple_loop_header_tags_share_a_line_and_column_growth_is_bounded() {
             .collect::<String>();
         format!("{text}loop_\n{tags}{}\n#\n", "0 ".repeat(columns))
     };
-    // A positive control prevents an unsupported-category rejection from
-    // masquerading as the actual header-allocation guard.
-    assert_eq!(load(&metadata(256)).document.bonds, vec![[0, 1]]);
-    let error = import_bytes(metadata(257).as_bytes(), "overwide.cif").unwrap_err();
-    assert!(
-        error.contains("column") || error.contains("budget"),
-        "expected a header bound, got {error}"
-    );
+    for columns in [256, 257, 1025] {
+        let result = load(&metadata(columns));
+        assert_eq!(result.document.bonds, vec![[0, 1]]);
+        assert_eq!(
+            records(&result.document)[0]["source"]["id"],
+            "joined-headers"
+        );
+    }
 }
 
 #[test]
@@ -668,14 +668,26 @@ fn unsupported_save_frames_and_global_blocks_fail_without_partial_imports() {
 }
 
 #[test]
-fn malformed_or_oversized_connection_data_fails_without_panicking() {
+fn malformed_connection_data_fails_and_large_valid_provenance_is_preserved() {
     let atoms = [site("1", "C", "C1", 0.), site("2", "N", "N1", 10.)];
     let row = connection("truncated", "covale", "C1", "N1");
     let mut malformed = document(&atoms, &[]);
     malformed.push_str("loop_\n_struct_conn.id\n_struct_conn.conn_type_id\ntruncated\n#\n");
     let mut huge_row = row;
     huge_row.insert("details".into(), "x".repeat(4 * 1024 * 1024));
-    let huge = document(&atoms, &[huge_row]);
+    let huge = document(&atoms, &[huge_row.clone()]);
+    let imported = load(&huge);
+    assert_eq!(imported.document.bonds, vec![[0, 1]]);
+    let retained = records(&imported.document);
+    assert_eq!(retained.len(), 1);
+    assert_eq!(
+        retained[0]["source"],
+        serde_json::to_value(huge_row).unwrap()
+    );
+    assert_eq!(
+        retained[0]["source"]["details"].as_str().unwrap().len(),
+        4 * 1024 * 1024
+    );
     let mut duplicated_tags = document(&atoms, &[]);
     duplicated_tags.push_str(
         "loop_\n_struct_conn.id\n_struct_conn.id\n_struct_conn.conn_type_id\none two covale\n#\n",
@@ -694,7 +706,6 @@ fn malformed_or_oversized_connection_data_fails_without_panicking() {
     let missing_id = document(&atoms, &[missing_id]);
     for (label, input) in [
         ("truncated", malformed),
-        ("oversized provenance", huge),
         ("duplicate tags", duplicated_tags),
         ("cross data block", cross_block),
         ("duplicate IDs", duplicated_ids),

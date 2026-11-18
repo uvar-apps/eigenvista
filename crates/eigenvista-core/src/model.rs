@@ -3,10 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 pub const BOHR_TO_ANGSTROM: f64 = 0.529177210903;
-pub const MAX_SAMPLES: usize = 128 * 128 * 128;
-pub const MAX_TRANSIENT_SAMPLES: usize = 256 * 256 * 256;
-pub const MAX_VERTICES: usize = 2_000_000;
-pub const MAX_BONDS: usize = 600_000;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Atom {
@@ -190,8 +186,10 @@ mod atoms_columnar {
             }
 
             fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
-                let mut atoms = Vec::with_capacity(seq.size_hint().unwrap_or(0));
+                // A wire-format size hint is not evidence that those records exist.
+                let mut atoms = Vec::new();
                 while let Some(atom) = seq.next_element::<Atom>()? {
+                    atoms.try_reserve(1).map_err(de::Error::custom)?;
                     atoms.push(atom);
                 }
                 Ok(atoms)
@@ -239,19 +237,16 @@ pub fn determinant(a: [[f64; 3]; 3]) -> f64 {
 }
 impl Grid {
     pub fn validate(&self) -> Result<()> {
-        self.validate_samples(MAX_SAMPLES, "128^3 sample")
+        self.validate_samples()
     }
-    /// Calculation grids are transient; imported and saved grids retain their smaller budget.
+    /// Calculation and persisted grids share the same structural validation.
     pub fn validate_transient(&self) -> Result<()> {
-        self.validate_samples(MAX_TRANSIENT_SAMPLES, "256^3 transient sample")
+        self.validate_samples()
     }
-    fn validate_samples(&self, limit: usize, label: &str) -> Result<()> {
+    fn validate_samples(&self) -> Result<()> {
         let n = self.dims.iter().try_fold(1usize, |n, d| n.checked_mul(*d));
-        if self.dims.iter().any(|d| *d < 2) || n.is_none_or(|n| n > limit || n != self.values.len())
-        {
-            return Err(format!(
-                "Grid dimensions/count exceed the {label} budget or disagree"
-            ));
+        if self.dims.iter().any(|d| *d < 2) || n.is_none_or(|n| n != self.values.len()) {
+            return Err("Grid dimensions overflow or disagree with the sample count".into());
         }
         if !finite(self.origin)
             || !finite(self.axes.into_iter().flatten())
@@ -292,16 +287,6 @@ impl Document {
         if let Some(structure) = &self.structure {
             structure.validate(self.atoms.len())?;
         }
-        if self.atoms.len() > 100_000
-            || self.bonds.len() > MAX_BONDS
-            || self.basis.len() > 1024
-            || self.orbitals.len() > 512
-            || self.surfaces.len() > 128
-            || self.grids.len() > 16
-            || self.densities.len() > 32
-        {
-            return Err("Document exceeds the current preview's resource budget".into());
-        }
         if self
             .atoms
             .iter()
@@ -319,9 +304,7 @@ impl Document {
         for b in &self.basis {
             if !finite(b.center)
                 || b.exponents.is_empty()
-                || b.exponents.len() > 64
                 || b.terms.is_empty()
-                || b.terms.len() > 32
                 || b.exponents.len() != b.coefficients.len()
                 || b.exponents.iter().any(|v| !v.is_finite() || *v <= 0.)
                 || !finite(b.coefficients.iter().copied())
@@ -353,7 +336,7 @@ impl Document {
         }
         for d in &self.densities {
             if n == 0
-                || d.matrix.len() != n * n
+                || n.checked_mul(n) != Some(d.matrix.len())
                 || !finite(d.matrix.iter().copied())
                 || !["total", "alpha", "beta", "spin", "difference", "transition"]
                     .contains(&d.kind.as_str())
@@ -379,10 +362,8 @@ impl Document {
         }
         for s in &self.surfaces {
             if s.positions.len() % 3 != 0
-                || s.positions.len() / 3 > MAX_VERTICES
                 || s.normals.len() != s.positions.len()
                 || s.indices.len() % 3 != 0
-                || s.indices.len() > MAX_VERTICES * 3
                 || !finite(s.positions.iter().copied())
                 || !finite(s.normals.iter().copied())
                 || s.indices
@@ -442,9 +423,6 @@ impl Document {
             analysis.validate(self)?;
         }
         if let Some(surfaces) = &self.molecular_surfaces {
-            if surfaces.len() > crate::molecular_surface::MAX_MOLECULAR_SURFACES {
-                return Err("Too many molecular surfaces".into());
-            }
             for surface in surfaces {
                 if !ids.insert(&surface.id) {
                     return Err("Duplicate molecular surface ID".into());

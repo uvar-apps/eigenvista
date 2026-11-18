@@ -4,32 +4,6 @@ use super::messagepack::Value;
 use std::collections::BTreeMap;
 
 pub(super) type Record<'a> = BTreeMap<&'a str, Value<'a>>;
-pub(super) const MAX_VALUES: usize = 16 * 1024 * 1024;
-
-/// Cumulative decoded values bound both resident arrays and transform work.
-pub(super) struct Budget(usize);
-
-impl Budget {
-    pub fn new() -> Self {
-        Self(MAX_VALUES)
-    }
-    pub fn take(&mut self, count: usize) -> Result<(), String> {
-        self.0 = self
-            .0
-            .checked_sub(count)
-            .ok_or("BinaryCIF exceeds the decoded-value budget")?;
-        Ok(())
-    }
-    pub fn vector<T>(&mut self, count: usize) -> Result<Vec<T>, String> {
-        self.take(count)?;
-        let mut result = Vec::new();
-        result
-            .try_reserve_exact(count)
-            .map_err(|_| "BinaryCIF could not allocate a decoded column")?;
-        Ok(result)
-    }
-}
-
 pub(super) fn object<'a>(value: &'a Value<'a>) -> Result<&'a Record<'a>, String> {
     match value {
         Value::Map(value) => Ok(value),
@@ -126,11 +100,7 @@ fn typed_float(value: f64, kind: i64) -> Result<f64, String> {
     }
 }
 
-fn byte_array<'a>(
-    input: Column<'a>,
-    encoding: &Record<'_>,
-    budget: &mut Budget,
-) -> Result<Column<'a>, String> {
+fn byte_array<'a>(input: Column<'a>, encoding: &Record<'_>) -> Result<Column<'a>, String> {
     let Column::Raw(raw) = input else {
         return Err("BinaryCIF ByteArray must decode raw bytes".into());
     };
@@ -147,7 +117,7 @@ fn byte_array<'a>(
     }
     let len = raw.len() / width;
     if kind >= 32 {
-        let mut values = budget.vector(len)?;
+        let mut values = eigenvista_core::allocation::buffer(len, "BinaryCIF decoded column")?;
         for chunk in raw.chunks_exact(width) {
             let value = if kind == 32 {
                 f64::from(f32::from_le_bytes(
@@ -160,7 +130,7 @@ fn byte_array<'a>(
         }
         return Ok(Column::Float(values));
     }
-    let mut values = budget.vector(len)?;
+    let mut values = eigenvista_core::allocation::buffer(len, "BinaryCIF decoded column")?;
     for chunk in raw.chunks_exact(width) {
         let value = match kind {
             1 => i64::from(chunk[0] as i8),
@@ -188,11 +158,9 @@ fn integer_transform<'a>(
     input: Column<'a>,
     encoding: &Record<'_>,
     kind: &str,
-    budget: &mut Budget,
 ) -> Result<Column<'a>, String> {
     let values = input.ints()?;
     if kind == "Delta" {
-        budget.take(values.len())?;
         let mut values = values;
         let mut previous = integer(field(encoding, "origin")?)?;
         let src = integer(field(encoding, "srcType")?)?;
@@ -209,7 +177,29 @@ fn integer_transform<'a>(
         return Ok(Column::Int(values));
     }
     let size = count(field(encoding, "srcSize")?)?;
-    let mut output = budget.vector(size)?;
+    // Validate declared expansion against the supplied compressed values before reserving.
+    if kind == "RunLength" {
+        if values.len() % 2 != 0 {
+            return Err("BinaryCIF odd run-length array".into());
+        }
+        let expanded = values
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .try_fold(0usize, |total, pair| {
+                let count =
+                    usize::try_from(pair[1]).map_err(|_| "BinaryCIF negative repeat count")?;
+                total
+                    .checked_add(count)
+                    .ok_or("BinaryCIF run-length count overflow")
+            })?;
+        if expanded != size {
+            return Err("BinaryCIF decoded srcSize mismatch".into());
+        }
+    } else if size > values.len() {
+        return Err("BinaryCIF packed srcSize exceeds its encoded value count".into());
+    }
+    let mut output = eigenvista_core::allocation::buffer(size, "BinaryCIF decoded column")?;
     if kind == "RunLength" {
         if values.len() % 2 != 0 {
             return Err("BinaryCIF odd run-length array".into());
@@ -277,12 +267,11 @@ fn float_transform<'a>(
     input: Column<'a>,
     encoding: &Record<'_>,
     kind: &str,
-    budget: &mut Budget,
 ) -> Result<Column<'a>, String> {
     let input = input.ints()?;
     let src = integer(field(encoding, "srcType")?)?;
     typed_float(0., src)?;
-    let mut output = budget.vector(input.len())?;
+    let mut output = eigenvista_core::allocation::buffer(input.len(), "BinaryCIF decoded column")?;
     if kind == "FixedPoint" {
         let factor = number(field(encoding, "factor")?)?;
         if factor == 0. {
@@ -309,66 +298,117 @@ fn float_transform<'a>(
     Ok(Column::Float(output))
 }
 
-/// Apply inverse transforms in reverse order, including nested dictionary indices.
-pub(super) fn decode<'a>(
-    encoded: &'a Record<'a>,
-    budget: &mut Budget,
-) -> Result<Column<'a>, String> {
-    chain(
-        bytes(field(encoded, "data")?)?,
-        array(field(encoded, "encoding")?)?,
-        budget,
-        0,
-    )
-}
-fn chain<'a>(
-    raw: &'a [u8],
-    encodings: &'a [Value<'a>],
-    budget: &mut Budget,
-    depth: usize,
-) -> Result<Column<'a>, String> {
-    if encodings.is_empty() || encodings.len() > 16 || depth > 8 {
-        return Err("BinaryCIF invalid encoding depth/length".into());
-    }
-    let mut values = Column::Raw(raw);
-    for encoding in encodings.iter().rev() {
-        let encoding = object(encoding)?;
-        let kind = text(field(encoding, "kind")?)?;
-        values = match kind {
-            "ByteArray" => byte_array(values, encoding, budget)?,
-            "Delta" | "RunLength" | "IntegerPacking" => {
-                integer_transform(values, encoding, kind, budget)?
+/// Apply inverse transforms using an allocation-backed continuation stack. Nested
+/// string dictionaries share the same engine and never recurse on the Rust stack.
+pub(super) fn decode<'a>(encoded: &'a Record<'a>) -> Result<Column<'a>, String> {
+    let encodings = array(field(encoded, "encoding")?)?;
+    let raw = bytes(field(encoded, "data")?)?;
+    let mut tasks = Vec::new();
+    schedule_chain(&mut tasks, encodings)?;
+    let mut current = Some(Column::Raw(raw));
+    while let Some(task) = tasks.pop() {
+        match task {
+            DecodeTask::Apply { encodings, index } => {
+                let encoding = object(&encodings[index])?;
+                let kind = text(field(encoding, "kind")?)?;
+                if index > 0 {
+                    eigenvista_core::allocation::push(
+                        &mut tasks,
+                        DecodeTask::Apply {
+                            encodings,
+                            index: index - 1,
+                        },
+                        "BinaryCIF decoding tasks",
+                    )?;
+                }
+                let input = current.take().ok_or("BinaryCIF missing transform input")?;
+                if kind == "StringArray" {
+                    let Column::Raw(raw) = input else {
+                        return Err("BinaryCIF StringArray requires raw bytes".into());
+                    };
+                    eigenvista_core::allocation::push(
+                        &mut tasks,
+                        DecodeTask::Indices { encoding },
+                        "BinaryCIF decoding tasks",
+                    )?;
+                    schedule_chain(&mut tasks, array(field(encoding, "dataEncoding")?)?)?;
+                    current = Some(Column::Raw(raw));
+                } else {
+                    current = Some(match kind {
+                        "ByteArray" => byte_array(input, encoding)?,
+                        "Delta" | "RunLength" | "IntegerPacking" => {
+                            integer_transform(input, encoding, kind)?
+                        }
+                        "FixedPoint" | "IntervalQuantization" => {
+                            float_transform(input, encoding, kind)?
+                        }
+                        _ => return Err(format!("BinaryCIF unsupported encoding {kind}")),
+                    });
+                }
             }
-            "FixedPoint" | "IntervalQuantization" => {
-                float_transform(values, encoding, kind, budget)?
+            DecodeTask::Indices { encoding } => {
+                let indices = current
+                    .take()
+                    .ok_or("BinaryCIF missing dictionary indices")?
+                    .ints()?;
+                eigenvista_core::allocation::push(
+                    &mut tasks,
+                    DecodeTask::Offsets { encoding, indices },
+                    "BinaryCIF decoding tasks",
+                )?;
+                schedule_chain(&mut tasks, array(field(encoding, "offsetEncoding")?)?)?;
+                current = Some(Column::Raw(bytes(field(encoding, "offsets")?)?));
             }
-            "StringArray" => string_array(values, encoding, budget, depth + 1)?,
-            _ => return Err(format!("BinaryCIF unsupported encoding {kind}")),
-        };
+            DecodeTask::Offsets { encoding, indices } => {
+                let offsets = current
+                    .take()
+                    .ok_or("BinaryCIF missing dictionary offsets")?
+                    .ints()?;
+                current = Some(string_values(indices, offsets, encoding)?);
+            }
+        }
     }
-    if matches!(values, Column::Raw(_)) {
+    let result = current.ok_or("BinaryCIF encoding did not decode its bytes")?;
+    if matches!(result, Column::Raw(_)) {
         return Err("BinaryCIF encoding did not decode its bytes".into());
     }
-    Ok(values)
+    Ok(result)
 }
 
-fn string_array<'a>(
-    input: Column<'a>,
+enum DecodeTask<'a> {
+    Apply {
+        encodings: &'a [Value<'a>],
+        index: usize,
+    },
+    Indices {
+        encoding: &'a Record<'a>,
+    },
+    Offsets {
+        encoding: &'a Record<'a>,
+        indices: Vec<i64>,
+    },
+}
+
+fn schedule_chain<'a>(
+    tasks: &mut Vec<DecodeTask<'a>>,
+    encodings: &'a [Value<'a>],
+) -> Result<(), String> {
+    let index = encodings
+        .len()
+        .checked_sub(1)
+        .ok_or("BinaryCIF encoding chain is empty")?;
+    eigenvista_core::allocation::push(
+        tasks,
+        DecodeTask::Apply { encodings, index },
+        "BinaryCIF decoding tasks",
+    )
+}
+
+fn string_values<'a>(
+    indices: Vec<i64>,
+    offsets: Vec<i64>,
     encoding: &'a Record<'a>,
-    budget: &mut Budget,
-    depth: usize,
 ) -> Result<Column<'a>, String> {
-    let Column::Raw(raw) = input else {
-        return Err("BinaryCIF StringArray requires raw bytes".into());
-    };
-    let indices = chain(raw, array(field(encoding, "dataEncoding")?)?, budget, depth)?.ints()?;
-    let offsets = chain(
-        bytes(field(encoding, "offsets")?)?,
-        array(field(encoding, "offsetEncoding")?)?,
-        budget,
-        depth,
-    )?
-    .ints()?;
     let data = text(field(encoding, "stringData")?)?;
     if offsets.first() != Some(&0) {
         return Err("BinaryCIF dictionary offsets must start at zero".into());
@@ -385,7 +425,8 @@ fn string_array<'a>(
     if usize::try_from(last).ok() != Some(total) {
         return Err("BinaryCIF dictionary offsets do not cover its string data".into());
     }
-    let mut boundaries = budget.vector(offsets.len())?;
+    let mut boundaries =
+        eigenvista_core::allocation::buffer(offsets.len(), "BinaryCIF decoded column")?;
     let mut chars = data.char_indices();
     let mut units = 0;
     let mut byte = 0;
@@ -406,7 +447,8 @@ fn string_array<'a>(
         }
         boundaries.push(byte);
     }
-    let mut output = budget.vector(indices.len())?;
+    let mut output =
+        eigenvista_core::allocation::buffer(indices.len(), "BinaryCIF decoded column")?;
     for index in indices {
         if index < -1 {
             return Err("BinaryCIF negative dictionary index is not the -1 sentinel".into());

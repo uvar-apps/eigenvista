@@ -244,20 +244,17 @@ pub fn metadata_document() -> Document {
 }
 
 #[test]
-fn native_metadata_validation_rejects_misalignment_indices_aliases_and_excessive_strings() {
+fn native_metadata_validation_rejects_misalignment_invalid_indices_and_aliases() {
     let base = metadata_document();
     base.validate().unwrap();
-    let mutations: [fn(&mut StructureMetadata); 12] = [
+    let mutations: [fn(&mut StructureMetadata); 9] = [
         |s| s.atom_names.clear(),
         |s| s.atom_residues[0] = 9,
         |s| s.residues[0].chain = 9,
         |s| s.chains.push(s.chains[0].clone()),
         |s| s.residues.push(s.residues[0].clone()),
-        |s| s.atom_names[0] = "X".repeat(129),
         |s| s.chains[0].label_id = Some("".into()),
-        |s| s.residues[0].insertion_code = Some("X".repeat(17)),
         |s| s.residues[0].label_seq_id = Some(0),
-        |s| s.residues[0].segment = 100_000,
         |s| s.secondary_source = "predicted".into(),
         |s| s.residues[0].secondary = SecondaryStructure::Helix,
     ];
@@ -266,6 +263,12 @@ fn native_metadata_validation_rejects_misalignment_indices_aliases_and_excessive
         mutate(doc.structure.as_mut().unwrap());
         assert!(doc.validate().is_err());
     }
+    let mut large = base.clone();
+    let metadata = large.structure.as_mut().unwrap();
+    metadata.atom_names[0] = "X".repeat(129);
+    metadata.residues[0].insertion_code = Some("X".repeat(17));
+    metadata.residues[0].segment = 100_000;
+    large.validate().unwrap();
     let mut doc = base;
     doc.structure = None;
     doc.view.representation = "cartoon".into();
@@ -374,20 +377,23 @@ fn primary_chain_and_residue_aliases_and_total_metadata_bytes_are_bounded() {
     let structure = doc.structure.as_mut().unwrap();
     structure.atom_names = vec!["X".repeat(100); 50_000];
     structure.atom_residues = vec![0; 50_000];
-    assert!(doc.validate().unwrap_err().contains("4 MiB"));
+    structure.residues.truncate(1);
+    structure.chains.truncate(1);
+    doc.validate().unwrap();
 }
 
 #[test]
-fn relevant_cif_metadata_is_bounded_without_retaining_large_sequence_text() {
+fn relevant_cif_metadata_accepts_rows_above_the_former_ceiling() {
     let mut metadata = "loop_\n_entity.id\n_entity.type\n".to_string();
     for _ in 0..100_001 {
         metadata.push_str("1 polymer\n");
     }
     let data = cif("ATOM 1 C CA . ALA A 1 1 CA ALA X 1 ? 0 0 0 1 1", &metadata);
-    assert!(
-        import::cif(&data, "oversized.cif")
-            .unwrap_err()
-            .contains("metadata exceeds the row budget")
+    let document = import::cif(&data, "large-metadata.cif").unwrap();
+    assert_eq!(document.atoms.len(), 1);
+    assert_eq!(
+        document.structure.unwrap().residues[0].kind,
+        ComponentKind::Protein
     );
     let metadata = "_entity_poly.entity_id 1\n_entity_poly.type 'polypeptide(L)'\n_entity_poly.pdbx_seq_one_letter_code\n;ALAGLY\nALAGLY\n;\n";
     let data = cif("ATOM 1 C CA . ALA A 1 1 CA ALA X 1 ? 0 0 0 1 1", metadata);

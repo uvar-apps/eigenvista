@@ -1,5 +1,8 @@
 # Structure imports and automatic bonds
 
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
 All supported formats, including XYZ, PDB, mmCIF/BinaryCIF, Molden, Gaussian cube, and native
 `.eigenvista` and legacy `.molekel` preview files, automatically compute display
 connectivity through the shared Rust
@@ -47,8 +50,8 @@ before metadata is attached, so every retained metadata index refers to the
 selected document atoms. Incomplete mmCIF identity can leave metadata unavailable
 rather than inventing a partial hierarchy.
 
-Metadata has a 100,000-selected-atom/record bound and 4 MiB cumulative string
-budget in addition to existing import/native limits. Native Save preserves it
+Metadata uses checked lengths and fallible buffers without an application
+record/string allowance. Native Save preserves it
 under the explicit biological-structure feature; old documents without it remain
 valid. These annotations do not add quantum data or change scientific field
 hashes. The source is not preserved wholesale; keep original inputs.
@@ -71,7 +74,10 @@ The distance test uses the Pyykko-Atsumi single-bond covalent radii for elements
 
 This is a geometric display-connectivity heuristic, not electronic bond-order perception. The minimum-distance and light-element coordination filters avoid common false connections and overlaps. They do not establish aromaticity, oxidation state, metal coordination, hydrogen bonds, or chemical validity in arbitrary geometries. Open Babel likewise separates proximity-based connections from subsequent bond-order handling and applies minimum-distance/valence checks. The Rust implementation does not link to Open Babel. [Open Babel `ConnectTheDots`](https://openbabel.org/api/3.0/classOpenBabel_1_1OBMol.shtml).
 
-Bounds are explicit: 100,000 atoms, 600,000 output connections, 2,000,000 candidates, and 10,000,000 visited neighbors. These limits are unchanged by radius partitioning. Excessively dense or invalid inputs fail rather than silently returning a partial bond list. Each radius-query result is at most the input atom count. Coordinates must be finite and within 1e9 angstrom of the origin. These are numerical/resource limits, not a guarantee of interactive rendering at the maximum atom count.
+The current source has no atom/bond/candidate/neighbor-visit allowance. Complete
+search output is retained or an actual allocation/representation error is
+reported. Coordinates remain finite and within the supported numerical range;
+these checks protect distance calculations rather than enforce a memory budget.
 
 ## PDB profile
 
@@ -158,19 +164,16 @@ the `1BH3.cif` baseline keeps its atom/bond counts. Independent inspection of
 
 The lexical profile accepts loop/scalar connection categories, wrapped connection
 values, quoted literals, and text blocks; atom rows remain line-aligned.
-Headers retain at most 256 columns, and a connection data line at most one million
-tokens. Header/data mixtures, inline category controls, save/global frames,
+Complete headers and connection lines are parsed with fallible buffers, without
+column/token count ceilings. Header/data mixtures, inline category controls, save/global frames,
 multiline atom rows, trailing tokens after text/data/stop boundaries, and
 connection references across data blocks are rejected explicitly. Separated
 boundary comments are supported. These checks are not full CIF dictionary validation.
 
-Budgets: 64 MiB per file, 250,000 parsed sites from the first model before
-alternate selection, 100,000 selected atoms,
-100,000 declarations, 2,000,000 reference-candidate visits, and 4 MiB serialized
-connection provenance, including outer manifest-string escaping. Cumulative record
-size is checked before allocating JSON strings, including repeated selected
-atom-site IDs. Malformed or excessive input fails rather than being truncated;
-the native manifest limit remains 8 MiB.
+Files, parsed/selected sites, declarations, reference visits and connection
+provenance have no artificial byte/count ceiling. Complete source identifiers and
+serialized provenance are retained. Checked lengths, valid format relationships
+and actual allocation failure determine acceptance.
 
 Out of scope: full dictionary validation against `mmcif_pdbx.dic`, symmetry
 expansion, and writing/exporting mmCIF. BinaryCIF input is described below.
@@ -204,19 +207,12 @@ attributes and crystal images apply. Native provenance keeps those decisions,
 the original BinaryCIF version/block name, and the original input-byte SHA-256,
 including compressed bytes for gzip inputs; the source file is not embedded.
 
-The outer import limit remains 128 MiB. BinaryCIF additionally bounds payload
-bytes after gzip expansion and canonical CIF text separately at **64 MiB**.
-MessagePack containers are checked before allocation: **1,000,000 nodes** and
-**64 nesting levels**. Interpreted columns share a cumulative **16 × 1024²
-decoded-value** budget, including intermediate transforms, masks, dictionary
-indices, and offset boundaries; pipelines allow at most **16 transforms** and
-**8 nested string-encoding levels**. Each interpreted category has 1–256 columns;
-`atom_site` allows **250,000 total rows before model/alternate selection**,
-`struct_conn` and each interpreted biological category allow 100,000 rows,
-and interpreted cell/symmetry categories allow
-one row. The shared 100,000 selected-atom and connection-provenance limits still
-apply. Malformed lengths, invalid masks/indices, arithmetic overflow, unsupported
-versions/encodings, and excessive expansion report errors rather than truncate.
+Input bytes, expanded gzip/canonical text, nodes, decoded values, columns and
+rows have no artificial memory/count ceiling. MessagePack parsing, column-transform traversal and tree cleanup use
+fallible iterative traversal without fixed nesting or pipeline-depth ceilings. Declared sizes are checked against
+actual encoded payloads before allocation. Malformed lengths, invalid masks or
+indices, arithmetic overflow, unsupported versions/encodings and actual
+allocation errors fail explicitly rather than truncating input.
 These bounds are not a peak-memory guarantee.
 
 [Independent BinaryCIF fixtures](../fixtures/bcif/README.md) provide the deposited
@@ -235,7 +231,7 @@ cargo run --locked -p eigenvista-convert -- fixtures/bcif/1crn.bcif --check --js
 
 ## Verification
 
-Tests cover water/methane XYZ, disconnected fragments, element alignment, model/alternate selection, explicit-plus-inferred connections, duplicate suppression, malformed input, dense-input budgets, coincident/planar/collinear points, and an independent exhaustive pair-distance comparison. Browser tests open XYZ/PDB through the actual file input, inspect rendered pixels, save/reopen connectivity, and check mobile layout and recovery after malformed imports.
+Tests cover water/methane XYZ, disconnected fragments, element alignment, model/alternate selection, explicit-plus-inferred connections, duplicate suppression, malformed input, dense-input allocation and complete neighbor results, coincident/planar/collinear points, and an independent exhaustive pair-distance comparison. Browser tests open XYZ/PDB through the actual file input, inspect rendered pixels, save/reopen connectivity, and check mobile layout and recovery after malformed imports.
 
 [Radius-query regressions](../crates/eigenvista-core/tests/bond_radius_queries.rs)
 add four cases spanning all 118 elements, cutoff/minimum boundaries, translated

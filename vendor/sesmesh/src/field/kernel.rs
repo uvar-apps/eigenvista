@@ -18,7 +18,7 @@ use super::lattice::{self, Lattice};
 use super::point::SesField;
 use super::{SimdLevel, SurfaceKind};
 use crate::control::{Control, Stage};
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::geom::{Status, Vec3};
 use crate::par;
 
@@ -72,7 +72,7 @@ struct Gathered {
 }
 
 impl Gathered {
-    fn clear(&mut self) {
+    fn try_clear(&mut self) -> Result<()> {
         for v in [
             &mut self.nx,
             &mut self.ny,
@@ -102,11 +102,12 @@ impl Gathered {
         }
         self.n_inside = 0;
         self.s_off.clear();
-        self.s_off.push(0);
+        error::push(&mut self.s_off, 0, "brick sphere offsets")?;
         self.s_blk.clear();
         self.c_off.clear();
-        self.c_off.push(0);
+        error::push(&mut self.c_off, 0, "brick circle offsets")?;
         self.c_blk.clear();
+        Ok(())
     }
 }
 
@@ -138,20 +139,27 @@ pub(crate) struct ScratchPool(Mutex<Vec<BrickScratch>>);
 
 impl ScratchPool {
     /// A buffer sized for `engine` (reused if one is pooled).
-    fn take<'p>(&'p self, engine: &Engine) -> Pooled<'p> {
+    fn take<'p>(&'p self, engine: &Engine) -> Result<Pooled<'p>> {
         let reused = self.0.lock().ok().and_then(|mut v| v.pop());
         let s = match reused {
             Some(mut s) if s.values.len() == engine.scratch_len() => {
                 // `local_of` is all-`u32::MAX` between bricks.
+                let additional = engine
+                    .field
+                    .arr
+                    .centers
+                    .len()
+                    .saturating_sub(s.local_of.len());
+                error::reserve(&mut s.local_of, additional, "sphere lookup")?;
                 s.local_of.resize(engine.field.arr.centers.len(), u32::MAX);
                 s
             }
-            _ => engine.scratch(),
+            _ => engine.try_scratch()?,
         };
-        Pooled {
+        Ok(Pooled {
             scratch: s,
             pool: self,
-        }
+        })
     }
 }
 
@@ -163,8 +171,14 @@ struct Pooled<'p> {
 
 impl Drop for Pooled<'_> {
     fn drop(&mut self) {
+        // A failed gather may have stopped before reset_local. Retries must
+        // never reuse partial candidate mappings.
+        self.scratch.local_of.fill(u32::MAX);
         if let Ok(mut v) = self.pool.0.lock() {
-            v.push(std::mem::take(&mut self.scratch));
+            // Pooling is optional; dropping a scratch buffer needs no new allocation.
+            if v.try_reserve(1).is_ok() {
+                v.push(std::mem::take(&mut self.scratch));
+            }
         }
     }
 }
@@ -191,15 +205,25 @@ impl Engine {
         brick: usize,
         simd: SimdLevel,
     ) -> Result<Self> {
-        if !(spacing.is_finite() && spacing >= 0.01) {
+        if !(spacing.is_finite() && spacing > 0.0) {
             return Err(Error::InvalidInput(format!(
-                "grid spacing must be at least 0.01 Å, got {spacing}"
+                "grid spacing must be finite and positive, got {spacing}"
             )));
         }
         if !(2..=32).contains(&brick) {
             return Err(Error::InvalidInput(format!(
                 "brick size must be 2..=32 cells, got {brick}"
             )));
+        }
+        let brick_span = brick as f64 * spacing;
+        let band = 3f64.sqrt() * spacing * 1.01;
+        if !brick_span.is_finite()
+            || !(0.5 * 3f64.sqrt() * brick_span).is_finite()
+            || !band.is_finite()
+            || !(band as f32).is_finite()
+            || (spacing as f32) == 0.0
+        {
+            return Err(Error::SizeOverflow("lattice spacing and brick span"));
         }
         let a = &field.arr;
         let (center, half) = match a.centers.first() {
@@ -210,11 +234,22 @@ impl Engine {
                     .iter()
                     .fold((first, first), |(lo, hi), &c| (lo.min(c), hi.max(c)));
                 let d = hi - lo;
-                ((lo + hi) * 0.5, 0.5 * d.x.max(d.y).max(d.z))
+                (lo * 0.5 + hi * 0.5, 0.5 * d.x.max(d.y).max(d.z))
             }
         };
+        let frame = [center.x, center.y, center.z].map(|v| (v / spacing).round());
+        if !half.is_finite()
+            || frame
+                .iter()
+                .any(|&v| !v.is_finite() || v < i64::MIN as f64 || v >= -(i64::MIN as f64))
+        {
+            return Err(Error::SizeOverflow("lattice coordinate frame"));
+        }
         let lattice = Lattice::new(spacing, brick, center);
-        let reach = half + 2.0 * a.max_expanded + 2.0 * field.probe + 4.0 * brick as f64 * spacing;
+        let reach = half + 2.0 * a.max_expanded + 2.0 * field.probe + 4.0 * brick_span;
+        if !reach.is_finite() {
+            return Err(Error::SizeOverflow("lattice evaluation reach"));
+        }
         let f32_ok = reach < F32_MAX_COORD && reach / spacing < f64::from(1u32 << 23);
         let detected = Level::new();
         let level = match simd {
@@ -228,12 +263,14 @@ impl Engine {
                 ))
             })?,
         };
-        let band = 3f64.sqrt() * spacing * 1.01;
         let coord_max = center.x.abs().max(center.y.abs()).max(center.z.abs())
             + half
             + a.max_expanded
             + field.probe
             + 2.0 * band;
+        if !coord_max.is_finite() {
+            return Err(Error::SizeOverflow("mesh coordinate extent"));
+        }
         Ok(Self {
             field,
             lattice,
@@ -263,19 +300,23 @@ impl Engine {
     }
 
     pub(crate) fn scratch(&self) -> BrickScratch {
+        self.try_scratch().expect("test/legacy scratch allocation")
+    }
+
+    fn try_scratch(&self) -> Result<BrickScratch> {
         let padded = self.scratch_len();
-        BrickScratch {
+        Ok(BrickScratch {
             g: Gathered::default(),
-            xs: vec![0.0; padded],
-            ys: vec![0.0; padded],
-            zs: vec![0.0; padded],
-            out: vec![0.0; padded],
-            values: vec![0.0; padded],
+            xs: error::filled(padded, 0.0, "brick sample buffers")?,
+            ys: error::filled(padded, 0.0, "brick sample buffers")?,
+            zs: error::filled(padded, 0.0, "brick sample buffers")?,
+            out: error::filled(padded, 0.0, "brick sample buffers")?,
+            values: error::filled(padded, 0.0, "brick sample buffers")?,
             groups: Default::default(),
-            local_of: vec![u32::MAX; self.field.arr.centers.len()],
+            local_of: error::filled(self.field.arr.centers.len(), u32::MAX, "sphere lookup")?,
             touched: Vec::new(),
             order: Vec::new(),
-        }
+        })
     }
 
     /// Bricks the surface can pass through, sorted by packed key.
@@ -284,7 +325,7 @@ impl Engine {
     /// [`Error::InvalidInput`] if coordinates exceed the brick key range.
     pub(crate) fn surface_bricks(&self) -> Result<(usize, Vec<[i32; 3]>)> {
         let touched = lattice::touched_bricks(&self.field, &self.lattice)?;
-        let surface = lattice::surface_bricks(&self.field, &self.lattice, &touched);
+        let surface = lattice::surface_bricks(&self.field, &self.lattice, &touched)?;
         Ok((touched.len(), surface))
     }
 
@@ -302,30 +343,6 @@ impl Engine {
             |scratch, i| {
                 self.evaluate(bricks[i], scratch);
                 f(bricks[i], &scratch.values[..n])
-            },
-        )
-    }
-
-    /// [`Engine::map_bricks`] with buffers taken from `pool` (and returned to
-    /// it for the meshing that follows: no buffer per parallel split).
-    pub(crate) fn map_bricks_pooled<T, F>(
-        &self,
-        bricks: &[[i32; 3]],
-        pool: &ScratchPool,
-        f: F,
-    ) -> Vec<T>
-    where
-        T: Send,
-        F: Fn([i32; 3], &[f32]) -> T + Sync + Send,
-    {
-        let n = self.samples_per_brick();
-        par::map_init(
-            bricks.len(),
-            || pool.take(self),
-            |scratch, i| {
-                let s = &mut scratch.scratch;
-                self.evaluate(bricks[i], s);
-                f(bricks[i], &s.values[..n])
             },
         )
     }
@@ -352,7 +369,7 @@ impl Engine {
     where
         A: Send,
         I: Fn() -> A + Sync + Send,
-        F: Fn(&mut A, [i32; 3], &[f32]) + Sync + Send,
+        F: Fn(&mut A, [i32; 3], &[f32]) -> Result<()> + Sync + Send,
     {
         let n = self.samples_per_brick();
         let total = bricks.len() as u64;
@@ -360,18 +377,18 @@ impl Engine {
         let done = AtomicU64::new(0);
         control.report(stage, 0, total);
         let chunk = chunk.max(1);
-        let out = par::map_init(
+        let out = par::try_map_init(
             bricks.len().div_ceil(chunk),
             || pool.take(self),
             |scratch, c| {
                 let mut acc = init();
                 for i in par::chunk_range(bricks.len(), chunk, c) {
                     if control.is_cancelled() {
-                        return None;
+                        return Err(Error::Cancelled);
                     }
                     let s = &mut scratch.scratch;
-                    self.evaluate(bricks[i], s);
-                    f(&mut acc, bricks[i], &s.values[..n]);
+                    self.try_evaluate(bricks[i], s)?;
+                    f(&mut acc, bricks[i], &s.values[..n])?;
                     if control.has_progress() {
                         let d = done.fetch_add(1, Ordering::Relaxed) + 1;
                         if d.is_multiple_of(step) && d < total {
@@ -379,12 +396,12 @@ impl Engine {
                         }
                     }
                 }
-                Some(acc)
+                Ok(acc)
             },
-        );
+        )?;
         control.check()?;
         control.report(stage, total, total);
-        Ok(out.into_iter().flatten().collect())
+        Ok(out)
     }
 
     /// Samples of brick `key` into `scratch.values[..samples_per_brick()]`.
@@ -397,6 +414,11 @@ impl Engine {
     /// sub-blocks; signs are always exact, so neighbouring bricks agree on
     /// every inside/outside decision.
     pub(crate) fn evaluate(&self, key: [i32; 3], s: &mut BrickScratch) {
+        self.try_evaluate(key, s)
+            .expect("test/legacy brick evaluation allocation")
+    }
+
+    fn try_evaluate(&self, key: [i32; 3], s: &mut BrickScratch) -> Result<()> {
         let b = self.lattice.b;
         let side = b + 1;
         let origin = self.lattice.brick_origin(key);
@@ -457,7 +479,9 @@ impl Engine {
                     }
                     match owner {
                         None => s.values[i] = if positive { band } else { -band },
-                        Some(sb) if self.f32_ok => s.groups[sb].push(i as u32),
+                        Some(sb) if self.f32_ok => {
+                            error::push(&mut s.groups[sb], i as u32, "brick active samples")?
+                        }
                         Some(_) => {
                             let idx = [origin[0] + x, origin[1] + y, origin[2] + z];
                             let v = self.field.clamped_value(self.lattice.point(idx), self.band);
@@ -469,7 +493,7 @@ impl Engine {
             }
         }
         if !self.f32_ok {
-            return;
+            return Ok(());
         }
         let probe = self.field.probe as f32;
         let cutoff = (self.field.probe + self.band) as f32;
@@ -506,7 +530,7 @@ impl Engine {
             }
             match self.field.kind {
                 SurfaceKind::Ses => {
-                    self.gather_ses(center, rho, s);
+                    self.gather_ses(center, rho, s)?;
                     let BrickScratch {
                         g, xs, ys, zs, out, ..
                     } = s;
@@ -519,7 +543,7 @@ impl Engine {
                     dispatch!(self.level, simd => ses_kernel(simd, g, xs, ys, zs, probe, cutoff * cutoff, out));
                 }
                 SurfaceKind::Sas | SurfaceKind::Vdw => {
-                    self.gather_spheres(center, rho, self.band, s);
+                    self.gather_spheres(center, rho, self.band, s)?;
                     let BrickScratch {
                         g, xs, ys, zs, out, ..
                     } = s;
@@ -536,16 +560,17 @@ impl Engine {
                 s.values[i as usize] = s.out[j];
             }
         }
+        Ok(())
     }
 
     /// Collects the spheres within `reach` of `b` (beyond their expanded
     /// radius) into the "near" arrays: first those that can contain a sample
     /// of the ball of radius `rho` around `b`, then the rest (possible
     /// blockers).
-    fn gather_near(&self, b: Vec3, rho: f64, reach: f64, s: &mut BrickScratch) {
+    fn gather_near(&self, b: Vec3, rho: f64, reach: f64, s: &mut BrickScratch) -> Result<()> {
         let a = &self.field.arr;
         let frame = self.lattice.frame_origin();
-        s.g.clear();
+        s.g.try_clear()?;
         s.touched.clear();
         let BrickScratch {
             g,
@@ -554,7 +579,7 @@ impl Engine {
             ..
         } = s;
         for pass in 0..2 {
-            a.cells.for_each_near(b, reach + a.max_expanded, |k| {
+            a.cells.try_for_each_near(b, reach + a.max_expanded, |k| {
                 let ku = k as usize;
                 let r = a.expanded[ku];
                 let d = b.dist(a.centers[ku]);
@@ -563,45 +588,48 @@ impl Engine {
                     || d >= r + reach
                     || contains_sample != (pass == 0)
                 {
-                    return;
+                    return Ok(());
                 }
                 local_of[ku] = g.nx.len() as u32;
-                touched.push(k);
+                error::push(touched, k, "brick candidates")?;
                 let c = a.centers[ku] - frame;
-                g.nx.push(c.x as f32);
-                g.ny.push(c.y as f32);
-                g.nz.push(c.z as f32);
+                error::push(&mut g.nx, c.x as f32, "brick candidates")?;
+                error::push(&mut g.ny, c.y as f32, "brick candidates")?;
+                error::push(&mut g.nz, c.z as f32, "brick candidates")?;
                 let r32 = r as f32;
-                g.nr.push(r32);
-                g.nr2.push(r32 * r32);
+                error::push(&mut g.nr, r32, "brick candidates")?;
+                error::push(&mut g.nr2, r32 * r32, "brick candidates")?;
                 let rt = (r32 - INSIDE_TOL).max(0.0);
-                g.nr2tol.push(rt * rt);
-            });
+                error::push(&mut g.nr2tol, rt * rt, "brick candidates")?;
+                Ok(())
+            })?;
             if pass == 0 {
                 g.n_inside = g.nx.len();
             }
         }
+        Ok(())
     }
 
-    fn reset_local(&self, s: &mut BrickScratch) {
+    fn reset_local(&self, s: &mut BrickScratch) -> Result<()> {
         for &k in &s.touched {
             s.local_of[k as usize] = u32::MAX;
         }
+        Ok(())
     }
 
-    fn gather_spheres(&self, b: Vec3, rho: f64, band: f64, s: &mut BrickScratch) {
-        self.gather_near(b, rho, band + rho, s);
-        self.reset_local(s);
+    fn gather_spheres(&self, b: Vec3, rho: f64, band: f64, s: &mut BrickScratch) -> Result<()> {
+        self.gather_near(b, rho, band + rho, s)?;
+        self.reset_local(s)
     }
 
     /// Candidates of the three classes for every sample within `rho` of `b`
     /// (Design §7.4): anything that can be the closest point of `P` within
     /// the cutoff lies within `G = r_p + band + rho` of `b`.
-    fn gather_ses(&self, b: Vec3, rho: f64, s: &mut BrickScratch) {
+    fn gather_ses(&self, b: Vec3, rho: f64, s: &mut BrickScratch) -> Result<()> {
         let a = &self.field.arr;
         let frame = self.lattice.frame_origin();
         let reach = self.field.probe + self.band + rho;
-        self.gather_near(b, rho, reach, s);
+        self.gather_near(b, rho, reach, s)?;
         let BrickScratch {
             g,
             local_of,
@@ -619,76 +647,79 @@ impl Engine {
             }
             let lb = (b.dist(a.centers[ku]) - a.expanded[ku]).abs();
             if lb <= reach {
-                order.push((lb, k));
+                error::push(order, (lb, k), "brick candidates")?;
             }
         }
         order.sort_unstable_by(|x, y| x.0.total_cmp(&y.0).then(x.1.cmp(&y.1)));
         for &(_, k) in order.iter() {
             let ku = k as usize;
             let local = local_of[ku] as usize;
-            g.sx.push(g.nx[local]);
-            g.sy.push(g.ny[local]);
-            g.sz.push(g.nz[local]);
-            g.sr.push(g.nr[local]);
+            error::push(&mut g.sx, g.nx[local], "brick candidates")?;
+            error::push(&mut g.sy, g.ny[local], "brick candidates")?;
+            error::push(&mut g.sz, g.nz[local], "brick candidates")?;
+            error::push(&mut g.sr, g.nr[local], "brick candidates")?;
             for &n in a.neighbors.row(ku) {
                 let l = local_of[n as usize];
                 if l != u32::MAX {
-                    g.s_blk.push(l);
+                    error::push(&mut g.s_blk, l, "brick candidates")?;
                 }
             }
-            g.s_off.push(g.s_blk.len() as u32);
+            error::push(&mut g.s_off, g.s_blk.len() as u32, "brick candidates")?;
         }
 
         // Class C.
         order.clear();
         self.field
             .circle_cells
-            .for_each_near(b, reach + self.field.rho_max, |ci| {
+            .try_for_each_near(b, reach + self.field.rho_max, |ci| {
                 let c = &a.circles[ci as usize];
                 let y = b - c.center;
                 let along = y.dot(c.axis);
                 let wl = (y - c.axis * along).norm();
                 let dist = (along * along + (wl - c.radius) * (wl - c.radius)).sqrt();
                 if dist <= reach {
-                    order.push((dist, ci));
+                    error::push(order, (dist, ci), "brick candidates")?;
                 }
-            });
+                Ok(())
+            })?;
         order.sort_unstable_by(|x, y| x.0.total_cmp(&y.0).then(x.1.cmp(&y.1)));
         for &(_, ci) in order.iter() {
             let c = &a.circles[ci as usize];
             let m = c.center - frame;
-            g.cx.push(m.x as f32);
-            g.cy.push(m.y as f32);
-            g.cz.push(m.z as f32);
-            g.ux.push(c.axis.x as f32);
-            g.uy.push(c.axis.y as f32);
-            g.uz.push(c.axis.z as f32);
-            g.ex.push(c.e1.x as f32);
-            g.ey.push(c.e1.y as f32);
-            g.ez.push(c.e1.z as f32);
-            g.rho.push(c.radius as f32);
+            error::push(&mut g.cx, m.x as f32, "brick candidates")?;
+            error::push(&mut g.cy, m.y as f32, "brick candidates")?;
+            error::push(&mut g.cz, m.z as f32, "brick candidates")?;
+            error::push(&mut g.ux, c.axis.x as f32, "brick candidates")?;
+            error::push(&mut g.uy, c.axis.y as f32, "brick candidates")?;
+            error::push(&mut g.uz, c.axis.z as f32, "brick candidates")?;
+            error::push(&mut g.ex, c.e1.x as f32, "brick candidates")?;
+            error::push(&mut g.ey, c.e1.y as f32, "brick candidates")?;
+            error::push(&mut g.ez, c.e1.z as f32, "brick candidates")?;
+            error::push(&mut g.rho, c.radius as f32, "brick candidates")?;
             for &n in a.circle_blockers.row(ci as usize) {
                 let l = local_of[n as usize];
                 if l != u32::MAX {
-                    g.c_blk.push(l);
+                    error::push(&mut g.c_blk, l, "brick candidates")?;
                 }
             }
-            g.c_off.push(g.c_blk.len() as u32);
+            error::push(&mut g.c_off, g.c_blk.len() as u32, "brick candidates")?;
         }
 
         // Class V.
-        self.field.vertex_cells.for_each_near(b, reach, |vi| {
+        self.field.vertex_cells.try_for_each_near(b, reach, |vi| {
             let p = a.vertices[vi as usize].position;
             if b.dist(p) <= reach {
                 let q = p - frame;
-                g.vx.push(q.x as f32);
-                g.vy.push(q.y as f32);
-                g.vz.push(q.z as f32);
+                error::push(&mut g.vx, q.x as f32, "brick candidates")?;
+                error::push(&mut g.vy, q.y as f32, "brick candidates")?;
+                error::push(&mut g.vz, q.z as f32, "brick candidates")?;
             }
-        });
+            Ok(())
+        })?;
         for &k in touched.iter() {
             local_of[k as usize] = u32::MAX;
         }
+        Ok(())
     }
 }
 

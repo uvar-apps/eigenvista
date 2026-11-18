@@ -1,6 +1,6 @@
-//! Independent protocol examples, invalid expansions and bounded transport checks.
+//! Independent protocol examples, invalid expansions and allocation-driven transport checks.
 
-use super::encoding::{Budget, Column, MAX_VALUES, Record, decode};
+use super::encoding::{Column, Record, decode};
 use super::messagepack::Value;
 use std::collections::BTreeMap;
 
@@ -43,26 +43,23 @@ fn little_endian_byte_arrays_cover_all_eight_numeric_types() {
         ),
     ] {
         assert_eq!(
-            decode(&encoded(&raw, vec![byte_array(kind)]), &mut Budget::new()).unwrap(),
+            decode(&encoded(&raw, vec![byte_array(kind)])).unwrap(),
             Column::Int(expected)
         );
     }
     assert_eq!(
-        decode(
-            &encoded(&[0, 0, 128, 63, 0, 0, 0, 192], vec![byte_array(32)]),
-            &mut Budget::new()
-        )
+        decode(&encoded(
+            &[0, 0, 128, 63, 0, 0, 0, 192],
+            vec![byte_array(32)]
+        ))
         .unwrap(),
         Column::Float(vec![1., -2.])
     );
     assert_eq!(
-        decode(
-            &encoded(
-                &[0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 192],
-                vec![byte_array(33)]
-            ),
-            &mut Budget::new()
-        )
+        decode(&encoded(
+            &[0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 192],
+            vec![byte_array(33)]
+        ))
         .unwrap(),
         Column::Float(vec![1., -2.])
     );
@@ -79,11 +76,7 @@ fn inverse_pipeline_combines_run_length_and_delta_in_declared_order() {
         [("srcSize", Value::Int(6)), ("srcType", Value::Int(3))],
     );
     assert_eq!(
-        decode(
-            &encoded(&[1, 4, 2, 2], vec![delta, rle, byte_array(1)]),
-            &mut Budget::new()
-        )
-        .unwrap(),
+        decode(&encoded(&[1, 4, 2, 2], vec![delta, rle, byte_array(1)])).unwrap(),
         Column::Int(vec![11, 12, 13, 14, 16, 18])
     );
     // CIFTools reconstructs each delta into the declared typed destination.
@@ -92,11 +85,7 @@ fn inverse_pipeline_combines_run_length_and_delta_in_declared_order() {
         [("origin", Value::Int(127)), ("srcType", Value::Int(1))],
     );
     assert_eq!(
-        decode(
-            &encoded(&[1, 1], vec![delta, byte_array(1)]),
-            &mut Budget::new()
-        )
-        .unwrap(),
+        decode(&encoded(&[1, 1], vec![delta, byte_array(1)])).unwrap(),
         Column::Int(vec![-128, -127])
     );
 }
@@ -124,11 +113,7 @@ fn signed_unsigned_and_two_byte_integer_packing_preserve_extremes() {
             ],
         );
         assert_eq!(
-            decode(
-                &encoded(&raw, vec![pack, byte_array(raw_type)]),
-                &mut Budget::new()
-            )
-            .unwrap(),
+            decode(&encoded(&raw, vec![pack, byte_array(raw_type)])).unwrap(),
             Column::Int(expected)
         );
     }
@@ -141,13 +126,10 @@ fn fixed_point_and_interval_quantization_respect_float_source_width() {
         [("factor", Value::Int(100)), ("srcType", Value::Int(33))],
     );
     assert_eq!(
-        decode(
-            &encoded(
-                &[123, 0, 0, 0, 22, 255, 255, 255],
-                vec![fixed, byte_array(3)]
-            ),
-            &mut Budget::new()
-        )
+        decode(&encoded(
+            &[123, 0, 0, 0, 22, 255, 255, 255],
+            vec![fixed, byte_array(3)]
+        ))
         .unwrap(),
         Column::Float(vec![1.23, -2.34])
     );
@@ -156,11 +138,7 @@ fn fixed_point_and_interval_quantization_respect_float_source_width() {
         [("factor", Value::Int(10)), ("srcType", Value::Int(32))],
     );
     assert_eq!(
-        decode(
-            &encoded(&[12], vec![fixed, byte_array(1)]),
-            &mut Budget::new()
-        )
-        .unwrap(),
+        decode(&encoded(&[12], vec![fixed, byte_array(1)])).unwrap(),
         Column::Float(vec![f64::from(1.2f32)])
     );
     let interval = transform(
@@ -173,11 +151,7 @@ fn fixed_point_and_interval_quantization_respect_float_source_width() {
         ],
     );
     assert_eq!(
-        decode(
-            &encoded(&[0, 1, 2], vec![interval, byte_array(1)]),
-            &mut Budget::new()
-        )
-        .unwrap(),
+        decode(&encoded(&[0, 1, 2], vec![interval, byte_array(1)])).unwrap(),
         Column::Float(vec![1., 1.5, 2.])
     );
 }
@@ -194,7 +168,7 @@ fn string_dictionaries_support_utf16_and_codepoint_offsets_without_character_tab
             ("offsets", Value::Bin(&raw_offsets)),
         ]);
         assert_eq!(
-            decode(&encoded(&[2, 1, 0, 255], vec![strings]), &mut Budget::new()).unwrap(),
+            decode(&encoded(&[2, 1, 0, 255], vec![strings])).unwrap(),
             Column::Text(vec!["x", "𝔸", "é", ""])
         );
     }
@@ -233,7 +207,7 @@ fn malformed_transforms_and_excessive_expansions_fail_before_allocation() {
                 transform(
                     "RunLength",
                     [
-                        ("srcSize", Value::Int(MAX_VALUES as i64 + 1)),
+                        ("srcSize", Value::Int(i64::MAX)),
                         ("srcType", Value::Int(3)),
                     ],
                 ),
@@ -281,14 +255,9 @@ fn malformed_transforms_and_excessive_expansions_fail_before_allocation() {
         ),
     ];
     for (index, value) in malformed.into_iter().enumerate() {
-        assert!(
-            decode(&value, &mut Budget::new()).is_err(),
-            "case {index} must be rejected"
-        );
+        assert!(decode(&value).is_err(), "case {index} must be rejected");
     }
-    let mut budget = Budget::new();
-    budget.take(MAX_VALUES).unwrap();
-    assert!(budget.vector::<i64>(1).is_err());
+    assert!(eigenvista_core::allocation::buffer::<i64>(usize::MAX, "decoded column").is_err());
 }
 
 #[test]
@@ -302,7 +271,7 @@ fn invalid_dictionary_offsets_indices_and_pipeline_nesting_are_rejected() {
             ("offsetEncoding", Value::Array(vec![byte_array(3)])),
             ("offsets", Value::Bin(&raw_offsets)),
         ]);
-        assert!(decode(&encoded(&[0], vec![strings]), &mut Budget::new()).is_err());
+        assert!(decode(&encoded(&[0], vec![strings])).is_err());
     }
     for indices in [[8u8], [254u8]] {
         let strings = obj([
@@ -312,14 +281,14 @@ fn invalid_dictionary_offsets_indices_and_pipeline_nesting_are_rejected() {
             ("offsetEncoding", Value::Array(vec![byte_array(1)])),
             ("offsets", Value::Bin(&[0, 1])),
         ]);
-        assert!(decode(&encoded(&indices, vec![strings]), &mut Budget::new()).is_err());
+        assert!(decode(&encoded(&indices, vec![strings])).is_err());
     }
     let chain = (0..17).map(|_| byte_array(1)).collect();
-    assert!(decode(&encoded(&[0], chain), &mut Budget::new()).is_err());
+    assert!(decode(&encoded(&[0], chain)).is_err());
 }
 
 #[test]
-fn gzip_expansion_is_bounded_independently_of_compressed_size() {
+fn large_gzip_expansion_still_validates_the_actual_messagepack_payload() {
     use std::io::Write;
     let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
     let chunk = [0u8; 64 * 1024];
@@ -329,8 +298,66 @@ fn gzip_expansion_is_bounded_independently_of_compressed_size() {
     let compressed = encoder.finish().unwrap();
     assert!(compressed.len() < 1024 * 1024);
     assert!(
-        super::parse(&compressed, "excessive.bcif.gz")
+        super::parse(&compressed, "large-malformed.bcif.gz")
             .unwrap_err()
-            .contains("64 MiB")
+            .contains("trailing bytes")
+    );
+}
+
+#[test]
+fn decoded_column_above_the_former_value_ceiling_preserves_every_repeat() {
+    let size = 16 * 1024 * 1024 + 1;
+    let raw: Vec<_> = [7i32, size as i32]
+        .into_iter()
+        .flat_map(i32::to_le_bytes)
+        .collect();
+    let data = encoded(
+        &raw,
+        vec![
+            transform(
+                "RunLength",
+                [
+                    ("srcSize", Value::Int(size as i64)),
+                    ("srcType", Value::Int(3)),
+                ],
+            ),
+            byte_array(3),
+        ],
+    );
+    let Column::Int(values) = decode(&data).unwrap() else {
+        panic!("integer column")
+    };
+    assert_eq!(values.len(), size);
+    assert!(values.iter().all(|value| *value == 7));
+}
+
+#[test]
+fn long_valid_transform_chains_have_no_application_length_limit() {
+    let mut chain = (0..20_000)
+        .map(|_| {
+            transform(
+                "Delta",
+                [("origin", Value::Int(0)), ("srcType", Value::Int(3))],
+            )
+        })
+        .collect::<Vec<_>>();
+    chain.push(byte_array(1));
+    assert_eq!(decode(&encoded(&[7], chain)).unwrap(), Column::Int(vec![7]));
+}
+
+#[test]
+fn long_valid_transform_chains_have_no_application_count_ceiling() {
+    let mut transforms: Vec<_> = (0..20_000)
+        .map(|_| {
+            transform(
+                "Delta",
+                [("origin", Value::Int(0)), ("srcType", Value::Int(3))],
+            )
+        })
+        .collect();
+    transforms.push(byte_array(1));
+    assert_eq!(
+        decode(&encoded(&[7], transforms)).unwrap(),
+        Column::Int(vec![7])
     );
 }

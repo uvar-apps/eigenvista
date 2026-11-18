@@ -73,17 +73,21 @@ pub(crate) fn parse(data: &[u8]) -> Result<Parsed, ParseError> {
         atom.radius = Some(radius as f32);
         atom.partial_charge = parse_f32(tok[n - 2]);
         if atom.partial_charge.is_none() {
-            diagnostics.warn(WarningKind::InvalidField, "invalid PQR charge", || {
-                format!("line {lineno}: '{}'", show(tok[n - 2]))
-            });
+            diagnostics
+                .warn(WarningKind::InvalidField, "invalid PQR charge", || {
+                    format!("line {lineno}: '{}'", show(tok[n - 2]))
+                })
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
         }
         match parse_i64(tok[1]).and_then(|v| u32::try_from(v).ok()) {
             Some(s) => atom.serial = s,
-            None => diagnostics.warn(
-                WarningKind::InvalidField,
-                "invalid atom serial number; using 0",
-                || format!("line {lineno}: '{}'", show(tok[1])),
-            ),
+            None => diagnostics
+                .warn(
+                    WarningKind::InvalidField,
+                    "invalid atom serial number; using 0",
+                    || format!("line {lineno}: '{}'", show(tok[1])),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?,
         }
         atom.name = strings.intern_bytes(tok[2]);
         atom.res_name = strings.intern_bytes(tok[3]);
@@ -97,23 +101,26 @@ pub(crate) fn parse(data: &[u8]) -> Result<Parsed, ParseError> {
             _ => (seq, None),
         };
         atom.ins_code = ins;
-        atom.res_seq = parse_i32(digits).unwrap_or_else(|| {
-            diagnostics.warn(
+        atom.res_seq = diagnostics
+            .or_warn(
+                parse_i32(digits),
+                0,
                 WarningKind::InvalidField,
                 "invalid residue number; using 0",
                 || format!("line {lineno}: '{}'", show(seq)),
-            );
-            0
-        });
+            )
+            .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
         let name = String::from_utf8_lossy(tok[2]);
         let res = String::from_utf8_lossy(tok[3]);
         atom.element = Element::infer_from_name(&name, &res, het);
         if atom.element.is_none() {
-            diagnostics.warn(
-                WarningKind::UnknownElement,
-                "element could not be inferred from the atom name",
-                || format!("line {lineno}: '{name}'"),
-            );
+            diagnostics
+                .warn(
+                    WarningKind::UnknownElement,
+                    "element could not be inferred from the atom name",
+                    || format!("line {lineno}: '{name}'"),
+                )
+                .map_err(|error| ParseError::caused_by(lineno, 1, error))?;
         }
         models.push(atom);
     }

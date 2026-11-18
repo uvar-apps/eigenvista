@@ -1,8 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 mod control;
 mod lifecycle;
+mod native_transfer;
 mod shader_parameters;
 
 fn validate_save_destination(
@@ -13,9 +15,6 @@ fn validate_save_destination(
         ext.eq_ignore_ascii_case("eigenvista") || ext.eq_ignore_ascii_case("molekel")
     }) {
         return Err("Save to a .eigenvista filename; original external-format files are not export destinations".into());
-    }
-    if protected_paths.len() > 256 {
-        return Err("Too many protected source paths".into());
     }
     if let Ok(destination) = path.canonicalize() {
         for source in protected_paths {
@@ -30,10 +29,16 @@ fn validate_save_destination(
 #[tauri::command]
 async fn save_native(
     app: tauri::AppHandle,
-    bytes: Vec<u8>,
-    name: String,
-    protected_paths: Option<Vec<String>>,
+    request: tauri::ipc::Request<'_>,
 ) -> Result<bool, String> {
+    let native_transfer::Transfer {
+        metadata:
+            native_transfer::NativeSaveMetadata {
+                name,
+                protected_paths,
+            },
+        bytes,
+    } = native_transfer::decode_body(request.body()).map_err(|error| error.to_string())?;
     tauri::async_runtime::spawn_blocking(move || {
         eigenvista_format::decode(&bytes)?;
         let Some(path) = app
@@ -46,7 +51,7 @@ async fn save_native(
             return Ok(false);
         };
         let path = path.into_path().map_err(|e| e.to_string())?;
-        validate_save_destination(&path, protected_paths.as_deref().unwrap_or_default())?;
+        validate_save_destination(&path, &protected_paths)?;
         eigenvista_format::native::save_atomic(&path, &bytes)?;
         Ok(true)
     })
@@ -92,7 +97,6 @@ mod tests {
 #[tauri::command]
 async fn save_shader_parameters(app: tauri::AppHandle, text: String) -> Result<bool, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        shader_parameters::validate_text(&text)?;
         let Some(path) = app
             .dialog()
             .file()
@@ -123,8 +127,8 @@ async fn save_csv(
     name: String,
     protected_paths: Vec<String>,
 ) -> Result<bool, String> {
-    if text.is_empty() || text.len() > eigenvista_control::MAX_CSV_BYTES {
-        return Err("CSV must contain at most 32 MiB of generated data".into());
+    if text.is_empty() {
+        return Err("CSV must contain generated data".into());
     }
     tauri::async_runtime::spawn_blocking(move || {
         let Some(path) = app
@@ -152,6 +156,18 @@ async fn save_csv(
 fn main() {
     tauri::Builder::default()
         .manage(lifecycle::Lifecycle::default())
+        .on_page_load(|webview, payload| {
+            if webview.label() == "main"
+                && matches!(payload.event(), tauri::webview::PageLoadEvent::Started)
+            {
+                control::unready(webview.app_handle());
+            }
+        })
+        .on_window_event(|window, event| {
+            if window.label() == "main" && matches!(event, tauri::WindowEvent::Destroyed) {
+                control::unready(window.app_handle());
+            }
+        })
         .setup(|app| {
             lifecycle::install(app.handle())?;
             control::install(app.handle()).map_err(Into::into)

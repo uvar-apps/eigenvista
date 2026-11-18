@@ -51,7 +51,7 @@ const readPreferences = (): Preferences => {
   const result = defaults();
   try {
     const text = localStorage.getItem(storageKey);
-    if (!text || new TextEncoder().encode(text).length > 4096) return result;
+    if (!text) return result;
     const value = JSON.parse(text);
     if (
       !value ||

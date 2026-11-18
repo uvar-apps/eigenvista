@@ -1,5 +1,5 @@
 use super::{column, serial};
-use crate::import::biological::{MAX_METADATA_ROWS, SecondaryRange, secondary_ranges};
+use crate::import::biological::{SecondaryRange, secondary_ranges};
 use crate::structure::{StructureBuilder, is_ion, named_kind, optional};
 use crate::{
     ComponentKind, Result, SecondaryStructure, StructureChain, StructureMetadata, StructureResidue,
@@ -45,7 +45,7 @@ impl PdbMetadata {
         };
         let mut model = 0;
         let mut closed = false;
-        let mut segment = 0;
+        let mut segment = 0usize;
         for line in source.lines() {
             let record = line.get(..6).unwrap_or(line).trim();
             match record {
@@ -53,10 +53,9 @@ impl PdbMetadata {
                 "ENDMDL" => closed = true,
                 "END" => break,
                 "TER" if model <= 1 && !closed => {
-                    segment += 1;
-                    if segment >= MAX_METADATA_ROWS {
-                        return Err("Too many PDB TER segments".into());
-                    }
+                    segment = segment
+                        .checked_add(1)
+                        .ok_or("PDB TER segment count overflow")?;
                 }
                 "ATOM" | "HETATM" if model <= 1 && !closed => {
                     let id = serial(column(line, 6, 11))?;
@@ -78,9 +77,6 @@ impl PdbMetadata {
                     );
                 }
                 "MODRES" => {
-                    if result.modifications.len() >= MAX_METADATA_ROWS {
-                        return Err("Too many PDB MODRES records".into());
-                    }
                     result.modifications.insert(
                         (
                             column(line, 16, 17).trim().into(),
@@ -92,9 +88,6 @@ impl PdbMetadata {
                     );
                 }
                 "HELIX" | "SHEET" => {
-                    if result.ranges.len() >= MAX_METADATA_ROWS {
-                        return Err("Too many PDB secondary annotations".into());
-                    }
                     let (a, b, c, name) = if record == "HELIX" {
                         (19, 21, 25, 15)
                     } else {

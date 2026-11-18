@@ -10,8 +10,8 @@ function readExpansion(): Expansion {
   ) as Expansion;
   try {
     const text = localStorage.getItem(storageKey);
-    // This preference contains eight booleans; do not parse an unbounded value.
-    if (!text || text.length > 1024) return expanded;
+    // Parse the complete preference, then accept only known boolean fields.
+    if (!text) return expanded;
     const stored: unknown = JSON.parse(text);
     if (!stored || typeof stored !== "object" || Array.isArray(stored))
       return expanded;

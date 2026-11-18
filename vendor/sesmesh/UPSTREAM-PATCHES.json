@@ -4,7 +4,25 @@
   "upstream_manifest_sha256": "33101809581739e239eaaa8802a28c40683b9d386c8f32e6a7c2d683b807f03c",
   "modified_files": {
     "src/control.rs": "6e5d1f5da9d6cbccd0c7906869a048c4bf6a0013fca3a6b2d8702bb591d4d24a",
-    "src/par.rs": "060075e2b082ec4e4afb4331dd245dd63e5fd6efd2c978edec9609aa7eb27250",
-    "src/surface.rs": "f19a9fa8457a32ccf3d8c7aa2ffa9e1ed170477f6d7d7f792f1308a488184032"
+    "src/diag.rs": "c4a219607abd6854efaa62c4b2cdf58f8015fc6e1f1fffa1c6405f0ccc4146a7",
+    "src/error.rs": "4fa8a487ca86e7589f4f1a78434aa598a728aecb56f666630a606d26671537b3",
+    "src/field/kernel.rs": "7d68c682f107a00824f21baddcf7b7aae285824e65e90b3b19cddef96d63859f",
+    "src/field/lattice.rs": "29fa42c85ef9f294d09bf97643fa03501549973c323aaabdb185b652d6dfb4a7",
+    "src/field/point.rs": "f1ffcad34ead43956e0ae3f245c40c3b59d27b1b091f702fcfe50d1424888340",
+    "src/geom/arrangement.rs": "a3a429c39909615181a99d98c79cb3cc1182c40436acf12e3c9efa070374e620",
+    "src/geom/cells.rs": "70d7e32dbd5292dfc0ac7aa09a89c4f011f861924eac0e2bbee9eeef49f7594a",
+    "src/io/assembly.rs": "596b1d682aebd1c65f6de88435919a6b86e704c5cff631eed1ad3434da1b1ba2",
+    "src/io/cif/mod.rs": "8406115f7496dfd930f1a77c0bdad0995397a069567efca1fb98f2b267275112",
+    "src/io/mod.rs": "ef5afe411655a1bf0e3d8bac172f7043827fb6f42de15156e859b6e66e4a5eab",
+    "src/io/pdb.rs": "d054669b1b221528fd6a74c013e9e3d48bd0c88a8040445663a710102862fdce",
+    "src/io/pqr.rs": "3d66b86b17e7fb275d563e46dc054317af24c4bf9249a8f440d577c9f9cb899b",
+    "src/io/xyz.rs": "ac6234199e97397e7d4c60406f1fa1ee3920e4243fbc71840a76af2bc55d2b9f",
+    "src/mesh/extract.rs": "1149db2cc80ccc350cf343541e6e562c5d1b016f061a6a3020d9597e982f0a03",
+    "src/mesh/mod.rs": "8527bb750b6dd456022e0181ab594a7e265568c0ebb2e7c88e3674cc35ef4271",
+    "src/mesh/post.rs": "5582aa66ab977b4a18030d1a65e18af606c0c6c085fd913085e1650d3ca539d3",
+    "src/par.rs": "da01955572a124bc885f6c9f91792b04afdc7cd7d2ff1f5013752a613c952d55",
+    "src/radii/mod.rs": "a7ba42dd19a8dba07e14820fe1fe2b7ec9bda61fb64f10472f4c188e1770bfd0",
+    "src/structure/select.rs": "7ee7e9261638ab3f388fb9028adb2566b193315b9723c325920452240b80a87e",
+    "src/surface.rs": "c83921733bd697161d43b2fd3b1e320457d634ccdd90d7c75739cf08c640ea55"
   }
 }

@@ -150,13 +150,13 @@ fn required_biological_feature_and_payload_must_agree_in_both_directions() {
 }
 
 #[test]
-fn metadata_budget_is_checked_before_native_publication() {
+fn metadata_above_the_former_text_limit_roundtrips() {
     let mut doc = fixtures::hydrogen_pair();
     let mut s = metadata();
     s.atom_names[1] = "X".repeat(129);
     doc.structure = Some(s);
-    assert!(eigenvista_format::validate_document(&doc).is_err());
-    assert!(encode(&doc).is_err());
+    eigenvista_format::validate_document(&doc).unwrap();
+    assert_eq!(decode(&encode(&doc).unwrap()).unwrap(), doc);
 }
 
 #[test]

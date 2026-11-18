@@ -1,5 +1,8 @@
 # Application control API
 
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
 Installed-app agents should use the packaged portable skill and technical
 reference, or the [binary-user setup guide](ai-connector.md). They require no
 development checkout or compilation. The source-build examples in this maintainer
@@ -20,9 +23,9 @@ The additive palette/biological-presentation work in
 catalog to 28 methods in the published 0.8.0 release. Discover the connected instance's catalog before using
 these additions; an older source-built instance may lack them.
 
-**Version 0.10.0 extension:** the Mac package includes the geometry,
+**Scientific inspection, introduced in 0.10.0:** the Mac package includes the geometry,
 SES/SAS and quantitative-field methods documented below (#83–#86). Older
-0.8.0 downloads do not have these methods. Use the matching 0.10.0
+0.8.0 downloads do not have these methods. Use the matching 0.10.1
 app/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
 establish availability.
@@ -133,7 +136,8 @@ directly**, without the wire-level `jsonrpc`/`id` envelope. Errors print
 Successful RPCs exit 0, including a `job.get` response describing a failed job;
 always inspect job status. `--wait SECONDS` polls an accepted job until it reaches
 a terminal state; failed/cancelled jobs then produce an error exit. It accepts
-whole seconds from 0 to 86400. A wait timeout does **not** cancel the calculation.
+nonnegative whole seconds, subject to the platform's actual time representation.
+A wait timeout does **not** cancel the calculation.
 The flag has no additional effect on a result that contains no `jobId`.
 
 ### Run the external demonstration
@@ -168,7 +172,7 @@ Start with `app.capabilities`. Its result includes:
 
 - `apiVersion: 1` and the current `instanceId`;
 - `methods`, each containing `method`, `description` and `inputSchema`;
-- `limits`, including supported `gridResolutions`;
+- `allocationPolicy: "allocation-driven"` and advisory `gridResolutionPresets`;
 - `files: {nativePaths, browserBytes, overwrite: false}` and `errorKinds`.
 
 Discover schemas from the connected app rather than assuming another version's
@@ -181,13 +185,13 @@ types and values outside supported bounds are rejected rather than coerced.
 During renderer startup, camera/background may be null while state remains
 queryable. Scientific coefficient, grid and mesh arrays are not returned.
 `palette` reports `{custom,name}`. The biological `structureDisplay` summary
-reports color mode, bounded hidden-chain selectors/count, hidden component kinds,
-isolation, selected-residue count, bounded chain styles/count, component styles
+reports color mode, complete hidden-chain selectors/count, hidden component kinds,
+isolation, selected-residue count, complete chain styles/count, component styles
 and visible-atom count. It does not return per-atom visibility, residue selections
 or the focus atom-index array. Record requested residue-range endpoints separately
 if they will be needed to recreate the presentation.
 The 0.10.0 extension additionally reports bounded `inspection` state:
-`pickEnabled`, `selectedCount`, up to 256 `orderedAtoms`, `measurementCount`,
+`pickEnabled`, `selectedCount`, complete `orderedAtoms`, `measurementCount`,
 `molecularSurfaceCount`, `analysisCount` and typed `lastPick`. Page source identities/selections
 through the dedicated methods instead of expecting scientific arrays in state.
 
@@ -195,10 +199,9 @@ Use IDs returned by the API. Human labels do not establish scientific meaning:
 for example, an occupation-derived density may have `kind: "density"` and
 `quantity: "total"` without the word “total” in its label. Unknown cube scalar
 meaning remains unspecified; opening a cube does not reconstruct orbitals.
-Document, field and surface IDs have a 512-character control selector limit.
-Overlong identifiers produce `limit_exceeded`; they are never silently truncated
-into a different selector. Display labels and other descriptive text may be
-shortened in metadata responses.
+Document, field and surface identifiers, labels, warnings and shader settings
+are returned completely. No selector-length or metadata-summary allowance
+rejects or truncates them. Scientific arrays use their dedicated data methods.
 
 ## Method reference
 
@@ -206,11 +209,11 @@ Document, field, surface, palette, biological-presentation, scene, shader, camer
 and image mutations accept optional `expectedRevision`; query methods and
 `job.cancel` do not accept it.
 All parameters shown as optional may be omitted, subject to native/browser file
-rules below. Results may include additional bounded metadata.
+rules below. Results may include additional metadata.
 
 | Method | Parameters | Result |
 | --- | --- | --- |
-| `app.capabilities` | `{}` | Version, instance, schemas, limits and host/file capabilities |
+| `app.capabilities` | `{}` | Version, instance, schemas, allocation policy, grid presets and host/file capabilities |
 | `app.state` | `{}` | Accepted document/presentation state |
 | `fields.list` | `offset?`, `limit?` | `{revision,total,offset,items}`: orbitals, densities, then stored grids |
 | `surfaces.list` | `{}` | `{revision,total,items}`: IDs, field IDs, isovalues, visibility, counts and source hashes |
@@ -258,11 +261,8 @@ seeds the manual radius from the current automatic value as the GUI does.
 Palette operations require an open document. Native `palette.load` callers supply one
 absolute `path` inside an already granted input root; `name` and `text` are
 rejected. Browser callers supply `name` and JSON `text`; filesystem paths are
-unavailable. Both paths have a **256 KiB UTF-8 input budget**. Native loading
-passes that bound to the broker's `read_with_limit` before reserving the file
-buffer, then decodes strict UTF-8. A large native palette is not first read under
-the general 128 MiB molecular-file limit. Browser text is checked by UTF-8 byte
-length as well as schema length.
+unavailable. Native reads grow fallibly and decode strict UTF-8; browser JSON
+uses the same complete parser. Neither path has a palette-byte allowance.
 
 Both hosts use the GUI's `parseAtomColors` validation: format
 `"eigenvista-atom-colors"`, version 1, a nonempty `colors` array, distinct integer
@@ -297,11 +297,11 @@ of the patch:
 | `showAll: true` | Clear hidden chains/kinds, isolation and residue-range filtering; retain colors/styles |
 | `clearStyles: true` | Clear chain and component representation overrides; retain colors/visibility |
 | `colorMode` | `"element"`, `"chain"`, `"entity"` or `"secondary"` |
-| `hiddenChains` | Replace hidden-chain indices with a distinct list of at most 512 existing chain indices |
+| `hiddenChains` | Replace hidden-chain indices with a distinct list of existing chain indices |
 | `hiddenKinds` | Replace hidden component kinds with a distinct list from the advertised component enum |
 | `isolatedChain` | Existing chain index to isolate, or `null` to stop isolation |
 | `residueRange` | `{chainIndex,first,last}` using deposited residue identifiers, or `null` to clear the range |
-| `chainStyles` | At most 512 distinct `{chainIndex,representation}` patches; `null` representation removes an override |
+| `chainStyles` | Distinct `{chainIndex,representation}` patches; `null` representation removes an override |
 | `componentStyles` | Component-kind keys mapped to a representation, or `null` to remove that override |
 
 Reset is applied first, then show-all/style clearing, then explicit values. An
@@ -315,8 +315,7 @@ same resolver as the GUI, including insertion codes and optional residue names.
 Chain styles take precedence over component styles, then the global document
 representation. Values are `ball-stick`, `liquorice`, `space-fill`, `trace`, `tube`,
 `ribbon` and `cartoon`. Protein styles are rejected for a component other than
-protein or a chain without protein residues. Active chain overrides are also
-capped at 512. These are bounded depiction choices, not changes to atom,
+protein or a chain without protein residues. These are session depiction choices, not changes to atom,
 connectivity, biological-identity or scientific arrays.
 
 `structure.focus` with `{target:"visible"}` frames the currently visible atoms.
@@ -360,7 +359,7 @@ counterparts. Coordinates and original atom/residue indices are **bohr and
 zero based** at this boundary; the GUI presents one-based numbers and accepts
 Å/bohr inputs. Do not parse labels to obtain identity. Preserve ordered picks
 for measurements, atom planes and profiles separately from sorted selection sets.
-Pages use `offset?`, `limit?` (1–100, default 100).
+Pages use `offset?`, `limit?` (positive safe-integer counts, default 100).
 
 `lastPick` is null or a typed original-source hit: `kind` is `atom`, `bond`,
 `residue`, `molecular_surface` or `quantum_surface`, with applicable `atom`,
@@ -396,7 +395,7 @@ back the accepted settings/results. No GUI operation is a required workaround.
 | `labels.remove` | `id` | Removes a label |
 | `molecularSurfaces.list` | Page | Settings/provenance/diagnostics/counts without bulk mesh or atom arrays |
 | `molecularSurfaces.atoms` | `id`, page | Original atom indices and resolved `radiusAngstrom` values |
-| `molecularSurfaces.warnings` | `id`, page | Full original warning strings; summaries expose only the first eight, each shortened to 256 characters |
+| `molecularSurfaces.warnings` | `id`, page | Full original warning strings; summaries also retain complete warnings |
 | `molecularSurfaces.generate` | Complete `request` below | Background create/replace SES/SAS mesh; same ID replaces only on success |
 | `molecularSurfaces.set` | `id`, `label?`, `visible?`, `color?`, `opacity?` | Updates saved appearance without recalculation |
 | `molecularSurfaces.remove` | `id` | Removes cached molecular mesh |
@@ -438,7 +437,8 @@ Empty `atom_indices` explicitly means **all source atoms**, including hidden
 atoms. A nonempty selection is treated as an isolated subset, not a patch of
 the full-molecule surface. `kind` is `ses` or `sas`; `radii_set` is `bondi` or
 `alvarez`; overrides contain `{element,radius_angstrom}`. Probe and spacing use
-Å (0.05–10 and 0.05–3 respectively). Missing element radii are errors; no generic
+Å: probe radius is finite and nonnegative; spacing is finite, positive and
+representable by the engine. Missing element radii are errors; no generic
 radius fallback or atom omission occurs. Cavities are kept; coarsening, smoothing
 and decimation are disabled. Shaders and surface appearance reuse existing
 operations; atom/bond AO remains separate. Save caches the geometry/provenance.
@@ -446,9 +446,8 @@ operations; atom/bond AO remains separate. Save caches the geometry/provenance.
 In this 0.10.0 extension, `shader.apply` can target `all` or one returned
 quantum/molecular surface ID; unknown IDs fail with `not_found`.
 `shader.set_uniforms` preserves the active target when omitted. Surface-list
-warning previews are bounded; use `molecularSurfaces.warnings` for complete,
-paginated diagnostic strings rather than treating a shortened preview as all
-available provenance.
+warning replies are complete; `molecularSurfaces.warnings` also provides paginated
+diagnostic strings when interpreting provenance.
 
 A field `descriptor` contains `field,quantity,value_unit,origin,note?` and
 `display_unit?`. Origins are `unknown`, `imported`, `derived`, `user_declared`;
@@ -482,8 +481,8 @@ the exact three-atom frame: centered at A, horizontal along B−A, normal along
 `(B−A)×(C−A)`, with a nondegenerate third point. Endpoints are included.
 
 `appearance` supports `visible`, `colormap` (`diverging`, `viridis`, `grayscale`),
-`show_key`, `show_labels`, optional ordered `range:[min,max]` and up to 32
-`contour_levels`. API ranges/levels are in **raw source scalar units**; GUI
+`show_key`, `show_labels`, optional ordered `range:[min,max]` and finite
+`contour_levels`, allocated without a count ceiling. API ranges/levels are in **raw source scalar units**; GUI
 controls display converted units. `analysis.samples` returns raw values and
 `status:"valid"/"outside"`, with `value:null` outside. CSV applies the descriptor's
 chosen display/export scalar unit, reports coordinates/profile distance in Å,
@@ -499,16 +498,17 @@ transfer; only a continuous slice colormap has a conventional continuous colorba
 
 ### Bounded output and persistence
 
-Read results through summaries/pages; the native frame limit remains 4 MiB.
+Read results through summaries/pages; the connector grows its frame buffer fallibly.
 `table.export` with an authorized new native `.csv` path returns a file receipt.
 Without a path it returns `{text,offset,totalCharacters,mimeType,name}`; browser
-clients concatenate chunks using the returned offset/text length, with a maximum
-1,048,576 UTF-16 code units per requested chunk. Offsets are UTF-16 positions;
+clients concatenate chunks using the returned offset/text length. Omitted
+`length` defaults to 1,048,576 UTF-16 code units; explicit positive safe-integer
+lengths may be larger. Offsets are UTF-16 positions;
 advance by the actual returned `text.length`, not the requested length. Chunk
 boundaries preserve Unicode surrogate pairs (a one-unit request can return two
 units), and an offset inside a pair is rejected with `invalid_arguments`.
 Never mistake that text receipt for a file written
-to the user's disk. Generated CSV is UTF-8, bounded to 32 MiB, correctly escaped
+to the user's disk. Generated CSV is UTF-8, allocation-driven, correctly escaped
 and neutralizes untrusted textual spreadsheet formulas while preserving numbers.
 
 Save persists named selections, annotations, molecular meshes and quantitative
@@ -517,11 +517,8 @@ active selection/pick mode, camera, palette, AO, background, shaders or biologic
 filters. A matching new reader is required; published 0.8.0 rejects the unfamiliar
 required native capabilities rather than dropping them silently.
 
-Further bounds: 64 named sets/1,000,000 aggregate references, 256 measurements,
-256 labels, 32 molecular meshes, two-million vertices/four-million triangles per
-molecular mesh, 256 MiB engine estimate, 128 probes, 8 planes up to 512²,
-16 profiles up to 4,096 samples, 16 MiB aggregate field cache and 1,000,000 contour
-segments. Existing native 128 MiB/archive/manifest guards still win. There is no
+Scientific records and caches are allocation-driven; no fixed count or memory
+allowance applies. There is no
 silent coarsening or source-data loss. Finite f64 data can remain numerically
 valid even when a specific f32 depiction is unavailable; inspect `renderingWarning`.
 
@@ -540,8 +537,8 @@ return `{jobId,status:"accepted"}`. Acceptance is not completion. `job.get`
 returns `jobId`, `operation`, `status`, optional `progress`, and a terminal
 `result` or structured `error`. Status is `accepted`, `running`, `completed`,
 `failed` or `cancelled`. Progress may contain `stage` and `counts` with completed
-and total work. Jobs are retained in bounded memory for the current app instance;
-they are not durable across app restart, and old terminal jobs can expire.
+and total work. Jobs are retained for the current controller lifetime;
+they are not durable across app restart.
 
 Use `--wait` or poll `job.get` before describing a calculation as completed.
 `job.cancel` only targets the named owned job and waits for cleanup. It does not
@@ -553,7 +550,7 @@ their final result through the ordinary RPC, rather than a job receipt.
 
 ## Native files and browser qualification
 
-Native document/image paths must be absolute, at most 4096 bytes, inside an
+Native document/image paths must be absolute and representable by the OS, inside an
 explicit granted root, with no `..` traversal or symlink components. Source
 files read through control are protected for that broker's lifetime; save/export
 cannot replace them through another path or hard-link alias. The app also passes
@@ -566,7 +563,7 @@ All control writes are **atomic no-clobber**: choose a new `.eigenvista`, `.png`
 or (in the 0.10.0 extension) `.csv`
 filename. `overwrite: true` is rejected even if a caller supplies it intentionally.
 Native document writes decode/validate the encoded archive before publication;
-PNG writes validate the PNG structure/checksums. CSV accepts bounded generated
+PNG writes validate the PNG structure/checksums. CSV accepts complete generated
 UTF-8 text and retains the same scoped/source-protected publication policy; it
 does not expose an unrestricted text writer. Filesystems lacking the required
 hard-link publication support fail rather than falling back to a weaker write.
@@ -594,13 +591,13 @@ const image = await api.request("image.export", { transparent: true });
 // image.revision (capture), image.currentRevision (response)
 ```
 
-Browser imports require `{name,bytes}` where `bytes` is a bounded array of byte
+Browser imports require `{name,bytes}` where `bytes` is an array of byte
 integers; native filesystem `path` is unavailable. Browser Save returns
 `{revision,saved:false,name,bytes,byteLength}` for the external harness to store.
 It does not force a download or clear dirty state, because encoding is not proof
 that the harness saved anything. Browser PNG export similarly returns its data
-URL instead of downloading it. Use the normal Save action for documents exceeding
-the browser control result budget.
+URL instead of downloading it. Large results use actual runtime allocations; no separate browser-result byte
+allowance applies.
 
 ## Wire protocol, errors and limits
 
@@ -620,7 +617,7 @@ native bridge correlation IDs and application job IDs are separate concepts.
 Use `error.data.kind` to classify failures; native and frontend layers can reuse
 numeric codes for different kinds. Typical outcomes include `invalid_arguments`,
 `invalid_params`, `method_not_found`, `busy`, `stale_document`, `permission_required`,
-`not_found`, `operation_failed`, `scope_denied`, `source_protected`,
+`not_found`, `operation_failed`, `allocation_failed`, `scope_denied`, `source_protected`,
 `destination_exists`, `validation_error`, `limit_exceeded`, `unauthorized`,
 `not_ready`, `timeout`, `connection_failed` and `unsupported`.
 
@@ -629,31 +626,26 @@ An unsaved-document replacement fails with `permission_required` unless
 operations are explicit failures. A transport timeout has an uncertain outcome:
 inspect current state/jobs and output files before repeating a mutation.
 
-| Bound | Current value |
-| --- | --- |
-| Raw request/response frame | 4 MiB; request metadata/envelope also count |
-| Concurrent native client connections | 4 |
-| Native frontend response deadline | 60 seconds |
-| Socket read/write deadline | 10 seconds; slow trickling does not reset it |
-| Connection descriptor | At most 16 KiB; private regular file |
-| Granted native roots | 1–16 |
-| Native file read/encoded document write | 128 MiB, with additional format limits |
-| Atom palette input | 256 KiB UTF-8; native size bound applied before file-buffer allocation |
-| Browser encoded Save result | 8 MiB |
-| PNG data URL | 16 MiB of characters, before base64 decoding |
-| Metadata page size | 1–100; default 100 |
-| Document/field/surface selector | At most 512 characters; explicit rejection, no ID truncation |
-| Biological hidden-chain/style selectors | At most 512 per request; at most 512 active chain styles |
-| Orbital mesh batch | At most 32 distinct orbital IDs; density/grid separately |
-| Retained jobs | 32, with terminal entries evicted first |
-| Grid resolutions | 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, 256 |
-
-These are rejection bounds, not performance or scientific-accuracy promises.
-The scientific/import/allocation limits still apply, including distinct bounds
-for authoritative stored grids. A large JSON result can hit the native wire
-limit even when the underlying document remains valid; native artifact methods
-return file receipts rather than transporting full molecular arrays or PNG data
-through that connection.
+Version 0.10.1 has no application byte/count ceilings for frames, files,
+encoded Save results, PNG/CSV artifacts, palettes, selectors or orbital batches.
+Pagination defaults to 100 records but accepts larger positive safe integers.
+Jobs remain discoverable for the controller lifetime. Grid presets are advisory;
+requested resolutions are safe integers of at least two. Discover
+`allocationPolicy` and `gridResolutionPresets` from `app.capabilities`.
+Native requests wait for completion or controller invalidation;
+there is no default processing or total-transfer cutoff. Socket inactivity is
+distinct from calculation duration. The Rust client may use an explicitly chosen
+deadline; CLI `--wait` remains a caller-selected job wait and does not cancel it.
+On macOS 14+, the desktop's supported background scheduling setting keeps
+scientific/Save workers runnable while the window is hidden. Older macOS does
+not implement that setting; OS sleep or process termination can still interrupt
+work. A transport wait does not keep the OS awake.
+A client may half-close its TCP sending side after the complete request and
+continue reading the reply. Abandoning the connection does not cancel an accepted
+operation. Pending reply state is released when the operation completes or its
+controller is invalidated. Authentication, scoped file access and no-clobber
+publication remain. Real runtime/address/format/device constraints
+still apply; see [allocation policy](allocation-policy.md).
 
 Implementation entry points are [controller/schemas](../app/src/control.ts),
 [App integration](../app/src/App.tsx), [viewport port](../app/src/viewportControl.ts),

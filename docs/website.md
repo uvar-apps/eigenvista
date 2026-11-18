@@ -13,24 +13,40 @@ provenance, Search Console ownership-tag maintenance and publication state.
 [Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the local AI
 connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
-Version 0.10.0 includes the packaged connector and scientific-inspection features;
-the AI pages guide users from that installed binary. The connector was introduced
-in 0.8.0; older 0.7.2 packages predate control.
+Version 0.10.1 retains the packaged connector and scientific-inspection features;
+the AI pages guide users from an installed binary. Scientific inspection and the
+four-tab workspace were introduced in 0.10.0; the connector was introduced in
+0.8.0. Older 0.7.2 packages predate control.
 The published homepage hero highlights **AI-enabled viewing**, links directly to
-the AI overview, and names the compatible 0.10.0 package beside the callout.
+the AI overview, and names the compatible published package beside the callout.
 Keep that availability label aligned with the actual public release.
 
-The current source is **0.10.0**, merged through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89)
-and tagged `v0.10.0`. Its
-scientific-inspection manual, tutorials and workspace guide describe the new
-0.10.0 Mac package. Older 0.8.0 downloads predate these additions. Normal startup uses one wide,
+The current source is **0.10.1**, prepared under
+[issue #93](https://github.com/uvar-apps/eigenvista/issues/93). Current authored
+manual, tutorial and AI setup copy follows that version. Release publication and
+the rebuilt download still require the release gates; this document does not
+assert that they are complete. The previous 0.10.0 source was merged through
+[PR #89](https://github.com/uvar-apps/eigenvista/pull/89) and tagged `v0.10.0`.
+Older 0.8.0 downloads predate scientific inspection. Normal startup uses one wide,
 resizable left/right pane with Molecule, Fields, Surfaces and Appearance tabs,
 hide/reopen and Zen mode. Keep current instructions aligned with that default.
 Published download links, DOI and historical capture versions must continue to
 identify their actual artifacts. A source tag does not imply a new binary
-download. Follow-up #90 explicitly authorizes the rebuilt 0.10.0 Mac release,
-updated download metadata and the Pages-only publisher. Record measured artifact
-facts only after package qualification; preserve the existing source tag.
+download. `tools/site/release.mjs` continues to identify the last verified
+download until the new package has been qualified. Record measured artifact
+facts only after package qualification; preserve existing source tags.
+
+The 0.10.1 reference explains a single camera-aligned light with neutral fill,
+smooth diffuse shape cues and one Blinn-Phong highlight. AO retains Lambert +
+SSAO without specular highlights. It also replaces obsolete file-byte, atom,
+bond, grid, orbital, surface, cache and export quotas with allocation-based
+behavior: requested data are retained, actual allocation/representation/device
+failures are reported, and calculations keep progress and cancellation. SES/SAS
+spacing and cavities are preserved without silent coarsening. The preset grid
+choices through 256³ are conveniences; custom positive resolutions are allowed.
+Keep scientific format restrictions distinct from removed resource ceilings.
+The 50-entry biological legend/search presentation and automatic AO-radius
+heuristic remain UI behavior; neither limits imported structure size.
 
 The three `simple-*` workspace PNGs are real 0.9.0 captures of the approved workspace, retained
 with exact hashes and dimensions in media provenance. They illustrate the
@@ -42,8 +58,9 @@ orbital amplitude (signed phase) from nonnegative electron density.
 
 ## A static directory, with a small publisher
 
-The current **0.10.0 Mac download** is published, with actual qualified artifact
-facts in `tools/site/release.mjs`. Site commit
+The previous **0.10.0 Mac download** was published with actual qualified artifact
+facts. This historical publication record is retained independently of 0.10.1
+release preparation. Site commit
 `3fc91fb56114c7b16219a2f86e8e817fc6332328` was published by
 [Pages deployment 44054046506](https://github.com/uvar-apps/eigenvista/actions/runs/44054046506).
 All 89 public files and the custom nested 404 match the qualified payload. The
@@ -110,10 +127,14 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. `CITATION.cff`, the README citation and About use the current 0.10.0
-version DOI (`10.5281/zenodo.24302658`), also recorded in `tools/site/release.mjs`.
-The project concept DOI (`10.5281/zenodo.24246123`) identifies all versions;
-the historical 0.8.0 archive retains DOI `10.5281/zenodo.24273137`.
+section. The 0.10.1 citation uses the project concept DOI
+(`10.5281/zenodo.24246123`) until the user supplies a new version-specific DOI;
+do not invent one or reuse an earlier archive DOI. The About page distinguishes
+the current citation from the historical 0.10.0 archive
+(`10.5281/zenodo.24302658`) and 0.8.0 archive
+(`10.5281/zenodo.24273137`). Its current download citation is derived from
+`tools/site/release.mjs`, which remains tied to the verified package until the
+release coordinator updates it.
 Keep citation title, author, version and DOI
 synchronized. A version DOI identifies that archive, so do not assign it to a
 later version. DOI metadata added after publication updates documentation
@@ -122,8 +143,8 @@ and release notes without moving the existing tag or rebuilding immutable assets
 The three simple-pane illustrations retain original PNGs and complete capture
 metadata under `docs/design/assets/simple-workspace-pane-2026-11-17/`. Public
 copies are lossless WebP at the same 1280 × 800 dimensions, with zero decoded
-pixel differences. Their source version remains 0.9.0; the 0.10.0 workspace adopts
-the same design. The public provenance JSON is compactly serialized to keep
+pixel differences. Their source version remains 0.9.0; the design introduced
+in 0.10.0 is retained in 0.10.1. The public provenance JSON is compactly serialized to keep
 all capture data and the new imagery within the existing 25 MiB payload bound.
 Existing image bytes, metadata values and palette provenance are preserved.
 Project history traces EigenVista to Molekel, developed by Ugo Varetto from

@@ -173,7 +173,7 @@ impl Structure {
         let model = &self.models[model_index];
         let atoms = &model.atoms;
 
-        let keep_alt = resolve_alt_locs(self, atoms, selection.alt_loc, diags);
+        let keep_alt = resolve_alt_locs(self, atoms, selection.alt_loc, diags)?;
         let chain_filter = self.chain_filter(model, selection)?;
         let excluded: Vec<Sym> = selection
             .exclude_residues
@@ -300,9 +300,9 @@ fn resolve_alt_locs(
     atoms: &[AtomRecord],
     policy: AltLocPolicy,
     diags: &mut Diagnostics,
-) -> Option<Vec<bool>> {
+) -> Result<Option<Vec<bool>>> {
     if policy == AltLocPolicy::All || atoms.iter().all(|a| a.alt_loc.is_none()) {
-        return None;
+        return Ok(None);
     }
     type ResidueKey = (Sym, i32, Option<char>, Sym);
     // Per residue: (letter, total occupancy) in order of first appearance.
@@ -339,10 +339,10 @@ fn resolve_alt_locs(
         })
         .collect();
 
-    let keep: Vec<bool> = atoms
-        .iter()
-        .map(|a| match a.alt_loc {
-            None => true,
+    let keep = crate::par::try_map(atoms.len(), |index| {
+        let a = &atoms[index];
+        match a.alt_loc {
+            None => Ok(true),
             Some(c) => {
                 let k = chosen[&key(a)] == c;
                 if !k {
@@ -358,11 +358,11 @@ fn resolve_alt_locs(
                                 structure.str(a.name)
                             )
                         },
-                    );
+                    )?;
                 }
-                k
+                Ok(k)
             }
-        })
-        .collect();
-    Some(keep)
+        }
+    })?;
+    Ok(Some(keep))
 }

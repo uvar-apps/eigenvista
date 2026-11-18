@@ -3,7 +3,7 @@
 //! Arrays are read directly from typed model slices. Only scalar metadata and
 //! array references enter the JSON tree; numeric payloads are never JSON Values.
 
-use super::{Array, PreviewBudget, digest};
+use super::{Array, digest};
 use eigenvista_core::{
     Atom, BasisFunction, Density, Document, Grid, Orbital, Result, Surface, Term,
 };
@@ -20,15 +20,13 @@ struct Packer {
     arrays: BTreeMap<String, Array>,
     entries: Vec<(String, Vec<u8>)>,
     array_bytes: usize,
-    budget: PreviewBudget,
 }
 
-pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocument> {
+pub(super) fn pack(doc: &Document) -> Result<PackedDocument> {
     let mut packer = Packer {
         arrays: BTreeMap::new(),
         entries: vec![],
         array_bytes: 0,
-        budget,
     };
     // Exhaustive patterns make new model fields a compiler error rather than a
     // silently omitted native field. JSON object keys retain their sorted order.
@@ -78,7 +76,7 @@ pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocume
         document["structure"] = metadata;
     }
     if let Some(annotations) = annotations {
-        let mut selections = Vec::with_capacity(annotations.selections.len());
+        let mut selections = allocate_rows(annotations.selections.len())?;
         for selection in &annotations.selections {
             let atoms = packer.usize_row(
                 None,
@@ -109,7 +107,7 @@ pub(super) fn pack(doc: &Document, budget: PreviewBudget) -> Result<PackedDocume
         document["molecular_surfaces"] = packer.molecular_surfaces(surfaces)?;
     }
     if let Some(analysis) = field_analysis {
-        let mut items = Vec::with_capacity(analysis.items.len());
+        let mut items = allocate_rows(analysis.items.len())?;
         for item in &analysis.items {
             let eigenvista_core::field_analysis::FieldAnalysisItem {
                 id,
@@ -160,13 +158,20 @@ fn reference(id: &str, row: Option<usize>) -> Value {
     }
 }
 
+fn allocate_rows<T>(length: usize) -> Result<Vec<T>> {
+    let mut rows = Vec::new();
+    rows.try_reserve_exact(length)
+        .map_err(|_| "Cannot allocate native metadata rows")?;
+    Ok(rows)
+}
+
 impl Packer {
     fn molecular_surfaces(
         &mut self,
         surfaces: &[eigenvista_core::molecular_surface::MolecularSurface],
     ) -> Result<Value> {
         use eigenvista_core::molecular_surface::MolecularSurface;
-        let mut rows = Vec::with_capacity(surfaces.len());
+        let mut rows = allocate_rows(surfaces.len())?;
         for MolecularSurface {
             id,
             label,
@@ -234,9 +239,6 @@ impl Packer {
         shape: Vec<usize>,
         values: impl IntoIterator<Item = [u8; WIDTH]>,
     ) -> Result<String> {
-        if self.entries.len() >= self.budget.array_entries {
-            return Err("Document has too many array entries for the preview profile".into());
-        }
         let count = shape
             .iter()
             .try_fold(1usize, |n, d| n.checked_mul(*d))
@@ -248,9 +250,6 @@ impl Packer {
             .array_bytes
             .checked_add(byte_count)
             .ok_or("Native array byte length overflow")?;
-        if total > self.budget.total_bytes {
-            return Err("Native document exceeds preview budget".into());
-        }
         let mut bytes = vec![];
         bytes
             .try_reserve_exact(byte_count)
@@ -278,6 +277,9 @@ impl Packer {
                 sha256: digest(&bytes),
             },
         );
+        self.entries
+            .try_reserve(1)
+            .map_err(|_| "Cannot allocate native array directory")?;
         self.entries.push((entry, bytes));
         self.array_bytes = total;
         Ok(id)
@@ -403,7 +405,7 @@ impl Packer {
                 )
             })
             .transpose()?;
-        let mut rows = Vec::with_capacity(basis.len());
+        let mut rows = allocate_rows(basis.len())?;
         for (
             row,
             BasisFunction {
@@ -447,7 +449,7 @@ impl Packer {
         } else {
             None
         };
-        let mut rows = Vec::with_capacity(terms.len());
+        let mut rows = allocate_rows(terms.len())?;
         for (
             row,
             Term {
@@ -471,7 +473,7 @@ impl Packer {
                 )
             })
             .transpose()?;
-        let mut rows = Vec::with_capacity(orbitals.len());
+        let mut rows = allocate_rows(orbitals.len())?;
         for (
             row,
             Orbital {
@@ -511,7 +513,7 @@ impl Packer {
                 )
             })
             .transpose()?;
-        let mut rows = Vec::with_capacity(densities.len());
+        let mut rows = allocate_rows(densities.len())?;
         for (
             row,
             Density {
@@ -560,7 +562,7 @@ impl Packer {
                 )
             })
             .transpose()?;
-        let mut rows = Vec::with_capacity(grids.len());
+        let mut rows = allocate_rows(grids.len())?;
         for (
             row,
             Grid {
@@ -654,7 +656,7 @@ impl Packer {
         } else {
             None
         };
-        let mut rows = Vec::with_capacity(surfaces.len());
+        let mut rows = allocate_rows(surfaces.len())?;
         for (
             row,
             Surface {
@@ -736,23 +738,17 @@ impl Packer {
 mod tests {
     use super::*;
 
-    fn packer(budget: PreviewBudget) -> Packer {
+    fn packer() -> Packer {
         Packer {
             arrays: BTreeMap::new(),
             entries: vec![],
             array_bytes: 0,
-            budget,
         }
     }
 
     #[test]
     fn overflow_and_capacity_errors_return_without_allocating_large_buffers() {
-        let unlimited = PreviewBudget {
-            array_entries: 1,
-            manifest_bytes: usize::MAX,
-            total_bytes: usize::MAX,
-        };
-        let mut p = packer(unlimited);
+        let mut p = packer();
         assert!(
             p.floats(vec![usize::MAX, 2], std::iter::empty())
                 .unwrap_err()
@@ -763,8 +759,7 @@ mod tests {
                 .unwrap_err()
                 .contains("byte length overflow")
         );
-        // u8 Vec capacity cannot exceed isize::MAX. This deterministically tests
-        // the fallible allocation branch without asking the OS for real memory.
+        // A real Vec representation failure, independent of available RAM.
         let impossible = isize::MAX as usize + 1;
         assert!(
             p.floats(vec![impossible / 8], std::iter::empty())
@@ -777,19 +772,10 @@ mod tests {
     }
 
     #[test]
-    fn byte_budget_and_declared_shape_bound_iteration() {
-        let budget = PreviewBudget {
-            array_entries: 3,
-            manifest_bytes: 0,
-            total_bytes: 16,
-        };
-        let mut p = packer(budget);
+    fn declared_shape_still_bounds_iteration_without_a_document_budget() {
+        let mut p = packer();
         p.floats(vec![1], [1.0].into_iter()).unwrap();
-        assert!(
-            p.floats(vec![2], [2.0, 3.0].into_iter())
-                .unwrap_err()
-                .contains("preview budget")
-        );
+        p.floats(vec![2], [2.0, 3.0].into_iter()).unwrap();
         for values in [vec![], vec![1.0, 2.0]] {
             assert!(
                 p.floats(vec![1], values.into_iter())
@@ -797,9 +783,16 @@ mod tests {
                     .contains("disagree with shape")
             );
         }
-        assert_eq!(p.array_bytes, 8);
-        assert_eq!(p.entries.len(), 1);
-        p.floats(vec![1], [2.0].into_iter()).unwrap();
-        assert_eq!(p.array_bytes, 16);
+        assert_eq!(p.array_bytes, 24);
+        assert_eq!(p.entries.len(), 2);
+    }
+
+    #[test]
+    fn accepts_more_than_the_former_array_entry_limit() {
+        let mut p = packer();
+        for _ in 0..8193 {
+            p.floats(vec![1], [1.0].into_iter()).unwrap();
+        }
+        assert_eq!(p.entries.len(), 8193);
     }
 }

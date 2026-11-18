@@ -12,6 +12,18 @@ export type NativeIpcProbe = {
   resolutions: { request: number; discard: boolean }[];
   approved: number[];
   saves: { bytes: number[]; name: string; protectedPaths: string[] }[];
+  controlSaves: {
+    bytes: number[];
+    path: string;
+    protectedPaths: string[];
+    overwrite: false;
+  }[];
+  files: Record<string, number[]>;
+  controlReady: boolean;
+  requestControl: (
+    method: string,
+    params?: Record<string, unknown>,
+  ) => Promise<unknown>;
   saveOutcome: NativeOutcome;
   failResolutions: number;
   clearOnResolutionError: boolean;
@@ -39,13 +51,20 @@ export async function installNativeIpc(
     parameterOutcome?: Exclude<NativeOutcome, "delayed">;
     failResolutions?: number;
     holdInitialPending?: boolean;
+    controlEnabled?: boolean;
   } = {},
 ) {
   await page.addInitScript((options) => {
     type Callback = (event: {
       event: string;
       id: number;
-      payload: number;
+      payload:
+        | number
+        | {
+            requestId: number;
+            method: string;
+            params: Record<string, unknown>;
+          };
     }) => void;
     const state = window as unknown as NativeIpcWindow & {
       isTauri: boolean;
@@ -59,6 +78,10 @@ export async function installNativeIpc(
     state.parameterExports = [];
     const callbacks = new Map<number, Callback>();
     const listeners = new Map<number, { event: string; handler: number }>();
+    const requests = new Map<
+      number,
+      { resolve: (value: unknown) => void; reject: (error: Error) => void }
+    >();
     let sequence = 0;
     let finishSave: ((saved: boolean) => void) | undefined;
     let finishGeneration: (() => void) | undefined;
@@ -70,6 +93,24 @@ export async function installNativeIpc(
       resolutions: [],
       approved: [],
       saves: [],
+      controlSaves: [],
+      files: {},
+      controlReady: false,
+      requestControl(method, params = {}) {
+        if (!probe.controlReady)
+          throw new Error("Native controller is not ready");
+        const requestId = ++sequence;
+        return new Promise((resolve, reject) => {
+          requests.set(requestId, { resolve, reject });
+          for (const [id, listener] of listeners)
+            if (listener.event === "eigenvista-control-request")
+              callbacks.get(listener.handler)?.({
+                event: listener.event,
+                id,
+                payload: { requestId, method, params },
+              });
+        });
+      },
       saveOutcome: options.saveOutcome ?? "saved",
       failResolutions: options.failResolutions ?? 0,
       clearOnResolutionError: false,
@@ -111,6 +152,38 @@ export async function installNativeIpc(
       },
     };
     state.nativeIpc = probe;
+    // Production passes a raw Uint8Array. Decode only these small test archives
+    // into the historic number[] probe shape used by the lifecycle assertions.
+    function documentTransfer(input: unknown) {
+      if (!(input instanceof Uint8Array))
+        throw new Error("Native document IPC must be binary");
+      if (
+        input.byteLength < 12 ||
+        new TextDecoder().decode(input.subarray(0, 4)) !== "EVT1"
+      )
+        throw new Error("Invalid native document transfer prefix");
+      const length = Number(
+        new DataView(
+          input.buffer,
+          input.byteOffset,
+          input.byteLength,
+        ).getBigUint64(4, true),
+      );
+      const end = 12 + length;
+      if (!Number.isSafeInteger(end) || end > input.byteLength)
+        throw new Error("Invalid native document metadata length");
+      const metadata = JSON.parse(
+        new TextDecoder("utf-8", { fatal: true }).decode(
+          input.subarray(12, end),
+        ),
+      ) as Record<string, unknown>;
+      if (
+        !Array.isArray(metadata.protectedPaths) ||
+        metadata.protectedPaths.some((path) => typeof path !== "string")
+      )
+        throw new Error("Missing protected source paths in native metadata");
+      return { metadata, bytes: Array.from(input.subarray(end)) };
+    }
     state.__TAURI_EVENT_PLUGIN_INTERNALS__ = {
       unregisterListener: (_event: string, id: number) => listeners.delete(id),
     };
@@ -120,7 +193,40 @@ export async function installNativeIpc(
         callbacks.set(id, callback);
         return id;
       },
-      invoke: async (command: string, args: Record<string, unknown> = {}) => {
+      invoke: async (
+        command: string,
+        input: Record<string, unknown> | Uint8Array = {},
+      ) => {
+        const args = input as Record<string, unknown>;
+        if (command === "control_connection")
+          return {
+            enabled: options.controlEnabled === true,
+            instanceId: "native-transfer-test",
+          };
+        if (command === "control_ready") {
+          probe.controlReady = true;
+          return;
+        }
+        if (command === "control_respond") {
+          const request = requests.get(args.requestId as number);
+          if (!request) throw new Error("Unknown native control request");
+          requests.delete(args.requestId as number);
+          const response = args.response as {
+            result?: unknown;
+            error?: { message: string };
+          };
+          if (response.error)
+            request.reject(
+              Object.assign(new Error(response.error.message), response.error),
+            );
+          else request.resolve(response.result);
+          return;
+        }
+        if (command === "control_read_file") {
+          const bytes = probe.files[args.path as string];
+          if (!bytes) throw new Error("Native test source does not exist");
+          return new Uint8Array(bytes);
+        }
         if (command === "plugin:event|listen") {
           const id = ++sequence;
           listeners.set(id, {
@@ -168,19 +274,40 @@ export async function installNativeIpc(
           }
           return;
         }
-        if (command === "save_native") {
-          probe.saves.push({
-            bytes: args.bytes as number[],
-            name: args.name as string,
-            protectedPaths: args.protectedPaths as string[],
-          });
+        if (command === "save_native" || command === "control_save_document") {
+          const { metadata, bytes } = documentTransfer(input);
+          if (command === "save_native") {
+            if (typeof metadata.name !== "string")
+              throw new Error("Missing native save name");
+            probe.saves.push({
+              bytes,
+              name: metadata.name,
+              protectedPaths: metadata.protectedPaths as string[],
+            });
+          } else {
+            if (
+              typeof metadata.path !== "string" ||
+              metadata.overwrite !== false
+            )
+              throw new Error("Missing native save path/no-overwrite metadata");
+            probe.controlSaves.push({
+              bytes,
+              path: metadata.path,
+              protectedPaths: metadata.protectedPaths as string[],
+              overwrite: false,
+            });
+          }
           if (probe.saveOutcome === "failed")
             throw new Error("Deliberate native write failure");
-          if (probe.saveOutcome === "delayed")
-            return await new Promise<boolean>((resolve) => {
-              finishSave = resolve;
-            });
-          return probe.saveOutcome === "saved";
+          const saved =
+            probe.saveOutcome === "delayed"
+              ? await new Promise<boolean>((resolve) => {
+                  finishSave = resolve;
+                })
+              : probe.saveOutcome === "saved";
+          if (command === "save_native") return saved;
+          if (!saved) throw new Error("Native control save cancelled");
+          return { path: metadata.path, bytes: bytes.length };
         }
         if (command === "plugin:dialog|open") {
           state.nativePicks.push(args.options as PickOptions);

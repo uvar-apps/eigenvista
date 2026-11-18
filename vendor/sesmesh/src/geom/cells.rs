@@ -5,117 +5,187 @@
 //! Uniform cell lists in CSR form (Design §6.2) and Morton ordering.
 
 use super::vec::Vec3;
+use crate::error::{self, Error, Result};
+use rustc_hash::FxHashMap;
 
-/// Points binned into a uniform grid. Items of a cell are stored
-/// contiguously, in ascending point index (deterministic).
+type CellKey = [usize; 3];
+
+/// Only occupied cells are stored. Keys visit z/y/x order; point indices in
+/// each cell are ascending, independently of hash-table iteration order.
 #[derive(Debug, Clone)]
 pub(crate) struct CellGrid {
     origin: Vec3,
     cell: f64,
-    dims: [usize; 3],
-    starts: Vec<u32>,
+    max_coord: CellKey,
+    keys: Vec<CellKey>,
+    starts: Vec<usize>,
     items: Vec<u32>,
+    lookup: FxHashMap<CellKey, usize>,
 }
 
 impl CellGrid {
-    /// Bins `points` into cells of edge `cell`. If the bounding box would
-    /// need more than `max(65 536, 8 × points)` cells (very sparse inputs),
-    /// the cell edge is doubled until it fits, so memory stays bounded.
-    ///
-    /// # Panics
-    /// If `cell` is not positive and finite.
-    pub(crate) fn new(points: &[Vec3], cell: f64) -> Self {
-        assert!(cell > 0.0 && cell.is_finite(), "cell size must be positive");
-        let Some(&first) = points.first() else {
-            return Self {
-                origin: Vec3::default(),
-                cell,
-                dims: [1, 1, 1],
-                starts: vec![0, 0],
-                items: Vec::new(),
-            };
+    /// Bins points using exactly the supplied positive, finite cell edge.
+    /// Empty spatial regions require no cell records; allocation follows the
+    /// actual occupied cells and points, without a cell-count quota or regridding.
+    pub(crate) fn new(points: &[Vec3], cell: f64) -> Result<Self> {
+        if !cell.is_finite() || cell <= 0.0 {
+            return Err(Error::InvalidInput(
+                "cell size must be finite and positive".into(),
+            ));
+        }
+        let mut grid = Self {
+            origin: Vec3::default(),
+            cell,
+            max_coord: [0; 3],
+            keys: Vec::new(),
+            starts: Vec::new(),
+            items: Vec::new(),
+            lookup: FxHashMap::default(),
         };
+        let Some(&first) = points.first() else {
+            error::push(&mut grid.starts, 0, "empty spatial cell offsets")?;
+            return Ok(grid);
+        };
+        if points.iter().any(|p| !p.is_finite()) {
+            return Err(Error::InvalidInput(
+                "spatial coordinates must be finite".into(),
+            ));
+        }
         let (lo, hi) = points
             .iter()
             .fold((first, first), |(lo, hi), &p| (lo.min(p), hi.max(p)));
         let extent = hi - lo;
-        let max_cells = (8 * points.len()).max(1 << 16);
-        let mut cell = cell;
-        let dims = loop {
-            let d = [extent.x, extent.y, extent.z].map(|e| (e / cell).floor() as usize + 1);
-            let total = d[0].checked_mul(d[1]).and_then(|v| v.checked_mul(d[2]));
-            match total {
-                Some(t) if t <= max_cells => break d,
-                _ => cell *= 2.0,
+        if !extent.is_finite() {
+            return Err(Error::SizeOverflow("spatial coordinate extent"));
+        }
+        grid.origin = lo;
+        for (axis, value) in [extent.x, extent.y, extent.z].into_iter().enumerate() {
+            grid.max_coord[axis] = Self::axis_coord(value, cell)?;
+        }
+        let mut ordered = error::capacity(points.len(), "occupied spatial cell points")?;
+        for (i, &point) in points.iter().enumerate() {
+            let rel = point - lo;
+            let key = [
+                Self::axis_coord(rel.x, cell)?,
+                Self::axis_coord(rel.y, cell)?,
+                Self::axis_coord(rel.z, cell)?,
+            ];
+            ordered.push((
+                key,
+                u32::try_from(i).map_err(|_| Error::SizeOverflow("spatial point indices"))?,
+            ));
+        }
+        ordered.sort_unstable_by_key(|&(key, i)| ([key[2], key[1], key[0]], i));
+        grid.items = error::capacity(points.len(), "spatial cell point indices")?;
+        for (key, point) in ordered {
+            if grid.keys.last() != Some(&key) {
+                let ordinal = grid.keys.len();
+                grid.lookup
+                    .try_reserve(1)
+                    .map_err(|source| Error::Allocation {
+                        what: "occupied spatial cell lookup",
+                        source,
+                    })?;
+                error::push(&mut grid.keys, key, "occupied spatial cell keys")?;
+                error::push(
+                    &mut grid.starts,
+                    grid.items.len(),
+                    "occupied spatial cell offsets",
+                )?;
+                grid.lookup.insert(key, ordinal);
             }
-        };
-        let mut grid = Self {
-            origin: lo,
-            cell,
-            dims,
-            starts: Vec::new(),
-            items: Vec::new(),
-        };
-        let keys: Vec<usize> = points.iter().map(|&p| grid.flat(grid.coord(p))).collect();
-        let total = dims[0] * dims[1] * dims[2];
-        let mut starts = vec![0u32; total + 1];
-        for &k in &keys {
-            starts[k + 1] += 1;
+            grid.items.push(point);
         }
-        for i in 0..total {
-            starts[i + 1] += starts[i];
-        }
-        let mut cursor = starts.clone();
-        let mut items = vec![0u32; points.len()];
-        for (i, &k) in keys.iter().enumerate() {
-            items[cursor[k] as usize] = u32::try_from(i).expect("fewer than 2^32 points");
-            cursor[k] += 1;
-        }
-        grid.starts = starts;
-        grid.items = items;
-        grid
+        error::push(
+            &mut grid.starts,
+            grid.items.len(),
+            "occupied spatial cell offsets",
+        )?;
+        Ok(grid)
     }
 
-    /// Cell edge actually used.
+    fn axis_coord(relative: f64, cell: f64) -> Result<usize> {
+        let coordinate = (relative / cell).floor();
+        // Tuple keys require each axis to fit; no product of empty dimensions
+        // needs to fit usize or be allocated.
+        let exclusive_end = usize::MAX as f64 + 1.0;
+        if !coordinate.is_finite() || coordinate < 0.0 || coordinate >= exclusive_end {
+            return Err(Error::SizeOverflow("spatial cell coordinate"));
+        }
+        Ok(coordinate as usize)
+    }
+
+    /// Fallible callback form, allowing allocation failures to escape neighbor queries.
+    pub(crate) fn try_for_each_near(
+        &self,
+        center: Vec3,
+        radius: f64,
+        mut f: impl FnMut(u32) -> Result<()>,
+    ) -> Result<()> {
+        let mut result = Ok(());
+        self.for_each_near(center, radius, |i| {
+            if result.is_ok() {
+                result = f(i);
+            }
+        });
+        result
+    }
+
+    /// The supplied cell edge, unchanged.
     pub(crate) fn cell(&self) -> f64 {
         self.cell
     }
 
-    fn coord(&self, p: Vec3) -> [usize; 3] {
-        let rel = [
-            p.x - self.origin.x,
-            p.y - self.origin.y,
-            p.z - self.origin.z,
-        ];
-        [0, 1, 2].map(|a| {
-            let c = (rel[a] / self.cell).floor();
-            if c <= 0.0 {
+    fn coord(&self, point: Vec3) -> CellKey {
+        let rel = point - self.origin;
+        let values = [rel.x, rel.y, rel.z];
+        std::array::from_fn(|axis| {
+            let coordinate = (values[axis] / self.cell).floor();
+            if coordinate <= 0.0 {
                 0
             } else {
-                (c as usize).min(self.dims[a] - 1)
+                (coordinate as usize).min(self.max_coord[axis])
             }
         })
     }
 
-    fn flat(&self, c: [usize; 3]) -> usize {
-        (c[2] * self.dims[1] + c[1]) * self.dims[0] + c[0]
+    fn visit(&self, ordinal: usize, f: &mut impl FnMut(u32)) {
+        for &point in &self.items[self.starts[ordinal]..self.starts[ordinal + 1]] {
+            f(point);
+        }
     }
 
-    /// Calls `f` for every point in the cells overlapping the axis-aligned box
-    /// around the ball (a superset of the points within `radius`).
+    /// Visits cells overlapping the query box (a conservative neighborhood),
+    /// always in z/y/x order with ascending input indices inside each cell.
     pub(crate) fn for_each_near(&self, center: Vec3, radius: f64, mut f: impl FnMut(u32)) {
+        if self.keys.is_empty() {
+            return;
+        }
         let r = Vec3::new(radius, radius, radius);
         let lo = self.coord(center - r);
         let hi = self.coord(center + r);
-        for z in lo[2]..=hi[2] {
-            for y in lo[1]..=hi[1] {
-                let row = self.flat([0, y, z]);
-                let (a, b) = (
-                    self.starts[row + lo[0]] as usize,
-                    self.starts[row + hi[0] + 1] as usize,
-                );
-                for &i in &self.items[a..b] {
-                    f(i);
+        // Choose by actual traversal work, not a storage quota. A huge empty
+        // box (even one whose cell-count product overflows) visits occupied keys.
+        let box_cells = (0..3).try_fold(1usize, |count, axis| {
+            hi[axis]
+                .checked_sub(lo[axis])?
+                .checked_add(1)?
+                .checked_mul(count)
+        });
+        if box_cells.is_some_and(|count| count <= self.keys.len()) {
+            for z in lo[2]..=hi[2] {
+                for y in lo[1]..=hi[1] {
+                    for x in lo[0]..=hi[0] {
+                        if let Some(&ordinal) = self.lookup.get(&[x, y, z]) {
+                            self.visit(ordinal, &mut f);
+                        }
+                    }
+                }
+            }
+        } else {
+            for (ordinal, key) in self.keys.iter().enumerate() {
+                if (0..3).all(|axis| lo[axis] <= key[axis] && key[axis] <= hi[axis]) {
+                    self.visit(ordinal, &mut f);
                 }
             }
         }
@@ -153,7 +223,7 @@ mod tests {
         ) {
             let pts: Vec<Vec3> = pts.into_iter().map(|(x, y, z)| Vec3::new(x, y, z)).collect();
             let q = Vec3::new(q.0, q.1, q.2);
-            let grid = CellGrid::new(&pts, cell);
+            let grid = CellGrid::new(&pts, cell).unwrap();
             let mut found = Vec::new();
             grid.for_each_near(q, radius, |i| found.push(i as usize));
             let unique = found.len();
@@ -169,16 +239,60 @@ mod tests {
     }
 
     #[test]
-    fn sparse_inputs_stay_bounded() {
+    fn far_sparse_inputs_preserve_the_supplied_edge() {
         let pts = [Vec3::new(0.0, 0.0, 0.0), Vec3::new(1e7, -1e7, 1e7)];
-        let grid = CellGrid::new(&pts, 1.0);
-        assert!(grid.starts.len() <= (1 << 16) + 1);
-        assert!(grid.cell() > 1.0);
+        let grid = CellGrid::new(&pts, 1.0).unwrap();
+        assert_eq!(grid.cell(), 1.0);
+        assert_eq!(grid.keys.len(), 2);
+        assert_eq!(grid.starts.len(), 3);
+        assert_eq!(grid.items.len(), pts.len());
         let mut seen = Vec::new();
-        grid.for_each_near(Vec3::new(1e7, -1e7, 1e7), 0.5, |i| seen.push(i));
-        assert!(seen.contains(&1));
-        let empty = CellGrid::new(&[], 2.0);
+        grid.for_each_near(pts[1], 0.5, |i| seen.push(i));
+        assert_eq!(seen, [1]);
+        seen.clear();
+        // The virtual dense cell-count product exceeds usize; occupied-cell
+        // queries still visit both points in deterministic spatial order.
+        grid.for_each_near(Vec3::default(), 2e7, |i| seen.push(i));
+        assert_eq!(seen, [0, 1]);
+        let empty = CellGrid::new(&[], 2.0).unwrap();
         empty.for_each_near(Vec3::default(), 10.0, |_| panic!("no points"));
+    }
+
+    #[test]
+    fn both_query_paths_match_spatial_order_oracle() {
+        let mut points = vec![
+            Vec3::new(2.0, 0.0, 0.0),
+            Vec3::new(0.0, 1.0, 0.0),
+            Vec3::new(1.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, 1.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.2, 0.2, 0.2),
+        ];
+        // Independent z/y/x then input-order oracle for the first six points.
+        let expected = [4, 5, 2, 0, 1, 3];
+        let collect = |grid: &CellGrid| {
+            let mut found = Vec::new();
+            grid.for_each_near(Vec3::new(1.0, 0.5, 0.5), 1.0, |i| found.push(i));
+            found
+        };
+        let sparse = CellGrid::new(&points, 1.0).unwrap();
+        assert_eq!(collect(&sparse), expected); // occupied-key traversal
+        points.extend((100..130).map(|x| Vec3::new(f64::from(x), 0.0, 0.0)));
+        let populated = CellGrid::new(&points, 1.0).unwrap();
+        assert_eq!(collect(&populated), expected); // hash lookup of query-box cells
+        assert_eq!(populated.cell(), 1.0);
+    }
+
+    #[test]
+    fn only_per_axis_representation_is_required() {
+        let grid = CellGrid::new(&[Vec3::default(), Vec3::new(1e9, 1e9, 1e9)], 1.0).unwrap();
+        assert_eq!(grid.keys.len(), 2);
+        assert_eq!(grid.cell(), 1.0);
+        let error = CellGrid::new(&[Vec3::default(), Vec3::new(1e100, 0.0, 0.0)], 1.0).unwrap_err();
+        assert!(matches!(
+            error,
+            Error::SizeOverflow("spatial cell coordinate")
+        ));
     }
 
     #[test]

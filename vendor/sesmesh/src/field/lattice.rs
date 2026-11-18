@@ -7,7 +7,7 @@
 
 use super::SurfaceKind;
 use super::point::SesField;
-use crate::error::{Error, Result};
+use crate::error::{self, Error, Result};
 use crate::geom::{Status, Vec3};
 use crate::par;
 
@@ -103,7 +103,7 @@ pub(crate) fn touched_bricks(field: &SesField, lattice: &Lattice) -> Result<Vec<
     // (`par::chunk_len`); the global sort and dedup make the result
     // independent of the chunking.
     let chunk = par::chunk_len(n);
-    let per_chunk: Vec<Result<Vec<u64>>> = par::map(n.div_ceil(chunk), |c| {
+    let per_chunk = par::try_map(n.div_ceil(chunk), |c| {
         let mut keys = Vec::new();
         // Neighbouring spheres share most bricks (a fine grid gives each
         // sphere hundreds): deduplicate whenever the buffer doubles, so it
@@ -118,7 +118,11 @@ pub(crate) fn touched_bricks(field: &SesField, lattice: &Lattice) -> Result<Vec<
             let c = a.centers[i];
             let lo = [c.x - r, c.y - r, c.z - r].map(|v| lattice.brick_of(v));
             let hi = [c.x + r, c.y + r, c.z + r].map(|v| lattice.brick_of(v));
-            if lo.iter().chain(&hi).any(|k| k.abs() >= KEY_BIAS - 1) {
+            if lo
+                .iter()
+                .chain(&hi)
+                .any(|k| k.unsigned_abs() >= (KEY_BIAS - 1) as u64)
+            {
                 return Err(Error::InvalidInput(format!(
                     "coordinates too far from the origin for grid spacing {} Å",
                     lattice.h
@@ -127,29 +131,31 @@ pub(crate) fn touched_bricks(field: &SesField, lattice: &Lattice) -> Result<Vec<
             for z in lo[2]..=hi[2] {
                 for y in lo[1]..=hi[1] {
                     for x in lo[0]..=hi[0] {
-                        keys.push(pack([x as i32, y as i32, z as i32]));
+                        error::push(
+                            &mut keys,
+                            pack([x as i32, y as i32, z as i32]),
+                            "touched brick keys",
+                        )?;
                     }
                 }
             }
             if keys.len() >= compact_at {
                 keys.sort_unstable();
                 keys.dedup();
-                compact_at = compact_at.max(2 * keys.len());
+                compact_at = compact_at.max(keys.len().saturating_mul(2));
             }
         }
         keys.sort_unstable();
         keys.dedup();
-        keys.shrink_to_fit();
         Ok(keys)
-    });
-    let mut keys = Vec::with_capacity(
-        per_chunk
-            .iter()
-            .map(|k| k.as_ref().map_or(0, Vec::len))
-            .sum(),
-    );
+    })?;
+    let count = per_chunk.iter().try_fold(0usize, |sum, part| {
+        sum.checked_add(part.len())
+            .ok_or(Error::SizeOverflow("touched bricks"))
+    })?;
+    let mut keys = error::capacity(count, "touched brick keys")?;
     for part in per_chunk {
-        keys.extend(part?);
+        keys.extend(part);
     }
     par::sort_unstable(&mut keys);
     keys.dedup();
@@ -163,17 +169,15 @@ pub(crate) fn surface_bricks(
     field: &SesField,
     lattice: &Lattice,
     touched: &[u64],
-) -> Vec<[i32; 3]> {
+) -> Result<Vec<[i32; 3]>> {
     let rho = lattice.brick_radius();
-    let keep: Vec<bool> = par::map(touched.len(), |t| {
-        uniform_sign(field, lattice.brick_center(unpack(touched[t])), rho).is_none()
-    });
-    touched
-        .iter()
-        .zip(keep)
-        .filter(|&(_, keep)| keep)
-        .map(|(&k, _)| unpack(k))
-        .collect()
+    let mut surface = error::capacity(touched.len(), "surface bricks")?;
+    for &key in touched {
+        if uniform_sign(field, lattice.brick_center(unpack(key)), rho).is_none() {
+            surface.push(unpack(key));
+        }
+    }
+    Ok(surface)
 }
 
 /// Sign of the field on the whole ball of radius `rho` around `center`, if

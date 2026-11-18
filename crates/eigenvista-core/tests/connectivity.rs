@@ -91,14 +91,12 @@ fn bond_detection_rejects_invalid_data_and_covers_all_elements() {
 }
 
 #[test]
-fn dense_input_hits_a_budget_instead_of_unbounded_pair_work() {
+fn dense_input_completes_beyond_the_former_neighbor_work_ceiling() {
     let atoms = vec![atom(6, [0.; 3]); 3200];
-    assert!(
-        bonds::perceive(&atoms, &[])
-            .err()
-            .unwrap()
-            .contains("neighbor budget")
-    );
+    let result = bonds::perceive(&atoms, &[]).unwrap();
+    assert!(result.neighbor_visits > 10_000_000);
+    assert!(result.bonds.is_empty());
+    assert_eq!(result.candidates, 0);
 }
 
 #[test]

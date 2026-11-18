@@ -89,7 +89,7 @@ test("publication validation and Save agree on real meshes, retained scientific 
       ["malformed density", malformed, JSON.stringify(malformed)],
       ["occupation", occupation, JSON.stringify(occupation)],
       ["nonfinite", nonfinite, nonfiniteJSON],
-      ["manifest", oversized, JSON.stringify(oversized)],
+      ["large manifest", oversized, JSON.stringify(oversized)],
     ] as const) {
       const validation = rejected(() => core.validate_document(json));
       const encoding = rejected(() => core.encode(json));
@@ -107,7 +107,18 @@ test("publication validation and Save agree on real meshes, retained scientific 
       const saved = await client.request<Uint8Array>("encode", { doc });
       const recovered =
         JSON.stringify(JSON.parse(core.decode(saved))) === validJSON;
-      decisions.push({ kind, validation, encoding, worker, recovered });
+      const completeLargePayload =
+        kind !== "large manifest" ||
+        JSON.parse(core.decode(core.encode(json))).provenance.at(-1) ===
+          oversized.provenance.at(-1);
+      decisions.push({
+        kind,
+        validation,
+        encoding,
+        worker,
+        recovered,
+        completeLargePayload,
+      });
     }
     return {
       decisions,
@@ -138,21 +149,14 @@ test("publication validation and Save agree on real meshes, retained scientific 
   for (const decision of result.decisions) {
     expect(decision.validation, decision.kind).toBe(decision.encoding);
     expect(decision.recovered, decision.kind).toBe(true);
-    if (decision.kind === "valid") {
+    if (["valid", "large manifest"].includes(decision.kind)) {
       expect(decision.validation).toBeNull();
       expect(decision.worker).toBeNull();
     } else {
       expect(decision.validation, decision.kind).not.toBeNull();
       expect(decision.worker, decision.kind).not.toBeNull();
     }
-    if (decision.kind === "manifest") {
-      expect(decision.validation).toContain(
-        "Native document exceeds preview budget",
-      );
-      expect(decision.worker).toContain(
-        "Native document exceeds preview budget",
-      );
-    }
+    expect(decision.completeLargePayload).toBe(true);
   }
 });
 

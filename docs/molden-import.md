@@ -1,5 +1,8 @@
 # Molden import and conversion
 
+**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+
+
 The shared Rust importer supports a bounded **real Gaussian Molden wavefunction
 profile**, not every historical producer variant. The application and command-line
 converter call the same library. Native `.eigenvista` remains the self-contained
@@ -48,8 +51,8 @@ Windows replacement behavior still requires platform qualification.
 Exit codes are `0` for complete success, `1` for any per-file import/write
 failure, and `2` for invalid options or destination/input-path preflight errors.
 All paths must resolve at preflight; after that, batch import failures do not
-discard successful outputs. At most 256 inputs are processed sequentially,
-with bounded regular-file reads. No GUI, Python, ORCA installation, or subprocess
+discard successful outputs. Inputs are processed sequentially without a batch-count allowance,
+with fallible regular-file reads. No GUI, Python, ORCA installation, or subprocess
 converter is needed. CLI output contains scientific data but no newly generated
 surfaces; open it in the app to generate and save meshes. Existing native meshes
 survive native-to-native conversion. The same commands accept supported XYZ,
@@ -60,8 +63,6 @@ PDB, and [Gaussian cube](cube-import.md) files, not only Molden.
 [`eigenvista-import`](../crates/eigenvista-import/src/lib.rs) exposes:
 
 ```rust
-pub const MAX_IMPORT_BYTES: usize = 128 * 1024 * 1024;
-
 pub fn import_bytes(bytes: &[u8], name: &str)
     -> Result<ImportResult, String>;
 
@@ -86,7 +87,7 @@ Both the new native profile and supported previous Molekel profile report
 `format: "eigenvista"`; callers must not infer compatibility or clean state
 from a filename suffix alone.
 
-ZIP magic routes through the existing bounded native decoder. A text
+ZIP magic routes through the existing validated native decoder. A text
 `[Molden Format]` header, case-insensitive and allowing a UTF-8 BOM/leading blank
 lines, takes precedence over a misleading extension. This includes names such
 as `molden.input` and `.molden.input`. `.molden`, `.mold`, and `.molden_input`
@@ -237,7 +238,7 @@ is embedded; `.eigenvista` instead contains the parsed scientific arrays needed 
 the viewer. Subsequent generated meshes and their metadata persist through
 normal Save.
 
-The first title section is used when nonempty, bounded to 1024 characters. Other sections,
+The first title section is retained when nonempty. Other sections,
 including frequencies, normal modes, optimization trajectories, charges, and
 core/ECP metadata, are not preserved as structured data. Each ignored section
 is named in the report/provenance, with its starting line. An ignored `[CORE]`
@@ -252,30 +253,19 @@ qualification.
 
 ## Limits and verification
 
-The shared byte limit is 128 MiB, with stricter existing XYZ/PDB/Cube limits
-still enforced by their parsers. Molden additionally bounds 500,000 lines,
-16,384 bytes per line, 128 sections, 100,000 atoms, 1,024 expanded AOs, 64
-primitives per AO, 512 MOs in total across all spin blocks and `[MO]` sections,
-and 256 bytes per MO header value. Core resource,
-relationship, finite-number, and format checks apply afterward. Limits are not
-interactive-performance promises. Input is in-memory, not streaming.
-
-The AO and MO caps are independent. A complete spatial set containing one MO
-per AO fits through 512 AOs; complete alpha and beta sets, each containing one
-MO per AO, fit through 256 AOs. For example, a 300-AO unrestricted export with
-300 alpha and 300 beta MOs exceeds the 512-MO cap. A partial export can contain
-up to 1,024 AOs and at most 512 listed MOs, subject to the other budgets. The
-importer retains every listed MO or rejects the input; it does not silently
-choose an orbital window. Missing orbitals cannot be recovered, and any
-occupation-derived density describes only the listed orbitals.
+EigenVista 0.10.1 has no fixed file/line/atom/basis/orbital memory ceilings.
+Every listed orbital is retained or the import fails with its actual validation
+or allocation error. Input is in-memory; finite values, complete relationships,
+normalization and supported conventions remain required. Missing orbitals cannot
+be recovered; any occupation-derived density describes only listed orbitals.
 
 The [parser unit tests](../crates/eigenvista-import/src/tests.rs) exercise content
 detection, units, references, SP, sparse coefficients, mixed angular flags,
 fractional/spin densities, missing data, reported losses, resource bounds,
 malformed input, native preservation, and profile rejection.
 The [capacity tests](../crates/eigenvista-import/tests/molden_capacity.rs)
-exercise exact AO/MO limits and one past each, importer/core agreement, complete
-spatial/two-spin sets, and the rejected 300-AO/600-MO unrestricted case.
+exercise complete sets beyond the old AO/MO ceilings, importer/core agreement,
+spatial/two-spin sets and malformed/incomplete inputs.
 
 The [independent tests](../crates/eigenvista-import/tests/independent_molden.rs)
 and [fixture guide](../fixtures/molden/README.md) cover RHF water, UHF hydroxyl,

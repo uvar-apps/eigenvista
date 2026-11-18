@@ -1,5 +1,6 @@
 use super::*;
 use eigenvista_core::{compute, fixtures};
+use std::io::Read;
 
 fn retained_document() -> Document {
     let mut doc = fixtures::hydrogen_pair();
@@ -23,86 +24,41 @@ fn retained_document() -> Document {
     doc
 }
 
-fn assert_budget_decision(doc: &Document, budget: PreviewBudget, accepted: bool) {
-    let validation = preflight(doc, budget).map(|_| ());
-    let encoding = preflight(doc, budget).and_then(encode_prepared);
-    assert_eq!(
-        validation,
-        encoding.as_ref().map(|_| ()).map_err(Clone::clone)
-    );
-    assert_eq!(validation.is_ok(), accepted);
-    if let Ok(bytes) = encoding {
-        assert_eq!(decode(&bytes).unwrap(), *doc);
-    }
-}
-
 #[test]
-fn exact_native_budget_boundaries_match_save_with_retained_science_and_meshes() {
-    // Exercise the production preflight at reduced limits to avoid multi-GiB
-    // serde expansions in ordinary tests. Production thresholds stay unchanged.
-    assert_eq!(PREVIEW_BUDGET.array_entries, 8191);
-    assert_eq!(PREVIEW_BUDGET.manifest_bytes, 8 * 1024 * 1024);
-    assert_eq!(PREVIEW_BUDGET.total_bytes, 128 * 1024 * 1024);
+fn publication_and_save_match_with_retained_science_and_meshes() {
     let mut doc = retained_document();
     let later_surfaces = std::mem::take(&mut doc.surfaces);
     for surfaces in [vec![], later_surfaces[..1].to_vec(), later_surfaces] {
         doc.surfaces = surfaces;
-        let prepared = preflight(&doc, PREVIEW_BUDGET).unwrap();
-        let array_entries = prepared.entries.len();
-        let manifest_bytes = prepared.manifest.len();
-        let total_bytes =
-            manifest_bytes + prepared.entries.iter().map(|e| e.1.len()).sum::<usize>();
-        let archive_bytes = encode(&doc).unwrap();
-        let mut archive = ZipArchive::new(Cursor::new(archive_bytes)).unwrap();
-        assert_eq!(archive.len() - 1, array_entries);
-        assert_eq!(
-            archive.by_name("manifest.json").unwrap().size(),
-            manifest_bytes as u64
-        );
-        assert_eq!(
-            (0..archive.len())
-                .map(|i| archive.by_index(i).unwrap().size())
-                .sum::<u64>(),
-            total_bytes as u64
-        );
         validate_document(&doc).unwrap();
-        let exact = PreviewBudget {
-            array_entries,
-            manifest_bytes,
-            total_bytes,
-        };
-        assert_budget_decision(&doc, exact, true);
-        for (array_entries, manifest_bytes, total_bytes) in [
-            (array_entries - 1, manifest_bytes, total_bytes),
-            (array_entries, manifest_bytes - 1, total_bytes),
-            (array_entries, manifest_bytes, total_bytes - 1),
-        ] {
-            assert_budget_decision(
-                &doc,
-                PreviewBudget {
-                    array_entries,
-                    manifest_bytes,
-                    total_bytes,
-                },
-                false,
-            );
-        }
-        for (array_entries, manifest_bytes, total_bytes) in [
-            (array_entries + 1, manifest_bytes, total_bytes),
-            (array_entries, manifest_bytes + 1, total_bytes),
-            (array_entries, manifest_bytes, total_bytes + 1),
-        ] {
-            assert_budget_decision(
-                &doc,
-                PreviewBudget {
-                    array_entries,
-                    manifest_bytes,
-                    total_bytes,
-                },
-                true,
-            );
-        }
+        assert_eq!(decode(&encode(&doc).unwrap()).unwrap(), doc);
     }
+}
+
+#[test]
+fn native_manifest_above_the_former_eight_mib_limit_roundtrips() {
+    let mut doc = fixtures::hydrogen_pair();
+    doc.title = "x".repeat(8 * 1024 * 1024 + 1);
+    let prepared = preflight(&doc).unwrap();
+    assert!(prepared.manifest.len() > 8 * 1024 * 1024);
+    assert_eq!(decode(&encode_prepared(prepared).unwrap()).unwrap(), doc);
+}
+
+#[test]
+fn more_than_the_former_zip_entry_limit_roundtrips() {
+    let mut doc = fixtures::hydrogen_pair();
+    let mut grid = compute::sample(&doc, "bonding", 2).unwrap();
+    for index in 0..8193 {
+        grid.id = format!("g{index}");
+        // Alternating lengths prevent column grouping while keeping this test
+        // small. Every array is referenced by a valid scientific object.
+        grid.dims = if index % 2 == 0 { [2, 2, 2] } else { [2, 2, 3] };
+        grid.values.resize(grid.dims.iter().product(), 0.);
+        doc.grids.push(grid.clone());
+    }
+    let bytes = encode(&doc).unwrap();
+    assert!(ZipArchive::new(Cursor::new(&bytes)).unwrap().len() > 8192);
+    assert_eq!(decode(&bytes).unwrap(), doc);
 }
 
 #[test]

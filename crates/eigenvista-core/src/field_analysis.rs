@@ -9,15 +9,6 @@ use sha2::{Digest, Sha256};
 use std::cmp::Ordering;
 use std::collections::HashSet;
 
-pub const MAX_PROBES: usize = 128;
-pub const MAX_PLANES: usize = 8;
-pub const MAX_PLANE_DIM: usize = 512;
-pub const MAX_PROFILES: usize = 16;
-pub const MAX_PROFILE_SAMPLES: usize = 4096;
-pub const MAX_CACHE_BYTES: usize = 16 * 1024 * 1024;
-pub const MAX_CONTOUR_LEVELS: usize = 32;
-pub const MAX_CONTOUR_SEGMENTS: usize = 1_000_000;
-pub const MAX_CSV_BYTES: usize = 32 * 1024 * 1024;
 pub const SAMPLER_VERSION: &str = "eigenvista-quantitative-f64-v1";
 
 /// A scalar interpretation, separate from the legacy numeric field identity.
@@ -38,8 +29,8 @@ impl FieldDescriptor {
     /// Validate references and dimensionally compatible declarations/conversions.
     pub fn validate(&self, doc: &Document) -> Result<()> {
         doc.check_field(&self.field)?;
-        bounded_text(&self.field, 512, "field ID")?;
-        bounded_text(&self.note, 2048, "field provenance note")?;
+        valid_text(&self.field, "field ID")?;
+        valid_text(&self.note, "field provenance note")?;
         if !["unknown", "imported", "derived", "user_declared"].contains(&self.origin.as_str()) {
             return Err("Unknown field declaration origin".into());
         }
@@ -166,15 +157,15 @@ impl AnalysisDefinition {
         match self {
             Self::Probe { .. } => Ok(1),
             Self::Plane { dims, .. } => {
-                if dims.iter().any(|v| !(2..=MAX_PLANE_DIM).contains(v)) {
-                    return Err("Plane dimensions must be between 2 and 512".into());
+                if dims.iter().any(|v| *v < 2) {
+                    return Err("Plane dimensions must be at least two".into());
                 }
                 dims[0]
                     .checked_mul(dims[1])
                     .ok_or("Plane allocation overflow".into())
             }
-            Self::Profile { count, .. } if (2..=MAX_PROFILE_SAMPLES).contains(count) => Ok(*count),
-            _ => Err("Profile count must be between 2 and 4096".into()),
+            Self::Profile { count, .. } if *count >= 2 => Ok(*count),
+            _ => Err("Profile count must be at least two".into()),
         }
     }
 
@@ -304,7 +295,6 @@ impl AnalysisAppearance {
             || self
                 .range
                 .is_some_and(|v| !v.iter().all(|x| x.is_finite()) || v[0] >= v[1])
-            || self.contour_levels.len() > MAX_CONTOUR_LEVELS
             || self.contour_levels.iter().any(|v| !v.is_finite())
         {
             return Err("Invalid field analysis range, colormap or contour levels".into());
@@ -339,8 +329,8 @@ impl FieldAnalysisItem {
     }
 
     fn validate_with_contour_count(&self, doc: &Document) -> Result<usize> {
-        bounded_text(&self.id, 128, "analysis ID")?;
-        bounded_text(&self.label, 256, "analysis label")?;
+        valid_text(&self.id, "analysis ID")?;
+        valid_text(&self.label, "analysis label")?;
         if self.id.is_empty()
             || self.field != self.descriptor.field
             || self.algorithm != SAMPLER_VERSION
@@ -414,10 +404,6 @@ pub struct FieldAnalysisState {
 
 impl FieldAnalysisState {
     pub fn validate(&self, doc: &Document) -> Result<()> {
-        if self.descriptors.len() > 560 || self.items.len() > MAX_PROBES + MAX_PLANES + MAX_PROFILES
-        {
-            return Err("Field analysis count budget exceeded".into());
-        }
         let mut fields = HashSet::new();
         for descriptor in &self.descriptors {
             descriptor.validate(doc)?;
@@ -426,7 +412,6 @@ impl FieldAnalysisState {
             }
         }
         let mut ids = HashSet::new();
-        let mut counts = [0usize; 3];
         let mut bytes = 0usize;
         let mut segments = 0usize;
         for item in &self.items {
@@ -436,28 +421,9 @@ impl FieldAnalysisState {
             segments = segments
                 .checked_add(item.validate_with_contour_count(doc)?)
                 .ok_or("Aggregate contour segment count overflow")?;
-            if segments > MAX_CONTOUR_SEGMENTS {
-                return Err(
-                    "Configured planes exceed the one-million aggregate contour segment budget"
-                        .into(),
-                );
-            }
-            let kind = match item.definition {
-                AnalysisDefinition::Probe { .. } => 0,
-                AnalysisDefinition::Plane { .. } => 1,
-                AnalysisDefinition::Profile { .. } => 2,
-            };
-            counts[kind] += 1;
             bytes = bytes
                 .checked_add(item.cache_bytes()?)
                 .ok_or("Field cache size overflow")?;
-        }
-        if counts[0] > MAX_PROBES
-            || counts[1] > MAX_PLANES
-            || counts[2] > MAX_PROFILES
-            || bytes > MAX_CACHE_BYTES
-        {
-            return Err("Field analysis count or 16 MiB aggregate cache budget exceeded".into());
         }
         Ok(())
     }
@@ -603,8 +569,8 @@ pub fn sample_with_progress(
     mut progress: impl FnMut(usize, usize) -> Result<()>,
 ) -> Result<FieldAnalysisItem> {
     doc.validate()?;
-    bounded_text(&request.id, 128, "analysis ID")?;
-    bounded_text(&request.label, 256, "analysis label")?;
+    valid_text(&request.id, "analysis ID")?;
+    valid_text(&request.label, "analysis label")?;
     if request.id.is_empty() {
         return Err("Analysis ID must not be empty".into());
     }
@@ -619,12 +585,6 @@ pub fn sample_with_progress(
         return Err("Descriptor references another field".into());
     }
     let count = request.definition.count()?;
-    let bytes = count
-        .checked_mul(12)
-        .ok_or("Field analysis allocation overflow")?;
-    if bytes > MAX_CACHE_BYTES {
-        return Err("Field analysis cache exceeds 16 MiB".into());
-    }
     let mut values = Vec::new();
     let mut valid = Vec::new();
     values
@@ -710,9 +670,6 @@ fn contour_count(item: &FieldAnalysisItem, dims: [usize; 2]) -> Result<usize> {
     let mut count = 0usize;
     for_each_contour(item, dims, |_, _, _| {
         count = count.checked_add(1).ok_or("Contour allocation overflow")?;
-        if count > MAX_CONTOUR_SEGMENTS {
-            return Err("Contour exceeds the one-million segment budget".into());
-        }
         Ok(())
     })?;
     Ok(count)
@@ -917,15 +874,6 @@ pub fn export_csv(item: &FieldAnalysisItem) -> Result<String> {
     }
     let factor = item.descriptor.display_factor()?;
     let mut output = String::new();
-    output
-        .try_reserve(
-            item.values
-                .len()
-                .checked_mul(240)
-                .unwrap_or(MAX_CSV_BYTES)
-                .min(MAX_CSV_BYTES),
-        )
-        .map_err(|_| "Cannot allocate analysis CSV")?;
     output.push_str("sample,x,y,z,coordinate_unit,distance,distance_unit,value,value_unit,status,method,field,source_hash,sample_hash,quantity,declaration_origin,note\n");
     for index in 0..item.values.len() {
         let point = sample_position(&item.definition, index)?.map(|v| v * BOHR_TO_ANGSTROM);
@@ -964,14 +912,7 @@ pub fn export_csv(item: &FieldAnalysisItem) -> Result<String> {
             csv_text(&item.descriptor.origin),
             csv_text(&item.descriptor.note)
         );
-        if output
-            .len()
-            .checked_add(row.len())
-            .is_none_or(|v| v > MAX_CSV_BYTES)
-        {
-            return Err("CSV exceeds the 32 MiB export budget".into());
-        }
-        output.push_str(&row);
+        crate::allocation::append(&mut output, &row, "analysis CSV")?;
     }
     Ok(output)
 }
@@ -1098,9 +1039,9 @@ fn fingerprint(value: &serde_json::Value) -> Result<String> {
     ))
 }
 
-fn bounded_text(value: &str, maximum: usize, label: &str) -> Result<()> {
-    if value.len() > maximum || value.chars().any(char::is_control) {
-        return Err(format!("Invalid or oversized {label}"));
+fn valid_text(value: &str, label: &str) -> Result<()> {
+    if value.chars().any(char::is_control) {
+        return Err(format!("Invalid {label}"));
     }
     Ok(())
 }

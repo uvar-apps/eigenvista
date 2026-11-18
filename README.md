@@ -1,14 +1,18 @@
 # EigenVista
 
+Version **0.10.1** adds smoother view-relative lighting and
+[allocation-driven workloads](docs/allocation-policy.md), including large
+molecular surfaces and native saves without application-imposed memory ceilings.
+
 **Explore molecular orbitals, electron density and large molecular structures.**
 
 EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**Version 0.10.0 — experimental development preview for Apple Silicon Macs.**
+**Version 0.10.1 — experimental development preview for Apple Silicon Macs.**
 
-**[Download 0.10.0 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)** ·
+**[Download 0.10.1 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.1)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
@@ -55,7 +59,7 @@ imports.
 
 ## A wider workspace and scientific inspection
 
-EigenVista 0.10.0 uses a single resizable tools pane, with four tabs:
+EigenVista 0.10.1 uses a single resizable tools pane, with four tabs:
 **Molecule**, **Fields**, **Surfaces** and **Appearance**. Put it on either side,
 widen it to let widgets flow into two columns, or hide it to reclaim the view.
 Zen mode removes the surrounding interface; fullscreen is a separate action.
@@ -75,8 +79,8 @@ choose an orbital and **Plane / contours**, then **Create plane**. The color bar
 reports signed orbital amplitude; choose an electron-density field for density.
 Read the [user guide](docs/user-guide.md) for probes, contours and line profiles.
 
-These additions are included in the **0.10.0 Mac download** and its bundled AI
-connector. Read the [0.10.0 release notes](docs/releases/0.10.0.md).
+These additions are included in the **0.10.1 Mac download** and its bundled AI
+connector. Read the [0.10.1 release notes](docs/releases/0.10.1.md).
 The [workspace design](docs/design/2026-11-17-simple-workspace-pane.md)
 records the approved layout; [handoff](docs/handoff.md) records current
 validation and delivery. The local `v0.9.0` tag remains the earlier scientific
@@ -84,7 +88,7 @@ inspection checkpoint.
 
 ## Start here
 
-The latest release is **0.10.0**, an experimental **Apple Silicon Mac** preview.
+The latest release is **0.10.1**, an experimental **Apple Silicon Mac** preview.
 The download includes the application, examples, shader presets, palettes,
 converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
 [installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
@@ -114,18 +118,15 @@ documentation and gallery.
 ## Cite EigenVista
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
-(Version 0.10.0) [Computer software]. Zenodo.
-[https://doi.org/10.5281/zenodo.24302658](https://doi.org/10.5281/zenodo.24302658)
+(Version 0.10.1) [Computer software].
+[Project DOI: 10.5281/zenodo.24246123](https://doi.org/10.5281/zenodo.24246123).
 
-Machine-readable metadata is in [CITATION.cff](CITATION.cff). The
-[project concept DOI](https://doi.org/10.5281/zenodo.24246123) identifies the
-project across versions. The historical 0.8.0 citation remains:
-
-Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
-(Version 0.8.0) [Computer software]. Zenodo.
-[https://doi.org/10.5281/zenodo.24273137](https://doi.org/10.5281/zenodo.24273137)
-
-Use the citation for the released version used in your work.
+Machine-readable metadata is in [CITATION.cff](CITATION.cff). The project DOI
+identifies all versions; a version-specific DOI for 0.10.1 has not been supplied.
+The historical 0.10.0 DOI remains
+[10.5281/zenodo.24302658](https://doi.org/10.5281/zenodo.24302658), and the 0.8.0 DOI
+remains [10.5281/zenodo.24273137](https://doi.org/10.5281/zenodo.24273137).
+Use the citation for the version used in your work.
 
 ## Author and copyright
 
@@ -150,10 +151,10 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Current release:** version **0.10.0**, a development preview, combines the wider
+**Current release:** version **0.10.1**, a development preview, combines the wider
 workspace with the scientific-inspection workflows above. See
-[0.10.0 notes](docs/releases/0.10.0.md) and
-[current status](docs/status.md#source-version-0100) for qualification and delivery.
+[0.10.1 notes](docs/releases/0.10.1.md) and
+[current status](docs/status.md) for qualification and delivery.
 
 Version **0.8.0** introduced AI-enabled viewing through an external local
 agent, with a prebuilt connector inside the Apple Silicon application. Ask Codex,
@@ -274,9 +275,9 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.10.0 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.0)
+The [0.10.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.1)
 provides the rebuilt ZIP, checksum and build metadata. Check
-[status](docs/status.md#source-version-0100) for verified source, SHA256 and local
+[status](docs/status.md) for verified source, SHA256 and local
 verification evidence. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)
 retains its original verified package; older releases are not updated in place.
 The [0.6.0 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.6.0)
@@ -308,7 +309,7 @@ and no Apple notarization. They include source and notices under the
   Cancelling one client's work preserves unrelated queued requests; scientific
   operations still run one at a time.
 - Searchable orbital table with energy, occupation, spin, and saved-surface counts;
-  select up to 32 orbitals per batch to generate persistent signed meshes together.
+  select the orbitals you want in a batch to generate persistent signed meshes together.
   Cancel or failure preserves prior geometry, and successful batches retain
   surfaces belonging to unselected fields. See the [user guide](docs/user-guide.md).
 - Experimental sampled raycasting and volume integration with actual shaders; these do not yet meet the full correctness/performance release gates.
@@ -362,23 +363,15 @@ opaque objects inside volumes and interpenetrating transparent layers are not
 yet correctly integrated. Do not treat these previews as publication-quality
 rendering.
 
-The format's named preview profile is intentionally narrower than the proposed full format. It has whole-array ZIP entries and a 128 MiB file/inflated-byte cap; it is not a streaming/chunked large-data implementation. Saving may need several in-memory copies. Camera and transient volume state are not yet persisted. See [format profile](docs/preview-format.md).
+The format's named preview profile is intentionally narrower than the proposed full format. It has whole-array ZIP entries, validated with allocation-driven buffers; it is not a streaming/chunked large-data implementation. Saving may need several in-memory copies. Camera and transient volume state are not yet persisted. See [format profile](docs/preview-format.md).
 
-Analytic sampling supports 12 through 256 points per axis in the API. Both UI
-selectors offer 24, 32, 40, 48, 64, 80, 96, 128, 160, 192, 224, and 256; the
-default remains 40. A transient sampled field may contain up to 256 cubed
-values, separately from the unchanged 128 cubed total-sample limit for imported
-and native authoritative grids. The two-million-vertex mesher limit now checks
-the actual case counts before extraction, using the pinned `mcubes` behavior;
-it is not a new meshing algorithm or topology guarantee.
-
-Other limits remain: 1,024 AOs, 512 MOs in total across all spin blocks,
-64 primitives per AO, 128 saved surfaces, 32 orbitals per batch, and 128 MiB
-geometry/native-container bounds, plus numerical and domain validation. The AO
-and MO caps are independent: a complete one-MO-per-AO spatial set fits through
-512 AOs, and complete alpha and beta sets through 256 AOs. Partial exports can
-use a larger basis within the same caps; missing orbitals are not recovered.
-See the [Molden limits](docs/molden-import.md#limits-and-verification).
+Current source accepts integer grid resolutions of at least two. Presets remain
+24 through 256, with a default of 40; enter a custom value and apply it with Enter
+or by leaving the input. Imports, source/transient grids, basis/orbital sets,
+mesh batches and native files have no application memory/count ceiling. Actual
+allocation errors, numeric/index/address representation and device capabilities
+still apply. See [allocation policy](docs/allocation-policy.md). Missing orbitals
+cannot be recovered from a partial export.
 There is no estimated CPU-work cutoff or silent
 resolution reduction for analytic sampling. Scalar sampling avoids unused
 gradients and folds density-matrix pairs. The WASM worker keeps the f64 sampled
@@ -398,7 +391,7 @@ does not interrupt the active request. Fatal worker failures reject all pending
 jobs, while recoverable errors leave the previous document intact. Allocation
 checks cannot guarantee
 recovery from every library, browser, GPU, or system out-of-memory failure;
-these bounds do not guarantee latency or maximum process memory usage.
+no latency or maximum process-memory promise is implied.
 
 Imported cubes can be resampled for display without modifying their
 authoritative values. All imports use published covalent radii and bounded

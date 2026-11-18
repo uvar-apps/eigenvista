@@ -8,17 +8,14 @@ use std::{
     path::{Path, PathBuf},
     sync::{
         Arc, Mutex,
-        atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc,
     },
     thread,
     time::{Duration, Instant},
 };
 
-pub const MAX_FRAME_BYTES: usize = 4 * 1024 * 1024;
-pub const REQUEST_TIMEOUT: Duration = Duration::from_secs(60);
-const SOCKET_TIMEOUT: Duration = Duration::from_secs(10);
-const MAX_CLIENTS: usize = 4;
+pub(crate) const SOCKET_TIMEOUT: Duration = Duration::from_secs(10);
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -61,11 +58,11 @@ pub struct Connection {
 impl Connection {
     pub fn load(path: &Path) -> Result<Self, RpcError> {
         let metadata = fs::symlink_metadata(path).map_err(RpcError::io)?;
-        if !metadata.is_file() || metadata.len() > 16384 {
+        if !metadata.is_file() {
             return Err(RpcError::new(
                 -32007,
                 "scope_denied",
-                "Connection must be a small regular private file",
+                "Connection must be a regular private file",
             ));
         }
         #[cfg(unix)]
@@ -93,18 +90,7 @@ impl Connection {
                     "Connection file changed while opening",
                 ));
             }
-            let mut bytes = Vec::new();
-            std::io::Read::by_ref(&mut file)
-                .take(16385)
-                .read_to_end(&mut bytes)
-                .map_err(RpcError::io)?;
-            if bytes.len() > 16384 {
-                return Err(RpcError::new(
-                    -32005,
-                    "limit_exceeded",
-                    "Connection file exceeds its limit",
-                ));
-            }
+            let bytes = crate::buffer::read(&mut file)?;
             let connection: Self = serde_json::from_slice(&bytes).map_err(|_| {
                 RpcError::new(-32600, "invalid_request", "Invalid connection descriptor")
             })?;
@@ -156,7 +142,6 @@ struct State {
     ready: AtomicBool,
     stopping: AtomicBool,
     next: AtomicU64,
-    clients: AtomicUsize,
     pending: Mutex<HashMap<u64, mpsc::SyncSender<Value>>>,
     dispatch: Arc<Dispatch>,
 }
@@ -195,35 +180,31 @@ impl Broker {
                 ready: AtomicBool::new(false),
                 stopping: AtomicBool::new(false),
                 next: AtomicU64::new(1),
-                clients: AtomicUsize::new(0),
                 pending: Mutex::new(HashMap::new()),
                 dispatch: Arc::new(dispatch),
             });
             let task = state.clone();
             let secret = connection.token.clone();
-            let listener = thread::spawn(move || {
-                while !task.stopping.load(Ordering::Acquire) {
-                    match socket.accept() {
-                        Ok((stream, _)) => {
-                            if task.clients.fetch_add(1, Ordering::AcqRel) >= MAX_CLIENTS {
-                                task.clients.fetch_sub(1, Ordering::AcqRel);
-                                drop(stream);
-                                continue;
+            let listener = thread::Builder::new()
+                .spawn(move || {
+                    while !task.stopping.load(Ordering::Acquire) {
+                        match socket.accept() {
+                            Ok((stream, _)) => {
+                                let task = task.clone();
+                                let secret = secret.clone();
+                                // OS thread/descriptor allocation determines concurrency.
+                                let _ = thread::Builder::new().spawn(move || {
+                                    serve(stream, &secret, &task);
+                                });
                             }
-                            let task = task.clone();
-                            let secret = secret.clone();
-                            thread::spawn(move || {
-                                serve(stream, &secret, &task);
-                                task.clients.fetch_sub(1, Ordering::AcqRel);
-                            });
+                            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                                thread::sleep(Duration::from_millis(10))
+                            }
+                            Err(_) => break,
                         }
-                        Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                            thread::sleep(Duration::from_millis(10))
-                        }
-                        Err(_) => break,
                     }
-                }
-            });
+                })
+                .map_err(RpcError::io)?;
             Ok(Self {
                 state,
                 connection,
@@ -237,6 +218,13 @@ impl Broker {
     }
     pub fn ready(&self) {
         self.state.ready.store(true, Ordering::Release);
+    }
+    /// Invalidate requests owned by a frontend that is navigating or closing.
+    pub fn unready(&self) {
+        self.state.ready.store(false, Ordering::Release);
+        if let Ok(mut pending) = self.state.pending.lock() {
+            pending.clear();
+        }
     }
     pub fn respond(&self, request_id: u64, response: Value) -> Result<(), RpcError> {
         if response
@@ -253,12 +241,6 @@ impl Broker {
             serde_json::from_value::<RpcError>(error.clone())
                 .map_err(|_| RpcError::new(-32602, "invalid_params", "Invalid structured error"))?;
         }
-        let bytes = serde_json::to_vec(&response).map_err(RpcError::io)?;
-        let response = if bytes.len() > MAX_FRAME_BYTES - 1024 {
-            json!({"error":RpcError::new(-32005,"limit_exceeded","Control result exceeds wire limit")})
-        } else {
-            response
-        };
         if let Some(sender) = self
             .state
             .pending
@@ -318,31 +300,26 @@ pub(crate) fn read_frame(stream: &mut TcpStream, timeout: Duration) -> Result<Ve
         stream
             .set_read_timeout(Some(remaining))
             .map_err(RpcError::io)?;
-        let capacity = buffer.len().min(MAX_FRAME_BYTES + 1 - bytes.len());
-        let count = stream.read(&mut buffer[..capacity]).map_err(|_| {
-            RpcError::new(-32004, "timeout", "Control frame read failed or timed out")
-        })?;
+        let count = match stream.read(&mut buffer) {
+            Ok(count) => count,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(socket_error(error, "read")),
+        };
         if count == 0 {
             return Err(RpcError::new(
-                -32600,
-                "invalid_request",
-                "Incomplete control frame",
+                -32006,
+                "connection_failed",
+                "Control peer disconnected before completing its frame",
             ));
         }
-        if let Some(end) = buffer[..count].iter().position(|b| *b == b'\n') {
-            bytes.extend_from_slice(&buffer[..=end]);
-            if bytes.len() <= MAX_FRAME_BYTES {
-                return Ok(bytes);
-            }
-        } else {
-            bytes.extend_from_slice(&buffer[..count]);
-        }
-        if bytes.len() >= MAX_FRAME_BYTES {
-            return Err(RpcError::new(
-                -32005,
-                "limit_exceeded",
-                "Control frame exceeds its byte limit",
-            ));
+        let end = buffer[..count].iter().position(|b| *b == b'\n');
+        let take = end.map_or(count, |index| index + 1);
+        bytes.try_reserve(take).map_err(|_| {
+            RpcError::new(-32005, "allocation_failed", "Cannot allocate control frame")
+        })?;
+        bytes.extend_from_slice(&buffer[..take]);
+        if end.is_some() {
+            return Ok(bytes);
         }
     }
 }
@@ -364,9 +341,11 @@ pub(crate) fn write_frame(
         stream
             .set_write_timeout(Some(remaining))
             .map_err(RpcError::io)?;
-        let written = stream.write(bytes).map_err(|_| {
-            RpcError::new(-32004, "timeout", "Control frame write failed or timed out")
-        })?;
+        let written = match stream.write(bytes) {
+            Ok(count) => count,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(socket_error(error, "write")),
+        };
         if written == 0 {
             return Err(RpcError::new(
                 -32006,
@@ -378,12 +357,127 @@ pub(crate) fn write_frame(
     }
     Ok(())
 }
+/// Progress resets the transport idle clock; a calculation's first response
+/// byte has no clock when `wait_for_response` is true.
+pub(crate) fn read_idle_frame(
+    stream: &mut TcpStream,
+    wait_for_response: bool,
+) -> Result<Vec<u8>, RpcError> {
+    read_idle_frame_with_timeout(stream, wait_for_response, SOCKET_TIMEOUT)
+}
+fn read_idle_frame_with_timeout(
+    stream: &mut TcpStream,
+    wait_for_response: bool,
+    idle: Duration,
+) -> Result<Vec<u8>, RpcError> {
+    let mut bytes = Vec::new();
+    let mut buffer = [0; 8192];
+    loop {
+        stream
+            .set_read_timeout(if wait_for_response && bytes.is_empty() {
+                None
+            } else {
+                Some(idle)
+            })
+            .map_err(RpcError::io)?;
+        let count = match stream.read(&mut buffer) {
+            Ok(count) => count,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(socket_error(error, "read")),
+        };
+        if count == 0 {
+            return Err(RpcError::new(
+                -32006,
+                "connection_failed",
+                "Control peer disconnected before completing its frame",
+            ));
+        }
+        let end = buffer[..count].iter().position(|byte| *byte == b'\n');
+        let take = end.map_or(count, |index| index + 1);
+        bytes.try_reserve(take).map_err(|_| {
+            RpcError::new(-32005, "allocation_failed", "Cannot allocate control frame")
+        })?;
+        bytes.extend_from_slice(&buffer[..take]);
+        if end.is_some() {
+            return Ok(bytes);
+        }
+    }
+}
+
+pub(crate) fn write_idle_frame(stream: &mut TcpStream, mut bytes: &[u8]) -> Result<(), RpcError> {
+    while !bytes.is_empty() {
+        stream
+            .set_write_timeout(Some(SOCKET_TIMEOUT))
+            .map_err(RpcError::io)?;
+        let count = match stream.write(bytes) {
+            Ok(count) => count,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(error) => return Err(socket_error(error, "write")),
+        };
+        if count == 0 {
+            return Err(RpcError::new(
+                -32006,
+                "connection_failed",
+                "Control peer disconnected while writing its frame",
+            ));
+        }
+        bytes = &bytes[count..];
+    }
+    Ok(())
+}
+
+fn socket_error(error: std::io::Error, operation: &str) -> RpcError {
+    if matches!(
+        error.kind(),
+        std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
+    ) {
+        RpcError::new(
+            -32004,
+            "timeout",
+            format!("Control frame {operation} deadline reached"),
+        )
+    } else {
+        RpcError::new(
+            -32006,
+            "connection_failed",
+            format!("Control frame {operation} failed: {error}"),
+        )
+    }
+}
+
+fn await_completion(receiver: &mpsc::Receiver<Value>) -> Result<Value, RpcError> {
+    // Request EOF is compatible with a TCP write-half-close: it says nothing
+    // about whether the caller still reads replies. Completion or an explicit
+    // controller lifecycle event owns this wait; reply I/O reports disconnects.
+    receiver.recv().map_err(|_| {
+        RpcError::new(
+            -32003,
+            "not_ready",
+            "Application controller disconnected before responding",
+        )
+    })
+}
+fn configure_stream(stream: &TcpStream) -> Result<(), RpcError> {
+    // BSD/macOS accepts may inherit the listener's O_NONBLOCK. Socket timeouts
+    // do not clear that flag: a large write would otherwise return WouldBlock
+    // after sending only part of the frame. Framing uses blocking reads/writes
+    // with caller deadlines or progress-based transport inactivity handling.
+    stream.set_nonblocking(false).map_err(RpcError::io)?;
+    stream
+        .set_read_timeout(Some(SOCKET_TIMEOUT))
+        .map_err(RpcError::io)?;
+    stream
+        .set_write_timeout(Some(SOCKET_TIMEOUT))
+        .map_err(RpcError::io)
+}
+
 fn serve(mut stream: TcpStream, token: &str, state: &Arc<State>) {
-    let _ = stream.set_read_timeout(Some(SOCKET_TIMEOUT));
-    let _ = stream.set_write_timeout(Some(SOCKET_TIMEOUT));
+    if configure_stream(&stream).is_err() {
+        return;
+    }
     let mut id = Value::Null;
     let result = (|| -> Result<Value, RpcError> {
-        let bytes = read_frame(&mut stream, SOCKET_TIMEOUT)?;
+        let bytes = read_idle_frame(&mut stream, false)?;
         let request: Request = serde_json::from_slice(&bytes).map_err(|error| {
             if error.is_syntax() || error.is_eof() {
                 RpcError::new(-32700, "parse_error", "Invalid JSON")
@@ -411,9 +505,7 @@ fn serve(mut stream: TcpStream, token: &str, state: &Arc<State>) {
         }
         if request.jsonrpc != "2.0"
             || !(request.id.is_string() || request.id.is_u64() || request.id.is_i64())
-            || request.id.as_str().is_some_and(|s| s.len() > 128)
             || request.method.is_empty()
-            || request.method.len() > 128
             || !request.params.is_object()
         {
             return Err(RpcError::new(
@@ -439,11 +531,27 @@ fn serve(mut stream: TcpStream, token: &str, state: &Arc<State>) {
             ));
         }
         let (sender, receiver) = mpsc::sync_channel(1);
-        state
-            .pending
-            .lock()
-            .map_err(|_| RpcError::io("Broker state unavailable"))?
-            .insert(request_id, sender);
+        {
+            let mut pending = state
+                .pending
+                .lock()
+                .map_err(|_| RpcError::io("Broker state unavailable"))?;
+            if !state.ready.load(Ordering::Acquire) || state.stopping.load(Ordering::Acquire) {
+                return Err(RpcError::new(
+                    -32003,
+                    "not_ready",
+                    "Application controller is no longer ready",
+                ));
+            }
+            pending.try_reserve(1).map_err(|_| {
+                RpcError::new(
+                    -32005,
+                    "allocation_failed",
+                    "Cannot allocate control request state",
+                )
+            })?;
+            pending.insert(request_id, sender);
+        }
         if let Err(error) = (state.dispatch)(ControlRequest {
             request_id,
             method: request.method,
@@ -454,34 +562,27 @@ fn serve(mut stream: TcpStream, token: &str, state: &Arc<State>) {
             }
             return Err(error);
         }
-        let response = receiver.recv_timeout(REQUEST_TIMEOUT).map_err(|_| {
-            RpcError::new(
-                -32004,
-                "timeout",
-                "Application request timed out or controller disconnected",
-            )
-        });
+        let response = await_completion(&receiver);
         if let Ok(mut pending) = state.pending.lock() {
             pending.remove(&request_id);
         }
         response
     })();
     let response = match result {
-        Ok(payload) => {
+        Ok(Value::Object(payload)) => {
             let mut result = json!({"jsonrpc":"2.0","id":id});
+            result.as_object_mut().unwrap().extend(payload);
             result
-                .as_object_mut()
-                .unwrap()
-                .extend(payload.as_object().unwrap().clone());
-            result
+        }
+        Ok(_) => {
+            json!({"jsonrpc":"2.0","id":id,"error":RpcError::new(-32603,"invalid_response","Controller returned a non-object response")})
         }
         Err(error) => json!({"jsonrpc":"2.0","id":id,"error":error}),
     };
-    if let Ok(mut bytes) = serde_json::to_vec(&response)
-        && bytes.len() <= MAX_FRAME_BYTES
-    {
-        bytes.push(b'\n');
-        let _ = write_frame(&mut stream, &bytes, SOCKET_TIMEOUT);
+    let bytes = crate::buffer::frame(&response).or_else(|_| crate::buffer::frame(
+        &json!({"jsonrpc":"2.0","id":null,"error":RpcError::new(-32005,"allocation_failed","Cannot allocate control response")})));
+    if let Ok(bytes) = bytes {
+        let _ = write_idle_frame(&mut stream, &bytes);
     }
 }
 
@@ -526,6 +627,74 @@ fn write_descriptor(path: &Path, connection: &Connection) -> Result<(), RpcError
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn progressing_frame_outlives_a_single_idle_interval() {
+        let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let mut sender = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (mut receiver, _) = listener.accept().unwrap();
+        let reader = thread::spawn(move || {
+            read_idle_frame_with_timeout(&mut receiver, false, Duration::from_millis(150))
+        });
+        // Total transfer time exceeds the idle allowance, but each chunk makes
+        // real progress. The separate absolute-deadline test remains unchanged.
+        for _ in 0..8 {
+            sender.write_all(b" ").unwrap();
+            thread::sleep(Duration::from_millis(30));
+        }
+        sender.write_all(b"\n").unwrap();
+        assert_eq!(reader.join().unwrap().unwrap(), b"        \n");
+    }
+
+    #[test]
+    fn departed_client_request_is_released_when_frontend_completes() {
+        let directory = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tmp")
+            .join(format!(
+                "control-disconnected-{}",
+                crate::random_hex(8).unwrap()
+            ));
+        fs::create_dir_all(&directory).unwrap();
+        let (dispatched, received) = mpsc::channel();
+        let broker = Broker::start(&directory.join("connection.json"), move |request| {
+            dispatched.send(request).unwrap();
+            Ok(())
+        })
+        .unwrap();
+        broker.ready();
+        let mut client = TcpStream::connect(&broker.connection.address).unwrap();
+        client.write_all(&crate::buffer::frame(&json!({"jsonrpc":"2.0","id":"disconnect","method":"document.save","params":{},"auth":broker.connection.token})).unwrap()).unwrap();
+        let request = received.recv_timeout(Duration::from_secs(2)).unwrap();
+        assert_eq!(broker.state.pending.lock().unwrap().len(), 1);
+        drop(client);
+        // TCP EOF cannot establish whether the peer still reads. A completion
+        // removes the pending sender even if delivery can no longer succeed.
+        broker
+            .respond(request.request_id, json!({"result":{"saved":true}}))
+            .unwrap();
+        assert!(broker.state.pending.lock().unwrap().is_empty());
+        drop(broker);
+        fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn accepted_control_stream_clears_inherited_nonblocking_before_framing() {
+        use std::os::fd::AsRawFd;
+        let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let peer = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (stream, _) = listener.accept().unwrap();
+        // Force the BSD inheritance state on all qualified Unix platforms.
+        stream.set_nonblocking(true).unwrap();
+        configure_stream(&stream).unwrap();
+        // SAFETY: F_GETFL inspects this test's live socket descriptor.
+        let flags = unsafe { libc::fcntl(stream.as_raw_fd(), libc::F_GETFL) };
+        assert!(flags >= 0);
+        assert_eq!(flags & libc::O_NONBLOCK, 0);
+        assert_eq!(stream.read_timeout().unwrap(), Some(SOCKET_TIMEOUT));
+        assert_eq!(stream.write_timeout().unwrap(), Some(SOCKET_TIMEOUT));
+        drop(peer);
+    }
     #[test]
     fn a_trickling_peer_cannot_extend_the_absolute_frame_deadline() {
         let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0)).unwrap();

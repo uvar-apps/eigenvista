@@ -1,5 +1,6 @@
 // Installed-app guidance; the published pages contain no executable scripts.
 import { application } from "../application.mjs";
+import { release } from "../release.mjs";
 import { agentWorkspaceNote } from "./workspace.mjs";
 const code = (value) =>
   `<pre class="wrap-code"><code>${value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</code></pre>`;
@@ -12,7 +13,7 @@ compatible app, I authorize downloading and installing the appropriate Mac
 binary package from https://github.com/uvar-apps/eigenvista/releases into an
 applications location I can write. Preserve existing app copies. Check that
 the package includes its connection helper, standalone instructions and
-"Start AI connection.command" launcher. Use the current 0.10.0 Mac package; older packages
+"Start AI connection.command" launcher. Use the current ${release.version} Mac package; older packages
 such as 0.7.2 do not include them. If no compatible package is available, explain that clearly,
 show me the official release page and stop the setup.
 

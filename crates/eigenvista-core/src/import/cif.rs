@@ -22,16 +22,6 @@ use crate::{Atom, BOHR_TO_ANGSTROM, Document, Result, bonds};
 use connections::{ConnectionRow, SiteIdentity};
 use std::collections::{BTreeMap, BTreeSet};
 
-/// mmCIF is markedly more verbose than legacy PDB for the same structure, so
-/// this budget is larger than the PDB one while staying under the 128 MiB
-/// import ceiling enforced upstream.
-const MAX_CIF_BYTES: usize = 64 * 1024 * 1024;
-
-/// Allocation bound on the atom collection, independent of file size.
-const MAX_ATOMS: usize = 250_000;
-const MAX_CIF_COLUMNS: usize = 256;
-const MAX_LINE_FIELDS: usize = 1_000_000;
-
 /// Coordinates beyond this are treated as invalid rather than trusted.
 const MAX_COORDINATE_ANGSTROM: f64 = 1.0e9;
 
@@ -65,9 +55,9 @@ fn control_token(value: &str) -> bool {
             .is_some_and(|p| p.eq_ignore_ascii_case("data_") || p.eq_ignore_ascii_case("save_"))
 }
 
-/// Tokenize within a pre-allocation field bound; a closing quote must be
+/// Tokenize complete fields; a closing quote must be
 /// followed by whitespace or end of line.
-fn tokens(line: &str, limit: usize) -> Result<Vec<Token<'_>>> {
+fn tokens(line: &str) -> Result<Vec<Token<'_>>> {
     let bytes = line.as_bytes();
     let mut fields = Vec::new();
     let mut i = 0;
@@ -78,9 +68,6 @@ fn tokens(line: &str, limit: usize) -> Result<Vec<Token<'_>>> {
         }
         if bytes[i] == b'#' {
             break;
-        }
-        if fields.len() >= limit {
-            return Err("mmCIF line/header exceeds the field budget".into());
         }
         if bytes[i] == b'\'' || bytes[i] == b'"' {
             let quote = bytes[i];
@@ -97,28 +84,36 @@ fn tokens(line: &str, limit: usize) -> Result<Vec<Token<'_>>> {
                 }
                 end += 1;
             }
-            fields.push(Token {
-                value: &line[start..end],
-                quoted: true,
-            });
+            crate::allocation::push(
+                &mut fields,
+                Token {
+                    value: &line[start..end],
+                    quoted: true,
+                },
+                "mmCIF tokens",
+            )?;
             i = end + 1;
         } else {
             let start = i;
             while i < bytes.len() && !bytes[i].is_ascii_whitespace() {
                 i += 1;
             }
-            fields.push(Token {
-                value: &line[start..i],
-                quoted: false,
-            });
+            crate::allocation::push(
+                &mut fields,
+                Token {
+                    value: &line[start..i],
+                    quoted: false,
+                },
+                "mmCIF tokens",
+            )?;
         }
     }
     Ok(fields)
 }
 
-/// Bound headers before allocating owned names, and never drop extra columns.
+/// Preserve complete headers and never drop extra columns.
 fn header_tags(tags: &mut Vec<String>, line: &str) -> Result<()> {
-    let fields = tokens(line, MAX_CIF_COLUMNS.saturating_sub(tags.len()))?;
+    let fields = tokens(line)?;
     for token in fields {
         if token.quoted || !token.value.starts_with('_') {
             return Err("mmCIF loop headers require unquoted column names; rows must start on a following line".into());
@@ -179,7 +174,7 @@ fn raw_scalar_value(
     line: &str,
     lines: &mut std::iter::Peekable<std::str::Lines<'_>>,
 ) -> Result<String> {
-    let fields = tokens(line, 2)?;
+    let fields = tokens(line)?;
     if fields.len() >= 2 {
         if fields.len() != 2 {
             return Err("mmCIF scalar must contain exactly one value".into());
@@ -211,7 +206,7 @@ fn raw_scalar_value(
         {
             break;
         }
-        let fields = tokens(next, 1)?;
+        let fields = tokens(next)?;
         if fields.len() != 1 {
             return Err("mmCIF scalar must contain exactly one value".into());
         }
@@ -248,7 +243,7 @@ fn connection_value(
     header: &LoopHeader,
     fields: &mut Vec<String>,
     rows: &mut Vec<ConnectionRow>,
-    budget: &mut usize,
+    declaration_count: &mut usize,
 ) -> Result<()> {
     fields.push(value);
     if fields.len() == header.tags.len() {
@@ -258,7 +253,7 @@ fn connection_value(
             .map(|tag| tag["_struct_conn.".len()..].to_string())
             .zip(fields.drain(..))
             .collect();
-        connections::push_row(rows, row, budget)?;
+        connections::push_row(rows, row, declaration_count)?;
     }
     Ok(())
 }
@@ -270,7 +265,7 @@ fn connection_value(
 /// window: in real PDB entries it can sit well past the header (byte 75k in
 /// 1BH3), because the header carries many other categories first.
 fn looks_like_mmcif(text: &str) -> bool {
-    text.lines().take(4096).any(|line| {
+    text.lines().any(|line| {
         let token = line.split_whitespace().next().unwrap_or_default();
         token.len() > 5
             && token
@@ -301,12 +296,6 @@ struct Site {
 /// Read the first model's geometry, select one occupancy-ranked alternate
 /// location per residue, then infer connectivity from coordinates.
 pub fn cif(text: &str, name: &str) -> Result<Document> {
-    if text.len() > MAX_CIF_BYTES {
-        return Err(format!(
-            "mmCIF exceeds the {} MiB preview file budget",
-            MAX_CIF_BYTES / (1024 * 1024)
-        ));
-    }
     if !looks_like_mmcif(text) {
         return Err("Not an mmCIF file: no `data_` block or `_atom_site` category found".into());
     }
@@ -319,7 +308,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
     let mut unknown_elements = 0usize;
     let mut discarded = 0usize;
     let mut declarations = Vec::new();
-    let mut declaration_budget = 0;
+    let mut declaration_declaration_count = 0;
     let mut connection_fields = Vec::new();
     let mut scalar_connection = ConnectionRow::new();
     let mut block = 0usize;
@@ -348,7 +337,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
                     header,
                     &mut connection_fields,
                     &mut declarations,
-                    &mut declaration_budget,
+                    &mut declaration_declaration_count,
                 )?;
             } else {
                 if atom_loop.is_some() {
@@ -383,7 +372,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             connections::push_row(
                 &mut declarations,
                 std::mem::take(&mut scalar_connection),
-                &mut declaration_budget,
+                &mut declaration_declaration_count,
             )?;
         }
         if data_start {
@@ -421,11 +410,10 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
                 } else {
                     "_struct_conn."
                 };
-                if tags.len() > MAX_CIF_COLUMNS
-                    || tags.iter().any(|tag| !tag.starts_with(prefix))
+                if tags.iter().any(|tag| !tag.starts_with(prefix))
                     || tags.iter().collect::<BTreeSet<_>>().len() != tags.len()
                 {
-                    return Err("Invalid, mixed, duplicate, or excessive mmCIF loop columns".into());
+                    return Err("Invalid, mixed, or duplicate mmCIF loop columns".into());
                 }
                 if atoms {
                     atom_blocks.insert(block);
@@ -496,12 +484,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         let Some(header) = atom_loop.as_ref() else {
             continue;
         };
-        let limit = if header.tags[0].starts_with("_struct_conn.") {
-            MAX_LINE_FIELDS
-        } else {
-            header.tags.len()
-        };
-        let parsed = tokens(line, limit)?;
+        let parsed = tokens(line)?;
         if parsed
             .iter()
             .any(|token| !token.quoted && control_token(token.value))
@@ -515,7 +498,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
                     header,
                     &mut connection_fields,
                     &mut declarations,
-                    &mut declaration_budget,
+                    &mut declaration_declaration_count,
                 )?;
             }
             continue;
@@ -592,12 +575,6 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
             }
         };
 
-        if sites.len() >= MAX_ATOMS {
-            return Err(format!(
-                "mmCIF exceeds the {MAX_ATOMS} atom preview budget (structure may be truncated upstream)"
-            ));
-        }
-
         let identity = SiteIdentity {
             id: field("_atom_site.id").to_string(),
             label: [
@@ -660,7 +637,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         connections::push_row(
             &mut declarations,
             scalar_connection,
-            &mut declaration_budget,
+            &mut declaration_declaration_count,
         )?;
     }
     if !declarations.is_empty() && (atom_blocks.len() != 1 || connection_blocks != atom_blocks) {
@@ -686,7 +663,7 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
         groups.entry(&site.key).or_default().push(index);
     }
 
-    let mut keep = vec![false; sites.len()];
+    let mut keep = crate::allocation::filled(sites.len(), false, "mmCIF selected atoms")?;
     for indices in groups.values() {
         // Mean occupancy per alternate label.
         let mut per_alt: BTreeMap<&str, (f64, usize)> = BTreeMap::new();
@@ -733,9 +710,6 @@ pub fn cif(text: &str, name: &str) -> Result<Document> {
 
     if doc.atoms.is_empty() {
         return Err("mmCIF has no atoms after alternate-location/occupancy selection".into());
-    }
-    if doc.atoms.len() > 100_000 {
-        return Err("mmCIF exceeds the 100000 selected-atom preview budget".into());
     }
 
     let selected: Vec<_> = sites

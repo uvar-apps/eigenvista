@@ -1,4 +1,4 @@
-use eigenvista_import::{ImportReport, MAX_IMPORT_BYTES, import_bytes};
+use eigenvista_import::{ImportReport, import_bytes};
 use serde::Serialize;
 use std::{
     collections::HashSet,
@@ -56,6 +56,10 @@ fn options(args: impl IntoIterator<Item = OsString>) -> Result<Command, String> 
     let mut positional = false;
     while let Some(arg) = args.next() {
         if positional {
+            options
+                .inputs
+                .try_reserve(1)
+                .map_err(|_| "Cannot allocate converter input list")?;
             options.inputs.push(arg.into());
             continue;
         }
@@ -80,14 +84,17 @@ fn options(args: impl IntoIterator<Item = OsString>) -> Result<Command, String> 
                     Some(args.next().ok_or("--output-dir needs a directory")?.into());
             }
             Some(s) if s.starts_with('-') => return Err(format!("Unknown option {s}; use --help")),
-            _ => options.inputs.push(arg.into()),
+            _ => {
+                options
+                    .inputs
+                    .try_reserve(1)
+                    .map_err(|_| "Cannot allocate converter input list")?;
+                options.inputs.push(arg.into());
+            }
         }
     }
     if options.inputs.is_empty() {
         return Err("Choose at least one input file; use --help".into());
-    }
-    if options.inputs.len() > 256 {
-        return Err("At most 256 input files may be converted in one batch".into());
     }
     if options.output.is_some() && options.directory.is_some() {
         return Err("Choose --output or --output-dir, not both".into());
@@ -145,95 +152,109 @@ struct Destination {
 }
 
 fn destinations(options: &Options) -> Result<Vec<Option<Destination>>, String> {
-    let inputs: HashSet<PathBuf> = options
-        .inputs
-        .iter()
-        .map(|input| fs::canonicalize(input).map_err(|e| format!("{}: {e}", input.display())))
-        .collect::<Result<_, _>>()?;
+    let mut inputs = HashSet::new();
+    inputs
+        .try_reserve(options.inputs.len())
+        .map_err(|_| "Cannot allocate converter source identities")?;
+    for input in &options.inputs {
+        inputs.insert(fs::canonicalize(input).map_err(|e| format!("{}: {e}", input.display()))?);
+    }
+    let mut output = Vec::new();
+    output
+        .try_reserve_exact(options.inputs.len())
+        .map_err(|_| "Cannot allocate converter destination list")?;
     if options.check {
-        return Ok((0..options.inputs.len()).map(|_| None).collect());
+        output.resize_with(options.inputs.len(), || None);
+        return Ok(output);
     }
     let mut destinations = HashSet::new();
     #[cfg(unix)]
     let mut file_identities = HashSet::new();
-    options
-        .inputs
-        .iter()
-        .map(|input| {
-            let destination = match (&options.output, &options.directory) {
-                (Some(output), _) => output.clone(),
-                (_, Some(directory)) => directory.join(output_name(input)?),
-                _ => input.with_file_name(output_name(input)?),
-            };
-            if !destination.extension().is_some_and(|ext| {
-                ext.eq_ignore_ascii_case("eigenvista") || ext.eq_ignore_ascii_case("molekel")
-            }) {
-                return Err("Output filenames must end in .eigenvista or .molekel".into());
-            }
-            let destination = canonical_destination(&destination)?;
-            if inputs.contains(&destination) {
+    destinations
+        .try_reserve(options.inputs.len())
+        .map_err(|_| "Cannot allocate converter destination identities")?;
+    #[cfg(unix)]
+    file_identities
+        .try_reserve(options.inputs.len())
+        .map_err(|_| "Cannot allocate converter file identities")?;
+    for input in &options.inputs {
+        let destination = match (&options.output, &options.directory) {
+            (Some(output), _) => output.clone(),
+            (_, Some(directory)) => directory.join(output_name(input)?),
+            _ => input.with_file_name(output_name(input)?),
+        };
+        if !destination.extension().is_some_and(|ext| {
+            ext.eq_ignore_ascii_case("eigenvista") || ext.eq_ignore_ascii_case("molekel")
+        }) {
+            return Err("Output filenames must end in .eigenvista or .molekel".into());
+        }
+        let destination = canonical_destination(&destination)?;
+        if inputs.contains(&destination) {
+            return Err(format!(
+                "Refusing to replace an input file: {}",
+                destination.display()
+            ));
+        }
+        // Case-insensitive aliases must also collide on the macOS target.
+        let key = if cfg!(target_os = "macos") || cfg!(target_os = "windows") {
+            destination.to_string_lossy().to_lowercase()
+        } else {
+            destination.to_string_lossy().into_owned()
+        };
+        if !destinations.insert(key) {
+            return Err(format!(
+                "Inputs map to the same output: {}",
+                destination.display()
+            ));
+        }
+        let exists = destination.exists();
+        #[cfg(unix)]
+        if exists {
+            use std::os::unix::fs::MetadataExt;
+            let metadata = fs::metadata(&destination).map_err(|e| e.to_string())?;
+            if !file_identities.insert((metadata.dev(), metadata.ino())) {
                 return Err(format!(
-                    "Refusing to replace an input file: {}",
+                    "Inputs map to the same existing output: {}",
                     destination.display()
                 ));
             }
-            // Case-insensitive aliases must also collide on the macOS target.
-            let key = if cfg!(target_os = "macos") || cfg!(target_os = "windows") {
-                destination.to_string_lossy().to_lowercase()
-            } else {
-                destination.to_string_lossy().into_owned()
-            };
-            if !destinations.insert(key) {
-                return Err(format!(
-                    "Inputs map to the same output: {}",
-                    destination.display()
-                ));
-            }
-            let exists = destination.exists();
-            #[cfg(unix)]
-            if exists {
-                use std::os::unix::fs::MetadataExt;
-                let metadata = fs::metadata(&destination).map_err(|e| e.to_string())?;
-                if !file_identities.insert((metadata.dev(), metadata.ino())) {
-                    return Err(format!(
-                        "Inputs map to the same existing output: {}",
-                        destination.display()
-                    ));
-                }
-            }
-            if exists && !options.force {
-                return Err(format!(
-                    "Output already exists: {}; use --force to replace it",
-                    destination.display()
-                ));
-            }
-            // Even --force must not clobber another batch result or a newly created file.
-            Ok(Some(Destination {
-                path: destination,
-                replace: exists && options.force,
-            }))
-        })
-        .collect()
+        }
+        if exists && !options.force {
+            return Err(format!(
+                "Output already exists: {}; use --force to replace it",
+                destination.display()
+            ));
+        }
+        // Even --force must not clobber another batch result or a newly created file.
+        output.push(Some(Destination {
+            path: destination,
+            replace: exists && options.force,
+        }));
+    }
+    Ok(output)
 }
 
-fn read_bounded(input: &Path) -> Result<Vec<u8>, String> {
+fn read_source(input: &Path) -> Result<Vec<u8>, String> {
     let metadata = fs::metadata(input).map_err(|e| e.to_string())?;
-    if !metadata.is_file() || metadata.len() > MAX_IMPORT_BYTES as u64 {
-        return Err("Input must be a regular file no larger than 128 MiB".into());
+    if !metadata.is_file() {
+        return Err("Input must be a regular file".into());
     }
-    let file = File::open(input).map_err(|e| e.to_string())?;
-    let metadata = file.metadata().map_err(|e| e.to_string())?;
-    if !metadata.is_file() || metadata.len() > MAX_IMPORT_BYTES as u64 {
-        return Err("Input must be a regular file no larger than 128 MiB".into());
+    let mut file = File::open(input).map_err(|e| e.to_string())?;
+    if !file.metadata().map_err(|e| e.to_string())?.is_file() {
+        return Err("Input must be a regular file".into());
     }
     let mut bytes = Vec::new();
-    file.take(MAX_IMPORT_BYTES as u64 + 1)
-        .read_to_end(&mut bytes)
-        .map_err(|e| e.to_string())?;
-    if bytes.len() > MAX_IMPORT_BYTES {
-        return Err("Input exceeds the 128 MiB byte budget".into());
+    let mut chunk = [0; 8192];
+    loop {
+        let count = file.read(&mut chunk).map_err(|e| e.to_string())?;
+        if count == 0 {
+            return Ok(bytes);
+        }
+        bytes
+            .try_reserve(count)
+            .map_err(|e| format!("Cannot allocate converter input: {e}"))?;
+        bytes.extend_from_slice(&chunk[..count]);
     }
-    Ok(bytes)
 }
 
 #[derive(Serialize)]
@@ -251,6 +272,9 @@ struct Outcome {
 fn convert(options: Options) -> Result<u8, String> {
     let destinations = destinations(&options)?;
     let mut outcomes = Vec::new();
+    outcomes
+        .try_reserve_exact(options.inputs.len())
+        .map_err(|_| "Cannot allocate conversion results")?;
     for (input, destination) in options.inputs.iter().zip(destinations) {
         let mut outcome = Outcome {
             input: input.to_string_lossy().into_owned(),
@@ -265,7 +289,7 @@ fn convert(options: Options) -> Result<u8, String> {
             error: None,
         };
         let result = (|| {
-            let bytes = read_bounded(input)?;
+            let bytes = read_source(input)?;
             let name = input.file_name().unwrap_or_default().to_string_lossy();
             let imported = import_bytes(&bytes, &name)?;
             outcome.atoms = imported.document.atoms.len();
@@ -343,5 +367,26 @@ fn main() -> ExitCode {
             eprintln!("eigenvista-convert: {error}");
             ExitCode::from(2)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn source_reader_accepts_more_than_the_former_128_mib_limit() {
+        let directory = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tmp");
+        fs::create_dir_all(&directory).unwrap();
+        let path = directory.join(format!("converter-large-source-{}.xyz", std::process::id()));
+        let file = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        file.set_len(128 * 1024 * 1024 + 1).unwrap();
+        let bytes = read_source(&path).unwrap();
+        assert_eq!(bytes.len(), 128 * 1024 * 1024 + 1);
+        fs::remove_file(path).unwrap();
     }
 }
