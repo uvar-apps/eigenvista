@@ -400,6 +400,10 @@ function main() {
     path.join(root, "docs/ai-connector.md"),
     path.join(payload, "ai-connector.md"),
   );
+  copy(
+    path.join(root, "docs/allocation-policy.md"),
+    path.join(payload, "allocation-policy.md"),
+  );
   copy(path.join(root, "docs/images"), path.join(payload, "images"));
   copy(
     path.join(root, "docs/structure-imports.md"),

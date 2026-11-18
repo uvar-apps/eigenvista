@@ -9,8 +9,9 @@ tester ZIPs predate it. Confirm the installed files and live capabilities
 rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
 qualification is pending; non-Unix attachment is unsupported.
 
-The scientific-inspection methods below ship in **0.10.0**. Older 0.8.0
-downloads lack them. Use the application, helper and instructions supplied
+Use the current **0.10.1** package. The scientific-inspection methods below were
+introduced in **0.10.0**. Older 0.8.0 downloads lack them. Use the application,
+helper and instructions supplied
 together, and inspect the connected app's live schemas. Do not promise features
 from a version comparison or require a source checkout to use an installed app.
 
@@ -147,8 +148,9 @@ The CLI prints result JSON directly, without a JSON-RPC envelope. Structured
 errors print an `error` object and exit 1. A successful `job.get` request can
 still describe a failed calculation: inspect its status. `--wait SECONDS`
 polls a returned job until a terminal status and exits with failure for failed
-or cancelled work. It accepts whole seconds 0–86400. A timeout does not cancel
-the job. The flag does nothing when a result has no job ID.
+or cancelled work. It accepts nonnegative whole seconds, subject to the
+platform's actual time representation. A timeout does not cancel the job.
+The flag does nothing when a result has no job ID.
 
 ## Discover schemas and current state
 
@@ -157,7 +159,7 @@ has 28 methods and 0.10.0 extends it additively. The connected
 catalog, not a hardcoded count, establishes support. The response provides:
 
 - `instanceId`, `apiVersion` and each method's `description` and `inputSchema`;
-- `limits`, including allowed grid resolutions and input/output budgets;
+- `allocationPolicy: "allocation-driven"` and advisory `gridResolutionPresets`;
 - file-host capabilities and structured error kinds.
 
 Use the live typed schemas as authority. Unknown keys, invalid enums, nonfinite
@@ -169,8 +171,8 @@ view/mode/resolution, shading, AO, palette, biological display summary, camera
 and background. Camera/background may be temporarily null during startup.
 Scientific arrays are not returned. Check live support for palette loading,
 biological display and automatic AO before attempting those lesson steps.
-Version 0.10.0 state also includes `inspection` with pick mode, selected count,
-bounded ordered picks, typed `lastPick` and counts of measurements, molecular
+Current state also includes `inspection` with pick mode, selected count,
+complete ordered picks, typed `lastPick` and counts of measurements, molecular
 surfaces and analyses. Use the dedicated paginated queries for actual source identities,
 named-set contents and numerical samples.
 
@@ -188,7 +190,7 @@ file grants.
 
 | Method | Parameters and result |
 | --- | --- |
-| `app.capabilities` | `{}` → live version, instance, schemas, limits and host capabilities |
+| `app.capabilities` | `{}` → live version, instance, schemas, allocation policy, grid presets and host capabilities |
 | `app.state` | `{}` → accepted document and presentation summary |
 | `fields.list` | `offset?`, `limit?` → paged orbital, density and stored-grid metadata |
 | `surfaces.list` | `{}` → saved surface IDs, fields, signed isovalues, visibility, counts, resolution and hashes |
@@ -229,8 +231,9 @@ the accepted document, worker, validation and renderer.
 
 All atom/residue indices are original, **zero based**; GUI numbers are one based.
 Coordinate vectors are **bohr** unless a parameter explicitly names angstrom.
-Pages accept `offset?` and `limit?` (1–100, default 100). Mutation methods accept
-optional `expectedRevision`; read methods do not. Discover exact schemas first.
+Pages accept `offset?` and `limit?` (positive safe-integer counts, default 100).
+The default page size does not restrict the total accessible data. Mutation
+methods accept optional `expectedRevision`; read methods do not. Discover exact schemas first.
 
 `lastPick` is null or a typed original-source hit. Its `kind` is `atom`, `bond`,
 `residue`, `molecular_surface` or `quantum_surface`; applicable fields are `atom`,
@@ -244,7 +247,7 @@ Source replacement or changed/removed mesh geometry invalidates old picks.
 | `selection.pick_mode` | `enabled`: toggle interactive original-atom picking |
 | `atoms.list` | Page, `residueIndex?`: source indices, elements, bohr positions and biological identities |
 | `residues.list` | Page, `name?`, `kind?`, `chainIndex?`: resolve one particular ligand/residue copy |
-| `selection.get` | Page: selected indices, bounded `orderedAtoms`, count, pick-mode state and typed `lastPick` |
+| `selection.get` | Page: selected indices, complete `orderedAtoms`, count, pick-mode state and typed `lastPick` |
 | `selection.list` | Page: named summaries; with `id`, page set atoms; add `seeds:true` for query seeds |
 | `selection.set` | Exactly one of `atoms`, `residueIndices`, `selectionId`; `mode?: replace/add/remove`, `showOnly?`, `resetFilters?`, `focus?` |
 | `selection.clear` | Clear transient picks/selection mask |
@@ -260,7 +263,7 @@ Source replacement or changed/removed mesh geometry invalidates old picks.
 | `labels.remove` | `id`: delete label |
 | `molecularSurfaces.list` | Page: SES/SAS settings, provenance, diagnostics and counts, without mesh/atom arrays |
 | `molecularSurfaces.atoms` | `id`, page: original `index` and resolved `radiusAngstrom` per included atom |
-| `molecularSurfaces.warnings` | `id`, page: full warning strings; summary warnings are limited to eight shortened previews |
+| `molecularSurfaces.warnings` | `id`, page: full warning strings; summaries also retain complete warnings |
 | `molecularSurfaces.generate` | Complete `request`: background SES/SAS creation/replacement |
 | `molecularSurfaces.set` | `id`, optional `label,visible,color,opacity`: accepted appearance update |
 | `molecularSurfaces.remove` | `id`: remove cached shape |
@@ -274,7 +277,7 @@ Source replacement or changed/removed mesh geometry invalidates old picks.
 | `analysis.samples` | `id`, page: raw f64 value/status/bohr position; profile distance/length in Å |
 | `analysis.set` | `id`, `label?`, `appearance?`, `automaticRange?`; true removes fixed range |
 | `analysis.remove` | `id`: remove definition/cache |
-| `table.export` | `kind: measurements/analysis`, analysis `id?`, new native `path?`, `overwrite?:false`; optional bounded text `offset,length` |
+| `table.export` | `kind: measurements/analysis`, analysis `id?`, new native `path?`, `overwrite?:false`; optional text chunk `offset,length` |
 
 ### Geometry and annotation payloads
 
@@ -286,7 +289,8 @@ angle arms or degenerate torsions return `value:null,status:"undefined",reason`.
 All geometry is nonperiodic and has no estimated uncertainty.
 
 `label` is `{id,text,visible,color,always_visible,atom? ,residue?}` with exactly
-one target. Colors are `#RRGGBB`; text is limited to 256 UTF-8 bytes. Named sets
+one target. Colors are `#RRGGBB`; annotation text must be nonempty and contain no
+control characters. There is no annotation byte/count allowance. Named sets
 use sorted unique source indices. Neighborhoods search all source atoms, including
 hidden atoms; seeds are included, and `wholeResidues` expands complete biological
 residues. Their saved results are materialized sets, not queries that silently
@@ -314,8 +318,10 @@ Use this complete request shape with `molecularSurfaces.generate`:
 Empty `atom_indices` means all loaded source atoms, including hidden ones.
 Nonempty indices make an **isolated selected-subset surface**, not a cropped
 patch of the whole molecule. `kind` is `ses`/`sas`; radii are `bondi` (Bondi/
-Mantina) or `alvarez`. Overrides are `{element,radius_angstrom}`. Probe radius
-0.05–10 and spacing 0.05–3 are Å. Missing radii produce an explicit element
+Mantina) or `alvarez`. Overrides are `{element,radius_angstrom}` with distinct
+elements and finite positive radii. Probe radius and spacing are Å: the probe is
+finite and nonnegative; spacing is finite, positive and representable by the engine.
+Missing radii produce an explicit element
 error: obtain/select an appropriate table or explicit user-supplied override,
 never invent a fallback or omit atoms. Cavities are kept and requested spacing
 is not silently coarsened. This creates shape, not quantum density/ESP.
@@ -325,8 +331,8 @@ Wait for the job, inspect `molecularSurfaces.list`, and page
 do not regenerate geometry. Existing shading, clipping/X-ray shaders and PNG
 apply; atom/bond AO does not shade the new surface. Save retains cached meshes
 and provenance, which reopen without rerunning the engine or the original file.
-Summaries include at most eight warnings shortened to 256 characters each; use
-`molecularSurfaces.warnings` to page full strings when interpreting diagnostics.
+Summaries retain complete warning strings; `molecularSurfaces.warnings` also
+offers paginated access when interpreting diagnostics.
 
 ### Field meaning, sampling and display
 
@@ -369,9 +375,10 @@ the supplied world coordinates must agree with those references. Both endpoints
 are included; zero-length profiles are rejected.
 
 Analysis `appearance` accepts `visible`, `colormap: diverging/viridis/grayscale`,
-`show_key`, `show_labels`, `range:[min,max]`, and up to 32 `contour_levels` for
-planes. API ranges/levels and paged values are raw source scalar units; the GUI
-shows converted units. `automaticRange:true` removes a fixed range. Keys/scales
+`show_key`, `show_labels`, ordered `range:[min,max]`, and finite `contour_levels` for
+planes, without a contour-count allowance. API ranges/levels and paged values
+are raw source scalar units; the GUI shows converted units.
+`automaticRange:true` removes a fixed range. Keys/scales
 and labels do not resample the numeric cache. Read `analysis.get` after edits.
 
 Analytic Gaussian evaluation or source-f64 affine-grid trilinear interpolation
@@ -400,29 +407,30 @@ scoped file receipt; use `kind:"measurements"` without an analysis ID for geomet
 The destination must be new, `.csv`, inside a granted root and not a source alias.
 Without a path, output is `{text,offset,totalCharacters,mimeType,name}`. Concatenate
 chunks using offset plus actual returned `text.length`; offsets/lengths use UTF-16
-code units, with at most 1,048,576 units requested. End boundaries preserve
+code units; omitted `length` defaults to 1,048,576 units, and explicit positive
+safe-integer lengths may be larger. End boundaries preserve
 surrogate pairs, so a one-unit request may return two units. An offset inside a
-surrogate pair fails with `invalid_arguments`. A text receipt does not establish disk persistence. CSV is bounded
-to 32 MiB UTF-8. It applies selected scalar display units, uses Å coordinates/
-profile distances, and includes method/source/provenance plus blank outside
+surrogate pair fails with `invalid_arguments`. A text receipt does not establish
+disk persistence. CSV has no application byte ceiling. It applies selected
+scalar display units, uses Å coordinates/profile distances, and includes
+method/source/provenance plus blank outside
 values/status. Untrusted text formulas are neutralized; negative numeric values
 remain numeric.
 
 Native Save additionally persists annotations, named sets, molecular meshes and
 field caches/interpretations/local appearance. Active selection/pick mode and
 full-scene settings remain transient. Old 0.8.0 readers reject the new required
-capabilities explicitly; use a 0.10.0 reader to reopen these documents.
-Bounds include 64 named sets/1,000,000 references, 256 measurements/labels,
-32 molecular meshes, 2,000,000 vertices/4,000,000 triangles per molecular mesh,
-256 MiB engine estimate, 128 probes, 8 planes up to 512², 16 profiles up to 4,096,
-16 MiB aggregate analysis cache and 1,000,000 contour segments. Existing native
-128 MiB limits and 4 MiB wire frames still apply; maxima need not fit together.
+capabilities explicitly; use a compatible reader such as 0.10.1 to reopen these
+documents. Scientific records, meshes and caches are allocation-driven, without
+fixed count or memory allowances. SES spacing is preserved; caches and records
+are not silently discarded to fit an estimate. Actual representation and
+semantic validation still apply.
 
 ## Scientific fields, jobs and image evidence
 
-Read all needed pages of `fields.list`; page size defaults to 100, with a maximum
-of 100. Use returned IDs. Orbital metadata includes spin, occupation and energy
-in hartree. Select HOMO/LUMO from the supplied energies and occupations, not from
+Read all needed pages of `fields.list`; page size defaults to 100 and accepts
+larger positive safe-integer counts. Use returned IDs. Orbital metadata includes
+spin, occupation and energy in hartree. Select HOMO/LUMO from the supplied energies and occupations, not from
 an assumed row number. Orbital sign colors show amplitude sign, not charge.
 
 A density with `kind:"density"` and `quantity:"total"` can have a label without
@@ -435,15 +443,15 @@ Use `field.preview` for direct sampled volume/raycast without creating saved
 meshes. Use `surfaces.generate` explicitly to keep isosurface geometry. The
 isovalue argument is a positive magnitude; orbital meshing produces both signs,
 while nonnegative total density has no negative-phase partner. An orbital batch
-contains at most 32 distinct orbital IDs; a supplied density/grid is generated
-separately. Refining a field replaces that field's saved meshes.
+accepts distinct orbital IDs without a fixed batch count; a supplied density/grid
+is generated separately. Refining a field replaces that field's saved meshes.
 
 An accepted job is not a completed calculation. Poll `job.get` or use `--wait`,
 then inspect `completed`, `failed` or `cancelled`. Retain a returned job ID for
 cancellation. Cancel only that request's owned job, not unrelated GUI work.
 Cancellation waits for cleanup, retains previously completed surfaces and does
 not undo geometry already published by a completed job. Jobs are not durable
-across app restart and old terminal entries can expire.
+across app restart; terminal entries remain available for the controller lifetime.
 
 After changing geometry, let the viewport finish preparing. Generation can
 change framing, so record and restore the camera when comparing resolutions or
@@ -473,6 +481,12 @@ own materials. AO off or zero strength restores the normal molecular material.
 Its screen-space appearance can change with the camera even when the automatic
 coordinate-derived radius is unchanged.
 
+Version 0.10.1 uses a camera-relative headlight and neutral fill, giving smooth
+illumination and one restrained highlight as the camera moves. Molecular AO
+remains matte Lambert shading; custom shaders retain their declared lighting,
+and volume compositing remains unlit. Illumination does not change scientific
+values or geometry.
+
 Camera position/target vectors are in bohr; orbit angles are degrees. `up` must
 be a unit direction and nonparallel to the view. Degenerate poses, pole-crossing
 orbits and control-limit violations fail. Zoom factors above one move closer,
@@ -492,10 +506,10 @@ surface colors.
 ## Palettes and biological presentation
 
 Palette operations require an open document. Native `palette.load` takes one
-absolute approved local path and rejects `name`/`text`. Its UTF-8 input is capped
-at 256 KiB before native file-buffer allocation and checked with the same palette
-parser as the app's file picker. Browser-connected hosts instead use `name` and
-JSON `text`, with the same UTF-8 byte limit. Invalid input retains the active
+absolute approved local path and rejects `name`/`text`. Its complete UTF-8 input
+is checked with the same palette parser as the app's file picker, without an
+application byte ceiling. Browser-connected hosts instead use `name` and
+JSON `text`, with the same palette validation. Invalid input retains the active
 palette; `palette.reset` restores bundled defaults.
 
 The palette format is `"eigenvista-atom-colors"`, version 1, with a nonempty
@@ -520,11 +534,11 @@ values. Reset/show-all/style clearing occur before explicit values:
 | `showAll:true` | Clear hidden chains/kinds, isolation and residue filtering; retain colors/styles |
 | `clearStyles:true` | Remove all chain/component representation overrides |
 | `colorMode` | `element`, `chain`, `entity` or `secondary` |
-| `hiddenChains` | Replace with a distinct list of existing chain indices, at most 512 |
+| `hiddenChains` | Replace with a distinct list of existing chain indices |
 | `hiddenKinds` | Replace with a distinct list from the live component-kind enum |
 | `isolatedChain` | Existing chain index, or `null` to stop isolation |
 | `residueRange` | `{chainIndex,first,last}` using deposited residue identifiers, or `null` |
-| `chainStyles` | At most 512 distinct `{chainIndex,representation}` updates; `null` style removes an override |
+| `chainStyles` | Distinct `{chainIndex,representation}` updates; `null` style removes an override |
 | `componentStyles` | Component-kind keys mapped to a representation, or `null` to remove it |
 
 Isolation restores its chain/component visibility and clears residue filtering.
@@ -533,8 +547,8 @@ app's resolver, then restores its chain/component visibility and clears
 isolation. When both are supplied, range is applied after isolation. Invalid
 selectors/ranges/styles reject the whole patch. Chain style overrides component
 style, which overrides the global representation. Protein styles require a
-protein component or a chain with protein residues; active chain styles are
-capped at 512.
+protein component or a chain with protein residues. Selector/style counts have
+no fixed application ceiling.
 
 A residue-range filter hides other chains: use a separate whole-chain style
 request when the user wants that chain in ball and stick while other chains
@@ -542,7 +556,7 @@ remain cartoons. Clearing filters/styles does not itself fit the camera.
 `structure.focus {target:"visible"}` frames visible atoms;
 `{target:"chain",chainIndex:N}` frames that chain's currently visible atoms.
 Focus does not unhide atoms. Show/isolate first; an empty target returns
-`not_found`. The display summary contains bounded selectors, counts and styles,
+`not_found`. The display summary contains complete selectors, counts and styles,
 not per-atom visibility, residue arrays or focus indices.
 
 ## Files, persistence and recovery
@@ -571,19 +585,32 @@ index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document
 when the user wants a reproducible presentation.
 
-Current bounds include 1–16 approved roots, 128 MiB for native molecular reads
-and encoded document writes, 256 KiB for palettes, 512 characters for document/
-field/surface selectors, 512 biological chain selectors/styles, 32 retained jobs,
-32-orbital batches, and metadata pages of at most 100. Allowed grid sizes are
-advertised in capabilities. Native request/response frames are limited to 4 MiB;
-the frontend deadline is 60 seconds. These are rejection bounds, not performance
-or scientific-accuracy promises. Do not raise them through a prompt.
+Version 0.10.1 has no application byte/count ceilings for files, wire frames,
+selectors, orbital batches, annotations, meshes or analysis caches. Approved
+roots remain explicit security grants, without a fixed root count. Grid presets
+are advisory: request a safe-integer resolution of at least two and preserve the
+user's intended dimensions. Critical buffers reserve fallibly and size/index
+arithmetic is checked. Actual WASM address space, JavaScript representation,
+native format fields and graphics-device capabilities still constrain a request.
+An allocation or validation failure is reported; recoverable failure and
+cancellation retain previous accepted results. The OS, browser or driver can
+terminate a process after overcommitting memory, which is not always recoverable.
+Save important work before very large jobs; do not silently reduce detail.
+
+Native calls wait for completion or controller invalidation, without a default
+processing or total-transfer deadline. Transport inactivity and caller-selected
+deadlines are separate. A TCP client may half-close its sending side after a
+complete request while continuing to read. Abandoning a connection does not
+cancel an accepted operation; pending replies release on completion or controller
+invalidation. On macOS 14+, the desktop disables WebKit inactive scheduling so
+workers remain runnable in the background. Older/unsupported systems ignore
+that setting; it does not prevent OS sleep or process termination.
 
 Classify failures by `error.data.kind`, not only numeric code. Common outcomes
 include `invalid_arguments`, `busy`, `stale_document`, `permission_required`,
 `scope_denied`, `source_protected`, `destination_exists`, `validation_error`,
-`limit_exceeded`, `not_ready`, `timeout` and `operation_failed`. A disconnected
-or timed-out request has an uncertain outcome: inspect state, owned jobs and
+`allocation_failed`, `limit_exceeded`, `not_ready`, `timeout` and `operation_failed`.
+A disconnected or timed-out request has an uncertain outcome: inspect state, owned jobs and
 outputs before retrying. Do not repeat calculations/saves blindly or remove
 another instance's connection file. Preserve the user's agent/model settings and
 leave the visible app running unless asked to close it.

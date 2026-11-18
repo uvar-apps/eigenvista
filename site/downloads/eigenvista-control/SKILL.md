@@ -16,16 +16,24 @@ but does not install the app, start a connection or register a skill with the
 chosen agent. Skill registration is optional and follows that agent's own
 mechanism. No additional MCP service or provider SDK is required.
 
-Use the current EigenVista 0.10.0 package and its bundled helper. The connector
+Use the current EigenVista 0.10.1 package and its bundled helper. The connector
 was introduced in 0.8.0; older 0.7.2 apps and tester ZIPs predate this package
 layout. If the bundled helper is absent or the connected app lacks
 a requested capability, explain what is missing and obtain the appropriate
 prebuilt package within the user's authorization.
 
-The scientific-inspection extension ships in **0.10.0**, including measurements,
-SES/SAS and quantitative-field operations. Older 0.8.0 binaries lack these
+The scientific-inspection extension was introduced in **0.10.0**, including
+measurements, SES/SAS and quantitative-field operations. Older 0.8.0 binaries lack these
 operations. Discover the connected app's actual schemas and use the application
 and helper supplied together; never infer features from the version string alone.
+
+Version 0.10.1 uses allocation-driven workloads and smooth camera-relative
+lighting. Request the user's intended resolution, orbital batch or SES spacing;
+do not impose an estimated memory allowance, truncate results or silently reduce
+detail. Actual allocation, runtime, format and device constraints still apply.
+Wait for completion or cancel the owned job; preserve earlier accepted results
+after a recoverable failure. An OS or browser process termination is not always
+recoverable, so keep important work saved before very large calculations.
 
 ## Work from the user's goal
 
@@ -34,8 +42,8 @@ chain A” into connector actions. Do not ask the user for method names, interna
 IDs, revisions or JSON, and do not hand palette or biological-display actions
 back to the user as GUI chores. This also applies to selections, measurements,
 labels, neighborhoods, radii/SES/SAS settings, field meanings/units, probes,
-planes/contours, profiles, keys and CSV/native/PNG exports. Every new control has
-an application API path; missing support means a mismatched/older app, not an
+planes/contours, profiles, keys and CSV/native/PNG exports. These scientific
+operations have application API paths; missing support means a mismatched/older app, not an
 instruction to make the user perform the action manually.
 
 1. Use the app and connection identified by the user or created during the
@@ -67,9 +75,9 @@ come from authoritative f64 sources, not GPU colors. SES/SAS use explicit radii,
 probe and spacing; a selected subset is an isolated object. Read back changed
 settings/results, inspect exported artifacts, and wait/cancel only your owned jobs.
 Use typed pick attribution rather than parsing inspection text or compact display
-indices. Read full paginated molecular-surface warnings when shortened previews
-are insufficient. A shader can target one returned quantum/molecular surface ID
-or all meshes; preserve its current target when only updating uniforms.
+indices. Read complete molecular-surface diagnostics from summaries or the
+paginated warning query. A shader can target one returned quantum/molecular
+surface ID or all meshes; preserve its current target when only updating uniforms.
 Save accepted annotations, molecular meshes and field caches in a matching native
 document; active selections and full-scene settings remain transient.
 

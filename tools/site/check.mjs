@@ -236,8 +236,8 @@ assert.throws(() =>
 const downloaded = JSON.parse(
   fs.readFileSync(path.join(site, "downloads/provenance.json")),
 );
-assert.equal(downloaded.files.length, 22);
-for (const filename of ["eigenvista-control/SKILL.md", "eigenvista-control/reference.md", "eigenvista-control/README.md"])
+assert.equal(downloaded.files.length, 23);
+for (const filename of ["eigenvista-control/SKILL.md", "eigenvista-control/reference.md", "eigenvista-control/README.md", "eigenvista-control/allocation-policy.md"])
   assert(downloaded.files.some((row) => row.file === filename), `Portable binary connector instructions: ${filename}`);
 for (const row of downloaded.files) {
   const bytes = fs.readFileSync(path.join(site, "downloads", row.file));

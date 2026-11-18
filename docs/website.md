@@ -23,18 +23,25 @@ Keep that availability label aligned with the actual public release.
 
 The current source is **0.10.1**, prepared under
 [issue #93](https://github.com/uvar-apps/eigenvista/issues/93). Current authored
-manual, tutorial and AI setup copy follows that version. Release publication and
-the rebuilt download still require the release gates; this document does not
-assert that they are complete. The previous 0.10.0 source was merged through
+manual, tutorial and AI setup copy follows that version. The rebuilt Apple
+Silicon package from source `5794a6ef6328fd3aa326e429a00779f24cf90fbb` passed
+independent package audit and extracted-app native acceptance. Its measured
+download facts are now recorded in `tools/site/release.mjs`: ZIP
+`EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.zip`, 82,174,932 bytes,
+SHA-256 `76732e155f73f57748f796e28917acbebed0a33f0ac6dd38431efa2411a7d9a5`.
+Public release and GitHub Pages publication/readback remain pending; local
+package qualification does not establish their completion. The previous
+0.10.0 source was merged through
 [PR #89](https://github.com/uvar-apps/eigenvista/pull/89) and tagged `v0.10.0`.
 Older 0.8.0 downloads predate scientific inspection. Normal startup uses one wide,
 resizable left/right pane with Molecule, Fields, Surfaces and Appearance tabs,
 hide/reopen and Zen mode. Keep current instructions aligned with that default.
 Published download links, DOI and historical capture versions must continue to
 identify their actual artifacts. A source tag does not imply a new binary
-download. `tools/site/release.mjs` continues to identify the last verified
-download until the new package has been qualified. Record measured artifact
-facts only after package qualification; preserve existing source tags.
+download. `tools/site/release.mjs` identifies the independently qualified 0.10.1
+package, and the generated site uses those measured facts for the planned
+release. Verify its actual public assets and Pages payload after publication;
+preserve existing source tags and historical package records.
 
 The 0.10.1 reference explains a single camera-aligned light with neutral fill,
 smooth diffuse shape cues and one Blinn-Phong highlight. AO retains Lambert +

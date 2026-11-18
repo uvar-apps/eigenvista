@@ -1,44 +1,77 @@
 # Development handoff
 
-## Release 0.10.1 — source qualification, 18 November 2026
+**Distribution follow-up (18 November):** the first clean 0.10.1 candidate
+passed runtime/archive checks, but final guide review found its newly linked
+allocation-policy.md missing from the standalone guide folders. The package
+copy lists and checks are being corrected, followed by a new clean-source
+build/audit/extracted acceptance. Earlier candidate identity below is historical;
+no 0.10.1 tag or assets have been pushed or published. Runtime code is unchanged.
 
-Version **0.10.1** includes accepted fixes [#91](https://github.com/uvar-apps/eigenvista/issues/91)
-(smooth camera-relative lighting) and [#92](https://github.com/uvar-apps/eigenvista/issues/92)
-(allocation-driven workloads). The user authorizes commit, a new annotated tag,
-push and publication with release notes and rebuilt Mac/AI connector
-redistributables; delivery is tracked in [#93](https://github.com/uvar-apps/eigenvista/issues/93).
+## Release 0.10.1 — qualified distribution, 18 November 2026
 
-Fresh local macOS 27 arm64 checks on the 0.10.1 source pass: formatting,
-**365 workspace Rust tests, 13 desktop tests, strict workspace/all-target Clippy,
-production WASM/TypeScript/frontend and native debug builds, 23 packaging/connector
-checks, and all 678 browser cases** (339 each in Chromium/WebKit, one worker,
+Version **0.10.1** includes smooth camera-relative lighting (#91) and
+allocation-driven workloads (#92). Delivery is tracked in
+[#93](https://github.com/uvar-apps/eigenvista/issues/93). The user authorizes
+commit, annotated tag, push and a published release with notes and rebuilt
+redistributables. **Package qualification is complete; public release/Pages
+publication and independent remote byte verification are still pending.**
+
+The immutable release source is **`5794a6ef6328fd3aa326e429a00779f24cf90fbb`**, annotated tag
+`v0.10.1`. The clean optimized Apple Silicon distribution is:
+
+- ZIP: `EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.zip` (82,174,932 bytes).
+- SHA256: `76732e155f73f57748f796e28917acbebed0a33f0ac6dd38431efa2411a7d9a5`.
+- Companions: `EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.zip.sha256` and `EigenVista-0.10.1-apple-silicon-20261118T011237Z-5794a6e.json`.
+- Local output: `artifacts/distributions/`; build identity reports
+  `sourceDirty: false`, arm64, macOS 13.0 deployment target and ad-hoc signing.
+- Release destination: [v0.10.1](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.1).
+
+Fresh local macOS 27 arm64 source checks pass: formatting, 365 workspace Rust
+tests, 13 desktop tests, strict workspace/all-target Clippy, WASM/TypeScript/
+production frontend and native builds, 23 packaging/connector checks and all
+678 application browser cases (339 each in Chromium/WebKit; one worker;
 zero failures/skips/flaky cases/retries). All 419 frozen runtime/test/input
-hashes match before/after. Complete-case identity and final JSON status were
-verified, rather than inferred from progress counters. Evidence lives under
-`tmp/release-0.10.1/`; the release issue records the durable delivery ledger.
+hashes match before/after both the browser suite and release packaging.
+The complete planned-case identities and final JSON results were verified.
 
-Both browsers independently generate/render/save/reopen full 1AON at the
-requested 0.5 Å spacing: 58,870 atoms, 2,091,126 vertices and 4,182,788 triangles.
-Source hash, area, volume, components and cavities match the scientific reference;
-reopened geometry exports without a viewport error. Both reopened PNGs were
-visually inspected. Current guide/connector links pass (478 links in 18 files).
+Both browsers generate/render/save/reopen the full 58,870-atom 1AON SES at
+requested 0.5 Å spacing, producing 2,091,126 vertices and 4,182,788 triangles.
+Geometry, source hash and physical/topological metrics match the scientific
+reference; both reopened caches export successfully. Their images were reviewed.
+The packager reran its Rust/production/converter/WASM checks successfully.
 
-**Package acceptance and publication remain pending.** Next: commit the qualified
-source, build a fresh clean optimized distribution, independently audit/extract
-it and exercise its actual app/launcher/helper/converter; then record measured
-website facts, validate the site, tag/push/publish and verify public bytes.
-A debug bundle or earlier 0.10.0 package does not qualify the new distribution.
-Do not claim new native/package evidence until those checks finish.
+Independent archive qualification checks **708 first-party source files**
+against the clean commit and live source, both dependency/source archives,
+all 21 pinned Sesmesh patches, licenses, bytes/modes, arm64/system libraries,
+ad-hoc signatures, five actual executable-embedded frontend/WASM assets, and
+all 13 bundled connector files. Protected documents are filtered before access.
+The actual extracted optimized app launched through its packaged launcher with
+only system runtime paths, exercising **34 inspection methods through
+184 calls and six PNG exports**. It passed authentic cancellation,
+scoped/no-clobber protections, quantitative references, AO/palette views and
+full 1AON generation, binary Save/reopen and image export from the reopened
+cache. All six images were visually inspected. The owned app stopped and its
+private descriptor was removed; the user's app and preview servers were preserved.
 
-Work only in EigenVista on main; Molekel is read-only. Preserve v0.10.0, existing
-packages/capture provenance, icon and scientific profiles/toolchain/dependency
-pins. No application CI. Current citation uses concept DOI
-10.5281/zenodo.24246123 until a version DOI is supplied; 24302658 remains specific
-to 0.10.0. Keep preview servers 5178/5190 and the user's unsaved tab intact.
-Linux, clean-Mac/Gatekeeper and the full supported macOS range remain unqualified.
-The dated source-correction records below preserve their original authorization,
-version and inactive/hidden-window boundaries; their no-release statements are
-superseded by this explicit release request.
+Evidence: `tmp/release-0.10.1/` (BROWSER-FINAL.json,
+package-identity.json, package-audit-latest.json, package-qualification.json and
+native/native-latest.json). The release issue provides the durable public ledger.
+The tagged source/archive preserve their truthful pre-publication snapshot;
+subsequent delivery/site records do not change runtime code or retag/rebuild it.
+
+Next: finish measured website generation/local checks, commit the delivery/site
+record, push main and the tag, publish all three assets with notes, verify
+anonymous downloads and Pages bytes, then close #91/#92/#93 and record delivery.
+No application CI. Keep v0.10.0 and its assets/captures immutable. Current citation
+uses concept DOI 10.5281/zenodo.24246123 until a version DOI is supplied;
+24302658 identifies only 0.10.0. Scientific profiles, dependency/toolchain pins
+and icon are unchanged. Work only in EigenVista; Molekel is read-only.
+
+Linux, clean-Mac/Gatekeeper installation, the full supported macOS range and
+universal OOM recovery remain unqualified. This package acceptance does not
+qualify inactive/hidden/minimized behavior; the earlier inactive, nonhidden
+source acceptance below remains a separate dated result. Keep preview servers
+5178/5190 and the original unsaved browser tab intact. No system /tmp.
 
 ## Allocation-driven memory correction (#92) — qualified for review, 17 November 2026
 

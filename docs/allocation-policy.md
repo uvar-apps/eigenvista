@@ -16,9 +16,10 @@ automatically coarsened. Orbital batches and saved geometry are not truncated to
 fit a preset count.
 
 On macOS 14 and newer, the desktop shell disables WebKit's inactive scheduling
-throttle so calculation and Save workers can continue while its window is hidden.
-Older macOS versions do not implement this setting. It does not prevent system
-sleep or process termination.
+throttle to keep calculation and Save workers runnable when the app is inactive.
+Inactive, nonhidden operation has source-level acceptance; hidden/minimized
+operation remains unqualified. Older macOS versions do not implement this
+setting. It does not prevent system sleep or process termination.
 
 Critical Rust buffers reserve fallibly. Size products and index conversions are
 checked before use. A reported allocator failure or unrepresentable size ends

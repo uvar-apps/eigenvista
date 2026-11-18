@@ -260,6 +260,7 @@ const examples = [
   ["skills/eigenvista-control/SKILL.md", "eigenvista-control/SKILL.md"],
   ["skills/eigenvista-control/reference.md", "eigenvista-control/reference.md"],
   ["docs/ai-connector.md", "eigenvista-control/README.md"],
+  ["docs/allocation-policy.md", "eigenvista-control/allocation-policy.md"],
 ];
 fs.mkdirSync(path.join(out, "downloads"), { recursive: true });
 const sourceRows = examples.map(([from, name]) => {
@@ -295,5 +296,5 @@ console.log(
 );
 fs.appendFileSync(
   path.join(out, "downloads/README.txt"),
-  "\nPortable agent instructions: eigenvista-control/SKILL.md and reference.md form a complete optional workflow folder; README.md is the installed-app user guide. These instructions do not install a binary or enable an older app. A compatible EigenVista.app supplies the prebuilt connection helper and launcher. No source checkout or compiler is required for that binary package.\n",
+  "\nPortable agent instructions: eigenvista-control/SKILL.md and reference.md form a complete optional workflow folder; README.md is the installed-app user guide, with allocation-policy.md explaining larger calculations. Keep these files together. These instructions do not install a binary or enable an older app. A compatible EigenVista.app supplies the prebuilt connection helper and launcher. No source checkout or compiler is required for that binary package.\n",
 );

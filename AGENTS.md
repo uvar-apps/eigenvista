@@ -1,5 +1,12 @@
 # EigenVista agent guide
 
+**Distribution follow-up (18 November):** the first clean 0.10.1 candidate
+passed runtime/archive checks, but final guide review found its newly linked
+allocation-policy.md missing from the standalone guide folders. The package
+copy lists and checks are being corrected, followed by a new clean-source
+build/audit/extracted acceptance. Earlier candidate identity below is historical;
+no 0.10.1 tag or assets have been pushed or published. Runtime code is unchanged.
+
 Standalone [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista) checkout.
 Rust workspace, `app/`, `crates/`, `docs/`, `tools/`, and `fixtures/` live at the
 repository root. There is no `next/` wrapper and no legacy C++ / Molekel build here.
@@ -49,31 +56,29 @@ documents; older `.molekel` preview documents remain readable. Check
 - [User website](https://uvar-apps.github.io/eigenvista/) ·
   [Website maintenance](docs/website.md): static `site/` output, content, media and publishing.
 
-## Release 0.10.1 preparation — 18 November 2026
+## Release 0.10.1 qualification — 18 November 2026
 
-Fresh 0.10.1 source checks now pass: 365 workspace and 13 desktop Rust tests,
-fmt/strict Clippy, production WASM/frontend/native debug builds, 23 packaging
-checks and all 678 browser cases on 419 frozen hashes (339 per engine; no
-failures/skips/flaky cases/retries). Both browsers pass full 1AON SES generation
-and large cache Save/reopen. Clean-source packaging, extracted-native acceptance
-and public release/site verification remain separate pending gates. See the
-living handoff/status for actual evidence.
+The user authorizes commit/tag/push/publication with rebuilt redistributables,
+tracked by [#93](https://github.com/uvar-apps/eigenvista/issues/93), including
+accepted fixes #91/#92. Clean source `5794a6ef6328fd3aa326e429a00779f24cf90fbb` is tagged `v0.10.1`.
+Fresh local source checks pass: 365 workspace and 13 desktop Rust tests,
+fmt/strict Clippy, production/native builds, 23 packaging checks and all
+678 browser cases on 419 frozen hashes (339 per engine; zero failures/skips/
+flaky cases/retries). Both browsers pass full 1AON SES and cache Save/reopen.
 
-The user authorizes bumping the current application to **0.10.1**, committing,
-annotating/pushing a new immutable tag and publishing a GitHub release with
-release notes and rebuilt redistributables. Track delivery through
-[#93](https://github.com/uvar-apps/eigenvista/issues/93), including fixes #91/#92.
-This authorization supersedes the older uncommitted/no-release statements in
-the dated 17 November qualification snapshots below. Continue on main; preserve
-existing v0.10.0 and all historical packages/capture provenance.
+The clean optimized ZIP and companions are rebuilt and independently audited;
+the actual extracted launcher/app/helper passed all 34 inspection methods,
+184 calls and six reviewed PNGs, including full 1AON cache recovery.
+Read current handoff/status for exact source, artifact bytes/hash and gaps.
+Website validation and public release/download/Pages readback are still pending;
+do not infer completion from the source tag. Historical pre-publication snapshots
+remain truthful records. Preserve old tags, packages and capture provenance.
 
-Prepare and validate all changes locally before pushing. Build a clean committed
-source package, audit/extract it and use its actual bundled launcher/helper for
-acceptance; a debug build does not qualify a redistributable. Record source/tag,
-package bytes/hash and publication evidence in the living handoff/status.
-Do not invent a 0.10.1 version DOI: current citation uses concept DOI
-10.5281/zenodo.24246123; 10.5281/zenodo.24302658 identifies only 0.10.0.
-The icon, scientific format/profiles and dependency/toolchain versions stay fixed.
+Current citation uses concept DOI 10.5281/zenodo.24246123 until a version DOI
+is supplied; 24302658 identifies 0.10.0 only. Keep scientific profiles, pinned
+toolchain/dependencies and icon unchanged. No application CI. All relevant
+local checks must pass before pushing. Later delivery/docs/site commits do
+not change runtime code or retag/rebuild the qualified archive.
 
 ## Required local validation before pushing
 

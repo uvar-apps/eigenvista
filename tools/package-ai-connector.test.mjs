@@ -85,12 +85,13 @@ test("prebuilt arm64 client, portable instructions and attributed data stage and
   const staged = stage(bundle);
   assert.equal(staged.architecture, "arm64");
   assert.match(staged.version, /^eigenvista-ctl /);
-  assert.equal(Object.keys(staged.files).length, 13);
+  assert.equal(Object.keys(staged.files).length, 14);
   const prefix = "Contents/Resources/AI-connector/";
   for (const name of [
     "SKILL.md",
     "reference.md",
     "README.md",
+    "allocation-policy.md",
     "Start AI connection.command",
     "examples/bicyclic-c7h10.molden",
     "examples/complex-field.cube",
@@ -136,6 +137,21 @@ test("prebuilt arm64 client, portable instructions and attributed data stage and
       environment,
     }),
     staged,
+  );
+  const extractedConnector = path.join(extract, "EigenVista.app", prefix);
+  const extractedReadme = fs.readFileSync(
+    path.join(extractedConnector, "README.md"),
+    "utf8",
+  );
+  assert.match(
+    extractedReadme,
+    /\]\(allocation-policy\.md\)/,
+    "Installed instructions must link to the included local allocation guide",
+  );
+  assert.deepEqual(
+    fs.readFileSync(path.join(extractedConnector, "allocation-policy.md")),
+    fs.readFileSync(path.join(root, "docs/allocation-policy.md")),
+    "The local guide must remain complete and readable after ZIP extraction without sources",
   );
 });
 

@@ -8,6 +8,7 @@ const resourceFiles = [
   ["skills/eigenvista-control/SKILL.md", "SKILL.md"],
   ["skills/eigenvista-control/reference.md", "reference.md"],
   ["docs/ai-connector.md", "README.md"],
+  ["docs/allocation-policy.md", "allocation-policy.md"],
   [
     "tools/ai-connector/Start AI connection.command",
     "Start AI connection.command",
