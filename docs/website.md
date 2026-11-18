@@ -1,8 +1,24 @@
 # User-facing website
 
+## 0.10.2 release preparation — 18 November 2026
+
+The current source is **0.10.2**, tracked by
+[#98](https://github.com/uvar-apps/eigenvista/issues/98). Current content describes
+clearer buttons, automatic field-plane updates, visible atom picking and live
+molecular-surface progress. Until the new clean-source package is qualified,
+`tools/site/release.mjs` continues to identify the immutable published 0.10.1
+download; `application.mjs` distinguishes source from verified download facts.
+Only record measured new asset bytes/hashes/source after extraction and native
+acceptance. The final release will publish all three assets and the prepared
+site through the existing Pages-only publisher, then independently compare
+public downloads and served pages. No application CI. Follow the living
+[handoff](handoff.md) and [status](status.md) for current qualification/publication.
+Use concept DOI **10.5281/zenodo.24246123** until the user supplies a 0.10.2 DOI.
+Preserve historical version DOIs, release identities and media provenance.
+
 ## 0.10.1 citation publication — 18 November 2026
 
-The current version DOI is [10.5281/zenodo.24328295](https://doi.org/10.5281/zenodo.24328295).
+The 0.10.1 version DOI is [10.5281/zenodo.24328295](https://doi.org/10.5281/zenodo.24328295).
 Published through citation commit `7dca1b257218689fedb9d6069e13b5a1d4aed297`
 and [Pages deployment 44220703219](https://github.com/uvar-apps/eigenvista/actions/runs/44220703219).
 All 90 public files and nested404 match the checked local site. GitHub release
@@ -23,7 +39,7 @@ provenance, Search Console ownership-tag maintenance and publication state.
 [Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the local AI
 connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
-Version 0.10.1 retains the packaged connector and scientific-inspection features;
+Version 0.10.2 retains the packaged connector and scientific-inspection features;
 the AI pages guide users from an installed binary. Scientific inspection and the
 four-tab workspace were introduced in 0.10.0; the connector was introduced in
 0.8.0. Older 0.7.2 packages predate control.
@@ -31,7 +47,7 @@ The published homepage hero highlights **AI-enabled viewing**, links directly to
 the AI overview, and names the compatible published package beside the callout.
 Keep that availability label aligned with the actual public release.
 
-The current source is **0.10.1**, tracked through
+The **0.10.1** publication was tracked through
 [issue #93](https://github.com/uvar-apps/eigenvista/issues/93). The final clean
 package uses source `927a2962e8193b41918737ee34adbd2b7a545c29`; its archive audit,
 self-contained guide/connector resources and actual extracted app/helper have
@@ -39,8 +55,8 @@ passed qualification. A first unpublished candidate was superseded after the
 last dependency review found the linked allocation guide missing from its
 standalone folders. Both the website and corrected package now carry it.
 
-Current authored content and generated download facts identify the corrected
-package. All 162 local browser cases pass. Public release/Pages readback is complete:
+The 0.10.1 authored content and generated download facts identified the corrected
+package. All 162 local browser cases passed. Its public release/Pages readback is complete:
 all three release downloads and all 90 tracked site files plus nested404 match.
 Pages deployment [44216922047](https://github.com/uvar-apps/eigenvista/actions/runs/44216922047)
 serves delivery commit `c4109f63a9bb4b40b64426dc620c305fe5a82d63`. See the living

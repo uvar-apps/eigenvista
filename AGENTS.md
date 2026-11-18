@@ -1,5 +1,29 @@
 # EigenVista agent guide
 
+## Release 0.10.2 preparation (#98) — 18 November 2026
+
+The user authorizes bumping to **0.10.2**, release-source and delivery commits,
+an annotated `v0.10.2` tag, pushes and a public release with notes and rebuilt
+redistributables. Track [#98](https://github.com/uvar-apps/eigenvista/issues/98).
+Include accepted fixes #94–#97: visible buttons, automatic quantitative-plane
+updates, gold/cyan atom-picking cues, and honest SES/SAS progress. Work on current
+main from `52d7622`; preserve all previous tags/assets, the icon, pins, scientific
+contracts and allocation policy. A new 0.10.2 Zenodo DOI has not been supplied;
+use concept DOI **10.5281/zenodo.24246123** and preserve 24328295 as 0.10.1 only.
+Local verification and fresh clean-source package/native acceptance must precede
+push/publication. Website download facts stay at the previous qualified package
+until the new ZIP is measured; synchronize them before publishing. No application
+CI. Preserve Vite PID7087/user tab; do not run browser/native/GPU checks during
+builds or another browser/native suite. Staging/evidence: `tmp/release-0.10.2/`;
+acceptance ledger: `.unlazy/release-0.10.2/`. Read living handoff/status for the
+current delivery state and exact identities. Fresh source qualification passes
+378 Rust workspace tests, 13 explicit desktop tests, fmt/strict Clippy,
+WASM/TypeScript/production/native-debug builds, 23 packaging checks and all
+720 Chromium/WebKit cases on 427 unchanged input hashes (360 per engine; zero
+failures/skips/flaky cases/retries). Version/CFF/site-static checks pass. Evidence:
+`tmp/release-0.10.2/`. Clean source commit and optimized package qualification
+are the next gates; no 0.10.2 tag, push or publication has occurred yet.
+
 ## Molecular-surface progress (#97) — source preview, 18 November 2026
 
 Tracked by [#97](https://github.com/uvar-apps/eigenvista/issues/97). The accepted

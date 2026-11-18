@@ -6,8 +6,8 @@ see. Keep using Codex Desktop or CLI, Claude Code, Pi, OpenCode, or another
 agent with local terminal/file access. An image viewer lets the agent inspect
 and show actual exported pictures.
 
-**EigenVista 0.10.1 includes the AI connector.** Download the Apple Silicon Mac
-package from the [0.10.1 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.1).
+**EigenVista 0.10.2 includes the AI connector.** Download the Apple Silicon Mac
+package from the [0.10.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.2).
 The app ships its prebuilt connection helper, launcher, instructions, examples
 and palettes. Check the included files below as well as the version; older
 packages such as 0.7.2 do not include them. If tools are missing, the agent should
@@ -20,13 +20,14 @@ application and helper supplied together; your agent should check the connected
 app's available features. Setup starts from the downloaded app, without a
 source checkout.
 
-Version 0.10.1 adds smooth camera-relative lighting and
+Version 0.10.2 adds visible picking cues, automatic field-plane updates and
+live molecular-surface progress. It retains smooth camera-relative lighting and
 [allocation-driven calculations and files](allocation-policy.md). Ask for the
 desired grid resolution or SES spacing in ordinary language. The application
 keeps that request rather than reducing detail to fit an estimated memory budget;
 actual runtime/device constraints and recoverable allocation errors still apply.
 
-EigenVista 0.10.1 groups tools into **Molecule**, **Fields**, **Surfaces**
+EigenVista 0.10.2 groups tools into **Molecule**, **Fields**, **Surfaces**
 and **Appearance**. You do not have to operate them first. Ask for the outcome;
 the agent shares their document and calculations. Pane position and Zen are
 local presentation choices, not connector actions.
@@ -149,7 +150,7 @@ compatible app, I authorize downloading and installing the appropriate Mac
 binary package from https://github.com/uvar-apps/eigenvista/releases into an
 applications location I can write. Preserve existing app copies. Check that
 the package includes its connection helper, standalone instructions and
-"Start AI connection.command" launcher. Use the current 0.10.1 Mac package; older packages
+"Start AI connection.command" launcher. Use the current 0.10.2 Mac package; older packages
 such as 0.7.2 do not include them. If no compatible package is available, explain that clearly,
 show me the official release page and stop the setup.
 
@@ -219,12 +220,11 @@ no manual palette loading is needed.
 
 ## Say what matters in the view
 
-In the newer source preview, ask “Select these atoms and show me which ones are
+In EigenVista 0.10.2, ask “Select these atoms and show me which ones are
 selected.” Gold reticles identify selected atoms; a cyan ring identifies the
 latest atom or bond inspected without adding it to the selection. Ask to clear
 the selection to remove both cues. Display-hidden atoms remain hidden, and the
-markers are included in exported images. The published 0.10.1 download predates
-this visibility correction.
+markers are included in exported images.
 
 Tell the agent which part of the molecule matters and what you want to compare.
 “Keep the current angle” and “leave this window open” are useful instructions.
@@ -246,23 +246,21 @@ density is nonnegative; an orbital amplitude is signed. Ask for a fixed range
 when comparing planes, or for a probe/profile when numbers matter. GUI users find
 these under **Fields → Quantitative field inspection**.
 
-In the newer source preview, you can also say “Move this plane half an angstrom
+In EigenVista 0.10.2, you can also say “Move this plane half an angstrom
 along Z, keeping its contours, colors and resolution” or “Use only the last
 position I asked for.” The agent updates the existing plane and waits for the
 completed result. GUI users can leave **Auto-update plane** enabled, use a
-spinner, or press **Enter** after typing a sampling value. The published 0.10.1
-package still uses manual recomputation; the agent checks what the connected
-app supports.
+spinner, or press **Enter** after typing a sampling value. When connecting to
+an older app, the agent checks which update options it supports.
 
 ## Protect your work and wait for results
 
-In the newer source preview, you can ask “How is the molecular surface coming
+In EigenVista 0.10.2, you can ask “How is the molecular surface coming
 along?” The agent can report the current phase, elapsed time and how much of the
 meshing phase has finished. A meshing percentage describes that phase rather
 than the whole calculation. Other phases report activity without an invented
 percentage or completion-time estimate. You can ask to cancel and keep the
-previous accepted surface. The published 0.10.1 download predates the detailed
-GUI progress displays.
+previous accepted surface.
 
 The agent should preserve unsaved work and wait for calculations and exports to
 finish before describing success. Opening a different file is not permission

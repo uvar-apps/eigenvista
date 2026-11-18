@@ -1,8 +1,10 @@
 # macOS tester ZIP
 
-Release **0.10.1** adds smooth camera-relative lighting and
-[allocation-driven workloads](allocation-policy.md) to the approved workspace,
-scientific inspection and packaged AI connector. Updating a source version alone
+Release **0.10.2** adds clearer action buttons, automatic quantitative-plane
+updates, visible atom-picking cues and live molecular-surface progress to the
+approved workspace, scientific inspection and packaged AI connector. It retains
+the smooth camera-relative lighting and [allocation-driven workloads](allocation-policy.md)
+introduced in 0.10.1. Updating a source version alone
 does not rebuild an archive; rebuild and follow [status](status.md) and the
 package's `BUILD-INFO.json` for its verified artifact identity. The historical
 0.10.0 package retains its original behavior; older 0.8.0 artifacts predate

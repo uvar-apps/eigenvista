@@ -1,6 +1,6 @@
 # Application control API
 
-**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.2:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 Installed-app agents should use the packaged portable skill and technical
@@ -25,7 +25,7 @@ these additions; an older source-built instance may lack them.
 
 **Scientific inspection, introduced in 0.10.0:** the Mac package includes the geometry,
 SES/SAS and quantitative-field methods documented below (#83–#86). Older
-0.8.0 downloads do not have these methods. Use the matching 0.10.1
+0.8.0 downloads do not have these methods. Use the matching 0.10.2
 app/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
 establish availability.
@@ -242,7 +242,7 @@ rules below. Results may include additional metadata.
 | `job.get` | `jobId` | Operation status, progress and terminal result/error |
 | `job.cancel` | `jobId` | Job state after owned cancellation/cleanup |
 
-Source preview #97 adds detailed molecular-surface progress presentation.
+EigenVista 0.10.2 (#97) adds detailed molecular-surface progress presentation.
 The existing `job.get.progress` retains raw `stage` and optional
 `counts:{completed,total}`. Engine phases are `geometry`, `classify`, `mesh`,
 `assemble` and `measure`; `preparing`, `transferring` and `validating` describe
@@ -252,7 +252,7 @@ overall percentage. `app.state.progress` adds the active `operation`, `label`
 and `elapsedSeconds`. Its `started` uses the WebView's monotonic clock, not Unix
 time. Wait for terminal job status rather than a phase reaching 100%, and cancel
 only an owned receipt. No overall percentage or ETA is inferred. These GUI
-displays and elapsed metadata are absent from the published 0.10.1 package.
+displays and elapsed metadata are included in 0.10.2.
 
 `scene.set` supports `representation`, `positiveColor`, `negativeColor`, `opacity`,
 `isovalue`, `shading`, `backgroundColor`, `volumeQuality` and
@@ -414,7 +414,7 @@ back the accepted settings/results. No GUI operation is a required workaround.
 | `fields.describe` | `fieldId` | Accepted or derived scalar interpretation/provenance |
 | `fields.set_key` | `visible` | Persists truthful current mesh/raycast/volume-key visibility |
 | `fields.set_metadata` | `descriptor` below | Records scalar interpretation/display units; raw sources/hash stay unchanged |
-| `analysis.create` | Complete `request` below; optional `supersede:true` for planes in the source preview | Background create/replace probe, plane or profile with f64 cache |
+| `analysis.create` | Complete `request` below; optional `supersede:true` for planes since 0.10.2 | Background create/replace probe, plane or profile with f64 cache |
 | `analysis.plane_atoms` | Ordered `atoms` (3), `extentAngstrom` (width/height), `dims` | Resolves an atom plane definition in world bohr |
 | `analysis.list` | Page | Analysis definitions, interpretation/counts and rendering warnings; no sample arrays |
 | `analysis.get` | `id` | One analysis summary/settings/provenance |
@@ -425,7 +425,7 @@ back the accepted settings/results. No GUI operation is a required workaround.
 
 ### Inspection object shapes and scientific conventions
 
-Source preview after 0.10.1 renders shared active selection as gold hollow
+EigenVista 0.10.2 renders shared active selection as gold hollow
 reticles; the latest typed inspection pick has cyan rings for attributed atoms
 that are not already selected. `selection.set`, mouse accumulation and named-set
 activation share this rendering path. Normal inspection clicks still update
@@ -434,7 +434,7 @@ clears both active selection and the last inspection pick. Hidden atoms are
 filtered out of depiction only, retaining their original indices in readback.
 Markers are foreground source-position cues included in PNG exports, not
 scientific geometry or molecular outlines. No new method or saved-file feature
-is required; the published 0.10.1 binary predates the visible-marker correction.
+is required.
 
 `measurement` contains `id,label,kind,atoms,visible,color,always_visible`.
 Distance uses two distinct IDs and returns Å; angle uses three, centered on the
@@ -503,7 +503,7 @@ must agree with those source references. Use `analysis.plane_atoms` to construct
 the exact three-atom frame: centered at A, horizontal along B−A, normal along
 `(B−A)×(C−A)`, with a nondegenerate third point. Endpoints are included.
 
-**Source preview after 0.10.1:** discover `analysis.create`'s input schema before
+**Plane replacement in 0.10.2:** discover `analysis.create`'s input schema before
 using its optional top-level `supersede:true`. This is supported for plane
 definitions only. Send the full request with the same analysis ID on each edit;
 the ordinary job receipt is returned immediately. A replacement can supersede
@@ -515,7 +515,7 @@ been published, it remains accepted until a newer successful publication.
 Existing appearance is preserved. Cancel only a receipt owned by your request
 with `job.cancel`. Explicit `expectedRevision` is checked again before queued
 execution; refresh state after a stale outcome. Source replacement and disposal
-prevent obsolete publication. The published 0.10.1 binary lacks this option.
+prevent obsolete publication. Older apps may lack this option.
 
 `appearance` supports `visible`, `colormap` (`diverging`, `viridis`, `grayscale`),
 `show_key`, `show_labels`, optional ordered `range:[min,max]` and finite
@@ -663,7 +663,7 @@ An unsaved-document replacement fails with `permission_required` unless
 operations are explicit failures. A transport timeout has an uncertain outcome:
 inspect current state/jobs and output files before repeating a mutation.
 
-Version 0.10.1 has no application byte/count ceilings for frames, files,
+Version 0.10.2 has no application byte/count ceilings for frames, files,
 encoded Save results, PNG/CSV artifacts, palettes, selectors or orbital batches.
 Pagination defaults to 100 records but accepts larger positive safe integers.
 Jobs remain discoverable for the controller lifetime. Grid presets are advisory;

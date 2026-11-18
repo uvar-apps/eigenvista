@@ -52,7 +52,7 @@ export default [
     body: `
 <p class="lede">Find an orbital, reveal a density surface, load a palette or focus on one protein chain. Tell your agent what you want and watch the same EigenVista window respond.</p>
 ${agentWorkspaceNote}
-<div class="notice"><strong>Included in EigenVista ${application.version} for Mac.</strong> The app ships its connection helper, launcher, agent instructions and examples together. <a href="ai-install.html">Set up your agent</a> and start exploring with ordinary prompts.</div>
+<div class="notice"><strong>Included in EigenVista ${release.version} for Mac.</strong> The app ships its connection helper, launcher, agent instructions and examples together. <a href="ai-install.html">Set up your agent</a> and start exploring with ordinary prompts.</div>
 <div class="actions"><a class="button primary" href="ai-install.html">Connect the installed app →</a><a class="button" href="ai-guide.html">What to ask your agent →</a></div>
 <figure class="plate"><div class="plate-label"><span>RECORDED AGENT SESSION</span><span>C₇H₁₀ / HOMO</span></div><a href="assets/media/ai-session-xray.webp"><img src="assets/media/ai-session-xray.webp" width="1700" height="1328" alt="Translucent cyan orbital lobes surround the carbon and hydrogen framework of C7H10 on a dark blue background" fetchpriority="high"></a><figcaption>An actual app export from a recorded external-agent session: the C₇H₁₀ HOMO (MO 26), on a 128³ grid, with an X-ray finish. <a href="ai-tutorial-orbitals.html">Follow the orbital workflow →</a></figcaption></figure>
 
@@ -65,7 +65,7 @@ ${agentWorkspaceNote}
 </div>
 
 <h2 id="connection">The app includes the connection tools</h2>
-<div class="notice"><strong>Explore scientific inspection in ${application.version}.</strong> Ask for geometry measurements/labels, ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field probes/planes/profiles. The ${application.version} Mac package and its connector include these workflows. Ask your agent to confirm available features when connecting to an older or custom app. A HOMO plane shows signed amplitude ψ; a total-density plane shows nonnegative electron density. <a href="reference-inspection.html">Read the scientific-inspection manual →</a></div>
+<div class="notice"><strong>Explore scientific inspection in ${application.version}.</strong> Ask for geometry measurements/labels, ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field probes/planes/profiles. The ${release.version} Mac package and its connector include the core inspection workflows. ${application.status === "published" ? `It also includes visible atom picks, plane-update controls and detailed molecular-surface progress.` : `The new selection, plane-update and surface-progress behavior is available in the ${application.version} test build.`} Ask your agent to confirm available features when connecting to an older or custom app. A HOMO plane shows signed amplitude ψ; a total-density plane shows nonnegative electron density. <a href="reference-inspection.html">Read the scientific-inspection manual →</a></div>
 <p>A compatible EigenVista Mac app ships its connection helper, standalone agent instructions, launcher, examples and palettes together. You do not need a separate MCP plugin. Your agent reads those instructions and handles discovery, commands and progress checks.</p>
 <p>Use <strong>Codex Desktop or CLI, Claude Code, Pi, OpenCode</strong>, or another agent with local terminal and file access. Codex Desktop already has terminal access; its CLI is optional. An image viewer lets the agent inspect and show actual PNG exports. There is no chat box or model account inside EigenVista; you keep using your chosen agent.</p>
 
@@ -90,7 +90,7 @@ ${agentWorkspaceNote}
       "Set up a connector-enabled EigenVista Mac package with its bundled launcher, or give your agent one prompt to install and connect it for you.",
     body: `
 <p class="lede">Use the connection tools already inside the Mac app. Open its launcher yourself, or give your agent the setup prompt and let it handle the installation and connection.</p>
-<div class="notice"><strong>Use EigenVista ${application.version} for Mac.</strong> Its connection helper, launcher, instructions, examples and palettes are inside the app. <a href="install.html">Download and install EigenVista</a>, then choose the setup method below. Check the included files when using an older or custom package.</div>
+<div class="notice"><strong>Use EigenVista ${release.version} for Mac.</strong> Its connection helper, launcher, instructions, examples and palettes are inside the app. <a href="install.html">Download and install EigenVista</a>, then choose the setup method below. Check the included files when using an older or custom package.</div>
 
 <h2 id="agents">Choose the agent you already use</h2>
 <p>Your agent needs local terminal/file access and, to inspect exported pictures, an image viewer. A cloud-only chat without access to this Mac cannot control its local app. Keep an existing working agent installation; choose only one if you need to install one.</p>
@@ -105,7 +105,7 @@ ${agentWorkspaceNote}
 ${agentSources}
 
 <h2 id="package">Check the compatible app package</h2>
-<p>Install the current EigenVista ${application.version} Mac package from the <a href="https://github.com/uvar-apps/eigenvista/releases">official release page ↗</a>. Follow the <a href="install.html">normal Mac installation guide</a>. The connection tools below must be included:</p>
+<p>Install the current EigenVista ${release.version} Mac package from the <a href="https://github.com/uvar-apps/eigenvista/releases">official release page ↗</a>. Follow the <a href="install.html">normal Mac installation guide</a>. The connection tools below must be included:</p>
 <div class="table-wrap"><table><thead><tr><th scope="col">Inside EigenVista.app</th><th scope="col">Purpose</th></tr></thead><tbody>
 <tr><td><code>Contents/MacOS/eigenvista-ctl</code></td><td>The prebuilt connection helper used by the agent.</td></tr>
 <tr><td><code>Contents/Resources/AI-connector/Start AI connection.command</code></td><td>The packaged launcher for an enabled session.</td></tr>
@@ -171,6 +171,7 @@ ${code(setupPrompt)}
 <tr><th scope="row">Change the finish</th><td>“Give this surface an X-ray finish so I can see the framework through it,” or “Cut a window into the density surface without changing the molecular data.”</td></tr>
 <tr><th scope="row">Keep a comparison fair</th><td>“Export AO off and on from the same camera, representation, palette and window size. Show me the actual images side by side.”</td></tr>
 <tr><th scope="row">Save the result</th><td>“Save a new molecular document, an opaque PNG and a transparent-background PNG in this session's Results folder. Use fresh filenames and show me the images.”</td></tr>
+<tr><th scope="row">Follow a molecular surface</th><td>“How is the molecular surface coming along? Tell me its current stage, elapsed time and how much of the meshing stage has finished.”</td></tr>
 <tr><th scope="row">Stop a long calculation</th><td>“Cancel only the calculation you started for my current request. Keep completed surfaces and the molecular data. Tell me when the app is ready again.”</td></tr>
 </tbody></table></div>
 <p>You can ask for palette loading/reset, element/chain/entity/secondary-structure coloring, hiding and isolation, residue ranges, per-chain/component styles, focus and automatic AO radius directly. The agent handles these choices; no manual palette loading is needed.</p>
@@ -199,7 +200,8 @@ ${agentWorkspaceNote}
 <p>For on-device-only work, choose an agent that supports a local model/runtime and check its tools, telemetry and network settings. <a href="https://opencode.ai/docs/providers/">OpenCode documents local runtimes ↗</a>. Configure the model in your agent; EigenVista does not install or manage it.</p>
 
 <h2 id="inspection">Scientific inspection</h2>
-<p>The <a href="reference-inspection.html">new inspection controls</a> are included in both the GUI and the ${application.version} Mac app's connector. Older 0.8.0 downloads predate them. Ask the agent to confirm that your connected application has these capabilities before starting.</p>
+<p>The <a href="reference-inspection.html">inspection controls</a> are included in both the GUI and the ${release.version} Mac app's connector. Older 0.8.0 downloads predate them. Ask the agent to confirm that your connected application has these capabilities before starting.</p>
+<p><strong>Inspection improvements in ${application.version}.</strong> Gold reticles identify atoms selected by you or your agent; a normal inspection click shows a cyan ring for atoms not already selected. A field plane can update as you commit sampling changes, while an agent can request its replacement directly. For molecular surfaces, the agent can report the current phase, elapsed time and measured mesh completion, then cancel only its own calculation while retaining completed surfaces. A meshing percentage describes that stage, not the whole job or a remaining-time estimate. ${application.status === "published" ? `These improvements are included in the current Mac package.` : `These improvements are in the ${application.version} test build; the published ${release.version} download predates them.`}</p>
 <ul><li>“Choose this ligand copy, show complete residues within 4 angstroms, label the selected distance and save the figure and numbers.”</li><li>“Generate an SES with explicit radii, a 1.4 angstrom solvent probe and 0.25 angstrom spacing. Apply X-ray shading only to that surface and keep its cached geometry.”</li><li>“Make a true HOMO amplitude slice with a fixed colorbar from minus 0.06 to plus 0.06 and signed contours at 0.02 and 0.04. Show units, plot values along the selected bond, and export the tables and image.”</li></ul>
 <p>The agent handles selections, palettes, parameters, cancellation, file access and exports without handing those steps back as GUI chores. Follow the <a href="tutorials-geometry.html">measurement</a>, <a href="tutorials-molecular-surfaces.html">molecular-shape</a> or <a href="tutorials-quantitative-fields.html">quantitative-field</a> lesson for an exact worked example.</p>
 

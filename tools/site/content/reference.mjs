@@ -7,12 +7,13 @@ export default [
     file: "reference.html",
     title: "User reference",
     searchTitle: "Molecular and quantum chemistry viewer reference manual",
-    description: `The EigenVista ${application.version} test-build manual: files, scene controls, quantum fields, scientific inspection, biological structures, and saving.`,
+    description: `The EigenVista ${application.version} ${application.status === "unreleased" ? "test-build " : ""}manual: files, scene controls, quantum fields, scientific inspection, biological structures, and saving.`,
     section: "reference",
     number: "03",
     body: `
 <div class="prose">
   <p>EigenVista displays molecular structures and supplied quantum-chemistry fields in an interactive 3D scene. This reference covers <strong>EigenVista ${application.version}</strong>, including the four-tab workspace and <a href="reference-inspection.html">scientific inspection</a>. The <strong>${release.version} Mac download</strong> includes these tools and its AI connector. Start with the <a href="install.html">installation guide</a> or a <a href="tutorials.html">worked tutorial</a> with a downloadable example.</p>
+  <p><strong>New in ${application.version}:</strong> action buttons stand out from labels; gold and cyan markers identify selected and inspected atoms; field planes update as you commit sampling changes; and molecular-surface generation shows its phase, elapsed time and measured mesh progress. ${application.status === "published" ? `These improvements are included in the ${release.version} Mac package.` : `These additions are being prepared for release; the published download remains ${release.version}.`} <a href="reference-inspection.html">Use the updated inspection tools →</a></p>
 
   <h2 id="manual">Find a workflow</h2>
   <ul class="toc">

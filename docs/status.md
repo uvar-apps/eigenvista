@@ -1,5 +1,28 @@
 # Implementation status
 
+## Release 0.10.2 preparation (#98) — 18 November 2026
+
+The user authorizes 0.10.2 version synchronization, commits, annotated tag,
+pushes and publication with rebuilt redistributables/release notes, tracked by
+[#98](https://github.com/uvar-apps/eigenvista/issues/98). This packages accepted
+#94–#97: button visibility, automatic field-plane updates, visible atom picking
+and molecular-surface progress. Preparation is in progress; the new package,
+tag and release have not been built/published yet. Prior 0.10.1 assets are
+unchanged. Concept DOI **10.5281/zenodo.24246123** applies until a 0.10.2 DOI is
+supplied; 24328295 continues to identify 0.10.1 only. See the living handoff and
+`tmp/release-0.10.2/` for qualification/delivery progress. No scientific,
+allocation-policy, format, icon or dependency/toolchain-pin changes are planned.
+Current required validation is local macOS, with no application CI; Linux and
+clean-Mac/Gatekeeper/entire-OS-range qualification remain pending.
+
+Fresh source qualification passes 378 Rust workspace and 13 explicit desktop
+tests, fmt/strict Clippy, WASM/TypeScript/production/native-debug builds,
+23 packaging/connector checks and all 720 Chromium/WebKit cases on 427 unchanged
+input hashes (360 per engine; zero failures/skips/flaky cases/retries). Version,
+CFF parsing and source-stage website build/static checks pass. Next gates are
+clean source commit and rebuilt optimized-package/extracted-native acceptance;
+no 0.10.2 tag, push or publication has occurred. See `tmp/release-0.10.2/`.
+
 ## Molecular-surface progress (#97) — source preview, 18 November 2026
 
 Tracked by [#97](https://github.com/uvar-apps/eigenvista/issues/97). Live SES/SAS

@@ -1,6 +1,6 @@
 # EigenVista connector reference for agents
 
-Source preview #97 shows molecular-surface progress in both the controls and
+EigenVista 0.10.2 (#97) shows molecular-surface progress in both the controls and
 viewport, including hidden Tools/Zen. Poll the existing `job.get` receipt:
 `progress.stage` reports `geometry`, `classify`, `mesh`, `assemble`, `measure`,
 with `preparing`, `transferring` and `validating` around the engine work.
@@ -10,15 +10,15 @@ binary stages report start/end only, not a measured overall percentage.
 Its `started` value uses the WebView's monotonic clock, not Unix time; use the
 reported elapsed value instead. Wait for terminal job status rather than a
 stage reaching 100%. Cancel only the owned job. No new method or file-format
-feature is needed; the published 0.10.1 GUI predates these progress displays.
+feature is needed. These progress displays and elapsed metadata are included in 0.10.2.
 
-Source preview after 0.10.1: active selection has gold reticles; the latest typed
+EigenVista 0.10.2: active selection has gold reticles; the latest typed
 inspection pick has cyan rings for attributed atoms not already selected. These
 use shared `selection.set`/mouse state and `selection.get.lastPick`; normal
 inspection does not overwrite selection. `selection.clear` clears selection and
 the transient last pick. Visibility filters suppress markers without changing
 original-ID readback. Foreground cues identify source positions and appear in
-PNG exports; they are not atom/surface outlines. Published 0.10.1 lacks this fix.
+PNG exports; they are not atom/surface outlines.
 
 This reference works with an installed connector-enabled EigenVista package and
 its prebuilt helper. The installed package supplies the required tools. This is
@@ -29,7 +29,7 @@ tester ZIPs predate it. Confirm the installed files and live capabilities
 rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
 qualification is pending; non-Unix attachment is unsupported.
 
-Use the current **0.10.1** package. The scientific-inspection methods below were
+Use the current **0.10.2** package. The scientific-inspection methods below were
 introduced in **0.10.0**. Older 0.8.0 downloads lack them. Use the application,
 helper and instructions supplied
 together, and inspect the connected app's live schemas. Do not promise features
@@ -374,9 +374,9 @@ claim. The app does not compute an electrostatic potential from coordinates.
 
 An `analysis.create` request contains `{id,label,field,definition,descriptor?}`.
 
-Source preview after 0.10.1 adds optional top-level `supersede:true` for plane
-definitions. Discover its presence in the live schema first; the published
-0.10.1 binary does not accept it. Reuse the same analysis ID and submit a complete
+Version 0.10.2 adds optional top-level `supersede:true` for plane
+definitions. Discover its presence in the live schema first; older
+apps may not accept it. Reuse the same analysis ID and submit a complete
 definition on every edit. The ordinary job receipt is immediate. Only an earlier
 replaceable plane job for the same ID and scientific source can be superseded;
 other work returns `busy`. Unpublished obsolete work is cancelled, its unwind is
@@ -450,7 +450,7 @@ remain numeric.
 Native Save additionally persists annotations, named sets, molecular meshes and
 field caches/interpretations/local appearance. Active selection/pick mode and
 full-scene settings remain transient. Old 0.8.0 readers reject the new required
-capabilities explicitly; use a compatible reader such as 0.10.1 to reopen these
+capabilities explicitly; use a compatible reader such as 0.10.2 to reopen these
 documents. Scientific records, meshes and caches are allocation-driven, without
 fixed count or memory allowances. SES spacing is preserved; caches and records
 are not silently discarded to fit an estimate. Actual representation and
@@ -511,7 +511,7 @@ own materials. AO off or zero strength restores the normal molecular material.
 Its screen-space appearance can change with the camera even when the automatic
 coordinate-derived radius is unchanged.
 
-Version 0.10.1 uses a camera-relative headlight and neutral fill, giving smooth
+Since 0.10.1, the viewer uses a camera-relative headlight and neutral fill, giving smooth
 illumination and one restrained highlight as the camera moves. Molecular AO
 remains matte Lambert shading; custom shaders retain their declared lighting,
 and volume compositing remains unlit. Illumination does not change scientific
@@ -615,7 +615,7 @@ index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document
 when the user wants a reproducible presentation.
 
-Version 0.10.1 has no application byte/count ceilings for files, wire frames,
+Version 0.10.2 has no application byte/count ceilings for files, wire frames,
 selectors, orbital batches, annotations, meshes or analysis caches. Approved
 roots remain explicit security grants, without a fixed root count. Grid presets
 are advisory: request a safe-integer resolution of at least two and preserve the

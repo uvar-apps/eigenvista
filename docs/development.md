@@ -10,10 +10,12 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
-### 0.10.1 source
+### 0.10.2 source
 
-Source version 0.10.1 adds smooth camera-relative lighting (#91) and
-[allocation-driven workloads](allocation-policy.md) (#92). It retains
+Source version 0.10.2 packages clearer buttons (#94), automatic plane updates
+(#95), visible atom picking (#96), and live SES/SAS progress (#97). It retains
+0.10.1's smooth camera-relative lighting (#91),
+[allocation-driven workloads](allocation-policy.md) (#92), and
 [Plan 009](../plans/009-scientific-inspection-implementation.md), introduced in 0.10.0
 from `codex/scientific-inspection` through [PR #89](https://github.com/uvar-apps/eigenvista/pull/89).
 The historical `v0.10.0` source tag and its Mac package retain their original
@@ -37,7 +39,7 @@ helper acceptance must cover every new method, updates/readback, cancellation,
 CSV/PNG, source preservation, file scopes/no-clobber and save/reopen. In-page
 controller tests alone do not establish installed connector support.
 
-Source-preview plane auto-update is tracked by #95. Focused tests are
+Plane auto-update, included in 0.10.2, is tracked by #95. Focused tests are
 `plane-auto-update.spec.ts` (real GUI/WASM/contours, input commits, numerical
 oracle, cache recovery and failure retention) and `plane-controller.spec.ts`
 (deterministic ownership, queued cancellation, publication/source/revision races).
@@ -45,9 +47,9 @@ Run these in both Chromium and WebKit from `app/`, then the full affected suites
 Numeric mouse-step tests target the native arrow inside the input's padding.
 Canvas-only screenshot oracles hide the separate workspace progress badge as
 well as toolbar/error overlays; do not confuse changing progress text with
-changed molecular rendering. The published 0.10.1 package remains unchanged.
+changed molecular rendering. Preserve historical 0.10.1 package identities.
 
-Source-preview molecular-surface progress is tracked by #97. The focused
+Molecular-surface progress, included in 0.10.2, is tracked by #97. The focused
 `molecular-progress.spec.ts` tests run real SES/SAS Rust/WASM calculations in
 both browsers. Instrumentation holds genuine worker callbacks to check live
 counts, phase-local percentages, elapsed time, API readback, cancellation and

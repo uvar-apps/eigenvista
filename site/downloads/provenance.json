@@ -118,26 +118,26 @@
     {
       "file": "eigenvista-control/SKILL.md",
       "source": "skills/eigenvista-control/SKILL.md",
-      "bytes": 6399,
-      "sha256": "8edb89c1fe96b2d8f183baffe4f6ddc3063de49dfac0992b25cb70a27b50f583"
+      "bytes": 6739,
+      "sha256": "47f7251a2f5b30c96799a33053856dbdde9fd11dea8f44016a5278d67c5b8d66"
     },
     {
       "file": "eigenvista-control/reference.md",
       "source": "skills/eigenvista-control/reference.md",
-      "bytes": 38815,
-      "sha256": "739dbb441a0a459cd903aa0c52120296106d70f7d6ada39a3abc1d6bc20f5277"
+      "bytes": 38766,
+      "sha256": "c355e7440feca056de18e915fa0051e1f39c3fd1fac4b3599d6cb10e78445bb7"
     },
     {
       "file": "eigenvista-control/README.md",
       "source": "docs/ai-connector.md",
-      "bytes": 19835,
-      "sha256": "184bf0b5ca8cefb5cdb864098d1f21ce5f7c6461a4fee7ff2b566876ff5c2ad1"
+      "bytes": 19744,
+      "sha256": "b72c82d13acdfe8e8348535ea6d994c6d662a62c78714232368e6743ac83d037"
     },
     {
       "file": "eigenvista-control/allocation-policy.md",
       "source": "docs/allocation-policy.md",
-      "bytes": 3912,
-      "sha256": "5315a31a668d9b6a87e8be961719e3e5021e6222b3728075d4a70ada03fd8991"
+      "bytes": 3935,
+      "sha256": "4e742c42e3904602de40848e1f1433b6b2323e9a4f1f202d429b8cbd57497184"
     }
   ]
 }

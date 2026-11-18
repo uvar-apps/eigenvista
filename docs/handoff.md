@@ -1,5 +1,43 @@
 # Development handoff
 
+## Release 0.10.2 preparation (#98) — 18 November 2026
+
+User authorizes version0.10.2, commit/tag/push/publication with release notes and
+fresh redistributables, tracked by [#98](https://github.com/uvar-apps/eigenvista/issues/98).
+Current main starts clean at `52d7622d8174df1a761a963204213bf1abbfb7b2`.
+The release packages accepted fixes #94–#97: button styling, automatic field-plane
+updates, visible picking, live molecular-surface progress. First-party version
+metadata is being synchronized; dependency/toolchain pins, icon, science,
+formats and allocation policy are unchanged. Use the concept DOI
+**10.5281/zenodo.24246123** until the user supplies a 0.10.2 DOI. The published
+0.10.1 version DOI 24328295 and old packages/tags remain historical identities.
+
+Release gates: complete local scientific/desktop/build/browser/packaging checks
+on frozen source; clean release-source commit; rebuilt optimized ZIP, converter,
+AI helper/launcher, notices and guides; independent extraction/audit and actual
+packaged native acceptance; measured website download facts; immutable annotated
+tag; push main/tag; GitHub release notes/three assets; public asset/Pages readback.
+Fresh source checks pass: **378 Rust workspace tests**, **13 explicit desktop
+tests**, fmt/strict Clippy, WASM/TypeScript/production/native-debug builds,
+**23 packaging/connector checks**, and all **720 browser cases**, 360 per
+engine, with zero failures/skips/flaky cases/retries. All **427 runtime/test/input
+hashes** stay unchanged through the complete browser run. Version and CFF parsing
+checks pass; seven own crates and both app manifests/config agree on 0.10.2,
+with dependency/toolchain pins, science and icon unchanged. The source-stage
+website build/static check passes with published download facts still truthfully
+at 0.10.1. Evidence includes `checks.json`, `browser-qualification.json`,
+`version-check.json` and source snapshots under the directory below.
+
+Next: commit clean release source, then build/audit/launch its actual optimized
+redistributable before changing download facts. No 0.10.2 tag, pushes or
+publication have occurred yet. Evidence/scripts stay in
+`tmp/release-0.10.2/`, acceptance ledger in `.unlazy/release-0.10.2/`.
+Documentation and website authors work on disjoint owned files; root performs
+all actual builds/browser/native checks sequentially. Preserve the existing
+preview server PID7087 and user's tab. Linux/clean-Mac/Gatekeeper/full macOS
+range/Intel qualification remains pending; the package remains ad-hoc signed,
+not notarized. Update this section as qualification/publication progresses.
+
 ## Molecular-surface progress (#97) — source preview, 18 November 2026
 
 Tracked by [#97](https://github.com/uvar-apps/eigenvista/issues/97). The user tested

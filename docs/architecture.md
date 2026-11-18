@@ -1,9 +1,9 @@
 # As-built architecture
 
-**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.2:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
-This describes the **0.10.1 application preview**, including the shared
+This describes the **0.10.2 application preview**, including the shared
 application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
@@ -11,10 +11,10 @@ not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
-Version 0.10.1 includes the **scientific-inspection implementation** introduced in 0.10.0
+Version 0.10.2 includes the **scientific-inspection implementation** introduced in 0.10.0
 ([Plan 009](../plans/009-scientific-inspection-implementation.md), #83–#86).
 Its selections/measurements/labels, SES/SAS meshes and quantitative field
-analyses are described below and are included in the 0.10.1 Mac package. Older 0.8.0
+analyses are described below and are included in the 0.10.2 Mac package. Older 0.8.0
 binaries predate them. Read the living handoff for source, artifact identity
 and actual qualification boundaries.
 The [scientific-inspection decision](design/2026-11-16-scientific-inspection.md)
@@ -109,7 +109,7 @@ owns accepted selection/pick order, worker requests and publication. Its
 operations are dispatched through the existing controller/helper, not a second
 document, scripting runtime or GUI-driving automation layer.
 
-Source preview after 0.10.1 adds committed-input plane auto-update. The React
+Version 0.10.2 adds committed-input plane auto-update. The React
 editor retains numeric drafts until a native step or Enter commit, coalesces
 rapid commits and owns receipt-specific cancellation through an AbortSignal.
 An additive `supersede:true` on `analysis.create` serializes replacement of only
@@ -120,7 +120,7 @@ keeps its last complete scene until replacement contours are prepared; contour
 failure retains that scene and makes synchronized export report the failure.
 Accepted numerical samples remain inspectable. Appearance-only changes reuse
 samples. No scientific evaluator, format, requested resolution or allocation
-policy changes. These controls are absent from the published 0.10.1 binary.
+policy changes. These controls are included in 0.10.2.
 
 | Component | Ownership |
 | --- | --- |
@@ -139,7 +139,7 @@ sets are distinct from ordered measurement/plane/profile atom sequences.
 Typed `lastPick` readback distinguishes atoms, bonds, residues and quantum/
 molecular surfaces, retaining original identity and explicit mesh-vertex or
 backbone-Cα attribution. A changed/removed source mesh invalidates its old pick.
-Source preview #96 renders selected atoms as gold target markers and inspected
+Version 0.10.2 (#96) renders selected atoms as gold target markers and inspected
 atoms as cyan rings, using batched foreground points with owned textures.
 Markers retain source identities but respect visibility filters; they identify
 positions rather than physical silhouettes. An ordinary inspection updates only
@@ -147,7 +147,7 @@ the annotation group, preserving molecular geometry, palettes, shaders and AO.
 Selection and ordered-pick props are guarded by source identity before passive
 reset effects run, preventing a stale cue on the first replacement-source frame.
 Clearing selection also clears the transient inspection cue. PNGs use the same
-scene markers as the interactive view; the published 0.10.1 app predates this fix.
+scene markers as the interactive view.
 Source geometry-only requests omit basis/density/grids and do not replace QC
 registration. Quantitative requests reuse prepared immutable numeric inputs and
 transfer f64 caches separately from f32 preview values. Active cancellation
@@ -560,7 +560,7 @@ checks, just like stale completion.
 Progress UI state is cleared on success, cancellation, and failure; it is not
 persisted in native documents.
 
-Source preview #97 also presents molecular SES/SAS progress in the surface
+Version 0.10.2 (#97) also presents molecular SES/SAS progress in the surface
 controls and a compact viewport activity card, including hidden Tools and Zen
 mode. `useScientificInspection` retains the operation, label and monotonic
 start time across phase changes and clears old counts when a phase has none.
@@ -573,7 +573,7 @@ its existing stage/count contract; `app.state` additionally exposes active
 `elapsedSeconds`. The progress components own their timers, so elapsed ticks
 do not rebuild the viewport or run scientific work. Cancellation, source guards,
 prior accepted results, scientific hashes and saved formats are unchanged.
-The published 0.10.1 package predates this presentation and elapsed readback.
+Version 0.10.2 includes this presentation and elapsed readback.
 
 App and Convert Files each create a stable scientific client. The bridge keeps
 one FIFO queue and posts only one request at a time. A client's `cancel()` removes

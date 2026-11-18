@@ -16,7 +16,7 @@ but does not install the app, start a connection or register a skill with the
 chosen agent. Skill registration is optional and follows that agent's own
 mechanism. No additional MCP service or provider SDK is required.
 
-Use the current EigenVista 0.10.1 package and its bundled helper. The connector
+Use the current EigenVista 0.10.2 package and its bundled helper. The connector
 was introduced in 0.8.0; older 0.7.2 apps and tester ZIPs predate this package
 layout. If the bundled helper is absent or the connected app lacks
 a requested capability, explain what is missing and obtain the appropriate
@@ -27,8 +27,8 @@ measurements, SES/SAS and quantitative-field operations. Older 0.8.0 binaries la
 operations. Discover the connected app's actual schemas and use the application
 and helper supplied together; never infer features from the version string alone.
 
-Version 0.10.1 uses allocation-driven workloads and smooth camera-relative
-lighting. Request the user's intended resolution, orbital batch or SES spacing;
+Version 0.10.2 retains the allocation-driven workloads and smooth camera-relative
+lighting introduced in 0.10.1. Request the user's intended resolution, orbital batch or SES spacing;
 do not impose an estimated memory allowance, truncate results or silently reduce
 detail. Actual allocation, runtime, format and device constraints still apply.
 Wait for completion or cancel the owned job; preserve earlier accepted results
@@ -74,13 +74,17 @@ stay unspecified unless the user supplies an interpretation. Numerical values
 come from authoritative f64 sources, not GPU colors. SES/SAS use explicit radii,
 probe and spacing; a selected subset is an isolated object. Read back changed
 settings/results, inspect exported artifacts, and wait/cancel only your owned jobs.
-For source-preview plane edits, discover whether `analysis.create` accepts
+For plane edits in 0.10.2, discover whether `analysis.create` accepts
 `supersede`; use the same analysis ID with a complete plane definition and
-`supersede:true` for latest-request replacement. This is absent from published
-0.10.1. It only supersedes a replaceable job for that plane/source, never unrelated
+`supersede:true` for latest-request replacement. Older 0.10.1 binaries lack
+this option. It only supersedes a replaceable job for that plane/source, never unrelated
 work. Keep requested resolution, appearance and scientific units; poll the
 returned job and cancel only your owned receipt. See the reference for revisions
 and publication boundaries.
+Molecular-surface jobs report real phase-local completion and active elapsed
+time. Report the phase and measured mesh progress without guessing an overall
+percentage or ETA. Selected atoms have gold reticles and ordinary inspection
+has cyan rings; these are transient presentation cues and appear in exported PNGs.
 Use typed pick attribution rather than parsing inspection text or compact display
 indices. Read complete molecular-surface diagnostics from summaries or the
 paginated warning query. A shader can target one returned quantum/molecular
