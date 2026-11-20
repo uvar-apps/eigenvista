@@ -1,5 +1,10 @@
 # Building and running from source
 
+Linux developers should also read the [Linux/Fish guide](linux.md), which
+records CachyOS prerequisites, the Linux package command and native qualification
+boundaries. `desktop:build` creates a Mac debug app bundle on macOS and a native
+unbundled debug executable on Linux.
+
 For an already packaged application, use the [user guide](user-guide.md).
 This guide is for the standalone EigenVista repository, which contains no
 legacy C++ application or legacy build system.
@@ -169,8 +174,9 @@ standalone helper and launcher; older 0.7.2 packages predate them.
 | --- | --- |
 | `npm --prefix app run wasm` | Optimized Rust/WASM and web bindings in `app/src/wasm/` |
 | `npm --prefix app run build` | WASM, TypeScript checking, and production frontend in `app/dist/` |
-| `npm --prefix app run desktop:build` | Debug macOS bundle at `target/debug/bundle/macos/EigenVista.app` |
+| `npm --prefix app run desktop:build` | Debug Mac bundle at `target/debug/bundle/macos/EigenVista.app`; Linux executable at `target/debug/eigenvista-desktop` |
 | `npm --prefix app run package:macos` | Verified optimized Apple Silicon tester ZIP under `artifacts/distributions/` |
+| `npm --prefix app run package:linux` | Verified optimized native x86_64 Linux tar.gz prefix under `artifacts/distributions/` |
 | `cargo build --manifest-path Cargo.toml --locked --release -p eigenvista-convert` | Standalone converter at `target/release/eigenvista-convert` |
 
 The converter links the same Rust importer used through WASM by Open and Convert
@@ -383,10 +389,12 @@ and actual local outcomes.
 ## Verification commands
 
 User policy, 14 November 2026 (#68): **all relevant checks must pass locally
-before every push**. Current required platform validation is local macOS only.
-The user will provide two local Linux machines; add appropriate local Linux
-validation once access is available and record its actual results. Until then,
-Linux qualification remains pending. GitHub CI is not a push, merge or release
+before every push**. Required platform validation now includes local macOS and
+the available CachyOS x86_64 host, `ugo@system76.local`. It is SSH-only, with Fish
+as its login shell; see the [Linux guide](linux.md) for explicit shell setup,
+browser tunneling and native qualification boundaries. A second Linux host has
+not yet been supplied. Record actual platform results; an isolated native test
+display does not qualify physical desktop/Wayland behavior. GitHub CI is not a push, merge or release
 requirement. The [agent rules](../AGENTS.md#required-local-validation-before-pushing)
 define source/result validity and documentation-only checks.
 
@@ -506,7 +514,7 @@ and is not a merge gate. [CI details](../ci/README.md) describe the retained
 Linux Rust/WASM/Chromium/WebKit/package and macOS desktop jobs, temporary storage
 and seven-day failure artifacts. Dated [status](status.md) preserves historical
 hosted evidence; it does not replace current local-before-push verification or
-qualify a packaged Linux/Windows release or physical macOS controls/dialogs.
+qualify other Linux distributions, Windows or physical native controls/dialogs.
 
 Node declarations are an explicit locked development dependency because tests
 and Vite/Playwright configuration use Node APIs. Run `npm --prefix app ci` to

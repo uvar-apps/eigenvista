@@ -864,15 +864,31 @@ test("each tab retains its own scroll while the four tab buttons remain reachabl
   await expandPanel(page, "Quantitative field inspection");
   await page.getByLabel("Analysis type", { exact: true }).selectOption("plane");
   const fields = activeScroller(page);
+  // Bookmark the completed wheel gesture, rather than an intermediate frame
+  // while WebKit is still delivering asynchronous scroll updates.
+  const nextScrollEnd = (scroller: typeof fields) =>
+    scroller.evaluate(
+      (element) =>
+        new Promise<number>((resolve) =>
+          element.addEventListener(
+            "scrollend",
+            () => resolve(element.scrollTop),
+            {
+              once: true,
+            },
+          ),
+        ),
+    );
   const fieldBeforeWheel = await fields.evaluate(
     (element) => element.scrollTop,
   );
   await fields.hover();
+  const fieldScrollEnd = nextScrollEnd(fields);
   await page.mouse.wheel(0, 500);
   await expect
     .poll(() => fields.evaluate((element) => element.scrollTop))
     .toBeGreaterThan(fieldBeforeWheel + 20);
-  const fieldTop = await fields.evaluate((element) => element.scrollTop);
+  const fieldTop = await fieldScrollEnd;
   await expect(
     tools(page).getByRole("tab", { name: "Fields", exact: true }),
   ).toBeInViewport();
@@ -885,13 +901,12 @@ test("each tab retains its own scroll while the four tab buttons remain reachabl
     (element) => element.scrollTop,
   );
   await appearance.hover();
+  const appearanceScrollEnd = nextScrollEnd(appearance);
   await page.mouse.wheel(0, 250);
   await expect
     .poll(() => appearance.evaluate((element) => element.scrollTop))
     .toBeGreaterThan(appearanceBeforeWheel + 20);
-  const appearanceTop = await appearance.evaluate(
-    (element) => element.scrollTop,
-  );
+  const appearanceTop = await appearanceScrollEnd;
   await choose(page, "Fields");
   await expect
     .poll(() => activeScroller(page).evaluate((element) => element.scrollTop))

@@ -21,6 +21,11 @@ of a large protein complex with ambient occlusion.
 
 **Version 0.10.3 — experimental development preview for Apple Silicon Macs.**
 
+A separate [Linux development preview](docs/linux.md) targets CachyOS x86_64.
+Its build, package and qualification work is tracked in
+[#108](https://github.com/uvar-apps/eigenvista/issues/108); it is not a new public
+release or a claim of support for every Linux distribution.
+
 **[Download 0.10.3 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
@@ -101,7 +106,8 @@ Version **0.10.3** is an experimental **Apple Silicon Mac** preview.
 The download includes the application, examples, shader presets, palettes,
 converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
 [installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
-first launch. Linux and Windows packages are not available yet.
+first launch. A separate CachyOS Linux package is available for local development
+testing; it is not part of this public release. Windows packages are not available.
 
 - [Explore orbitals and density](https://uvar-apps.github.io/eigenvista/tutorials-orbitals.html)
   with a supplied Molden calculation.

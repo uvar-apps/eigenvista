@@ -955,8 +955,13 @@ exposed to the frontend.
 The [tester packager](tester-packaging.md) builds an optimized arm64 app,
 embeds notices, ad-hoc signs the staged bundle and standalone converter, includes documentation/source,
 and verifies the extracted ZIP before publishing it locally. It does not
-notarize or upload. macOS/Apple Silicon is the exercised platform; portable
-components make Linux/Windows feasible but do not establish support.
+notarize or upload. The separate [Linux preview](linux.md) uses a verified tar.gz
+prefix with `bin/` executables and `share/eigenvista/` resources. Both package
+types use the same Rust science, shared controller and embedded frontend; the
+Linux launcher locates the executables through the prefix instead of a Mac
+bundle. See the [Linux qualification decision](design/2026-11-20-linux-desktop-preview.md)
+for the CachyOS runtime baseline and evidence boundaries. Other distributions
+and Windows require their own qualification.
 
 ## Decisions still open
 

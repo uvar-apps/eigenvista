@@ -1,5 +1,9 @@
 # macOS tester ZIP
 
+For the separate Linux development tarball, see [Linux packaging](linux.md).
+This page describes the Apple Silicon package; its signing and `.app` paths
+do not apply to the Linux prefix.
+
 Release **0.10.3** adds pending-edit Save coordination, optional atomic
 replacement for converter/AI exports to the tested Mac ExFAT volume, and the
 Accessible elements palette. It retains the clearer action buttons, automatic
