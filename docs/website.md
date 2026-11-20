@@ -1,5 +1,23 @@
 # User-facing website
 
+## 0.10.3 Zenodo citation — 20 November 2026
+
+The user-supplied version DOI for EigenVista 0.10.3 is
+[10.5281/zenodo.24391046](https://doi.org/10.5281/zenodo.24391046). Current
+README/CFF, release notes and website metadata use this DOI. Concept DOI
+10.5281/zenodo.24246123 identifies all versions; older version citations and
+media provenance remain historical. The installation guide now lists all three
+optional palettes included in 0.10.3. Package source, download names/bytes/hash,
+version and annotated tag are unchanged; this update requires no rebuild.
+
+Local citation/YAML and static website checks pass, including 1,079 local
+references, 24 exact downloads and all 162 Chromium/WebKit route/viewport cases.
+Desktop/mobile citation review passes. All three anonymous release downloads
+match qualified bytes; GitHub release notes now use the new DOI with asset/tag
+identities preserved. All 420 qualified runtime/test/input hashes are unchanged;
+runtime tests were not rerun for this documentation-only update. Evidence:
+`tmp/doi-0.10.3/`. Verify Pages readback after deployment.
+
 ## Release 0.10.3 published — 20 November 2026 (#103)
 
 Authored/generated pages describe the delivered 0.10.3 Save, ExFAT and palette
@@ -192,11 +210,12 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. The 0.10.1 citation uses its version-specific DOI
-(`10.5281/zenodo.24328295`), supplied by the user on 18 November 2026.
+section. The current 0.10.3 citation uses its version-specific DOI
+(`10.5281/zenodo.24391046`), supplied by the user on 20 November 2026.
 The concept DOI (`10.5281/zenodo.24246123`) identifies all versions.
 The About page distinguishes
-the current citation from the historical 0.10.0 archive
+the current citation from the historical 0.10.1 archive
+(`10.5281/zenodo.24328295`), 0.10.0 archive
 (`10.5281/zenodo.24302658`) and 0.8.0 archive
 (`10.5281/zenodo.24273137`). Its current download citation is derived from
 `tools/site/release.mjs`, which remains tied to the verified package until the
