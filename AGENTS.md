@@ -32,8 +32,13 @@ Local qualification also passes 373 scientific/support Rust tests, 14 current
 desktop tests, fmt/strict Clippy, production/native builds, 23 packaging checks
 and 162 website route/viewport checks. Actual APFS/ExFAT, ENOSPC/EROFS and the
 rebuilt helper's 46 calls pass. Final palette comparisons retain 32 originals,
-160 diagnostic views and eight reviewed sheets. Local development-ZIP
-qualification and PR delivery remain. Evidence/scripts live in
+160 diagnostic views and eight reviewed sheets. The clean local development ZIP
+from `b9359451e0cb5453db9055681c8906ad2a522ad8` is qualified: 82,280,317 bytes,
+SHA-256 `c57e5d6f8c16b3cf91d896333645e65128a2e3181080e1012dae712c012bd380`.
+Independent extraction audits 729 source files, 15 connector files and five
+embedded assets; the actual extracted app/helper passes another 46 calls and
+three reviewed PNGs, including independently checked transparency. Exact package
+path and boundaries are in the living handoff. PR delivery remains. Evidence/scripts live in
 `tmp/save-exfat-accessibility/`, gates in `.unlazy/save-exfat-accessibility/`.
 The published 0.10.2 package/tag/DOI stay immutable. New source-build packages must
 include the palette both at top level and inside the connector resources.

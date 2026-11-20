@@ -21,8 +21,13 @@ APFS/ExFAT/full/readonly publication, 46 helper calls and three reviewed PNGs.
 Palette review covers 32 originals and 160 diagnostic views. The complete
 browser suite passes all 752 cases (376 per engine), with zero failures, skips,
 flaky cases or retries and all 420 recorded input hashes unchanged. All 162
-website checks and final static checks pass. Local development-ZIP qualification
-and PR delivery remain. See [handoff](handoff.md) for exact evidence and delivery state;
+website checks and final static checks pass. The local clean development ZIP
+from `b935945` is qualified (82,280,317 bytes; SHA-256
+`c57e5d6f8c16b3cf91d896333645e65128a2e3181080e1012dae712c012bd380`).
+Independent extraction verifies 729 source files, 15 connector files and five
+embedded assets; its actual app/helper passes 46 additional calls and three
+reviewed PNGs, including real ExFAT exports and transparent alpha. This archive
+is not uploaded as a public release. PR delivery remains. See [handoff](handoff.md) for exact evidence and delivery state;
 source decisions are recorded in the linked design notes there.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)

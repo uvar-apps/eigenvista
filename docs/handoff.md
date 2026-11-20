@@ -32,11 +32,31 @@ eight contact sheets. The final complete run passes all 752 browser cases,
 376 per engine, with zero failures, skips, flaky cases or retries and all 420
 runtime/test/input hashes unchanged. Final comparisons bind 32 original PNGs
 to 160 diagnostic views and eight reviewed sheets. All 162 website cases and
-static checks pass (27 pages, 24 exact downloads). Local development ZIP and
-PR delivery remain. Evidence: `tmp/save-exfat-accessibility/`, gates:
+static checks pass (27 pages, 24 exact downloads). PR delivery remains.
+Evidence: `tmp/save-exfat-accessibility/`, gates:
 `.unlazy/save-exfat-accessibility/`. The earlier 751/752 run is a retained
 test-readiness diagnostic; see the Save/ExFAT decision for the correction.
 The source notes distinguish these updates from the original 0.10.2 download.
+
+Clean local development package source: `b9359451e0cb5453db9055681c8906ad2a522ad8`.
+ZIP: `artifacts/distributions/EigenVista-0.10.2-apple-silicon-20261120T040055Z-b935945.zip`
+— **82,280,317 bytes**, SHA-256
+`c57e5d6f8c16b3cf91d896333645e65128a2e3181080e1012dae712c012bd380`.
+Its checksum/build-info companions identify the same clean build. Independent
+extraction verifies 729 source files, 57 Sesmesh files, 15 connector files, five
+standalone palette files and five embedded production assets, plus signatures
+and exact archived/source bytes. The actual extracted app/helper passes another
+46 calls and three reviewed PNGs, including all three ExFAT export types,
+Save/reopen, protected sources and independently verified transparent alpha.
+Owned apps/descriptors/volumes are cleaned up. The earlier source-debug and
+extracted-package receipts are separate, not one doubled call count.
+
+This is a local development archive, not a newly published release. Later
+documentation commits retain its qualified runtime/input hashes and truthful
+source snapshot. Linux/Windows/Intel, clean-Mac/Gatekeeper, physical OS quit/save
+dialogs and the full macOS range remain unqualified. Exact receipts include
+`package-identity.json`, `package-audit-latest.json`, `native-package-acceptance.json`,
+`package-alpha.json`, `browser-qualification.json` and `post-browser.json`.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
