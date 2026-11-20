@@ -1,10 +1,10 @@
 # Use the installed EigenVista app with your agent
 
-For the Linux development package, use the
-[Linux setup and connector instructions](linux.md). Its launcher is
+For the Linux x86_64 package, use the
+[Linux setup and connector instructions](https://uvar-apps.github.io/eigenvista/ai-install.html). Its launcher is
 `share/eigenvista/AI-connector/Start AI connection.sh` and its helper is
-`bin/eigenvista-ctl`. The Apple Silicon release and Mac paths below remain
-separate from that development preview.
+`bin/eigenvista-ctl`. The detailed Mac paths and setup prompt below apply to
+the Apple Silicon package; use the linked Linux instructions for that platform.
 
 Ask your agent to open a molecule, find an orbital, load a palette, focus on a
 protein chain or export a figure. It operates the same EigenVista window you

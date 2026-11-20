@@ -19,8 +19,8 @@ but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
 
 **Scientific inspection, introduced in 0.10.0:** measurements and labels, ligand neighborhoods, SES/SAS
-molecular surfaces, and quantitative field inspection are included in the Mac
-package and its AI connector. Older 0.8.0 apps do not include them. An AI
+molecular surfaces, and quantitative field inspection are included in the current
+Mac and Linux packages and their AI connector. Older 0.8.0 apps do not include them. An AI
 assistant should confirm which features the connected application provides.
 
 **New in 0.10.3:** Save refuses while an inspection edit is pending, including
@@ -74,8 +74,8 @@ remain supported, including their scientific data and saved surfaces.
 
 The tester ZIP is for **Apple Silicon Macs** (M-series processors), not Intel
 Macs. It targets macOS 13 or later; that complete OS range has not been tested.
-The package's `BUILD-INFO.json` records the actual build system. Linux and
-Windows packages are not available yet.
+The package's `BUILD-INFO.json` records the actual build system. The separate
+CachyOS Linux preview is described below. Windows packages are not available.
 
 1. Unzip the package and move `EigenVista.app` to Applications.
 2. Double-click the app. A mathematical hydrogen-pair example opens initially.
@@ -93,9 +93,29 @@ Do not disable Gatekeeper globally. Stop and report malware or damaged-app
 warnings instead of bypassing them. Managed Macs may disallow exceptions.
 See [Apple's security instructions](https://support.apple.com/en-us/102445).
 
+## Install and start on Linux
+
+The Linux x86_64 preview is qualified on **CachyOS**. Extract the entire tar.gz
+directory and retain `bin/` and `share/` together. In a graphical Linux session,
+run `./bin/eigenvista` from the extracted directory. The installed program needs
+system GTK 3, WebKitGTK 4.1 and their dependencies; it needs no Rust, Node.js or
+source checkout. The tested build uses glibc 2.44 and WebKitGTK 2.54.1. Other
+distributions, older runtime libraries, Wayland and native hardware GPU behavior
+remain unqualified. See the [installation guide](https://uvar-apps.github.io/eigenvista/install.html).
+
+Examples, palettes, shaders and guides live under `share/eigenvista/`. References
+to `Examples/`, `Palettes/` and `Shaders/` below use that prefix on Linux.
+The converter is `bin/eigenvista-convert` and can run over SSH without a display.
+The app and AI connector need a graphical display, including during automation.
+To connect an agent, invoke the executable
+`"./share/eigenvista/AI-connector/Start AI connection.sh"` from Fish or another
+shell; do not source the Bash script. Follow the
+[AI setup guide](https://uvar-apps.github.io/eigenvista/ai-install.html).
+
 ## A first session
 
-1. Click **Open** and select `Examples/water.pdb` from the extracted ZIP.
+1. Click **Open** and select `Examples/water.pdb` from the extracted package
+   (`share/eigenvista/Examples/water.pdb` on Linux).
 2. **Molecule → Molecular data** should show **3 atoms** and **2 bonds**. Bonds are computed
    automatically, including when the file has no explicit connections.
 3. Try the **Representation** choices: Ball and stick, Liquorice, and Van der
