@@ -1,15 +1,17 @@
 # EigenVista
 
-Version **0.10.2** makes inspection easier with clearer action buttons, visible
-atom-selection cues, automatically updated field planes, and live progress
-for molecular surfaces. It retains smooth view-relative lighting and
+Version **0.10.3** prevents Save from overtaking pending inspection edits, adds
+an explicit replacement option for converter/AI exports to the tested Mac ExFAT
+volume, and includes the optional Accessible elements palette. It retains
+automatic field-plane updates, live molecular-surface progress, visible atom
+picking, smooth view-relative lighting and
 [allocation-driven workloads](docs/allocation-policy.md).
 
-Source updates after the published 0.10.2 package are tracked in
-[#99](https://github.com/uvar-apps/eigenvista/issues/99) (Save coordination),
-[#100](https://github.com/uvar-apps/eigenvista/issues/100) (ExFAT export compatibility)
-and [#72](https://github.com/uvar-apps/eigenvista/issues/72) (an optional accessibility
-palette). The existing release download keeps its original contents.
+Release qualification and delivery are tracked in
+[#103](https://github.com/uvar-apps/eigenvista/issues/103). See the
+[0.10.3 notes](docs/releases/0.10.3.md) and [living handoff](docs/handoff.md)
+for package identity and publication state. Historical releases keep their
+original contents.
 
 **Explore molecular orbitals, electron density and large molecular structures.**
 
@@ -17,9 +19,9 @@ EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**Version 0.10.2 — experimental development preview for Apple Silicon Macs.**
+**Version 0.10.3 — experimental development preview for Apple Silicon Macs.**
 
-**[Download 0.10.2 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.2)** ·
+**[Download 0.10.3 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
@@ -66,7 +68,7 @@ imports.
 
 ## A wider workspace and scientific inspection
 
-EigenVista 0.10.2 uses a single resizable tools pane, with four tabs:
+EigenVista 0.10.3 uses a single resizable tools pane, with four tabs:
 **Molecule**, **Fields**, **Surfaces** and **Appearance**. Put it on either side,
 widen it to let widgets flow into two columns, or hide it to reclaim the view.
 Zen mode removes the surrounding interface; fullscreen is a separate action.
@@ -86,8 +88,8 @@ choose an orbital and **Plane / contours**, then **Create plane**. The color bar
 reports signed orbital amplitude; choose an electron-density field for density.
 Read the [user guide](docs/user-guide.md) for probes, contours and line profiles.
 
-These additions are included in the **0.10.2 Mac download** and its bundled AI
-connector. Read the [0.10.2 release notes](docs/releases/0.10.2.md).
+These additions are included in the **0.10.3 Mac download** and its bundled AI
+connector. Read the [0.10.3 release notes](docs/releases/0.10.3.md).
 The [workspace design](docs/design/2026-11-17-simple-workspace-pane.md)
 records the approved layout; [handoff](docs/handoff.md) records current
 validation and delivery. The local `v0.9.0` tag remains the earlier scientific
@@ -95,7 +97,7 @@ inspection checkpoint.
 
 ## Start here
 
-Version **0.10.2** is an experimental **Apple Silicon Mac** preview.
+Version **0.10.3** is an experimental **Apple Silicon Mac** preview.
 The download includes the application, examples, shader presets, palettes,
 converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
 [installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
@@ -125,11 +127,11 @@ documentation and gallery.
 ## Cite EigenVista
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
-(Version 0.10.2) [Computer software].
+(Version 0.10.3) [Computer software].
 [Concept DOI: 10.5281/zenodo.24246123](https://doi.org/10.5281/zenodo.24246123).
 
 Machine-readable metadata is in [CITATION.cff](CITATION.cff). A version-specific
-DOI has not yet been supplied for 0.10.2; the concept DOI identifies EigenVista
+DOI has not yet been supplied for 0.10.3; the concept DOI identifies EigenVista
 across all versions. The historical 0.10.1 DOI remains
 [10.5281/zenodo.24328295](https://doi.org/10.5281/zenodo.24328295).
 The historical 0.10.0 DOI remains
@@ -160,9 +162,9 @@ scientific data and saved meshes. New saves use EigenVista format identifiers
 and are not guaranteed readable by older Molekel builds, even when saved with
 a `.molekel` filename. See the [native profile](docs/preview-format.md).
 
-**Current release:** version **0.10.2**, a development preview, combines the wider
+**Current release:** version **0.10.3**, a development preview, combines the wider
 workspace with the scientific-inspection workflows above. See
-[0.10.2 notes](docs/releases/0.10.2.md) and
+[0.10.3 notes](docs/releases/0.10.3.md) and
 [current status](docs/status.md) for qualification and delivery.
 
 Version **0.8.0** introduced AI-enabled viewing through an external local
@@ -284,7 +286,7 @@ npm run test:packaging # Packaging safety and license-notice regression tests
 Stop an independently started Vite server before `npm run desktop`. Install Playwright's browsers once with `npm exec playwright -- install chromium webkit`, using the temporary-directory variables above.
 
 For sharing with friends, see [tester packaging](docs/tester-packaging.md).
-The [0.10.2 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.2)
+The [0.10.3 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
 provides the rebuilt ZIP, checksum and build metadata. Check
 [status](docs/status.md) for verified source, SHA256 and local
 verification evidence. The [0.7.1 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.7.1)

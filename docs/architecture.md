@@ -1,9 +1,9 @@
 # As-built architecture
 
-**Version 0.10.2:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
-This describes the **0.10.2 application preview**, including the shared
+This describes the **0.10.3 application preview**, including the shared
 application-control API and packaged external-agent connector,
 background controls, transparent PNG export (#73/#74), optional atom palettes,
 biological structure views, molecular ambient occlusion and sidebar reordering,
@@ -11,10 +11,10 @@ not the complete
 [proposed architecture](https://github.com/ugovaretto/molekel/blob/4edabf6852db44ff849e82223bef6c0702730e3c/doc/rewrite/03-architecture-decision.md).
 Read [status](status.md) for dated verification and uncompleted release gates.
 
-Version 0.10.2 includes the **scientific-inspection implementation** introduced in 0.10.0
+Version 0.10.3 includes the **scientific-inspection implementation** introduced in 0.10.0
 ([Plan 009](../plans/009-scientific-inspection-implementation.md), #83–#86).
 Its selections/measurements/labels, SES/SAS meshes and quantitative field
-analyses are described below and are included in the 0.10.2 Mac package. Older 0.8.0
+analyses are described below and are included in the 0.10.3 Mac package. Older 0.8.0
 binaries predate them. Read the living handoff for source, artifact identity
 and actual qualification boundaries.
 The [scientific-inspection decision](design/2026-11-16-scientific-inspection.md)
@@ -120,7 +120,7 @@ keeps its last complete scene until replacement contours are prepared; contour
 failure retains that scene and makes synchronized export report the failure.
 Accepted numerical samples remain inspectable. Appearance-only changes reuse
 samples. No scientific evaluator, format, requested resolution or allocation
-policy changes. These controls are included in 0.10.2.
+policy changes. These controls are included in 0.10.3.
 
 | Component | Ownership |
 | --- | --- |
@@ -217,7 +217,7 @@ NDJSON JSON-RPC broker, scoped filesystem adapter, client library and
 controller; the broker does not interpret scientific commands. File grants use
 Unix directory descriptors and no-follow traversal, protect imported sources,
 validate encoded documents/PNGs and default to atomic no-clobber publication.
-Source builds after 0.10.2 accept explicit `overwrite:true` for atomic replacement
+Version 0.10.3 accepts explicit `overwrite:true` for atomic replacement
 through the same descriptor-pinned writer. That permission includes late-created
 targets; protected inputs and scoped traversal remain unchanged. Default
 exclusive publication is unavailable on the qualified Mac ExFAT volume, whereas
@@ -578,7 +578,7 @@ its existing stage/count contract; `app.state` additionally exposes active
 `elapsedSeconds`. The progress components own their timers, so elapsed ticks
 do not rebuild the viewport or run scientific work. Cancellation, source guards,
 prior accepted results, scientific hashes and saved formats are unchanged.
-Version 0.10.2 includes this presentation and elapsed readback.
+Version 0.10.3 includes this presentation and elapsed readback.
 
 App and Convert Files each create a stable scientific client. The bridge keeps
 one FIFO queue and posts only one request at a time. A client's `cancel()` removes
@@ -886,12 +886,12 @@ suffix. Encoding always writes EigenVista identifiers even with that old suffix,
 so new saves are not guaranteed readable in previous Molekel builds. No automatic
 file migration is performed. Imported external source paths
 are protected against replacement. Batch conversion protects all selected sources.
-CLI saves protect inputs and output aliases, require explicit replacement
+Default CLI saves protect inputs and output aliases, require explicit replacement
 permission for existing destinations, and atomically publish initially absent files without replacement
 even with `--force`. This uses same-directory hard links; filesystems that do
 not support them fail explicitly instead of falling back to an unsafe overwrite.
 
-The source follow-up (#100) adds explicit `--replace`, separate from `--force`:
+Version 0.10.3 (#100) adds explicit `--replace`, separate from `--force`:
 it permits complete atomic replacement, including when a destination appears
 after preflight, while preserving source/colliding-output protections. Its
 replacement writer works on the tested Mac ExFAT volume; the unchanged default

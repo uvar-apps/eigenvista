@@ -1,6 +1,6 @@
 # Molden import and conversion
 
-**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 The shared Rust importer supports a bounded **real Gaussian Molden wavefunction
@@ -38,18 +38,17 @@ selects one destination. `--check` validates and reports without writing.
 format/warnings/`requires_save`, atom/orbital/density counts, and error. Without it, summaries
 and warnings go to standard error. Use `--` before filenames starting with `-`.
 
-Existing outputs require explicit `--force` or, in the source follow-up,
-`--replace`; input paths are never valid
-destinations, even with that option. The converter preflights destinations,
+Existing outputs require explicit `--force` or `--replace`; input paths are
+never valid destinations, even with either option. The converter preflights destinations,
 rejects output symlinks and colliding paths, validates the encoded native data,
-and publishes complete files atomically. Initially absent outputs remain
-no-clobber even with `--force`: a filesystem alias or concurrently created file
-cannot replace an earlier batch result. Such late collisions report failure
+and publishes complete files atomically. In the default mode and with
+`--force`, initially absent outputs remain no-clobber: a filesystem alias or
+concurrently created file cannot replace an earlier batch result. Such late collisions report failure
 and retain completed outputs. No-clobber publication requires hard-link support
 on the destination filesystem; failure does not fall back to unsafe replacement.
 Windows replacement behavior still requires platform qualification.
 
-The source follow-up to 0.10.2 adds **`--replace`** for explicit atomic
+Version 0.10.3 adds **`--replace`** for explicit atomic
 replacement, including on the tested macOS ExFAT volume. This option allows
 replacing a destination that already exists or is created while conversion is
 running. It is separate from `--force`; do not combine the two. Input files,
@@ -266,7 +265,7 @@ qualification.
 
 ## Limits and verification
 
-EigenVista 0.10.1 has no fixed file/line/atom/basis/orbital memory ceilings.
+EigenVista 0.10.3 has no fixed file/line/atom/basis/orbital memory ceilings.
 Every listed orbital is retained or the import fails with its actual validation
 or allocation error. Input is in-memory; finite values, complete relationships,
 normalization and supported conventions remain required. Missing orbitals cannot

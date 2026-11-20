@@ -1,5 +1,29 @@
 # User-facing website
 
+## Release 0.10.3 published — 20 November 2026 (#103)
+
+Authored/generated pages describe the delivered 0.10.3 Save, ExFAT and palette
+features. Download metadata below is measured from the independently qualified
+archive; assets are published before merging the site. Preserve media capture identities,
+dimensions, aspect ratios and historical citation/source records.
+
+Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
+
+ZIP: `artifacts/distributions/EigenVista-0.10.3-apple-silicon-20261120T073506Z-1caf8bd.zip` — **82,290,759 bytes**.
+
+SHA-256: `fe3beae96bfb8869535613a109c1bb33ea6b15163eca3082029ecca38213d0a2`.
+
+The checksum and build-info companions identify the same clean build. The ZIP
+contains the optimized app, converter, AI helper/launcher, guides, examples, all
+three optional palettes, notices and source/dependency archives.
+
+Published [EigenVista 0.10.3](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
+on 20 November 2026 with release notes and all three rebuilt assets. Independent
+anonymous downloads match complete ZIP/checksum/build-info bytes. The annotated
+`v0.10.3` identifies the clean package source. Website merge/Pages readback remains.
+Later delivery metadata does not retag or rebuild the qualified runtime. Track
+#103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
+
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
@@ -45,7 +69,7 @@ provenance, Search Console ownership-tag maintenance and publication state.
 [Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the local AI
 connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
-Version 0.10.2 retains the packaged connector and scientific-inspection features;
+Version 0.10.3 retains the packaged connector and scientific-inspection features;
 the AI pages guide users from an installed binary. Scientific inspection and the
 four-tab workspace were introduced in 0.10.0; the connector was introduced in
 0.8.0. Older 0.7.2 packages predate control.

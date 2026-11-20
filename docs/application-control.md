@@ -1,8 +1,8 @@
 # Application control API
 
-**Version 0.10.2:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
-Source follow-up (#99): GUI and API Save now share pending-inspection admission.
+Save coordination in 0.10.3 (#99): GUI and API Save share pending-inspection admission.
 An inspection write is admitted synchronously before React/worker validation;
 coalesced GUI writes stay pending through their final accepted publication.
 Committed plane intent is included before preparation/debounce; manual
@@ -35,7 +35,7 @@ these additions; an older source-built instance may lack them.
 
 **Scientific inspection, introduced in 0.10.0:** the Mac package includes the geometry,
 SES/SAS and quantitative-field methods documented below (#83–#86). Older
-0.8.0 downloads do not have these methods. Use the matching 0.10.2
+0.8.0 downloads do not have these methods. Use the matching 0.10.3
 app/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
 establish availability.
@@ -183,8 +183,8 @@ Start with `app.capabilities`. Its result includes:
 - `apiVersion: 1` and the current `instanceId`;
 - `methods`, each containing `method`, `description` and `inputSchema`;
 - `allocationPolicy: "allocation-driven"` and advisory `gridResolutionPresets`;
-- `files: {nativePaths, browserBytes, overwrite}` and `errorKinds`. In the source
-  follow-up to 0.10.2, `overwrite:true` advertises optional native replacement
+- `files: {nativePaths, browserBytes, overwrite}` and `errorKinds`. In
+  0.10.3, `overwrite:true` advertises optional native replacement
   support, not the default behavior; browser exports advertise false.
 
 Discover schemas from the connected app rather than assuming another version's
@@ -609,7 +609,7 @@ are rejected. Existing export paths are probed without blocking on a FIFO and
 must still satisfy the selected publication and source-protection policy.
 
 Control writes default to **atomic no-clobber**: choose a new `.eigenvista`,
-`.png` or `.csv` filename. The source follow-up to 0.10.2 also permits explicit
+`.png` or `.csv` filename. Version 0.10.3 also permits explicit
 native `overwrite:true` for `document.save`, `image.export` and `table.export`.
 It authorizes atomic replacement of existing or late-created destinations.
 Source paths/hard-link aliases and scoped-path validation remain protected.
@@ -620,8 +620,9 @@ rejects true; inspect live schemas/capabilities before using the new option.
 Native document writes decode/validate the encoded archive before publication;
 PNG writes validate the PNG structure/checksums. CSV accepts complete generated
 UTF-8 text and retains the same scoped/source-protected publication policy; it
-does not expose an unrestricted text writer. Filesystems lacking the required
-hard-link publication support fail rather than falling back to a weaker write.
+does not expose an unrestricted text writer. Default no-clobber writes fail on
+filesystems lacking hard-link publication support rather than silently choosing
+replacement or exposing a partial final file.
 A file receipt is `{path,bytes}`; native Save adds `saved`, `current`,
 `snapshotRevision` and `revision`, while PNG export adds dimensions/MIME type.
 PNG `revision` identifies the document at capture; `currentRevision` identifies
@@ -681,7 +682,7 @@ An unsaved-document replacement fails with `permission_required` unless
 operations are explicit failures. A transport timeout has an uncertain outcome:
 inspect current state/jobs and output files before repeating a mutation.
 
-Version 0.10.2 has no application byte/count ceilings for frames, files,
+Version 0.10.3 has no application byte/count ceilings for frames, files,
 encoded Save results, PNG/CSV artifacts, palettes, selectors or orbital batches.
 Pagination defaults to 100 records but accepts larger positive safe integers.
 Jobs remain discoverable for the controller lifetime. Grid presets are advisory;

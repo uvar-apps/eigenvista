@@ -1,6 +1,6 @@
 # EigenVista user guide
 
-**Version 0.10.2:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 ## What this program does
@@ -13,7 +13,7 @@ supplied orbitals or density matrices, generate signed
 isosurfaces, and save the molecular data and surface geometry together in a
 portable `.eigenvista` document.
 
-This guide describes version **0.10.2**, an experimental
+This guide describes version **0.10.3**, an experimental
 development preview. Scientific calculations and rendering have targeted tests,
 but the application is not yet a qualified scientific release. It visualizes
 supplied data; it does not calculate a wavefunction from atom positions.
@@ -23,7 +23,14 @@ molecular surfaces, and quantitative field inspection are included in the Mac
 package and its AI connector. Older 0.8.0 apps do not include them. An AI
 assistant should confirm which features the connected application provides.
 
-**New in 0.10.2:** action buttons stand out from labels, selected and inspected
+**New in 0.10.3:** Save refuses while an inspection edit is pending, including
+committed plane updates during preparation and their brief update delay. Wait
+for completion, then save again. Converter and AI exports offer explicitly
+selected replacement on the tested Mac ExFAT volume, while the default still
+refuses overwrites. The optional Accessible elements palette is included with
+the package and works through the same palette loader and AI connector.
+
+**Retained from 0.10.2:** action buttons stand out from labels, selected and inspected
 atoms have visible markers, quantitative planes update as committed values change,
 and SES/SAS generation reports its phase, elapsed time and measured mesh progress.
 The inspection and calculation features share the installed AI connector.
@@ -38,7 +45,7 @@ agent. The Mac app bundles its connection helper, launcher, examples and
 palettes; no source checkout or compiler is required. Start with the
 [connector guide](ai-connector.md) and [0.8.0 release notes](releases/0.8.0.md).
 See [current status](status.md) and the
-[0.10.2 notes](releases/0.10.2.md) for current release qualification.
+[0.10.3 notes](releases/0.10.3.md) for current release qualification.
 
 Version 0.7.2 added scene background controls and transparent PNG export
 ([#73](https://github.com/uvar-apps/eigenvista/issues/73),
@@ -111,7 +118,7 @@ retain their emphasis; unavailable actions remain visibly muted. Keyboard focus
 uses an outlined ring. Tabs, section disclosures and orbital rows keep their
 existing flat presentation.
 
-EigenVista 0.10.2 opens with one wide tools pane, initially **480 px**
+EigenVista 0.10.3 opens with one wide tools pane, initially **480 px**
 wide on the **right**. This is the approved default workspace
 ([#88](https://github.com/uvar-apps/eigenvista/issues/88)); no special preview URL
 is needed. Older 0.8.0 apps retain their earlier two-sidebar layout and lack
@@ -139,7 +146,7 @@ saved molecular data.
 
 See the [simple-pane guide](design/2026-11-17-simple-workspace-pane.md)
 for the design, retained behavior and validation boundaries. The following
-navigation describes the 0.10.2 Mac app.
+navigation describes the 0.10.3 Mac app.
 
 ## Finding your way around
 
@@ -388,7 +395,7 @@ every deposited annotation, model or conformer.
 
 ## Scientific inspection
 
-These controls are included in EigenVista 0.10.2 and its bundled AI connector.
+These controls are included in EigenVista 0.10.3 and its bundled AI connector.
 They work with the original loaded atoms: hiding a chain
 or changing a representation does not renumber the source atoms or alter the
 scientific data. Your external AI assistant can perform the same operations;
@@ -617,7 +624,7 @@ camera/AO/palette/shader scene configuration.
 
 ### Memory and large calculations
 
-EigenVista 0.10.2 attempts requested allocations without byte/count ceilings for
+EigenVista 0.10.3 attempts requested allocations without byte/count ceilings for
 selections, labels, molecular meshes or numerical caches. SES spacing stays as
 requested. Recoverable allocation failures and cancellation retain previous
 accepted results. Actual runtime address space, numeric/index representation and
@@ -930,7 +937,7 @@ elements 1–109; elements 110–118 retain the built-in defaults. The source va
 notice are retained with the examples. The built-in palette remains the default.
 
 The optional **Accessible elements** palette, `accessible-elements.json`, is
-available with the source follow-up to 0.10.2 and as a
+included with EigenVista 0.10.3 and available as a
 [website download](https://uvar-apps.github.io/eigenvista/downloads/accessible-elements.json).
 Load it with **Colours file…** just like Pastel or Muted. It changes fourteen
 common elements; all others retain built-in colors. It emphasizes distinctions
@@ -940,7 +947,7 @@ It is an alternative to the conventional element colors, not a guarantee that
 every element pair is distinguishable. Picking still reports element identity;
 AO and transparent PNGs retain the chosen palette. The original published
 0.10.2 ZIP predates this additional palette, but its loader accepts the downloaded
-file. New packages include it in `Palettes/` and the AI connector's `palettes/`.
+file. The 0.10.3 package includes it in `Palettes/` and the AI connector's `palettes/`.
 
 **Colours file…** loads a JSON palette:
 
@@ -1044,7 +1051,7 @@ back to Molden/PDB/XYZ/cube and does not perform automatic background saving.
 Use a new `.eigenvista` filename; replacing an existing native file is an explicit
 Save-dialog choice, not an automatic result of Open or Convert.
 
-In the source follow-up to 0.10.2, Save refuses while an inspection edit is
+In 0.10.3, Save refuses while an inspection edit is
 still being applied. Wait for it to finish, then save again. This includes
 pending molecular-surface appearance changes and annotation updates: Save must
 not capture the previous state while those edits are awaiting validation.
@@ -1065,7 +1072,7 @@ does not change that behavior. Create the file on APFS and copy the completed
 output to the external drive. Desktop replacement Save uses a different path,
 which succeeded on the tested ExFAT image. See the
 [filesystem research](../plans/005-native-save-contract-research.md) for coverage.
-Source builds after 0.10.2 add an explicit **`--replace`** converter option and
+Version 0.10.3 adds an explicit **`--replace`** converter option and
 an equivalent intentional-replacement choice through the AI connector. This
 publishes complete files on the tested Mac ExFAT volume, but can replace a
 destination that exists or appears while the export runs. Imported source files
@@ -1116,7 +1123,7 @@ Keep original data and backups because the native preview schema is not frozen.
 | WebGL2 unavailable | Check graphics acceleration or try another compatible device/browser |
 | Graphics context lost | Save if possible, then restart/reload; unsaved data may be lost |
 
-EigenVista 0.10.2 applies no application memory/record ceilings. Invalid data,
+EigenVista 0.10.3 applies no application memory/record ceilings. Invalid data,
 unsupported scientific profiles, unrepresentable sizes and actual allocation
 failures still produce errors. Complete imported orbital sets are retained;
 missing orbitals cannot be recovered. See [allocation policy](allocation-policy.md)
@@ -1144,7 +1151,7 @@ Connector-enabled binary packages offer optional external control for coding
 agents and other harnesses. The installed app includes a prebuilt connection
 helper and portable agent instructions; no source checkout, compiler or development
 server is needed. It operates the same document and renderer with explicitly
-chosen file access. The connector has shipped since version 0.8.0; the current 0.10.2 package also
+chosen file access. The connector has shipped since version 0.8.0; the 0.10.3 package also
 includes scientific inspection. Older 0.7.2 packages do not include it. The
 normal interface remains available.
 The [connector guide](ai-connector.md) covers installation, a ready-to-use agent

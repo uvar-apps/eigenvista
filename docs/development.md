@@ -10,10 +10,13 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
-### 0.10.2 source
+### 0.10.3 source
 
-Source version 0.10.2 packages clearer buttons (#94), automatic plane updates
-(#95), visible atom picking (#96), and live SES/SAS progress (#97). It retains
+Source version 0.10.3 adds pending-inspection Save coordination (#99), optional
+atomic replacement for converter/AI exports on the tested Mac ExFAT volume
+(#100), and the packaged Accessible elements palette (#72). It retains
+0.10.2's clearer buttons (#94), automatic plane updates (#95), visible atom
+picking (#96), and live SES/SAS progress (#97), together with
 0.10.1's smooth camera-relative lighting (#91),
 [allocation-driven workloads](allocation-policy.md) (#92), and
 [Plan 009](../plans/009-scientific-inspection-implementation.md), introduced in 0.10.0

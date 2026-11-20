@@ -1,12 +1,12 @@
 {
-  "version": "0.10.2",
+  "version": "0.10.3",
   "doi": "10.5281/zenodo.24246123",
-  "source": "21c8307b72c3588464e06abeb07df055484ea78f",
-  "url": "https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.2",
-  "base": "https://github.com/uvar-apps/eigenvista/releases/download/v0.10.2/",
-  "stem": "EigenVista-0.10.2-apple-silicon-20261118T081849Z-21c8307",
-  "zipBytes": 82241275,
-  "zipSha256": "cb9221b2e887eecdf5e7f574b6b2336253b64271400315b828b803dee77f551e",
+  "source": "1caf8bd2c2825dba7ff43bd67f542463b740b979",
+  "url": "https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3",
+  "base": "https://github.com/uvar-apps/eigenvista/releases/download/v0.10.3/",
+  "stem": "EigenVista-0.10.3-apple-silicon-20261120T073506Z-1caf8bd",
+  "zipBytes": 82290759,
+  "zipSha256": "fe3beae96bfb8869535613a109c1bb33ea6b15163eca3082029ecca38213d0a2",
   "platform": "Apple Silicon Mac",
   "minimumMacOS": "13.0"
 }

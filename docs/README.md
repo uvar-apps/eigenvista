@@ -1,15 +1,14 @@
 # Documentation map
 
-Version **0.10.2** adds clearer action buttons, visible atom-selection cues,
-automatic quantitative-plane updates and live SES/SAS progress. It retains
-smooth camera-relative lighting and [allocation-driven workloads](allocation-policy.md).
+Version **0.10.3** adds pending-edit Save coordination (#99), explicitly selected
+atomic replacement for converter/AI exports to the tested Mac ExFAT volume
+(#100), and the optional [Accessible elements palette](../palettes/accessible-elements.json)
+(#72). It retains automatic field-plane updates, visible picking cues, live
+SES/SAS progress, smooth camera-relative lighting and
+[allocation-driven workloads](allocation-policy.md).
 Historical release records retain the behavior of their original binaries.
-
-The source follow-up to 0.10.2 covers pending-edit Save coordination (#99),
-ExFAT export compatibility (#100), and the optional
-[Accessible elements palette](../palettes/accessible-elements.json) (#72).
-These source updates do not replace the published 0.10.2 package. The
-[living handoff](handoff.md) records validation and delivery.
+The [0.10.3 notes](releases/0.10.3.md) and [living handoff](handoff.md)
+record release qualification, validation and delivery (#103).
 
 This is the documentation hub for the **EigenVista development preview**.
 EigenVista is a modern rewrite of Molekel, the molecular visualization
@@ -36,7 +35,7 @@ the real-app shader demo/social image, and Search Console maintenance (#77).
 [#83–#86](https://github.com/uvar-apps/eigenvista/issues/83): measurements/labels
 and ligand neighborhoods, SES/SAS molecular surfaces, and quantitative field
 probes/planes/contours/profiles. All have shared API and external AI connector
-paths. These additions are included in the 0.10.2 Mac package; older 0.8.0
+paths. These additions are included in the 0.10.3 Mac package; older 0.8.0
 binaries predate them. Use live capability discovery with the packaged connector.
 Current artifact and qualification evidence belongs in [handoff](handoff.md)
 and [status](status.md).
@@ -51,8 +50,9 @@ preserved as historical research, with their separate captures and qualification
 The [implementation decision](design/2026-11-16-scientific-inspection.md) records
 the contracts and evidence boundaries behind those workflows.
 
-Current version: **0.10.2**, with automatic plane updates, visible picking cues
-and live molecular-surface progress through the GUI and AI connector. Other
+Current version: **0.10.3**, with pending-edit Save coordination, explicit
+ExFAT replacement and the optional Accessible elements palette through existing
+GUI/API/AI workflows. Other
 features include smooth scene lighting, allocation-driven workloads, live orbital/density calculation progress,
 voxel-relative sampled preview quality, explicit custom shader transparency,
 scoped worker cancellation and resident document reuse.
@@ -126,12 +126,12 @@ limits of opening new saves in older builds.
 | Need | Read |
 | --- | --- |
 | Restart from a fresh coding-agent session without the old chat | [Session handoff](session-handoff-2026-10-21_173143-AWST.md) and [ready-to-use prompt](restart-prompt-2026-10-21_173143-AWST.md) |
-| Current release changes and known limitations | [0.10.2 notes](releases/0.10.2.md), [handoff](handoff.md) and [status](status.md) |
+| Current release changes and known limitations | [0.10.3 notes](releases/0.10.3.md), [handoff](handoff.md) and [status](status.md) |
 | What EigenVista does, installation, controls, files, saving, troubleshooting | [User guide](user-guide.md) |
-| Selections, measurements, labels, neighborhoods, SES/SAS and quantitative fields | [User guide](user-guide.md#scientific-inspection-in-the-unreleased-test-build), [API additions](application-control.md#unreleased-scientific-inspection-api), [native capabilities](preview-format.md#scientific-inspection-capabilities-unreleased) |
+| Selections, measurements, labels, neighborhoods, SES/SAS and quantitative fields | [User guide](user-guide.md#scientific-inspection), [API additions](application-control.md#scientific-inspection-api-0100), [native capabilities](preview-format.md#scientific-inspection-capabilities-0100) |
 | Development setup, run/build commands, tests, outputs | [Development guide](development.md) |
 | Components, code ownership, scientific contracts, runtime data flow | [As-built architecture](architecture.md) |
-| Install and use the connector with Codex, Claude Code, Pi, OpenCode or a generic local agent | [Connector installation and user guide](ai-connector.md), with a copyable setup prompt for the 0.10.2 Mac package |
+| Install and use the connector with Codex, Claude Code, Pi, OpenCode or a generic local agent | [Connector installation and user guide](ai-connector.md), with a copyable setup prompt for the 0.10.3 Mac package |
 | Prompt-driven orbital, density, large-molecule AO and protein-representation lessons | [AI website section](https://uvar-apps.github.io/eigenvista/ai.html); these four tutorials are maintained only on the website |
 | External harness control, CLI, method discovery, jobs and scoped artifacts (introduced in 0.8.0; inspection additions in 0.10.0) | [Application control](application-control.md) and [accepted decision](design/2026-11-16-application-control-api.md) |
 | Recorded natural-language orbital visualization, with PDF/HTML/Markdown and images | [Sample AI session](sample-ai-session/README.md) |

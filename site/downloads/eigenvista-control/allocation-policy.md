@@ -1,6 +1,6 @@
 # Allocation-driven workloads
 
-EigenVista **0.10.2** retains the correction introduced in **0.10.1**, tracked by
+EigenVista **0.10.3** retains the correction introduced in **0.10.1**, tracked by
 [#92](https://github.com/uvar-apps/eigenvista/issues/92), removing application-imposed
 memory ceilings. Historical release notes and qualification snapshots retain
 the limits that applied to their original binaries.
