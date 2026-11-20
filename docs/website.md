@@ -4,7 +4,7 @@
 
 Authored/generated pages describe the delivered 0.10.3 Save, ExFAT and palette
 features. Download metadata below is measured from the independently qualified
-archive; assets are published before merging the site. Preserve media capture identities,
+archive; assets were published before the website update. Preserve media capture identities,
 dimensions, aspect ratios and historical citation/source records.
 
 Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
@@ -20,9 +20,15 @@ three optional palettes, notices and source/dependency archives.
 Published [EigenVista 0.10.3](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
 on 20 November 2026 with release notes and all three rebuilt assets. Independent
 anonymous downloads match complete ZIP/checksum/build-info bytes. The annotated
-`v0.10.3` identifies the clean package source. Website merge/Pages readback remains.
-Later delivery metadata does not retag or rebuild the qualified runtime. Track
-#103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
+`v0.10.3` identifies the clean package source. Release work was merged through
+[PR #104](https://github.com/uvar-apps/eigenvista/pull/104) as
+`602c869884b7b51ee0b5fbe5e34fba57d091be1f`. Pages-only deployment
+[44698474275](https://github.com/uvar-apps/eigenvista/actions/runs/44698474275) succeeded; anonymous readback matches all
+**91 served website files** and the custom nested404 byte-for-byte.
+No application CI ran. Old tags/assets remain unchanged. Later delivery metadata
+retains all 420 qualified runtime/test/input hashes; do not retag or rebuild the
+unchanged release. Track #103. Evidence: `tmp/release-0.10.3/`; gates:
+`.unlazy/release-0.10.3/`.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
