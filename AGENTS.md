@@ -2,9 +2,10 @@
 
 ## Save / ExFAT / accessibility batch — 20 November 2026
 
-Work on `codex/save-exfat-accessibility`, baseline `e9b0ef1`, tracked in #99,
-#100 and #72. User authorizes local validation, commits/pushes and merge through
-a PR. Version remains 0.10.2; no tag or public release is requested.
+Implemented on `codex/save-exfat-accessibility`, baseline `e9b0ef1`, and merged
+through [PR #101](https://github.com/uvar-apps/eigenvista/pull/101) as `7bb3d89`.
+Issues #99, #100 and #72 are completed. Version remains 0.10.2; no tag or public
+release was created. The delivery-record follow-up changes documentation only.
 
 GUI/API Save share synchronous pending-inspection admission. GUI Save refuses
 while an edit is applying; native exit and browser unload observe that state.
@@ -38,7 +39,11 @@ SHA-256 `c57e5d6f8c16b3cf91d896333645e65128a2e3181080e1012dae712c012bd380`.
 Independent extraction audits 729 source files, 15 connector files and five
 embedded assets; the actual extracted app/helper passes another 46 calls and
 three reviewed PNGs, including independently checked transparency. Exact package
-path and boundaries are in the living handoff. PR delivery remains. Evidence/scripts live in
+path and boundaries are in the living handoff. Pages deployment
+[44672440454](https://github.com/uvar-apps/eigenvista/actions/runs/44672440454)
+publishes the integration commit; all 91 served files and the custom nested404
+match the prepared site anonymously. No application CI ran. Broader #41 and
+the separate #85 contact-rendering work remain open. Evidence/scripts live in
 `tmp/save-exfat-accessibility/`, gates in `.unlazy/save-exfat-accessibility/`.
 The published 0.10.2 package/tag/DOI stay immutable. New source-build packages must
 include the palette both at top level and inside the connector resources.

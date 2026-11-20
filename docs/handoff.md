@@ -2,10 +2,12 @@
 
 ## Save / ExFAT / accessibility batch — 20 November 2026
 
-Active branch `codex/save-exfat-accessibility`, baseline `e9b0ef1`; user authorizes
-implementation, local checks and merge through a PR. Track #99 (Save), #100
-(explicit ExFAT publication) and #72 (optional palette). Version remains 0.10.2;
-published tags/assets/citation identities stay unchanged.
+Implemented on `codex/save-exfat-accessibility`, baseline `e9b0ef1`, and merged
+through [PR #101](https://github.com/uvar-apps/eigenvista/pull/101) at integration
+commit `7bb3d89675d2e789184f93dbed74102a13b60e7d`. Issues #99 (Save), #100
+(explicit ExFAT publication) and #72 (optional palette) are closed as completed.
+Version remains 0.10.2; published tags/assets/citation identities stay unchanged.
+The subsequent delivery-record update is documentation only.
 
 Synchronous pending-inspection admission now prevents GUI Save/native clean exit
 from overtaking a validated or coalesced edit; API Save reports busy. Actual
@@ -32,7 +34,8 @@ eight contact sheets. The final complete run passes all 752 browser cases,
 376 per engine, with zero failures, skips, flaky cases or retries and all 420
 runtime/test/input hashes unchanged. Final comparisons bind 32 original PNGs
 to 160 diagnostic views and eight reviewed sheets. All 162 website cases and
-static checks pass (27 pages, 24 exact downloads). PR delivery remains.
+static checks pass (27 pages, 24 exact downloads). The merged tree and all 420
+recorded runtime/test/input hashes match the qualified feature tree.
 Evidence: `tmp/save-exfat-accessibility/`, gates:
 `.unlazy/save-exfat-accessibility/`. The earlier 751/752 run is a retained
 test-readiness diagnostic; see the Save/ExFAT decision for the correction.
@@ -57,6 +60,14 @@ source snapshot. Linux/Windows/Intel, clean-Mac/Gatekeeper, physical OS quit/sav
 dialogs and the full macOS range remain unqualified. Exact receipts include
 `package-identity.json`, `package-audit-latest.json`, `native-package-acceptance.json`,
 `package-alpha.json`, `browser-qualification.json` and `post-browser.json`.
+
+The website is published through Pages-only deployment
+[44672440454](https://github.com/uvar-apps/eigenvista/actions/runs/44672440454),
+source `7bb3d89675d2e789184f93dbed74102a13b60e7d`. Anonymous readback verifies
+all 91 served files and the custom nested404 byte-for-byte. No application CI
+ran. Exact publication evidence is in `pages-status.json` and `public-files.json`.
+Broader #41 permissions/durability/platform research and the separate #85
+SES/VDW contact-rendering work remain open; do not close them with this batch.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
