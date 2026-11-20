@@ -367,7 +367,7 @@ main.workspace-lab {
     gap: 6px;
   }
   .application:has(.workspace-lab) .brand h1 {
-    font-size: 18px;
+    font-size: clamp(16px, 4.7vw, 18px);
   }
   .application:has(.workspace-lab) .topbar .file-actions {
     gap: 3px;

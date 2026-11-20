@@ -5,15 +5,19 @@ import path from "node:path";
 import { activateWidget } from "./workspace";
 import { pngPixels, settleScene, trackSceneDraws } from "./scenePixels";
 
-// Dense original structures exercise the real macOS GPU rather than Chromium's
-// software rasterizer. WebKit keeps its normal backend. Captures record the
+// Keep the runner's explicitly selected renderer; macOS Chromium defaults to
+// Metal. WebKit keeps its normal backend. Captures record the
 // actual renderer; no atom, geometry, sample or quality reduction is performed.
 test.use({
-  launchOptions: async ({ browserName }, use) => {
+  launchOptions: async ({ browserName }, use, info) => {
+    const configured = info.project.use.launchOptions ?? {};
     await use(
       process.platform === "darwin" && browserName === "chromium"
-        ? { args: ["--use-angle=metal"] }
-        : {},
+        ? {
+            ...configured,
+            args: [...(configured.args ?? []), "--use-angle=metal"],
+          }
+        : configured,
     );
   },
 });
@@ -206,7 +210,7 @@ for (const subject of [
   test(`existing and accessible palettes retain real ${subject.name} geometry under ordinary shading and AO`, async ({
     page,
   }, info) => {
-    test.setTimeout(180000);
+    test.setTimeout(Math.max(info.project.timeout, 180000));
     await ready(page, path.resolve("..", subject.file));
     const source = await science(page);
     const initial = await call<{ document: { atomCount: number } }>(

@@ -1,5 +1,11 @@
 # Use the installed EigenVista app with your agent
 
+For the Linux development package, use the
+[Linux setup and connector instructions](linux.md). Its launcher is
+`share/eigenvista/AI-connector/Start AI connection.sh` and its helper is
+`bin/eigenvista-ctl`. The Apple Silicon release and Mac paths below remain
+separate from that development preview.
+
 Ask your agent to open a molecule, find an orbital, load a palette, focus on a
 protein chain or export a figure. It operates the same EigenVista window you
 see. Keep using Codex Desktop or CLI, Claude Code, Pi, OpenCode, or another

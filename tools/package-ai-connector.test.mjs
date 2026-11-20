@@ -85,12 +85,13 @@ test("prebuilt arm64 client, portable instructions and attributed data stage and
   const staged = stage(bundle);
   assert.equal(staged.architecture, "arm64");
   assert.match(staged.version, /^eigenvista-ctl /);
-  assert.equal(Object.keys(staged.files).length, 15);
+  assert.equal(Object.keys(staged.files).length, 16);
   const prefix = "Contents/Resources/AI-connector/";
   for (const name of [
     "SKILL.md",
     "reference.md",
     "README.md",
+    "linux.md",
     "allocation-policy.md",
     "Start AI connection.command",
     "examples/bicyclic-c7h10.molden",

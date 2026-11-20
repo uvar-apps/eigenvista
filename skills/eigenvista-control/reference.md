@@ -27,8 +27,10 @@ technical agent guidance; users can request all operations in ordinary language.
 
 EigenVista 0.8.0 is the first connector-enabled package. Older 0.7.2 apps and
 tester ZIPs predate it. Confirm the installed files and live capabilities
-rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
-qualification is pending; non-Unix attachment is unsupported.
+rather than treating older versions as connector-enabled. The public native connector
+package targets macOS. A separate CachyOS x86_64 development package uses the same
+protocol; consult its Linux guide and qualification record rather than inferring
+support for every Linux distribution. Non-Unix attachment is unsupported.
 
 Use the current **0.10.3** package. The scientific-inspection methods below were
 introduced in **0.10.0**. Older 0.8.0 downloads lack them. Use the application,
@@ -37,6 +39,14 @@ together, and inspect the connected app's live schemas. Do not promise features
 from a version comparison or require a source checkout to use an installed app.
 
 ## Package and instruction folder
+
+The Linux development prefix supplies `bin/eigenvista`, `bin/eigenvista-ctl`
+and `share/eigenvista/AI-connector/`, containing these same instructions,
+examples/palettes and `Start AI connection.sh`. Invoke that executable launcher
+from Fish; do not source its Bash contents. Its workspace/input options and
+private connection protocol match the Mac launcher. The helper only connects;
+it has no `launch` subcommand. Direct native startup uses the app executable
+and the control flags documented below.
 
 The macOS package places these files inside the selected app bundle:
 

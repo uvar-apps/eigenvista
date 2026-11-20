@@ -13,7 +13,8 @@
     "desktop": "node ../tools/run.mjs desktop",
     "desktop:build": "node ../tools/run.mjs desktop-build",
     "package:macos": "node ../tools/package-macos.mjs",
-    "test:packaging": "node --test ../tools/package-support.test.mjs"
+    "test:packaging": "node --test ../tools/package-support.test.mjs",
+    "package:linux": "node ../tools/package-linux.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",

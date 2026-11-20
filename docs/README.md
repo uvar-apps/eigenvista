@@ -1,5 +1,11 @@
 # Documentation map
 
+For the CachyOS x86_64 development port, see the [Linux guide](linux.md),
+including Fish commands, package layout, AI setup and qualification boundaries.
+The [Linux qualification record](design/2026-11-20-linux-desktop-preview.md)
+identifies the exact package, headless test method and remaining desktop checks.
+The public Mac release and Linux development packages remain distinct.
+
 Version **0.10.3** adds pending-edit Save coordination (#99), explicitly selected
 atomic replacement for converter/AI exports to the tested Mac ExFAT volume
 (#100), and the optional [Accessible elements palette](../palettes/accessible-elements.json)

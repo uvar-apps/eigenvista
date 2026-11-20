@@ -7,7 +7,8 @@ export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 fail() { printf 'EigenVista AI connection: %s\n' "$*" >&2; exit 1; }
 help() {
   printf '%s\n' \
-    'Start AI connection.command [--workspace DIR] [--input DIR ...]' \
+    'Start AI connection.command (macOS) / Start AI connection.sh (Linux)' \
+    '  [--workspace DIR] [--input DIR ...]' \
     '' \
     'Starts one new connected EigenVista window in this terminal.' \
     'No compiler, source checkout, Node.js or model installation is needed.' \
@@ -59,14 +60,23 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-[ ! -L "$0" ] || fail 'Run the launcher inside EigenVista.app, not a symlink to it.'
+[ ! -L "$0" ] || fail 'Run the launcher inside the installed EigenVista package, not a symlink to it.'
 script_dir="$(CDPATH= cd -P -- "$(dirname -- "$0")" && pwd -P)"
-contents="$(CDPATH= cd -P -- "$script_dir/../.." && pwd -P)"
-bundle="$(dirname -- "$contents")"
-case "$bundle" in *.app) ;; *) fail 'Keep this launcher inside EigenVista.app/Contents/Resources/AI-connector.' ;; esac
-[ "$script_dir" = "$contents/Resources/AI-connector" ] || fail 'Unexpected launcher location inside the app.'
-desktop="$contents/MacOS/eigenvista-desktop"
-client="$contents/MacOS/eigenvista-ctl"
+case "$script_dir" in
+  */Contents/Resources/AI-connector)
+    contents="$(CDPATH= cd -P -- "$script_dir/../.." && pwd -P)"
+    bundle="$(dirname -- "$contents")"
+    case "$bundle" in *.app) ;; *) fail 'Keep this launcher inside EigenVista.app/Contents/Resources/AI-connector.' ;; esac
+    desktop="$contents/MacOS/eigenvista-desktop"
+    client="$contents/MacOS/eigenvista-ctl"
+    ;;
+  */share/eigenvista/AI-connector)
+    bundle="$(CDPATH= cd -P -- "$script_dir/../../.." && pwd -P)"
+    desktop="$bundle/bin/eigenvista"
+    client="$bundle/bin/eigenvista-ctl"
+    ;;
+  *) fail 'Keep this launcher inside the installed EigenVista app or Linux package.' ;;
+esac
 for executable in "$desktop" "$client"; do
   [ -f "$executable" ] && [ -x "$executable" ] && [ ! -L "$executable" ] || fail "Missing bundled executable: $executable"
 done
@@ -88,7 +98,6 @@ for directory in ${extra_inputs[@]+"${extra_inputs[@]}"}; do
   for existing in "${approved[@]}"; do [ "$directory" != "$existing" ] || found=true; done
   if [ "$found" = false ]; then approved+=("$directory"); fi
 done
-[ "${#approved[@]}" -le 15 ] || fail 'Too many input directories (at most 15, including the three defaults).'
 mkdir -p -- "$inputs" "$sessions"
 session="$(mktemp -d "$sessions/session.XXXXXX")"
 chmod 700 "$session"

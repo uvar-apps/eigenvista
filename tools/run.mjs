@@ -71,7 +71,17 @@ switch (process.argv[2]) {
     run(bin("tauri"), ["dev"], app);
     break;
   case "desktop-build":
-    run(bin("tauri"), ["build", "--debug", "--bundles", "app"], app);
+    run(
+      bin("tauri"),
+      [
+        "build",
+        "--debug",
+        ...(process.platform === "darwin"
+          ? ["--bundles", "app"]
+          : ["--no-bundle"]),
+      ],
+      app,
+    );
     break;
   default:
     throw new Error(

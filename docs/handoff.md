@@ -1,5 +1,73 @@
 # Development handoff
 
+## CachyOS Linux preview qualified — 20 November 2026 (#108)
+
+Implemented on `codex/linux-system76`, baseline
+`fa410bab79ed533561aa41d10a665f227e443cfa`. The user authorized committing and
+pushing this branch on 20 November 2026. This change records the qualified Linux
+implementation and its documentation; no new version, PR, merge, tag or public
+release is requested. Public 0.10.3 Mac assets, website and DOI stay unchanged. Track
+[#108](https://github.com/uvar-apps/eigenvista/issues/108), which remains open.
+Work only in EigenVista; Molekel is read-only.
+
+The user confirmed `system76.local` is **headless/SSH-only**: CachyOS x86_64,
+Intel i7-9750H (six cores/twelve threads), 64GB RAM, Fish and passwordless sudo.
+Remote checkout: `/home/ugo/projects/eigenvista`. SSH automation explicitly uses
+`/bin/sh -s` and `tmp/linux-port/env.sh`; interactive Fish uses `env.fish`.
+Pinned Rust1.99.0/wasm-bindgen0.2.108 are isolated under repo-local
+`tmp/toolchains/`; system Rust1.98.1 and shell profiles are unchanged. No desktop
+environment was installed. Use the [Linux guide](linux.md) for desktop
+commands, Fish builds and the tested SSH browser tunnel.
+
+Qualified archive in `artifacts/distributions/` on both hosts:
+`EigenVista-0.10.3-linux-x86_64-20261120T135729Z-fa410ba-dirty.tar.gz` —
+**82,811,544 bytes**, SHA-256
+`ba8a941a9c51402dbca16ba1d42a41ac9ff23232e380db34dde7c2d2c4110309`.
+Its checksum/build-info companions bind the same dirty development snapshot:
+736 source files, 64 resources, five embedded assets. The current extracted
+native prefix is remote `tmp/linux-port/EigenVista-v3`, not the earlier
+diagnostic `EigenVista` prefix. Later completion docs do not change the archived
+binaries. All 413 genuine runtime/test/input hashes match on both hosts.
+A final audit removed Mac transfer sidecars and a generated QA screenshot from
+the source payload; the metadata filter is tested before filesystem access.
+Those diagnostics remain in repo-local tmp. The clean package retains all
+three identical tested executables; no application or browser-test source changed.
+
+Linux passes **385 Rust cases**, fmt/strict all-target Clippy, production and
+native builds, and **752 browser cases** (376 host Chromium + 376 local matching
+Playwright/Noble WebKit). macOS passes **387 Rust cases**, fmt/strict Clippy,
+fresh production/native builds, **752 browser cases** and **32 packaging checks**.
+Browser suites have zero failures/skips/flaky cases/retries. Source pins,
+scientific/native Rust, formats, logo and allocation policy are unchanged.
+The real Linux font fallback exposed a one-pixel mobile overflow; the small
+heading fix and renderer/scroll/startup test-harness corrections are qualified.
+
+The actual extracted Linux launcher/app/helper passes **3,638 calls**, 34
+inspection methods and **26 reviewed PNGs**, including a 323-point independent
+scalar oracle, full 58,870-atom 1AON SES/progress/cancel/cache Save/reopen, twenty
+extra input roots, direct 48³ orbital/density/Cube volume and ray-cast with zero
+saved meshes, protein representations, Pastel/AO and protected export failures.
+Private descriptors and owned app/display/test-server processes are cleaned up;
+unrelated services are preserved. Diagnostic annotations sometimes overlap or
+have low contrast; these are functional QA, not gallery compositions.
+
+Native qualification used authenticated TCP Xvfb with repo-local private XDG
+and authority files, both Unix transports disabled and root `-nolock`. An initial
+unprivileged display experiment incorrectly created system-temporary X99 files;
+it was disclosed/stopped and the files removed. Corrected runs verified no such
+files. Keep this setup requirement explicit. Native display GL reported
+llvmpipe; host Chromium EGL independently reported Intel UHD630. WebKit's
+masked “Apple GPU” string is not hardware evidence. Physical desktop, native
+hardware GPU/Wayland/file-dialog/close behavior, clean installations, older
+glibc and other distributions remain unqualified. The package is a CachyOS
+tar.gz prefix, not a universal AppImage. Continue appropriate local Mac and
+available Linux validation before any future push.
+
+The [qualification record](design/2026-11-20-linux-desktop-preview.md) contains architecture/licensing/setup
+decisions and exact evidence boundaries. Evidence: local `tmp/linux-system76/`,
+remote `tmp/linux-port/`; gates: `.unlazy/linux-system76/`. Preserve diagnostic
+history and prior public tags/assets. Review/integration is the next step.
+
 ## 0.10.3 Zenodo citation — 20 November 2026
 
 The user-supplied version DOI for EigenVista 0.10.3 is

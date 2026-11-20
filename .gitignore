@@ -7,6 +7,7 @@
 /app/src/wasm/
 /app/src-tauri/gen/
 /app/test-results/
+/app/artifacts/
 /app/playwright-report/
 /artifacts/
 # Personal chat exports are not application source or redistribution inputs.

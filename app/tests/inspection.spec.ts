@@ -88,7 +88,12 @@ async function ready(page: Page) {
   await page.waitForFunction(() =>
     Boolean((window as ControlWindow).eigenvistaControl),
   );
-  await expect(page.locator("footer [role=status]")).toContainText("triangles");
+  await expect(page.locator("footer [role=status]")).toContainText(
+    "triangles",
+    {
+      timeout: 30000,
+    },
+  );
   await expect
     .poll(async () => (await call<{ busy: string }>(page, "app.state")).busy)
     .toBe("");
