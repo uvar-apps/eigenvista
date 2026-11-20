@@ -23,8 +23,10 @@ of a large protein complex with ambient occlusion.
 
 A separate [Linux development preview](docs/linux.md) targets CachyOS x86_64.
 Its build, package and qualification work is tracked in
-[#108](https://github.com/uvar-apps/eigenvista/issues/108); it is not a new public
-release or a claim of support for every Linux distribution.
+[#108](https://github.com/uvar-apps/eigenvista/issues/108) and merged through
+[PR #109](https://github.com/uvar-apps/eigenvista/pull/109). A clean Linux package
+is being prepared for the existing 0.10.3 release. Other distributions remain
+unqualified.
 
 **[Download 0.10.3 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·

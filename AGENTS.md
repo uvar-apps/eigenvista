@@ -1,5 +1,28 @@
 # EigenVista agent guide
 
+## Linux 0.10.3 publication in progress — 20 November 2026 (#108)
+
+The user authorized PR merge, current-version release notes, commits/pushes,
+Linux package publication and the matching website update. [PR #109](https://github.com/uvar-apps/eigenvista/pull/109)
+merged the qualified source as `ea65d62e829c0427c592032bdb716356bd8e2f56`;
+its tree exactly matches tested branch commit `1459f8a`. Work now continues on
+main. Build and qualify a clean committed-source Linux package before adding
+its archive/checksum/build-info to the existing v0.10.3 release. Preserve the
+original Mac assets, version DOI and immutable v0.10.3 tag. Record the Linux
+source separately; never relabel the earlier dirty development archive as clean.
+
+The previous 413 genuine runtime/test/input hashes and all completed Mac/Linux
+qualification remain applicable while those files are unchanged. The new package
+needs its own extracted payload/native acceptance and final anonymous readback.
+Website content/download facts and all relevant local checks must be complete
+before pushing the final site; publish assets before public download links.
+Keep issue108 open until this delivery is complete. No hosted application CI;
+the authorized Pages-only publisher remains separate. Evidence and acceptance:
+`tmp/linux-release-0.10.3/` and `.unlazy/linux-release-0.10.3/`.
+
+The earlier Linux section below is the historical development-package snapshot,
+not the clean package being prepared for publication.
+
 ## CachyOS Linux preview qualified — 20 November 2026 (#108)
 
 Implemented on `codex/linux-system76`, baseline

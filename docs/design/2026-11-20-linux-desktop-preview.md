@@ -7,6 +7,16 @@ The user authorized committing and pushing the qualified implementation on
 The qualified archive retains its original pre-commit dirty-snapshot identity;
 the public 0.10.3 Mac download and Zenodo DOI remain unchanged.
 
+## Publication follow-up
+
+The user subsequently authorized PR merge, current 0.10.3 release notes,
+commit/push, Linux asset publication and a website update. PR #109 merged the
+qualified implementation as `ea65d62e829c0427c592032bdb716356bd8e2f56`.
+A clean committed-source package is being prepared. The original Mac assets and
+v0.10.3 tag remain immutable; the added Linux package records its own source.
+The development archive described below remains historical evidence. See the
+living handoff for the final published artifact and acceptance results.
+
 ## Runtime and package decision
 
 Build natively on `ugo@system76.local`: CachyOS x86_64, Intel i7-9750H

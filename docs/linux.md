@@ -1,10 +1,12 @@
 # Linux development preview
 
 Linux work is tracked in [issue #108](https://github.com/uvar-apps/eigenvista/issues/108).
-The first target is **CachyOS x86_64** on the local System76 machine. The public
-0.10.3 release still supplies the Apple Silicon Mac package; this development
-branch does not create a new release. See the [living handoff](handoff.md) for
-the exact tested source, package, results and remaining desktop checks.
+The first target is **CachyOS x86_64** on the local System76 machine. The Linux
+implementation is merged through [PR #109](https://github.com/uvar-apps/eigenvista/pull/109).
+A clean Linux package is being prepared for the existing
+[0.10.3 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3).
+See the [living handoff](handoff.md) for the exact tested source, package,
+publication state and remaining desktop checks.
 
 ## Run on a Linux desktop
 
