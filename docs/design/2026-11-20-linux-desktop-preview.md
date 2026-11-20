@@ -2,10 +2,11 @@
 
 Tracked by [#108](https://github.com/uvar-apps/eigenvista/issues/108), developed
 on `codex/linux-system76` from `fa410bab79ed533561aa41d10a665f227e443cfa`.
-The user authorized committing and pushing the qualified implementation on
-20 November 2026. No new public release, version, tag, PR or merge is requested.
-The qualified archive retains its original pre-commit dirty-snapshot identity;
-the public 0.10.3 Mac download and Zenodo DOI remain unchanged.
+The initial development phase was qualified before commit on 20 November 2026.
+The publication follow-up below records the user's later PR/merge/release
+authorization and the clean Linux archive. The earlier development archive
+retains its historical dirty-snapshot identity. The original Mac download,
+v0.10.3 tag and Zenodo DOI remain unchanged.
 
 ## Publication follow-up
 
@@ -22,7 +23,9 @@ passes 3,728 calls and 26 reviewed PNGs; all 413 genuine runtime/test/input hash
 remain unchanged. All six release assets match independent anonymous downloads.
 The original Mac assets and v0.10.3 tag remain immutable. The development
 archive described below remains historical evidence. See the living handoff
-for the final delivery and website receipt.
+for the final delivery. Website commit 11ddfa8475d0541613c52dd29e80020c0c8681c3
+is published through Pages run 44759879664; all 92 served files and the custom
+nested404 match the prepared site anonymously. No application CI ran.
 
 ## Runtime and package decision
 

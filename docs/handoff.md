@@ -43,12 +43,19 @@ static checks cover 27 pages, 1,088 local references, 76 image uses and 25 exact
 download copies. All 162 Chromium/WebKit route/viewport cases pass with 20 reviewed
 desktop/mobile captures. Publication-state wording changed only the raw Linux
 guide/provenance download; all HTML/CSS/JS/media remain byte-identical to that
-passing browser run. Pictures/fonts/videos/logo are unchanged. Pages publication
-and anonymous served-tree readback are the final delivery step; append its
-receipt after verification. Do not infer completed deployment from a Git push.
+passing browser run. Pictures/fonts/videos/logo are unchanged.
+The [Pages-only deployment](https://github.com/uvar-apps/eigenvista/actions/runs/44759879664)
+succeeded from website commit 11ddfa8475d0541613c52dd29e80020c0c8681c3.
+Independent anonymous readback matches all **92 served files** and the custom
+nested404 byte-for-byte. The configuration marker .nojekyll is not a served
+page; untracked local Finder metadata is not in the committed deployment.
+The live homepage, installation and AI pages now offer the qualified Linux
+archive. No application CI ran. Delivery-record-only follow-ups preserve that
+verified website tree. The owned 5190 preview was stopped; the user's app and
+unrelated services remain untouched.
 
 Linux remains a **CachyOS x86_64 experimental preview**, built/tested with
-glibc 2.44, GTK 3 and WebKitGTK 4.1 version2.54.1. Native tests used authenticated
+glibc 2.44, GTK 3 and WebKitGTK 4.1 version 2.54.1. Native tests used authenticated
 TCP Xvfb/llvmpipe; host Chromium EGL used Intel UHD 630, and WebKit's masked
 Apple GPU string is not hardware evidence. Physical desktop/dialogs/close,
 native hardware GPU/Wayland, clean installs, older glibc and other distributions
@@ -63,8 +70,9 @@ All temporary files stay under EigenVista tmp on each host. Molekel is read-only
 
 Evidence/oracles: tmp/linux-release-0.10.3/ (package-qualified.json,
 published-assets-qualified.json, verify-package.py, site-final-evidence.json,
-verify-site.mjs); acceptance: .unlazy/linux-release-0.10.3/. Issue #108 tracks
-final delivery and should close after live website verification. The earlier
+verify-site.mjs, live-site-qualified.json); acceptance:
+.unlazy/linux-release-0.10.3/. Issue #108 records the completed port/publication
+and remaining platform qualification boundaries. The earlier
 development-package sections below are historical, not the published payload.
 
 ## CachyOS Linux preview qualified — 20 November 2026 (#108)
