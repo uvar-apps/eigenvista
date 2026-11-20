@@ -16,7 +16,13 @@ Desktop/mobile citation review passes. All three anonymous release downloads
 match qualified bytes; GitHub release notes now use the new DOI with asset/tag
 identities preserved. All 420 qualified runtime/test/input hashes are unchanged;
 runtime tests were not rerun for this documentation-only update. Evidence:
-`tmp/doi-0.10.3/`. Verify Pages readback after deployment.
+`tmp/doi-0.10.3/`. Published through [PR #106](https://github.com/uvar-apps/eigenvista/pull/106)
+as `f4c86285ed073712c8e1d4e53496fdcc8f07c570`. The
+[Pages-only deployment](https://github.com/uvar-apps/eigenvista/actions/runs/44702873552)
+succeeded; anonymous readback matches all 91 served files and the custom nested
+404 byte-for-byte. The live citation and release metadata identify 0.10.3 and
+its new DOI. No application CI ran. Later documentation-only delivery records
+leave that verified website tree and package source unchanged.
 
 ## Release 0.10.3 published — 20 November 2026 (#103)
 
