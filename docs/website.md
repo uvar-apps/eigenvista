@@ -1,10 +1,10 @@
 # User-facing website
 
-## Release 0.10.3 qualified — publication pending (#103)
+## Release 0.10.3 published — 20 November 2026 (#103)
 
 Authored/generated pages describe the delivered 0.10.3 Save, ExFAT and palette
 features. Download metadata below is measured from the independently qualified
-archive; publish assets before merging the site. Preserve media capture identities,
+archive; assets are published before merging the site. Preserve media capture identities,
 dimensions, aspect ratios and historical citation/source records.
 
 Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
@@ -17,10 +17,12 @@ The checksum and build-info companions identify the same clean build. The ZIP
 contains the optimized app, converter, AI helper/launcher, guides, examples, all
 three optional palettes, notices and source/dependency archives.
 
-Publication is pending: commit/push the qualified branch, create the annotated
-v0.10.3 tag at the clean package source, publish all three assets with release
-notes, verify anonymous bytes, then merge the prepared website and verify Pages.
-Track #103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
+Published [EigenVista 0.10.3](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
+on 20 November 2026 with release notes and all three rebuilt assets. Independent
+anonymous downloads match complete ZIP/checksum/build-info bytes. The annotated
+`v0.10.3` identifies the clean package source. Website merge/Pages readback remains.
+Later delivery metadata does not retag or rebuild the qualified runtime. Track
+#103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)
 

@@ -1,6 +1,6 @@
 # Development handoff
 
-## Release 0.10.3 qualified — publication pending (#103)
+## Release 0.10.3 published — 20 November 2026 (#103)
 
 Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
 
@@ -39,10 +39,12 @@ and densely selected pocket markers obscure detail. No new rendering regression
 was found. Preserve all prior tags and release assets. Use concept DOI
 10.5281/zenodo.24246123 until the user supplies a 0.10.3 DOI.
 
-Publication is pending: commit/push the qualified branch, create the annotated
-v0.10.3 tag at the clean package source, publish all three assets with release
-notes, verify anonymous bytes, then merge the prepared website and verify Pages.
-Track #103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
+Published [EigenVista 0.10.3](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
+on 20 November 2026 with release notes and all three rebuilt assets. Independent
+anonymous downloads match complete ZIP/checksum/build-info bytes. The annotated
+`v0.10.3` identifies the clean package source. Website merge/Pages readback remains.
+Later delivery metadata does not retag or rebuild the qualified runtime. Track
+#103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
 
 ## Save / ExFAT / accessibility batch — 20 November 2026
 
