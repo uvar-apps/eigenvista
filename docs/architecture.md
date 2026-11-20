@@ -216,7 +216,12 @@ NDJSON JSON-RPC broker, scoped filesystem adapter, client library and
 `eigenvista-ctl` binary. The Tauri bridge correlates requests with the frontend
 controller; the broker does not interpret scientific commands. File grants use
 Unix directory descriptors and no-follow traversal, protect imported sources,
-validate encoded documents/PNGs and publish without overwriting destinations.
+validate encoded documents/PNGs and default to atomic no-clobber publication.
+Source builds after 0.10.2 accept explicit `overwrite:true` for atomic replacement
+through the same descriptor-pinned writer. That permission includes late-created
+targets; protected inputs and scoped traversal remain unchanged. Default
+exclusive publication is unavailable on the qualified Mac ExFAT volume, whereas
+explicit replacement works. Browser exports have no replacement mode.
 Native Save sends the encoded archive through Tauri as raw binary, avoiding
 conversion into millions of JSON numbers. A checked `EVT1` frame carries a
 little-endian u64 metadata length, UTF-8 JSON metadata and the unchanged archive
@@ -881,10 +886,24 @@ suffix. Encoding always writes EigenVista identifiers even with that old suffix,
 so new saves are not guaranteed readable in previous Molekel builds. No automatic
 file migration is performed. Imported external source paths
 are protected against replacement. Batch conversion protects all selected sources.
-CLI saves protect inputs and output aliases, require `--force` for existing
-destinations, and atomically publish initially absent files without replacement
+CLI saves protect inputs and output aliases, require explicit replacement
+permission for existing destinations, and atomically publish initially absent files without replacement
 even with `--force`. This uses same-directory hard links; filesystems that do
 not support them fail explicitly instead of falling back to an unsafe overwrite.
+
+The source follow-up (#100) adds explicit `--replace`, separate from `--force`:
+it permits complete atomic replacement, including when a destination appears
+after preflight, while preserving source/colliding-output protections. Its
+replacement writer works on the tested Mac ExFAT volume; the unchanged default
+does not. The earlier filesystem research remains evidence of its original
+no-clobber behavior, not a promise of crash durability.
+
+Save coordination (#99) shares a synchronous pending-inspection admission
+tracker between controller requests and complete GUI command lifetimes. A
+pending validated or coalesced write blocks GUI Save and native automatic exit
+before the first asynchronous synchronization; API Save reports busy. Each
+admission releases exactly once on completion, failure or stale rejection.
+This does not change the saved format or serialize scientific work on the UI.
 
 Shader parameter export uses the separate `save_shader_parameters` command.
 It accepts complete UTF-8 text using fallible buffers, offers a `.params` dialog, checks the

@@ -59,6 +59,8 @@ fn help_version_and_invalid_options_are_explicit() {
     assert!(help.contains("default: INPUT.eigenvista"));
     assert!(help.contains("BinaryCIF .bcif"));
     assert!(help.contains("gzip-wrapped .bcif.gz"));
+    assert!(help.contains("--replace"));
+    assert!(help.contains("appears later"));
     let version = dir.run(&["--version"]);
     assert!(version.status.success());
     assert_eq!(
@@ -70,6 +72,8 @@ fn help_version_and_invalid_options_are_explicit() {
         vec!["--unknown"],
         vec!["--output"],
         vec!["--check", "--force", "in.xyz"],
+        vec!["--check", "--replace", "in.xyz"],
+        vec!["--force", "--replace", "in.xyz"],
     ] {
         assert_eq!(dir.run(&args).status.code(), Some(2));
     }
@@ -175,6 +179,103 @@ fn conversion_preserves_structure_and_refuses_accidental_overwrite() {
     assert_eq!(fs::read(dir.0.join("water.eigenvista")).unwrap(), saved);
     assert!(dir.run(&["water.xyz", "--force"]).status.success());
     assert_eq!(fs::read(dir.0.join("water.xyz")).unwrap(), original);
+}
+
+#[test]
+fn explicit_replacement_creates_and_replaces_complete_outputs_without_changing_inputs() {
+    let dir = Scratch::new();
+    dir.water("water.xyz");
+    let original = fs::read(dir.0.join("water.xyz")).unwrap();
+    let output = dir.0.join("water.eigenvista");
+    let expected = eigenvista_import::import_bytes(&original, "water.xyz")
+        .unwrap()
+        .document;
+    for prior in [None, Some(b"existing unrelated output".as_slice())] {
+        if let Some(bytes) = prior {
+            fs::write(&output, bytes).unwrap();
+        }
+        let result = dir.run(&["water.xyz", "--replace", "--json"]);
+        assert!(result.status.success(), "{result:?}");
+        let decoded = eigenvista_format::decode(&fs::read(&output).unwrap()).unwrap();
+        assert_eq!(decoded, expected);
+        assert_eq!(fs::read(dir.0.join("water.xyz")).unwrap(), original);
+        assert!(!fs::read_dir(&dir.0).unwrap().any(|entry| {
+            entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with(".eigenvista-")
+        }));
+    }
+    let bytes = fs::read(&output).unwrap();
+    let result = dir.run(&["water.eigenvista", "--replace", "-o", "water.eigenvista"]);
+    assert_eq!(result.status.code(), Some(2));
+    assert_eq!(fs::read(&output).unwrap(), bytes);
+}
+
+#[test]
+fn explicit_replacement_still_rejects_invalid_inputs_and_duplicate_batch_outputs() {
+    let dir = Scratch::new();
+    fs::write(dir.0.join("bad.xyz"), "invalid input").unwrap();
+    let output = dir.0.join("bad.eigenvista");
+    fs::write(&output, b"prior complete bytes").unwrap();
+    assert_eq!(dir.run(&["bad.xyz", "--replace"]).status.code(), Some(1));
+    assert_eq!(fs::read(output).unwrap(), b"prior complete bytes");
+    dir.water("water.xyz");
+    fs::create_dir(dir.0.join("out")).unwrap();
+    assert_eq!(
+        dir.run(&["water.xyz", "water.xyz", "--replace", "--output-dir", "out"])
+            .status
+            .code(),
+        Some(2)
+    );
+    assert_eq!(fs::read_dir(dir.0.join("out")).unwrap().count(), 0);
+}
+
+#[test]
+#[cfg(unix)]
+fn explicit_replacement_refuses_symlink_outputs_and_retains_source_bytes() {
+    use std::os::unix::fs::symlink;
+    let dir = Scratch::new();
+    dir.water("water.xyz");
+    let source = dir.0.join("water.xyz");
+    let original = fs::read(&source).unwrap();
+    let destination = dir.0.join("alias.eigenvista");
+    symlink(&source, &destination).unwrap();
+    assert_eq!(
+        dir.run(&["water.xyz", "--replace", "-o", "alias.eigenvista"])
+            .status
+            .code(),
+        Some(2)
+    );
+    assert!(
+        fs::symlink_metadata(&destination)
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+    assert_eq!(fs::read(source).unwrap(), original);
+}
+
+#[test]
+#[cfg(unix)]
+fn replacement_flags_cannot_overwrite_an_input_hard_link_alias() {
+    let dir = Scratch::new();
+    dir.water("water.xyz");
+    let source = dir.0.join("water.xyz");
+    let alias = dir.0.join("alias.eigenvista");
+    fs::hard_link(&source, &alias).unwrap();
+    let before = fs::read(&source).unwrap();
+    for flag in ["--force", "--replace"] {
+        assert_eq!(
+            dir.run(&["water.xyz", flag, "-o", "alias.eigenvista"])
+                .status
+                .code(),
+            Some(2)
+        );
+        assert_eq!(fs::read(&source).unwrap(), before);
+        assert_eq!(fs::read(&alias).unwrap(), before);
+    }
 }
 
 #[test]

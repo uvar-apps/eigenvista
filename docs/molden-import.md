@@ -38,7 +38,8 @@ selects one destination. `--check` validates and reports without writing.
 format/warnings/`requires_save`, atom/orbital/density counts, and error. Without it, summaries
 and warnings go to standard error. Use `--` before filenames starting with `-`.
 
-Existing outputs require explicit `--force`; input paths are never valid
+Existing outputs require explicit `--force` or, in the source follow-up,
+`--replace`; input paths are never valid
 destinations, even with that option. The converter preflights destinations,
 rejects output symlinks and colliding paths, validates the encoded native data,
 and publishes complete files atomically. Initially absent outputs remain
@@ -47,6 +48,18 @@ cannot replace an earlier batch result. Such late collisions report failure
 and retain completed outputs. No-clobber publication requires hard-link support
 on the destination filesystem; failure does not fall back to unsafe replacement.
 Windows replacement behavior still requires platform qualification.
+
+The source follow-up to 0.10.2 adds **`--replace`** for explicit atomic
+replacement, including on the tested macOS ExFAT volume. This option allows
+replacing a destination that already exists or is created while conversion is
+running. It is separate from `--force`; do not combine the two. Input files,
+symlinks and colliding batch destinations remain protected. Use a new output
+name and the default mode unless replacement is intentional. The tested Mac
+ExFAT driver supports neither hard links nor exclusive rename, so default
+no-clobber creation still reports an unsupported operation there. `--replace`
+publishes a complete staged file; it does not expose a partially written final
+file or establish power-loss durability. The original published 0.10.2 converter
+does not have this option.
 
 Exit codes are `0` for complete success, `1` for any per-file import/write
 failure, and `2` for invalid options or destination/input-path preflight errors.

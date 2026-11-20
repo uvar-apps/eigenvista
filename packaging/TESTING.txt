@@ -39,6 +39,11 @@ Do not share the private connection file's contents.
 
 QUICK TEST
 
+- Optional: Appearance > Atom colours > Colours file… loads
+  Palettes/accessible-elements.json, a fourteen-common-element alternative
+  evaluated with color-vision simulations. Other elements keep their defaults.
+  Read Palettes/README.md for coverage and remaining ambiguous pairs.
+
 - Click Open and choose Examples/water.pdb or Examples/water.xyz.
   Both should show 3 atoms and 2 automatically computed bonds.
 - Try Ball and stick, Liquorice, and Van der Waals representations.

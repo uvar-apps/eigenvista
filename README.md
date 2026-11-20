@@ -5,6 +5,12 @@ atom-selection cues, automatically updated field planes, and live progress
 for molecular surfaces. It retains smooth view-relative lighting and
 [allocation-driven workloads](docs/allocation-policy.md).
 
+Source updates after the published 0.10.2 package are tracked in
+[#99](https://github.com/uvar-apps/eigenvista/issues/99) (Save coordination),
+[#100](https://github.com/uvar-apps/eigenvista/issues/100) (ExFAT export compatibility)
+and [#72](https://github.com/uvar-apps/eigenvista/issues/72) (an optional accessibility
+palette). The existing release download keeps its original contents.
+
 **Explore molecular orbitals, electron density and large molecular structures.**
 
 EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an

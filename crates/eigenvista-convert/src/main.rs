@@ -22,6 +22,7 @@ BinaryCIF .bcif and gzip-wrapped .bcif.gz inputs use the same mmCIF policies.
   -o, --output FILE     Destination for one input (default: INPUT.eigenvista)
       --output-dir DIR Destination directory, required for multiple inputs
       --force          Replace existing outputs, never input files
+      --replace        Allow atomic replacement even if an output appears later
       --check          Validate and report without writing any documents
       --json           Print a machine-readable result array to stdout
   -h, --help           Show this help
@@ -30,7 +31,11 @@ BinaryCIF .bcif and gzip-wrapped .bcif.gz inputs use the same mmCIF policies.
 
 Output directories must already exist. No external tools or calculation engines
 are invoked. Output publication is atomic; existing outputs are protected unless
---force is supplied. Batch failures retain completed outputs and exit nonzero.
+--force or --replace is supplied. --force only replaces outputs found during
+preflight; --replace also allows replacement of a file created before publication
+and supports filesystems such as ExFAT without hard links. Never input files.
+Choose --force or --replace, not both. Batch failures retain completed outputs
+and exit nonzero.
 Exit codes: 0 success, 1 conversion/write failure, 2 invalid arguments/paths.
 ";
 
@@ -40,6 +45,7 @@ struct Options {
     output: Option<PathBuf>,
     directory: Option<PathBuf>,
     force: bool,
+    replace: bool,
     check: bool,
     json: bool,
 }
@@ -68,6 +74,7 @@ fn options(args: impl IntoIterator<Item = OsString>) -> Result<Command, String> 
             Some("-h" | "--help") => return Ok(Command::Help),
             Some("-V" | "--version") => return Ok(Command::Version),
             Some("--force") => options.force = true,
+            Some("--replace") => options.replace = true,
             Some("--check") => options.check = true,
             Some("--json") => options.json = true,
             Some("-o" | "--output") => {
@@ -99,8 +106,16 @@ fn options(args: impl IntoIterator<Item = OsString>) -> Result<Command, String> 
     if options.output.is_some() && options.directory.is_some() {
         return Err("Choose --output or --output-dir, not both".into());
     }
-    if options.check && (options.output.is_some() || options.directory.is_some() || options.force) {
-        return Err("--check does not accept destination or --force options".into());
+    if options.force && options.replace {
+        return Err("Choose --force or --replace, not both".into());
+    }
+    if options.check
+        && (options.output.is_some()
+            || options.directory.is_some()
+            || options.force
+            || options.replace)
+    {
+        return Err("--check does not accept destination, --force or --replace options".into());
     }
     if !options.check && options.inputs.len() > 1 && options.directory.is_none() {
         return Err("Multiple input files require --output-dir".into());
@@ -151,13 +166,36 @@ struct Destination {
     replace: bool,
 }
 
+impl Destination {
+    /// Apply the publication permission selected during preflight, not a later existence check.
+    fn publish(&self, bytes: &[u8]) -> Result<(), String> {
+        if self.replace {
+            eigenvista_format::native::save_atomic(&self.path, bytes)
+        } else {
+            eigenvista_format::native::save_atomic_new(&self.path, bytes)
+        }
+    }
+}
+
 fn destinations(options: &Options) -> Result<Vec<Option<Destination>>, String> {
     let mut inputs = HashSet::new();
     inputs
         .try_reserve(options.inputs.len())
         .map_err(|_| "Cannot allocate converter source identities")?;
+    #[cfg(unix)]
+    let mut input_identities = HashSet::new();
+    #[cfg(unix)]
+    input_identities
+        .try_reserve(options.inputs.len())
+        .map_err(|_| "Cannot allocate converter source file identities")?;
     for input in &options.inputs {
         inputs.insert(fs::canonicalize(input).map_err(|e| format!("{}: {e}", input.display()))?);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let metadata = fs::metadata(input).map_err(|e| e.to_string())?;
+            input_identities.insert((metadata.dev(), metadata.ino()));
+        }
     }
     let mut output = Vec::new();
     output
@@ -212,6 +250,12 @@ fn destinations(options: &Options) -> Result<Vec<Option<Destination>>, String> {
         if exists {
             use std::os::unix::fs::MetadataExt;
             let metadata = fs::metadata(&destination).map_err(|e| e.to_string())?;
+            if input_identities.contains(&(metadata.dev(), metadata.ino())) {
+                return Err(format!(
+                    "Refusing to replace an input file alias: {}",
+                    destination.display()
+                ));
+            }
             if !file_identities.insert((metadata.dev(), metadata.ino())) {
                 return Err(format!(
                     "Inputs map to the same existing output: {}",
@@ -219,16 +263,17 @@ fn destinations(options: &Options) -> Result<Vec<Option<Destination>>, String> {
                 ));
             }
         }
-        if exists && !options.force {
+        if exists && !options.force && !options.replace {
             return Err(format!(
-                "Output already exists: {}; use --force to replace it",
+                "Output already exists: {}; use --force or --replace to replace it",
                 destination.display()
             ));
         }
-        // Even --force must not clobber another batch result or a newly created file.
+        // --force retains its preflight-only permission; --replace explicitly
+        // permits replacement at publication, while batch destinations stay unique.
         output.push(Some(Destination {
             path: destination,
-            replace: exists && options.force,
+            replace: options.replace || (exists && options.force),
         }));
     }
     Ok(output)
@@ -298,11 +343,7 @@ fn convert(options: Options) -> Result<u8, String> {
             outcome.report = Some(imported.report);
             if let Some(destination) = destination {
                 let encoded = eigenvista_format::encode(&imported.document)?;
-                if destination.replace {
-                    eigenvista_format::native::save_atomic(&destination.path, &encoded)?;
-                } else {
-                    eigenvista_format::native::save_atomic_new(&destination.path, &encoded)?;
-                }
+                destination.publish(&encoded)?;
             }
             Ok::<_, String>(())
         })();
@@ -373,6 +414,60 @@ fn main() -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn preflight_permission_controls_a_destination_created_before_publication() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tmp");
+        fs::create_dir_all(&root).unwrap();
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let directory = root.join(format!(
+            "converter-late-output-{}-{nonce}",
+            std::process::id()
+        ));
+        fs::create_dir(&directory).unwrap();
+        let input = directory.join("input.xyz");
+        fs::write(&input, "1\nHydrogen\nH 0 0 0\n").unwrap();
+        let expected =
+            eigenvista_format::encode(&eigenvista_core::fixtures::hydrogen_pair()).unwrap();
+        for (name, force, replace) in [
+            ("default", false, false),
+            ("force", true, false),
+            ("replace", false, true),
+        ] {
+            let output = directory.join(format!("{name}.eigenvista"));
+            let options = Options {
+                inputs: vec![input.clone()],
+                output: Some(output.clone()),
+                force,
+                replace,
+                ..Options::default()
+            };
+            let planned = destinations(&options).unwrap().pop().unwrap().unwrap();
+            fs::write(&output, b"independent late-created complete file").unwrap();
+            let result = planned.publish(&expected);
+            assert_eq!(result.is_ok(), replace);
+            assert_eq!(
+                fs::read(output).unwrap(),
+                if replace {
+                    expected.as_slice()
+                } else {
+                    b"independent late-created complete file"
+                }
+            );
+        }
+        assert_eq!(fs::read_to_string(input).unwrap(), "1\nHydrogen\nH 0 0 0\n");
+        assert!(!fs::read_dir(&directory).unwrap().any(|entry| {
+            entry
+                .unwrap()
+                .file_name()
+                .to_string_lossy()
+                .starts_with(".eigenvista-")
+        }));
+        fs::remove_dir_all(directory).unwrap();
+    }
 
     #[test]
     fn source_reader_accepts_more_than_the_former_128_mib_limit() {

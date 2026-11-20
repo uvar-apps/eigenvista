@@ -1,5 +1,30 @@
 # Implementation status
 
+## Save / ExFAT / accessibility batch — 20 November 2026
+
+Implementation is on `codex/save-exfat-accessibility`, baseline `e9b0ef1`,
+tracked by #99/#100/#72. The user authorizes a PR merge after local validation;
+no version bump, tag or public release. Current 0.10.2 assets stay immutable.
+
+Pending validated/coalesced inspection edits now block GUI Save and native
+automatic exit; API Save reports busy. Optional CLI `--replace` and native
+export `overwrite:true` enable complete atomic publication on the tested Mac
+ExFAT volume, with explicit user permission for replacement. Default refusal,
+source protection and old `--force` remain. Broader #41 policy is separate.
+An optional fourteen-element palette uses the existing GUI/API/helper loader.
+
+All 58 focused Chromium/WebKit cases pass, including queued planes, manual
+preflight, negative controls and existing plane ownership tests. Current
+verification includes 373 scientific/support Rust tests, 14 desktop tests,
+fmt/strict Clippy, production/native builds, 23 packaging checks, actual
+APFS/ExFAT/full/readonly publication, 46 helper calls and three reviewed PNGs.
+Palette review covers 32 originals and 160 diagnostic views. The complete
+browser suite passes all 752 cases (376 per engine), with zero failures, skips,
+flaky cases or retries and all 420 recorded input hashes unchanged. All 162
+website checks and final static checks pass. Local development-ZIP qualification
+and PR delivery remain. See [handoff](handoff.md) for exact evidence and delivery state;
+source decisions are recorded in the linked design notes there.
+
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.

@@ -32,6 +32,23 @@ and **Appearance**. You do not have to operate them first. Ask for the outcome;
 the agent shares their document and calculations. Pane position and Zen are
 local presentation choices, not connector actions.
 
+For the optional accessibility palette, download
+[accessible-elements.json](https://uvar-apps.github.io/eigenvista/downloads/accessible-elements.json)
+into an authorized input folder, or use the copy included with a newer package.
+Then ask: “Load Accessible elements, use element coloring, turn on ambient
+occlusion, and save a transparent PNG of this molecule.” The agent can load the
+palette directly; no separate GUI step is required. This palette is not inside
+the original 0.10.2 ZIP. Its fourteen-element coverage and remaining color
+ambiguities are documented in the [palette guide](https://github.com/uvar-apps/eigenvista/blob/main/palettes/README.md).
+
+Source builds after 0.10.2 also offer an explicit replacement mode for exports
+to ExFAT drives. Ask for a new filename by default. If you want to replace a
+particular output, tell the agent explicitly; replacement may also replace a
+file created at that destination while export is running. Imported source files
+remain protected. An older app may not support this mode, so the agent must
+check the connected app's features. The new Save coordination also reports when
+an inspection edit is still applying; wait for completion before saving again.
+
 The website has the same [overview](https://uvar-apps.github.io/eigenvista/ai.html),
 [installed-app setup](https://uvar-apps.github.io/eigenvista/ai-install.html)
 and [everyday requests](https://uvar-apps.github.io/eigenvista/ai-guide.html).
@@ -273,7 +290,7 @@ save blindly, stop unrelated work or silently allow access to more folders.
 
 ## Keep the data and the picture
 
-Use new filenames: the connector does not overwrite earlier outputs, and
+Use new filenames: the connector refuses overwrites by default, and
 original imported files remain protected. Ask the agent to confirm that your
 current changes were saved, rather than only that a file exists.
 

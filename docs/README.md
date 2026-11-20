@@ -5,6 +5,12 @@ automatic quantitative-plane updates and live SES/SAS progress. It retains
 smooth camera-relative lighting and [allocation-driven workloads](allocation-policy.md).
 Historical release records retain the behavior of their original binaries.
 
+The source follow-up to 0.10.2 covers pending-edit Save coordination (#99),
+ExFAT export compatibility (#100), and the optional
+[Accessible elements palette](../palettes/accessible-elements.json) (#72).
+These source updates do not replace the published 0.10.2 package. The
+[living handoff](handoff.md) records validation and delivery.
+
 This is the documentation hub for the **EigenVista development preview**.
 EigenVista is a modern rewrite of Molekel, the molecular visualization
 application developed by Ugo Varetto between 2006 and 2010. See the original

@@ -1,5 +1,43 @@
 # EigenVista agent guide
 
+## Save / ExFAT / accessibility batch — 20 November 2026
+
+Work on `codex/save-exfat-accessibility`, baseline `e9b0ef1`, tracked in #99,
+#100 and #72. User authorizes local validation, commits/pushes and merge through
+a PR. Version remains 0.10.2; no tag or public release is requested.
+
+GUI/API Save share synchronous pending-inspection admission. GUI Save refuses
+while an edit is applying; native exit and browser unload observe that state.
+Failed/stale writes release admission and retain accepted data. Preserve the
+coalesced GUI lifetime as well as controller request admission.
+
+Actual Mac ExFAT rejects hard links and both exclusive-rename primitives. The
+user explicitly approved optional atomic replacement, including late-created
+destinations: CLI `--replace`, native document/PNG/CSV `overwrite:true`. Default
+false/no-overwrite and existing `--force` semantics remain. Protected sources,
+descriptor-pinned parents and validation still apply. Never silently enable
+replacement to bypass the default ExFAT limitation. Broader #41 durability and
+permissions research remains separate; no power-loss guarantee.
+
+Optional `palettes/accessible-elements.json` covers fourteen common elements;
+104 retain defaults. It uses existing GUI/API/helper loading. Qualification
+compares unchanged water/full 1AON under ordinary/AO, four palettes, three CVD
+simulations and grayscale, with explicit ambiguities and no universal-accessibility
+claim. Dense Chromium QA uses Metal on Darwin only; record actual renderer.
+
+All 752 Chromium/WebKit cases pass (376 per engine), with zero failures, skips,
+flaky cases or retries and 420 unchanged runtime/test/input hashes. The 58 focused
+cases and two original-editor negative controls cover the Save/exit gaps.
+Local qualification also passes 373 scientific/support Rust tests, 14 current
+desktop tests, fmt/strict Clippy, production/native builds, 23 packaging checks
+and 162 website route/viewport checks. Actual APFS/ExFAT, ENOSPC/EROFS and the
+rebuilt helper's 46 calls pass. Final palette comparisons retain 32 originals,
+160 diagnostic views and eight reviewed sheets. Local development-ZIP
+qualification and PR delivery remain. Evidence/scripts live in
+`tmp/save-exfat-accessibility/`, gates in `.unlazy/save-exfat-accessibility/`.
+The published 0.10.2 package/tag/DOI stay immutable. New source-build packages must
+include the palette both at top level and inside the connector resources.
+
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.

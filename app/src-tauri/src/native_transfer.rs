@@ -37,16 +37,9 @@ pub struct ControlSaveMetadata {
     pub protected_paths: Vec<String>,
     pub overwrite: bool,
 }
-impl Metadata for ControlSaveMetadata {
-    fn validate(&self) -> Result<(), TransferError> {
-        if self.overwrite {
-            return Err(TransferError::Invalid(
-                "Control saves are no-clobber; choose a new filename".into(),
-            ));
-        }
-        Ok(())
-    }
-}
+// The scoped writer validates destination/source policy. This boundary checks
+// the typed permission, retaining explicit false and true without coercion.
+impl Metadata for ControlSaveMetadata {}
 
 #[derive(Debug)]
 pub struct Transfer<T> {
@@ -128,7 +121,7 @@ mod tests {
     }
 
     #[test]
-    fn malformed_headers_metadata_types_and_overwrite_fail_before_payload_copy() {
+    fn malformed_headers_and_metadata_types_fail_before_payload_copy() {
         let good = frame(
             json!({"path":"/result.eigenvista","protectedPaths":[],"overwrite":false}),
             &[1],
@@ -156,7 +149,7 @@ mod tests {
                 .contains("Truncated")
         );
         for metadata in [
-            json!({"path":"/x","protectedPaths":[],"overwrite":true}),
+            json!({"path":"/x","protectedPaths":[],"overwrite":"true"}),
             json!({"path":9,"protectedPaths":[],"overwrite":false}),
             json!({"path":"/x","protectedPaths":[9],"overwrite":false}),
             json!({"path":"/x","protectedPaths":[],"overwrite":false,"bytes":[1]}),
@@ -174,6 +167,22 @@ mod tests {
         assert!(
             decode_body::<ControlSaveMetadata>(&InvokeBody::Json(json!({"bytes":[1]}))).is_err()
         );
+    }
+
+    #[test]
+    fn native_control_transfer_retains_explicit_publication_permission() {
+        for overwrite in [false, true] {
+            let payload = [0, 255, b'P', b'K'];
+            let encoded = frame(
+                json!({"path":"/result.eigenvista","protectedPaths":["/input.eigenvista"],"overwrite":overwrite}),
+                &payload,
+            );
+            let decoded: Transfer<ControlSaveMetadata> = decode(&encoded).unwrap();
+            assert_eq!(decoded.metadata.overwrite, overwrite);
+            assert_eq!(decoded.metadata.protected_paths, ["/input.eigenvista"]);
+            assert_eq!(decoded.metadata.path, "/result.eigenvista");
+            assert_eq!(decoded.bytes, payload);
+        }
     }
 
     #[test]

@@ -9,6 +9,7 @@ water.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and
 signed-affine.cube: synthetic signed affine field, two atoms/one bond, skewed 7x7x7 grid. It is a mathematical rendering fixture, not a quantum-chemistry calculation.
 1AON.cif: public deposited GroEL-GroES structure; see https://www.rcsb.org/structure/1AON for the original structure and citation. Repository import selects 58,870 source atoms.
 matterviz-pastel.json / matterviz-muted.json: original MatterViz RGB values for elements1-109 in EigenVista's palette envelope. Author Janosh Riebesell; revision fae7a3e7fddf26f9625391ea76f28c7ebd261de9. MIT notice retained in LICENSE-MatterViz.txt; elements110-118 use built-in defaults.
+accessible-elements.json: optional fourteen-element palette with documented color-vision simulations and remaining ambiguities. Source and coverage: https://github.com/uvar-apps/eigenvista/blob/main/palettes/README.md . Not included in the original 0.10.2 ZIP; the existing loader accepts this download.
 
 Source file paths and exact SHA-256 values: provenance.json.
 Source repository: https://github.com/uvar-apps/eigenvista

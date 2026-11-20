@@ -94,7 +94,12 @@ document; active selections and full-scene settings remain transient.
 
 Use `expectedRevision` for document-dependent changes, inspect fresh state after
 stale/busy/uncertain outcomes, and cancel only the operation owned by the current
-request. Preserve original inputs and never overwrite an existing output.
+request. Preserve original inputs and use new output names by default. Only use
+native `overwrite:true` when the connected schema supports it and the user has
+explicitly authorized replacing that output. It can replace a destination
+created during export too; do not silently enable it to work around ExFAT's
+unsupported no-clobber mode. A normal request to save a result does not imply
+replacement permission.
 
 Keep the app open unless the user asks otherwise. Report the completed result,
 actual artifact paths and any remaining limitation in plain language. An agent

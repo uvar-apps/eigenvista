@@ -23,6 +23,7 @@ const resourceFiles = [
   ...[
     "matterviz-muted.json",
     "matterviz-pastel.json",
+    "accessible-elements.json",
     "README.md",
     "LICENSE-MatterViz.txt",
   ].map((name) => [`palettes/${name}`, `palettes/${name}`]),

@@ -1,5 +1,43 @@
 # Development handoff
 
+## Save / ExFAT / accessibility batch — 20 November 2026
+
+Active branch `codex/save-exfat-accessibility`, baseline `e9b0ef1`; user authorizes
+implementation, local checks and merge through a PR. Track #99 (Save), #100
+(explicit ExFAT publication) and #72 (optional palette). Version remains 0.10.2;
+published tags/assets/citation identities stay unchanged.
+
+Synchronous pending-inspection admission now prevents GUI Save/native clean exit
+from overtaking a validated or coalesced edit; API Save reports busy. Actual
+Mac ExFAT rejects hard links/exclusive rename. The user approved opt-in atomic
+replacement via CLI `--replace` and native document/PNG/CSV `overwrite:true`;
+default no-overwrite/`--force` and source protections remain. Never silently
+choose replacement. Permissions and power-loss research remains in #41.
+
+Accessible elements adds 14 common-element overrides through existing loading,
+with 104 defaults retained. Its exact mapping, primary sources, simulation method
+and ambiguities are in the [palette guide](../palettes/README.md) and
+[decision](design/2026-11-20-accessibility-palette.md). The
+[Save/ExFAT decision](design/2026-11-20-save-and-exfat.md) records contracts.
+
+Final focused checks pass all 58 Chromium/WebKit cases. Committed plane intent
+is admitted before preparation/debounce; manual preflight has cancellation and
+source/field guards. The original editor fails both new negative controls, and
+its exact corrected bytes were restored. All 373 scientific/support Rust tests
+and 14 current desktop tests, fmt/strict Clippy, production/native builds and
+23 packaging checks pass. Fresh actual APFS/ExFAT/default/replacement/race and
+ENOSPC/EROFS checks pass; the current native helper passes 46 calls and three
+reviewed PNGs. Palette review covers 32 originals, 160 diagnostic views and
+eight contact sheets. The final complete run passes all 752 browser cases,
+376 per engine, with zero failures, skips, flaky cases or retries and all 420
+runtime/test/input hashes unchanged. Final comparisons bind 32 original PNGs
+to 160 diagnostic views and eight reviewed sheets. All 162 website cases and
+static checks pass (27 pages, 24 exact downloads). Local development ZIP and
+PR delivery remain. Evidence: `tmp/save-exfat-accessibility/`, gates:
+`.unlazy/save-exfat-accessibility/`. The earlier 751/752 run is a retained
+test-readiness diagnostic; see the Save/ExFAT decision for the correction.
+The source notes distinguish these updates from the original 0.10.2 download.
+
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
