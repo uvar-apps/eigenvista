@@ -1,5 +1,15 @@
 # User-facing website
 
+## Release 0.10.3 preparation — 20 November 2026 (#103)
+
+Current source and user guidance describe 0.10.3: pending-edit Save coordination,
+explicitly selected ExFAT export replacement and the packaged Accessible
+elements palette. Keep old release records and capture provenance intact.
+The site generator keeps current source identity separate from measured
+published-package facts. Update the latter only from the qualified rebuilt
+archive, and publish release assets before the new download links reach main.
+Record exact validation/publication outcomes in the living handoff/status.
+
 ## Release 0.10.2 published — 18 November 2026 (#98)
 
 Clean release/package source: **`21c8307b72c3588464e06abeb07df055484ea78f`**.
@@ -45,7 +55,7 @@ provenance, Search Console ownership-tag maintenance and publication state.
 [Issue #79](https://github.com/uvar-apps/eigenvista/issues/79) adds the local AI
 connector section and four prompt-driven tutorials. See the
 [connector guide](ai-connector.md) for manual and agent-assisted installation.
-Version 0.10.2 retains the packaged connector and scientific-inspection features;
+Version 0.10.3 retains the packaged connector and scientific-inspection features;
 the AI pages guide users from an installed binary. Scientific inspection and the
 four-tab workspace were introduced in 0.10.0; the connector was introduced in
 0.8.0. Older 0.7.2 packages predate control.

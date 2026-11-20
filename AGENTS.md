@@ -1,5 +1,28 @@
 # EigenVista agent guide
 
+## Release 0.10.3 preparation — 20 November 2026 (#103)
+
+User authorizes version 0.10.3, commit/tag/push, rebuilt redistributables and a
+published release with notes. Work on `codex/release-0.10.3`, baseline `4e8fd53`,
+tracked by [#103](https://github.com/uvar-apps/eigenvista/issues/103). Includes
+accepted Save coordination (#99), explicitly selected ExFAT replacement (#100)
+and the optional Accessible elements palette (#72), merged through #101/#102.
+Preserve default no-overwrite, old `--force`, protected sources, scientific data,
+format/toolchain/dependency pins, icon, allocation policy and all old tags/assets.
+Use concept DOI 10.5281/zenodo.24246123 until a 0.10.3 DOI is supplied.
+
+Fresh local macOS source checks pass 387 Rust workspace cases (14
+desktop cases included), explicit desktop tests, fmt/strict Clippy, production
+WASM/TypeScript/frontend/native-debug builds, 23 packaging/connector checks,
+all 752 Chromium/WebKit cases (376 per engine, zero failures/skips/flaky/retries)
+and 162 source-stage website checks. All 420 recorded runtime/test/input
+hashes stay fixed. Clean optimized-package rebuilding and extracted-native
+acceptance remain; no 0.10.3 tag, release or published package exists yet. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
+No application CI. Pages-only publisher is authorized. Linux/Windows/Intel,
+clean-Mac/Gatekeeper, full macOS-range and physical OS-action qualification
+remain separate gaps. Keep the living handoff current as gates complete.
+
+
 ## Save / ExFAT / accessibility batch — 20 November 2026
 
 Implemented on `codex/save-exfat-accessibility`, baseline `e9b0ef1`, and merged

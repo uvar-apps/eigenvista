@@ -1,6 +1,6 @@
 # Structure imports and automatic bonds
 
-**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 All supported formats, including XYZ, PDB, mmCIF/BinaryCIF, Molden, Gaussian cube, and native

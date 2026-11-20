@@ -1,7 +1,8 @@
 # EigenVista connector reference for agents
 
-EigenVista 0.10.2 (#97) shows molecular-surface progress in both the controls and
-viewport, including hidden Tools/Zen. Poll the existing `job.get` receipt:
+EigenVista 0.10.3 retains the molecular-surface progress introduced in 0.10.2
+(#97), shown in both the controls and viewport, including hidden Tools/Zen.
+Poll the existing `job.get` receipt:
 `progress.stage` reports `geometry`, `classify`, `mesh`, `assemble`, `measure`,
 with `preparing`, `transferring` and `validating` around the engine work.
 `progress.counts` is stage-local. Meshing counts are completed/total blocks;
@@ -12,7 +13,7 @@ reported elapsed value instead. Wait for terminal job status rather than a
 stage reaching 100%. Cancel only the owned job. No new method or file-format
 feature is needed. These progress displays and elapsed metadata are included in 0.10.2.
 
-EigenVista 0.10.2: active selection has gold reticles; the latest typed
+EigenVista 0.10.3: active selection has gold reticles; the latest typed
 inspection pick has cyan rings for attributed atoms not already selected. These
 use shared `selection.set`/mouse state and `selection.get.lastPick`; normal
 inspection does not overwrite selection. `selection.clear` clears selection and
@@ -29,7 +30,7 @@ tester ZIPs predate it. Confirm the installed files and live capabilities
 rather than treating older versions as connector-enabled. The native connector initially targets macOS. Linux
 qualification is pending; non-Unix attachment is unsupported.
 
-Use the current **0.10.2** package. The scientific-inspection methods below were
+Use the current **0.10.3** package. The scientific-inspection methods below were
 introduced in **0.10.0**. Older 0.8.0 downloads lack them. Use the application,
 helper and instructions supplied
 together, and inspect the connected app's live schemas. Do not promise features
@@ -598,7 +599,7 @@ hard-link aliases. Never read an unapproved file through another tool and
 resubmit its contents to bypass the connector's refusal.
 
 Writes default to atomic no-clobber. Choose new `.eigenvista`, `.png` and `.csv`
-paths. The source follow-up to 0.10.2 permits `overwrite:true` on native document,
+paths. Version 0.10.3 permits `overwrite:true` on native document,
 PNG and CSV exports only after explicit user authorization for that output.
 This publishes a complete replacement, including over late-created targets;
 source/scoped-path protections remain. It enables the tested Mac ExFAT path,
@@ -621,7 +622,7 @@ index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document
 when the user wants a reproducible presentation.
 
-Version 0.10.2 has no application byte/count ceilings for files, wire frames,
+Version 0.10.3 has no application byte/count ceilings for files, wire frames,
 selectors, orbital batches, annotations, meshes or analysis caches. Approved
 roots remain explicit security grants, without a fixed root count. Grid presets
 are advisory: request a safe-integer resolution of at least two and preserve the

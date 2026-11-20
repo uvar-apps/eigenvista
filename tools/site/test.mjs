@@ -229,7 +229,7 @@ for (const [engine, launcher] of [
       assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
       assert((await development.textContent()).includes(`published Mac download below remains ${release.version}`));
     }
-    assert.equal(await development.getByRole("link").getAttribute("href"), "reference-inspection.html");
+    assert.equal(await development.getByRole("link").getAttribute("href"), "reference-files.html");
     assert.equal(await page.getByRole("link", { name: "Download for Mac" }).getAttribute("href"), `${release.base}${release.stem}.zip`);
     assert.deepEqual(await (await context.request.get(base + "application.json")).json(), application);
     assert.deepEqual(await (await context.request.get(base + "release.json")).json(), release);
