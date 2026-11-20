@@ -1,5 +1,23 @@
 # Implementation status
 
+## 0.10.3 Zenodo citation — 20 November 2026
+
+The user-supplied version DOI for EigenVista 0.10.3 is
+[10.5281/zenodo.24391046](https://doi.org/10.5281/zenodo.24391046). Current
+README/CFF, release notes and website metadata use this DOI. Concept DOI
+10.5281/zenodo.24246123 identifies all versions; older version citations and
+media provenance remain historical. The installation guide now lists all three
+optional palettes included in 0.10.3. Package source, download names/bytes/hash,
+version and annotated tag are unchanged; this update requires no rebuild.
+
+Local citation/YAML and static website checks pass, including 1,079 local
+references, 24 exact downloads and all 162 Chromium/WebKit route/viewport cases.
+Desktop/mobile citation review passes. All three anonymous release downloads
+match qualified bytes; GitHub release notes now use the new DOI with asset/tag
+identities preserved. All 420 qualified runtime/test/input hashes are unchanged;
+runtime tests were not rerun for this documentation-only update. Evidence:
+`tmp/doi-0.10.3/`. Verify Pages readback after deployment.
+
 ## Release 0.10.3 published — 20 November 2026 (#103)
 
 Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
@@ -36,8 +54,9 @@ not notarized. Linux/Windows/Intel, clean-Mac/Gatekeeper, the full macOS range a
 physical OS actions remain unqualified. QA captures are functional checks, not
 gallery compositions: some chosen pale annotations overlap or have low contrast,
 and densely selected pocket markers obscure detail. No new rendering regression
-was found. Preserve all prior tags and release assets. Use concept DOI
-10.5281/zenodo.24246123 until the user supplies a 0.10.3 DOI.
+was found. Preserve all prior tags and release assets. The 0.10.3 version DOI
+is 10.5281/zenodo.24391046; concept DOI 10.5281/zenodo.24246123 identifies
+all versions.
 
 Published [EigenVista 0.10.3](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
 on 20 November 2026 with release notes and all three rebuilt assets. Independent

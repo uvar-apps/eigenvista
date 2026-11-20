@@ -128,11 +128,11 @@ documentation and gallery.
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
 (Version 0.10.3) [Computer software].
-[Concept DOI: 10.5281/zenodo.24246123](https://doi.org/10.5281/zenodo.24246123).
+[DOI: 10.5281/zenodo.24391046](https://doi.org/10.5281/zenodo.24391046).
 
-Machine-readable metadata is in [CITATION.cff](CITATION.cff). A version-specific
-DOI has not yet been supplied for 0.10.3; the concept DOI identifies EigenVista
-across all versions. The historical 0.10.1 DOI remains
+Machine-readable metadata is in [CITATION.cff](CITATION.cff). The
+[concept DOI 10.5281/zenodo.24246123](https://doi.org/10.5281/zenodo.24246123)
+identifies EigenVista across all versions. The historical 0.10.1 DOI remains
 [10.5281/zenodo.24328295](https://doi.org/10.5281/zenodo.24328295).
 The historical 0.10.0 DOI remains
 [10.5281/zenodo.24302658](https://doi.org/10.5281/zenodo.24302658), and the 0.8.0 DOI
