@@ -5,7 +5,7 @@ The first target is **CachyOS x86_64** on the local System76 machine. The Linux
 implementation is merged through [PR #109](https://github.com/uvar-apps/eigenvista/pull/109).
 A clean Linux package is being prepared for the existing
 [0.10.3 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3).
-See the [living handoff](handoff.md) for the exact tested source, package,
+See the [living handoff](https://github.com/uvar-apps/eigenvista/blob/main/docs/handoff.md) for the exact tested source, package,
 publication state and remaining desktop checks.
 
 ## Run on a Linux desktop
@@ -48,7 +48,7 @@ sourcing it into Fish. It opens a separate connected window and prints a
 nonsecret session-note path. Give that path to Codex, Claude Code, Pi, OpenCode
 or another terminal-capable agent and ask it to read the bundled instructions.
 Then request molecular tasks in ordinary language. See the
-[AI user guide](ai-connector.md) for examples and folder permissions.
+[AI user guide](https://uvar-apps.github.io/eigenvista/ai.html) for examples and folder permissions.
 
 To choose a workspace and grant a molecular-data directory:
 
@@ -92,7 +92,7 @@ WASM on the browser's machine. It does not exercise the Linux native window,
 native file dialogs or native AI connector. Native qualification instead used
 the actual extracted app, launcher and helper on an isolated authenticated Xvfb
 display, followed by molecular tasks and PNG exports; see the
-[qualification record](design/2026-11-20-linux-desktop-preview.md).
+[qualification record](https://github.com/uvar-apps/eigenvista/blob/main/docs/design/2026-11-20-linux-desktop-preview.md).
 
 The ignored `tmp/linux-port/env.fish` belongs to this prepared checkout, not to
 the downloadable package. For a fresh checkout use the source setup below. Do
