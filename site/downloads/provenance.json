@@ -130,20 +130,26 @@
     {
       "file": "eigenvista-control/reference.md",
       "source": "skills/eigenvista-control/reference.md",
-      "bytes": 39239,
-      "sha256": "0c97c9fd1dfbdf740d38ecc5ee965d0759356465a1a8701283326fd82fe17a9f"
+      "bytes": 39894,
+      "sha256": "f3a0ae9bf02bdc235a1c0cf36617c70fb53642fdf501c08fb5d862f9afb26b8d"
     },
     {
       "file": "eigenvista-control/README.md",
       "source": "docs/ai-connector.md",
-      "bytes": 21062,
-      "sha256": "83cfe3d9790a5a5af533f5988307a42ffb2ab61b16d9e7963caecf7e963c6bc6"
+      "bytes": 21445,
+      "sha256": "0692b8a40ec49e095cfa5c2ae94bd0e47807a4b8727a50286271bc12c7418337"
     },
     {
       "file": "eigenvista-control/allocation-policy.md",
       "source": "docs/allocation-policy.md",
       "bytes": 3935,
       "sha256": "fb0273a721b10f54e09941fdba9f354c93bf570b64001d140828e3fa4316f5a9"
+    },
+    {
+      "file": "eigenvista-control/linux.md",
+      "source": "docs/linux.md",
+      "bytes": 8917,
+      "sha256": "4ffbee11b94571bb69e40dca62ae64b0c4eb3142f947729dd496c06973962345"
     }
   ]
 }

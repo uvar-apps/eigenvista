@@ -1,27 +1,71 @@
 # Development handoff
 
-## Linux 0.10.3 publication in progress — 20 November 2026 (#108)
+## Linux 0.10.3 release published — 20 November 2026 (#108)
 
-The user authorized PR merge, current-version release notes, commits/pushes,
-Linux package publication and the matching website update. [PR #109](https://github.com/uvar-apps/eigenvista/pull/109)
-merged the qualified source as `ea65d62e829c0427c592032bdb716356bd8e2f56`;
-its tree exactly matches tested branch commit `1459f8a`. Work now continues on
-main. Build and qualify a clean committed-source Linux package before adding
-its archive/checksum/build-info to the existing v0.10.3 release. Preserve the
-original Mac assets, version DOI and immutable v0.10.3 tag. Record the Linux
-source separately; never relabel the earlier dirty development archive as clean.
+The user authorized PR merge, release notes, commit/push, Linux publication and
+the matching website update. [PR #109](https://github.com/uvar-apps/eigenvista/pull/109)
+merged the tested implementation as ea65d62e829c0427c592032bdb716356bd8e2f56.
+Work is now on main. Release preparation and portable-guide corrections are
+committed; the clean Linux package source is
+[53ebf37a399872d7b7b4e30397e6eb9a0a9a530b](https://github.com/uvar-apps/eigenvista/tree/53ebf37a399872d7b7b4e30397e6eb9a0a9a530b).
 
-The previous 413 genuine runtime/test/input hashes and all completed Mac/Linux
-qualification remain applicable while those files are unchanged. The new package
-needs its own extracted payload/native acceptance and final anonymous readback.
-Website content/download facts and all relevant local checks must be complete
-before pushing the final site; publish assets before public download links.
-Keep issue108 open until this delivery is complete. No hosted application CI;
-the authorized Pages-only publisher remains separate. Evidence and acceptance:
-`tmp/linux-release-0.10.3/` and `.unlazy/linux-release-0.10.3/`.
+[EigenVista 0.10.3](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)
+now includes both Mac and Linux distributions. New Linux archive:
+EigenVista-0.10.3-linux-x86_64-20261120T143721Z-53ebf37.tar.gz —
+**82,817,498 bytes**, SHA-256
+9491e341f551517e377d393732d833fe4db436c0fd755216a4df689a331604ec.
+Archive/checksum/build-info are available publicly; sourceDirty is false.
+Independent anonymous downloads match all six qualified release files. Original
+Mac asset IDs/bytes/hash, prerelease state, immutable v0.10.3 tag and DOI
+10.5281/zenodo.24391046 are unchanged. The tag names original Mac source
+1caf8bd2c2825dba7ff43bd67f542463b740b979; the added Linux archive records its
+separate clean source. Never retag or replace either published package.
 
-The earlier Linux section below is the historical development-package snapshot,
-not the clean package being prepared for publication.
+The clean Linux package independently verifies 736 source files against that
+commit, 64 resources, five embedded assets and 413 unchanged runtime/test/input
+hashes on both machines. Fresh extracted app/helper acceptance passes **3,728
+calls**, all 34 inspection methods and **26 reviewed PNGs**: independent 323-point
+scalar oracle, full 58,870-atom 1AON SES/progress/cancel/cache Save/reopen, twenty
+additional input roots, direct orbital/density/Cube volume+ray-cast without
+saved meshes, protein depictions and Pastel/AO. Owned apps/display and private
+descriptors are cleaned up; unrelated services remain untouched.
+
+Completed regression evidence remains valid on those unchanged sources:
+385 Linux Rust cases, 387 Mac Rust cases, fmt/strict Clippy, production/native
+builds and all 752 browser cases per platform, with zero failures/skips/flaky
+cases/retries. Current 32 packaging checks also pass. No scientific/pin/format/
+logo/allocation-policy change or hosted application CI. The original Mac
+binary remains unchanged; it is not a new Mac rebuild.
+
+The prepared website offers both downloads, Linux installation and AI setup,
+separate source attribution and a phone checksum-wrap correction. Current
+static checks cover 27 pages, 1,088 local references, 76 image uses and 25 exact
+download copies. All 162 Chromium/WebKit route/viewport cases pass with 20 reviewed
+desktop/mobile captures. Publication-state wording changed only the raw Linux
+guide/provenance download; all HTML/CSS/JS/media remain byte-identical to that
+passing browser run. Pictures/fonts/videos/logo are unchanged. Pages publication
+and anonymous served-tree readback are the final delivery step; append its
+receipt after verification. Do not infer completed deployment from a Git push.
+
+Linux remains a **CachyOS x86_64 experimental preview**, built/tested with
+glibc 2.44, GTK 3 and WebKitGTK 4.1 version2.54.1. Native tests used authenticated
+TCP Xvfb/llvmpipe; host Chromium EGL used Intel UHD 630, and WebKit's masked
+Apple GPU string is not hardware evidence. Physical desktop/dialogs/close,
+native hardware GPU/Wayland, clean installs, older glibc and other distributions
+remain unqualified. The binary app/AI connector require a display; the converter
+can run over SSH. No desktop environment was installed.
+
+Clean Linux build/test worktree:
+/home/ugo/projects/eigenvista/tmp/linux-release-0.10.3/source, detached at
+53ebf37. It remains clean. Preserve the original remote development checkout and
+all diagnostic artifacts; do not reset its uncommitted development snapshot.
+All temporary files stay under EigenVista tmp on each host. Molekel is read-only.
+
+Evidence/oracles: tmp/linux-release-0.10.3/ (package-qualified.json,
+published-assets-qualified.json, verify-package.py, site-final-evidence.json,
+verify-site.mjs); acceptance: .unlazy/linux-release-0.10.3/. Issue #108 tracks
+final delivery and should close after live website verification. The earlier
+development-package sections below are historical, not the published payload.
 
 ## CachyOS Linux preview qualified — 20 November 2026 (#108)
 

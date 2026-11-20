@@ -236,13 +236,13 @@ assert.throws(() =>
 const downloaded = JSON.parse(
   fs.readFileSync(path.join(site, "downloads/provenance.json")),
 );
-assert.equal(downloaded.files.length, 24);
+assert.equal(downloaded.files.length, 25);
 assert.equal(
   downloaded.files.find((row) => row.file === "accessible-elements.json")?.source,
   "palettes/accessible-elements.json",
   "The optional palette is an attributed, byte-verified public download",
 );
-for (const filename of ["eigenvista-control/SKILL.md", "eigenvista-control/reference.md", "eigenvista-control/README.md", "eigenvista-control/allocation-policy.md"])
+for (const filename of ["eigenvista-control/SKILL.md", "eigenvista-control/reference.md", "eigenvista-control/README.md", "eigenvista-control/allocation-policy.md", "eigenvista-control/linux.md"])
   assert(downloaded.files.some((row) => row.file === filename), `Portable binary connector instructions: ${filename}`);
 for (const row of downloaded.files) {
   const bytes = fs.readFileSync(path.join(site, "downloads", row.file));
@@ -297,9 +297,9 @@ assert.equal(
 assert.equal(application.publishedVersion, release.version);
 assert(html.get("index.html").includes("data-current-development"), "Homepage explicitly explains current availability");
 if (published) {
-  assert(html.get("index.html").includes(`${release.version} · Available for Mac.`));
-  assert(html.get("index.html").includes("The Mac download includes this workspace, the scientific tools and the AI connector."));
-  assert(html.get("install.html").replace(/<[^>]*>/g, "").includes("The ZIP includes the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual."));
+  assert(html.get("index.html").includes(`${release.version} · Available for ${release.linux ? "Mac and Linux" : "Mac"}.`));
+  assert(html.get("index.html").includes(`${release.linux ? "Both downloads include" : "The Mac download includes"} this workspace, the scientific tools and the AI connector.`));
+  assert(html.get("install.html").replace(/<[^>]*>/g, "").includes(`${release.linux ? "Both packages include" : "The ZIP includes"} the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual.`));
   assert(html.get("about.html").includes(`href="https://doi.org/${release.doi}">${release.doi}</a>`), "Current released-version citation DOI");
 } else {
   assert(html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
@@ -307,6 +307,27 @@ if (published) {
 }
 assert(html.get("install.html").includes(`Published download: ${release.version}`));
 assert(html.get("install.html").includes(`${release.base}${release.stem}.zip`), "Download identifies the verified package");
+if (release.linux) {
+  const linux = release.linux;
+  assert.match(linux.source, /^[0-9a-f]{40}$/);
+  assert.equal(linux.target, "x86_64-unknown-linux-gnu");
+  assert.equal(linux.distribution, "CachyOS");
+  assert.match(linux.glibc, /^\d+\.\d+(?:\.\d+)?$/);
+  assert.match(linux.webkitGTK, /^\d+\.\d+\.\d+$/);
+  assert(Number.isSafeInteger(linux.archiveBytes) && linux.archiveBytes > 0);
+  assert.match(linux.archiveSha256, /^[0-9a-f]{64}$/);
+  assert.match(linux.stem, new RegExp(`^EigenVista-${release.version.replaceAll(".", "\\.")}-linux-x86_64-\\d{8}T\\d{6}Z-${linux.source.slice(0, 7)}$`));
+  const install = html.get("install.html"), ai = html.get("ai-install.html");
+  for (const suffix of [".tar.gz", ".tar.gz.sha256", ".json"])
+    assert(install.includes(`href="${release.base}${linux.stem}${suffix}"`), `Linux download includes its exact ${suffix} companion`);
+  assert(html.get("index.html").includes(`href="${release.base}${linux.stem}.tar.gz"`));
+  for (const token of [linux.archiveSha256, "sha256sum -c", `tar -xzf ${linux.stem}.tar.gz`, "./bin/eigenvista", "glibc", "WebKitGTK 4.1", "graphical", "not an AppImage"])
+    assert(install.includes(token), `Complete installed Linux workflow: ${token}`);
+  for (const token of ["data-linux-launcher", "bin/eigenvista-ctl", "share/eigenvista/AI-connector/Start AI connection.sh", "Fish", "do not source", "graphical display", "CachyOS-tested Linux x86_64"])
+    assert(ai.includes(token), `Complete installed Linux AI workflow: ${token}`);
+  assert(!install.includes("Linux and Windows packages are not available yet."));
+  assert(html.get("about.html").includes(`https://github.com/uvar-apps/eigenvista/tree/${linux.source}`), "Linux source is attributed independently of the original Mac tag");
+}
 assert(html.get("about.html").includes("This version-specific DOI identifies the released 0.8.0 archive"), "Historical DOI remains attributed to its actual archive");
 assert(html.get("about.html").includes('href="https://doi.org/10.5281/zenodo.24246123"'));
 assert(html.get("about.html").includes("Published 0.10.0 archive"), "Previous version DOI stays attributed to its actual archive");

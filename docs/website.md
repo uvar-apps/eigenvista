@@ -1,5 +1,44 @@
 # User-facing website
 
+## Linux 0.10.3 download addendum — 20 November 2026 (#108)
+
+The user authorized publication of the Linux package alongside the existing
+0.10.3 Mac release and requested the matching website update. The authored
+homepage, installation, About and AI pages now explain the Linux x86_64 prefix,
+Fish-safe launch commands and the shared prebuilt connector. Keep installed
+users independent of a source checkout, compiler or internal application API.
+
+Preserve the original Mac download fields, version tag, DOI and captured media.
+The additional `release.linux` object must come from the measured clean archive
+and its build-information companion: stem, bytes, SHA-256, actual source commit,
+target and tested CachyOS/glibc/WebKitGTK baseline. A shared version label does
+not make the Linux source commit identical to the original Mac tag. The About
+page links the Linux source separately; archive URLs remain under v0.10.3.
+
+The Linux instructions require a graphical session and system GTK 3/WebKitGTK
+4.1. Do not imply an AppImage, older-glibc/other-distribution support, a headless
+native window, or qualified Wayland/native hardware GPU/physical desktop
+behavior. The Linux converter alone can run without a display. Keep the Mac
+app-bundle commands and Linux `bin/` plus `share/` commands visibly distinct.
+
+The explicit public-download corpus now also carries the Linux guide required
+by the portable connection reference, for 25 byte-verified named files.
+Measured Linux archive: `EigenVista-0.10.3-linux-x86_64-20261120T143721Z-53ebf37.tar.gz`,
+82,817,498 bytes, SHA-256
+`9491e341f551517e377d393732d833fe4db436c0fd755216a4df689a331604ec`.
+Its clean source is `53ebf37a399872d7b7b4e30397e6eb9a0a9a530b`; the website
+metadata are independently bound to the actual archive/checksum/build-info.
+
+Final local checks pass 27 pages, 1,088 local references, 76 image uses,
+25 exact downloads and all 162 Chromium/WebKit route/viewport cases. Targeted
+desktop/mobile review covers the Linux download, installation and AI commands;
+20 captures are retained. The review found a phone checksum overflow caused by
+a child code rule overriding its wrapping parent; the small selector correction
+retains exact copied commands and a real 390/320-pixel regression check.
+Pictures, video, fonts and the logo retain their original bytes and dimensions.
+Publication and anonymous served-file readback are tracked in the living
+handoff; these local results alone do not claim that a deployment completed.
+
 ## 0.10.3 Zenodo citation — 20 November 2026
 
 The user-supplied version DOI for EigenVista 0.10.3 is

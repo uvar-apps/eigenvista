@@ -8,5 +8,15 @@
   "zipBytes": 82290759,
   "zipSha256": "fe3beae96bfb8869535613a109c1bb33ea6b15163eca3082029ecca38213d0a2",
   "platform": "Apple Silicon Mac",
-  "minimumMacOS": "13.0"
+  "minimumMacOS": "13.0",
+  "linux": {
+    "stem": "EigenVista-0.10.3-linux-x86_64-20261120T143721Z-53ebf37",
+    "archiveBytes": 82817498,
+    "archiveSha256": "9491e341f551517e377d393732d833fe4db436c0fd755216a4df689a331604ec",
+    "source": "53ebf37a399872d7b7b4e30397e6eb9a0a9a530b",
+    "target": "x86_64-unknown-linux-gnu",
+    "distribution": "CachyOS",
+    "glibc": "2.44",
+    "webkitGTK": "2.54.1"
+  }
 }

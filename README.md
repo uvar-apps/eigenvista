@@ -19,16 +19,16 @@ EigenVista is a molecular and quantum chemistry viewer. Inspect the shape of an
 orbital, look inside a density surface with a custom shader, or reveal the folds
 of a large protein complex with ambient occlusion.
 
-**Version 0.10.3 — experimental development preview for Apple Silicon Macs.**
+**Version 0.10.3 — experimental previews for Apple Silicon Macs and CachyOS Linux x86_64.**
 
-A separate [Linux development preview](docs/linux.md) targets CachyOS x86_64.
-Its build, package and qualification work is tracked in
-[#108](https://github.com/uvar-apps/eigenvista/issues/108) and merged through
-[PR #109](https://github.com/uvar-apps/eigenvista/pull/109). A clean Linux package
-is being prepared for the existing 0.10.3 release. Other distributions remain
-unqualified.
+The [Linux preview](docs/linux.md) targets CachyOS x86_64 and includes the
+viewer, converter and AI connector. Its implementation is merged through
+[PR #109](https://github.com/uvar-apps/eigenvista/pull/109), tracked by
+[#108](https://github.com/uvar-apps/eigenvista/issues/108). Read the
+[0.10.3 release notes](docs/releases/0.10.3.md) for each platform's measured
+archive and source identity. Other Linux distributions remain unqualified.
 
-**[Download 0.10.3 for Mac](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)** ·
+**[Download 0.10.3 for Mac or Linux](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3)** ·
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
@@ -104,12 +104,13 @@ inspection checkpoint.
 
 ## Start here
 
-Version **0.10.3** is an experimental **Apple Silicon Mac** preview.
-The download includes the application, examples, shader presets, palettes,
-converter and a ready-to-use AI connector. It is ad-hoc signed and not Apple-notarized; follow the
-[installation guide](https://uvar-apps.github.io/eigenvista/install.html) for the
-first launch. A separate CachyOS Linux package is available for local development
-testing; it is not part of this public release. Windows packages are not available.
+Version **0.10.3** provides experimental **Apple Silicon Mac** and
+**CachyOS Linux x86_64** packages with the app, examples, shader presets,
+palettes, converter and a ready-to-use AI connector. Follow the
+[installation guide](https://uvar-apps.github.io/eigenvista/install.html).
+The Mac app is ad-hoc signed and not Apple-notarized. Linux uses system GTK 3
+and WebKitGTK 4.1 and requires a graphical display; its standalone converter can
+run over SSH. Windows and Intel Mac packages are not available.
 
 - [Explore orbitals and density](https://uvar-apps.github.io/eigenvista/tutorials-orbitals.html)
   with a supplied Molden calculation.
@@ -157,7 +158,7 @@ EigenVista is licensed under [GPL-2.0-or-later](LICENSE).
 
 ## Development status and history
 
-A clean Rust scientific core with a React/Three.js interface, shared by a Tauri macOS application and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
+A clean Rust scientific core with a React/Three.js interface, shared by Tauri macOS/Linux applications and the browser. This directory is independent of the legacy implementation. No legacy source is copied or built, and no C++ is used in the application.
 
 The current implementation is maintained in
 [`uvar-apps/eigenvista`](https://github.com/uvar-apps/eigenvista). Its code was
@@ -176,7 +177,7 @@ workspace with the scientific-inspection workflows above. See
 [current status](docs/status.md) for qualification and delivery.
 
 Version **0.8.0** introduced AI-enabled viewing through an external local
-agent, with a prebuilt connector inside the Apple Silicon application. Ask Codex,
+agent, with a prebuilt connector in the Mac and Linux packages. Ask Codex,
 Claude Code, Pi, OpenCode or another terminal-capable agent to explore orbitals,
 load palettes, prepare molecular views and export figures. The normal GUI remains
 the same; no embedded console or model account is required.
@@ -425,4 +426,4 @@ the Pyykko-Atsumi covalent radii used for bond perception, and a Rust test
 pins the table against those sources. See
 [element display data](app/src/elements.ts).
 
-Direct analytic shader raycasting, topology-certified MC33, shrinkwrap, full transfer-function editing, OBJ import, atom-color text import, metadata editing, undo, and release qualification remain to be implemented. Other external formats are deferred; no direct ORCA reader is planned for this increment. Linux and Windows are architectural targets, not tested supported releases.
+Direct analytic shader raycasting, topology-certified MC33, shrinkwrap, full transfer-function editing, OBJ import, atom-color text import, metadata editing, undo, and release qualification remain to be implemented. Other external formats are deferred; no direct ORCA reader is planned for this increment. The Linux x86_64 preview is qualified on CachyOS within the [documented boundaries](docs/linux.md); other Linux distributions and Windows remain unqualified.

@@ -179,6 +179,17 @@ for (const [engine, launcher] of [
     assert(setupPrompt.includes("binary package from https://github.com/uvar-apps/eigenvista/releases"));
     assert(setupPrompt.includes("standalone instructions"));
     assert(!/cargo build|git clone|wasm-bindgen|EIGENVISTA_REPO/.test(setupPrompt));
+    let linuxLauncher, linuxCommand;
+    if (release.linux) {
+      linuxLauncher = page.locator("[data-linux-launcher] pre code");
+      linuxCommand = `cd "$HOME/Downloads/${release.linux.stem}"\n"./share/eigenvista/AI-connector/Start AI connection.sh"`;
+      assert.equal(await linuxLauncher.textContent(), linuxCommand);
+      assert(setupPrompt.includes("Check my operating system and CPU"));
+      assert(setupPrompt.includes("CachyOS-tested Linux x86_64 package"));
+      assert(setupPrompt.includes("normally from Fish rather than sourcing it"));
+      assert(setupPrompt.includes("graphical display is available"));
+      assert.equal(await page.locator("#linux-launcher").count(), 1);
+    }
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 });
       const header = await codexRow.getByRole("rowheader").boundingBox();
@@ -190,6 +201,7 @@ for (const [engine, launcher] of [
       assert(install.width > width * 0.7, "Phone commands use a readable full-width cell");
       assert.equal(await codexRow.getByRole("cell").first().textContent(), installer);
       assert.equal(await launcher.textContent(), launcherCommand);
+      if (release.linux) assert.equal(await linuxLauncher.textContent(), linuxCommand, "Fish-safe Linux command survives the mobile layout unchanged");
       assert.equal(await page.locator("pre code").filter({ hasText: "Set up EigenVista so you can operate its desktop window for me." }).textContent(), setupPrompt);
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
@@ -223,14 +235,38 @@ for (const [engine, launcher] of [
     await page.goto(base);
     const development = page.locator("[data-current-development]");
     if (published) {
-      assert((await development.textContent()).includes(`${release.version} · Available for Mac.`));
-      assert((await development.textContent()).includes("The Mac download includes this workspace, the scientific tools and the AI connector."));
+      assert((await development.textContent()).includes(`${release.version} · Available for ${release.linux ? "Mac and Linux" : "Mac"}.`));
+      assert((await development.textContent()).includes(`${release.linux ? "Both downloads include" : "The Mac download includes"} this workspace, the scientific tools and the AI connector.`));
     } else {
       assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
       assert((await development.textContent()).includes(`published Mac download below remains ${release.version}`));
     }
     assert.equal(await development.getByRole("link").getAttribute("href"), "reference-files.html");
     assert.equal(await page.getByRole("link", { name: "Download for Mac" }).getAttribute("href"), `${release.base}${release.stem}.zip`);
+    if (release.linux) {
+      const linux = release.linux;
+      assert.equal(await page.getByRole("link", { name: "Download for Linux" }).getAttribute("href"), `${release.base}${linux.stem}.tar.gz`);
+      await page.goto(base + "install.html");
+      const linuxDownload = page.locator("[data-linux-download]");
+      assert.equal(await linuxDownload.getByRole("link", { name: "Download for Linux" }).getAttribute("href"), `${release.base}${linux.stem}.tar.gz`);
+      assert.equal(await linuxDownload.getByRole("link", { name: "Linux SHA-256 checksum" }).getAttribute("href"), `${release.base}${linux.stem}.tar.gz.sha256`);
+      assert.equal(await linuxDownload.getByRole("link", { name: "Linux build information" }).getAttribute("href"), `${release.base}${linux.stem}.json`);
+      await linuxDownload.getByRole("link", { name: "Linux installation steps" }).click();
+      await page.locator("#linux").waitFor();
+      assert((await page.locator("article").textContent()).includes(linux.archiveSha256));
+      const installCommand = page.locator("pre code").filter({ hasText: `tar -xzf ${linux.stem}.tar.gz` });
+      const expectedCommand = `sha256sum -c ${linux.stem}.tar.gz.sha256\ntar -xzf ${linux.stem}.tar.gz\ncd ${linux.stem}\n./bin/eigenvista`;
+      assert.equal(await installCommand.textContent(), expectedCommand);
+      for (const width of [390, 320]) {
+        await page.setViewportSize({ width, height: 844 });
+        assert.equal(await installCommand.textContent(), expectedCommand, "Linux installation remains copyable on a narrow screen");
+        const checksum = page.locator("pre").filter({ hasText: linux.archiveSha256 });
+        const checksumWidth = await checksum.evaluate(element => ({ visible: element.clientWidth, content: element.scrollWidth }));
+        assert(checksumWidth.visible > 0 && checksumWidth.content <= checksumWidth.visible, "The complete Linux checksum wraps inside the phone viewport");
+      }
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await page.goto(base);
+    }
     assert.deepEqual(await (await context.request.get(base + "application.json")).json(), application);
     assert.deepEqual(await (await context.request.get(base + "release.json")).json(), release);
     const video = page.locator("#shader-demo video");

@@ -3,8 +3,9 @@
 Linux work is tracked in [issue #108](https://github.com/uvar-apps/eigenvista/issues/108).
 The first target is **CachyOS x86_64** on the local System76 machine. The Linux
 implementation is merged through [PR #109](https://github.com/uvar-apps/eigenvista/pull/109).
-A clean Linux package is being prepared for the existing
-[0.10.3 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3).
+The clean Linux package is available from the
+[0.10.3 release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3),
+alongside the separate Apple Silicon Mac package.
 See the [living handoff](https://github.com/uvar-apps/eigenvista/blob/main/docs/handoff.md) for the exact tested source, package,
 publication state and remaining desktop checks.
 

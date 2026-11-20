@@ -604,7 +604,8 @@ pre {
 pre code {
   overflow-wrap: normal;
 }
-.wrap-code {
+.wrap-code,
+.wrap-code code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

@@ -12,10 +12,17 @@ the public 0.10.3 Mac download and Zenodo DOI remain unchanged.
 The user subsequently authorized PR merge, current 0.10.3 release notes,
 commit/push, Linux asset publication and a website update. PR #109 merged the
 qualified implementation as `ea65d62e829c0427c592032bdb716356bd8e2f56`.
-A clean committed-source package is being prepared. The original Mac assets and
-v0.10.3 tag remain immutable; the added Linux package records its own source.
-The development archive described below remains historical evidence. See the
-living handoff for the final published artifact and acceptance results.
+The clean Linux archive is published in the existing 0.10.3 release:
+EigenVista-0.10.3-linux-x86_64-20261120T143721Z-53ebf37.tar.gz,
+82,817,498 bytes, SHA-256
+9491e341f551517e377d393732d833fe4db436c0fd755216a4df689a331604ec.
+Its source is 53ebf37a399872d7b7b4e30397e6eb9a0a9a530b with sourceDirty:false;
+all 736 source files match that commit. Fresh extracted-native acceptance
+passes 3,728 calls and 26 reviewed PNGs; all 413 genuine runtime/test/input hashes
+remain unchanged. All six release assets match independent anonymous downloads.
+The original Mac assets and v0.10.3 tag remain immutable. The development
+archive described below remains historical evidence. See the living handoff
+for the final delivery and website receipt.
 
 ## Runtime and package decision
 
