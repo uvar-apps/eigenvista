@@ -2,9 +2,10 @@
 
 ## Save / ExFAT / accessibility batch — 20 November 2026
 
-Implementation is on `codex/save-exfat-accessibility`, baseline `e9b0ef1`,
-tracked by #99/#100/#72. The user authorizes a PR merge after local validation;
-no version bump, tag or public release. Current 0.10.2 assets stay immutable.
+Implemented on `codex/save-exfat-accessibility`, baseline `e9b0ef1`, and merged
+through [PR #101](https://github.com/uvar-apps/eigenvista/pull/101) as `7bb3d89`.
+Issues #99/#100/#72 are completed. No version bump, tag or public release;
+current 0.10.2 assets stay immutable. The delivery-record follow-up is docs only.
 
 Pending validated/coalesced inspection edits now block GUI Save and native
 automatic exit; API Save reports busy. Optional CLI `--replace` and native
@@ -27,7 +28,10 @@ from `b935945` is qualified (82,280,317 bytes; SHA-256
 Independent extraction verifies 729 source files, 15 connector files and five
 embedded assets; its actual app/helper passes 46 additional calls and three
 reviewed PNGs, including real ExFAT exports and transparent alpha. This archive
-is not uploaded as a public release. PR delivery remains. See [handoff](handoff.md) for exact evidence and delivery state;
+is not uploaded as a public release. Pages deployment 44672440454 publishes the
+integration commit; all 91 served files and the custom nested404 match prepared
+bytes anonymously. No application CI ran. Broader #41 and the separate #85
+contact-rendering work remain open. See [handoff](handoff.md) for exact evidence and delivery state;
 source decisions are recorded in the linked design notes there.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)
