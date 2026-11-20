@@ -1,27 +1,48 @@
 # Implementation status
 
-## Release 0.10.3 preparation — 20 November 2026 (#103)
+## Release 0.10.3 qualified — publication pending (#103)
 
-User authorizes version 0.10.3, commit/tag/push, rebuilt redistributables and a
-published release with notes. Work on `codex/release-0.10.3`, baseline `4e8fd53`,
-tracked by [#103](https://github.com/uvar-apps/eigenvista/issues/103). Includes
-accepted Save coordination (#99), explicitly selected ExFAT replacement (#100)
-and the optional Accessible elements palette (#72), merged through #101/#102.
-Preserve default no-overwrite, old `--force`, protected sources, scientific data,
-format/toolchain/dependency pins, icon, allocation policy and all old tags/assets.
-Use concept DOI 10.5281/zenodo.24246123 until a 0.10.3 DOI is supplied.
+Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
 
-Fresh local macOS source checks pass 387 Rust workspace cases (14
-desktop cases included), explicit desktop tests, fmt/strict Clippy, production
-WASM/TypeScript/frontend/native-debug builds, 23 packaging/connector checks,
-all 752 Chromium/WebKit cases (376 per engine, zero failures/skips/flaky/retries)
-and 162 source-stage website checks. All 420 recorded runtime/test/input
-hashes stay fixed. Clean optimized-package rebuilding and extracted-native
-acceptance remain; no 0.10.3 tag, release or published package exists yet. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
-No application CI. Pages-only publisher is authorized. Linux/Windows/Intel,
-clean-Mac/Gatekeeper, full macOS-range and physical OS-action qualification
-remain separate gaps. Keep the living handoff current as gates complete.
+ZIP: `artifacts/distributions/EigenVista-0.10.3-apple-silicon-20261120T073506Z-1caf8bd.zip` — **82,290,759 bytes**.
 
+SHA-256: `fe3beae96bfb8869535613a109c1bb33ea6b15163eca3082029ecca38213d0a2`.
+
+The checksum and build-info companions identify the same clean build. The ZIP
+contains the optimized app, converter, AI helper/launcher, guides, examples, all
+three optional palettes, notices and source/dependency archives.
+
+Fresh local macOS checks pass 387 Rust workspace tests (14 desktop tests
+included), explicit desktop tests, fmt/strict Clippy, production/native builds,
+23 packaging checks and all 752 Chromium/WebKit cases, 376 per engine, with
+zero failures/skips/flaky cases/retries and all 420 runtime/test/input hashes
+unchanged. Both source-stage and final measured website checks pass all 162 cases.
+Current download facts identify the qualified 0.10.3 archive.
+
+Independent extraction verifies 730 source files, 57 Sesmesh files,
+15 connector files, 5 palette files and 5 exact embedded production
+assets, signatures and archived/source parity. The actual packaged launcher/app/
+helper passes 34 inspection methods through 1,626 recorded calls and
+11 reviewed PNGs: plane supersession, an independent 323-point scalar oracle
+(maximum error 4.44e-16), full 58,870-atom 1AON SES, genuine progress/
+cancellation and cached Save/reopen. Actual ExFAT acceptance passes another
+46 connector calls, 5 packaged converter cases and 3 reviewed PNGs, including
+all three export types, explicit replacement/default refusal, source protection
+and independently checked transparent alpha. Owned processes/descriptors/volumes
+are cleaned up.
+
+No application CI. The package remains an ad-hoc-signed Apple Silicon preview,
+not notarized. Linux/Windows/Intel, clean-Mac/Gatekeeper, the full macOS range and
+physical OS actions remain unqualified. QA captures are functional checks, not
+gallery compositions: some chosen pale annotations overlap or have low contrast,
+and densely selected pocket markers obscure detail. No new rendering regression
+was found. Preserve all prior tags and release assets. Use concept DOI
+10.5281/zenodo.24246123 until the user supplies a 0.10.3 DOI.
+
+Publication is pending: commit/push the qualified branch, create the annotated
+v0.10.3 tag at the clean package source, publish all three assets with release
+notes, verify anonymous bytes, then merge the prepared website and verify Pages.
+Track #103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
 
 ## Save / ExFAT / accessibility batch — 20 November 2026
 

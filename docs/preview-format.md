@@ -1,6 +1,6 @@
 # Native preview profile
 
-**Version 0.10.1:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 This implementation is an experimental subset of the research proposal, not

@@ -1,14 +1,26 @@
 # User-facing website
 
-## Release 0.10.3 preparation — 20 November 2026 (#103)
+## Release 0.10.3 qualified — publication pending (#103)
 
-Current source and user guidance describe 0.10.3: pending-edit Save coordination,
-explicitly selected ExFAT export replacement and the packaged Accessible
-elements palette. Keep old release records and capture provenance intact.
-The site generator keeps current source identity separate from measured
-published-package facts. Update the latter only from the qualified rebuilt
-archive, and publish release assets before the new download links reach main.
-Record exact validation/publication outcomes in the living handoff/status.
+Authored/generated pages describe the delivered 0.10.3 Save, ExFAT and palette
+features. Download metadata below is measured from the independently qualified
+archive; publish assets before merging the site. Preserve media capture identities,
+dimensions, aspect ratios and historical citation/source records.
+
+Clean release/package source: **`1caf8bd2c2825dba7ff43bd67f542463b740b979`**.
+
+ZIP: `artifacts/distributions/EigenVista-0.10.3-apple-silicon-20261120T073506Z-1caf8bd.zip` — **82,290,759 bytes**.
+
+SHA-256: `fe3beae96bfb8869535613a109c1bb33ea6b15163eca3082029ecca38213d0a2`.
+
+The checksum and build-info companions identify the same clean build. The ZIP
+contains the optimized app, converter, AI helper/launcher, guides, examples, all
+three optional palettes, notices and source/dependency archives.
+
+Publication is pending: commit/push the qualified branch, create the annotated
+v0.10.3 tag at the clean package source, publish all three assets with release
+notes, verify anonymous bytes, then merge the prepared website and verify Pages.
+Track #103. Evidence: `tmp/release-0.10.3/`; gates: `.unlazy/release-0.10.3/`.
 
 ## Release 0.10.2 published — 18 November 2026 (#98)
 

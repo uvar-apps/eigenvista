@@ -8,7 +8,7 @@ SES/SAS progress, smooth camera-relative lighting and
 [allocation-driven workloads](allocation-policy.md).
 Historical release records retain the behavior of their original binaries.
 The [0.10.3 notes](releases/0.10.3.md) and [living handoff](handoff.md)
-record release preparation, validation and delivery (#103).
+record release qualification, validation and delivery (#103).
 
 This is the documentation hub for the **EigenVista development preview**.
 EigenVista is a modern rewrite of Molekel, the molecular visualization

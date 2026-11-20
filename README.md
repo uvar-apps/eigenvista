@@ -7,7 +7,7 @@ automatic field-plane updates, live molecular-surface progress, visible atom
 picking, smooth view-relative lighting and
 [allocation-driven workloads](docs/allocation-policy.md).
 
-Release preparation and qualification are tracked in
+Release qualification and delivery are tracked in
 [#103](https://github.com/uvar-apps/eigenvista/issues/103). See the
 [0.10.3 notes](docs/releases/0.10.3.md) and [living handoff](docs/handoff.md)
 for package identity and publication state. Historical releases keep their
