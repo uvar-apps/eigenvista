@@ -346,6 +346,7 @@ function main() {
   for (const file of [
     "matterviz-muted.json",
     "matterviz-pastel.json",
+    "accessible-elements.json",
     "README.md",
     "LICENSE-MatterViz.txt",
   ])

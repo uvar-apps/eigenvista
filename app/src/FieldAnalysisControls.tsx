@@ -37,6 +37,8 @@ export interface FieldAnalysisControlsProps {
   error: string;
   onCommand: Command;
   onCancel?: () => void;
+  /** Admit committed intent before definition preparation or its debounce. */
+  onBeginEdit?: () => () => void;
 }
 const UNITS: Record<string, string[]> = {
   unspecified: ["unspecified"],
@@ -466,13 +468,28 @@ function AnalysisForm(props: FormProps) {
   const preparing = useRef<AbortController | null>(null);
   const controllers = useRef(new Set<AbortController>());
   const work = useRef(new Set<Promise<void>>());
+  const pendingEdit = useRef<{ sequence: number; finish: () => void } | null>(
+    null,
+  );
   const [automatic, setAutomatic] = useState(true);
   const [committed, setCommitted] = useState(0);
   const [autoStatus, setAutoStatus] = useState<"idle" | "queued" | "updating">(
     "idle",
   );
   const [manualBusy, setManualBusy] = useState(false);
+  const finishEdit = (sequence: number) => {
+    if (pendingEdit.current?.sequence !== sequence) return;
+    pendingEdit.current.finish();
+    pendingEdit.current = null;
+  };
+  const beginEdit = () => {
+    pendingEdit.current = {
+      sequence: intent.current,
+      finish: current.current.onBeginEdit?.() ?? (() => {}),
+    };
+  };
   const invalidate = () => {
+    finishEdit(intent.current);
     intent.current++;
     window.clearTimeout(timer.current);
     preparing.current?.abort();
@@ -485,7 +502,7 @@ function AnalysisForm(props: FormProps) {
       invalidate();
       current.current.onLiveActivity(false);
     };
-  }, [props.doc.atoms]);
+  }, [props.doc.atoms, props.field]);
   const [kind, setKind] = useState<AnalysisDefinition["kind"]>(
     saved?.kind ?? "probe",
   );
@@ -629,6 +646,7 @@ function AnalysisForm(props: FormProps) {
   const commitPlane = () => {
     if (!automatic || kind !== "plane" || !props.editing) return;
     invalidate();
+    beginEdit();
     props.onError("");
     setAutoStatus("queued");
     setCommitted(intent.current);
@@ -643,8 +661,10 @@ function AnalysisForm(props: FormProps) {
         !mounted.current ||
         sequence !== intent.current ||
         controller.signal.aborted
-      )
+      ) {
+        finishEdit(sequence);
         return;
+      }
       // An unrelated calculation owns the app. Keep its work intact and wait.
       if (current.current.busy && controllers.current.size === 0) {
         schedule(request, sequence, controller);
@@ -680,6 +700,7 @@ function AnalysisForm(props: FormProps) {
             current.current.onLiveActivity(controllers.current.size > 0);
             if (sequence === intent.current && !retry) setAutoStatus("idle");
           }
+          if (!retry) finishEdit(sequence);
         }
       });
       work.current.add(task);
@@ -690,6 +711,7 @@ function AnalysisForm(props: FormProps) {
     const controller = new AbortController();
     preparing.current = controller;
     const prepare = async () => {
+      let scheduled = false;
       try {
         const request: AnalysisRequest = {
           id: props.editing!.id,
@@ -697,13 +719,17 @@ function AnalysisForm(props: FormProps) {
           field: props.field,
           definition: await definition({ signal: controller.signal }),
         };
-        if (committed === intent.current && !controller.signal.aborted)
+        if (committed === intent.current && !controller.signal.aborted) {
           schedule(request, committed, controller);
+          scheduled = true;
+        }
       } catch (error) {
         if (committed === intent.current && !controller.signal.aborted) {
           setAutoStatus("idle");
           props.onError(error instanceof Error ? error.message : String(error));
         }
+      } finally {
+        if (!scheduled) finishEdit(committed);
       }
     };
     void prepare();
@@ -712,7 +738,10 @@ function AnalysisForm(props: FormProps) {
   }, [committed]);
   const submit = async () => {
     invalidate();
+    beginEdit();
     const sequence = intent.current;
+    const controller = new AbortController();
+    preparing.current = controller;
     setAutoStatus("idle");
     setManualBusy(true);
     try {
@@ -722,9 +751,14 @@ function AnalysisForm(props: FormProps) {
         id: props.editing?.id ?? inspectionId("analysis"),
         label: label.trim() || `${human(kind)} · ${props.field}`,
         field: props.field,
-        definition: await definition(),
+        definition: await definition({ signal: controller.signal }),
       };
-      await props.command("analysis.create", { request });
+      if (!mounted.current || sequence !== intent.current) return;
+      await props.command(
+        "analysis.create",
+        { request },
+        { signal: controller.signal },
+      );
       if (!mounted.current || sequence !== intent.current) return;
       if (request.definition.kind === "plane") {
         props.onPlaneSaved(request);
@@ -733,6 +767,7 @@ function AnalysisForm(props: FormProps) {
       if (mounted.current && sequence === intent.current)
         props.onError(error instanceof Error ? error.message : String(error));
     } finally {
+      finishEdit(sequence);
       if (mounted.current) setManualBusy(false);
     }
   };
@@ -766,6 +801,7 @@ function AnalysisForm(props: FormProps) {
                 setAutomatic(enabled);
                 setAutoStatus(enabled ? "queued" : "idle");
                 if (enabled) {
+                  beginEdit();
                   props.onError("");
                   setCommitted(intent.current);
                 }

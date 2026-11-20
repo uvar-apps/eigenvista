@@ -1,0 +1,20 @@
+{
+  "format": "eigenvista-atom-colors",
+  "version": 1,
+  "colors": [
+    { "z": 1, "symbol": "H", "color": "#e6e6e6" },
+    { "z": 6, "symbol": "C", "color": "#333333" },
+    { "z": 7, "symbol": "N", "color": "#0072b2" },
+    { "z": 8, "symbol": "O", "color": "#d55e00" },
+    { "z": 9, "symbol": "F", "color": "#009e73" },
+    { "z": 12, "symbol": "Mg", "color": "#007d5a" },
+    { "z": 15, "symbol": "P", "color": "#cc79a7" },
+    { "z": 16, "symbol": "S", "color": "#f0e442" },
+    { "z": 17, "symbol": "Cl", "color": "#56b4e9" },
+    { "z": 20, "symbol": "Ca", "color": "#7ac99d" },
+    { "z": 26, "symbol": "Fe", "color": "#e69f00" },
+    { "z": 30, "symbol": "Zn", "color": "#999999" },
+    { "z": 35, "symbol": "Br", "color": "#8c510a" },
+    { "z": 53, "symbol": "I", "color": "#6c3a80" }
+  ]
+}

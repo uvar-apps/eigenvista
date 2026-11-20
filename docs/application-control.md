@@ -2,6 +2,16 @@
 
 **Version 0.10.2:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
+Source follow-up (#99): GUI and API Save now share pending-inspection admission.
+An inspection write is admitted synchronously before React/worker validation;
+coalesced GUI writes stay pending through their final accepted publication.
+Committed plane intent is included before preparation/debounce; manual
+preparation and cancellation share that lifetime, while text drafts are excluded.
+Save reports busy/refuses without encoding while such edits are pending. Await
+successful edit completion before saving. Validation failure or stale revision
+retains the accepted document and releases admission. Native exit and browser
+unload also observe pending edits. The published 0.10.2 package predates this fix.
+
 
 Installed-app agents should use the packaged portable skill and technical
 reference, or the [binary-user setup guide](ai-connector.md). They require no
@@ -161,8 +171,8 @@ presets, changes the camera and exports four PNGs plus `controlled.eigenvista`.
 `harness-result.json` records actual results and artifact hashes. It runs outside
 EigenVista using Node and the CLI; it is not code evaluated inside the app.
 
-Choose a fresh output directory for each run: writes never overwrite existing
-files. The harness does not authorize discarding dirty work or widening roots.
+Choose a fresh output directory for each run: this harness refuses to overwrite
+existing files. It does not authorize discarding dirty work or widening roots.
 Inspect the generated images with the external agent's image viewer when
 assessing composition and rendering quality.
 
@@ -173,7 +183,9 @@ Start with `app.capabilities`. Its result includes:
 - `apiVersion: 1` and the current `instanceId`;
 - `methods`, each containing `method`, `description` and `inputSchema`;
 - `allocationPolicy: "allocation-driven"` and advisory `gridResolutionPresets`;
-- `files: {nativePaths, browserBytes, overwrite: false}` and `errorKinds`.
+- `files: {nativePaths, browserBytes, overwrite}` and `errorKinds`. In the source
+  follow-up to 0.10.2, `overwrite:true` advertises optional native replacement
+  support, not the default behavior; browser exports advertise false.
 
 Discover schemas from the connected app rather than assuming another version's
 catalog. Arguments are strict objects: unknown keys, nonfinite numbers, invalid
@@ -223,7 +235,7 @@ rules below. Results may include additional metadata.
 | `structure.set` | Biological session patch described below | Applied display summary and actual camera |
 | `structure.focus` | `target` (`"visible"` or `"chain"`); `chainIndex` only for `"chain"` | Display summary and focused camera |
 | `document.open` | Native: `path`; browser: `name`, `bytes`; `discardUnsaved?` | Imported document summary, import `report`, `previewError`, revision |
-| `document.save` | Native: `path`; `overwrite?: false` | Native file receipt or browser encoded bytes |
+| `document.save` | Native: `path`; `overwrite?: boolean` | Native file receipt or browser encoded bytes |
 | `field.select` | `fieldId` | Selected field/revision, or a job receipt if sampling is required |
 | `field.preview` | `fieldId`, `mode: "volume" | "raycast"`, `resolution` | Sampling-only job receipt; no marching cubes |
 | `surfaces.generate` | `fieldIds`, positive `isovalue`, `resolution` | Mesh-generation job receipt |
@@ -238,7 +250,7 @@ rules below. Results may include additional metadata.
 | `camera.set` | `position`, `target`, `up?` | Applied camera/revision |
 | `camera.orbit` | `horizontalDegrees`, `verticalDegrees` | Applied camera/revision |
 | `camera.zoom` | Positive `factor` | Applied camera/revision |
-| `image.export` | Native: `path`; `transparent?`, `overwrite?: false` | PNG file receipt or browser PNG data URL, dimensions, `revision`, `currentRevision` |
+| `image.export` | Native: `path`; `transparent?`, `overwrite?: boolean` | PNG file receipt or browser PNG data URL, dimensions, `revision`, `currentRevision` |
 | `job.get` | `jobId` | Operation status, progress and terminal result/error |
 | `job.cancel` | `jobId` | Job state after owned cancellation/cleanup |
 
@@ -421,7 +433,7 @@ back the accepted settings/results. No GUI operation is a required workaround.
 | `analysis.samples` | `id`, page | Raw f64 values/statuses and bohr positions; profile distances/length in Å |
 | `analysis.set` | `id`, `label?`, `appearance?`, `automaticRange?` | Updates local presentation; `automaticRange:true` removes a fixed range |
 | `analysis.remove` | `id` | Removes definition/cache/depiction |
-| `table.export` | `kind: measurements/analysis`, `id?` (required for analysis); native `path?`, `overwrite?:false`; browser `offset?`, `length?` | Native scoped CSV receipt or bounded generated text chunk |
+| `table.export` | `kind: measurements/analysis`, `id?` (required for analysis); native `path?`, `overwrite?:boolean`; browser `offset?`, `length?` | Native scoped CSV receipt or bounded generated text chunk |
 
 ### Inspection object shapes and scientific conventions
 
@@ -594,11 +606,17 @@ cannot replace them through another path or hard-link alias. The app also passes
 its protected imported-source hint into native Save.
 Only regular input files are accepted; directories, FIFOs and other special files
 are rejected. Existing export paths are probed without blocking on a FIFO and
-must still satisfy the no-clobber policy.
+must still satisfy the selected publication and source-protection policy.
 
-All control writes are **atomic no-clobber**: choose a new `.eigenvista`, `.png`
-or (in the 0.10.0 extension) `.csv`
-filename. `overwrite: true` is rejected even if a caller supplies it intentionally.
+Control writes default to **atomic no-clobber**: choose a new `.eigenvista`,
+`.png` or `.csv` filename. The source follow-up to 0.10.2 also permits explicit
+native `overwrite:true` for `document.save`, `image.export` and `table.export`.
+It authorizes atomic replacement of existing or late-created destinations.
+Source paths/hard-link aliases and scoped-path validation remain protected.
+On the qualified Mac ExFAT volume only the explicit replacement mode works;
+default no-clobber creation still reports unsupported filesystem capability.
+Browser byte/text exports reject replacement. The original 0.10.2 package
+rejects true; inspect live schemas/capabilities before using the new option.
 Native document writes decode/validate the encoded archive before publication;
 PNG writes validate the PNG structure/checksums. CSV accepts complete generated
 UTF-8 text and retains the same scoped/source-protected publication policy; it
@@ -680,7 +698,7 @@ work. A transport wait does not keep the OS awake.
 A client may half-close its TCP sending side after the complete request and
 continue reading the reply. Abandoning the connection does not cancel an accepted
 operation. Pending reply state is released when the operation completes or its
-controller is invalidated. Authentication, scoped file access and no-clobber
+controller is invalidated. Authentication, scoped file access and default no-clobber
 publication remain. Real runtime/address/format/device constraints
 still apply; see [allocation policy](allocation-policy.md).
 

@@ -10,6 +10,12 @@ package's `BUILD-INFO.json` for its verified artifact identity. The historical
 0.10.0 package retains its original behavior; older 0.8.0 artifacts predate
 scientific inspection and the current workspace.
 
+Source builds after this release add pending-edit Save coordination, optional
+atomic replacement for converter/AI exports to the tested Mac ExFAT volume,
+and `accessible-elements.json` in both `Palettes/` and the app's connector
+resources. The original published 0.10.2 assets remain unchanged. Inspect
+`BUILD-INFO.json` and the living handoff to identify a newer development package.
+
 A newly built source package uses the approved **480 px** left/right tools pane
 with **Molecule**, **Fields**, **Surfaces** and **Appearance** tabs. Its widgets
 remain collapsible and reorderable; the header provides hide/show, Zen and
@@ -86,6 +92,8 @@ The ZIP contains:
   with loading instructions and the upstream MIT license. Each overrides
   elements 1–109; elements 110–118 keep the built-in defaults. Load through
   **Appearance → Atom colours → Colours file…**.
+  New source packages also include `accessible-elements.json`, with fourteen
+  common-element overrides and documented color-vision evaluation/ambiguities.
 - The application license and collected third-party notices. Notices are also
   embedded in the app's Resources, so moving the app does not discard them.
 - The exact standalone first-party source snapshot, lockfiles, and data-only

@@ -236,7 +236,12 @@ assert.throws(() =>
 const downloaded = JSON.parse(
   fs.readFileSync(path.join(site, "downloads/provenance.json")),
 );
-assert.equal(downloaded.files.length, 23);
+assert.equal(downloaded.files.length, 24);
+assert.equal(
+  downloaded.files.find((row) => row.file === "accessible-elements.json")?.source,
+  "palettes/accessible-elements.json",
+  "The optional palette is an attributed, byte-verified public download",
+);
 for (const filename of ["eigenvista-control/SKILL.md", "eigenvista-control/reference.md", "eigenvista-control/README.md", "eigenvista-control/allocation-policy.md"])
   assert(downloaded.files.some((row) => row.file === filename), `Portable binary connector instructions: ${filename}`);
 for (const row of downloaded.files) {

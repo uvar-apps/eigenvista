@@ -20,7 +20,7 @@ import {
 } from "./control";
 import { attachDesktopControl } from "./desktopControl";
 import { makeNativeTransfer } from "./nativeTransfer";
-import { INSPECTION_METHODS } from "./inspectionSchemas";
+import { INSPECTION_METHODS, inspectionReadMethods } from "./inspectionSchemas";
 import { useScientificInspection } from "./useScientificInspection";
 import { InspectionControls } from "./InspectionControls";
 import { MolecularSurfaceControls } from "./MolecularSurfaceControls";
@@ -35,6 +35,7 @@ import {
 } from "./control/presentation";
 import type { CameraState, ViewportControl } from "./viewportControl";
 import { NativeExitGuard } from "./NativeExitGuard";
+import { createPendingInspectionSave } from "./pendingInspectionSave";
 import {
   hasNativeSave,
   subscribeNativeSaves,
@@ -204,6 +205,13 @@ export default function App() {
   const unsaved = useRef(dirty);
   const activity = useRef(true);
   const saving = useRef(false);
+  const [pendingInspectionSave] = useState(createPendingInspectionSave);
+  // Re-render the native exit prompt when admitted work finishes; its event
+  // handlers also read the synchronous snapshot before React catches up.
+  useSyncExternalStore(
+    pendingInspectionSave.subscribe,
+    pendingInspectionSave.getSnapshot,
+  );
   const documentRevision = useRef(0);
   const inspection = useScientificInspection({
     doc,
@@ -252,7 +260,14 @@ export default function App() {
     ) => {
       if (!inspectionCommandRef.current)
         return Promise.reject(new Error("Inspection control is not ready"));
-      return inspectionCommandRef.current(method, params, options);
+      const finish =
+        Object.hasOwn(INSPECTION_METHODS, method) &&
+        !inspectionReadMethods.has(method)
+          ? pendingInspectionSave.begin()
+          : () => {};
+      return inspectionCommandRef
+        .current(method, params, options)
+        .finally(finish);
     },
     [],
   );
@@ -276,7 +291,7 @@ export default function App() {
       if (!controlHost.current)
         throw new ControlError("unavailable", "The application is not ready");
       return controlHost.current;
-    });
+    }, pendingInspectionSave);
     controller.current = control;
     const connection = new AbortController();
     let closed = false;
@@ -581,7 +596,7 @@ export default function App() {
   useEffect(() => {
     if (native) return;
     const guard = (e: BeforeUnloadEvent) => {
-      if (unsaved.current) {
+      if (unsaved.current || pendingInspectionSave.getSnapshot()) {
         e.preventDefault();
       }
     };
@@ -806,6 +821,12 @@ export default function App() {
     }
   }
   async function save(): Promise<boolean> {
+    if (pendingInspectionSave.getSnapshot()) {
+      setError(
+        "An inspection edit is still being applied. Wait for it to finish, then save again.",
+      );
+      return false;
+    }
     const snapshot = current.current;
     if (!snapshot || activity.current || saving.current || hasNativeSave())
       return false;
@@ -1038,7 +1059,7 @@ export default function App() {
             makeNativeTransfer(bytes, {
               path: params.path,
               protectedPaths: protectedSourcePath ? [protectedSourcePath] : [],
-              overwrite: false,
+              overwrite: params.overwrite === true,
             }),
           ),
         );
@@ -1286,7 +1307,7 @@ export default function App() {
           {
             path: params.path,
             dataUrl: capture.dataUrl,
-            overwrite: false,
+            overwrite: params.overwrite === true,
           },
         );
         return {
@@ -1481,6 +1502,7 @@ export default function App() {
             error={inspection.error}
             onCancel={stop}
             onCommand={sendInspectionCommand}
+            onBeginEdit={pendingInspectionSave.begin}
           />
         ),
         molecular: (
@@ -1503,7 +1525,10 @@ export default function App() {
           document: current.current,
           dirty: unsaved.current,
           busy:
-            activity.current || conversionActivity.current || hasNativeSave(),
+            activity.current ||
+            conversionActivity.current ||
+            hasNativeSave() ||
+            pendingInspectionSave.getSnapshot(),
           saving: saving.current || hasNativeSave(),
           conversionPending,
         })}

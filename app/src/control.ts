@@ -2,6 +2,7 @@ import { gridResolutions } from "./resolution";
 import { REPRESENTATION_OPTIONS, COMPONENT_KINDS } from "./molecularDisplay";
 import type { EigenVistaDocument } from "./types";
 import type { CameraState, ViewportControl } from "./viewportControl";
+import type { PendingInspectionSave } from "./pendingInspectionSave";
 import {
   INSPECTION_METHODS,
   inspectionBackgroundMethods,
@@ -296,10 +297,10 @@ export const CONTROL_METHODS = {
     }),
   ),
   "document.save": definition(
-    "Save a scoped native destination, or encode browser bytes without clearing dirty state.",
+    "Save a scoped native destination; overwrite:true explicitly allows atomic replacement, otherwise refuse existing outputs. Browser returns encoded bytes.",
     mutation({
       path: string,
-      overwrite: { type: "boolean", enum: [false] },
+      overwrite: boolean,
     }),
   ),
   "field.select": definition(
@@ -405,11 +406,11 @@ export const CONTROL_METHODS = {
     ]),
   ),
   "image.export": definition(
-    "Capture the actual final frame, optionally with a transparent background.",
+    "Capture the actual final frame. Native overwrite:true explicitly allows atomic replacement; default refuses existing outputs.",
     mutation({
       path: string,
       transparent: boolean,
-      overwrite: { type: "boolean", enum: [false] },
+      overwrite: boolean,
     }),
   ),
   "job.get": definition(
@@ -589,7 +590,10 @@ const sameSource = (
       a.provenance === b.provenance,
   );
 
-export function createApplicationControl(getHost: () => ControlHost) {
+export function createApplicationControl(
+  getHost: () => ControlHost,
+  pendingInspectionSave?: PendingInspectionSave,
+) {
   const jobs = new Map<string, Job>();
   let active: Job | undefined;
   let mutating = false;
@@ -783,6 +787,13 @@ export function createApplicationControl(getHost: () => ControlHost) {
       method: string,
       params: Record<string, unknown> = {},
     ): Promise<unknown> {
+      // Admission precedes the first React synchronization/worker validation.
+      // The GUI shares this tracker, including its coalesced input lifetime.
+      const finishInspection =
+        Object.hasOwn(INSPECTION_METHODS, method) &&
+        !inspectionReadMethods.has(method)
+          ? pendingInspectionSave?.begin()
+          : undefined;
       try {
         if (disposed)
           throw new ControlError(
@@ -813,6 +824,15 @@ export function createApplicationControl(getHost: () => ControlHost) {
               if (typeof id === "string") identifier(id, "Field ID");
         }
         validate(params, definition.inputSchema);
+        if (
+          params.overwrite === true &&
+          ["document.save", "image.export", "table.export"].includes(method) &&
+          !getHost().native
+        )
+          throw new ControlError(
+            "invalid_arguments",
+            "Replacement applies only to native file exports; browser exports return data",
+          );
         if (
           method === "analysis.create" &&
           params.supersede === true &&
@@ -846,7 +866,7 @@ export function createApplicationControl(getHost: () => ControlHost) {
             files: {
               nativePaths: getHost().native,
               browserBytes: !getHost().native,
-              overwrite: false,
+              overwrite: getHost().native,
             },
             errorKinds: Object.keys(ERROR_CODES),
           };
@@ -1102,6 +1122,11 @@ export function createApplicationControl(getHost: () => ControlHost) {
           (method === "scene.set" && params.isovalue !== undefined)
         )
           idle();
+        if (method === "document.save" && pendingInspectionSave?.getSnapshot())
+          throw new ControlError(
+            "busy",
+            "An inspection edit is still being applied; wait for it to finish before saving",
+          );
         if (method !== "document.open") getDocument();
         if (mutating)
           throw new ControlError(
@@ -1130,6 +1155,8 @@ export function createApplicationControl(getHost: () => ControlHost) {
         }
       } catch (error) {
         throw controlError(error);
+      } finally {
+        finishInspection?.();
       }
     },
   };

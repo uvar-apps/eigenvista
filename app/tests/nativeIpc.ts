@@ -16,10 +16,18 @@ export type NativeIpcProbe = {
     bytes: number[];
     path: string;
     protectedPaths: string[];
-    overwrite: false;
+    overwrite: boolean;
   }[];
   files: Record<string, number[]>;
   controlReady: boolean;
+  controlExports: {
+    command: string;
+    path: string;
+    overwrite: boolean;
+    text?: string;
+    dataUrl?: string;
+    protectedPaths?: string[];
+  }[];
   requestControl: (
     method: string,
     params?: Record<string, unknown>,
@@ -94,6 +102,7 @@ export async function installNativeIpc(
       approved: [],
       saves: [],
       controlSaves: [],
+      controlExports: [],
       files: {},
       controlReady: false,
       requestControl(method, params = {}) {
@@ -287,14 +296,14 @@ export async function installNativeIpc(
           } else {
             if (
               typeof metadata.path !== "string" ||
-              metadata.overwrite !== false
+              typeof metadata.overwrite !== "boolean"
             )
-              throw new Error("Missing native save path/no-overwrite metadata");
+              throw new Error("Missing native save path/publication metadata");
             probe.controlSaves.push({
               bytes,
               path: metadata.path,
               protectedPaths: metadata.protectedPaths as string[],
-              overwrite: false,
+              overwrite: metadata.overwrite,
             });
           }
           if (probe.saveOutcome === "failed")
@@ -308,6 +317,32 @@ export async function installNativeIpc(
           if (command === "save_native") return saved;
           if (!saved) throw new Error("Native control save cancelled");
           return { path: metadata.path, bytes: bytes.length };
+        }
+        if (
+          command === "control_write_image" ||
+          command === "control_write_csv"
+        ) {
+          if (
+            typeof args.path !== "string" ||
+            typeof args.overwrite !== "boolean"
+          )
+            throw new Error("Missing native export path/publication metadata");
+          probe.controlExports.push({
+            command,
+            path: args.path,
+            overwrite: args.overwrite,
+            ...(command === "control_write_csv"
+              ? {
+                  text: args.text as string,
+                  protectedPaths: args.protectedPaths as string[],
+                }
+              : { dataUrl: args.dataUrl as string }),
+          });
+          const bytes =
+            command === "control_write_csv"
+              ? new TextEncoder().encode(args.text as string).length
+              : atob((args.dataUrl as string).split(",")[1]).length;
+          return { path: args.path, bytes };
         }
         if (command === "plugin:dialog|open") {
           state.nativePicks.push(args.options as PickOptions);

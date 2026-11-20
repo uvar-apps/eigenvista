@@ -95,11 +95,9 @@ fn scientific_csv_is_scoped_source_protected_and_no_clobber() {
             .write_csv(&dir.0.join("nul.csv"), "x\0y", &[], false)
             .is_err()
     );
-    assert!(
-        files
-            .write_csv(&dir.0.join("overwrite.csv"), text, &[], true)
-            .is_err()
-    );
+    let replacement = dir.0.join("overwrite.csv");
+    files.write_csv(&replacement, text, &[], true).unwrap();
+    assert_eq!(fs::read_to_string(replacement).unwrap(), text);
     let outside = Scratch::new("csv-outside");
     assert!(
         files
@@ -552,8 +550,11 @@ fn native_writes_validate_before_publication_and_racing_writes_never_clobber() {
     assert_eq!(outcomes.iter().filter(|x| x.is_ok()).count(), 1);
     let before = fs::read(&target).unwrap();
     eigenvista_format::decode(&before).unwrap();
-    assert!(files.save_document(&target, &native(), &[], true).is_err());
-    assert_eq!(fs::read(&target).unwrap(), before);
+    let replacement = eigenvista_format::encode(&eigenvista_core::fixtures::open_shell()).unwrap();
+    files
+        .save_document(&target, &replacement, &[], true)
+        .unwrap();
+    assert_eq!(fs::read(&target).unwrap(), replacement);
     assert_eq!(
         fs::metadata(&target).unwrap().permissions().mode() & 0o777,
         0o600
@@ -573,6 +574,187 @@ fn native_writes_validate_before_publication_and_racing_writes_never_clobber() {
         ),
         "source_protected"
     );
+}
+
+#[test]
+fn explicit_atomic_replacement_supports_all_exports_and_preserves_failed_destinations() {
+    let dir = Scratch::new("replacement");
+    let files = scope(&dir);
+    let first = native();
+    let second = eigenvista_format::encode(&eigenvista_core::fixtures::open_shell()).unwrap();
+    let destination = dir.0.join("document.eigenvista");
+    files
+        .save_document(&destination, &first, &[], true)
+        .unwrap();
+    files
+        .save_document(&destination, &second, &[], true)
+        .unwrap();
+    assert_eq!(fs::read(&destination).unwrap(), second);
+    assert!(
+        files
+            .save_document(&destination, b"invalid", &[], true)
+            .is_err()
+    );
+    assert_eq!(fs::read(&destination).unwrap(), second);
+
+    let csv = dir.0.join("table.csv");
+    files.write_csv(&csv, "value\n1\n", &[], true).unwrap();
+    files.write_csv(&csv, "value\n2\n", &[], true).unwrap();
+    assert_eq!(fs::read_to_string(&csv).unwrap(), "value\n2\n");
+    assert!(files.write_csv(&csv, "\0", &[], true).is_err());
+    assert_eq!(fs::read_to_string(csv).unwrap(), "value\n2\n");
+
+    let icon = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../app/src-tauri/icons/icon.png");
+    let bytes = fs::read(icon).unwrap();
+    let url = format!(
+        "data:image/png;base64,{}",
+        base64::engine::general_purpose::STANDARD.encode(&bytes)
+    );
+    let png = dir.0.join("image.png");
+    files.write_image(&png, &url, true).unwrap();
+    fs::write(&png, b"previous output").unwrap();
+    files.write_image(&png, &url, true).unwrap();
+    assert_eq!(fs::read(&png).unwrap(), bytes);
+    assert!(
+        files
+            .write_image(&png, "data:image/png;base64,YmFk", true)
+            .is_err()
+    );
+    assert_eq!(fs::read(png).unwrap(), bytes);
+    assert_eq!(fs::read_dir(&dir.0).unwrap().count(), 3);
+}
+
+#[test]
+fn explicit_replacement_keeps_source_alias_scope_and_symlink_protection() {
+    let dir = Scratch::new("replace-protected");
+    let outside = Scratch::new("replace-outside");
+    let files = scope(&dir);
+    let bytes = native();
+    let source = dir.0.join("source.eigenvista");
+    fs::write(&source, &bytes).unwrap();
+    files.read(&source).unwrap();
+    let alias = dir.0.join("alias.eigenvista");
+    fs::hard_link(&source, &alias).unwrap();
+    for destination in [&source, &alias] {
+        assert_eq!(
+            kind(
+                &files
+                    .save_document(destination, &bytes, &[], true)
+                    .unwrap_err()
+            ),
+            "source_protected"
+        );
+        assert_eq!(fs::read(destination).unwrap(), bytes);
+    }
+    let hinted = dir.0.join("hinted.csv");
+    fs::write(&hinted, "original").unwrap();
+    assert_eq!(
+        kind(
+            &files
+                .write_csv(
+                    &hinted,
+                    "value\n1\n",
+                    &[hinted.to_string_lossy().into_owned()],
+                    true
+                )
+                .unwrap_err()
+        ),
+        "source_protected"
+    );
+    assert_eq!(fs::read_to_string(&hinted).unwrap(), "original");
+    let link = dir.0.join("link.eigenvista");
+    symlink(&source, &link).unwrap();
+    assert_eq!(
+        kind(&files.save_document(&link, &bytes, &[], true).unwrap_err()),
+        "scope_denied"
+    );
+    assert!(
+        fs::symlink_metadata(&link)
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+    let folder = dir.0.join("folder");
+    symlink(&outside.0, &folder).unwrap();
+    for path in [
+        outside.0.join("leak.eigenvista"),
+        folder.join("leak.eigenvista"),
+    ] {
+        assert_eq!(
+            kind(&files.save_document(&path, &bytes, &[], true).unwrap_err()),
+            "scope_denied"
+        );
+    }
+    assert_eq!(fs::read_dir(&outside.0).unwrap().count(), 0);
+    assert_eq!(fs::read(source).unwrap(), bytes);
+    assert!(!fs::read_dir(&dir.0).unwrap().any(|entry| {
+        entry
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".eigenvista-control-save-")
+    }));
+}
+
+#[test]
+fn racing_explicit_replacements_publish_only_complete_valid_documents() {
+    use std::sync::atomic::{AtomicBool, Ordering};
+    let dir = Scratch::new("replace-race");
+    let files = Arc::new(scope(&dir));
+    let path = dir.0.join("result.eigenvista");
+    let mut candidates = vec![native()];
+    for index in 0..12 {
+        let mut document = eigenvista_core::fixtures::hydrogen_pair();
+        document.id = format!("replacement-race-{index}");
+        candidates.push(eigenvista_format::encode(&document).unwrap());
+    }
+    fs::write(&path, &candidates[0]).unwrap();
+    let candidates = Arc::new(candidates);
+    let stop = Arc::new(AtomicBool::new(false));
+    let reader = {
+        let path = path.clone();
+        let candidates = candidates.clone();
+        let stop = stop.clone();
+        thread::spawn(move || {
+            let mut observations = 0;
+            loop {
+                let bytes = fs::read(&path).unwrap();
+                assert!(
+                    candidates.contains(&bytes),
+                    "partial or unknown publication"
+                );
+                eigenvista_format::decode(&bytes).unwrap();
+                observations += 1;
+                if stop.load(Ordering::Acquire) {
+                    return observations;
+                }
+                thread::yield_now();
+            }
+        })
+    };
+    let barrier = Arc::new(Barrier::new(candidates.len() - 1));
+    let writers: Vec<_> = (1..candidates.len())
+        .map(|index| {
+            let path = path.clone();
+            let candidates = candidates.clone();
+            let files = files.clone();
+            let barrier = barrier.clone();
+            thread::spawn(move || {
+                barrier.wait();
+                files
+                    .save_document(&path, &candidates[index], &[], true)
+                    .unwrap();
+            })
+        })
+        .collect();
+    for writer in writers {
+        writer.join().unwrap();
+    }
+    stop.store(true, Ordering::Release);
+    assert!(reader.join().unwrap() > 0);
+    let final_bytes = fs::read(&path).unwrap();
+    assert!(candidates[1..].contains(&final_bytes));
+    assert_eq!(fs::read_dir(&dir.0).unwrap().count(), 1);
 }
 
 #[test]

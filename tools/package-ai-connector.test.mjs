@@ -85,7 +85,7 @@ test("prebuilt arm64 client, portable instructions and attributed data stage and
   const staged = stage(bundle);
   assert.equal(staged.architecture, "arm64");
   assert.match(staged.version, /^eigenvista-ctl /);
-  assert.equal(Object.keys(staged.files).length, 14);
+  assert.equal(Object.keys(staged.files).length, 15);
   const prefix = "Contents/Resources/AI-connector/";
   for (const name of [
     "SKILL.md",
@@ -99,6 +99,7 @@ test("prebuilt arm64 client, portable instructions and attributed data stage and
     "examples/LICENSE",
     "palettes/matterviz-muted.json",
     "palettes/matterviz-pastel.json",
+    "palettes/accessible-elements.json",
     "palettes/README.md",
     "palettes/LICENSE-MatterViz.txt",
   ])

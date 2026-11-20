@@ -342,7 +342,7 @@ export const INSPECTION_METHODS = {
     mutation({ id: str }, ["id"]),
   ),
   "table.export": entry(
-    "Export a generated measurement or quantitative CSV to an authorized path or bounded browser text chunk.",
+    "Export generated CSV. Native overwrite:true explicitly allows atomic replacement; default refuses existing outputs. Browser returns text.",
     mutation(
       {
         kind: { enum: ["measurements", "analysis"] },
@@ -350,7 +350,7 @@ export const INSPECTION_METHODS = {
         path: str,
         offset: { type: "integer", minimum: 0 },
         length: { type: "integer", minimum: 1 },
-        overwrite: { enum: [false] },
+        overwrite: bool,
       },
       ["kind"],
     ),

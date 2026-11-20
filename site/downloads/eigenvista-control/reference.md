@@ -220,7 +220,7 @@ file grants.
 | `structure.set` | Biological patch below → accepted display summary and camera |
 | `structure.focus` | `target` (`"visible"` or `"chain"`), `chainIndex` for chain only → focused camera/display summary |
 | `document.open` | `path`, `discardUnsaved?` → imported summary, report, preview error and revision |
-| `document.save` | New `path`, `overwrite?: false` → native save receipt |
+| `document.save` | New `path`, `overwrite?: boolean` → native save receipt |
 | `field.select` | `fieldId` → selection result or a sampling job |
 | `field.preview` | `fieldId`, `mode` (`"volume"` or `"raycast"`), `resolution` → sampling-only job |
 | `surfaces.generate` | `fieldIds`, positive `isovalue`, `resolution` → mesh-generation job |
@@ -235,7 +235,7 @@ file grants.
 | `camera.set` | `position`, `target`, `up?` → accepted camera |
 | `camera.orbit` | `horizontalDegrees`, `verticalDegrees` → accepted camera |
 | `camera.zoom` | Positive `factor` → accepted camera |
-| `image.export` | New `path`, `transparent?`, `overwrite?: false` → PNG receipt, dimensions and capture/current revisions |
+| `image.export` | New `path`, `transparent?`, `overwrite?: boolean` → PNG receipt, dimensions and capture/current revisions |
 | `job.get` | `jobId` → progress and terminal outcome |
 | `job.cancel` | `jobId` → owned cancellation and cleanup outcome |
 
@@ -297,7 +297,7 @@ Source replacement or changed/removed mesh geometry invalidates old picks.
 | `analysis.samples` | `id`, page: raw f64 value/status/bohr position; profile distance/length in Å |
 | `analysis.set` | `id`, `label?`, `appearance?`, `automaticRange?`; true removes fixed range |
 | `analysis.remove` | `id`: remove definition/cache |
-| `table.export` | `kind: measurements/analysis`, analysis `id?`, new native `path?`, `overwrite?:false`; optional text chunk `offset,length` |
+| `table.export` | `kind: measurements/analysis`, analysis `id?`, new native `path?`, `overwrite?:boolean`; optional text chunk `offset,length` |
 
 ### Geometry and annotation payloads
 
@@ -597,8 +597,14 @@ inputs read by control remain protected for the broker's lifetime, including
 hard-link aliases. Never read an unapproved file through another tool and
 resubmit its contents to bypass the connector's refusal.
 
-All writes are atomic and no-clobber. Choose new `.eigenvista`, `.png` and `.csv` paths;
-`overwrite:true` is rejected. Inspect native save receipts for `saved:true` and
+Writes default to atomic no-clobber. Choose new `.eigenvista`, `.png` and `.csv`
+paths. The source follow-up to 0.10.2 permits `overwrite:true` on native document,
+PNG and CSV exports only after explicit user authorization for that output.
+This publishes a complete replacement, including over late-created targets;
+source/scoped-path protections remain. It enables the tested Mac ExFAT path,
+whose driver rejects default exclusive publication. Older 0.10.2 packages reject
+true; inspect live schemas and `files.overwrite` support. Browser exports reject
+replacement. Inspect native save receipts for `saved:true` and
 `current:true`; a file's existence alone does not establish that current work was
 saved. PNG receipts include dimensions, capture `revision` and `currentRevision`.
 If the molecule changes during export, check which view the image represents.

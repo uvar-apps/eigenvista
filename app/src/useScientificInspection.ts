@@ -762,7 +762,7 @@ export function useScientificInspection(options: Options) {
           protectedPaths: latest.current.protectedPath
             ? [latest.current.protectedPath]
             : [],
-          overwrite: false,
+          overwrite: params.overwrite === true,
         });
       if (!native && params.path !== undefined)
         throw new ControlError(

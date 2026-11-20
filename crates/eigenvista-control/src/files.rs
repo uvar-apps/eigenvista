@@ -150,6 +150,60 @@ mod unix {
         Ok(unsafe { File::from_raw_fd(fd) })
     }
 
+    /// Inspect the destination without following leaf symlinks or leaving its pinned parent.
+    fn check_destination(
+        parent: &Parent,
+        protected: &Protected,
+        overwrite: bool,
+    ) -> Result<(), RpcError> {
+        if protected.paths.contains(&parent.path) {
+            return Err(RpcError::new(
+                -32008,
+                "source_protected",
+                "The imported source cannot be replaced",
+            ));
+        }
+        // SAFETY: stat is initialized output storage and both descriptor/name stay live.
+        let mut metadata = unsafe { std::mem::zeroed::<libc::stat>() };
+        let inspected = unsafe {
+            libc::fstatat(
+                parent.directory.as_raw_fd(),
+                parent.name.as_ptr(),
+                &mut metadata,
+                libc::AT_SYMLINK_NOFOLLOW,
+            )
+        };
+        if inspected != 0 {
+            let error = std::io::Error::last_os_error();
+            return if error.kind() == std::io::ErrorKind::NotFound {
+                Ok(())
+            } else {
+                Err(RpcError::io(error))
+            };
+        }
+        if metadata.st_mode & libc::S_IFMT != libc::S_IFREG {
+            return Err(denied("Only regular files are valid export destinations"));
+        }
+        if protected
+            .identities
+            .contains(&(metadata.st_dev as u64, metadata.st_ino))
+        {
+            return Err(RpcError::new(
+                -32008,
+                "source_protected",
+                "The destination aliases a protected source",
+            ));
+        }
+        if !overwrite {
+            return Err(RpcError::new(
+                -32009,
+                "destination_exists",
+                "The destination already exists",
+            ));
+        }
+        Ok(())
+    }
+
     impl ScopedFiles {
         pub fn new(paths: &[PathBuf]) -> Result<Self, RpcError> {
             if paths.is_empty() {
@@ -247,46 +301,21 @@ mod unix {
             }
             Ok(())
         }
-        fn write_new(&self, path: &Path, bytes: &[u8]) -> Result<FileReceipt, RpcError> {
+        /// Stage complete bytes and publish within the pinned destination directory.
+        /// Replacement is allowed only when the caller explicitly requested it.
+        fn write_atomic(
+            &self,
+            path: &Path,
+            bytes: &[u8],
+            overwrite: bool,
+        ) -> Result<FileReceipt, RpcError> {
             let parent = self.parent(path)?;
             {
                 let protected = self
                     .protected
                     .lock()
                     .map_err(|_| RpcError::io("Source protection state unavailable"))?;
-                if protected.paths.contains(&parent.path) {
-                    return Err(RpcError::new(
-                        -32008,
-                        "source_protected",
-                        "The imported source cannot be replaced",
-                    ));
-                }
-                // Opening through the pinned parent prevents a leaf/ancestor symlink escape.
-                if let Ok(existing) = open_at(
-                    &parent.directory,
-                    &parent.name,
-                    libc::O_RDONLY | libc::O_NONBLOCK,
-                ) {
-                    let metadata = existing.metadata().map_err(RpcError::io)?;
-                    if !metadata.is_file() {
-                        return Err(denied("Only regular files are valid export destinations"));
-                    }
-                    if protected
-                        .identities
-                        .contains(&(metadata.dev(), metadata.ino()))
-                    {
-                        return Err(RpcError::new(
-                            -32008,
-                            "source_protected",
-                            "The destination aliases a protected source",
-                        ));
-                    }
-                    return Err(RpcError::new(
-                        -32009,
-                        "destination_exists",
-                        "The destination already exists",
-                    ));
-                }
+                check_destination(&parent, &protected, overwrite)?;
             }
             let temporary = CString::new(format!(
                 ".eigenvista-control-save-{}",
@@ -302,17 +331,37 @@ mod unix {
                 file.write_all(bytes).map_err(RpcError::io)?;
                 file.sync_all().map_err(RpcError::io)?;
                 drop(file);
+                // A completed read may have protected this source during staging.
+                // Hold the protection lock across final validation and publication.
+                let protected = self
+                    .protected
+                    .lock()
+                    .map_err(|_| RpcError::io("Source protection state unavailable"))?;
+                check_destination(&parent, &protected, overwrite)?;
                 // SAFETY: both names and the pinned directory descriptor remain live.
-                let linked = unsafe {
-                    libc::linkat(
-                        parent.directory.as_raw_fd(),
-                        temporary.as_ptr(),
-                        parent.directory.as_raw_fd(),
-                        parent.name.as_ptr(),
-                        0,
-                    )
+                // Rename publishes only complete bytes; it may replace a late-created
+                // destination only when this operation explicitly grants that permission.
+                let published = if overwrite {
+                    unsafe {
+                        libc::renameat(
+                            parent.directory.as_raw_fd(),
+                            temporary.as_ptr(),
+                            parent.directory.as_raw_fd(),
+                            parent.name.as_ptr(),
+                        )
+                    }
+                } else {
+                    unsafe {
+                        libc::linkat(
+                            parent.directory.as_raw_fd(),
+                            temporary.as_ptr(),
+                            parent.directory.as_raw_fd(),
+                            parent.name.as_ptr(),
+                            0,
+                        )
+                    }
                 };
-                if linked != 0 {
+                if published != 0 {
                     let error = std::io::Error::last_os_error();
                     return Err(if error.raw_os_error() == Some(libc::EEXIST) {
                         RpcError::new(
@@ -320,8 +369,15 @@ mod unix {
                             "destination_exists",
                             "The destination already exists",
                         )
+                    } else if !overwrite
+                        && (error.raw_os_error() == Some(libc::ENOTSUP)
+                            || error.kind() == std::io::ErrorKind::Unsupported)
+                    {
+                        RpcError::io(
+                            "This filesystem cannot publish an atomic no-overwrite export; explicitly allow replacement or choose another volume",
+                        )
                     } else {
-                        RpcError::io("Atomic no-clobber publication failed")
+                        RpcError::io(format!("Atomic file publication failed: {error}"))
                     });
                 }
                 Ok(FileReceipt {
@@ -340,11 +396,6 @@ mod unix {
             protected_paths: &[String],
             overwrite: bool,
         ) -> Result<FileReceipt, RpcError> {
-            if overwrite {
-                return Err(invalid(
-                    "Control saves are no-clobber; choose a new filename",
-                ));
-            }
             if !path.extension().is_some_and(|e| {
                 e.eq_ignore_ascii_case("eigenvista") || e.eq_ignore_ascii_case("molekel")
             }) {
@@ -356,10 +407,10 @@ mod unix {
             eigenvista_format::decode(bytes)
                 .map_err(|message| RpcError::new(-32602, "validation_error", message))?;
             self.protect_hints(protected_paths)?;
-            self.write_new(path, bytes)
+            self.write_atomic(path, bytes, overwrite)
         }
         /// Publish a generated CSV under the same pinned-root and
-        /// no-clobber contract as native documents, never as an arbitrary writer.
+        /// publication contract as native documents, never as an arbitrary writer.
         pub fn write_csv(
             &self,
             path: &Path,
@@ -367,9 +418,6 @@ mod unix {
             protected_paths: &[String],
             overwrite: bool,
         ) -> Result<FileReceipt, RpcError> {
-            if overwrite {
-                return Err(invalid("CSV exports are no-clobber; choose a new filename"));
-            }
             if !path
                 .extension()
                 .is_some_and(|e| e.eq_ignore_ascii_case("csv"))
@@ -380,7 +428,7 @@ mod unix {
                 return Err(invalid("CSV must be nonempty UTF-8 without NUL"));
             }
             self.protect_hints(protected_paths)?;
-            self.write_new(path, text.as_bytes())
+            self.write_atomic(path, text.as_bytes(), overwrite)
         }
         pub fn write_image(
             &self,
@@ -388,11 +436,6 @@ mod unix {
             data_url: &str,
             overwrite: bool,
         ) -> Result<FileReceipt, RpcError> {
-            if overwrite {
-                return Err(invalid(
-                    "Control image exports are no-clobber; choose a new filename",
-                ));
-            }
             if !path
                 .extension()
                 .is_some_and(|e| e.eq_ignore_ascii_case("png"))
@@ -422,7 +465,7 @@ mod unix {
                 .decode_vec(encoded, &mut bytes)
                 .map_err(|_| invalid("Invalid PNG base64"))?;
             validate_png(&bytes)?;
-            self.write_new(path, &bytes)
+            self.write_atomic(path, &bytes, overwrite)
         }
     }
 

@@ -929,6 +929,19 @@ choose **Coloring → Element** to display atom-color overrides. Each file cover
 elements 1–109; elements 110–118 retain the built-in defaults. The source values and upstream MIT
 notice are retained with the examples. The built-in palette remains the default.
 
+The optional **Accessible elements** palette, `accessible-elements.json`, is
+available with the source follow-up to 0.10.2 and as a
+[website download](https://uvar-apps.github.io/eigenvista/downloads/accessible-elements.json).
+Load it with **Colours file…** just like Pastel or Muted. It changes fourteen
+common elements; all others retain built-in colors. It emphasizes distinctions
+among common molecular atoms, with documented color-vision simulations and
+remaining ambiguities in the [palette notes](https://github.com/uvar-apps/eigenvista/blob/main/palettes/README.md).
+It is an alternative to the conventional element colors, not a guarantee that
+every element pair is distinguishable. Picking still reports element identity;
+AO and transparent PNGs retain the chosen palette. The original published
+0.10.2 ZIP predates this additional palette, but its loader accepts the downloaded
+file. New packages include it in `Palettes/` and the AI connector's `palettes/`.
+
 **Colours file…** loads a JSON palette:
 
 ```json
@@ -1031,6 +1044,16 @@ back to Molden/PDB/XYZ/cube and does not perform automatic background saving.
 Use a new `.eigenvista` filename; replacing an existing native file is an explicit
 Save-dialog choice, not an automatic result of Open or Convert.
 
+In the source follow-up to 0.10.2, Save refuses while an inspection edit is
+still being applied. Wait for it to finish, then save again. This includes
+pending molecular-surface appearance changes and annotation updates: Save must
+not capture the previous state while those edits are awaiting validation.
+Committed automatic-plane changes count as pending during preparation and their
+brief update delay; typing an uncommitted draft does not block Save.
+The same coordination protects Save and Quit. A failed or cancelled edit
+retains the previous accepted document; review its error before saving.
+The original published 0.10.2 package predates this correction.
+
 Native saving publishes a complete replacement file. On the tested APFS volume,
 an overwrite changes existing Unix permission bits to `0600` (owner read/write)
 rather than preserving them. Atomic replacement does not establish recovery
@@ -1042,6 +1065,13 @@ does not change that behavior. Create the file on APFS and copy the completed
 output to the external drive. Desktop replacement Save uses a different path,
 which succeeded on the tested ExFAT image. See the
 [filesystem research](../plans/005-native-save-contract-research.md) for coverage.
+Source builds after 0.10.2 add an explicit **`--replace`** converter option and
+an equivalent intentional-replacement choice through the AI connector. This
+publishes complete files on the tested Mac ExFAT volume, but can replace a
+destination that exists or appears while the export runs. Imported source files
+remain protected. The default still refuses overwrites; `--force` keeps its
+earlier, preflight-only permission. Use replacement only when you intend it.
+This does not change permissions policy or provide a power-loss guarantee.
 
 Older `.molekel` preview files open without a manual conversion or migration.
 Native Save also permits the old `.molekel` suffix, but every new save contains
