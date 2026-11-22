@@ -4,22 +4,10 @@ For the separate Linux development tarball, see [Linux packaging](linux.md).
 This page describes the Apple Silicon package; its signing and `.app` paths
 do not apply to the Linux prefix.
 
-Release **0.10.3** adds pending-edit Save coordination, optional atomic
-replacement for converter/AI exports to the tested Mac ExFAT volume, and the
-Accessible elements palette. It retains the clearer action buttons, automatic
-quantitative-plane updates, visible atom-picking cues and live molecular-surface
-progress introduced in 0.10.2, together with
-the smooth camera-relative lighting and [allocation-driven workloads](allocation-policy.md)
-introduced in 0.10.1. Updating a source version alone
-does not rebuild an archive; rebuild and follow [status](status.md) and the
-package's `BUILD-INFO.json` for its verified artifact identity. The historical
-0.10.0 package retains its original behavior; older 0.8.0 artifacts predate
-scientific inspection and the current workspace.
-
-Version 0.10.3 includes `accessible-elements.json` in both `Palettes/` and the
-app's connector resources. The original published 0.10.2 assets remain unchanged.
-Inspect `BUILD-INFO.json` and the living handoff for the verified build and
-publication state; release qualification is tracked in #103.
+Release **0.10.4** adds independent matte ambient occlusion for opaque SES and
+SAS. Both platforms are built from the same source tag. Read the
+[release notes](releases/0.10.4.md) and the package's `BUILD-INFO.json` for
+version, source and validation details.
 
 A newly built source package uses the approved **480 px** left/right tools pane
 with **Molecule**, **Fields**, **Surfaces** and **Appearance** tabs. Its widgets

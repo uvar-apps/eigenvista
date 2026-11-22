@@ -1,6 +1,6 @@
 # Application control API
 
-**Version 0.10.3:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.4:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 Save coordination in 0.10.3 (#99): GUI and API Save share pending-inspection admission.
 An inspection write is admitted synchronously before React/worker validation;
@@ -35,7 +35,7 @@ these additions; an older source-built instance may lack them.
 
 **Scientific inspection, introduced in 0.10.0:** the Mac package includes the geometry,
 SES/SAS and quantitative-field methods documented below (#83–#86). Older
-0.8.0 downloads do not have these methods. Use the matching 0.10.3
+0.8.0 downloads do not have these methods. Use the matching 0.10.4
 app/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
 establish availability.
@@ -609,7 +609,7 @@ are rejected. Existing export paths are probed without blocking on a FIFO and
 must still satisfy the selected publication and source-protection policy.
 
 Control writes default to **atomic no-clobber**: choose a new `.eigenvista`,
-`.png` or `.csv` filename. Version 0.10.3 also permits explicit
+`.png` or `.csv` filename. Version 0.10.4 also permits explicit
 native `overwrite:true` for `document.save`, `image.export` and `table.export`.
 It authorizes atomic replacement of existing or late-created destinations.
 Source paths/hard-link aliases and scoped-path validation remain protected.
@@ -682,7 +682,7 @@ An unsaved-document replacement fails with `permission_required` unless
 operations are explicit failures. A transport timeout has an uncertain outcome:
 inspect current state/jobs and output files before repeating a mutation.
 
-Version 0.10.3 has no application byte/count ceilings for frames, files,
+Version 0.10.4 has no application byte/count ceilings for frames, files,
 encoded Save results, PNG/CSV artifacts, palettes, selectors or orbital batches.
 Pagination defaults to 100 records but accepts larger positive safe integers.
 Jobs remain discoverable for the controller lifetime. Grid presets are advisory;

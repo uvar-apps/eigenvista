@@ -1,5 +1,14 @@
 # Implementation status
 
+## 0.10.4 release preparation — 22 November 2026 (#112)
+
+0.10.4 packages the molecular surface ambient occlusion merged in
+[PR #111](https://github.com/uvar-apps/eigenvista/pull/111). Issue
+[#112](https://github.com/uvar-apps/eigenvista/issues/112) tracks the Mac and Linux
+builds and website delivery. Both archives use the same clean source revision.
+See the [release notes](releases/0.10.4.md) for the feature and platform guidance. The
+download metadata and verification record are published after archive checks.
+
 ## Molecular surface ambient occlusion — 22 November 2026 (#110)
 
 Optional matte Lambert plus SSAO for fully opaque SES and SAS was developed on

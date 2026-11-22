@@ -15,7 +15,14 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
-### 0.10.3 source
+### 0.10.4 source
+
+Version 0.10.4 adds separate screen-space AO for opaque SES and SAS using
+the existing GTAO renderer and matte Lambert shading. The automatic radius
+adapts to the molecule. The [release notes](releases/0.10.4.md) and
+[living handoff](handoff.md) record qualification on both build hosts.
+
+### 0.10.3 changes
 
 Source version 0.10.3 adds pending-inspection Save coordination (#99), optional
 atomic replacement for converter/AI exports on the tested Mac ExFAT volume
