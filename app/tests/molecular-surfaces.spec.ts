@@ -7,7 +7,12 @@ import type {
   MolecularSurfaceRequest,
 } from "../src/inspectionTypes";
 import type { EigenVistaDocument } from "../src/types";
-import { pngPixels, settleScene, trackSceneDraws } from "./scenePixels";
+import {
+  pngPixels,
+  scenePixels,
+  settleScene,
+  trackSceneDraws,
+} from "./scenePixels";
 
 type Job = {
   jobId: string;
@@ -1084,6 +1089,219 @@ test("active molecular replacement cancellation retains accepted geometry and al
   ).toBeGreaterThan(0);
   await generate(page, request("retry", "sas"));
   expect((await list(page)).total).toBe(2);
+});
+
+for (const kind of ["ses", "sas"] as const) {
+  test(`opaque 1CRN ${kind.toUpperCase()} uses independent AO and keeps live appearance and export`, async ({
+    page,
+  }, info) => {
+    await page.setViewportSize({ width: 1000, height: 760 });
+    await ready(page);
+    await openFile(page, path.resolve("../fixtures/bcif/1crn.bcif"));
+    const id = "Crambin";
+    await generate(page, { ...request(id, kind), opacity: 1 });
+    await call(page, "scene.set", {
+      shading: kind === "ses" ? "diffuse" : "blinn-phong",
+    });
+    await call(page, "camera.fit");
+    await activateWidget(page, "appearance");
+    const toggle = page.getByRole("checkbox", {
+      name: "Molecular surface ambient occlusion",
+      exact: true,
+    });
+    const atomToggle = page.getByRole("checkbox", {
+      name: "Atom and bond ambient occlusion",
+      exact: true,
+    });
+    await expect(toggle).not.toBeChecked();
+    await expect(toggle).toHaveAccessibleDescription(/100% opacity/);
+    const image = async (transparent = false) =>
+      (await call<{ dataUrl: string }>(page, "image.export", { transparent }))
+        .dataUrl;
+    const buffer = (url: string) => Buffer.from(url.split(",")[1], "base64");
+    const off = await image(true);
+    const offPixels = await pngPixels(page, buffer(off));
+    await toggle.check();
+    await expect(atomToggle).not.toBeChecked();
+    expect(
+      (await call<{ ambientOcclusion: unknown }>(page, "app.state"))
+        .ambientOcclusion,
+    ).toMatchObject({
+      enabled: false,
+      surfaceEnabled: true,
+      automaticRadius: true,
+      radiusAngstrom: 2.25,
+      surfaceRadiusAngstrom: 4,
+    });
+    const radius = page.getByLabel("AO radius (angstrom)", { exact: true });
+    await expect(radius).toHaveValue("4");
+    await expect(radius).toBeDisabled();
+    const automatic = page.getByLabel("Automatic AO radius", { exact: true });
+    await automatic.uncheck();
+    await expect(radius).toHaveValue("4");
+    await expect(radius).toBeEnabled();
+    await call(page, "scene.set", { ambientOcclusion: { radiusAngstrom: 3 } });
+    await expect(radius).toHaveValue("3");
+    expect(
+      (await call<{ ambientOcclusion: unknown }>(page, "app.state"))
+        .ambientOcclusion,
+    ).toMatchObject({ automaticRadius: false, surfaceRadiusAngstrom: 3 });
+    await automatic.check();
+    await expect(radius).toHaveValue("4");
+    const full = await image(true);
+    const visible = await image();
+    const fullPixels = await pngPixels(page, buffer(full));
+    // Sample the compositor independently after the viewport has drawn.
+    await settleScene(page);
+    const displayed = await scenePixels(page);
+    const exported = await pngPixels(page, buffer(visible));
+    expect(displayed.error).toBe(0);
+    expect(Math.abs(displayed.rgbChecksum - exported.rgbChecksum)).toBeLessThan(
+      exported.rgbChecksum * 0.001,
+    );
+    await call(page, "scene.set", { ambientOcclusion: { strength: 0.01 } });
+    const weak = await image(true);
+    for (const [name, url] of [
+      ["normal-transparent", off],
+      ["surface-ao", visible],
+      ["surface-ao-transparent", full],
+      ["lambert-weak-ao", weak],
+    ])
+      await info.attach(`${name}.png`, {
+        body: buffer(url),
+        contentType: "image/png",
+      });
+    // The two captures use the same Lambert material. Look for visible
+    // darkening in regions of the surface, since AO leaves exposed areas bright.
+    const contrast = await page.evaluate(
+      async ([weak, full]) => {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d")!;
+        const read = async (url: string) => {
+          const image = new Image();
+          image.src = url;
+          await image.decode();
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          context.drawImage(image, 0, 0);
+          return context.getImageData(0, 0, canvas.width, canvas.height);
+        };
+        const before = await read(weak);
+        const after = await read(full);
+        if (before.width !== after.width || before.height !== after.height)
+          throw new Error("AO changed the export dimensions");
+        let opaque = 0;
+        let visiblyDarker = 0;
+        for (let i = 0; i < before.data.length; i += 4) {
+          if (before.data[i + 3] !== 255 || after.data[i + 3] !== 255) continue;
+          opaque++;
+          const drop =
+            before.data[i] -
+            after.data[i] +
+            before.data[i + 1] -
+            after.data[i + 1] +
+            before.data[i + 2] -
+            after.data[i + 2];
+          if (drop >= 18) visiblyDarker++;
+        }
+        return { opaque, visiblyDarker };
+      },
+      [weak, full],
+    );
+    expect(contrast.opaque).toBeGreaterThan(5_000);
+    expect(contrast.visiblyDarker / contrast.opaque).toBeGreaterThan(0.01);
+    expect(offPixels.alphaChecksum).toBe(fullPixels.alphaChecksum);
+    await call(page, "scene.set", { ambientOcclusion: { strength: 0 } });
+    expect(await image(true)).toBe(off);
+    await call(page, "scene.set", { ambientOcclusion: { strength: 1 } });
+    // Three's Poisson denoiser seeds fresh noise on pass recreation.
+    const restored = await pngPixels(page, buffer(await image(true)));
+    expect(restored.alphaChecksum).toBe(fullPixels.alphaChecksum);
+    expect(
+      Math.abs(restored.rgbChecksum - fullPixels.rgbChecksum),
+    ).toBeLessThan(fullPixels.rgbChecksum * 0.01);
+
+    await activateWidget(page, "molecular");
+    await page
+      .getByText(new RegExp(`^${id} · ${kind.toUpperCase()} ·`))
+      .click();
+    const color = page.getByLabel(`Color for ${id}`, { exact: true });
+    const opacity = page.getByLabel(`Opacity for ${id}`, { exact: true });
+    await color.fill("#df8c7b");
+    await expect
+      .poll(async () => (await list(page)).items[0].color)
+      .toBe("#df8c7b");
+    const recolored = await image(true);
+    expect(recolored).not.toBe(full);
+    await opacity.fill("0.8");
+    await expect
+      .poll(async () => (await list(page)).items[0].opacity)
+      .toBe(0.8);
+    const translucent = await image(true);
+    expect(translucent).not.toBe(recolored);
+    await call(page, "scene.set", {
+      ambientOcclusion: { surfaceEnabled: false },
+    });
+    expect(await image(true)).toBe(translucent);
+    await call(page, "scene.set", {
+      ambientOcclusion: { surfaceEnabled: true },
+    });
+    await opacity.fill("1");
+    await expect.poll(async () => (await list(page)).items[0].opacity).toBe(1);
+    const originalColor = await pngPixels(page, buffer(recolored));
+    const restoredColor = await pngPixels(page, buffer(await image(true)));
+    expect(restoredColor.alphaChecksum).toBe(originalColor.alphaChecksum);
+    expect(
+      Math.abs(restoredColor.rgbChecksum - originalColor.rgbChecksum),
+    ).toBeLessThan(originalColor.rgbChecksum * 0.01);
+    await expect(
+      page.getByRole("alert").filter({ hasText: /ambient occlusion/i }),
+    ).toHaveCount(0);
+  });
+}
+
+test("surface AO excludes quantum meshes, hidden surfaces and custom shaders with atom AO active", async ({
+  page,
+}) => {
+  await ready(page);
+  await openFile(
+    page,
+    path.resolve("../fixtures/native/water-rhf-0.5.12.eigenvista"),
+  );
+  const image = async () =>
+    (
+      await call<{ dataUrl: string }>(page, "image.export", {
+        transparent: true,
+      })
+    ).dataUrl;
+  const setAO = (surfaceEnabled: boolean) =>
+    call(page, "scene.set", {
+      ambientOcclusion: { enabled: true, surfaceEnabled },
+    });
+  const id = "Water SES";
+  await generate(page, { ...request(id), opacity: 1 });
+  await call(page, "camera.fit");
+  await setAO(false);
+  const atomsAndFields = await image();
+  await setAO(true);
+  expect(await image()).not.toBe(atomsAndFields);
+  await call(page, "molecularSurfaces.set", { id, visible: false });
+  const hidden = await image();
+  await setAO(false);
+  expect(await image()).toBe(hidden);
+  await call(page, "molecularSurfaces.set", { id, visible: true });
+  await call(page, "shader.apply", {
+    preset: "surface-clip",
+    target: "all",
+    uniforms: { factor: 0.24, zmax: 0.25 },
+  });
+  const clipped = await image();
+  expect(clipped).not.toBe(atomsAndFields);
+  await setAO(true);
+  expect(await image()).toBe(clipped);
+  await expect(
+    page.getByRole("alert").filter({ hasText: /ambient occlusion/i }),
+  ).toHaveCount(0);
 });
 
 test("a bounded original-index selection from 1AON generates its isolated molecular surface", async ({

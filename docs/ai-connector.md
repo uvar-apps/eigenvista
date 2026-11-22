@@ -225,6 +225,7 @@ examples are already available to the session.
 | Compare orbitals | “Find the HOMO and LUMO. Show both signs of the HOMO at an isovalue of 0.03, wait for the surface to finish, and show me an image.” |
 | Inspect density | “Show the supplied electron density as a volume first. Then make a surface at 0.04 electrons/bohr³ so we can look inside it.” |
 | Load a palette and add depth | “Load the bundled MatterViz Pastel palette, color the atoms by element, and turn on ambient occlusion using its automatic radius. Keep this camera angle.” |
+| Shade a molecular surface | “Set the solvent-excluded surface to full opacity. Turn on ambient occlusion for molecular surfaces with automatic radius, then show me an image. Keep atom and bond ambient occlusion off.” |
 | Use your own palette | “Load the atom palette from [palette file] and show me the result. Keep the molecular data and this framing.” |
 | Read a protein assembly | “Show the protein as a cartoon and color it by chain. Isolate chain A and focus on it. Keep the complete molecular data.” |
 | Explore a subset | “Show residues [range] of chain [name]. Give that chain a ball-and-stick style while the other visible protein chains stay as cartoons. Focus on the visible structure.” |

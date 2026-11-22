@@ -392,7 +392,7 @@ try {
         shading: "original MeshStandardMaterial",
       },
     });
-    await control("Ambient occlusion").check();
+    await control("Atom and bond ambient occlusion").check();
     await settle();
     const settings = {
       enabled: true,
@@ -407,7 +407,7 @@ try {
       ...detail,
       ambientOcclusion: settings,
     });
-    await control("Ambient occlusion").uncheck();
+    await control("Atom and bond ambient occlusion").uncheck();
     await settle();
     const restored = path.join(staging, `${id}-restored.png`),
       pending = page.waitForEvent("download");

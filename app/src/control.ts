@@ -338,7 +338,7 @@ export const CONTROL_METHODS = {
     mutation({ surfaceId: string }, ["surfaceId"]),
   ),
   "scene.set": definition(
-    "Apply a validated document/session appearance patch.",
+    "Apply document/session appearance settings, including separate AO switches for atoms and opaque SES/SAS.",
     mutation({
       mode: { type: "string", enum: ["mesh"] },
       representation: {
@@ -354,6 +354,7 @@ export const CONTROL_METHODS = {
       volumeQuality: { type: "integer", enum: [1, 2, 4] },
       ambientOcclusion: object({
         enabled: boolean,
+        surfaceEnabled: boolean,
         strength: { type: "number", minimum: 0, maximum: 1 },
         radiusAngstrom: { type: "number", minimum: 0.25, maximum: 50 },
         automaticRadius: boolean,

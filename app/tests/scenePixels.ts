@@ -56,6 +56,7 @@ export async function pngPixels(page: Page, png: Buffer) {
     const context = canvas.getContext("2d")!;
     context.drawImage(image, 0, 0);
     const data = context.getImageData(0, 0, width, height).data;
+    let alphaChecksum = 0;
     let colorful = 0,
       positive = 0,
       negative = 0,
@@ -79,6 +80,7 @@ export async function pngPixels(page: Page, png: Buffer) {
           g = data[source + 1],
           b = data[source + 2],
           a = data[source + 3];
+        alphaChecksum = (alphaChecksum + a * ((i % 97) + 1)) % 2147483647;
         if (Math.max(r, g, b) - Math.min(r, g, b) > 30) colorful++;
         if (g > r + 20 && g > b + 8) positive++;
         if (r > g + 20 && b > g + 8) negative++;
@@ -123,6 +125,7 @@ export async function pngPixels(page: Page, png: Buffer) {
       checksum,
       rgbChecksum,
       rgbaChecksum,
+      alphaChecksum,
       foreground,
       foreground12,
       centerForeground,

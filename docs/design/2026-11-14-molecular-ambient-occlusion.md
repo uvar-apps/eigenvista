@@ -4,6 +4,10 @@ Date: 14 November 2026. Status: implemented; current verification evidence and
 remaining gates are recorded in status and the tracking issue.
 Issue: [#59](https://github.com/uvar-apps/eigenvista/issues/59).
 
+This record describes the original atom and bond AO. The
+[architecture guide](../architecture.md) also describes the later independent
+SES/SAS pass introduced in [#110](https://github.com/uvar-apps/eigenvista/issues/110).
+
 ## Visual target and rejected prototype
 
 The user's primary reference is the old Molekel

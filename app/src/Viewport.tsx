@@ -84,11 +84,15 @@ const IDENTITY_QUATERNION = new THREE.Quaternion();
 
 export interface AmbientOcclusionSettings {
   enabled: boolean;
+  surfaceEnabled?: boolean;
   strength: number;
   radiusAngstrom: number;
+  /** Resolved molecular surface radius. Defaults to the shared radius. */
+  surfaceRadiusAngstrom?: number;
 }
 const DEFAULT_AMBIENT_OCCLUSION: AmbientOcclusionSettings = {
   enabled: false,
+  surfaceEnabled: false,
   strength: 1,
   radiusAngstrom: 3,
 };
@@ -411,6 +415,7 @@ export function Viewport({
     controls: OrbitControls;
     group: THREE.Group;
     ambientOcclusion: MolecularAmbientOcclusion;
+    surfaceOcclusion: MolecularAmbientOcclusion;
     draw: (checkAllocations?: boolean) => void;
     fit: () => void;
     focus: (atoms: readonly number[]) => void;
@@ -455,6 +460,7 @@ export function Viewport({
   onShaderLogRef.current = onShaderLog;
   const [error, setError] = useState("");
   const [occlusionError, setOcclusionError] = useState("");
+  const [surfaceOcclusionError, setSurfaceOcclusionError] = useState("");
   const occlusionSettings = useRef(ambientOcclusion);
   occlusionSettings.current = ambientOcclusion;
   useEffect(() => {
@@ -485,22 +491,44 @@ export function Viewport({
     const group = new THREE.Group();
     scene.add(group);
     const occlusion = new MolecularAmbientOcclusion(renderer, scene, camera);
+    const surfaceOcclusion = new MolecularAmbientOcclusion(
+      renderer,
+      scene,
+      camera,
+      "surfaces",
+    );
+    const occlusionPasses = [
+      {
+        pass: occlusion,
+        option: "enabled",
+        radius: "radiusAngstrom",
+        label: "Atom and bond ambient occlusion",
+        report: setOcclusionError,
+      },
+      {
+        pass: surfaceOcclusion,
+        option: "surfaceEnabled",
+        radius: "surfaceRadiusAngstrom",
+        label: "Molecular surface ambient occlusion",
+        report: setSurfaceOcclusionError,
+      },
+    ] as const;
     // The viewport and synchronous PNG export must draw the same final frame.
     const draw = (checkAllocations = false) => {
       updateAnnotationScale(group, camera, renderer.domElement.clientHeight);
       const settings = occlusionSettings.current;
-      try {
-        occlusion.render({
-          enabled: settings.enabled,
-          strength: settings.strength,
-          radius: settings.radiusAngstrom / BOHR,
-        });
-      } catch (cause) {
-        setOcclusionError(
-          "Unable to apply ambient occlusion: " +
-            String(cause) +
-            ". Disable and re-enable Ambient occlusion to retry.",
-        );
+      for (const { pass, option, radius, label, report } of occlusionPasses) {
+        try {
+          pass.render({
+            enabled: settings[option] === true,
+            strength: settings.strength,
+            radius: (settings[radius] ?? settings.radiusAngstrom) / BOHR,
+          });
+        } catch (cause) {
+          report(
+            `Unable to apply ${label.toLowerCase()}: ${String(cause)}. Disable and re-enable ${label} to retry.`,
+          );
+        }
       }
       renderer.render(scene, camera);
       // Query only at resource boundaries: getError synchronizes with the GPU
@@ -684,6 +712,7 @@ export function Viewport({
       controls,
       group,
       ambientOcclusion: occlusion,
+      surfaceOcclusion,
       draw,
       fit,
       focus,
@@ -813,6 +842,7 @@ export function Viewport({
     const lost = (e: Event) => {
       e.preventDefault();
       occlusion.resetContext();
+      surfaceOcclusion.resetContext();
       setError("Graphics context lost. Reload the document to recover.");
     };
     renderer.domElement.addEventListener("pointerdown", pointerdown);
@@ -837,6 +867,7 @@ export function Viewport({
       controls.removeEventListener("change", invalidate);
       controls.dispose();
       occlusion.dispose();
+      surfaceOcclusion.dispose();
       dispose(group);
       renderer.dispose();
       div.removeChild(renderer.domElement);
@@ -859,6 +890,7 @@ export function Viewport({
     if (contourPending || contourPreparationFailed) return;
     const shader = shaderRef.current;
     const group = new THREE.Group();
+    const opaqueMolecularSurfaces: THREE.Mesh[] = [];
     let stagedAtomIndices: number[] = [];
     let stagedMessages: string[] = [];
     const stagedDisplay = displayRef.current;
@@ -1084,6 +1116,8 @@ export function Viewport({
         if ("vertex_atoms" in s) {
           mesh.userData.molecularSurface = true;
           mesh.userData.vertexAtoms = s.vertex_atoms;
+          if (s.opacity === 1 && !usesCustom)
+            opaqueMolecularSurfaces.push(mesh);
         }
         group.add(mesh);
       }
@@ -1175,13 +1209,15 @@ export function Viewport({
       );
       return;
     }
-    e.ambientOcclusion.setMolecules(
+    e.ambientOcclusion.setMeshes(
       group.children.filter(
         (object): object is THREE.InstancedMesh =>
           object instanceof THREE.InstancedMesh,
       ),
     );
+    e.surfaceOcclusion.setMeshes(opaqueMolecularSurfaces);
     setOcclusionError("");
+    setSurfaceOcclusionError("");
     dispose(e.group);
     e.group.clear();
     e.group.add(group);
@@ -1324,14 +1360,15 @@ export function Viewport({
   useEffect(() => {
     const current = engine.current;
     if (!current) return;
+    const disabled = { enabled: false, strength: 0, radius: 1 };
+    // Release targets immediately, including after a failed enable attempt.
     if (!ambientOcclusion.enabled || ambientOcclusion.strength === 0) {
-      // Release targets immediately, including after a failed enable attempt.
-      current.ambientOcclusion.render({
-        enabled: false,
-        strength: 0,
-        radius: 1,
-      });
+      current.ambientOcclusion.render(disabled);
       setOcclusionError("");
+    }
+    if (!ambientOcclusion.surfaceEnabled || ambientOcclusion.strength === 0) {
+      current.surfaceOcclusion.render(disabled);
+      setSurfaceOcclusionError("");
     }
     current.needsRender = true;
   }, [ambientOcclusion]);
@@ -1746,9 +1783,9 @@ export function Viewport({
           {contourFailure.message}
         </div>
       )}
-      {occlusionError && (
+      {(occlusionError || surfaceOcclusionError) && (
         <div className="viewport-error" role="alert">
-          {occlusionError}
+          {[occlusionError, surfaceOcclusionError].filter(Boolean).join(" ")}
         </div>
       )}
       {proteinNeeded && (

@@ -28,6 +28,7 @@ type State = {
     strength: number;
     automaticRadius: boolean;
     radiusAngstrom: number;
+    surfaceRadiusAngstrom: number;
   };
 };
 type ProbeWindow = Window & {
@@ -537,6 +538,7 @@ test("real protein representations prepare distinct scenes and automatic AO radi
   expect((await call<State>(page, "app.state")).ambientOcclusion).toEqual({
     ...automatic,
     automaticRadius: false,
+    surfaceRadiusAngstrom: automatic.radiusAngstrom,
   });
   await expect(
     page.getByLabel("AO radius (angstrom)", { exact: true }),
