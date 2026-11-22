@@ -31,7 +31,12 @@ pixels. Physical Linux desktop and other distributions remain unqualified.
 Site verification covered 27 pages, 1,092 local references, 78 image uses,
 25 exact example/guide downloads and 162 browser route/viewport cases. Four
 additional comparisons checked desktop and mobile interaction in Chromium and
-WebKit at the original 826 × 682 aspect ratio. Logs, readback bytes, manifests,
+WebKit at the original 826 × 682 aspect ratio.
+On 22 November the homepage added that same SES comparison directly after the
+atom and bond AO figure. The updated site passed the 162 browser cases and
+four focused desktop/mobile checks in Chromium and WebKit. Evidence is in
+`tmp/home-ses-ao/`.
+ Logs, readback bytes, manifests,
 and native results are under `tmp/release-0.10.4/` on the two hosts.
 
 ## Molecular surface ambient occlusion — 22 November 2026 (#110)

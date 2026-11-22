@@ -9,6 +9,12 @@ the molecular-surfaces tutorial compares the full 1AON SES with and without the
 effect at the accepted 24 Å radius. The images are lossless copies of the
 approved preview exports with explicit capture provenance.
 
+The homepage also shows the same 1AON SES comparison immediately below the
+atom and bond AO example. The homepage and tutorial share the comparison
+markup and reuse the same images. The 22 November homepage update passed all
+162 browser cases and four desktop/mobile checks for slider independence,
+image proportions, and section placement.
+
 Static checks and all 162 browser cases passed. The new comparison also passed
 desktop and mobile interaction and aspect-ratio checks in both engines.
 Delivery evidence is tracked in [#112](https://github.com/uvar-apps/eigenvista/issues/112).

@@ -1,5 +1,6 @@
 import { release } from "../release.mjs";
 import { application } from "../application.mjs";
+import { surfaceAoComparison } from "./surface-ao.mjs";
 import { workspaceFigure } from "./workspace.mjs";
 
 export default [
@@ -73,6 +74,10 @@ export default [
     <div class="comparison-control" hidden><label for="home-ao">Reveal ambient occlusion</label><input id="home-ao" type="range" min="0" max="100" value="50"><output for="home-ao">50%</output></div>
     <figcaption>1AON: 58,870 atoms, with the same camera, structure and MatterViz Pastel element palette. Off uses normal shading; On uses Lambert + SSAO. <a href="tutorials-ao.html">Recreate this view →</a></figcaption>
   </figure>
+</section>
+<section class="section-block ao-feature" id="ses-ao">
+  <div class="section-heading"><h2>SES ambient occlusion</h2><p class="lede">Bring out pockets and clefts on the solvent-excluded surface of the same 1AON complex. <a href="tutorials-molecular-surfaces.html#surface-ao">Try it on a molecular surface →</a></p></div>
+  ${surfaceAoComparison("home-ses-ao")}
 </section>
 <section class="section-block split-story">
   <figure class="plate"><div class="plate-label"><span>05 / A CONVERSATION WITH THE VIEWER</span><span>RECORDED SESSION</span></div><a href="ai-tutorial-orbitals.html"><img src="assets/media/ai-session-xray.webp" alt="Smooth signed HOMO surfaces rendered with the X-ray shader during a recorded prompt-driven EigenVista session" loading="lazy"></a><figcaption>An actual external-agent session: the C₇H₁₀ HOMO at ±0.03 bohr<sup>−3/2</sup>, refined from 64³ to 128³ and styled with the X-ray preset.</figcaption></figure>

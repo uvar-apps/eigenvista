@@ -1,5 +1,6 @@
 import { application } from "../application.mjs";
 import { release } from "../release.mjs";
+import { surfaceAoComparison } from "./surface-ao.mjs";
 import { workspaceFigure } from "./workspace.mjs";
 
 const development = `<div class="notice" data-unreleased-inspection><strong>EigenVista ${application.version} · Scientific inspection.</strong> ${application.status === "published" ? `The ${release.version} Mac download includes the four-tab workspace and the scientific-inspection controls described here, through both the GUI and its bundled AI connector. It also includes visible atom picks, automatic field-plane updates and detailed molecular-surface progress.` : `The selection markers, automatic plane updates and detailed molecular-surface progress described here are available in the ${application.version} test build and are not included in the published ${release.version} download.`} If you are using an older app, update it before following these workflows.</div>`;
@@ -141,14 +142,7 @@ ${workspaceFigure("crambin-shape-left", "The left-hand Surfaces pane with molecu
 <p>Save a new <code>c7h10-shape-comparison.eigenvista</code> and export the figure. Reopen it and confirm both cached shapes and their provenance load without regeneration. Camera and custom shader settings remain session choices, so keep the exported figure too.</p>
 <h2 id="surface-ao">6. Reveal pockets with ambient occlusion</h2>
 <p>Set a saved SES or SAS to opacity <strong>1</strong> and use built-in shading. Open <strong>Appearance</strong> and enable <strong>Molecular surface ambient occlusion</strong>. Leave <strong>Automatic AO radius</strong> on to scale the effect with molecule size. Uncheck it to tune the radius, or adjust <strong>AO strength</strong> to soften the shadows.</p>
-<figure class="comparison surface-ao-comparison" data-comparison>
-  <div class="comparison-images">
-    <div class="comparison-before"><img src="assets/surface-ao/1aon-ses-off.webp" width="826" height="682" alt="The 1AON solvent-excluded surface with built-in diffuse shading" loading="lazy"><span class="image-label">AO OFF</span></div>
-    <div class="comparison-after"><img src="assets/surface-ao/1aon-ses-auto.webp" width="826" height="682" alt="The same 1AON surface with darker clefts and cavities under matte ambient occlusion" loading="lazy"><span class="image-label">AO ON</span></div>
-  </div>
-  <div class="comparison-control" hidden><label for="surface-ao-reveal">Reveal molecular surface AO</label><input id="surface-ao-reveal" type="range" min="0" max="100" value="50"><output for="surface-ao-reveal">50%</output></div>
-  <figcaption>Full 1AON SES, 4.18 million triangles, from the same camera. Alvarez radii, 1.4 Å probe, 0.5 Å grid spacing and 24 Å automatic AO radius. <a href="downloads/1AON.cif" download>Download 1AON</a>.</figcaption>
-</figure>
+${surfaceAoComparison("surface-ao-reveal")}
 <h2 id="radius-errors">If a radius or allocation is rejected</h2>
 <p>Some elements lack a value in a selected table. The app names the missing element; choose a suitable table or provide an explicit positive radius with defensible provenance. Do not silently omit it or substitute a display radius. Generation attempts the requested allocation without a preset memory ceiling. If allocation fails, choose an explicitly coarser spacing or smaller source selection and retry; the error does not silently change your settings.</p>
 <h2 id="agent">Ask your agent instead</h2>
