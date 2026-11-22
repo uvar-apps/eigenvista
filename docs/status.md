@@ -1,5 +1,15 @@
 # Implementation status
 
+## Molecular surface ambient occlusion — 22 November 2026 (#110)
+
+Optional matte Lambert plus SSAO for fully opaque SES and SAS was developed on
+`codex/surface-ssao`. Automatic radius scales with the molecule and manual
+radius remains adjustable. The pre-push macOS and CachyOS validations each
+passed 758 browser cases, plus locked Rust, desktop, Clippy, production build
+and packaging checks. See the
+[handoff](handoff.md#molecular-surface-ambient-occlusion--22-november-2026-110)
+for the preview, validation evidence and scope.
+
 ## Linux 0.10.3 release published — 20 November 2026 (#108)
 
 The user authorized PR merge, release notes, commit/push, Linux publication and

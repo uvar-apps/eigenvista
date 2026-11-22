@@ -416,7 +416,9 @@ test("transparent export preserves real molecular ambient occlusion and restores
   await page.getByRole("button", { name: "Fit scene", exact: true }).click();
   await background(page, "#243343");
   const off = await capture(page, false, "1crn-ao-off");
-  await page.getByLabel("Ambient occlusion", { exact: true }).check();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .check();
   const on = await capture(page, false, "1crn-ao-on");
   expect(on.stats.checksum).not.toBe(off.stats.checksum);
   const state = await clearState(page);

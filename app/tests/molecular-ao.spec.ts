@@ -254,7 +254,7 @@ async function ready(page: Page) {
     { timeout: 45000 },
   );
   await expect(
-    page.getByLabel("Ambient occlusion", { exact: true }),
+    page.getByLabel("Atom and bond ambient occlusion", { exact: true }),
   ).not.toBeChecked();
   await openContact(page, "ao-contact.xyz");
 }
@@ -421,7 +421,9 @@ test("the real AO controls are session-only and preserve clean documents and sci
   await page.evaluate(() => {
     (window as unknown as AoWindow).aoWorkerPosts = 0;
   });
-  await page.getByLabel("Ambient occlusion", { exact: true }).check();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .check();
   await expect(page.getByLabel("AO strength", { exact: true })).toHaveValue(
     "1",
   );
@@ -478,7 +480,7 @@ test("the real AO controls are session-only and preserve clean documents and sci
   );
   await openContact(page, "ao-next.xyz");
   await expect(
-    page.getByLabel("Ambient occlusion", { exact: true }),
+    page.getByLabel("Atom and bond ambient occlusion", { exact: true }),
   ).toBeChecked();
   await expect(
     page.getByLabel("AO radius (angstrom)", { exact: true }),
@@ -510,7 +512,7 @@ test("the real AO controls are session-only and preserve clean documents and sci
     { timeout: 45000 },
   );
   await expect(
-    page.getByLabel("Ambient occlusion", { exact: true }),
+    page.getByLabel("Atom and bond ambient occlusion", { exact: true }),
   ).not.toBeChecked();
   await expect(page.getByLabel("AO strength", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("alert")).toHaveCount(0);
@@ -527,7 +529,9 @@ test("AO desktop PNGs match the actual current compositor when idle, repeated an
   try {
     const page = await context.newPage();
     await ready(page);
-    await page.getByLabel("Ambient occlusion", { exact: true }).check();
+    await page
+      .getByLabel("Atom and bond ambient occlusion", { exact: true })
+      .check();
     const first = await capture(page, info.outputPath("ao-idle.png"));
     const repeated = await capture(page, info.outputPath("ao-repeated.png"));
     expect(repeated.bytes).toEqual(first.bytes);
@@ -588,7 +592,9 @@ test("bounded AO PNGs match the actual current compositor after orbit, HiDPI res
           })),
       )
       .toEqual({ width: 480, height: 256 });
-    await page.getByLabel("Ambient occlusion", { exact: true }).check();
+    await page
+      .getByLabel("Atom and bond ambient occlusion", { exact: true })
+      .check();
     await page.getByRole("button", { name: "Zoom in", exact: true }).click();
     await settleAoScene(page);
     const beforeResize = await page
@@ -753,9 +759,11 @@ test("injected FBO and driver-link failures retain the scene and recover on new 
       armed: true,
     }),
   );
-  await page.getByLabel("Ambient occlusion", { exact: true }).check();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .check();
   await expect(page.getByRole("alert")).toContainText(
-    "Unable to apply ambient occlusion:",
+    "Unable to apply atom and bond ambient occlusion:",
   );
   await page.evaluate(() => {
     (window as unknown as AoWindow).aoFault.armed = false;
@@ -765,11 +773,13 @@ test("injected FBO and driver-link failures retain the scene and recover on new 
   page.once("dialog", (dialog) => dialog.accept());
   await openContact(page, "ao-recover.xyz");
   await expect(
-    page.getByLabel("Ambient occlusion", { exact: true }),
+    page.getByLabel("Atom and bond ambient occlusion", { exact: true }),
   ).toBeChecked();
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect((await scenePixels(page)).checksum).not.toBe(initial.checksum);
-  await page.getByLabel("Ambient occlusion", { exact: true }).uncheck();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .uncheck();
   await settleScene(page);
   const beforeLink = await scenePixels(page);
   await page.evaluate(() =>
@@ -778,15 +788,21 @@ test("injected FBO and driver-link failures retain the scene and recover on new 
       armed: true,
     }),
   );
-  await page.getByLabel("Ambient occlusion", { exact: true }).check();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .check();
   await expect(page.getByRole("alert")).toContainText(
-    "Unable to apply ambient occlusion:",
+    "Unable to apply atom and bond ambient occlusion:",
   );
   await settleScene(page);
   expect((await scenePixels(page)).checksum).toBe(beforeLink.checksum);
-  await page.getByLabel("Ambient occlusion", { exact: true }).uncheck();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .uncheck();
   await expect(page.getByRole("alert")).toHaveCount(0);
-  await page.getByLabel("Ambient occlusion", { exact: true }).check();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .check();
   await settleScene(page);
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect((await scenePixels(page)).checksum).not.toBe(beforeLink.checksum);

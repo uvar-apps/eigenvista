@@ -122,7 +122,9 @@ test("default GUI displays protein representations, pastel atoms, AO and backgro
   ).toBeVisible();
   const off = await scenePixels(page);
   await activateWidget(page, "appearance");
-  await page.getByLabel("Ambient occlusion", { exact: true }).check();
+  await page
+    .getByLabel("Atom and bond ambient occlusion", { exact: true })
+    .check();
   await expect(
     page.getByLabel("Automatic AO radius", { exact: true }),
   ).toBeChecked();

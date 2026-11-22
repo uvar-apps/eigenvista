@@ -522,9 +522,10 @@ surface to change its color and opacity immediately, without an Apply button or
 regenerating its mesh. **Rename surface** commits a name separately. Empty or
 out-of-range opacity text leaves the accepted appearance unchanged. The
 generation form's initial color and opacity apply when generating a mesh.
-Surface shading
-and the X-ray/clipping shaders also apply; atom/bond ambient occlusion does not
-add an AO effect to these surfaces.
+For matte shading that emphasizes surface recesses, set the saved SES or SAS
+to opacity **1** and enable **Molecular surface ambient occlusion** in
+**Appearance → Appearance**. This uses the built-in surface shading.
+The X-ray and clipping shaders use their own lighting.
 
 For a clear SES overlay, use **Ball and stick** or **Liquorice**. Van der Waals
 spheres share SES atom-contact boundaries; the two independent triangulations
@@ -908,31 +909,38 @@ molecular ambient occlusion remains matte Lambert shading without highlights.
 
 ### Molecular ambient occlusion
 
-Under **Appearance → Appearance**, enable **Ambient occlusion** for matte shading of atom
-contacts and the broad folds/cavities of dense molecules. Use
-**Representation → Van der Waals** for space-filling spheres. AO starts off.
+Under **Appearance → Appearance**, enable **Atom and bond ambient occlusion**
+for matte shading of atom contacts and the broad folds of dense molecules.
+Use **Representation → Van der Waals** for space-filling spheres. AO starts off.
 While active, atoms and bonds use **Lambert shading plus SSAO**, without specular
 highlights. **AO strength** controls the effect (0–100%); zero restores the normal
 view.
 
-For best results with ambient occlusion, use the **MatterViz Pastel** atom-color
+Use **Molecular surface ambient occlusion** to bring out clefts on a visible
+SES or SAS at 100% opacity with built-in shading. This switch is independent
+of atom and bond AO. The strength control works on both.
+If you lower a surface's opacity, it returns to its selected surface shading.
+Returning to opacity 1 resumes AO while the switch is on.
+
+For best results with ambient occlusion on atoms, use the **MatterViz Pastel** atom-color
 scheme, `matterviz-pastel.json`. Load it through **Appearance → Atom colours → Colours file…**
 from `palettes/` in the source checkout or `Palettes/` in the tester ZIP. For
 biological structures, choose **Coloring → Element** to use the palette.
 
-**Automatic AO radius** starts checked. It chooses a neighborhood from the atom
-coordinates (1.5–30 Å), so a large protein gets broader shading than a small
-molecule. Camera zoom, field grids and representation changes do not change
-that radius. The **AO radius (angstrom)** readout shows the current choice.
-To adjust it, uncheck **Automatic AO radius**; the slider starts from the current
-automatic value and allows 0.25–50 Å in quarter-angstrom steps. A larger radius
-can emphasize broader recesses; a smaller one focuses on nearby contacts.
+**Automatic AO radius** starts checked. It chooses a radius from the size of
+the molecule. SES and SAS use a wider neighborhood than atom contacts so
+larger pockets get more depth. Camera zoom, field grids and representation
+changes do not change those radii. The **AO radius (angstrom)** readout shows
+the current values. To adjust the radius, uncheck **Automatic AO radius** and
+move the slider (0.25–50 Å). Manual mode uses one radius for both switches.
+A larger radius emphasizes broad recesses. A smaller one focuses on nearby
+contacts.
 
 These settings last for the session across Open and are independent of saved
 molecular data. Reload starts with AO off. PNG export includes the current
-shading. Element colors and picking remain available. Quantum fields and saved
-surfaces keep their own materials; transparent ones can show the shaded
-molecule through them.
+shading. Element colors and picking remain available. Quantum fields,
+translucent surfaces and custom shaders keep their own materials. Transparent
+objects can show the shaded geometry behind them.
 
 This is an approximate screen-space visual cue: hidden/offscreen geometry and
 camera changes affect it, and it does not indicate electron density or another

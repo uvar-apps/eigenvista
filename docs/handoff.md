@@ -1,11 +1,82 @@
 # Development handoff
 
+## Molecular surface ambient occlusion — 22 November 2026 (#110)
+
+The 0.10.3 development preview adds optional surface AO for visible, fully
+opaque SES and SAS. The feature was developed on `codex/surface-ssao` from
+`558e8f7`.
+Issue [#110](https://github.com/uvar-apps/eigenvista/issues/110) tracks the
+work. The local Vite preview is at [127.0.0.1:5178](http://127.0.0.1:5178/).
+Release status below is historical.
+
+**Molecular surface ambient occlusion** is in **Appearance → Appearance**.
+Set the saved SES/SAS opacity to 1 in **Surfaces**. Its independent GTAO pass
+replaces the built-in surface material with matte Lambert while active.
+Quantum meshes, sampled fields, user shaders and translucent surfaces retain
+their existing shading. Both AO switches are off on startup. Strength is shared.
+Manual radius is adjustable and shared. Automatic radius adapts to the atom
+bounds and uses a wider neighborhood for the surface. This selects **4 Å on
+1CRN** and **24 Å on 1AON**, matching the user's preferred large-mesh comparison.
+The GUI and connector use the same controls. Mesh generation and file encoding
+stay independent of display AO.
+
+The production WASM/TypeScript/Vite build passes. Chromium 153 with ANGLE Metal
+on the Apple M4 and local Playwright WebKit both generated and orbited 1AON SES
+using Alvarez radii, a 1.4 Å probe and 0.5 Å spacing. The complete run had
+58,870 atoms, 2,091,126 vertices and 4,182,788 triangles. Both exported usable
+PNG images with AO off/on and after orbit. Chromium Metal headless reported
+median animation-frame intervals of 16.7 ms off and 33.3 ms on during one
+automated drag per state at a 760 × 682 drawing size. The corresponding 1CRN
+medians were 16.7 ms with either setting. These are local browser samples.
+The WebKit drag completed between animation callbacks and gives no useful
+frame-interval data. Native packaged-app validation remains pending.
+
+Reviewed captures and browser timings are under `tmp/surface-ssao/`, including
+the original radius comparison and the final `*-calibrated-*.png` and
+`*-calibrated-*.json` records. User controls and the implementation are
+described in the [user guide](user-guide.md#molecular-ambient-occlusion),
+[architecture](architecture.md), and [AI connector guide](ai-connector.md).
+
+The selected 114-case Chromium/WebKit regression run passed 112 cases. Two
+new SES cases exposed a whole-image brightness assertion that missed localized
+darkening. The revised assertion compares visible contrast on opaque pixels
+between the same Lambert material at weak and full strength. After the final
+build finished, all 12 focused executions passed (three scenarios, two engines,
+two repetitions). Logs are `regression-final.log` and `contrast-verified.log`
+under `tmp/surface-ssao/`. The full repository suite is a pre-push gate.
+
+User testing confirmed that surface AO worked well. The Appearance widget now
+labels the existing control **Atom and bond ambient occlusion** alongside
+**Molecular surface ambient occlusion**. The user guide and capture script
+match the new label. TypeScript and all 10 targeted Chromium/WebKit checks
+passed on the renamed UI. Desktop and mobile captures were reviewed. The checks
+are recorded in `tmp/surface-ssao/label-checks.log`.
+
+The user approved the feature and requested a PR merge on 22 November 2026.
+The pre-push validation passed on both required platforms. macOS Apple Silicon
+passed 387 locked Rust and desktop tests, formatting, strict workspace/all-target
+Clippy, the production build, 758 Chromium/WebKit cases (379 per engine), and
+32 packaging checks. CachyOS x86_64 on system76 passed the equivalent build and
+lint checks, 385 Rust and desktop tests, 379 host Chromium EGL cases on Intel
+UHD 630, 379 Playwright 1.63.0 Noble WebKit cases, and 26 applicable packaging
+checks. Final browser runs reported zero failures, skips, or retries. The
+22.6-minute Linux WebKit run used a separate writable staging copy after the
+first copy blocked a screenshot write. Native tests here are build, unit, and
+Mac connector-packaging checks. Physical packaged-app acceptance is separate.
+
+All 737 tracked input paths matched the SHA-256 manifest in the macOS build
+copy, Linux host copy, and Linux WebKit copy before this documentation update.
+The isolated macOS build produced byte-identical WebAssembly for the running
+preview, whose server stayed active. Logs are in
+`tmp/surface-ssao/merge-validation/` on macOS and
+`tmp/surface-ssao-merge-20261122/` on system76. The PR is linked from issue #110.
+
 ## Linux 0.10.3 release published — 20 November 2026 (#108)
 
 The user authorized PR merge, release notes, commit/push, Linux publication and
 the matching website update. [PR #109](https://github.com/uvar-apps/eigenvista/pull/109)
 merged the tested implementation as ea65d62e829c0427c592032bdb716356bd8e2f56.
-Work is now on main. Release preparation and portable-guide corrections are
+The release work was completed on main. Release preparation and portable-guide corrections are
 committed; the clean Linux package source is
 [53ebf37a399872d7b7b4e30397e6eb9a0a9a530b](https://github.com/uvar-apps/eigenvista/tree/53ebf37a399872d7b7b4e30397e6eb9a0a9a530b).
 

@@ -26,7 +26,7 @@ export function automaticMolecularAoRadiusAngstrom(
   );
 }
 
-const MOLECULE_LAYER = 1;
+const AO_LAYERS = { atoms: 1, surfaces: 2 } as const;
 const AO_CHUNK = "#include <aomap_fragment>";
 const AO_PROGRAM_KEY = "eigenvista-molecular-ao-v5";
 
@@ -53,16 +53,16 @@ interface MaterialBinding {
 }
 
 /**
- * Molecule-only AO producer. The caller still renders the complete scene directly
- * after render(); scientific field and surface materials never receive this map.
+ * Computes AO for one group of meshes. The caller renders the complete scene
+ * directly after render(), with this AO map bound only to the group's materials.
  */
 export class MolecularAmbientOcclusion {
-  private meshes: readonly THREE.InstancedMesh[] = [];
+  private meshes: readonly THREE.Mesh[] = [];
   private pass: GTAOPass | null = null;
-  private masks = new Map<THREE.InstancedMesh, number>();
+  private masks = new Map<THREE.Mesh, number>();
   private bindings: MaterialBinding[] = [];
   private materialAssignments = new Map<
-    THREE.InstancedMesh,
+    THREE.Mesh,
     {
       original: THREE.Material | THREE.Material[];
       active: THREE.Material | THREE.Material[];
@@ -83,9 +83,10 @@ export class MolecularAmbientOcclusion {
     private readonly renderer: THREE.WebGLRenderer,
     private readonly scene: THREE.Scene,
     private readonly camera: THREE.PerspectiveCamera,
+    private readonly scope: keyof typeof AO_LAYERS = "atoms",
   ) {}
 
-  setMolecules(meshes: readonly THREE.InstancedMesh[]): void {
+  setMeshes(meshes: readonly THREE.Mesh[]): void {
     if (
       this.disposed ||
       (meshes.length === this.meshes.length &&
@@ -155,6 +156,8 @@ export class MolecularAmbientOcclusion {
           if (!this.pass) {
             this.pass = new GTAOPass(this.scene, this.camera, width, height);
             this.pass.output = GTAOPass.OUTPUT.Off;
+            if (this.scope === "surfaces")
+              this.pass.normalMaterial.side = THREE.DoubleSide;
             this.pass.updateGtaoMaterial({
               samples: 32,
               distanceExponent: 2,
@@ -163,8 +166,8 @@ export class MolecularAmbientOcclusion {
             });
             this.pass.updatePdMaterial({
               samples: 8,
-              radius: 4,
-              lumaPhi: 0.25,
+              radius: this.scope === "surfaces" ? 6 : 4,
+              lumaPhi: this.scope === "surfaces" ? 0.5 : 0.25,
             });
             needsValidation = true;
           } else if (this.pass.width !== width || this.pass.height !== height) {
@@ -181,13 +184,14 @@ export class MolecularAmbientOcclusion {
             thickness: options.radius,
           });
 
+          const layer = AO_LAYERS[this.scope];
           if (this.masks.size === 0) {
             for (const mesh of this.meshes) {
               this.masks.set(mesh, mesh.layers.mask);
-              mesh.layers.enable(MOLECULE_LAYER);
+              mesh.layers.enable(layer);
             }
           }
-          this.camera.layers.set(MOLECULE_LAYER);
+          this.camera.layers.set(layer);
           // Off still computes normal/depth, GTAO and denoise. Neither buffer
           // argument is accessed, and gtaoMap exposes the denoised target directly.
           pass.render(
@@ -207,7 +211,7 @@ export class MolecularAmbientOcclusion {
             attachedMaterials = true;
           }
         });
-        // Compile only the registered molecular instances with the main scene's
+        // Compile only the registered meshes with the main scene's
         // lights, after the target/camera layers are restored. Hooks and driver
         // diagnostics record failures without throwing through Three's stacks.
         if (attachedMaterials && this.pendingShaderError === null) {
@@ -264,28 +268,40 @@ export class MolecularAmbientOcclusion {
     const convert = (original: THREE.Material): THREE.MeshLambertMaterial => {
       const existing = converted.get(original);
       if (existing) return existing;
-      if (!(original instanceof THREE.MeshStandardMaterial))
-        throw new Error("Molecular AO requires standard atom/bond inputs.");
-      // Own only the active Lambert material; preserve the exact borrowed
-      // legacy material and the existing instance geometry/color buffers.
+      const standard =
+        original instanceof THREE.MeshStandardMaterial ? original : null;
+      // The built-in Blinn–Phong surface uses a color uniform. User shaders
+      // are excluded when the viewport registers the surface meshes.
+      const color: unknown =
+        standard?.color ??
+        (this.scope === "surfaces" && original instanceof THREE.ShaderMaterial
+          ? original.uniforms.color?.value
+          : null);
+      if (!(color instanceof THREE.Color))
+        throw new Error("Ambient occlusion requires a built-in material.");
+      // Borrow the original material and leave geometry untouched.
       const material = new THREE.MeshLambertMaterial({
-        color: original.color,
-        emissive: original.emissive,
-        emissiveIntensity: original.emissiveIntensity,
+        color,
+        ...(standard && {
+          emissive: standard.emissive,
+          emissiveIntensity: standard.emissiveIntensity,
+          flatShading: standard.flatShading,
+        }),
         opacity: original.opacity,
         transparent: original.transparent,
         side: original.side,
         depthTest: original.depthTest,
         depthWrite: original.depthWrite,
         vertexColors: original.vertexColors,
-        flatShading: original.flatShading,
-        fog: original.fog,
+        fog: standard?.fog ?? false,
         toneMapped: original.toneMapped,
       });
       this.bindings.push({ material });
       converted.set(original, material);
       const uniforms = this.uniforms;
       const controller = this;
+      // SES/SAS needs a gentler response on shallow changes in curvature.
+      const visibilityExponent = this.scope === "surfaces" ? "3.0" : "6.0";
       const hook: THREE.Material["onBeforeCompile"] = function (
         this: THREE.Material,
         shader,
@@ -311,7 +327,7 @@ export class MolecularAmbientOcclusion {
               AO_CHUNK,
               `${AO_CHUNK}\n// Illustrative matte contact shading: keep the visibility local to molecular
 // diffuse light, with enough contrast to survive the scene directional light.
-float eigenvistaVisibility = pow(clamp(texture2D(eigenvistaMolecularAo, gl_FragCoord.xy / eigenvistaMolecularAoViewport).r, 0.0, 1.0), 6.0);
+float eigenvistaVisibility = pow(clamp(texture2D(eigenvistaMolecularAo, gl_FragCoord.xy / eigenvistaMolecularAoViewport).r, 0.0, 1.0), ${visibilityExponent});
 float eigenvistaContact = mix(1.0, eigenvistaVisibility, eigenvistaMolecularAoStrength);
 reflectedLight.directDiffuse *= eigenvistaContact;
 reflectedLight.indirectDiffuse *= eigenvistaContact;
@@ -328,7 +344,7 @@ reflectedLight.indirectDiffuse *= eigenvistaContact;
         }
       };
       material.onBeforeCompile = hook;
-      material.customProgramCacheKey = () => AO_PROGRAM_KEY;
+      material.customProgramCacheKey = () => `${AO_PROGRAM_KEY}-${this.scope}`;
       return material;
     };
     for (const mesh of this.meshes) {

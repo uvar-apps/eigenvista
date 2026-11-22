@@ -708,11 +708,15 @@ unlit. No scientific geometry, palette or stored view fields change.
 
 Molecular ambient occlusion is an optional session display setting. The
 [controller](../app/src/molecularAmbientOcclusion.ts) uses the pinned GTAO addon
-as a molecule-only normal/depth and AO producer on reserved layer 1. It attaches
-screen-map uniforms to owned MeshLambertMaterial replacements on the existing
-instanced atoms/bonds. Active SSAO uses Lambert diffuse shading without specular
-highlights; a visibility exponent of 6 and strength mixing modulate both diffuse
-light terms. This illustrative shading targets broad molecular folds and
+to produce normal/depth and AO maps. Reserved layer 1 contains the existing
+instanced atoms and bonds. Layer 2 contains visible SES/SAS meshes at opacity 1
+with built-in shading. Each enabled layer has its own pass and screen-map
+uniforms on owned MeshLambertMaterial replacements. The separate normal/depth
+maps prevent cross-occlusion between the groups and exclude quantum fields
+and custom shaders. The surface pass uses double-sided normals to match the
+built-in surface materials. Active SSAO uses Lambert diffuse shading without specular
+highlights. Strength mixing and a visibility exponent of 6 for atoms and bonds
+or 3 for surfaces modulate both diffuse light terms. This illustrative shading targets broad molecular folds and
 cavities. The final complete scene remains a direct render, preserving
 field/custom-shader and transparency/depth/color paths. Transparent-field
 pixels can change through the newly shaded molecular backdrop. No chemistry,
@@ -722,14 +726,20 @@ Automatic radius defaults on and uses 5% of the atom-coordinate bounding-box
 diagonal, converted to angstrom, rounded to the nearest quarter angstrom and
 clamped to 1.5–30 Å. App memoizes it by the immutable atoms reference; camera,
 field bounds and display representation do not change it. Turning Auto off
-retains its current value for manual adjustment over 0.25–50 Å. This is a session
-display choice, not a scientific radius stored in the document.
+retains the displayed radius for manual adjustment over 0.25–50 Å. The
+automatic surface radius is five-thirds of the automatic atom radius, rounded
+to the nearest angstrom. Manual mode shares a radius, and both modes share
+strength. The session setting `ambientOcclusion.enabled` controls atoms and
+bonds and `ambientOcclusion.surfaceEnabled` controls SES/SAS. Both are exposed
+through `scene.set` and `app.state`. State reports the resolved surface radius
+as `ambientOcclusion.surfaceRadiusAngstrom`.
 
 Target dimensions follow the full physical drawing buffer up to the actual
 device texture/renderbuffer capability. There is no software edge/memory cap.
-GTAO uses sample parameter 32 and distance exponent 2; Poisson denoise uses
-8 samples, radius 4 and luma rejection 0.25. No half-resolution stage or beauty
-composer is used.
+GTAO uses sample parameter 32 and distance exponent 2. Poisson denoise uses
+8 samples with radius 4 and luma rejection 0.25 for atoms and bonds, and radius
+6 and luma rejection 0.5 for surfaces. Both render at full resolution without a
+beauty composer.
 Off/zero allocates no pass; disabling releases owned pass resources. Owned
 Lambert materials are disposed and the exact original material references are
 restored on Off/zero, failure or scene replacement before old-group disposal.

@@ -362,7 +362,7 @@ export async function molecularProbe(
       renderer.render(scene, camera);
       const beforeConstructor = resources();
       const controller = new MolecularAmbientOcclusion(renderer, scene, camera);
-      controller.setMolecules([atoms, bonds]);
+      controller.setMeshes([atoms, bonds]);
       const afterConstructor = resources();
       const extension = gl.getExtension("WEBGL_debug_renderer_info");
       const backend = extension
@@ -495,11 +495,11 @@ export async function molecularProbe(
           draw("cycle-off", false);
           // A newly opened document can compile its very first frame with AO on.
           // Fresh materials exercise that path without a prewarmed legacy program.
-          controller.setMolecules([]);
+          controller.setMeshes([]);
           atoms.material = material.clone();
           bonds.material = bondMaterial.clone();
           freshMaterials.push(atoms.material, bonds.material);
-          controller.setMolecules([atoms, bonds]);
+          controller.setMeshes([atoms, bonds]);
           draw("on-first", true);
           draw("first-off", false);
           draw("first-on-again", true);

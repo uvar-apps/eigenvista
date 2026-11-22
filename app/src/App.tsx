@@ -121,23 +121,44 @@ export default function App() {
   const [mode, setMode] = useState<RenderMode>("mesh");
   const [volumeQuality, setVolumeQuality] = useState<VolumeQuality>(2);
   const [automaticAoRadius, setAutomaticAoRadius] = useState(true);
-  const [ambientOcclusion, setAmbientOcclusion] =
-    useState<AmbientOcclusionSettings>({
-      enabled: false,
-      strength: 1,
-      radiusAngstrom: 3,
-    });
+  const [ambientOcclusion, setAmbientOcclusion] = useState<
+    Omit<AmbientOcclusionSettings, "surfaceRadiusAngstrom">
+  >({
+    enabled: false,
+    surfaceEnabled: false,
+    strength: 1,
+    radiusAngstrom: 3,
+  });
   const automaticAoRadiusAngstrom = useMemo(
     () => automaticMolecularAoRadiusAngstrom(doc?.atoms.positions ?? []),
     [doc?.atoms],
   );
-  const viewportAmbientOcclusion = useMemo(
-    () =>
-      automaticAoRadius
-        ? { ...ambientOcclusion, radiusAngstrom: automaticAoRadiusAngstrom }
-        : ambientOcclusion,
-    [ambientOcclusion, automaticAoRadius, automaticAoRadiusAngstrom],
+  // The envelope benefits from a broader neighborhood than atom contacts.
+  // Keep the automatic radius in molecular units and independent of the view.
+  const automaticSurfaceAoRadiusAngstrom = Math.round(
+    (automaticAoRadiusAngstrom * 5) / 3,
   );
+  const viewportAmbientOcclusion = useMemo(
+    () => ({
+      ...ambientOcclusion,
+      radiusAngstrom: automaticAoRadius
+        ? automaticAoRadiusAngstrom
+        : ambientOcclusion.radiusAngstrom,
+      surfaceRadiusAngstrom: automaticAoRadius
+        ? automaticSurfaceAoRadiusAngstrom
+        : ambientOcclusion.radiusAngstrom,
+    }),
+    [
+      ambientOcclusion,
+      automaticAoRadius,
+      automaticAoRadiusAngstrom,
+      automaticSurfaceAoRadiusAngstrom,
+    ],
+  );
+  const aoRadiusReadout =
+    ambientOcclusion.surfaceEnabled && !ambientOcclusion.enabled
+      ? viewportAmbientOcclusion.surfaceRadiusAngstrom
+      : viewportAmbientOcclusion.radiusAngstrom;
   const [surfaceShading, setSurfaceShading] =
     useState<SurfaceShading>("diffuse");
   const [shaderEditor, setShaderEditor] = useState<ShaderEditorState>({
@@ -1172,15 +1193,21 @@ export default function App() {
         setVolumeQuality(params.volumeQuality as VolumeQuality);
       if (params.ambientOcclusion !== undefined) {
         const { automaticRadius, ...patch } =
-          params.ambientOcclusion as Partial<AmbientOcclusionSettings> & {
+          params.ambientOcclusion as Partial<typeof ambientOcclusion> & {
             automaticRadius?: boolean;
           };
         if (
           automaticRadius === false &&
           automaticAoRadius &&
           patch.radiusAngstrom === undefined
-        )
-          patch.radiusAngstrom = automaticAoRadiusAngstrom;
+        ) {
+          const surfaceOnly =
+            (patch.surfaceEnabled ?? ambientOcclusion.surfaceEnabled) &&
+            !(patch.enabled ?? ambientOcclusion.enabled);
+          patch.radiusAngstrom = surfaceOnly
+            ? automaticSurfaceAoRadiusAngstrom
+            : automaticAoRadiusAngstrom;
+        }
         setAmbientOcclusion((current) => ({ ...current, ...patch }));
         if (automaticRadius !== undefined)
           setAutomaticAoRadius(automaticRadius);
@@ -2055,9 +2082,8 @@ export default function App() {
                 </select>
               </label>
               <label className="ambient-occlusion-toggle">
-                Ambient occlusion
+                Atom and bond ambient occlusion
                 <input
-                  aria-label="Ambient occlusion"
                   type="checkbox"
                   checked={ambientOcclusion.enabled}
                   onChange={(event) =>
@@ -2068,11 +2094,29 @@ export default function App() {
                   }
                 />
               </label>
+              <label className="ambient-occlusion-toggle">
+                Molecular surface ambient occlusion
+                <input
+                  type="checkbox"
+                  checked={ambientOcclusion.surfaceEnabled}
+                  onChange={(event) =>
+                    setAmbientOcclusion((current) => ({
+                      ...current,
+                      surfaceEnabled: event.target.checked,
+                    }))
+                  }
+                  aria-describedby="surface-ao-requirements"
+                />
+              </label>
               {ambientOcclusion.enabled && (
+                <p className="empty">Matte Lambert shading with SSAO.</p>
+              )}
+              <p id="surface-ao-requirements" className="empty">
+                SES and SAS use matte AO at 100% opacity with built-in shading.
+              </p>
+              {(ambientOcclusion.enabled ||
+                ambientOcclusion.surfaceEnabled) && (
                 <>
-                  <p className="empty">
-                    Lambert shading + SSAO for atoms and bonds.
-                  </p>
                   <label className="range-label">
                     AO strength
                     <output>
@@ -2103,7 +2147,7 @@ export default function App() {
                         if (!event.target.checked)
                           setAmbientOcclusion((current) => ({
                             ...current,
-                            radiusAngstrom: automaticAoRadiusAngstrom,
+                            radiusAngstrom: aoRadiusReadout,
                           }));
                         setAutomaticAoRadius(event.target.checked);
                       }}
@@ -2112,7 +2156,11 @@ export default function App() {
                   <label className="range-label">
                     AO radius (angstrom)
                     <output>
-                      {viewportAmbientOcclusion.radiusAngstrom.toFixed(2)} Å
+                      {automaticAoRadius &&
+                      ambientOcclusion.enabled &&
+                      ambientOcclusion.surfaceEnabled
+                        ? `${aoRadiusReadout.toFixed(2)} Å atoms · ${viewportAmbientOcclusion.surfaceRadiusAngstrom.toFixed(2)} Å surfaces`
+                        : `${aoRadiusReadout.toFixed(2)} Å`}
                     </output>
                     <input
                       aria-label="AO radius (angstrom)"
@@ -2121,7 +2169,7 @@ export default function App() {
                       max="50"
                       step="0.25"
                       disabled={automaticAoRadius}
-                      value={viewportAmbientOcclusion.radiusAngstrom}
+                      value={aoRadiusReadout}
                       onChange={(event) =>
                         setAmbientOcclusion((current) => ({
                           ...current,
