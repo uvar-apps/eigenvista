@@ -1,13 +1,17 @@
 # Implementation status
 
-## 0.10.4 release preparation — 22 November 2026 (#112)
+## EigenVista 0.10.4 published — 22 November 2026 (#112)
 
-0.10.4 packages the molecular surface ambient occlusion merged in
-[PR #111](https://github.com/uvar-apps/eigenvista/pull/111). Issue
-[#112](https://github.com/uvar-apps/eigenvista/issues/112) tracks the Mac and Linux
-builds and website delivery. Both archives use the same clean source revision.
-See the [release notes](releases/0.10.4.md) for the feature and platform guidance. The
-download metadata and verification record are published after archive checks.
+[Version 0.10.4](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4) includes optional matte ambient occlusion for opaque
+SES and SAS, with a separate control for atoms and bonds. The Apple Silicon
+Mac ZIP and CachyOS x86_64 tarball were built from the same tag at
+`9a5e8eb5fa5d8b052518dd23690209642855c792`. Release notes and the six package, checksum and build-info
+downloads were published and verified by anonymous readback. The website
+uses the actual archives and includes the approved 1AON comparison.
+
+See the [0.10.4 notes](releases/0.10.4.md) for the downloads and
+[#112](https://github.com/uvar-apps/eigenvista/issues/112) for delivery verification. The Zenodo concept DOI is
+10.5281/zenodo.24246123. The 0.10.3 DOI still identifies that archive.
 
 ## Molecular surface ambient occlusion — 22 November 2026 (#110)
 

@@ -12,8 +12,8 @@ see. Keep using Codex Desktop or CLI, Claude Code, Pi, OpenCode, or another
 agent with local terminal/file access. An image viewer lets the agent inspect
 and show actual exported pictures.
 
-**EigenVista 0.10.3 includes the AI connector.** For package availability and the
-Apple Silicon Mac download, use the [0.10.3 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.3).
+**EigenVista 0.10.4 includes the AI connector.** For package availability and the
+Apple Silicon Mac download, use the [0.10.4 release page](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4).
 The app ships its prebuilt connection helper, launcher, instructions, examples
 and palettes. Check the included files below as well as the version; older
 packages such as 0.7.2 do not include them. If tools are missing, the agent should
@@ -33,23 +33,23 @@ desired grid resolution or SES spacing in ordinary language. The application
 keeps that request rather than reducing detail to fit an estimated memory budget;
 actual runtime/device constraints and recoverable allocation errors still apply.
 
-EigenVista 0.10.3 groups tools into **Molecule**, **Fields**, **Surfaces**
+EigenVista 0.10.4 groups tools into **Molecule**, **Fields**, **Surfaces**
 and **Appearance**. You do not have to operate them first. Ask for the outcome;
 the agent shares their document and calculations. Pane position and Zen are
 local presentation choices, not connector actions.
 
 For the optional accessibility palette, download
 [accessible-elements.json](https://uvar-apps.github.io/eigenvista/downloads/accessible-elements.json)
-into an authorized input folder, or use the copy included with 0.10.3 in the
+into an authorized input folder, or use the copy included with 0.10.4 in the
 ZIP's `Palettes/` directory or the app's connector `palettes/` directory.
 Then ask: “Load Accessible elements, use element coloring, turn on ambient
 occlusion, and save a transparent PNG of this molecule.” The agent can load the
-palette directly; no separate GUI step is required. The 0.10.3 package includes
+palette directly; no separate GUI step is required. The 0.10.4 package includes
 the palette; the original 0.10.2 ZIP predates it. Its fourteen-element coverage
 and remaining color ambiguities are documented in the
 [palette guide](https://github.com/uvar-apps/eigenvista/blob/main/palettes/README.md).
 
-Version 0.10.3 also offers an explicit replacement mode for exports
+Version 0.10.4 also offers an explicit replacement mode for exports
 to ExFAT drives. Ask for a new filename by default. If you want to replace a
 particular output, tell the agent explicitly; replacement may also replace a
 file created at that destination while export is running. Imported source files
@@ -175,7 +175,7 @@ compatible app, I authorize downloading and installing the appropriate Mac
 binary package from https://github.com/uvar-apps/eigenvista/releases into an
 applications location I can write. Preserve existing app copies. Check that
 the package includes its connection helper, standalone instructions and
-"Start AI connection.command" launcher. Use the matching 0.10.3 Mac package; older packages
+"Start AI connection.command" launcher. Use the matching 0.10.4 Mac package; older packages
 such as 0.7.2 do not include them. If no compatible package is available, explain that clearly,
 show me the official release page and stop the setup.
 
@@ -225,6 +225,7 @@ examples are already available to the session.
 | Compare orbitals | “Find the HOMO and LUMO. Show both signs of the HOMO at an isovalue of 0.03, wait for the surface to finish, and show me an image.” |
 | Inspect density | “Show the supplied electron density as a volume first. Then make a surface at 0.04 electrons/bohr³ so we can look inside it.” |
 | Load a palette and add depth | “Load the bundled MatterViz Pastel palette, color the atoms by element, and turn on ambient occlusion using its automatic radius. Keep this camera angle.” |
+| Shade a molecular surface | “Set the solvent-excluded surface to full opacity. Turn on ambient occlusion for molecular surfaces with automatic radius, then show me an image. Keep atom and bond ambient occlusion off.” |
 | Use your own palette | “Load the atom palette from [palette file] and show me the result. Keep the molecular data and this framing.” |
 | Read a protein assembly | “Show the protein as a cartoon and color it by chain. Isolate chain A and focus on it. Keep the complete molecular data.” |
 | Explore a subset | “Show residues [range] of chain [name]. Give that chain a ball-and-stick style while the other visible protein chains stay as cartoons. Focus on the visible structure.” |
@@ -245,7 +246,7 @@ no manual palette loading is needed.
 
 ## Say what matters in the view
 
-In EigenVista 0.10.3, ask “Select these atoms and show me which ones are
+In EigenVista 0.10.4, ask “Select these atoms and show me which ones are
 selected.” Gold reticles identify selected atoms; a cyan ring identifies the
 latest atom or bond inspected without adding it to the selection. Ask to clear
 the selection to remove both cues. Display-hidden atoms remain hidden, and the
@@ -271,7 +272,7 @@ density is nonnegative; an orbital amplitude is signed. Ask for a fixed range
 when comparing planes, or for a probe/profile when numbers matter. GUI users find
 these under **Fields → Quantitative field inspection**.
 
-In EigenVista 0.10.3, you can also say “Move this plane half an angstrom
+In EigenVista 0.10.4, you can also say “Move this plane half an angstrom
 along Z, keeping its contours, colors and resolution” or “Use only the last
 position I asked for.” The agent updates the existing plane and waits for the
 completed result. GUI users can leave **Auto-update plane** enabled, use a
@@ -280,7 +281,7 @@ an older app, the agent checks which update options it supports.
 
 ## Protect your work and wait for results
 
-In EigenVista 0.10.3, you can ask “How is the molecular surface coming
+In EigenVista 0.10.4, you can ask “How is the molecular surface coming
 along?” The agent can report the current phase, elapsed time and how much of the
 meshing phase has finished. A meshing percentage describes that phase rather
 than the whole calculation. Other phases report activity without an invented

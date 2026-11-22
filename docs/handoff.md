@@ -1,13 +1,38 @@
 # Development handoff
 
-## 0.10.4 release preparation — 22 November 2026 (#112)
+## EigenVista 0.10.4 published — 22 November 2026 (#112)
 
-0.10.4 packages the molecular surface ambient occlusion merged in
-[PR #111](https://github.com/uvar-apps/eigenvista/pull/111). Issue
-[#112](https://github.com/uvar-apps/eigenvista/issues/112) tracks the Mac and Linux
-builds and website delivery. Both archives use the same clean source revision.
-See the [release notes](releases/0.10.4.md) for the feature and platform guidance. The
-download metadata and verification record are published after archive checks.
+[Version 0.10.4](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4) includes optional matte ambient occlusion for opaque
+SES and SAS, with a separate control for atoms and bonds. The Apple Silicon
+Mac ZIP and CachyOS x86_64 tarball were built from the same tag at
+`9a5e8eb5fa5d8b052518dd23690209642855c792`. Release notes and the six package, checksum and build-info
+downloads were published and verified by anonymous readback. The website
+uses the actual archives and includes the approved 1AON comparison.
+
+See the [0.10.4 notes](releases/0.10.4.md) for the downloads and
+[#112](https://github.com/uvar-apps/eigenvista/issues/112) for delivery verification. The Zenodo concept DOI is
+10.5281/zenodo.24246123. The 0.10.3 DOI still identifies that archive.
+
+The archives were audited against all 738 files in the packaged source
+manifests. Mac ZIP is **82,357,123 bytes**, SHA-256
+`c57ae71a63ea910adc13d348de8b0342f0e5880032ce3b5d5a067015efd4d3b8`. Linux tarball is **82,841,238 bytes**, SHA-256
+`45022cae9103bacc6403a6ac8c17a9730c688788d1c7ffeac2a37268c5ca77bd`.
+
+Both clean release builds passed locked Rust and desktop tests, strict Clippy,
+production builds, package checks, and packaged converter/WASM agreement. The
+758 Chromium/WebKit cases per platform are the verified pre-merge results for
+the same runtime and test sources. The extracted 0.10.4 Mac and Linux apps each
+passed 38 bundled-connector calls and 10 PNG checks, including the complete
+4,182,788-triangle 1AON SES at 24 Å. Quantum-field and translucent-surface
+controls differed by at most one eight-bit channel level on the Linux
+software-rendering test display. Turning off 1AON AO restored identical
+pixels. Physical Linux desktop and other distributions remain unqualified.
+
+Site verification covered 27 pages, 1,092 local references, 78 image uses,
+25 exact example/guide downloads and 162 browser route/viewport cases. Four
+additional comparisons checked desktop and mobile interaction in Chromium and
+WebKit at the original 826 × 682 aspect ratio. Logs, readback bytes, manifests,
+and native results are under `tmp/release-0.10.4/` on the two hosts.
 
 ## Molecular surface ambient occlusion — 22 November 2026 (#110)
 

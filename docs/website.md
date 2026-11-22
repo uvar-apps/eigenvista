@@ -1,5 +1,18 @@
 # User-facing website
 
+## EigenVista 0.10.4 — 22 November 2026
+
+The site offers both verified [0.10.4 previews](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4). Binary checksums and
+build information are linked from Install. Both archives use the same source
+tag. The manual distinguishes atom and bond AO from molecular surface AO, and
+the molecular-surfaces tutorial compares the full 1AON SES with and without the
+effect at the accepted 24 Å radius. The images are lossless copies of the
+approved preview exports with explicit capture provenance.
+
+Static checks and all 162 browser cases passed. The new comparison also passed
+desktop and mobile interaction and aspect-ratio checks in both engines.
+Delivery evidence is tracked in [#112](https://github.com/uvar-apps/eigenvista/issues/112).
+
 ## Linux 0.10.3 download addendum — 20 November 2026 (#108)
 
 The user authorized publication of the Linux package alongside the existing

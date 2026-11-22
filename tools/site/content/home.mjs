@@ -64,7 +64,7 @@ export default [
   <div><p class="eyebrow">03 / Molecular orbitals</p><h2>Follow the lobes.<br>Compare the orbitals.</h2><p>Choose among the 118 orbitals in this bicyclic hydrocarbon example. Compare the HOMO and LUMO, inspect their nodal structure, and switch between a saved mesh and a volume preview.</p><p>Generate a fine grid when you want a detailed surface. Calculations run in the background, with progress and cancellation available while you explore the scene.</p><a class="button" href="tutorials-orbitals.html">Explore the orbital workflow →</a></div>
 </section>
 <section class="section-block ao-feature">
-  <div class="section-heading"><p class="eyebrow">04 / Large molecular structures</p><h2>Find the folds.</h2><p class="lede">Ambient occlusion brings contacts, recesses and broad cavities into view. Use the Pastel palette for best results.</p></div>
+  <div class="section-heading"><p class="eyebrow">04 / Large molecular structures</p><h2>Find the folds.</h2><p class="lede">Ambient occlusion brings contacts, recesses and broad cavities into view. Try the Pastel palette for atoms and bonds, or <a href="tutorials-molecular-surfaces.html#surface-ao">shade an opaque SES or SAS</a> with its own controls.</p></div>
   <figure class="comparison" data-comparison>
     <div class="comparison-images">
       <div class="comparison-before"><img src="assets/media/1aon-ao-off.webp" width="1200" height="900" alt="1AON with ambient occlusion off, using normal molecular shading" loading="lazy"><span class="image-label">AO OFF</span></div>

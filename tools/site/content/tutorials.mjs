@@ -239,8 +239,8 @@ export default [
 
       <h2 id="compare-ao">2. Compare normal lighting and ambient occlusion</h2>
       <ol>
-        <li><p>In the <strong>Appearance</strong> tab, expand the <strong>Appearance</strong> widget and leave <strong>Ambient occlusion</strong> off initially. Observe the contacts and central recesses. Optionally export this view before continuing.</p></li>
-        <li><p>Enable <strong>Ambient occlusion</strong>. Active AO uses <strong>Lambert shading plus SSAO</strong>, without specular highlights. Keep <strong>Automatic AO radius</strong> checked and read <strong>AO radius (angstrom)</strong>.</p></li>
+        <li><p>In the <strong>Appearance</strong> tab, expand the <strong>Appearance</strong> widget and leave <strong>Atom and bond ambient occlusion</strong> off initially. Observe the contacts and central recesses. Optionally export this view before continuing.</p></li>
+        <li><p>Enable <strong>Atom and bond ambient occlusion</strong>. Active AO uses <strong>Lambert shading plus SSAO</strong>, without specular highlights. Keep <strong>Automatic AO radius</strong> checked and read <strong>AO radius (angstrom)</strong>.</p></li>
         <li><p>Adjust <strong>AO strength</strong> while keeping camera, palette, representation, and background unchanged. Compare a moderate strength with zero, then toggle AO off and on. Zero or Off restores normal molecular rendering.</p></li>
         <li><p>For a closer experiment, uncheck <strong>Automatic AO radius</strong>. The manual slider starts from the automatic value: smaller radii emphasize nearby contacts; larger radii can emphasize broader recesses. Recheck automatic radius afterward.</p></li>
       </ol>
@@ -251,7 +251,7 @@ export default [
 
       <h2 id="inspect-chains">3. Switch to chains and protein cartoons</h2>
       <ol>
-        <li><p>Set <strong>Ambient occlusion</strong> off. Switch to <strong>Molecule → Molecular data</strong>, choose <strong>Representation → Protein cartoon</strong>, then <strong>Biological structure → Coloring → Chain</strong>. Use <strong>Fit scene</strong> to frame the complete complex.</p></li>
+        <li><p>Set <strong>Atom and bond ambient occlusion</strong> off. Switch to <strong>Molecule → Molecular data</strong>, choose <strong>Representation → Protein cartoon</strong>, then <strong>Biological structure → Coloring → Chain</strong>. Use <strong>Fit scene</strong> to frame the complete complex.</p></li>
         <li><p>Expand <strong>Chains</strong>. Each row identifies a deposited chain instance. If needed, use <strong>Filter chain or entity</strong> to find the chain you want; the list displays at most 50 matching entries.</p></li>
         <li><p>For chain A, use <strong>Isolate</strong>, then <strong>Focus</strong>. Alternatively, <strong>Focus visible structure</strong> frames all currently visible atoms. A chain style can override a component style, and either can override the global representation.</p></li>
         <li><p>Choose <strong>Coloring → Secondary structure</strong>. Inspect deposited helices, strand arrows, and unassigned loops. Click an atom where atomic detail is visible to inspect its biological context.</p></li>

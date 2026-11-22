@@ -1,6 +1,6 @@
 # EigenVista connector reference for agents
 
-EigenVista 0.10.3 retains the molecular-surface progress introduced in 0.10.2
+EigenVista 0.10.4 retains the molecular-surface progress introduced in 0.10.2
 (#97), shown in both the controls and viewport, including hidden Tools/Zen.
 Poll the existing `job.get` receipt:
 `progress.stage` reports `geometry`, `classify`, `mesh`, `assemble`, `measure`,
@@ -13,7 +13,7 @@ reported elapsed value instead. Wait for terminal job status rather than a
 stage reaching 100%. Cancel only the owned job. No new method or file-format
 feature is needed. These progress displays and elapsed metadata are included in 0.10.2.
 
-EigenVista 0.10.3: active selection has gold reticles; the latest typed
+EigenVista 0.10.4: active selection has gold reticles; the latest typed
 inspection pick has cyan rings for attributed atoms not already selected. These
 use shared `selection.set`/mouse state and `selection.get.lastPick`; normal
 inspection does not overwrite selection. `selection.clear` clears selection and
@@ -32,7 +32,7 @@ package targets macOS. A separate CachyOS x86_64 development package uses the sa
 protocol; consult its Linux guide and qualification record rather than inferring
 support for every Linux distribution. Non-Unix attachment is unsupported.
 
-Use the current **0.10.3** package. The scientific-inspection methods below were
+Use the current **0.10.4** package. The scientific-inspection methods below were
 introduced in **0.10.0**. Older 0.8.0 downloads lack them. Use the application,
 helper and instructions supplied
 together, and inspect the connected app's live schemas. Do not promise features
@@ -509,18 +509,21 @@ positive `isovalue`, `shading`, `backgroundColor`, `volumeQuality` and
 `trace`, `tube`, `ribbon` and `cartoon`. Colors are six-digit `#RRGGBB`, opacity is
 0–1, shading is `diffuse` or `blinn-phong`, and volume quality is 1, 2 or 4.
 
-AO accepts `enabled`, `strength` (0–1), `radiusAngstrom` (0.25–50) and
+AO accepts `enabled` for atoms and bonds, `surfaceEnabled` for molecular surfaces,
+`strength` (0–1), `radiusAngstrom` (0.25–50) and
 `automaticRadius`. An explicit radius selects manual mode. To restore automatic
 radius, send `automaticRadius:true` without an explicit radius; supplying both
 is rejected before any part of the scene patch changes. Leaving automatic mode
 with `automaticRadius:false` and no explicit radius seeds the manual value from
 the current automatic radius. Omitting radius properties keeps the current mode.
 
-Active AO uses Lambert shading plus SSAO without specular highlights, on atomic
-spheres/bonds only. Protein depiction geometry and field surfaces retain their
-own materials. AO off or zero strength restores the normal molecular material.
-Its screen-space appearance can change with the camera even when the automatic
-coordinate-derived radius is unchanged.
+Active AO uses matte Lambert shading. For surface AO, set a visible SES or SAS
+to opacity 1 through its saved surface appearance and use built-in shading.
+Strength and the manual radius are shared. In automatic mode, `app.state`
+reports the effective surface radius as `ambientOcclusion.surfaceRadiusAngstrom`.
+The surface radius uses a broader neighborhood than the radius for atoms and
+bonds. Turning off a switch or setting strength to zero restores the original
+materials. Screen-space shading can vary as the camera moves.
 
 Since 0.10.1, the viewer uses a camera-relative headlight and neutral fill, giving smooth
 illumination and one restrained highlight as the camera moves. Molecular AO
@@ -632,7 +635,7 @@ index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document
 when the user wants a reproducible presentation.
 
-Version 0.10.3 has no application byte/count ceilings for files, wire frames,
+Version 0.10.4 has no application byte/count ceilings for files, wire frames,
 selectors, orbital batches, annotations, meshes or analysis caches. Approved
 roots remain explicit security grants, without a fixed root count. Grid presets
 are advisory: request a safe-integer resolution of at least two and preserve the

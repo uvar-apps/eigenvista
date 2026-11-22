@@ -1,0 +1,39 @@
+{
+  "input": {
+    "file": "fixtures/cif/1AON.cif",
+    "sha256": "6b202f340ffb9a1924d5315ce9e837e02cee1dbd745df675be76f6d4e1b8e66f"
+  },
+  "capture": "Actual Chromium Metal web-preview PNG exports during PR #111 development with matching camera and mesh.",
+  "settings": {
+    "atoms": 58870,
+    "vertices": 2091126,
+    "triangles": 4182788,
+    "surface": "SES",
+    "radii": "Alvarez",
+    "probeAngstrom": 1.4,
+    "spacingAngstrom": 0.5,
+    "opacity": 1,
+    "automaticAoAngstrom": 24
+  },
+  "encoding": "Lossless WebP checked against the original PNG",
+  "images": [
+    {
+      "file": "1aon-ses-off.webp",
+      "bytes": 166444,
+      "width": 826,
+      "height": 682,
+      "sha256": "f1421ef01e265483d05de81861d06b905d06502b89a55fa4fc99a5e5721e008d",
+      "originalPngSha256": "bf230a7932830909ad18413f2662cda862d7a7346f61d8bb11f0b63641dde8a1",
+      "surfaceAo": false
+    },
+    {
+      "file": "1aon-ses-auto.webp",
+      "bytes": 166658,
+      "width": 826,
+      "height": 682,
+      "sha256": "932b3ecccff54c914c43190e4b6900a938e535a86ec173e50d42c09e673718b7",
+      "originalPngSha256": "d26a17e57a7da21f3cde84f613851b0581d8c15cc3fe16205a82c7fe44e7ee0c",
+      "surfaceAo": true
+    }
+  ]
+}

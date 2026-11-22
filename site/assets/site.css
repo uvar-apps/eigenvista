@@ -702,6 +702,9 @@ details[open] summary {
   background: #ecebe4;
   color: #151613;
 }
+.surface-ao-comparison {
+  --comparison-ratio: 826/682;
+}
 .comparison-images {
   position: relative;
 }
@@ -717,7 +720,7 @@ details[open] summary {
   border-top: 2px solid #151613;
 }
 .comparison.is-ready .comparison-images {
-  aspect-ratio: 4/3;
+  aspect-ratio: var(--comparison-ratio, 4/3);
   overflow: hidden;
 }
 .comparison.is-ready .comparison-before,
