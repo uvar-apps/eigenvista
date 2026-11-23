@@ -12,6 +12,18 @@ import {
 } from "./molecularDisplay";
 import type { BackbonePoint, ProteinBackbone } from "./useProteinBackbone";
 
+function proteinDisplayColor(
+  doc: EigenVistaDocument,
+  state: StructureDisplayState,
+  atom: number,
+  palette: AtomPalette | undefined,
+  unknownSecondary: boolean,
+) {
+  return unknownSecondary && state.colorMode !== "residue-class"
+    ? UNKNOWN_STRUCTURE_COLOR
+    : atomDisplayColor(doc, state, atom, palette);
+}
+
 export type ProteinRepresentation = "trace" | "tube" | "ribbon" | "cartoon";
 export const isProteinRepresentation = (
   value: MolecularRepresentation,
@@ -451,9 +463,7 @@ export function createProteinGeometry(
     unknownSecondary = 0;
   const tint = (point: BackbonePoint, unknown = false) =>
     new THREE.Color(
-      unknown
-        ? UNKNOWN_STRUCTURE_COLOR
-        : atomDisplayColor(doc, state, point.atom, palette),
+      proteinDisplayColor(doc, state, point.atom, palette, unknown),
     );
   for (const run of runs) {
     if (run.style === "ribbon" || run.style === "cartoon")
@@ -525,7 +535,7 @@ export function createProteinGeometry(
     );
   if (unknownSecondary)
     warnings.push(
-      `${unknownSecondary} residues have no deposited secondary assignment and use thin gray unassigned loops.`,
+      `${unknownSecondary} residues have no deposited secondary assignment and use thin unassigned loops.`,
     );
   return { group, warnings };
 }
@@ -549,9 +559,7 @@ export function retintProteinGeometry(
     const colors = geometry.getAttribute("color");
     for (let i = 0; i < atoms.length; i++) {
       tint.set(
-        unknown?.[i]
-          ? UNKNOWN_STRUCTURE_COLOR
-          : atomDisplayColor(doc, state, atoms[i], palette),
+        proteinDisplayColor(doc, state, atoms[i], palette, !!unknown?.[i]),
       );
       colors.setXYZ(i, tint.r, tint.g, tint.b);
     }

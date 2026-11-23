@@ -320,7 +320,7 @@ of the patch:
 | `reset: true` | Restore default biological session display, including Element coloring and inherited styles |
 | `showAll: true` | Clear hidden chains/kinds, isolation and residue-range filtering; retain colors/styles |
 | `clearStyles: true` | Clear chain and component representation overrides; retain colors/visibility |
-| `colorMode` | `"element"`, `"chain"`, `"entity"` or `"secondary"` |
+| `colorMode` | `"element"`, `"chain"`, `"entity"`, `"secondary"` or `"residue-class"` |
 | `hiddenChains` | Replace hidden-chain indices with a distinct list of existing chain indices |
 | `hiddenKinds` | Replace hidden component kinds with a distinct list from the advertised component enum |
 | `isolatedChain` | Existing chain index to isolate, or `null` to stop isolation |
@@ -341,6 +341,10 @@ representation. Values are `ball-stick`, `liquorice`, `space-fill`, `trace`, `tu
 `ribbon` and `cartoon`. Protein styles are rejected for a component other than
 protein or a chain without protein residues. These are session depiction choices, not changes to atom,
 connectivity, biological-identity or scientific arrays.
+
+`residue-class` groups standard amino acids by side-chain chemistry and leaves
+nonprotein atoms in their element colors. Check `app.capabilities` for available
+values when connecting to an older binary.
 
 `structure.focus` with `{target:"visible"}` frames the currently visible atoms.
 With `{target:"chain",chainIndex:N}`, it frames only that chain's currently

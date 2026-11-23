@@ -156,6 +156,17 @@ test("display helpers preserve declared source identities, visibility, style pre
         { ...state, colorMode: "secondary" },
         0,
       ),
+      residueClass: display.atomDisplayColor(
+        document,
+        { ...state, colorMode: "residue-class" },
+        0,
+      ),
+      waterInResidueClasses: display.atomDisplayColor(
+        document,
+        { ...state, colorMode: "residue-class" },
+        22,
+        new Map([[8, "#123456"]]),
+      ),
       equivalentChainColors: [
         display.chainColor({ label_id: null, author_id: "A", entity_id: null }),
         display.chainColor({ label_id: "A", author_id: "A", entity_id: "1" }),
@@ -187,6 +198,8 @@ test("display helpers preserve declared source identities, visibility, style pre
   expect(result.elementOverride).toBe("#123456");
   expect(result.unknownEntity).toBe("#8a939a");
   expect(result.unknownSecondary).toBe("#8a939a");
+  expect(result.residueClass).toBe("#e69f00");
+  expect(result.waterInResidueClasses).toBe("#123456");
   expect(result.equivalentChainColors[0]).toBe(result.equivalentChainColors[1]);
   expect(result.distinctChainColors[0]).not.toBe(result.distinctChainColors[1]);
   expect(result.unchanged).toBe(true);

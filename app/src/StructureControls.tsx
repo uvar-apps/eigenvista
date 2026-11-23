@@ -3,10 +3,12 @@ import type { ComponentKind, EigenVistaDocument } from "./types";
 import {
   chainColor,
   chainLabel,
+  COLOR_MODE_OPTIONS,
   COMPONENT_KINDS,
   entityColor,
   isAtomVisible,
   REPRESENTATION_OPTIONS,
+  RESIDUE_CLASS_LEGEND,
   SECONDARY_COLORS,
   selectResidueRange,
   type ColorMode,
@@ -178,7 +180,9 @@ export function StructureControls({
                 secondary === "unknown" ? "Unknown / unassigned" : secondary,
               color,
             }))
-          : [];
+          : value.colorMode === "residue-class"
+            ? RESIDUE_CLASS_LEGEND
+            : [];
 
   return (
     <section className="structure-controls" aria-label="Structure display">
@@ -195,15 +199,22 @@ export function StructureControls({
             onChange({ ...value, colorMode: event.target.value as ColorMode })
           }
         >
-          <option value="element">Element</option>
-          <option value="chain">Chain</option>
-          <option value="entity">Entity</option>
-          <option value="secondary">Secondary structure</option>
+          {COLOR_MODE_OPTIONS.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </select>
       </label>
       {value.colorMode === "element" && (
         <p className="structure-note">
           Element colors include your atom-color overrides.
+        </p>
+      )}
+      {value.colorMode === "residue-class" && (
+        <p className="structure-note">
+          Colors group protein residues by side-chain chemistry. Nonprotein
+          atoms use element colors.
         </p>
       )}
       {legend.length > 0 && (

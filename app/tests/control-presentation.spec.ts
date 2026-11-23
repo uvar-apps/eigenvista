@@ -277,6 +277,43 @@ test("palette API matches GUI rendering, rejects malformed input atomically and 
   expect(await scientificSnapshot(page)).toBe(scientific);
 });
 
+test("residue-class coloring is shared by the GUI and connector and recolors atoms and cartoons", async ({
+  page,
+}) => {
+  await ready(page, crambin);
+  await activateWidget(page, "document");
+  const original = await scientificSnapshot(page);
+  const pose = await call<Pose>(page, "camera.get");
+  const element = await frame(page, pose);
+  const coloring = page.getByLabel("Structure coloring", { exact: true });
+  await coloring.selectOption("residue-class");
+  expect((await call<State>(page, "app.state")).structureDisplay).toMatchObject(
+    { colorMode: "residue-class", visibleAtomCount: 327 },
+  );
+  const legend = page.getByRole("list", { name: "Structure color legend" });
+  await expect(legend.getByRole("listitem")).toHaveText([
+    "Hydrophobic / nonpolar",
+    "Polar uncharged",
+    "Acidic",
+    "Basic",
+    "Unclassified protein residue",
+  ]);
+  expect((await frame(page, pose)).hash).not.toBe(element.hash);
+
+  await call(page, "structure.set", {
+    colorMode: "secondary",
+    componentStyles: { protein: "cartoon" },
+  });
+  await expect(coloring).toHaveValue("secondary");
+  await expect(page.getByText(/unassigned loops/).first()).toBeVisible();
+  const secondary = await frame(page, pose);
+  await call(page, "structure.set", { colorMode: "residue-class" });
+  await expect(coloring).toHaveValue("residue-class");
+  const classes = await frame(page, pose);
+  expect(classes.hash).not.toBe(secondary.hash);
+  expect(await scientificSnapshot(page)).toBe(original);
+});
+
 test("biological API filters, inserted-residue selection, focus and style inheritance match visible GUI geometry", async ({
   page,
 }) => {

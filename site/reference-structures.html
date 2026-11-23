@@ -29,7 +29,7 @@
   <p>PDB CONECT and supported mmCIF/BinaryCIF covalent, disulfide, and metal declarations are retained, including accepted links beyond automatic distance cutoffs. Coordinate-based display connections fill gaps. Source declaration details and unresolved, duplicate, or omitted links are recorded in Provenance. Different/unknown symmetry images are reported without generating mates.</p>
   <p>Occupancies, B-factors, and formal charges are not retained as atom attributes; the complete source hierarchy and all annotations/models/conformers are not preserved. Cell/symmetry reporting is not crystal-image expansion. The importer supports a defined format profile, not complete mmCIF dictionary validation. Gzip input is supported only for BinaryCIF, not compressed text mmCIF or PDB. Keep the original structure file.</p>
   <h3>Secondary assignments</h3>
-  <p>Supported PDB HELIX/SHEET and mmCIF/BinaryCIF deposited annotations supply secondary structure. Missing, unsupported, ambiguous, or conflicting assignments remain unknown with notices. EigenVista does not run DSSP or infer secondary structure from coordinates. An unassigned gray loop is an explicit uncertainty, not a predicted coil.</p>
+  <p>Supported PDB HELIX/SHEET and mmCIF/BinaryCIF deposited annotations supply secondary structure. Missing, unsupported, ambiguous, or conflicting assignments remain unknown with notices. EigenVista does not run DSSP or infer secondary structure from coordinates. An unassigned loop indicates missing assignment.</p>
 
   <h2 id="coloring">Coloring and identity</h2>
   <p>Choose <strong>Coloring</strong> under Biological structure. The legend explains the visible categories.</p>
@@ -40,6 +40,7 @@
       <tr><th scope="row">Chain</th><td>Distinct deposited chain instances. mmCIF label identifiers appear with author identifiers when different; PDB uses author chain identifiers.</td></tr>
       <tr><th scope="row">Entity</th><td>Chains belonging to the same supplied entity share a color. The supported PDB profile lacks this mapping and reports entity unknown.</td></tr>
       <tr><th scope="row">Secondary structure</th><td>Deposited helices, sheets, and supported coil/turn assignments; unknown/unassigned residues remain gray.</td></tr>
+      <tr><th scope="row">Residue class</th><td>In the development preview, color standard protein residues by side-chain class: nonpolar, polar uncharged, acidic, or basic. Unclassified protein residues appear gray. Nonprotein atoms use element colors.</td></tr>
     </tbody>
   </table></div>
   <p>Chain/entity colors are deterministic. Names/colors are based on the complete imported source, so filtering does not rename or recolor the remainder. Extra source identifiers distinguish otherwise identical displayed names in legends, controls, and picking. Unknown identities are labelled instead of inferred from location. A long legend shows its first 50 entries with a count notice.</p>
@@ -66,7 +67,7 @@
   </ol>
   <p>Protein depictions are unavailable for nonprotein components, which keep atomic detail. Nucleic-acid cartoons and glycan depictions are not implemented.</p>
   <h3>Missing data stays visible as a limitation</h3>
-  <p>Missing backbone atoms, source chain/segment ends, sequence breaks, and unsupported gaps break a path rather than bridge it. Ambiguous residue identities also interrupt the depiction. Missing secondary assignments remain thin gray unassigned loops in ribbon/cartoon modes, even with chain/entity coloring. Missing carbonyl orientation uses a thin-tube fallback and an informational notice; isolated backbone points remain visible as markers.</p>
+  <p>Missing backbone atoms, source chain/segment ends, sequence breaks, and unsupported gaps break a path rather than bridge it. Ambiguous residue identities also interrupt the depiction. Ribbon and cartoon modes show missing assignments as thin unassigned loops. The loops are gray in the released version. In the development preview, Residue class can tint them by side-chain class. Missing carbonyl orientation uses a thin-tube fallback and an informational notice; isolated backbone points remain visible as markers.</p>
   <p>Protein depiction geometry uses its own diffuse shading. <a href="reference-scene.html#ao">Ambient occlusion</a> continues to shade atomic spheres/bonds, not the new protein geometry. For an AO view of a dense complex, choose Van der Waals, Element coloring, and the Pastel palette.</p>
 
   <h2 id="residues">Show a deposited residue range</h2>

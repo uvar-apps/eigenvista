@@ -16,7 +16,14 @@ export type MolecularRepresentation =
   | "tube"
   | "ribbon"
   | "cartoon";
-export type ColorMode = "element" | "chain" | "entity" | "secondary";
+export const COLOR_MODE_OPTIONS = [
+  { value: "element", label: "Element" },
+  { value: "chain", label: "Chain" },
+  { value: "entity", label: "Entity" },
+  { value: "secondary", label: "Secondary structure" },
+  { value: "residue-class", label: "Residue class" },
+] as const;
+export type ColorMode = (typeof COLOR_MODE_OPTIONS)[number]["value"];
 /** Session-only presentation; every index refers to the unchanged source data. */
 export interface StructureDisplayState {
   colorMode: ColorMode;
@@ -57,6 +64,35 @@ export const SECONDARY_COLORS: Readonly<Record<SecondaryStructure, string>> = {
   coil: "#4b9d8a",
   unknown: UNKNOWN_STRUCTURE_COLOR,
 };
+
+// Group standard amino acids by their side-chain chemistry.
+const RESIDUE_CLASSES = [
+  {
+    label: "Hydrophobic / nonpolar",
+    color: "#e69f00",
+    names: ["ALA", "GLY", "ILE", "LEU", "MET", "PHE", "PRO", "TRP", "VAL"],
+  },
+  {
+    label: "Polar uncharged",
+    color: "#0072b2",
+    names: ["ASN", "CYS", "GLN", "SER", "THR", "TYR"],
+  },
+  { label: "Acidic", color: "#cc79a7", names: ["ASP", "GLU"] },
+  { label: "Basic", color: "#009e73", names: ["ARG", "HIS", "LYS"] },
+];
+const residueClassColors = new Map(
+  RESIDUE_CLASSES.flatMap(({ color, names }) =>
+    names.map((name) => [name, color] as const),
+  ),
+);
+export const RESIDUE_CLASS_LEGEND = [
+  ...RESIDUE_CLASSES.map(({ label, color }) => ({ key: label, label, color })),
+  {
+    key: "unclassified",
+    label: "Unclassified protein residue",
+    color: UNKNOWN_STRUCTURE_COLOR,
+  },
+];
 
 export const defaultStructureDisplay = (): StructureDisplayState => ({
   colorMode: "element",
@@ -335,6 +371,11 @@ export const atomDisplayColor = (
     return resolveAtomColor(doc.atoms.elements[atom], palette);
   if (state.colorMode === "secondary")
     return SECONDARY_COLORS[residue.secondary];
+  if (state.colorMode === "residue-class")
+    return residue.kind === "protein"
+      ? (residueClassColors.get(residue.name.trim().toUpperCase()) ??
+          UNKNOWN_STRUCTURE_COLOR)
+      : resolveAtomColor(doc.atoms.elements[atom], palette);
   let colors = colorCache.get(structure);
   if (!colors) {
     colors = {

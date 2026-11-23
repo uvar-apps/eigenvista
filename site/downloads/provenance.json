@@ -130,14 +130,14 @@
     {
       "file": "eigenvista-control/reference.md",
       "source": "skills/eigenvista-control/reference.md",
-      "bytes": 40126,
-      "sha256": "f4951750b0263c19310b40a91891b24d4c6bf7f64044df6c9bc2aa1812ae5b57"
+      "bytes": 40177,
+      "sha256": "8eb0c292ef8b985b9f211861b076200932574c92c58c7eadbee23451a24b8482"
     },
     {
       "file": "eigenvista-control/README.md",
       "source": "docs/ai-connector.md",
-      "bytes": 21670,
-      "sha256": "b528492b8a59b7f329eff77b7031fe3249f166d58260ef4371d9288e430bb651"
+      "bytes": 21796,
+      "sha256": "8827c07d3281a58e324f91766af90d46a181db7e745475a70bb1ff22a67eb66f"
     },
     {
       "file": "eigenvista-control/allocation-policy.md",

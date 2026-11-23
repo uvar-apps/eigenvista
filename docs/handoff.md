@@ -1,5 +1,37 @@
 # Development handoff
 
+## Residue-class coloring — 23 November 2026 (#71)
+
+The 0.10.4 development preview adds **Molecule → Molecular data →
+Biological structure → Coloring → Residue class**. Standard amino acids use
+four side-chain classes with a labeled legend. Unclassified protein residues
+are gray. Nonprotein atoms retain element palette colors and nonprotein bond
+segments stay neutral. The mode colors existing atomic and backbone depictions,
+including unassigned ribbon/cartoon loops. Coloring is session presentation.
+
+The connector discovers `residue-class` through `app.capabilities` and applies
+it with `structure.set`. The current scoped implementation is the residue-class
+slice of rank 7 in [#71](https://github.com/uvar-apps/eigenvista/issues/71).
+The user guide, connector references and website preview describe the mode.
+
+On macOS, the 52 affected Chromium/WebKit application cases and 162 website
+cases passed, along with TypeScript, the production frontend build and static
+site checks. The real macOS debug desktop and `eigenvista-ctl` loaded crambin,
+selected the mode and exported a residue-colored cartoon PNG. The focused
+application case passed on `system76.local` in host Chromium/EGL and Noble
+container WebKit. The browser regression compares the saved scientific
+document before and after coloring. Evidence is in `tmp/residue-classes/`.
+
+Pre-push verification passed the complete 762-case application inventory on
+each host, with 381 cases per browser and zero failures, skips or retries.
+Linux Chromium used host EGL. Linux WebKit ran in the local Noble container
+with the pinned browser. Both hosts tested the same freshly built WASM.
+macOS also passed formatting, locked Rust and desktop tests, strict workspace
+Clippy, the frontend build, 33 packaging checks and 162 website cases.
+Linux passed TypeScript, production build, 27 packaging and static site checks.
+The source tree and matching case reports are recorded in
+`tmp/residue-classes-delivery/`.
+
 ## X-ray shader with surface colors — 23 November 2026 (#113)
 
 The 0.10.4 development checkout adds `app/shaders/surface-x-ray.*`. Load the

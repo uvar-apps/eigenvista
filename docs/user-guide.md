@@ -342,6 +342,16 @@ In **Molecule → Molecular data → Biological structure**, choose **Coloring**
 - **Secondary structure** distinguishes deposited helices, sheets and coils/turns.
   Unknown or unassigned residues stay explicitly gray. The program does not run
   DSSP or predict assignments when annotations are missing.
+- **Residue class** colors standard amino acids by side-chain class. The legend
+  shows hydrophobic/nonpolar, polar uncharged, acidic and basic groups.
+  Unclassified protein residues are gray. Nonprotein atoms keep their element
+  colors, including palette overrides, and nonprotein bond segments stay neutral.
+
+Residue class is a qualitative grouping. It includes phenylalanine and
+tryptophan in the nonpolar group and tyrosine in the polar uncharged group.
+The colors describe residue identities independently of pH or secondary
+structure.
+[Amino-acid side-chain chemistry, OpenStax Biology 2e](https://openstax.org/books/biology-2e/pages/3-4-proteins).
 
 The legend identifies the colors; chain and entity colors are deterministic.
 Unknown identities are labeled explicitly rather than inferred from positions.
@@ -379,8 +389,9 @@ and **Secondary-structure cartoon**. Trace and tube follow the protein backbone;
 cartoons distinguish helical ribbons, strand arrows and connecting loops.
 Missing backbone atoms, chain/segment ends and unsupported gaps break the path
 rather than inventing connections. Missing secondary assignments remain
-thin gray unassigned loops in ribbon/cartoon modes, including when chain or
-entity coloring is selected. These are display geometry, not additional imported atoms or
+thin unassigned loops in ribbon/cartoon modes. Residue-class coloring tints
+these loops by residue identity. Other coloring modes keep them gray.
+These are display geometry, not additional imported atoms or
 quantum-chemistry surfaces. Nucleic-acid cartoons and glycan depictions are not
 part of this increment. Missing carbonyl orientation uses a thin-tube fallback
 with an informational notice; isolated backbone points remain visible as markers.

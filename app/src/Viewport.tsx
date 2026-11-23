@@ -994,6 +994,13 @@ export function Viewport({
       const orientation = new THREE.Quaternion();
       const cylinderAxis = new THREE.Vector3(0, 1, 0);
       const coloredBonds = !!doc.structure && display.colorMode !== "element";
+      const neutralBondColor = "#9ba3a8";
+      const bondColor = (atom: number) =>
+        display.colorMode === "residue-class" &&
+        doc.structure?.residues[doc.structure.atom_residues[atom]]?.kind !==
+          "protein"
+          ? neutralBondColor
+          : atomDisplayColor(doc, display, atom, paletteRef.current);
       const placed: {
         i: number;
         j: number;
@@ -1011,11 +1018,7 @@ export function Viewport({
         from.set(...columns.positions[i]);
         to.set(...columns.positions[j]);
         if (delta.subVectors(to, from).length() < 1e-10) continue;
-        if (
-          coloredBonds &&
-          atomDisplayColor(doc, display, i, paletteRef.current) !==
-            atomDisplayColor(doc, display, j, paletteRef.current)
-        ) {
+        if (coloredBonds && bondColor(i) !== bondColor(j)) {
           placed.push(
             { i, j, half: 1, colorAtom: i },
             { i, j, half: 2, colorAtom: j },
@@ -1025,7 +1028,7 @@ export function Viewport({
       if (placed.length > 0) {
         const bondGeometry = new THREE.CylinderGeometry(1, 1, 1, 12);
         const bondMaterial = new THREE.MeshStandardMaterial({
-          color: coloredBonds ? "#ffffff" : "#9ba3a8",
+          color: coloredBonds ? "#ffffff" : neutralBondColor,
           roughness: 0.5,
         });
         const bonds = new THREE.InstancedMesh(
@@ -1057,14 +1060,7 @@ export function Viewport({
           matrix.compose(midpoint, orientation, scale);
           bonds.setMatrixAt(instance, matrix);
           if (coloredBonds) {
-            tint.set(
-              atomDisplayColor(
-                doc,
-                display,
-                entry.colorAtom,
-                paletteRef.current,
-              ),
-            );
+            tint.set(bondColor(entry.colorAtom));
             bonds.setColorAt(instance, tint);
           }
           labels.push(

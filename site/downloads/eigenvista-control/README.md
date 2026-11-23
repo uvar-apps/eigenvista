@@ -228,6 +228,7 @@ examples are already available to the session.
 | Shade a molecular surface | “Set the solvent-excluded surface to full opacity. Turn on ambient occlusion for molecular surfaces with automatic radius, then show me an image. Keep atom and bond ambient occlusion off.” |
 | Use your own palette | “Load the atom palette from [palette file] and show me the result. Keep the molecular data and this framing.” |
 | Read a protein assembly | “Show the protein as a cartoon and color it by chain. Isolate chain A and focus on it. Keep the complete molecular data.” |
+| See residue classes | “Show the protein as a cartoon colored by residue class. Keep ligands in their element colors.” |
 | Explore a subset | “Show residues [range] of chain [name]. Give that chain a ball-and-stick style while the other visible protein chains stay as cartoons. Focus on the visible structure.” |
 | Return to an overview | “Show all components again, clear individual chain and component style overrides, and use the global cartoon view. Give chains from the same molecular entity the same color and fit the complete assembly.” |
 | Change the finish | “Give this surface an X-ray finish so I can see the framework through it,” or “Cut a window into the density surface without changing the molecular data.” |

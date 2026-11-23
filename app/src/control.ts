@@ -1,5 +1,9 @@
 import { gridResolutions } from "./resolution";
-import { REPRESENTATION_OPTIONS, COMPONENT_KINDS } from "./molecularDisplay";
+import {
+  COLOR_MODE_OPTIONS,
+  COMPONENT_KINDS,
+  REPRESENTATION_OPTIONS,
+} from "./molecularDisplay";
 import type { EigenVistaDocument } from "./types";
 import type { CameraState, ViewportControl } from "./viewportControl";
 import type { PendingInspectionSave } from "./pendingInspectionSave";
@@ -244,7 +248,7 @@ export const CONTROL_METHODS = {
       clearStyles: { type: "boolean", enum: [true] },
       colorMode: {
         type: "string",
-        enum: ["element", "chain", "entity", "secondary"],
+        enum: COLOR_MODE_OPTIONS.map(({ value }) => value),
       },
       hiddenChains: { type: "array", items: chainIndex },
       hiddenKinds: {

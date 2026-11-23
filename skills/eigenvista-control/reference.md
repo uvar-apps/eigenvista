@@ -577,7 +577,7 @@ values. Reset/show-all/style clearing occur before explicit values:
 | `reset:true` | Default biological display, including Element coloring and inherited styles |
 | `showAll:true` | Clear hidden chains/kinds, isolation and residue filtering; retain colors/styles |
 | `clearStyles:true` | Remove all chain/component representation overrides |
-| `colorMode` | `element`, `chain`, `entity` or `secondary` |
+| `colorMode` | `element`, `chain`, `entity`, `secondary` or `residue-class` when listed by `app.capabilities` |
 | `hiddenChains` | Replace with a distinct list of existing chain indices |
 | `hiddenKinds` | Replace with a distinct list from the live component-kind enum |
 | `isolatedChain` | Existing chain index, or `null` to stop isolation |
