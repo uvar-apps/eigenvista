@@ -33,6 +33,7 @@ ${workspaceNotice}
 <p>For the complete field workflow, see <a href="tutorials-orbitals.html">the orbital tutorial</a>. The shaders below work on the generated surface, so you can try several finishes on the same geometry.</p>
 
 <h2 id="xray">Give it an X-ray finish</h2>
+<p>For the finish shown in <a href="gallery.html">Crambin in X-ray</a>, load the bundled <code>surface-x-ray.vert</code>, <code>surface-x-ray.frag</code> and <code>surface-x-ray.params</code> from the package’s <code>Shaders/</code> folder. Leave <strong>Shader transparency</strong> enabled and adjust the surface color to change the tint.</p>
 <p>This preset makes front-facing areas more transparent and keeps the outline stronger. It is useful when a surface would otherwise hide the atoms inside.</p>
 <ol>
   <li>Download <a href="downloads/shaders/x-ray.vert" download="x-ray.vert">x-ray.vert</a>, <a href="downloads/shaders/x-ray.frag" download="x-ray.frag">x-ray.frag</a> and <a href="downloads/shaders/x-ray.params" download="x-ray.params">x-ray.params</a>.</li>

@@ -239,9 +239,9 @@ for (const [engine, launcher] of [
       assert((await development.textContent()).includes(`${release.linux ? "Both downloads include" : "The Mac download includes"} this workspace, the scientific tools and the AI connector.`));
     } else {
       assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
-      assert((await development.textContent()).includes(`published Mac download below remains ${release.version}`));
+      assert((await development.textContent()).includes(`published downloads below are version ${release.version}`));
     }
-    assert.equal(await development.getByRole("link").getAttribute("href"), "reference-files.html");
+    assert.equal(await development.getByRole("link").getAttribute("href"), "reference-structures.html#coloring");
     assert.equal(await page.getByRole("link", { name: "Download for Mac" }).getAttribute("href"), `${release.base}${release.stem}.zip`);
     if (release.linux) {
       const linux = release.linux;

@@ -4,10 +4,28 @@
 
 The release includes residue-class coloring in the GUI and bundled AI
 connector, plus the surface-colored X-ray shader and crambin Gallery view.
+The [published prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.5)
+has two archives, two checksums and two build-info files. Anonymous downloads
+matched all six verified local files.
 Use the [0.10.5 notes](releases/0.10.5.md) for downloads and
 [#114](https://github.com/uvar-apps/eigenvista/issues/114) for qualification
 and delivery. The Zenodo concept DOI is `10.5281/zenodo.24246123`. The DOI
 `10.5281/zenodo.24452126` identifies the 0.10.4 archive.
+
+Both packages were built from `b6a3f271d8f6cdfd0795f902ee489314c62c5248`.
+Their checksums and the complete 747-file source manifests were independently
+verified. The three packaged `surface-x-ray` files matched the tagged sources.
+Extracted Mac and Linux apps passed 46 and 47 bundled-connector calls,
+respectively, with 12 PNG checks on each. This includes residue-class coloring
+on crambin, active surface AO on the complete 4,182,788-triangle 1AON SES and
+checks for translucent and quantum surfaces. Linux used Xvfb on CachyOS.
+
+The application and full test sources match the prior 762-case per-host
+qualification. Fresh 0.10.5 packaging ran locked Rust, desktop, Clippy, native
+builds and archive roundtrips on both hosts. Six focused release browser cases
+passed on macOS, and the website passed static checks and all 162 browser cases.
+Evidence is in `tmp/release-0.10.5/`; local archives, checksums and build metadata
+are under `artifacts/distributions/`.
 
 ## Residue-class coloring — 23 November 2026 (#71)
 

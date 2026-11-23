@@ -1,5 +1,14 @@
 # User-facing website
 
+## EigenVista 0.10.5 — 23 November 2026
+
+The homepage and structure reference describe residue-class coloring. The
+shader guide explains how to load the bundled surface-colored X-ray example
+used in the crambin Gallery image. The installation page lists the Apple
+Silicon and CachyOS x86_64 downloads, each with checksum and build information.
+The archives share the source tag recorded in the
+[0.10.5 notes](releases/0.10.5.md).
+
 ## EigenVista 0.10.4 — 22 November 2026
 
 The site offers both verified [0.10.4 previews](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4). Binary checksums and
@@ -274,11 +283,11 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. The current 0.10.4 citation uses its version-specific DOI
-(`10.5281/zenodo.24452126`), supplied by the user on 23 November 2026.
-The concept DOI (`10.5281/zenodo.24246123`) identifies all versions.
+section. The README citation links the 0.10.5 GitHub release. The About page
+uses the Zenodo concept DOI (`10.5281/zenodo.24246123`) for the project.
 The About page distinguishes
-the current citation from the historical 0.10.3 archive
+the current citation from the historical 0.10.4 archive
+(`10.5281/zenodo.24452126`), 0.10.3 archive
 (`10.5281/zenodo.24391046`), 0.10.1 archive
 (`10.5281/zenodo.24328295`), 0.10.0 archive
 (`10.5281/zenodo.24302658`) and 0.8.0 archive

@@ -424,7 +424,7 @@ eigenvista-convert --help</code></pre>
       <tr><th scope="row">Chain</th><td>Distinct deposited chain instances. mmCIF label identifiers appear with author identifiers when different; PDB uses author chain identifiers.</td></tr>
       <tr><th scope="row">Entity</th><td>Chains belonging to the same supplied entity share a color. The supported PDB profile lacks this mapping and reports entity unknown.</td></tr>
       <tr><th scope="row">Secondary structure</th><td>Deposited helices, sheets, and supported coil/turn assignments; unknown/unassigned residues remain gray.</td></tr>
-      <tr><th scope="row">Residue class</th><td>In the development preview, color standard protein residues by side-chain class: nonpolar, polar uncharged, acidic, or basic. Unclassified protein residues appear gray. Nonprotein atoms use element colors.</td></tr>
+      <tr><th scope="row">Residue class</th><td>Colors standard protein residues by side-chain class: nonpolar, polar uncharged, acidic, or basic. Unclassified protein residues appear gray. Nonprotein atoms use element colors.</td></tr>
     </tbody>
   </table></div>
   <p>Chain/entity colors are deterministic. Names/colors are based on the complete imported source, so filtering does not rename or recolor the remainder. Extra source identifiers distinguish otherwise identical displayed names in legends, controls, and picking. Unknown identities are labelled instead of inferred from location. A long legend shows its first 50 entries with a count notice.</p>
@@ -451,7 +451,7 @@ eigenvista-convert --help</code></pre>
   </ol>
   <p>Protein depictions are unavailable for nonprotein components, which keep atomic detail. Nucleic-acid cartoons and glycan depictions are not implemented.</p>
   <h3>Missing data stays visible as a limitation</h3>
-  <p>Missing backbone atoms, source chain/segment ends, sequence breaks, and unsupported gaps break a path rather than bridge it. Ambiguous residue identities also interrupt the depiction. Ribbon and cartoon modes show missing assignments as thin unassigned loops. The loops are gray in the released version. In the development preview, Residue class can tint them by side-chain class. Missing carbonyl orientation uses a thin-tube fallback and an informational notice; isolated backbone points remain visible as markers.</p>
+  <p>Missing backbone atoms, source chain/segment ends, sequence breaks, and unsupported gaps break a path rather than bridge it. Ambiguous residue identities also interrupt the depiction. Ribbon and cartoon modes show missing assignments as thin unassigned loops. Residue-class coloring tints these loops by side-chain class. Other coloring modes show them in gray. Missing carbonyl orientation uses a thin-tube fallback and an informational notice; isolated backbone points remain visible as markers.</p>
   <p>Protein depiction geometry uses its own diffuse shading. <a href="reference-scene.html#ao">Ambient occlusion</a> continues to shade atomic spheres/bonds, not the new protein geometry. For an AO view of a dense complex, choose Van der Waals, Element coloring, and the Pastel palette.</p>
 
   <h2 id="residues">Show a deposited residue range</h2>
