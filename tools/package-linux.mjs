@@ -7,6 +7,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import {
   ABOUT_VERSION,
+  packagedSurfaceShaders,
   testerPackageName,
   packageSourceFiles,
   snapshotFiles,
@@ -155,6 +156,10 @@ export const linuxResourceFiles = (sourceManifest) => {
       `${dataPath}/AI-connector/examples/README.md`,
     ],
     ["LICENSE", `${dataPath}/AI-connector/examples/LICENSE`],
+    ...packagedSurfaceShaders.map((file) => [
+      `app/shaders/${file}`,
+      `${dataPath}/Shaders/${file}`,
+    ]),
     ...palettes.flatMap((name) => [
       [`palettes/${name}`, `${dataPath}/Palettes/${name}`],
       [`palettes/${name}`, `${dataPath}/AI-connector/palettes/${name}`],

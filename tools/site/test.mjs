@@ -403,7 +403,7 @@ for (const [engine, launcher] of [
 
     await page.goto(base + "gallery.html");
     await allImages(page);
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 8);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 9);
     await page.getByRole("button", { name: "Molecules", exact: true }).click();
     assert.equal(await page.locator("[data-gallery-item]:visible").count(), 2);
     await page
@@ -412,9 +412,10 @@ for (const [engine, launcher] of [
     await page.keyboard.press("Enter");
     assert.equal(await page.locator("[data-gallery-item]:visible").count(), 3);
     await page.getByRole("button", { name: "Shaders", exact: true }).click();
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 3);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 4);
+    assert.equal(await page.getByRole("heading", { name: "Crambin in X-ray", exact: true }).isVisible(), true);
     await page.getByRole("button", { name: "All views", exact: true }).click();
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 8);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 9);
     const comparisons = [];
     for (const [i, figure] of (
       await page.locator("[data-comparison]").all()
@@ -519,7 +520,7 @@ for (const [engine, launcher] of [
     await plain.goto(base + "gallery.html");
     assert.equal(await plain.locator("[data-comparison].is-ready").count(), 0);
     assert.equal(await plain.locator(".comparison-control:visible").count(), 0);
-    assert.equal(await plain.locator("[data-gallery-item]:visible").count(), 8);
+    assert.equal(await plain.locator("[data-gallery-item]:visible").count(), 9);
     await plain
       .getByRole("navigation")
       .getByRole("link", { name: "Manual", exact: true })

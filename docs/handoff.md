@@ -1,5 +1,38 @@
 # Development handoff
 
+## X-ray shader with surface colors — 23 November 2026 (#113)
+
+The 0.10.4 development checkout adds `app/shaders/surface-x-ray.*`. Load the
+vertex, fragment and parameter files in **Appearance → Surface shader** with
+transparency enabled. The fragment tint comes from the mesh's assigned color.
+The `minOpacity`, `maxOpacity` and `da` controls set the view-angle opacity
+range and cutoff. The Mac and Linux packaging scripts stage all three files
+in `Shaders/`; the release packages still correspond to the tagged source.
+
+Live recoloring passed in Chromium and WebKit on the signed orbital example
+and the 327-atom 1CRN SES, with PNG evidence under `tmp/surface-x-ray/`.
+The shader, transparency, molecular-surface and production workflow suites
+passed all 64 cases across both engines. TypeScript, the Vite production build
+and 27 packaging tests passed locally. Track delivery in
+[#113](https://github.com/uvar-apps/eigenvista/issues/113).
+
+The Gallery now includes the 1CRN X-ray close-up under **Shaders**. The blue
+SES fills about 87% of the 1280 × 960 frame height. The capture preserves the
+original viewing direction with a 1.5× zoom and recentered camera. The WebP
+matches the application PNG pixel for pixel. Local capture and verification
+evidence is in `tmp/gallery-crambin-xray/`. The regenerated site passed static
+validation and all 162 Chromium/WebKit cases. Desktop and phone previews
+preserve the 4:3 image proportions in both engines.
+
+Before pushing, `node tools/package-macos.mjs` built and verified a private
+Apple Silicon test ZIP. All three packaged shader files match the sources.
+Both hosts passed the 27 packaging checks. On `system76.local`, the X-ray
+recoloring test passed with host Chromium/EGL and WebKit in the Noble
+Playwright container. Both container engines verified the Gallery at 1440,
+390 and 320 pixels. The broader Linux website sweep stopped on a Chromium
+homepage overflow also reproduced on the preceding main commit. The Gallery
+fits both narrow viewports. Evidence is in `tmp/xray-gallery-delivery/`.
+
 ## EigenVista 0.10.4 published — 22 November 2026 (#112)
 
 [Version 0.10.4](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4) includes optional matte ambient occlusion for opaque

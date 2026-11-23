@@ -343,8 +343,9 @@ application suites or create new platform qualification.
 
 ## Capture authentic media
 
-The local website contains 16 curated captures: the original 15 real EigenVista
-0.7.2 captures and one source-preview AI-session image. The original nine quantum images
+The main Gallery media provenance lists 17 captures, including the original 15
+EigenVista 0.7.2 captures, one source-preview AI-session image and the crambin
+X-ray close-up. The original nine quantum images
 show a 17-atom C₇H₁₀ molecular calculation, high-resolution frontier orbitals and
 volume rendering, X-ray and cutaway density surfaces, the actual workspace and
 readable shader controls, plus an imported 29-atom cube field. Six retained
@@ -363,6 +364,13 @@ in the original session and must not be presented as measured reproduction data.
 The lesson labels suggested settings as starting values. Do not relabel this
 image as a capture from the released 0.7.2 binary. Existing media keep their
 original hashes, including the Pastel/element AO comparisons.
+
+`crambin-xray.webp` is a 1280 × 960 lossless export from the EigenVista
+development preview using the surface-colored X-ray shader in #113. It shows
+the 327-atom 1CRN SES with a 1.4 Å probe radius and 0.5 Å grid spacing. The
+close-up keeps the reference view direction and blue surface color, with a
+1.5× camera zoom and the scene recentered. Capture settings, source PNGs and
+the pixel comparison are under `tmp/gallery-crambin-xray/`.
 
 `tools/site/capture-quantum.mjs` records the new real-UI photography procedure.
 It uses the existing production app on owned port 5189, the installed Playwright

@@ -346,7 +346,7 @@ assert(media && typeof media === "object", "Actual image provenance exists");
 assert.equal(media.application.version, capturedRelease.version);
 assert.equal(media.application.sourceRevision, capturedRelease.source);
 assert.deepEqual(media.errors, []);
-assert.equal(media.images.length, 16);
+assert.equal(media.images.length, 17);
 for (const row of media.images) {
   assert(/^[a-z0-9-]+\.webp$/.test(row.file), row.file);
   const bytes = fs.readFileSync(path.join(site, "assets/media", row.file));
@@ -363,6 +363,7 @@ for (const row of media.images) {
 }
 const allowedInputs = new Set([
   "fixtures/cif/1AON.cif",
+  "fixtures/bcif/1crn.bcif",
   "fixtures/large-structure/4PJ1.pdb",
   "tools/site/examples/bicyclic-c7h10.molden",
   "tools/site/examples/complex-field.cube",
@@ -372,6 +373,9 @@ const allowedInputs = new Set([
   "app/shaders/surface-clip.vert",
   "app/shaders/surface-clip.frag",
   "app/shaders/surface-clip.params",
+  "app/shaders/surface-x-ray.vert",
+  "app/shaders/surface-x-ray.frag",
+  "app/shaders/surface-x-ray.params",
   "palettes/matterviz-pastel.json",
   "palettes/LICENSE-MatterViz.txt",
 ]);
@@ -446,6 +450,7 @@ const expectedMedia = [
   "quantum-lumo",
   "quantum-volume",
   "quantum-xray",
+  "crambin-xray",
   "quantum-unclipped",
   "quantum-clipped",
   "shader-controls",

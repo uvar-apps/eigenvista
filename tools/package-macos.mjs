@@ -9,6 +9,7 @@ import {
 } from "./package-ai-connector.mjs";
 import {
   ABOUT_VERSION,
+  packagedSurfaceShaders,
   testerPackageName,
   packageSourceFiles,
   testerEnvironment,
@@ -343,6 +344,11 @@ function main() {
   );
   copy(path.join(root, "packaging/examples"), path.join(payload, "Examples"));
   copy(path.join(root, "shaders"), path.join(payload, "Shaders"));
+  for (const file of packagedSurfaceShaders)
+    copy(
+      path.join(sources, "app/shaders", file),
+      path.join(payload, "Shaders", file),
+    );
   for (const file of [
     "matterviz-muted.json",
     "matterviz-pastel.json",

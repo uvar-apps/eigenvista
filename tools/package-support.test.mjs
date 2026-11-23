@@ -7,6 +7,7 @@ import { spawnSync } from "node:child_process";
 import {
   testerEnvironment,
   testerPackageName,
+  packagedSurfaceShaders,
   existingSourceFiles,
   packageSourceFiles,
   inside,
@@ -188,6 +189,20 @@ test("classic Molekel shaders ship with provenance for the tester archive", () =
   ])
     assert.ok(fs.existsSync(path.join(shaders, name)), `missing ${name}`);
   assert.ok(fs.existsSync(path.join(shaders, "doc/readme")));
+});
+test("X-ray shader examples can be staged from a package source snapshot", (t) => {
+  const sources = packagedSurfaceShaders.map((file) => `app/shaders/${file}`);
+  const snapshot = fixture(t);
+  const manifest = snapshotFiles(repo, sources, snapshot);
+  assert.equal(sources.length, 3);
+  for (const file of sources) {
+    assert.ok(manifest[file]);
+    assert.ok(!fs.existsSync(path.join(repo, "shaders", path.basename(file))));
+    assert.deepEqual(
+      fs.readFileSync(path.join(snapshot, file)),
+      fs.readFileSync(path.join(repo, file)),
+    );
+  }
 });
 test("source snapshots include current edits and reject symlinks/credentials", (t) => {
   const dir = fixture(t);

@@ -261,6 +261,9 @@ test("Real Linux resources stage with exact hashes, modes, all palettes, example
     "Examples/water.pdb",
     "Examples/water.xyz",
     "Shaders/x-ray.frag",
+    "Shaders/surface-x-ray.vert",
+    "Shaders/surface-x-ray.frag",
+    "Shaders/surface-x-ray.params",
     "Shaders/lambert.vert",
     "User-guide.md",
   ])

@@ -244,6 +244,56 @@ test("default GUI generates a real orbital, applies custom shader files and live
   expect(after.doc.orbitals).toEqual(before.doc.orbitals);
 });
 
+test("bundled X-ray shader retains both phase colors and follows live appearance edits", async ({
+  page,
+}, info) => {
+  await ready(page);
+  const appearance = await activateWidget(page, "appearance");
+  const positive = appearance.getByLabel("Positive color", { exact: true });
+  const negative = appearance.getByLabel("Negative color", { exact: true });
+  await positive.fill("#404040");
+  await negative.fill("#404040");
+  const shader = await activateWidget(page, "surface-shader");
+  for (const [kind, extension] of [
+    ["vertex", "vert"],
+    ["fragment", "frag"],
+    ["params", "params"],
+  ]) {
+    await shader
+      .locator(`[data-shader-input="${kind}"]`)
+      .setInputFiles(path.resolve(`shaders/surface-x-ray.${extension}`));
+  }
+  await expect(shader.locator('input[type="color"]')).toHaveCount(0);
+  await expect(shader.getByLabel("Shader transparency")).toBeChecked();
+  await shader.getByRole("button", { name: "Apply shader", exact: true }).click();
+  await expect(shader.locator(".shader-status")).toContainText("Applied");
+  await settleScene(page);
+  const neutral = await scenePixels(page);
+
+  await positive.fill("#00ff00");
+  await negative.fill("#ff00ff");
+  await settleScene(page);
+  const both = await scenePixels(page);
+  expect(both.error).toBe(0);
+  expect(both.positive).toBeGreaterThan(neutral.positive + 100);
+  expect(both.negative).toBeGreaterThan(neutral.negative + 100);
+  await exportPng(page, info, "x-ray-phase-colors", true);
+
+  await positive.fill("#404040");
+  await settleScene(page);
+  const recolored = await scenePixels(page);
+  expect(recolored.positive).toBeLessThanOrEqual(neutral.positive);
+  expect(recolored.negative).toBeGreaterThan(neutral.negative + 100);
+  await expect(shader.locator(".shader-status")).toContainText("Applied");
+  await exportPng(page, info, "x-ray-phase-recolored", true);
+
+  await shader.getByLabel("maxOpacity", { exact: true }).fill("0");
+  await settleScene(page);
+  expect((await scenePixels(page)).negative).toBeLessThanOrEqual(
+    neutral.negative,
+  );
+});
+
 test("default header conversion saves requested output while retaining the active molecular scene", async ({
   page,
 }, info) => {

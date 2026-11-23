@@ -1036,6 +1036,14 @@ Display→Shaders:
    Diffuse / Blinn-Phong materials and clears the loaded files and parameters.
    Use it before loading a different pair when shared uniform types conflict.
 
+For an X-ray effect that follows the surface's diffuse color, load
+`surface-x-ray.vert`, `surface-x-ray.frag` and `surface-x-ray.params`.
+Find them in the package's `Shaders/` folder or in `app/shaders/` in the source
+tree. Leave **Shader transparency** checked and apply the shader. Change the
+positive or negative color in **Appearance**, or the color of a saved molecular
+surface, to retint the X-ray effect immediately. Use `minOpacity`,
+`maxOpacity` and `da` to adjust the opacity range and discard cutoff.
+
 **Shader transparency** is checked by default and blends the fragment shader's
 alpha, even when document opacity is 100%. Uncheck it for opaque rendering:
 the final alpha is forced to 1 and depth writes are enabled. The control updates

@@ -4,6 +4,12 @@ import path from "node:path";
 
 export const ABOUT_VERSION = "0.9.1";
 
+export const packagedSurfaceShaders = [
+  "surface-x-ray.vert",
+  "surface-x-ray.frag",
+  "surface-x-ray.params",
+];
+
 export function testerPackageName(config, revision, started, dirty) {
   if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.-]+)?$/.test(config.version))
     throw new Error("Unsafe package version");
