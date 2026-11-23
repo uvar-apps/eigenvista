@@ -16,7 +16,7 @@ but does not install the app, start a connection or register a skill with the
 chosen agent. Skill registration is optional and follows that agent's own
 mechanism. No additional MCP service or provider SDK is required.
 
-Use the current EigenVista 0.10.4 package and its bundled helper. The connector
+Use the current EigenVista 0.10.5 package and its bundled helper. The connector
 was introduced in 0.8.0; older 0.7.2 apps and tester ZIPs predate this package
 layout. If the bundled helper is absent or the connected app lacks
 a requested capability, explain what is missing and obtain the appropriate
@@ -27,7 +27,7 @@ measurements, SES/SAS and quantitative-field operations. Older 0.8.0 binaries la
 operations. Discover the connected app's actual schemas and use the application
 and helper supplied together; never infer features from the version string alone.
 
-Version 0.10.4 retains the allocation-driven workloads and smooth camera-relative
+Version 0.10.5 retains the allocation-driven workloads and smooth camera-relative
 lighting introduced in 0.10.1. Request the user's intended resolution, orbital batch or SES spacing;
 do not impose an estimated memory allowance, truncate results or silently reduce
 detail. Actual allocation, runtime, format and device constraints still apply.

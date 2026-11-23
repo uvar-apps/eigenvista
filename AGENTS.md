@@ -1,5 +1,14 @@
 # EigenVista agent guide
 
+## EigenVista 0.10.5
+
+The release adds residue-class coloring in the GUI and shared controller
+(#71), the bundled `surface-x-ray.*` shader (#113), and the crambin Gallery
+close-up. The classifier and legend use the same palette, and the shader
+reads the mesh's assigned diffuse color. Both redistributables come from the
+same clean source tag. See the [0.10.5 notes](docs/releases/0.10.5.md),
+[handoff](docs/handoff.md) and [release issue #114](https://github.com/uvar-apps/eigenvista/issues/114).
+
 ## EigenVista 0.10.4 published — 22 November 2026 (#112)
 
 [Version 0.10.4](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4) includes optional matte ambient occlusion for opaque

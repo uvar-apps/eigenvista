@@ -4,9 +4,9 @@ For the separate Linux development tarball, see [Linux packaging](linux.md).
 This page describes the Apple Silicon package; its signing and `.app` paths
 do not apply to the Linux prefix.
 
-Release **0.10.4** adds independent matte ambient occlusion for opaque SES and
-SAS. Both platforms are built from the same source tag. Read the
-[release notes](releases/0.10.4.md) and the package's `BUILD-INFO.json` for
+Release **0.10.5** includes residue-class coloring and the surface-colored
+X-ray shader example. Both platforms are built from the same source tag. Read the
+[release notes](releases/0.10.5.md) and the package's `BUILD-INFO.json` for
 version, source and validation details.
 
 A newly built source package uses the approved **480 px** left/right tools pane

@@ -1,4 +1,4 @@
-EIGENVISTA 0.10.4 PREVIEW - FRIENDS AND TESTERS
+EIGENVISTA 0.10.5 PREVIEW - FRIENDS AND TESTERS
 
 Read User-guide.md for the complete installation, controls, file workflows,
 surface generation, saving, and troubleshooting guide.
@@ -37,7 +37,16 @@ molecule is open. No source checkout or development tools are needed.
 The launcher starts a separate enabled window and leaves existing windows alone.
 Do not share the private connection file's contents.
 
-NEW IN 0.10.4
+NEW IN 0.10.5
+
+- In Molecule > Molecular data > Biological structure, choose Residue class
+  to color protein residues by side-chain class. The connector offers the
+  same mode.
+- Load Shaders/surface-x-ray.vert, .frag and .params in Appearance > Surface
+  shader. Leave Shader transparency enabled. The tint follows the color
+  assigned to each surface.
+
+MOLECULAR SURFACE AMBIENT OCCLUSION
 
 - Set a saved SES or SAS molecular surface to opacity 1 and enable
   Molecular surface ambient occlusion in the Appearance tab. The effect uses

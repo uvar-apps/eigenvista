@@ -15,6 +15,12 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
+### 0.10.5 source
+
+The residue-class color mode is shared between the GUI and controller schema.
+The surface-colored X-ray example is staged into both packages by the
+packaging scripts. See the [0.10.5 notes](releases/0.10.5.md).
+
 ### 0.10.4 source
 
 Version 0.10.4 adds separate screen-space AO for opaque SES and SAS using

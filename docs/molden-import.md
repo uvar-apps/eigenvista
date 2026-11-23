@@ -1,6 +1,6 @@
 # Molden import and conversion
 
-**Version 0.10.4:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.5:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 The shared Rust importer supports a bounded **real Gaussian Molden wavefunction
@@ -265,7 +265,7 @@ qualification.
 
 ## Limits and verification
 
-EigenVista 0.10.4 has no fixed file/line/atom/basis/orbital memory ceilings.
+EigenVista 0.10.5 has no fixed file/line/atom/basis/orbital memory ceilings.
 Every listed orbital is retained or the import fails with its actual validation
 or allocation error. Input is in-memory; finite values, complete relationships,
 normalization and supported conventions remain required. Missing orbitals cannot

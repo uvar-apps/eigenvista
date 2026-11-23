@@ -1,5 +1,14 @@
 # Development handoff
 
+## EigenVista 0.10.5 — 23 November 2026 (#114)
+
+The release includes residue-class coloring in the GUI and bundled AI
+connector, plus the surface-colored X-ray shader and crambin Gallery view.
+Use the [0.10.5 notes](releases/0.10.5.md) for downloads and
+[#114](https://github.com/uvar-apps/eigenvista/issues/114) for qualification
+and delivery. The Zenodo concept DOI is `10.5281/zenodo.24246123`. The DOI
+`10.5281/zenodo.24452126` identifies the 0.10.4 archive.
+
 ## Residue-class coloring — 23 November 2026 (#71)
 
 The 0.10.4 development preview adds **Molecule → Molecular data →

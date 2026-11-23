@@ -1,6 +1,6 @@
 # Gaussian cube import
 
-**Version 0.10.4:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.5:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 
 The shared Rust importer reads one bounded scalar field from `.cube` or `.cub`.

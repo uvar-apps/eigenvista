@@ -1,5 +1,12 @@
 # Implementation status
 
+## EigenVista 0.10.5 — 23 November 2026 (#114)
+
+The current release adds residue-class coloring, a surface-colored X-ray
+shader in both packages, and a close-up of crambin in the Gallery. See the
+[0.10.5 notes](releases/0.10.5.md) and [#114](https://github.com/uvar-apps/eigenvista/issues/114)
+for qualification and download identities.
+
 ## EigenVista 0.10.4 published — 22 November 2026 (#112)
 
 [Version 0.10.4](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.4) includes optional matte ambient occlusion for opaque
