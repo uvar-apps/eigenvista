@@ -274,11 +274,12 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. The current 0.10.3 citation uses its version-specific DOI
-(`10.5281/zenodo.24391046`), supplied by the user on 20 November 2026.
+section. The current 0.10.4 citation uses its version-specific DOI
+(`10.5281/zenodo.24452126`), supplied by the user on 23 November 2026.
 The concept DOI (`10.5281/zenodo.24246123`) identifies all versions.
 The About page distinguishes
-the current citation from the historical 0.10.1 archive
+the current citation from the historical 0.10.3 archive
+(`10.5281/zenodo.24391046`), 0.10.1 archive
 (`10.5281/zenodo.24328295`), 0.10.0 archive
 (`10.5281/zenodo.24302658`) and 0.8.0 archive
 (`10.5281/zenodo.24273137`). Its current download citation is derived from

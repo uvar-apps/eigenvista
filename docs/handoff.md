@@ -10,8 +10,16 @@ downloads were published and verified by anonymous readback. The website
 uses the actual archives and includes the approved 1AON comparison.
 
 See the [0.10.4 notes](releases/0.10.4.md) for the downloads and
-[#112](https://github.com/uvar-apps/eigenvista/issues/112) for delivery verification. The Zenodo concept DOI is
-10.5281/zenodo.24246123. The 0.10.3 DOI still identifies that archive.
+[#112](https://github.com/uvar-apps/eigenvista/issues/112) for delivery verification.
+On 23 November 2026, the
+[Zenodo DOI for 0.10.4](https://doi.org/10.5281/zenodo.24452126) was confirmed
+against Zenodo's record and added to the README, citation metadata,
+release notes and website. The concept DOI `10.5281/zenodo.24246123`
+identifies EigenVista across releases.
+The CFF citation matches Zenodo's title, version and DOI. The regenerated
+site passed static validation for 27 pages and all 162 Chromium/WebKit
+route and viewport checks. The 0.10.4 tag and published packages retain
+their release identities.
 
 The archives were audited against all 738 files in the packaged source
 manifests. Mac ZIP is **82,357,123 bytes**, SHA-256

@@ -10,8 +10,10 @@ downloads were published and verified by anonymous readback. The website
 uses the actual archives and includes the approved 1AON comparison.
 
 See the [0.10.4 notes](releases/0.10.4.md) for the downloads and
-[#112](https://github.com/uvar-apps/eigenvista/issues/112) for delivery verification. The Zenodo concept DOI is
-10.5281/zenodo.24246123. The 0.10.3 DOI still identifies that archive.
+[#112](https://github.com/uvar-apps/eigenvista/issues/112) for delivery verification.
+The [Zenodo DOI for 0.10.4](https://doi.org/10.5281/zenodo.24452126) is
+`10.5281/zenodo.24452126`. The concept DOI `10.5281/zenodo.24246123`
+identifies EigenVista across releases.
 
 ## Molecular surface ambient occlusion — 22 November 2026 (#110)
 
