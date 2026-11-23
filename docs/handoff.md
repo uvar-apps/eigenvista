@@ -9,8 +9,17 @@ has two archives, two checksums and two build-info files. Anonymous downloads
 matched all six verified local files.
 Use the [0.10.5 notes](releases/0.10.5.md) for downloads and
 [#114](https://github.com/uvar-apps/eigenvista/issues/114) for qualification
-and delivery. The Zenodo concept DOI is `10.5281/zenodo.24246123`. The DOI
-`10.5281/zenodo.24452126` identifies the 0.10.4 archive.
+and delivery. On 23 November 2026, the version-specific DOI was checked
+against Zenodo's 0.10.5 record and added to the README, citation metadata,
+release notes and website.
+[Zenodo DOI 10.5281/zenodo.24453689](https://doi.org/10.5281/zenodo.24453689)
+
+The CFF citation matches Zenodo's title, version and DOI. The regenerated
+site passed static validation for 27 pages and all 162 Chromium/WebKit
+route and viewport checks.
+
+The concept DOI `10.5281/zenodo.24246123` identifies EigenVista across
+releases, and `10.5281/zenodo.24452126` identifies the 0.10.4 archive.
 
 Both packages were built from `b6a3f271d8f6cdfd0795f902ee489314c62c5248`.
 Their checksums and the complete 747-file source manifests were independently

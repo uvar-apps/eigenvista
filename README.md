@@ -136,7 +136,7 @@ documentation and gallery.
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
 (Version 0.10.5) [Computer software].
-[GitHub release](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.5).
+[DOI 10.5281/zenodo.24453689](https://doi.org/10.5281/zenodo.24453689).
 
 Machine-readable metadata is in [CITATION.cff](CITATION.cff). The
 [concept DOI 10.5281/zenodo.24246123](https://doi.org/10.5281/zenodo.24246123)

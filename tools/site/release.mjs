@@ -1,7 +1,7 @@
 // Download facts from the qualified 0.10.5 archives.
 export const release = Object.freeze({
   "version": "0.10.5",
-  "doi": "10.5281/zenodo.24246123",
+  "doi": "10.5281/zenodo.24453689",
   "source": "b6a3f271d8f6cdfd0795f902ee489314c62c5248",
   "url": "https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.5",
   "base": "https://github.com/uvar-apps/eigenvista/releases/download/v0.10.5/",

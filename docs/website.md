@@ -283,8 +283,10 @@ Author and copyright details appear in the README, the About page and the shared
 footer on every page: Author: Ugo Varetto; Copyright (c) 2026 - Ugo Varetto.
 Keep these visible when editing the layout, alongside the existing license and
 third-party credits. The shared footer links to About's **Cite EigenVista**
-section. The README citation links the 0.10.5 GitHub release. The About page
-uses the Zenodo concept DOI (`10.5281/zenodo.24246123`) for the project.
+section. The README and About page use the 0.10.5 version DOI.
+[Zenodo DOI 10.5281/zenodo.24453689](https://doi.org/10.5281/zenodo.24453689)
+
+The concept DOI (`10.5281/zenodo.24246123`) identifies the project.
 The About page distinguishes
 the current citation from the historical 0.10.4 archive
 (`10.5281/zenodo.24452126`), 0.10.3 archive

@@ -6,6 +6,8 @@ The current release adds residue-class coloring, a surface-colored X-ray
 shader in both packages, and a close-up of crambin in the Gallery. See the
 [0.10.5 notes](releases/0.10.5.md) and [#114](https://github.com/uvar-apps/eigenvista/issues/114)
 for qualification and download identities.
+The 0.10.5 archive is published on Zenodo.
+[Zenodo DOI 10.5281/zenodo.24453689](https://doi.org/10.5281/zenodo.24453689)
 
 ## EigenVista 0.10.4 published — 22 November 2026 (#112)
 

@@ -8,6 +8,8 @@ close-up. The classifier and legend use the same palette, and the shader
 reads the mesh's assigned diffuse color. Both redistributables come from the
 same clean source tag. See the [0.10.5 notes](docs/releases/0.10.5.md),
 [handoff](docs/handoff.md) and [release issue #114](https://github.com/uvar-apps/eigenvista/issues/114).
+Cite the 0.10.5 archive using its Zenodo DOI.
+[Zenodo DOI 10.5281/zenodo.24453689](https://doi.org/10.5281/zenodo.24453689)
 
 ## EigenVista 0.10.4 published — 22 November 2026 (#112)
 
