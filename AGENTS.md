@@ -9,6 +9,8 @@ example. The GUI loads the shader pair and `Salicylic-Phong.params`; the
 external connector discovers the same shader as a preset. Both export the
 numeric potential legend. Use the [release notes](docs/releases/0.10.6.md)
 and [living handoff](docs/handoff.md) for current qualification.
+Cite the 0.10.6 archive using its
+[Zenodo DOI 10.5281/zenodo.24529041](https://doi.org/10.5281/zenodo.24529041).
 
 ## EigenVista 0.10.5
 

@@ -22,8 +22,16 @@ uses a lossless copy of the accepted figure. The [website tutorial](https://uvar
 includes downloadable source data and shaders and both GUI and plain-language
 agent instructions. The site passed its static checks and 168 Chromium/WebKit
 route and viewport checks. Evidence lives in the ignored `tmp/release-0.10.6/`
-directory on the Mac and the build host. Use the Zenodo concept DOI
-`10.5281/zenodo.24246123` until 0.10.6 has an archive DOI.
+directory on the Mac and the build host.
+
+The 0.10.6 archive is published on Zenodo. The current README, CFF, release
+notes and website use its
+[version DOI 10.5281/zenodo.24529041](https://doi.org/10.5281/zenodo.24529041).
+The concept DOI `10.5281/zenodo.24246123` identifies EigenVista across versions.
+The 25 November 2026 citation update matched the CFF and website metadata
+to Zenodo's public record. Static checks and 168 Chromium/WebKit route and
+viewport checks passed for the updated site. The tag and binary archives
+retain their build-time provenance.
 
 The applicable Rust, desktop, Clippy, build, and packaging checks pass on
 both hosts. Chromium and WebKit each cover 384 passing cases per host with

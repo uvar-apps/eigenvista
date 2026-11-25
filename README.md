@@ -133,12 +133,14 @@ documentation and gallery.
 ## Cite EigenVista
 
 Varetto, U. (2026). *EigenVista: molecular and quantum chemistry visualization*
-(Version 0.10.6) [Computer software].
-Use the project’s [concept DOI](https://doi.org/10.5281/zenodo.24246123) until a 0.10.6 archive DOI is available. The [0.10.5 archive DOI](https://doi.org/10.5281/zenodo.24453689) identifies that earlier version.
+(Version 0.10.6) [Computer software]. Zenodo.
+[DOI 10.5281/zenodo.24529041](https://doi.org/10.5281/zenodo.24529041)
 
 Machine-readable metadata is in [CITATION.cff](CITATION.cff). The
 [concept DOI 10.5281/zenodo.24246123](https://doi.org/10.5281/zenodo.24246123)
-identifies EigenVista across all versions. The 0.10.4 archive is available at
+identifies EigenVista across all versions. The 0.10.5 archive is available at
+[DOI 10.5281/zenodo.24453689](https://doi.org/10.5281/zenodo.24453689).
+The 0.10.4 archive is available at
 [DOI 10.5281/zenodo.24452126](https://doi.org/10.5281/zenodo.24452126).
 The 0.10.3 archive has its own
 [DOI 10.5281/zenodo.24391046](https://doi.org/10.5281/zenodo.24391046).

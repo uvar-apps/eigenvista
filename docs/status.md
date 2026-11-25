@@ -9,6 +9,8 @@ Both packages include the shader, 88% opacity preset and salicylic acid
 example. Follow the [GUI and agent tutorial](https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html)
 to reproduce the [Gallery view](https://uvar-apps.github.io/eigenvista/gallery.html#salicylic-acid).
 The [release notes](releases/0.10.6.md) identify both archives and source.
+The 0.10.6 archive is published on Zenodo.
+[Zenodo DOI 10.5281/zenodo.24529041](https://doi.org/10.5281/zenodo.24529041)
 
 ## Electrostatic potential mapping — 25 November 2026 (#115)
 
