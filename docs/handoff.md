@@ -15,6 +15,30 @@ The [user workflow](user-guide.md#color-an-electron-density-surface-by-electrost
 and [format](preview-format.md) describe the source feature. The published
 0.10.5 binaries, tag and citation identify the earlier release below.
 
+The final source and test snapshot is
+`53aaca7a5165529e13c6c18df929087f4505da59`. All 753 tracked input hashes matched
+on macOS, the CachyOS checkout and the isolated WebKit checkout. Locked Rust
+and desktop tests passed 390 on macOS and 388 on CachyOS. Both passed formatting,
+strict workspace/all-target Clippy, TypeScript/WASM production builds, native
+connector smoke tests, and the packaged Rust dependency notice checks. Packaging
+checks passed 33 on Mac and 27 on Linux.
+
+The final browser matrix passed 766 tests per platform, 383 each in Chromium
+and WebKit, with zero skips, failures or retries. Linux Chromium used the
+host Intel UHD 630 through EGL. WebKit ran in the pinned Playwright 1.63.0
+Noble container with its own Vite server and the established 600-second case
+timeout for the slower backend. The Linux native connector used authenticated
+TCP Xvfb and llvmpipe. These checks use source-built native apps.
+
+The analytic Gaussian check and 36 PySCF/libcint points qualify the Coulomb
+kernel across closed- and open-shell examples with Cartesian and spherical
+terms through G. Browser coverage includes the signed legend, actual mapped
+pixels, separate back/front passes for translucent maps, both shading modes,
+PNG composition, saved appearance and cancellation at the mapping checkpoint.
+The 112³ pyridine example shows the corrected translucent rendering and
+21,228 triangles. Logs, renderer evidence and reviewed images are in `tmp/mep/`
+on both hosts. The ordinary source uses the project's local validation workflow.
+
 ## EigenVista 0.10.5 — 23 November 2026 (#114)
 
 The release includes residue-class coloring in the GUI and bundled AI

@@ -720,9 +720,11 @@ The registered worker meshes the density and then maps its vertices. It
 publishes the resulting surface only after the same document preflight used
 for Save. The archive binds f64 potential values to the density hash, nuclei,
 and ordered vertices. The renderer interpolates the potential before applying
-the color ramp, then applies the built-in diffuse/Blinn–Phong lighting. The
-viewport and PNG composition share one signed legend, and the controller uses
-the same generation, cancellation and appearance paths as the GUI.
+the color ramp, then applies the built-in diffuse/Blinn–Phong lighting.
+Translucent mapped meshes draw back faces before front faces to keep triangle
+traversal order from producing stripes. The viewport and PNG composition
+share one signed legend, and the controller uses the same generation,
+cancellation and appearance paths as the GUI.
 
 Molecular ambient occlusion is an optional session display setting. The
 [controller](../app/src/molecularAmbientOcclusion.ts) uses the pinned GTAO addon
