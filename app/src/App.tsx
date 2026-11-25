@@ -31,7 +31,11 @@ import { InspectionControls } from "./InspectionControls";
 import { MolecularSurfaceControls } from "./MolecularSurfaceControls";
 import { FieldAnalysisControls } from "./FieldAnalysisControls";
 import { WorkspaceFrame } from "./WorkspacePane";
-import { controlPreset, updateDeclaredUniforms } from "./control/presets";
+import {
+  controlPreset,
+  updateDeclaredUniforms,
+  type SurfaceShaderPreset,
+} from "./control/presets";
 import {
   patchStructureDisplay,
   visibleStructureAtoms,
@@ -1321,7 +1325,7 @@ export default function App() {
         const pair =
           method === "shader.apply"
             ? controlPreset(
-                params.preset as "surface-clip" | "x-ray",
+                params.preset as SurfaceShaderPreset,
                 patch,
                 params.transparency as boolean | undefined,
               )

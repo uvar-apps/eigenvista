@@ -253,6 +253,7 @@ test("Real Linux resources stage with exact hashes, modes, all palettes, example
     "README.md",
     "examples/bicyclic-c7h10.molden",
     "examples/complex-field.cube",
+    "examples/salicylic-acid-rhf.molden",
   ])
     assert.ok(restored[`share/eigenvista/AI-connector/${file}`]);
   assert.ok(restored["share/eigenvista/Examples/water.molden"]);

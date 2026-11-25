@@ -23,3 +23,15 @@ without assigning a physical interpretation from its filename.
 
 The surface shader examples are shipped separately under `downloads/shaders/`.
 Their README and GPL notice retain the original shader attribution.
+
+## Salicylic acid
+
+`salicylic-acid-rhf.molden` contains the C₇H₆O₃ geometry and a closed-shell,
+all-electron RHF/6-31G(d) calculation produced by PySCF 2.14.0. The
+[PubChem CID 338](https://pubchem.ncbi.nlm.nih.gov/compound/338) 3D conformer
+was translated to center the coordinates before export. This is a
+single-point calculation at the supplied conformer geometry. Display bonds
+are inferred by EigenVista.
+
+SHA-256: `aadd4302ae928ca83b7dfd9894700075abc4c0711191eb148166e729cfa6f626`.
+The published Molden example accompanies EigenVista under GPL-2.0-or-later.

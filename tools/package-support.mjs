@@ -8,6 +8,9 @@ export const packagedSurfaceShaders = [
   "surface-x-ray.vert",
   "surface-x-ray.frag",
   "surface-x-ray.params",
+  "surface-phong-vertex-color.vert",
+  "surface-phong-vertex-color.frag",
+  "Salicylic-Phong.params",
 ];
 
 export function testerPackageName(config, revision, started, dirty) {

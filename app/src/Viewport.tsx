@@ -1,10 +1,12 @@
 import {
   attachPotential,
+  drawCenteredPotentialKey,
   drawPotentialKey,
   potentialColors,
   POTENTIAL_RAMP_GLSL,
   type PotentialKey,
 } from "./electrostaticRendering";
+import { usesVertexColorPhong } from "./control/presets";
 import {
   useEffect,
   useMemo,
@@ -39,6 +41,7 @@ import {
   type ShaderPair,
 } from "./shaderTools";
 import { volumeObject, type VolumeQuality } from "./volume";
+import { SurfaceTransparency } from "./surfaceTransparency";
 import { addSceneLighting, SURFACE_LIGHTING_GLSL } from "./sceneLighting";
 import {
   MolecularAmbientOcclusion,
@@ -512,6 +515,7 @@ export function Viewport({
     controls.enableDamping = true;
     const group = new THREE.Group();
     scene.add(group);
+    const transparency = new SurfaceTransparency(renderer);
     const occlusion = new MolecularAmbientOcclusion(renderer, scene, camera);
     const surfaceOcclusion = new MolecularAmbientOcclusion(
       renderer,
@@ -552,7 +556,7 @@ export function Viewport({
           );
         }
       }
-      renderer.render(scene, camera);
+      transparency.render(scene, camera, group);
       // Query only at resource boundaries: getError synchronizes with the GPU
       // process and must not stall every camera/damping frame.
       if (checkAllocations || engine.current?.allocationPending) {
@@ -670,8 +674,23 @@ export function Viewport({
               context.fillText(message, x, y + 21);
             }
           });
-          const potentialKeys = committedPotentialKeys.current;
+          const active = shaderRef.current;
+          const potentialKeys = committedPotentialKeys.current.filter(
+            (key) =>
+              !key.centered ||
+              active?.transparent === false ||
+              Number(active?.values.opacity) > 0,
+          );
           potentialKeys.forEach((key, index) => {
+            if (key.centered && potentialKeys.length === 1) {
+              drawCenteredPotentialKey(
+                context,
+                key,
+                width / pixelRatio,
+                height / pixelRatio,
+              );
+              return;
+            }
             const y =
               height / pixelRatio - 36 - (potentialKeys.length - index) * 76;
             drawPotentialKey(
@@ -877,6 +896,7 @@ export function Viewport({
       e.preventDefault();
       occlusion.resetContext();
       surfaceOcclusion.resetContext();
+      transparency.releaseBuffers();
       setError("Graphics context lost. Reload the document to recover.");
     };
     renderer.domElement.addEventListener("pointerdown", pointerdown);
@@ -902,6 +922,7 @@ export function Viewport({
       controls.dispose();
       occlusion.dispose();
       surfaceOcclusion.dispose();
+      transparency.dispose();
       dispose(group);
       renderer.dispose();
       div.removeChild(renderer.domElement);
@@ -923,6 +944,7 @@ export function Viewport({
     // prepared. Publishing a plane without its lines causes visible flicker.
     if (contourPending || contourPreparationFailed) return;
     const shader = shaderRef.current;
+    const vertexColorPhong = shader && usesVertexColorPhong(shader);
     const group = new THREE.Group();
     const opaqueMolecularSurfaces: THREE.Mesh[] = [];
     let stagedAtomIndices: number[] = [];
@@ -1140,10 +1162,11 @@ export function Viewport({
         const mapped = potential?.enabled ? potential : undefined;
         if (mapped) {
           attachPotential(geometry, mapped, Boolean(usesCustom));
-          if (!usesCustom && s.opacity > 0)
+          if (usesCustom ? vertexColorPhong : s.opacity > 0)
             potentialKeys.push({
               range: mapped.range,
               label: `Density isovalue ${("isovalue" in s ? s.isovalue : null)?.toPrecision(4)} e/bohr³`,
+              centered: Boolean(usesCustom),
             });
         } else if (shader)
           attachSurfaceColors(geometry, s.color, s.positions.length / 3);

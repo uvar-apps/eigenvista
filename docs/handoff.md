@@ -1,5 +1,29 @@
 # Development handoff
 
+## Custom-shaded surface depth ordering — 25 November 2026 (#118)
+
+[Issue #118](https://github.com/uvar-apps/eigenvista/issues/118) is a P1
+renderer correctness fix in the working tree based on `702a7ee`. The viewport
+and PNG export share depth peeling for transparent custom-shaded surfaces.
+The renderer uses each shader's emitted alpha and composites visible
+fragments from front to back against the existing scene depth. The transparent
+targets are reused between frames, and the pass stops when no more fragments
+can affect the image at PNG precision.
+
+The generic vertex-colored Phong shader under `app/shaders/` reads only the
+mesh inputs. `Salicylic-Phong.params` sets 88% opacity. The salicylic acid
+preview recorded in `tmp/mep/` shows the nearer lobe correctly at 88% with
+the bonds visible through it. At 100% both shader transparency settings
+show the foreground surface. The new browser regression tests overlapping
+triangles in one mesh, an atom between layers, view rotation, tiny and zero
+alpha, and both ordinary and transparent PNG export.
+
+The macOS TypeScript check and production frontend build passed. All 102
+affected browser cases passed, 51 in Chromium and 51 in WebKit. The browser
+log is `tmp/mep/p1-transparency-final-browser.log` and the 88% capture is
+`tmp/mep/salicylic-phong-depth-corrected.png`. This is local source
+verification. Native bundles and Linux release qualification remain pending.
+
 ## Electrostatic potential on total-density meshes — 25 November 2026 (#115)
 
 Issue [#115](https://github.com/uvar-apps/eigenvista/issues/115) tracks the

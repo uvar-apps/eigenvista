@@ -1,5 +1,15 @@
 # EigenVista agent guide
 
+## EigenVista 0.10.6 (#117)
+
+This release adds all-electron potential mapping on total-density meshes
+(#115), fixes custom-shader transparency depth ordering (#118), and bundles
+the generic vertex-colored Phong shader and a reproducible salicylic acid
+example. The GUI loads the shader pair and `Salicylic-Phong.params`; the
+external connector discovers the same shader as a preset. Both export the
+numeric potential legend. Use the [release notes](docs/releases/0.10.6.md)
+and [living handoff](docs/handoff.md) for current qualification.
+
 ## EigenVista 0.10.5
 
 The release adds residue-class coloring in the GUI and shared controller

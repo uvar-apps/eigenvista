@@ -15,6 +15,14 @@ and crate directories use `eigenvista-*`, and browser bindings are generated as
 
 ## Prerequisites
 
+### 0.10.6 source
+
+The density worker can map electrostatic potential on a total-density mesh.
+The generic vertex-colored Phong preset uses the same source files through
+the GUI and app controller. Transparent custom shader fragments are
+depth-ordered in the viewport and exported PNG. See the
+[0.10.6 notes](releases/0.10.6.md).
+
 ### 0.10.5 source
 
 The residue-class color mode is shared between the GUI and controller schema.

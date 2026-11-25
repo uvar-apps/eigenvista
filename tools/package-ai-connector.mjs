@@ -19,6 +19,7 @@ const resourceFiles = [
     "examples/bicyclic-c7h10.molden",
   ],
   ["tools/site/examples/complex-field.cube", "examples/complex-field.cube"],
+  ["tools/site/examples/salicylic-acid-rhf.molden", "examples/salicylic-acid-rhf.molden"],
   ["tools/site/examples/README.md", "examples/README.md"],
   ["LICENSE", "examples/LICENSE"],
   ...[

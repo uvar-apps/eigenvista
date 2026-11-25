@@ -1,6 +1,6 @@
 # Application control API
 
-**Version 0.10.5:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
+**Version 0.10.6:** workloads use [allocation-driven memory handling](allocation-policy.md), with no application memory budgets. Historical release records retain the limits that applied to their original binaries.
 
 Save coordination in 0.10.3 (#99): GUI and API Save share pending-inspection admission.
 An inspection write is admitted synchronously before React/worker validation;
@@ -35,7 +35,7 @@ these additions; an older source-built instance may lack them.
 
 **Scientific inspection, introduced in 0.10.0:** the Mac package includes the geometry,
 SES/SAS and quantitative-field methods documented below (#83–#86). Older
-0.8.0 downloads do not have these methods. Use the matching 0.10.5
+0.8.0 downloads do not have these methods. Use the matching 0.10.6
 app/helper and the connected instance's
 `app.capabilities`, not the numeric version or a hardcoded method count, to
 establish availability.
@@ -243,7 +243,7 @@ rules below. Results may include additional metadata.
 | `surfaces.set_visibility` | `surfaceId`, `visible` | Applied visibility/revision |
 | `surfaces.remove` | `surfaceId` | Removal/revision |
 | `scene.set` | Any supported appearance patch below | Applied view/session settings and revision |
-| `shader.apply` | `preset: "surface-clip" | "x-ray"`, `target?` (`"all"`; 0.10.0: one QC/molecular surface ID), `uniforms?`, `transparency?` | Applied shader metadata/revision |
+| `shader.apply` | `preset` (`surface-clip`, `x-ray`, or `surface-phong-vertex-color`), `target?` (`all` or a QC/molecular surface ID), `uniforms?`, `transparency?` | Applied shader metadata/revision |
 | `shader.set_uniforms` | `uniforms`, `target?` as above, `transparency?` | Applied declared uniforms/revision; omitted target retains the applied target |
 | `shader.clear` | `{}` | Cleared shader/revision |
 | `camera.get` | `{}` | `{revision,position,target,up}` |
@@ -372,9 +372,11 @@ total-density matrix ID. The positive isovalue sets the shape. The job reports
 `mapping` progress in mesh vertices. On success `surfaces.list` reports
 `electrostaticPotential: {enabled, range, units}` for the mapped mesh.
 Use `surfaces.set_potential_appearance` to set either or both of `enabled` and
-`range` without recomputing samples. Set `shading: "blinn-phong"` through
-`scene.set` for highlights. The visible built-in potential key is included by
-`image.export`. The native connector exposes these same live schemas.
+`range` without recomputing samples. For vertex-colored custom Phong, use
+`shader.apply` with preset `surface-phong-vertex-color`, the mapped surface ID,
+`uniforms: {opacity: 0.88}` and `transparency: true`. The centered potential
+legend is included in `image.export`. The native connector exposes these
+same live schemas.
 
 You can ask the connected assistant to “color the total electron-density surface
 by electrostatic potential, show the color scale, add Phong highlights, and save
@@ -630,7 +632,7 @@ are rejected. Existing export paths are probed without blocking on a FIFO and
 must still satisfy the selected publication and source-protection policy.
 
 Control writes default to **atomic no-clobber**: choose a new `.eigenvista`,
-`.png` or `.csv` filename. Version 0.10.5 also permits explicit
+`.png` or `.csv` filename. Version 0.10.6 also permits explicit
 native `overwrite:true` for `document.save`, `image.export` and `table.export`.
 It authorizes atomic replacement of existing or late-created destinations.
 Source paths/hard-link aliases and scoped-path validation remain protected.
@@ -703,7 +705,7 @@ An unsaved-document replacement fails with `permission_required` unless
 operations are explicit failures. A transport timeout has an uncertain outcome:
 inspect current state/jobs and output files before repeating a mutation.
 
-Version 0.10.5 has no application byte/count ceilings for frames, files,
+Version 0.10.6 has no application byte/count ceilings for frames, files,
 encoded Save results, PNG/CSV artifacts, palettes, selectors or orbital batches.
 Pagination defaults to 100 records but accepts larger positive safe integers.
 Jobs remain discoverable for the controller lifetime. Grid presets are advisory;

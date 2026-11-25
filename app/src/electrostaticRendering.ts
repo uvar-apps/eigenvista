@@ -51,7 +51,48 @@ export function attachPotential(
   geometry.setAttribute("potential", new THREE.BufferAttribute(values, 1));
 }
 
-export type PotentialKey = { range: number; label: string };
+export type PotentialKey = { range: number; label: string; centered?: boolean };
+
+/** Figure legend for the bundled vertex-color shader, including PNG export. */
+export function drawCenteredPotentialKey(
+  context: CanvasRenderingContext2D,
+  key: PotentialKey,
+  width: number,
+  height: number,
+) {
+  const rail = Math.min(650, width * 0.68);
+  const left = (width - rail) / 2;
+  const y = height - 37;
+  context.save();
+  const gradient = context.createLinearGradient(left, y, left + rail, y);
+  const color = new THREE.Color();
+  for (let i = 0; i <= 64; i++)
+    gradient.addColorStop(i / 64, ramp(i / 64, color).getStyle());
+  context.fillStyle = gradient;
+  context.fillRect(left, y, rail, 17);
+  context.textAlign = "center";
+  context.textBaseline = "alphabetic";
+  context.strokeStyle = "rgba(0,0,0,0.85)";
+  context.lineWidth = 2.5;
+  context.fillStyle = "white";
+  const label = (text: string, x: number, baseline: number) => {
+    context.strokeText(text, x, baseline);
+    context.fillText(text, x, baseline);
+  };
+  context.font = "600 18px system-ui, sans-serif";
+  label("Electrostatic potential (hartree/e)", width / 2, y - 47);
+  context.font = "600 13px system-ui, sans-serif";
+  const digits = Math.max(3, 2 - Math.floor(Math.log10(key.range)));
+  for (let i = 0; i <= 4; i++) {
+    const value = key.range * (i / 2 - 1);
+    label(
+      digits <= 5 ? value.toFixed(digits) : value.toPrecision(3),
+      left + (rail * i) / 4,
+      y - 20,
+    );
+  }
+  context.restore();
+}
 
 export function drawPotentialKey(
   context: CanvasRenderingContext2D,

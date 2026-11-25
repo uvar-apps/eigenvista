@@ -152,6 +152,10 @@ export const linuxResourceFiles = (sourceManifest) => {
       `${dataPath}/AI-connector/examples/complex-field.cube`,
     ],
     [
+      "tools/site/examples/salicylic-acid-rhf.molden",
+      `${dataPath}/AI-connector/examples/salicylic-acid-rhf.molden`,
+    ],
+    [
       "tools/site/examples/README.md",
       `${dataPath}/AI-connector/examples/README.md`,
     ],

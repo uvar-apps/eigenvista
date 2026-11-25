@@ -251,15 +251,51 @@ export function buildSurfaceMaterial(
     const value = pair.values[def.name] ?? defaultValue(def.kind, def.name);
     uniforms[def.name] = { value: toUniformValue(def.kind, value) };
   }
+  const fragment = prepareFragmentSource(pair.fragmentSource);
+  const writesDepth = /\bgl_FragDepth\b/.test(fragment);
   const material = new THREE.ShaderMaterial({
     side: THREE.DoubleSide,
     uniforms,
     vertexShader: prepareVertexSource(pair.vertexSource),
-    fragmentShader: `#define main eigenvista_custom_fragment_main
-${prepareFragmentSource(pair.fragmentSource)}
+    fragmentShader: `
+#ifdef EIGENVISTA_DEPTH_PEEL
+  // Offscreen targets normally use a linear output transform. A custom
+  // shader must produce the same display colors here as on the canvas.
+  #define linearToOutputTexel sRGBTransferOETF
+  uniform highp sampler2D eigenvistaSceneDepth;
+  uniform highp sampler2D eigenvistaPreviousDepth;
+  uniform highp sampler2D eigenvistaAccumulation;
+  uniform bool eigenvistaHasPreviousDepth;
+
+  void eigenvistaTestDepth(float depth) {
+    ivec2 pixel = ivec2(gl_FragCoord.xy);
+    if (depth >= texelFetch(eigenvistaSceneDepth, pixel, 0).r ||
+        (eigenvistaHasPreviousDepth &&
+         depth <= texelFetch(eigenvistaPreviousDepth, pixel, 0).r) ||
+        // At this point the remaining contribution is below half an
+        // 8-bit display code, even if every deeper fragment is white.
+        texelFetch(eigenvistaAccumulation, pixel, 0).a <= 0.5 / 255.0)
+      discard;
+  }
+#endif
+#define main eigenvista_custom_fragment_main
+${fragment}
 #undef main
 void main() {
+  #ifdef EIGENVISTA_DEPTH_PEEL
+    ${
+      writesDepth
+        ? "gl_FragDepth = gl_FragCoord.z;"
+        : "eigenvistaTestDepth(gl_FragCoord.z);"
+    }
+  #endif
   eigenvista_custom_fragment_main();
+  #ifdef EIGENVISTA_DEPTH_PEEL
+    ${writesDepth ? "eigenvistaTestDepth(clamp(gl_FragDepth, 0.0, 1.0));" : ""}
+    if (!(gl_FragColor.a > 0.0)) discard;
+    gl_FragColor = clamp(gl_FragColor, 0.0, 1.0);
+    gl_FragColor.rgb *= gl_FragColor.a;
+  #endif
   #ifdef EIGENVISTA_OPAQUE_SHADER_ALPHA
     gl_FragColor.a = 1.0;
   #endif

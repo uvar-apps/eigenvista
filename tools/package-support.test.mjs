@@ -190,11 +190,11 @@ test("classic Molekel shaders ship with provenance for the tester archive", () =
     assert.ok(fs.existsSync(path.join(shaders, name)), `missing ${name}`);
   assert.ok(fs.existsSync(path.join(shaders, "doc/readme")));
 });
-test("X-ray shader examples can be staged from a package source snapshot", (t) => {
+test("X-ray and vertex-colored Phong examples stage from the package source snapshot", (t) => {
   const sources = packagedSurfaceShaders.map((file) => `app/shaders/${file}`);
   const snapshot = fixture(t);
   const manifest = snapshotFiles(repo, sources, snapshot);
-  assert.equal(sources.length, 3);
+  assert.equal(sources.length, 6);
   for (const file of sources) {
     assert.ok(manifest[file]);
     assert.ok(!fs.existsSync(path.join(repo, "shaders", path.basename(file))));

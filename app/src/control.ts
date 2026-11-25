@@ -381,7 +381,10 @@ export const CONTROL_METHODS = {
     "Apply a bundled shader preset and declared uniform values.",
     mutation(
       {
-        preset: { type: "string", enum: ["surface-clip", "x-ray"] },
+        preset: {
+          type: "string",
+          enum: ["surface-clip", "x-ray", "surface-phong-vertex-color"],
+        },
         target: string,
         uniforms,
         transparency: boolean,

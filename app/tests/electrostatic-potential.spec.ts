@@ -62,6 +62,12 @@ async function exported(page: Page) {
       checksum,
       negative: at(15, image.height / ratio - 72),
       positive: at(230, image.height / ratio - 72),
+      centeredNegative: at(
+        (image.width / ratio - Math.min(650, (image.width / ratio) * 0.68)) /
+          2 +
+          5,
+        image.height / ratio - 31,
+      ),
     };
   }, dataUrl);
 }
@@ -179,6 +185,19 @@ test("maps a density mesh with Phong, exports the color key, and restores map da
   );
   expect(await saved(page)).toEqual(beforeSave);
   expect((await exported(page)).negative[0]).toBeGreaterThan(200);
+  await call(page, "shader.apply", {
+    preset: "surface-phong-vertex-color",
+    target: surface.id,
+    uniforms: { opacity: 0.88 },
+    transparency: true,
+  });
+  const custom = await exported(page);
+  expect(custom.centeredNegative[0]).toBeGreaterThan(200);
+  expect(custom.centeredNegative[0]).toBeGreaterThan(
+    custom.centeredNegative[2] + 100,
+  );
+  await call(page, "shader.set_uniforms", { uniforms: { opacity: 0 } });
+  expect((await exported(page)).centeredNegative[3]).toBe(0);
   expect(errors).toEqual([]);
 });
 
