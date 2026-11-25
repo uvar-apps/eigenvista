@@ -238,7 +238,9 @@ test("controller maps one total density and cancels a replacement at the mapping
   const before = await saved(page);
   expect(before.some((s) => s.electrostaticPotential?.enabled)).toBe(true);
   const cancelled = await page.evaluate(async (request) => {
-    const state = window as Window & { mepProbe: Probe };
+    const state = window as Window & { mepProbe?: Probe };
+    if (!state.mepProbe)
+      throw new Error("Mapping checkpoint probe not installed");
     const job = (await window.eigenvistaControl!.request("surfaces.generate", {
       ...request,
       resolution: 96,
