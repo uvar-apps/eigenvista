@@ -21,6 +21,7 @@ const BIO_PROFILE: &str = "eigenvista-biological-structure-v1";
 const ANNOTATIONS_PROFILE: &str = "eigenvista-annotations-v1";
 const MOLECULAR_SURFACES_PROFILE: &str = "eigenvista-molecular-surfaces-v1";
 const FIELD_ANALYSIS_PROFILE: &str = "eigenvista-field-analysis-v1";
+const ELECTROSTATIC_POTENTIAL_PROFILE: &str = "eigenvista-electrostatic-potential-v1";
 
 /// Exact ordered capabilities reject unknown/duplicate flags and require each
 /// optional scientific payload to declare its interpretation explicitly.
@@ -35,6 +36,13 @@ fn required_features(document: &Value) -> Vec<String> {
         if document.get(key).is_some_and(|value| !value.is_null()) {
             features.push(feature.into());
         }
+    }
+    if document["surfaces"].as_array().is_some_and(|surfaces| {
+        surfaces
+            .iter()
+            .any(|surface| !surface["electrostatic_potential"].is_null())
+    }) {
+        features.push(ELECTROSTATIC_POTENTIAL_PROFILE.into());
     }
     features
 }
@@ -370,6 +378,41 @@ mod tests {
         assert!(bytes.starts_with(b"PK"));
         assert_eq!(decode(&bytes).unwrap(), d);
     }
+    #[test]
+    fn mapped_density_mesh_roundtrip_binds_samples_to_the_mesh_and_atoms() {
+        let mut d = fixtures::hydrogen_pair();
+        let field = "total";
+        let g = compute::sample(&d, field, 12).unwrap();
+        let hash = compute::source_hash(&d, field).unwrap();
+        let mut surface = compute::mesh(&g, 0.08, field, &hash, "#259d86", 0.6).unwrap();
+        eigenvista_core::electrostatic::map_surface(&d, &mut surface, |_, _| Ok(())).unwrap();
+        let map = surface.electrostatic_potential.as_mut().unwrap();
+        map.enabled = false;
+        map.range *= 0.5;
+        d.surfaces.push(surface);
+        let bytes = encode(&d).unwrap();
+        assert_eq!(decode(&bytes).unwrap(), d);
+        let mut zip = ZipArchive::new(Cursor::new(bytes)).unwrap();
+        let manifest: Manifest =
+            serde_json::from_reader(zip.by_name("manifest.json").unwrap()).unwrap();
+        assert!(
+            manifest
+                .required_features
+                .contains(&ELECTROSTATIC_POTENTIAL_PROFILE.into())
+        );
+        let values = &manifest.document["surfaces"][0]["electrostatic_potential"]["values"];
+        let array = &manifest.arrays[values["$array"].as_str().unwrap()];
+        assert_eq!(array.dtype, "f64");
+        assert_eq!(array.shape, vec![d.surfaces[0].positions.len() / 3]);
+
+        let point = d.surfaces[0].positions[0];
+        d.surfaces[0].positions[0] += 0.5;
+        assert!(validate_document(&d).unwrap_err().contains("source hash"));
+        d.surfaces[0].positions[0] = point;
+        d.atoms[0].position[0] += 0.01;
+        assert!(validate_document(&d).unwrap_err().contains("source hash"));
+    }
+
     #[test]
     fn open_shell_roundtrip() {
         let d = fixtures::open_shell();

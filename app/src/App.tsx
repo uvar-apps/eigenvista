@@ -1,3 +1,8 @@
+import { potentialSwatch } from "./electrostaticRendering";
+import {
+  SurfacePotentialControls,
+  type PotentialAppearance,
+} from "./SurfacePotentialControls";
 import { GridResolutionInput } from "./GridResolutionInput";
 import {
   useCallback,
@@ -118,6 +123,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [resolution, setResolution] = useState(40);
+  const [mapPotential, setMapPotential] = useState(false);
   const [mode, setMode] = useState<RenderMode>("mesh");
   const [volumeQuality, setVolumeQuality] = useState<VolumeQuality>(2);
   const [automaticAoRadius, setAutomaticAoRadius] = useState(true);
@@ -412,6 +418,7 @@ export default function App() {
     orbitals?: string[],
     markDirty = true,
     execution?: ControlExecution,
+    electrostaticPotential = false,
   ) {
     if (!document.view.field) return;
     if (!isGridResolution(res)) {
@@ -462,6 +469,7 @@ export default function App() {
             field,
             resolution: res,
             iso: document.view.isovalue,
+            electrostaticPotential,
           },
           (stage, counts) => {
             if (token !== generation.current) return;
@@ -470,6 +478,8 @@ export default function App() {
               setBusy(`${description} / Sampling field`);
             if (stage === "meshing")
               setBusy(`${description} / Extracting meshes`);
+            if (stage === "mapping")
+              setBusy(`${description} / Mapping electrostatic potential`);
             execution?.progress(stage, counts);
           },
           { signal: execution?.signal },
@@ -530,7 +540,7 @@ export default function App() {
       );
       setGrid(activeGrid);
       execution?.markPublished();
-      if (orbitals) {
+      if (orbitals || electrostaticPotential) {
         setMode("mesh");
         setResolution(res);
       }
@@ -560,6 +570,37 @@ export default function App() {
       }
     }
   }
+  function setPotentialAppearance(
+    document: EigenVistaDocument,
+    surfaceId: string,
+    patch: PotentialAppearance,
+  ) {
+    const surface = document.surfaces.find((s) => s.id === surfaceId);
+    const potential = surface?.electrostatic_potential;
+    if (!potential)
+      throw new ControlError(
+        "not_found",
+        "This surface has no electrostatic potential samples",
+      );
+    const next = { ...potential, ...patch };
+    if (next.enabled !== potential.enabled || next.range !== potential.range) {
+      setDoc({
+        ...document,
+        surfaces: document.surfaces.map((s) =>
+          s.id === surfaceId ? { ...s, electrostatic_potential: next } : s,
+        ),
+      });
+      setDirty(true);
+    }
+    return {
+      surfaceId,
+      enabled: next.enabled,
+      range: next.range,
+      units: "hartree/e",
+      revision: documentRevision.current,
+    };
+  }
+
   function generateOrbitals(ids: string[], iso: number, res: number) {
     if (!doc || busy || !ids.length) return;
     if (!Number.isFinite(iso) || iso <= 0 || !isGridResolution(res)) {
@@ -1128,6 +1169,7 @@ export default function App() {
         orbitalBatch ? ids : undefined,
         true,
         execution,
+        params.electrostaticPotential === true,
       );
       setMode("mesh");
       setResolution(params.resolution as number);
@@ -1137,6 +1179,21 @@ export default function App() {
       if (document.view.field === params.fieldId)
         return { fieldId: params.fieldId, revision: documentRevision.current };
       return await selectField(params.fieldId as string, execution);
+    }
+    if (method === "surfaces.set_potential_appearance") {
+      const patch: PotentialAppearance = {};
+      if (typeof params.enabled === "boolean") patch.enabled = params.enabled;
+      if (typeof params.range === "number") patch.range = params.range;
+      if (patch.enabled === undefined && patch.range === undefined)
+        throw new ControlError(
+          "invalid_arguments",
+          "Supply the potential visibility or range",
+        );
+      return setPotentialAppearance(
+        document,
+        params.surfaceId as string,
+        patch,
+      );
     }
     if (method === "surfaces.set_visibility" || method === "surfaces.remove") {
       const found = document.surfaces.find(
@@ -1988,12 +2045,38 @@ export default function App() {
                   }}
                 />
               </label>
+              {doc.densities.some(
+                (d) => d.id === doc.view.field && d.kind === "total",
+              ) && (
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={mapPotential}
+                    disabled={!!busy}
+                    onChange={(event) => setMapPotential(event.target.checked)}
+                  />
+                  Map electrostatic potential (all-electron density)
+                </label>
+              )}
               <button
                 className="primary generate"
                 disabled={
                   busy ? !busy.startsWith("Calculating") : !doc.view.field
                 }
-                onClick={() => (busy ? stop() : compute(doc))}
+                onClick={() => {
+                  if (busy) return stop();
+                  void compute(
+                    doc,
+                    resolution,
+                    undefined,
+                    true,
+                    undefined,
+                    mapPotential &&
+                      doc.densities.some(
+                        (d) => d.id === doc.view.field && d.kind === "total",
+                      ),
+                  );
+                }}
               >
                 {busy.startsWith("Calculating") ? (
                   <>
@@ -2323,50 +2406,69 @@ export default function App() {
                 <p className="empty">No surfaces</p>
               )}
               {doc.surfaces.map((s) => (
-                <div className="surface-row" key={s.id}>
-                  <button
-                    aria-label={`Toggle ${s.label}`}
-                    title="Toggle visibility"
-                    onClick={() => {
-                      setDoc({
-                        ...doc,
-                        surfaces: doc.surfaces.map((x) =>
-                          x.id === s.id ? { ...x, visible: !x.visible } : x,
-                        ),
-                      });
-                      setDirty(true);
-                    }}
-                  >
-                    {s.visible ? <Eye size={16} /> : <EyeOff size={16} />}
-                  </button>
-                  <span
-                    className="surface-swatch"
-                    style={{ background: s.color }}
-                  />
-                  <div>
-                    <strong>
-                      {s.isovalue === null
-                        ? s.label
-                        : `${s.field} ${s.isovalue > 0 ? "+" : ""}${s.isovalue}`}
-                    </strong>
-                    <small>
-                      {(s.indices.length / 3).toLocaleString()} triangles
-                    </small>
+                <div key={s.id}>
+                  <div className="surface-row">
+                    <button
+                      aria-label={`Toggle ${s.label}`}
+                      title="Toggle visibility"
+                      onClick={() => {
+                        setDoc({
+                          ...doc,
+                          surfaces: doc.surfaces.map((x) =>
+                            x.id === s.id ? { ...x, visible: !x.visible } : x,
+                          ),
+                        });
+                        setDirty(true);
+                      }}
+                    >
+                      {s.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
+                    <span
+                      className="surface-swatch"
+                      style={{
+                        background: s.electrostatic_potential?.enabled
+                          ? potentialSwatch
+                          : s.color,
+                      }}
+                    />
+                    <div>
+                      <strong>
+                        {s.isovalue === null
+                          ? s.label
+                          : `${s.field} ${s.isovalue > 0 ? "+" : ""}${s.isovalue}`}
+                      </strong>
+                      <small>
+                        {(s.indices.length / 3).toLocaleString()} triangles
+                      </small>
+                    </div>
+                    <button
+                      aria-label={`Delete ${s.label}`}
+                      title="Delete surface"
+                      disabled={!!busy}
+                      onClick={() => {
+                        setDoc({
+                          ...doc,
+                          surfaces: doc.surfaces.filter((x) => x.id !== s.id),
+                        });
+                        setDirty(true);
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                  <button
-                    aria-label={`Delete ${s.label}`}
-                    title="Delete surface"
-                    disabled={!!busy}
-                    onClick={() => {
-                      setDoc({
-                        ...doc,
-                        surfaces: doc.surfaces.filter((x) => x.id !== s.id),
-                      });
-                      setDirty(true);
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {s.electrostatic_potential && (
+                    <SurfacePotentialControls
+                      surface={s}
+                      disabled={!!busy}
+                      onChange={(patch) =>
+                        setPotentialAppearance(
+                          current.current ?? doc,
+                          s.id,
+                          patch,
+                        )
+                      }
+                    />
+                  )}
                 </div>
               ))}
             </PanelSection>

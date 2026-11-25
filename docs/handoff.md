@@ -1,5 +1,20 @@
 # Development handoff
 
+## Electrostatic potential on total-density meshes — 25 November 2026 (#115)
+
+Issue [#115](https://github.com/uvar-apps/eigenvista/issues/115) tracks the
+implementation on `codex/density-surface-mep`. The selected positive density
+isovalue determines geometry. The worker evaluates the all-electron molecular
+electrostatic potential in hartree/e at the marching-cubes vertices. Saved maps
+retain the f64 samples, source fingerprint, visibility and symmetric color range.
+The built-in renderer uses the same signed ramp in the mesh and exported legend.
+The GUI and connector share the cancellable generation and appearance operations.
+
+The [user workflow](user-guide.md#color-an-electron-density-surface-by-electrostatic-potential),
+[controller details](application-control.md#electrostatic-potential-on-a-density-surface)
+and [format](preview-format.md) describe the source feature. The published
+0.10.5 binaries, tag and citation identify the earlier release below.
+
 ## EigenVista 0.10.5 — 23 November 2026 (#114)
 
 The release includes residue-class coloring in the GUI and bundled AI

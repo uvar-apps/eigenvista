@@ -25,6 +25,7 @@ export function CalculationProgress({
     preparing: "Preparing field",
     sampling: "Sampling field",
     meshing: "Extracting meshes",
+    mapping: "Mapping electrostatic potential",
     transferring: "Preparing display",
     validating: "Checking saved geometry",
   };
@@ -48,7 +49,7 @@ export function CalculationProgress({
       <div className="calculation-detail">
         <span>
           {counts
-            ? `${counts.completed} / ${counts.total} ${progress.stage === "sampling" ? "slices" : "signs"}`
+            ? `${counts.completed} / ${counts.total} ${progress.stage === "sampling" ? "slices" : progress.stage === "mapping" ? "vertices" : "signs"}`
             : ""}
         </span>
         <span aria-label="Elapsed calculation time">{elapsed} s elapsed</span>

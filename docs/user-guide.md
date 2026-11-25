@@ -850,6 +850,31 @@ Imported scalar grids have unspecified scalar units: consult their source.
 An isovalue outside the sampled range can yield no surfaces. Reduce the
 magnitude or try another field, without assuming that an empty mesh is an error.
 
+### Color an electron-density surface by electrostatic potential
+
+1. Open an all-electron Molden or EigenVista document with a **total electron density** matrix.
+   Select that matrix in **Fields → Quantum fields**.
+2. In **Fields → Field rendering**, choose the density **Isovalue** and **Grid resolution**.
+   Check **Map electrostatic potential (all-electron density)** and click **Generate surfaces**.
+   The density isovalue sets the shape. The **Mapping electrostatic potential** phase reports
+   completed mesh vertices. You can cancel and keep the previous surface.
+3. In **Appearance → Appearance**, choose **Blinn-Phong** for highlights or **Diffuse** for matte
+   shading. The color bar reads negative red, zero green and positive blue in hartree/e.
+   The potential is for a positive unit test charge, referenced to zero at infinity.
+4. In **Surfaces → Saved surfaces**, set **Color range ± (hartree/e)** to compare views on the
+   same scale. Press Enter to apply the value. Values outside the range use the endpoint
+   colors. **Show electrostatic potential** switches between the map and the surface's
+   assigned solid color. These controls reuse the samples.
+5. Save to retain the mesh, samples, and color range. PNG export includes the visible color
+   bar, including with transparent background. Built-in surface shading is a session setting.
+   If you target the map with a custom shader, that shader determines the colors.
+
+Use a calculation with all electrons represented in the density. The Molden format may omit
+effective-core-potential information, so confirm this in the source calculation. Sampled cubes
+and orbital or spin densities do not supply the total Gaussian density used by this workflow.
+Mapping evaluates nuclear and electronic Coulomb contributions at each distinct vertex, so
+calculation time increases with both the basis and mesh size.
+
 ## Rendering and appearance
 
 **Isosurface mesh** displays saved triangles and works immediately after

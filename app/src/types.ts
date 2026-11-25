@@ -54,6 +54,12 @@ export interface Surface {
   positions: number[];
   normals: number[];
   indices: number[];
+  electrostatic_potential?: {
+    source_hash: string;
+    values: number[];
+    range: number;
+    enabled: boolean;
+  };
   color: string;
   opacity: number;
   visible: boolean;

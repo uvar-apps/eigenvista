@@ -191,6 +191,16 @@ Small scalar metadata is JSON. Basis radial weights already include normalizatio
 
 Saved surface records contain source field ID and scientific hash, signed isovalue, algorithm/version, grid origin/step vectors/resolution, precision, geometry/normals/indices, sRGB color, opacity, and visibility. Quantum inputs remain in the same document. A source mismatch is rejected in this preview; the later revision-aware model should preserve historical assets with their original inputs.
 
+An optional `surfaces[].electrostatic_potential` record contains the sampled
+positive-test-charge potential in hartree/e, one little-endian f64 per mesh
+vertex, plus `source_hash`, a finite positive symmetric display `range`, and
+`enabled`. Its fingerprint binds the density source, nuclear charges and
+coordinates, and ordered sampling coordinates to the all-electron MEP v1
+algorithm. The archive requires `eigenvista-electrostatic-potential-v1` after
+the other optional profiles if any surface carries the record. Older readers
+reject that feature explicitly. Ordinary unmapped archives retain the same
+profile and layout.
+
 Loading verifies ZIP paths, duplicate entries, supported compression, declared inflated size, reference coverage, column index bounds, shape products, byte lengths, digests, finite arrays, IDs, indices, and scientific dimensions. Entry/file/inflated/grid/mesh sizes are checked for actual representation and allocation success. The preview refuses unreferenced archive entries and unsupported required profiles. Original source attachments, arbitrary extensions, multiple geometry revisions, chunk streaming, and migrations are not implemented.
 
 `eigenvista-format::decode` preserves the validated document exactly. The shared

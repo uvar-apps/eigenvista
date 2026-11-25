@@ -472,6 +472,7 @@ pub fn mesh(
         indices.push(u32::try_from(*index).map_err(|_| "Surface index overflow")?);
     }
     let mut surface = Surface {
+        electrostatic_potential: None,
         id: format!(
             "surface-{field}-{}",
             if iso > 0. { "positive" } else { "negative" }

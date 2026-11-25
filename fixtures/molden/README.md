@@ -129,3 +129,21 @@ Review changed orbital phases, degenerate subspaces, software versions, and
 checksums when regenerating. Keep the frozen expected values independent of
 the implementation under test. The generator is an offline qualification tool,
 not an additional application converter or mandatory build dependency.
+
+### Electrostatic potential reference
+
+[`electrostatic-reference.json`](electrostatic-reference.json) records 36 potential
+values in hartree/e from PySCF 2.14.0 / libcint. The generator reads the frozen
+Molden inputs as PySCF basis functions and occupations, evaluates the
+`int1e_rinv` operator at nine independent points, and subtracts the electronic
+contraction from the sum of nuclear charge over distance. The Rust comparison
+covers closed- and open-shell molecules, Cartesian and spherical general
+contractions through G, and both near- and far-field points. The synthetic
+SPDFG fixtures qualify the polynomial integrals.
+
+Regenerate with the environment pinned by
+[`reference-requirements.txt`](../../tools/reference-requirements.txt).
+
+```sh
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 tmp/reference-venv/bin/python   tools/generate_electrostatic_reference.py > fixtures/molden/electrostatic-reference.json
+```

@@ -706,6 +706,24 @@ different sides of an asymmetric molecule. User/bundled custom GLSL keeps its
 declared lighting; pure volume compositing, numerical planes and labels remain
 unlit. No scientific geometry, palette or stored view fields change.
 
+A mapped positive total-density mesh uses Gaussian nuclear-attraction integrals
+to evaluate the potential of a positive test charge. The [core evaluator](../crates/eigenvista-core/src/electrostatic.rs)
+contracts the total density matrix against one-electron Coulomb integrals and
+subtracts that electronic term from the nuclear term, in hartree/e. Scaled
+Hermite derivatives and Boys-function recurrences work on the same contracted
+Cartesian and spherical polynomial basis as density sampling. No Coulomb
+grid, atomic point-charge fit, distance truncation, or wavefunction solve is
+involved. See the [McMurchie–Davidson integral method](https://doi.org/10.1016/0021-9991(78)90092-X)
+and the [PySCF independent reference](../fixtures/molden/electrostatic-reference.json).
+
+The registered worker meshes the density and then maps its vertices. It
+publishes the resulting surface only after the same document preflight used
+for Save. The archive binds f64 potential values to the density hash, nuclei,
+and ordered vertices. The renderer interpolates the potential before applying
+the color ramp, then applies the built-in diffuse/Blinn–Phong lighting. The
+viewport and PNG composition share one signed legend, and the controller uses
+the same generation, cancellation and appearance paths as the GUI.
+
 Molecular ambient occlusion is an optional session display setting. The
 [controller](../app/src/molecularAmbientOcclusion.ts) uses the pinned GTAO addon
 to produce normal/depth and AO maps. Reserved layer 1 contains the existing

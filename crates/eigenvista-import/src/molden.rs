@@ -153,6 +153,14 @@ pub(super) fn parse(text: &str, name: &str) -> Result<(Document, Vec<String>), S
         parse_orbitals(section, &mut document)?;
     }
     finish_orbitals(&mut document, &mut warnings)?;
+    if sections
+        .iter()
+        .any(|s| matches!(s.name.as_str(), "CORE" | "ECP"))
+    {
+        document
+            .provenance
+            .push(eigenvista_core::ECP_PROVENANCE.into());
+    }
     let mut ignored = HashSet::new();
     for section in &sections {
         if matches!(
