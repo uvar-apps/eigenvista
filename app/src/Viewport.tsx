@@ -1,4 +1,11 @@
 import {
+  attachPotential,
+  drawPotentialKey,
+  potentialColors,
+  POTENTIAL_RAMP_GLSL,
+  type PotentialKey,
+} from "./electrostaticRendering";
+import {
   useEffect,
   useMemo,
   useRef,
@@ -132,20 +139,27 @@ function surfaceMaterial(
     opacity: number;
   },
   shading: SurfaceShading,
+  mapped: boolean,
 ) {
-  if (shading === "blinn-phong") {
+  if (shading === "blinn-phong" || mapped) {
     return new THREE.ShaderMaterial({
       glslVersion: THREE.GLSL3,
       transparent: s.opacity < 1,
+      // Draw mapped translucent meshes back faces first. Interleaving the
+      // triangles blends different potentials in marching-cubes traversal order.
+      forceSinglePass: !mapped,
       side: THREE.DoubleSide,
       depthWrite: s.opacity >= 1,
       uniforms: {
         color: { value: new THREE.Color(s.color) },
         opacity: { value: s.opacity },
+        ...(mapped ? { potentialStops: potentialColors } : {}),
       },
       vertexShader: `out vec3 vNormal; out vec3 vWorld;
+        ${mapped ? "in float potential; out float vPotential;" : ""}
         void main() {
           vNormal = normalize(mat3(modelMatrix) * normal);
+          ${mapped ? "vPotential = potential;" : ""}
           vec4 p = modelMatrix * vec4(position, 1.0);
           vWorld = p.xyz;
           gl_Position = projectionMatrix * viewMatrix * p;
@@ -155,12 +169,19 @@ function surfaceMaterial(
         #define gl_FragColor outputColor
         in vec3 vNormal; in vec3 vWorld;
         uniform vec3 color; uniform float opacity;
+        ${mapped ? `in float vPotential; ${POTENTIAL_RAMP_GLSL}` : ""}
         ${SURFACE_LIGHTING_GLSL}
         void main() {
           vec3 n = normalize(vNormal);
           if (!gl_FrontFacing) n = -n;
-          float light = sceneSurfaceLighting(n, cameraPosition - vWorld, true);
-          outputColor = vec4(color * light, opacity);
+          vec3 viewDirection = cameraPosition - vWorld;
+          float light = sceneSurfaceLighting(n, viewDirection, ${shading === "blinn-phong"});
+          ${
+            mapped
+              ? `float diffuse = sceneSurfaceLighting(n, viewDirection, false);
+               outputColor = vec4(potentialColor(vPotential) * diffuse + vec3(light - diffuse), opacity);`
+              : "outputColor = vec4(color * light, opacity);"
+          }
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
@@ -229,6 +250,7 @@ export function Viewport({
 }) {
   const host = useRef<HTMLDivElement>(null);
   const fieldKeyCanvas = useRef<HTMLCanvasElement>(null);
+  const committedPotentialKeys = useRef<PotentialKey[]>([]);
   const modeRef = useRef(mode);
   modeRef.current = mode;
   const [contourState, setContourState] = useState<{
@@ -648,6 +670,18 @@ export function Viewport({
               context.fillText(message, x, y + 21);
             }
           });
+          const potentialKeys = committedPotentialKeys.current;
+          potentialKeys.forEach((key, index) => {
+            const y =
+              height / pixelRatio - 36 - (potentialKeys.length - index) * 76;
+            drawPotentialKey(
+              context,
+              key,
+              14,
+              y,
+              Math.max(1, Math.min(220, width / pixelRatio - 28)),
+            );
+          });
           context.restore();
         }
       }
@@ -893,6 +927,7 @@ export function Viewport({
     const opaqueMolecularSurfaces: THREE.Mesh[] = [];
     let stagedAtomIndices: number[] = [];
     let stagedMessages: string[] = [];
+    const potentialKeys: PotentialKey[] = [];
     const stagedDisplay = displayRef.current;
     try {
       const columns = doc.atoms;
@@ -1098,13 +1133,25 @@ export function Viewport({
         geometry.setIndex(s.indices);
         const usesCustom =
           shader && (shader.target === "all" || shader.target === s.id);
-        if (shader)
+        const potential =
+          "electrostatic_potential" in s
+            ? s.electrostatic_potential
+            : undefined;
+        const mapped = potential?.enabled ? potential : undefined;
+        if (mapped) {
+          attachPotential(geometry, mapped, Boolean(usesCustom));
+          if (!usesCustom && s.opacity > 0)
+            potentialKeys.push({
+              range: mapped.range,
+              label: `Density isovalue ${("isovalue" in s ? s.isovalue : null)?.toPrecision(4)} e/bohr³`,
+            });
+        } else if (shader)
           attachSurfaceColors(geometry, s.color, s.positions.length / 3);
         const mesh = new THREE.Mesh(
           geometry,
           usesCustom && shader
             ? buildSurfaceMaterial(shader, s)
-            : surfaceMaterial(s, shading),
+            : surfaceMaterial(s, shading, Boolean(mapped)),
         );
         if (usesCustom) mesh.userData.customShader = true;
         mesh.userData.label = `${s.label} | ${(s.indices.length / 3).toLocaleString()} triangles`;
@@ -1218,6 +1265,7 @@ export function Viewport({
     e.group.clear();
     e.group.add(group);
     committedDoc.current = doc;
+    committedPotentialKeys.current = potentialKeys;
     committedScene.current = sceneInput;
     committedInspectedPick.current = inspectedPick;
     committedDisplay.current = stagedDisplay;
@@ -1391,7 +1439,8 @@ export function Viewport({
       if (
         fieldKeyCanvas.current &&
         (fieldAnalysisLegends(committedDoc.current).length ||
-          committedDoc.current.field_analysis?.show_field_key)
+          committedDoc.current.field_analysis?.show_field_key ||
+          committedPotentialKeys.current.length)
       ) {
         const output = document.createElement("canvas");
         output.width = e.renderer.domElement.width;
@@ -1756,7 +1805,10 @@ export function Viewport({
     <div className="scene-wrap" style={{ backgroundColor }}>
       <div className="scene" ref={host} data-testid="viewport" />
       {(fieldAnalysisLegends(doc).length > 0 ||
-        doc.field_analysis?.show_field_key) && (
+        doc.field_analysis?.show_field_key ||
+        doc.surfaces.some(
+          (s) => s.visible && s.electrostatic_potential?.enabled,
+        )) && (
         <canvas
           ref={fieldKeyCanvas}
           aria-label="Quantitative field keys"

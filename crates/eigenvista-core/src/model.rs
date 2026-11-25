@@ -2,6 +2,9 @@ use crate::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
+/// Import marker for sources explicitly declaring an effective core potential.
+pub const ECP_PROVENANCE: &str = "Source declares effective core potentials.";
+
 pub const BOHR_TO_ANGSTROM: f64 = 0.529177210903;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -69,6 +72,8 @@ pub struct Surface {
     pub positions: Vec<f64>,
     pub normals: Vec<f64>,
     pub indices: Vec<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub electrostatic_potential: Option<crate::electrostatic::ElectrostaticPotential>,
     pub color: String,
     pub opacity: f64,
     pub visible: bool,
@@ -387,6 +392,9 @@ impl Document {
                         "Saved surface source hash does not match its scientific inputs".into(),
                     );
                 }
+            }
+            if let Some(potential) = &s.electrostatic_potential {
+                potential.validate(self, s)?;
             }
         }
         if ![

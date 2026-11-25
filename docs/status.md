@@ -1,5 +1,15 @@
 # Implementation status
 
+## Electrostatic potential mapping — 25 November 2026 (#115)
+
+The source supports mapping an all-electron molecular electrostatic potential
+onto a positive total electron-density isosurface. The built-in Diffuse and
+Blinn–Phong renderers use a signed color ramp and a numeric key in the viewport
+and PNG exports. The GUI and AI connector support background generation,
+cancellation, and changes to the saved map's display range or visibility.
+See the [user guide](user-guide.md#color-an-electron-density-surface-by-electrostatic-potential)
+and [handoff](handoff.md#electrostatic-potential-on-total-density-meshes--25-november-2026-115).
+
 ## EigenVista 0.10.5 — 23 November 2026 (#114)
 
 The current release adds residue-class coloring, a surface-colored X-ray

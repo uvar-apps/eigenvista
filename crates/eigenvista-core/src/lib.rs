@@ -1,6 +1,7 @@
 pub mod allocation;
 pub mod bonds;
 pub mod compute;
+pub mod electrostatic;
 pub mod field_analysis;
 pub mod fixtures;
 pub mod import;

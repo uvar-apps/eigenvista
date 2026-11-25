@@ -1,4 +1,4 @@
-use eigenvista_core::{Document, Grid, View, compute, fixtures, valid_color};
+use eigenvista_core::{Document, Grid, Surface, View, compute, fixtures, valid_color};
 use wasm_bindgen::prelude::*;
 mod inspection;
 mod serialization;
@@ -63,7 +63,16 @@ pub fn surfaces(json: &str, grid_json: &str, field: &str, iso: f64) -> Result<St
     let d = parse(json)?;
     let g = serde_json::from_str(grid_json).map_err(err)?;
     let hash = compute::source_hash(&d, field).map_err(err)?;
-    mesh_surfaces(&d.view, &g, field, &hash, iso, |_, _| Ok(()))
+    to_string(&mesh_surfaces(
+        &d.view,
+        &g,
+        field,
+        &hash,
+        iso,
+        false,
+        |_, _| Ok(()),
+    )?)
+    .map_err(err)
 }
 
 fn report_progress(
@@ -87,21 +96,24 @@ fn mesh_surfaces(
     field: &str,
     hash: &str,
     iso: f64,
+    positive_only: bool,
     mut progress: impl FnMut(usize, usize) -> Result<(), JsValue>,
-) -> Result<String, JsValue> {
+) -> Result<Vec<Surface>, JsValue> {
     let mut surfaces = vec![];
-    progress(0, 2)?;
+    let total = if positive_only { 1 } else { 2 };
+    progress(0, total)?;
     for (index, (level, color)) in [(iso, &view.positive_color), (-iso, &view.negative_color)]
         .into_iter()
+        .take(total)
         .enumerate()
     {
         let s = compute::mesh(g, level, field, hash, color, view.opacity).map_err(err)?;
         if !s.indices.is_empty() {
             surfaces.push(s);
         }
-        progress(index + 1, 2)?;
+        progress(index + 1, total)?;
     }
-    to_string(&surfaces).map_err(err)
+    Ok(surfaces)
 }
 
 /// Retain the authoritative f64 samples inside WASM instead of roundtripping grid JSON.
@@ -189,14 +201,16 @@ impl SampledField {
                 "Cached samples do not match the current scientific inputs",
             ));
         }
-        mesh_surfaces(
+        to_string(&mesh_surfaces(
             &document.view,
             &self.grid,
             &self.field,
             &self.hash,
             iso,
+            false,
             |done, total| report_progress(&progress, done, total),
-        )
+        )?)
+        .map_err(err)
     }
 }
 
@@ -323,14 +337,46 @@ impl RegisteredDocument {
             isovalue: iso,
             ..self.document.view.clone()
         };
-        mesh_surfaces(
+        to_string(&mesh_surfaces(
             &view,
             &sampled.grid,
             &sampled.field,
             &sampled.hash,
             iso,
+            false,
             |done, total| report_progress(&progress, done, total),
-        )
+        )?)
+        .map_err(err)
+    }
+
+    /// Build a positive density surface and evaluate its secondary scalar.
+    pub fn electrostatic_surface(
+        &self,
+        iso: f64,
+        progress: Option<js_sys::Function>,
+        mapping_progress: Option<js_sys::Function>,
+    ) -> Result<String, JsValue> {
+        if !iso.is_finite() || iso <= 0. || !(iso as f32).is_finite() {
+            return Err(err("Invalid density isovalue"));
+        }
+        let sampled = self.sampled()?;
+        let mut surfaces = mesh_surfaces(
+            &self.document.view,
+            &sampled.grid,
+            &sampled.field,
+            &sampled.hash,
+            iso,
+            true,
+            |done, total| report_progress(&progress, done, total),
+        )?;
+        let surface = surfaces.first_mut().ok_or_else(|| {
+            err("No density surface at this isovalue; choose another isovalue or grid resolution")
+        })?;
+        eigenvista_core::electrostatic::map_surface(&self.document, surface, |done, total| {
+            report_progress(&mapping_progress, done, total).map_err(|e| format!("{e:?}"))
+        })
+        .map_err(err)?;
+        to_string(&surfaces).map_err(err)
     }
 }
 

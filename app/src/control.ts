@@ -323,14 +323,26 @@ export const CONTROL_METHODS = {
     ),
   ),
   "surfaces.generate": definition(
-    "Start an atomic batch of orbital meshes or one supplied density/grid.",
+    "Generate orbital, density or grid meshes. Optionally color one all-electron total density surface by molecular electrostatic potential.",
     mutation(
       {
         fieldIds: { type: "array", minItems: 1, items: string },
         isovalue: { type: "number", minimum: Number.MIN_VALUE },
+        electrostaticPotential: boolean,
         resolution: { type: "integer", minimum: 2 },
       },
       ["fieldIds", "isovalue", "resolution"],
+    ),
+  ),
+  "surfaces.set_potential_appearance": definition(
+    "Enable or hide the electrostatic potential colors or change the symmetric range in hartree/e. Retain the geometry and samples.",
+    mutation(
+      {
+        surfaceId: string,
+        enabled: boolean,
+        range: { type: "number", minimum: Number.MIN_VALUE },
+      },
+      ["surfaceId"],
     ),
   ),
   "surfaces.set_visibility": definition(
@@ -820,7 +832,8 @@ export function createApplicationControl(
             identifier(params.fieldId, "Field ID");
           if (
             (method === "surfaces.remove" ||
-              method === "surfaces.set_visibility") &&
+              method === "surfaces.set_visibility" ||
+              method === "surfaces.set_potential_appearance") &&
             typeof params.surfaceId === "string"
           )
             identifier(params.surfaceId, "Surface ID");
@@ -1007,6 +1020,15 @@ export function createApplicationControl(
               vertexCount: s.positions.length / 3,
               resolution: [...s.resolution],
               sourceHash: bounded(s.source_hash),
+              ...(s.electrostatic_potential
+                ? {
+                    electrostaticPotential: {
+                      enabled: s.electrostatic_potential.enabled,
+                      range: s.electrostatic_potential.range,
+                      units: "hartree/e",
+                    },
+                  }
+                : {}),
             })),
           };
         }
@@ -1100,6 +1122,17 @@ export function createApplicationControl(
               "invalid_arguments",
               "A batch may contain orbitals only; generate one supplied density/grid separately",
             );
+          if (
+            params.electrostaticPotential === true &&
+            (ids.length !== 1 ||
+              !d.densities.some(
+                (density) => density.id === ids[0] && density.kind === "total",
+              ))
+          )
+            throw new ControlError(
+              "invalid_arguments",
+              "Choose one all-electron total density matrix to map electrostatic potential",
+            );
           return startJob(method, params);
         }
         if (method === "field.select") {
@@ -1123,6 +1156,7 @@ export function createApplicationControl(
             "document.save",
             "field.select",
             "surfaces.remove",
+            "surfaces.set_potential_appearance",
           ].includes(method) ||
           (method === "scene.set" && params.isovalue !== undefined)
         )

@@ -1336,3 +1336,9 @@ footer [role="status"] {
   gap: 0.5rem;
   margin-top: 1.5rem;
 }
+
+.surface-potential-controls {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.25rem 0 0.75rem;
+}

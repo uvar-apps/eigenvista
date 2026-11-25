@@ -673,6 +673,7 @@ impl Packer {
                 positions: points,
                 normals: directions,
                 indices: triangles,
+                electrostatic_potential,
                 color,
                 opacity,
                 visible,
@@ -711,7 +712,7 @@ impl Packer {
                 vec![3],
                 dimensions.iter().copied(),
             )?;
-            rows.push(json!({
+            let mut surface = json!({
                 "algorithm": algorithm,
                 "color": color,
                 "field": field,
@@ -728,7 +729,20 @@ impl Packer {
                 "resolution": resolution,
                 "source_hash": source_hash,
                 "visible": visible,
-            }));
+            });
+            if let Some(potential) = electrostatic_potential {
+                let values = self.floats(
+                    vec![potential.values.len()],
+                    potential.values.iter().copied(),
+                )?;
+                surface["electrostatic_potential"] = json!({
+                    "source_hash": potential.source_hash,
+                    "values": reference(&values, None),
+                    "range": potential.range,
+                    "enabled": potential.enabled,
+                });
+            }
+            rows.push(surface);
         }
         Ok(Value::Array(rows))
     }

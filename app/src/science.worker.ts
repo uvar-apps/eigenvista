@@ -211,13 +211,19 @@ self.onmessage = async (event: MessageEvent) => {
         const surfaces =
           action === "generate"
             ? JSON.parse(
-                document.surfaces(
-                  args.iso,
-                  args.appearance.positive_color,
-                  args.appearance.negative_color,
-                  args.appearance.opacity,
-                  measuredProgress("meshing"),
-                ),
+                args.electrostaticPotential
+                  ? document.electrostatic_surface(
+                      args.iso,
+                      measuredProgress("meshing"),
+                      measuredProgress("mapping"),
+                    )
+                  : document.surfaces(
+                      args.iso,
+                      args.appearance.positive_color,
+                      args.appearance.negative_color,
+                      args.appearance.opacity,
+                      measuredProgress("meshing"),
+                    ),
               )
             : null;
         progress("transferring");

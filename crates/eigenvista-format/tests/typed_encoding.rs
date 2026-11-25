@@ -61,6 +61,7 @@ fn document(rows: usize) -> Document {
             values: vec![-0., 1., 2., 3., 4., 5., 6., 7.],
         });
         doc.surfaces.push(Surface {
+            electrostatic_potential: None,
             id: format!("surface-{index}"),
             label: "layout".into(),
             field: None,

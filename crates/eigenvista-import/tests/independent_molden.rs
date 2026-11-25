@@ -387,3 +387,48 @@ fn legacy_molden_input_imports_without_modifying_its_source() {
             .all(|value| value.is_finite())
     );
 }
+
+#[test]
+fn molecular_potential_matches_pyscf_point_charge_integrals() {
+    #[derive(Deserialize)]
+    struct ReferenceSet {
+        points_bohr: Vec<[f64; 3]>,
+        fixtures: Vec<PotentialReference>,
+    }
+    #[derive(Deserialize)]
+    struct PotentialReference {
+        fixture: String,
+        sha256: String,
+        values: Vec<f64>,
+    }
+    let reference: ReferenceSet = serde_json::from_str(include_str!(
+        "../../../fixtures/molden/electrostatic-reference.json"
+    ))
+    .unwrap();
+    for fixture in reference.fixtures {
+        let &(name, input, _) = CASES.iter().find(|f| f.0 == fixture.fixture).unwrap();
+        assert_eq!(format!("{:x}", Sha256::digest(input)), fixture.sha256);
+        let document = import_bytes(input, &format!("{name}.molden"))
+            .unwrap()
+            .document;
+        let total = document
+            .densities
+            .iter()
+            .find(|d| d.kind == "total")
+            .unwrap();
+        let values = eigenvista_core::electrostatic::evaluate_points(
+            &document,
+            &total.id,
+            reference.points_bohr.iter().copied(),
+            |_, _| Ok(()),
+        )
+        .unwrap();
+        assert_eq!(values.len(), fixture.values.len());
+        for (actual, expected) in values.into_iter().zip(fixture.values) {
+            assert!(
+                (actual - expected).abs() < 2e-8,
+                "{name}: {actual} versus {expected}"
+            );
+        }
+    }
+}

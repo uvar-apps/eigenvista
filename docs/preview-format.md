@@ -135,7 +135,8 @@ explicit feature negotiation.
 | `eigenvista-field-analysis-v1` | `field_analysis` | Structured quantity/unit/provenance descriptors, probe/plane/profile definitions and f64 caches/status masks, fingerprints, local appearance and current-field-key visibility |
 
 The canonical feature order is base polynomial, biological structure if present,
-annotations if present, molecular surfaces if present, field analysis if present.
+annotations if present, molecular surfaces if present, field analysis if present,
+and [electrostatic potential mapping](#cached-meshes-and-electrostatic-potential) if present.
 Every non-null optional payload must declare its feature; every optional feature
 must have its payload. Unknown, duplicate, missing and unordered features are
 rejected, as are marker/payload mismatches. The legacy `molekel` profile remains
@@ -189,7 +190,19 @@ Every array leaf previously cost one ZIP entry, one manifest descriptor (~196 by
 
 Small scalar metadata is JSON. Basis radial weights already include normalization; no automatic normalization is applied. Orbital energies are optional hartree values, not fabricated zeros. Occupations are explicit. A full row-major density matrix identifies its kind independently of orbitals. Current object relationships use stable IDs within a single geometry/basis document.
 
+### Cached meshes and electrostatic potential
+
 Saved surface records contain source field ID and scientific hash, signed isovalue, algorithm/version, grid origin/step vectors/resolution, precision, geometry/normals/indices, sRGB color, opacity, and visibility. Quantum inputs remain in the same document. A source mismatch is rejected in this preview; the later revision-aware model should preserve historical assets with their original inputs.
+
+An optional `surfaces[].electrostatic_potential` record contains the sampled
+positive-test-charge potential in hartree/e, one little-endian f64 per mesh
+vertex, plus `source_hash`, a finite positive symmetric display `range`, and
+`enabled`. Its fingerprint binds the density source, nuclear charges and
+coordinates, and ordered sampling coordinates to the all-electron MEP v1
+algorithm. The archive requires `eigenvista-electrostatic-potential-v1` after
+the other optional profiles if any surface carries the record. Older readers
+reject that feature explicitly. Ordinary unmapped archives retain the same
+profile and layout.
 
 Loading verifies ZIP paths, duplicate entries, supported compression, declared inflated size, reference coverage, column index bounds, shape products, byte lengths, digests, finite arrays, IDs, indices, and scientific dimensions. Entry/file/inflated/grid/mesh sizes are checked for actual representation and allocation success. The preview refuses unreferenced archive entries and unsupported required profiles. Original source attachments, arbitrary extensions, multiple geometry revisions, chunk streaming, and migrations are not implemented.
 

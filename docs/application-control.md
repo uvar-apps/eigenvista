@@ -238,7 +238,8 @@ rules below. Results may include additional metadata.
 | `document.save` | Native: `path`; `overwrite?: boolean` | Native file receipt or browser encoded bytes |
 | `field.select` | `fieldId` | Selected field/revision, or a job receipt if sampling is required |
 | `field.preview` | `fieldId`, `mode: "volume" | "raycast"`, `resolution` | Sampling-only job receipt; no marching cubes |
-| `surfaces.generate` | `fieldIds`, positive `isovalue`, `resolution` | Mesh-generation job receipt |
+| `surfaces.generate` | `fieldIds`, positive `isovalue`, `resolution`, `electrostaticPotential?: boolean` | Mesh-generation job receipt |
+| `surfaces.set_potential_appearance` | `surfaceId`, `enabled?: boolean`, positive `range?: number` | Applied potential visibility, symmetric range in hartree/e and revision |
 | `surfaces.set_visibility` | `surfaceId`, `visible` | Applied visibility/revision |
 | `surfaces.remove` | `surfaceId` | Removal/revision |
 | `scene.set` | Any supported appearance patch below | Applied view/session settings and revision |
@@ -362,6 +363,22 @@ when biological metadata exists; palettes and AO remain session choices across
 Open. Reload resets session choices. A native Save and an exported PNG therefore
 serve different purposes: the former keeps molecular data and saved depiction
 geometry, while the latter captures the current presentation.
+
+### Electrostatic potential on a density surface
+
+On builds that advertise `surfaces.set_potential_appearance` in `app.capabilities`,
+send `electrostaticPotential: true` to `surfaces.generate` with one all-electron
+total-density matrix ID. The positive isovalue sets the shape. The job reports
+`mapping` progress in mesh vertices. On success `surfaces.list` reports
+`electrostaticPotential: {enabled, range, units}` for the mapped mesh.
+Use `surfaces.set_potential_appearance` to set either or both of `enabled` and
+`range` without recomputing samples. Set `shading: "blinn-phong"` through
+`scene.set` for highlights. The visible built-in potential key is included by
+`image.export`. The native connector exposes these same live schemas.
+
+You can ask the connected assistant to “color the total electron-density surface
+by electrostatic potential, show the color scale, add Phong highlights, and save
+a PNG.”
 
 ### Camera and surface capture
 
@@ -496,7 +513,7 @@ user edits are recorded as declarations. Supported quantities include
 and `potential_energy`. Discover/validate the compatible units. Cube meanings
 remain unspecified until declared. Declaration does not rescale samples;
 supported density/amplitude bohr↔Å display conversions leave caches unchanged.
-No electrostatics or wavefunction solver is introduced.
+These declarations describe existing samples. They do not compute electrostatic potential.
 
 An analysis request contains `id,label,field,definition,descriptor?`. Definitions:
 
