@@ -32,6 +32,8 @@ The 25 November 2026 citation update matched the CFF and website metadata
 to Zenodo's public record. Static checks and 168 Chromium/WebKit route and
 viewport checks passed for the updated site. The tag and binary archives
 retain their build-time provenance.
+After repeated artifact lookup errors, the Pages-only workflow now waits for
+the upload job to finish before deploying the already prepared `site/` tree.
 
 The applicable Rust, desktop, Clippy, build, and packaging checks pass on
 both hosts. Chromium and WebKit each cover 384 passing cases per host with
