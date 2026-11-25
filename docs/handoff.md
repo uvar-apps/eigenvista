@@ -1,5 +1,36 @@
 # Development handoff
 
+## EigenVista 0.10.6 — 25 November 2026 (#117)
+
+The Apple Silicon and CachyOS x86_64 previews use the same clean source,
+`576e80e0aad9cf643b1ff04c6f9b3db5c35cace3`. Independent archive checks
+matched the packaged shader files, connector resources and every one of the
+760 source files to the build manifests and that commit. Use the
+[release notes](releases/0.10.6.md) for the archive, checksum and build info
+links on each platform.
+
+The installed connector recognizes the generic `surface-phong-vertex-color`
+preset. The GUI loads the same shader files and the separate
+`Salicylic-Phong.params` opacity preset. Both include the potential scale
+in the exported PNG. Native tests from the extracted archives reproduced the
+21,064-triangle figure with 20 connector calls on macOS and 21 on CachyOS
+through authenticated Xvfb. Each captured and inspected four PNGs with the
+88% and 100% depth checks. The matching GUI workflow produced a 1220 × 852 PNG.
+
+The [Gallery](https://uvar-apps.github.io/eigenvista/gallery.html#salicylic-acid)
+uses a lossless copy of the accepted figure. The [website tutorial](https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html)
+includes downloadable source data and shaders and both GUI and plain-language
+agent instructions. The site passed its static checks and 168 Chromium/WebKit
+route and viewport checks. Evidence lives in the ignored `tmp/release-0.10.6/`
+directory on the Mac and the build host. Use the Zenodo concept DOI
+`10.5281/zenodo.24246123` until 0.10.6 has an archive DOI.
+
+The applicable Rust, desktop, Clippy, build, and packaging checks pass on
+both hosts. Chromium and WebKit each cover 384 passing cases per host with
+no skipped cases. The parallel Linux WebKit run timed out in the 1AON
+palette case. That exact test passed in an isolated rerun. See
+`browser-qualification.json` in the release evidence directory.
+
 ## Custom-shaded surface depth ordering — 25 November 2026 (#118)
 
 [Issue #118](https://github.com/uvar-apps/eigenvista/issues/118) is a P1
@@ -23,8 +54,8 @@ alpha, and both ordinary and transparent PNG export.
 The macOS TypeScript check and production frontend build passed. All 102
 affected browser cases passed, 51 in Chromium and 51 in WebKit. The browser
 log is `tmp/mep/p1-transparency-final-browser.log` and the 88% capture is
-`tmp/mep/salicylic-phong-depth-corrected.png`. This is local source
-verification. Native bundles and Linux release qualification remain pending.
+`tmp/mep/salicylic-phong-depth-corrected.png`. This source-stage
+verification preceded the package qualification above.
 
 ## Electrostatic potential on total-density meshes — 25 November 2026 (#115)
 

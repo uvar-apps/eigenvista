@@ -229,7 +229,7 @@ ${agentWorkspaceNote}
 <p>The agent handles selections, palettes, parameters, cancellation, file access and exports without handing those steps back as GUI chores. Follow the <a href="tutorials-geometry.html">measurement</a>, <a href="tutorials-molecular-surfaces.html">molecular-shape</a> or <a href="tutorials-quantitative-fields.html">quantitative-field</a> lesson for an exact worked example.</p>
 
 <h2 id="walkthroughs">Try a focused workflow</h2>
-<ul><li><a href="ai-tutorial-orbitals.html">Explore orbitals with an agent</a></li><li><a href="ai-tutorial-density.html">Inspect density with an agent</a></li><li><a href="ai-tutorial-ao.html">Compare ambient occlusion</a></li><li><a href="ai-tutorial-representations.html">Compare molecular representations</a></li></ul>
+<ul><li><a href="ai-tutorial-orbitals.html">Explore orbitals with an agent</a></li><li><a href="ai-tutorial-density.html">Inspect density with an agent</a></li><li><a href="tutorials-electrostatic-potential.html#ai">Make a Phong-shaded electrostatic potential figure</a></li><li><a href="ai-tutorial-ao.html">Compare ambient occlusion</a></li><li><a href="ai-tutorial-representations.html">Compare molecular representations</a></li></ul>
 <p>Your agent can read the packaged instructions directly, or use their public <a href="downloads/eigenvista-control/SKILL.md">workflow</a> and <a href="downloads/eigenvista-control/reference.md">connection-reference</a> copies. You choose the outcome; it handles the connection details.</p>
 `,
   },

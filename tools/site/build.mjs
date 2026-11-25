@@ -33,6 +33,7 @@ const groups = [
   "reference",
   "inspection",
   "tutorials",
+  "electrostatic-potential",
   "gallery",
   "shaders",
   "ai",
@@ -63,7 +64,7 @@ const media = JSON.parse(
   fs.readFileSync(path.join(site, "assets/media/provenance.json")),
 );
 const dimensions = new Map(
-  [...media.images, ...media.workspacePaneCaptures.images].map((row) => [row.file, row]),
+  [...media.images, ...media.workspacePaneCaptures.images, media.electrostaticCapture].map((row) => [row.file, row]),
 );
 const cssVersion = createHash("sha256")
   .update(fs.readFileSync(path.join(site, "assets/site.css")))
@@ -249,6 +250,7 @@ const examples = [
   ["palettes/LICENSE-MatterViz.txt", "LICENSE-MatterViz.txt"],
   ["tools/site/examples/bicyclic-c7h10.molden", "bicyclic-c7h10.molden"],
   ["tools/site/examples/complex-field.cube", "complex-field.cube"],
+  ["tools/site/examples/salicylic-acid-rhf.molden", "salicylic-acid-rhf.molden"],
   ["tools/site/examples/README.md", "README-quantum-example.txt"],
   ["shaders/x-ray.vert", "shaders/x-ray.vert"],
   ["shaders/x-ray.frag", "shaders/x-ray.frag"],
@@ -256,6 +258,9 @@ const examples = [
   ["app/shaders/surface-clip.vert", "shaders/surface-clip.vert"],
   ["app/shaders/surface-clip.frag", "shaders/surface-clip.frag"],
   ["app/shaders/surface-clip.params", "shaders/surface-clip.params"],
+  ["app/shaders/surface-phong-vertex-color.vert", "shaders/surface-phong-vertex-color.vert"],
+  ["app/shaders/surface-phong-vertex-color.frag", "shaders/surface-phong-vertex-color.frag"],
+  ["app/shaders/Salicylic-Phong.params", "shaders/Salicylic-Phong.params"],
   ["shaders/README.md", "shaders/README.txt"],
   ["LICENSE", "shaders/LICENSE.txt"],
   ["skills/eigenvista-control/SKILL.md", "eigenvista-control/SKILL.md"],
@@ -291,7 +296,7 @@ fs.writeFileSync(
 );
 fs.writeFileSync(
   path.join(out, "downloads/README.txt"),
-  `EigenVista public tutorial examples\n\nbicyclic-c7h10.molden: 17-atom C7H10 molecular calculation, 125 basis functions and 118 listed orbitals. Source and orbital notes: README-quantum-example.txt.\ncomplex-field.cube: original 29-atom, 84x84x84 scalar grid from Molekel data/elf_pic.cube. Source header does not identify scalar meaning/units.\nshaders/: ready-to-load X-ray and clipping shader pairs and parameters; original attribution and GPL notice are included.\n\nwater.pdb / water.xyz: synthetic three-atom water geometry (two inferred display bonds).\nwater.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and 24 spatial orbitals. See fixtures/molden/README.md in the public repository for scientific provenance.\nsigned-affine.cube: synthetic signed affine field, two atoms/one bond, skewed 7x7x7 grid. It is a mathematical rendering fixture, not a quantum-chemistry calculation.\n1AON.cif: public deposited GroEL-GroES structure; see https://www.rcsb.org/structure/1AON for the original structure and citation. Repository import selects 58,870 source atoms.\nmatterviz-pastel.json / matterviz-muted.json: original MatterViz RGB values for elements1-109 in EigenVista's palette envelope. Author Janosh Riebesell; revision fae7a3e7fddf26f9625391ea76f28c7ebd261de9. MIT notice retained in LICENSE-MatterViz.txt; elements110-118 use built-in defaults.\naccessible-elements.json: optional fourteen-element palette with documented color-vision simulations and remaining ambiguities. Source and coverage: https://github.com/uvar-apps/eigenvista/blob/main/palettes/README.md . Included in the 0.10.3 Mac and Linux packages and bundled connectors; the older 0.10.2 loader also accepts this download.\n\nSource file paths and exact SHA-256 values: provenance.json.\nSource repository: https://github.com/uvar-apps/eigenvista\nApplication/website license: GPL-2.0-or-later (../LICENSE.txt). Preserve original data and palette notices.\n`,
+  `EigenVista public tutorial examples\n\nbicyclic-c7h10.molden: 17-atom C7H10 molecular calculation, 125 basis functions and 118 listed orbitals. Source and orbital notes: README-quantum-example.txt.\nsalicylic-acid-rhf.molden: all-electron RHF/6-31G(d) salicylic acid example. See README-quantum-example.txt and ../tutorials-electrostatic-potential.html.\ncomplex-field.cube: original 29-atom, 84x84x84 scalar grid from Molekel data/elf_pic.cube. Source header does not identify scalar meaning/units.\nshaders/: ready-to-load X-ray, clipping and vertex-colored Phong shader pairs and parameters; original attribution and GPL notice are included.\n\nwater.pdb / water.xyz: synthetic three-atom water geometry (two inferred display bonds).\nwater.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and 24 spatial orbitals. See fixtures/molden/README.md in the public repository for scientific provenance.\nsigned-affine.cube: synthetic signed affine field, two atoms/one bond, skewed 7x7x7 grid. It is a mathematical rendering fixture, not a quantum-chemistry calculation.\n1AON.cif: public deposited GroEL-GroES structure; see https://www.rcsb.org/structure/1AON for the original structure and citation. Repository import selects 58,870 source atoms.\nmatterviz-pastel.json / matterviz-muted.json: original MatterViz RGB values for elements1-109 in EigenVista's palette envelope. Author Janosh Riebesell; revision fae7a3e7fddf26f9625391ea76f28c7ebd261de9. MIT notice retained in LICENSE-MatterViz.txt; elements110-118 use built-in defaults.\naccessible-elements.json: optional fourteen-element palette with documented color-vision simulations and remaining ambiguities. Source and coverage: https://github.com/uvar-apps/eigenvista/blob/main/palettes/README.md . Included in the 0.10.3 Mac and Linux packages and bundled connectors; the older 0.10.2 loader also accepts this download.\n\nSource file paths and exact SHA-256 values: provenance.json.\nSource repository: https://github.com/uvar-apps/eigenvista\nApplication/website license: GPL-2.0-or-later (../LICENSE.txt). Preserve original data and palette notices.\n`,
 );
 console.log(
   `SITE_BUILD_PASS ${pages.length} pages; ${sourceRows.length} explicit public downloads`,

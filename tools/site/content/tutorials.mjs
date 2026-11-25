@@ -21,6 +21,7 @@ export default [
       <ol>
         <li><p><a href="tutorials-first-molecule.html"><strong>Open, inspect, and save your first molecule</strong></a>. Use three-atom water to learn rotation, zoom, picking, representations, and native Save.</p></li>
         <li><p><a href="tutorials-orbitals.html"><strong>Explore orbitals from a real calculation</strong></a>. Explore the HOMO and LUMO of a bicyclic hydrocarbon, compare volume and surface views, and save a smooth orbital mesh.</p></li>
+        <li><p><a href="tutorials-electrostatic-potential.html"><strong>Map electrostatic potential on a density surface</strong></a>. Reproduce the salicylic acid Gallery image with the GUI or an AI agent.</p></li>
         <li><p><a href="tutorials-cube.html"><strong>Inspect a sampled cube field</strong></a>. Explore a scalar field around a 29-atom complex, compare volume and surface views, and save the grid with its mesh.</p></li>
         <li><p><a href="tutorials-ao.html"><strong>Read a large biological structure</strong></a>. Use MatterViz Pastel and ambient occlusion on 1AON, then switch to chain cartoons and isolate a chain.</p></li>
       </ol>
@@ -30,6 +31,7 @@ export default [
       <ol>
         <li><a href="ai-tutorial-orbitals.html">From a prompt to a HOMO figure</a>: a recorded orbital, shader and image-export session.</li>
         <li><a href="ai-tutorial-density.html">Explore electron density</a>: direct volume sampling, an envelope mesh and a view into the molecular interior.</li>
+        <li><a href="tutorials-electrostatic-potential.html#ai">Make the salicylic acid figure</a>: an electrostatic potential map with transparent Phong shading and a scale.</li>
         <li><a href="ai-tutorial-ao.html">Read crowded atomic structure</a>: ambient occlusion and atomic representations on a large molecular assembly.</li>
         <li><a href="ai-tutorial-representations.html">Find the assembly's shape</a>: trace, tube, ribbon and cartoon views, with atomic detail when you need it.</li>
       </ol>

@@ -241,7 +241,7 @@ for (const [engine, launcher] of [
       assert((await development.textContent()).includes(`${application.version} · Unreleased test build`));
       assert((await development.textContent()).includes(`published downloads below are version ${release.version}`));
     }
-    assert.equal(await development.getByRole("link").getAttribute("href"), "reference-structures.html#coloring");
+    assert.equal(await development.getByRole("link").getAttribute("href"), "tutorials-electrostatic-potential.html");
     assert.equal(await page.getByRole("link", { name: "Download for Mac" }).getAttribute("href"), `${release.base}${release.stem}.zip`);
     if (release.linux) {
       const linux = release.linux;
@@ -403,19 +403,20 @@ for (const [engine, launcher] of [
 
     await page.goto(base + "gallery.html");
     await allImages(page);
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 9);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 10);
     await page.getByRole("button", { name: "Molecules", exact: true }).click();
     assert.equal(await page.locator("[data-gallery-item]:visible").count(), 2);
     await page
       .getByRole("button", { name: "Quantum fields", exact: true })
       .focus();
     await page.keyboard.press("Enter");
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 3);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 4);
+    assert.equal(await page.locator("#salicylic-acid").isVisible(), true);
     await page.getByRole("button", { name: "Shaders", exact: true }).click();
     assert.equal(await page.locator("[data-gallery-item]:visible").count(), 4);
     assert.equal(await page.getByRole("heading", { name: "Crambin in X-ray", exact: true }).isVisible(), true);
     await page.getByRole("button", { name: "All views", exact: true }).click();
-    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 9);
+    assert.equal(await page.locator("[data-gallery-item]:visible").count(), 10);
     const comparisons = [];
     for (const [i, figure] of (
       await page.locator("[data-comparison]").all()
@@ -497,6 +498,8 @@ for (const [engine, launcher] of [
       ["manual-mobile", "reference-scene.html", 390],
       ["tutorial", "tutorials-orbitals.html", 1100],
       ["gallery", "gallery.html", 1440],
+      ["electrostatic-desktop", "tutorials-electrostatic-potential.html", 1440],
+      ["electrostatic-phone", "tutorials-electrostatic-potential.html", 390],
       ["inspection-manual-desktop", "reference-inspection.html", 1440],
       ["inspection-manual-mobile", "reference-inspection.html", 390],
       ["inspection-geometry", "tutorials-geometry.html", 1100],
@@ -520,7 +523,7 @@ for (const [engine, launcher] of [
     await plain.goto(base + "gallery.html");
     assert.equal(await plain.locator("[data-comparison].is-ready").count(), 0);
     assert.equal(await plain.locator(".comparison-control:visible").count(), 0);
-    assert.equal(await plain.locator("[data-gallery-item]:visible").count(), 9);
+    assert.equal(await plain.locator("[data-gallery-item]:visible").count(), 10);
     await plain
       .getByRole("navigation")
       .getByRole("link", { name: "Manual", exact: true })

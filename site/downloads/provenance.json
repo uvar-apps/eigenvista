@@ -68,10 +68,16 @@
       "sha256": "c8cbdb64f4386e6c2da9ab875537b22cabdf828a272457ff98a5e21e550fafa6"
     },
     {
+      "file": "salicylic-acid-rhf.molden",
+      "source": "tools/site/examples/salicylic-acid-rhf.molden",
+      "bytes": 648307,
+      "sha256": "aadd4302ae928ca83b7dfd9894700075abc4c0711191eb148166e729cfa6f626"
+    },
+    {
       "file": "README-quantum-example.txt",
       "source": "tools/site/examples/README.md",
-      "bytes": 1514,
-      "sha256": "e011b5e40bc0dceeaa5b37b18164bba2325c6660481e4a081a24c3e606224a5b"
+      "bytes": 2086,
+      "sha256": "e60f559cbec28125a17000da14160d200dc3c266f289bef26c280f62bba682d6"
     },
     {
       "file": "shaders/x-ray.vert",
@@ -110,6 +116,24 @@
       "sha256": "e7dea8fc3d92d4b93886ebfad0eb2d6279fc47f4ecda19a67ec28202ce471892"
     },
     {
+      "file": "shaders/surface-phong-vertex-color.vert",
+      "source": "app/shaders/surface-phong-vertex-color.vert",
+      "bytes": 334,
+      "sha256": "46efa45fa8c908c8a2dc45d6ee43a2638341b46bbf55b90a8ab95c9739f870af"
+    },
+    {
+      "file": "shaders/surface-phong-vertex-color.frag",
+      "source": "app/shaders/surface-phong-vertex-color.frag",
+      "bytes": 1521,
+      "sha256": "4520af13558c0466aff550df7cad1d09437ff701a8bcf91f6b05a8e3c9ec5ae2"
+    },
+    {
+      "file": "shaders/Salicylic-Phong.params",
+      "source": "app/shaders/Salicylic-Phong.params",
+      "bytes": 19,
+      "sha256": "7fb78b745c45058efa094e28cbe6d43cf6fd875934a50fc2cdcc6063f6e09594"
+    },
+    {
       "file": "shaders/README.txt",
       "source": "shaders/README.md",
       "bytes": 1399,
@@ -125,31 +149,31 @@
       "file": "eigenvista-control/SKILL.md",
       "source": "skills/eigenvista-control/SKILL.md",
       "bytes": 7079,
-      "sha256": "a2f6c2e702672798b6b66fc7c2f78be6a002119e8796dd7de6774c10b9e5b647"
+      "sha256": "34268a90392dda4a42a59477b0b33b0720300e3e683f5bbd8eea850410b66fe1"
     },
     {
       "file": "eigenvista-control/reference.md",
       "source": "skills/eigenvista-control/reference.md",
-      "bytes": 40177,
-      "sha256": "03bf3953d51049e7aa2cff376df5d1dac6226df45cfbf3be36e12a1d3ab50247"
+      "bytes": 40559,
+      "sha256": "8367aafaa85779d954bac33ed4e62c3dbeaf63967012741f90cb63f2b98b8cb8"
     },
     {
       "file": "eigenvista-control/README.md",
       "source": "docs/ai-connector.md",
       "bytes": 21796,
-      "sha256": "a3349ed6c71cf1e2007c95daea4c979d8a6b3f224a5d09362d69c0890836f417"
+      "sha256": "f178f0548c2a690946b3f048bb3071787663a2eded031e9dfb5481f85f6f879d"
     },
     {
       "file": "eigenvista-control/allocation-policy.md",
       "source": "docs/allocation-policy.md",
       "bytes": 3935,
-      "sha256": "cb8941576f5ce21a6bba20cc401db59ae12b3efbd41f1e90b6880152704750d3"
+      "sha256": "eb2fc0a77be0a7da4e9aeb4d73c9a8ccb22284738ec5333a707d98d59175758a"
     },
     {
       "file": "eigenvista-control/linux.md",
       "source": "docs/linux.md",
       "bytes": 8917,
-      "sha256": "a39871bfcacb3c3fc1a52481de3a751b10ac3f49e6dce67daa76e1a06d417c76"
+      "sha256": "76eba87213cc1872f4b405e114814c47ae48e49f2741e78ba5d9aa59288a5804"
     }
   ]
 }

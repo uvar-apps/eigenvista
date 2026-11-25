@@ -1,8 +1,9 @@
 EigenVista public tutorial examples
 
 bicyclic-c7h10.molden: 17-atom C7H10 molecular calculation, 125 basis functions and 118 listed orbitals. Source and orbital notes: README-quantum-example.txt.
+salicylic-acid-rhf.molden: all-electron RHF/6-31G(d) salicylic acid example. See README-quantum-example.txt and ../tutorials-electrostatic-potential.html.
 complex-field.cube: original 29-atom, 84x84x84 scalar grid from Molekel data/elf_pic.cube. Source header does not identify scalar meaning/units.
-shaders/: ready-to-load X-ray and clipping shader pairs and parameters; original attribution and GPL notice are included.
+shaders/: ready-to-load X-ray, clipping and vertex-colored Phong shader pairs and parameters; original attribution and GPL notice are included.
 
 water.pdb / water.xyz: synthetic three-atom water geometry (two inferred display bonds).
 water.molden: independently calculated RHF/cc-pVDZ water; 24 basis functions and 24 spatial orbitals. See fixtures/molden/README.md in the public repository for scientific provenance.

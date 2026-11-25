@@ -60,7 +60,7 @@ const html = new Map(
       fs.readFileSync(path.join(site, row.path), "utf8"),
     ]),
 );
-assert.equal(html.size, 27, "Complete website route inventory");
+assert.equal(html.size, 28, "Complete website route inventory");
 for (const page of [
   "ai.html", "ai-install.html", "ai-guide.html",
   "ai-tutorial-orbitals.html", "ai-tutorial-density.html",
@@ -236,7 +236,13 @@ assert.throws(() =>
 const downloaded = JSON.parse(
   fs.readFileSync(path.join(site, "downloads/provenance.json")),
 );
-assert.equal(downloaded.files.length, 25);
+assert.equal(downloaded.files.length, 29);
+for (const file of [
+  "salicylic-acid-rhf.molden",
+  "shaders/surface-phong-vertex-color.vert",
+  "shaders/surface-phong-vertex-color.frag",
+  "shaders/Salicylic-Phong.params",
+]) assert(downloaded.files.some((row) => row.file === file), `Tutorial download: ${file}`);
 assert.equal(
   downloaded.files.find((row) => row.file === "accessible-elements.json")?.source,
   "palettes/accessible-elements.json",
@@ -302,7 +308,7 @@ if (published) {
   assert(html.get("install.html").replace(/<[^>]*>/g, "").includes(`${release.linux ? "Both packages include" : "The ZIP includes"} the four-tab Tools pane, scientific-inspection controls and AI connector described in this manual.`));
   assert(html.get("about.html").includes(`href="https://doi.org/${release.doi}">${release.doi}</a>`), "Current released-version citation DOI");
 } else {
-  assert(html.get("index.html").includes(`The published Mac download below remains ${release.version}`));
+  assert(html.get("index.html").includes(`The published downloads below are version ${release.version}`));
   assert(html.get("about.html").includes(`(Version ${release.version}) [Computer software]`), "Development source retains the published-version citation");
 }
 assert(html.get("install.html").includes(`Published download: ${release.version}`));
@@ -417,9 +423,18 @@ for (const row of workspaceMedia.images) {
 }
 for (const row of workspaceMedia.inputs)
   assert.equal(hash(fs.readFileSync(path.join(root, row.file))), row.sha256);
+const electrostatic = media.electrostaticCapture;
+const electrostaticImage = fs.readFileSync(path.join(site, "assets/media", electrostatic.file));
+assert.equal(electrostaticImage.length, electrostatic.bytes);
+assert.equal(hash(electrostaticImage), electrostatic.sha256);
+assert.equal(electrostaticImage.toString("ascii", 8, 12), "WEBP");
+assert.equal(electrostatic.width, 1220);
+assert.equal(electrostatic.height, 852);
+for (const row of electrostatic.inputs)
+  assert.equal(hash(fs.readFileSync(path.join(root, row.file))), row.sha256);
 assert.deepEqual(mediaFiles.map((row) => path.basename(row.path)).sort(),
-  [...media.images, ...workspaceMedia.images].map((row) => row.file).sort(),
-  "Complete curated capture inventory, including three approved-workspace images");
+  [...media.images, ...workspaceMedia.images, electrostatic].map((row) => row.file).sort(),
+  "Complete curated capture inventory, including the electrostatic potential figure");
 const inspectionMedia = JSON.parse(fs.readFileSync(path.join(site, "assets/inspection/provenance.json")));
 assert.equal(inspectionMedia.application.publishedRelease, false);
 assert.equal(inspectionMedia.application.branch, "codex/scientific-inspection");

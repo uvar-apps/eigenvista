@@ -293,7 +293,7 @@ eigenvista-convert --help</code></pre>
   <h3>Parameters and validation</h3>
   <p>Matching uniform types retain their values when new sources load; changed types reset to defaults. A parameter file with a nonnumeric value, unsupported/mismatched kind, or wrong component count is rejected with its parameter name and line number, preserving current values and the applied shader. Clear before loading another pair when shared uniform types conflict. Parameter export uses lines such as <code>float name&lt;TAB&gt;value</code> and writes a complete replacement file.</p>
   <h3>Transparency and errors</h3>
-  <p><strong>Shader transparency</strong> starts checked and blends fragment alpha even when document opacity is 100%. Uncheck it for opaque rendering: final alpha becomes one and depth writes are enabled. It updates an applied shader live and is saved in neither the document nor parameter file. <strong>Clear shader</strong> resets it to checked.</p>
+  <p><strong>Shader transparency</strong> starts checked and blends visible fragments in depth order, even when document opacity is 100%. Uncheck it to force opaque output. The setting updates an applied shader live and lasts for the session. <strong>Clear shader</strong> resets it to checked.</p>
   <p>Compile/link errors appear in red in the panel after Apply. Correct and reapply the pair, or Clear shader to restore built-in materials. Transparent objects use ordinary object sorting; intersecting layers can show ordering artifacts.</p>
 </div>`,
   },
@@ -325,6 +325,10 @@ eigenvista-convert --help</code></pre>
   </ol>
   <p>An isovalue outside the sampled range can legitimately produce no surface. Try a smaller magnitude or another field. Larger resolution costs more CPU time and memory and is not an accuracy guarantee. Changing the selected field, isovalue, or resolution does not automatically regenerate existing meshes.</p>
   <p>For a sampled preview without mesh extraction, choose <strong>Volume preview</strong> or <strong>Sampled raycast preview</strong> under <strong>Mode</strong>. Analytic orbitals/densities are sampled directly; you do not need to generate a mesh first.</p>
+
+  <h2 id="electrostatic-potential">Map electrostatic potential</h2>
+  <p>Select a compatible all-electron total-density matrix, choose <strong>Isosurface mesh</strong>, then enable <strong>Map electrostatic potential (all-electron density)</strong> before generating the surface. The density sets the geometry. The potential is evaluated on the generated vertices and displayed in hartree per elementary charge.</p>
+  <p>Under <strong>Surfaces → Saved surfaces</strong>, adjust <strong>Color range ± (hartree/e)</strong> or toggle the map without recalculating it. The color scale follows the viewport into an exported PNG. The bundled vertex-colored Phong shader preserves the map colors. <a href="tutorials-electrostatic-potential.html">Make the salicylic acid Gallery figure</a>.</p>
 
   <h2 id="orbitals">Browse and generate several orbitals</h2>
   <ol>

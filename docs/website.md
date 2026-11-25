@@ -1,5 +1,17 @@
 # User-facing website
 
+## EigenVista 0.10.6 — 25 November 2026
+
+The homepage and installation page identify the Apple Silicon and CachyOS
+x86_64 archives from the qualified build metadata. The Gallery uses a
+lossless copy of the accepted 1220 × 852 salicylic acid render. Its tutorial
+covers the GUI and an external AI connector, with exact settings, checked
+Molden and shader downloads, and the provenance for the original capture.
+The released app exports the potential scale directly.
+
+Static checks cover 28 pages and 29 verified example/guide downloads.
+Chromium and WebKit passed all 168 route and viewport checks.
+
 ## EigenVista 0.10.5 — 23 November 2026
 
 The homepage and structure reference describe residue-class coloring. The

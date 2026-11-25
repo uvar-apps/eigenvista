@@ -1,5 +1,15 @@
 # Implementation status
 
+## EigenVista 0.10.6 — 25 November 2026 (#117)
+
+Version 0.10.6 provides all-electron electrostatic potential on positive
+total-density meshes and a generic vertex-colored Phong shader. The viewport
+and PNG exporter blend translucent custom shader fragments in depth order.
+Both packages include the shader, 88% opacity preset and salicylic acid
+example. Follow the [GUI and agent tutorial](https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html)
+to reproduce the [Gallery view](https://uvar-apps.github.io/eigenvista/gallery.html#salicylic-acid).
+The [release notes](releases/0.10.6.md) identify both archives and source.
+
 ## Electrostatic potential mapping — 25 November 2026 (#115)
 
 The source supports mapping an all-electron molecular electrostatic potential
@@ -12,7 +22,7 @@ and [handoff](handoff.md#electrostatic-potential-on-total-density-meshes--25-nov
 
 ## EigenVista 0.10.5 — 23 November 2026 (#114)
 
-The current release adds residue-class coloring, a surface-colored X-ray
+This release added residue-class coloring, a surface-colored X-ray
 shader in both packages, and a close-up of crambin in the Gallery. See the
 [0.10.5 notes](releases/0.10.5.md) and [#114](https://github.com/uvar-apps/eigenvista/issues/114)
 for qualification and download identities.

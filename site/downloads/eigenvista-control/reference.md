@@ -1,6 +1,6 @@
 # EigenVista connector reference for agents
 
-EigenVista 0.10.5 retains the molecular-surface progress introduced in 0.10.2
+EigenVista 0.10.6 retains the molecular-surface progress introduced in 0.10.2
 (#97), shown in both the controls and viewport, including hidden Tools/Zen.
 Poll the existing `job.get` receipt:
 `progress.stage` reports `geometry`, `classify`, `mesh`, `assemble`, `measure`,
@@ -13,7 +13,7 @@ reported elapsed value instead. Wait for terminal job status rather than a
 stage reaching 100%. Cancel only the owned job. No new method or file-format
 feature is needed. These progress displays and elapsed metadata are included in 0.10.2.
 
-EigenVista 0.10.5: active selection has gold reticles; the latest typed
+EigenVista 0.10.6: active selection has gold reticles; the latest typed
 inspection pick has cyan rings for attributed atoms not already selected. These
 use shared `selection.set`/mouse state and `selection.get.lastPick`; normal
 inspection does not overwrite selection. `selection.clear` clears selection and
@@ -32,7 +32,7 @@ package targets macOS. A separate CachyOS x86_64 development package uses the sa
 protocol; consult its Linux guide and qualification record rather than inferring
 support for every Linux distribution. Non-Unix attachment is unsupported.
 
-Use the current **0.10.5** package. The scientific-inspection methods below were
+Use the current **0.10.6** package. The scientific-inspection methods below were
 introduced in **0.10.0**. Older 0.8.0 downloads lack them. Use the application,
 helper and instructions supplied
 together, and inspect the connected app's live schemas. Do not promise features
@@ -238,7 +238,7 @@ file grants.
 | `surfaces.set_visibility` | `surfaceId`, `visible` → accepted visibility/revision |
 | `surfaces.remove` | `surfaceId` → removal/revision |
 | `scene.set` | Appearance patch below → accepted settings/revision |
-| `shader.apply` | `preset` (`"x-ray"` or `"surface-clip"`), `target?` (`"all"` or an actual QC/molecular surface ID), `uniforms?`, `transparency?` → shader state |
+| `shader.apply` | `preset` (`x-ray`, `surface-clip` or `surface-phong-vertex-color`), `target?` (`all` or an actual QC/molecular surface ID), `uniforms?`, `transparency?` → shader state |
 | `shader.set_uniforms` | `uniforms`, `target?` as above, `transparency?` → accepted values; omitted target retains the applied target |
 | `shader.clear` | `{}` → cleared session shader |
 | `camera.get` | `{}` → position, target and up vectors plus revision |
@@ -536,7 +536,12 @@ be a unit direction and nonparallel to the view. Degenerate poses, pole-crossing
 orbits and control-limit violations fail. Zoom factors above one move closer,
 below one move away. `camera.fit` explicitly frames the current visible scene.
 
-Bundled surface presets are `x-ray` and `surface-clip`. The original 0.8.0 connector targets `all` saved
+Bundled surface presets are `x-ray`, `surface-clip` and `surface-phong-vertex-color`.
+For the Phong electrostatic potential figure, generate a single total-density
+mesh with `electrostaticPotential: true`, set its range with
+`surfaces.set_potential_appearance`, and target it with the Phong preset.
+Set its declared `opacity` uniform and leave shader transparency on.
+`image.export` includes the potential legend. The original 0.8.0 connector targets `all` saved
 surfaces. In 0.10.0, `target` can also be one returned quantum
 or molecular surface ID; unknown IDs fail. Omitted `shader.set_uniforms` target
 preserves the currently applied target. Inspect returned declared uniforms before
@@ -635,7 +640,7 @@ index-based biological settings and retains color mode when metadata exists;
 reload resets session choices. Keep settings and PNGs with the native document
 when the user wants a reproducible presentation.
 
-Version 0.10.5 has no application byte/count ceilings for files, wire frames,
+Version 0.10.6 has no application byte/count ceilings for files, wire frames,
 selectors, orbital batches, annotations, meshes or analysis caches. Approved
 roots remain explicit security grants, without a fixed root count. Grid presets
 are advisory: request a safe-integer resolution of at least two and preserve the
