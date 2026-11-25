@@ -31,6 +31,13 @@ no skipped cases. The parallel Linux WebKit run timed out in the 1AON
 palette case. That exact test passed in an isolated rerun. See
 `browser-qualification.json` in the release evidence directory.
 
+The [0.10.6 prerelease](https://github.com/uvar-apps/eigenvista/releases/tag/v0.10.6)
+is public. Anonymous downloads match all six qualified archive, checksum and
+build-info files. [Pages run 45593341516](https://github.com/uvar-apps/eigenvista/actions/runs/45593341516)
+deployed `4e09065144272ea01bbd84ffa3ac3ac168b8c8ed`. Anonymous readback matched
+all 102 served files and the nested 404. The successful Pages run was a fresh
+dispatch after the initial deployment and its same-run artifact retry failed.
+
 ## Custom-shaded surface depth ordering — 25 November 2026 (#118)
 
 [Issue #118](https://github.com/uvar-apps/eigenvista/issues/118) is a P1

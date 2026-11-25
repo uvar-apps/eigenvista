@@ -11,6 +11,9 @@ The released app exports the potential scale directly.
 
 Static checks cover 28 pages and 29 verified example/guide downloads.
 Chromium and WebKit passed all 168 route and viewport checks.
+[Pages deployment 45593341516](https://github.com/uvar-apps/eigenvista/actions/runs/45593341516)
+serves commit `4e09065144272ea01bbd84ffa3ac3ac168b8c8ed`. Anonymous readback
+matched every served file and the custom nested 404 byte-for-byte.
 
 ## EigenVista 0.10.5 — 23 November 2026
 
