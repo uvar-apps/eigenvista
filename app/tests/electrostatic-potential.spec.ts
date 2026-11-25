@@ -117,17 +117,17 @@ test("maps a density mesh with Phong, exports the color key, and restores map da
   // Interleaving front and back triangles produces visible strips at an angle.
   const backFacePass = await page.evaluate(async () => {
     const prototype = WebGL2RenderingContext.prototype;
-    const original = prototype.cullFace;
+    const original = prototype.frontFace;
     let drewBackFaces = false;
-    prototype.cullFace = function (mode) {
-      if (mode === this.FRONT) drewBackFaces = true;
+    prototype.frontFace = function (mode) {
+      if (mode === this.CW) drewBackFaces = true;
       return original.call(this, mode);
     };
     try {
       await window.eigenvistaControl!.request("image.export");
       return drewBackFaces;
     } finally {
-      prototype.cullFace = original;
+      prototype.frontFace = original;
     }
   });
   expect(backFacePass).toBe(true);
