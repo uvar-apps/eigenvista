@@ -8,12 +8,13 @@ Version 0.10.6 offers separate Mac and Linux archives built from the same
 source tag. Read the [release notes](releases/0.10.6.md) for their qualification
 and download identities.
 
-Version **0.10.6** adds residue-class coloring to protein depictions in the GUI
-and [AI connector](ai-connector.md). The bundled X-ray shader follows each
-surface's diffuse color, and the Gallery shows it on crambin.
+Version **0.10.6** adds electrostatic potential on electron-density surfaces
+and a vertex-colored Phong shader in the GUI and [AI connector](ai-connector.md).
+The [salicylic acid tutorial](https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html)
+shows how to make the Gallery image.
 Historical release records retain the behavior of their original binaries.
 The [0.10.6 notes](releases/0.10.6.md) and [living handoff](handoff.md)
-record release qualification, validation and delivery (#114).
+record release qualification, validation and delivery (#117).
 
 This is the documentation hub for the **EigenVista development preview**.
 EigenVista is a modern rewrite of Molekel, the molecular visualization

@@ -39,12 +39,12 @@ Do not share the private connection file's contents.
 
 NEW IN 0.10.6
 
-- In Molecule > Molecular data > Biological structure, choose Residue class
-  to color protein residues by side-chain class. The connector offers the
-  same mode.
-- Load Shaders/surface-x-ray.vert, .frag and .params in Appearance > Surface
-  shader. Leave Shader transparency enabled. The tint follows the color
-  assigned to each surface.
+- Color a total electron-density mesh by molecular electrostatic potential.
+- Load surface-phong-vertex-color.vert, .frag and Salicylic-Phong.params
+  from Shaders/ in Appearance > Surface shader. With Shader transparency
+  enabled, the front of the surface blends correctly over the interior.
+- Make the salicylic acid Gallery image using the GUI or a connected agent:
+  https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html
 
 MOLECULAR SURFACE AMBIENT OCCLUSION
 

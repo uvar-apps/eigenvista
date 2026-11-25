@@ -1054,6 +1054,14 @@ or a `symbol` that disagrees with the element for that number.
 
 ### Custom surface shaders
 
+To shade a density mesh while keeping its electrostatic potential colors,
+load `surface-phong-vertex-color.vert` and
+`surface-phong-vertex-color.frag` from `Shaders/`. Load
+`Salicylic-Phong.params` for 88% opacity and keep **Shader transparency**
+enabled. The potential legend appears on the viewport and in exported PNGs.
+The [salicylic acid tutorial](https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html)
+gives the example and both the GUI and connector workflows.
+
 **Appearance → Surface shader** optionally replaces the built-in surface
 materials with a user vertex + fragment GLSL pair, similar to classic Molekel
 Display→Shaders:

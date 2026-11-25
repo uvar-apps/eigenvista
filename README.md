@@ -1,16 +1,14 @@
 # EigenVista
 
-Version **0.10.6** adds **Residue class** coloring for protein atoms and
-cartoons, available through the GUI and AI connector. A new bundled
-`surface-x-ray` shader uses each surface's assigned diffuse color. See the
-close-up of crambin's solvent-excluded surface in the
-[Gallery](https://uvar-apps.github.io/eigenvista/gallery.html).
+Version **0.10.6** adds molecular electrostatic potential on total
+electron-density surfaces, a generic vertex-colored Phong shader, and
+depth-ordered blending for translucent custom shaders. See the
+[salicylic acid Gallery view](https://uvar-apps.github.io/eigenvista/gallery.html#salicylic-acid)
+and the [GUI and AI connector tutorial](https://uvar-apps.github.io/eigenvista/tutorials-electrostatic-potential.html).
 
-Release qualification and delivery are tracked in
-[#114](https://github.com/uvar-apps/eigenvista/issues/114). See the
-[0.10.6 notes](docs/releases/0.10.6.md) and [living handoff](docs/handoff.md)
-for package identity and publication state. Historical releases keep their
-original contents.
+Release qualification is tracked in [#117](https://github.com/uvar-apps/eigenvista/issues/117).
+See the [0.10.6 notes](docs/releases/0.10.6.md) and [living handoff](docs/handoff.md)
+for package and validation details.
 
 **Explore molecular orbitals, electron density and large molecular structures.**
 

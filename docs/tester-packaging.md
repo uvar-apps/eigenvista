@@ -4,8 +4,9 @@ For the separate Linux development tarball, see [Linux packaging](linux.md).
 This page describes the Apple Silicon package; its signing and `.app` paths
 do not apply to the Linux prefix.
 
-Release **0.10.6** includes residue-class coloring and the surface-colored
-X-ray shader example. Both platforms are built from the same source tag. Read the
+Release **0.10.6** includes electrostatic potential mapping, the generic
+vertex-colored Phong shader and a salicylic acid example. Both platforms are
+built from the same source tag. Read the
 [release notes](releases/0.10.6.md) and the package's `BUILD-INFO.json` for
 version, source and validation details.
 
