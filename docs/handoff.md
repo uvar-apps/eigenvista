@@ -9,6 +9,8 @@ The renderer uses each shader's emitted alpha and composites visible
 fragments from front to back against the existing scene depth. The transparent
 targets are reused between frames, and the pass stops when no more fragments
 can affect the image at PNG precision.
+The fragment wrapper writes the same depth it compares so WebKit cannot
+reselect a low-alpha fragment because of an interpolation rounding difference.
 
 The generic vertex-colored Phong shader under `app/shaders/` reads only the
 mesh inputs. `Salicylic-Phong.params` sets 88% opacity. The salicylic acid

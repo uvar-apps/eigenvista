@@ -283,11 +283,10 @@ ${fragment}
 #undef main
 void main() {
   #ifdef EIGENVISTA_DEPTH_PEEL
-    ${
-      writesDepth
-        ? "gl_FragDepth = gl_FragCoord.z;"
-        : "eigenvistaTestDepth(gl_FragCoord.z);"
-    }
+    // Store the depth we compare. Fixed-function depth interpolation can
+    // round differently from gl_FragCoord.z on some WebKit backends.
+    gl_FragDepth = gl_FragCoord.z;
+    ${writesDepth ? "" : "eigenvistaTestDepth(gl_FragDepth);"}
   #endif
   eigenvista_custom_fragment_main();
   #ifdef EIGENVISTA_DEPTH_PEEL
