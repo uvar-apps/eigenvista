@@ -145,6 +145,9 @@ function surfaceMaterial(
     return new THREE.ShaderMaterial({
       glslVersion: THREE.GLSL3,
       transparent: s.opacity < 1,
+      // Draw mapped translucent meshes back faces first. Interleaving the
+      // triangles blends different potentials in marching-cubes traversal order.
+      forceSinglePass: !mapped,
       side: THREE.DoubleSide,
       depthWrite: s.opacity >= 1,
       uniforms: {

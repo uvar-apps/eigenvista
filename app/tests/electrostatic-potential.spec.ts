@@ -113,6 +113,24 @@ test("maps a density mesh with Phong, exports the color key, and restores map da
   await appearance.getByLabel("Surface shading").selectOption("blinn-phong");
   await hideToolsForScene(page);
   await settleScene(page);
+  // A translucent mapped mesh should draw back faces in their own pass.
+  // Interleaving front and back triangles produces visible strips at an angle.
+  const backFacePass = await page.evaluate(async () => {
+    const prototype = WebGL2RenderingContext.prototype;
+    const original = prototype.cullFace;
+    let drewBackFaces = false;
+    prototype.cullFace = function (mode) {
+      if (mode === this.FRONT) drewBackFaces = true;
+      return original.call(this, mode);
+    };
+    try {
+      await window.eigenvistaControl!.request("image.export");
+      return drewBackFaces;
+    } finally {
+      prototype.cullFace = original;
+    }
+  });
+  expect(backFacePass).toBe(true);
   const initial = await exported(page);
   await call(page, "surfaces.set_potential_appearance", {
     surfaceId: surface.id,

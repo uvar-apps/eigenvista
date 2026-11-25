@@ -376,8 +376,9 @@ Use `surfaces.set_potential_appearance` to set either or both of `enabled` and
 `scene.set` for highlights. The visible built-in potential key is included by
 `image.export`. The native connector exposes these same live schemas.
 
-Example user prompt: “Color the total electron-density surface by electrostatic
-potential, show the color scale, add Phong highlights, and save a PNG.”
+You can ask the connected assistant to “color the total electron-density surface
+by electrostatic potential, show the color scale, add Phong highlights, and save
+a PNG.”
 
 ### Camera and surface capture
 

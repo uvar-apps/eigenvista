@@ -135,7 +135,8 @@ explicit feature negotiation.
 | `eigenvista-field-analysis-v1` | `field_analysis` | Structured quantity/unit/provenance descriptors, probe/plane/profile definitions and f64 caches/status masks, fingerprints, local appearance and current-field-key visibility |
 
 The canonical feature order is base polynomial, biological structure if present,
-annotations if present, molecular surfaces if present, field analysis if present.
+annotations if present, molecular surfaces if present, field analysis if present,
+and [electrostatic potential mapping](#cached-meshes-and-electrostatic-potential) if present.
 Every non-null optional payload must declare its feature; every optional feature
 must have its payload. Unknown, duplicate, missing and unordered features are
 rejected, as are marker/payload mismatches. The legacy `molekel` profile remains
@@ -188,6 +189,8 @@ alongside the frozen compatibility corpus.
 Every array leaf previously cost one ZIP entry, one manifest descriptor (~196 bytes to describe as little as 24 bytes of payload), and one decode buffer. The 8,192-entry cap therefore capped a document at roughly **8,191 atoms regardless of byte size**, and raising the cap alone would still have failed: at 65,963 atoms the manifest alone reaches ~12 MiB against the separate 8 MiB manifest budget. Coalescing removes all three per-row costs at once.
 
 Small scalar metadata is JSON. Basis radial weights already include normalization; no automatic normalization is applied. Orbital energies are optional hartree values, not fabricated zeros. Occupations are explicit. A full row-major density matrix identifies its kind independently of orbitals. Current object relationships use stable IDs within a single geometry/basis document.
+
+### Cached meshes and electrostatic potential
 
 Saved surface records contain source field ID and scientific hash, signed isovalue, algorithm/version, grid origin/step vectors/resolution, precision, geometry/normals/indices, sRGB color, opacity, and visibility. Quantum inputs remain in the same document. A source mismatch is rejected in this preview; the later revision-aware model should preserve historical assets with their original inputs.
 

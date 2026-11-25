@@ -145,5 +145,6 @@ Regenerate with the environment pinned by
 [`reference-requirements.txt`](../../tools/reference-requirements.txt).
 
 ```sh
-OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 tmp/reference-venv/bin/python   tools/generate_electrostatic_reference.py > fixtures/molden/electrostatic-reference.json
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 tmp/reference-venv/bin/python \
+  tools/generate_electrostatic_reference.py > fixtures/molden/electrostatic-reference.json
 ```
