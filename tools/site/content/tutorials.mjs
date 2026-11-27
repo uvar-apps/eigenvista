@@ -13,6 +13,7 @@ export default [
     number: "04",
     body: `
       ${workspaceNotice}
+      <p>Explore <a href="https://uvar-apps.github.io/eigenvista-education/"><strong>EigenVista Education</strong></a> for captioned GUI and AI connector tutorials, scientific animations, and downloadable results.</p>
       <h2 id="before-you-start">Before you start</h2>
       <p>These GUI instructions follow EigenVista ${application.version} and its four-tab Tools pane. The <a href="install.html">${release.version} Mac download</a> includes every workflow below: molecular display, quantum rendering, measurements, SES/SAS and quantitative analysis. Open example files with the app’s <strong>Open</strong> button. The website supplies instructions and data; the app runs the local workflows.</p>
       <p>Start with the first lesson if you are new to the viewport. Then choose the kind of data you work with. Keep the original inputs and save your work to new <code>.eigenvista</code> files.</p>

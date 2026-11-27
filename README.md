@@ -29,6 +29,7 @@ archive and source identity. Other Linux distributions remain unqualified.
 [Installation](https://uvar-apps.github.io/eigenvista/install.html) ·
 [Manual](https://uvar-apps.github.io/eigenvista/reference.html) ·
 [Tutorials](https://uvar-apps.github.io/eigenvista/tutorials.html) ·
+[EigenVista Education](https://uvar-apps.github.io/eigenvista-education/) ·
 [Gallery](https://uvar-apps.github.io/eigenvista/gallery.html)
 
 [![A luminous X-ray density surface reveals the atomic framework of a bicyclic C7H10 molecule](site/assets/media/quantum-xray.webp)](https://uvar-apps.github.io/eigenvista/surface-shaders.html)
